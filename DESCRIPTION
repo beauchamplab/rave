@@ -9,7 +9,26 @@ Description: R Analysis and Visualization of ECOG Data
 License: GNU
 Encoding: UTF-8
 LazyData: true
-Imports: Rcpp (>= 0.12.12)
+LazyData: true
+Imports:
+	stringr,
+	R.matlab,
+	magrittr,
+	tidyverse,
+	abind,
+	future,
+	shiny,
+	shinydashboard,
+	plotly,
+	moments,
+	parallel,
+	assertthat,
+	bit,
+	ff,
+	htmltools,
+	shinyjs,
+	plyr,
+	Rcpp (>= 0.12.12)
 LinkingTo: Rcpp
 Collate: 
     'RcppExports.R'
