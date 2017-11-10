@@ -1,0 +1,12 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+.git
+.dropbox
+temp
+NAMESPACE_old
+desktop.ini
+src/*.o
+src/*.so
+src/*.dll

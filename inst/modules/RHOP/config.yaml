@@ -1,0 +1,14 @@
+# Config file for rhopls_code
+
+# Which of R command
+r_command: '/usr/local/bin/R'
+
+# Which Rscript command
+rscript_command: '/usr/local/bin/Rscript'
+
+# Must add to Matlab environment
+usr_local_bin: '/usr/local/bin'
+
+# Matlab toolboxes, default assumes they are in rhopls_code directory
+tensor_toolbox: 'tensor_toolbox'
+yamlmatlab_toolbox: 'YAMLMatlab'

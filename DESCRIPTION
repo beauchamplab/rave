@@ -1,0 +1,41 @@
+Package: rave
+Type: Package
+Title: R Analysis and Visualization of ECOG Data
+Version: 0.1.0
+Author: Beauchamplab
+Maintainer: beauchamp lab <beauchamplab@gmail.com>
+Description: R Analysis and Visualization of ECOG Data
+    This package is under development.
+License: GNU
+Encoding: UTF-8
+LazyData: true
+Imports: Rcpp (>= 0.12.12)
+LinkingTo: Rcpp
+Collate: 
+    'RcppExports.R'
+    'cache.R'
+    'options.R'
+    'cls_electrode.R'
+    'cls_observable.R'
+    'cls_prophet.R'
+    'utils.R'
+    'cls_repository.R'
+    'cls_suma.R'
+    'cls_worker.R'
+    'dev_virtualenv.R'
+    'expr_to_function.R'
+    'ff_mann.R'
+    'find_all_subjects.R'
+    'format_reader.R'
+    'init_app.R'
+    'load_modules.R'
+    'logger.R'
+    'operators.R'
+    'reset.R'
+    'shiny_components.R'
+    'shiny_dashboard.R'
+    'shiny_dataselector.R'
+    'shiny_dynamic_module.R'
+    'shiny_widgets.R'
+    'tools.R'
+RoxygenNote: 6.0.1

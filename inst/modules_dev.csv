@@ -1,0 +1,7 @@
+category,module_id,label,source_path,active,packages,author,version,is_univariate,suma_enabled,order
+SUMA,suma_module,SUMA Viewer,./inst/modules/suma_viewer.R,FALSE,stringr,Zhengjia,0.0.1,TRUE,TRUE,0
+Overview,condition_explorer,Condition Explorer,./inst/modules/condition_explorer.R,TRUE,"plotly, tidyverse",John Magnotti,1.0.1,TRUE,TRUE,100
+Trial Clusters,cluster_over_trials,Spearman Correlation,./inst/modules/cluster_within_electrode.R,FALSE,"magrittr, plotly",Zhengjia,0.1.0,TRUE,TRUE,200
+Mask,mask_generator,Mask Generator,./inst/modules/mask_generator.R,FALSE,stringr,Zhengjia,0.0.1,TRUE,FALSE,300
+Test,example,Example Module,./inst/example/patrick/demo_module.R,FALSE,stringr,Zhengjia,0.0.1,TRUE,TRUE,400
+RHOP,rhop,RHOP,./inst/modules/RHOP/main.R,FALSE,"R.matlab,uuid,dynamicTreeCut,rhdf5,e1071",Zhengjia,0.0.1,TRUE,TRUE,500

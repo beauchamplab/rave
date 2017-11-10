@@ -1,0 +1,161 @@
+.sidebar-separator {
+  line-height: 30pt;
+  text-align: center;
+  margin-top: 15pt;
+  display: block;
+}
+.sidebar-separator::before, .sidebar-separator::after {
+  content: '';
+  border-top: 1px solid #ccc;
+  margin-top: 15pt;
+  width: 45px;
+  display: block;
+  float: right;
+}
+.sidebar-separator::before {
+  float: left;
+}
+#main_background {
+  height: 100vh !important;
+  margin-top: -65px;
+  margin-bottom: -15px;
+  padding-top: 65px;
+  padding-bottom: 15px;
+  position: relative;
+}
+#main_background img {max-height: 100% !important}
+
+.ratio1to1,
+.ratio5to2,
+.ratio5to4,
+.ratio2to1,
+.ratio3to2,
+.ratio16to9 {
+	width: 100%;
+	position: relative;
+}
+
+.ratio1to1>div,
+.ratio2to1>div,
+.ratio5to4>div,
+.ratio5to2>div,
+.ratio3to2>div,
+.ratio16to9>div{
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	position: absolute;
+}
+
+.ratio1to1>.shiny-plot-output,
+.ratio5to2>.shiny-plot-output,
+.ratio5to4>.shiny-plot-output,
+.ratio3to2>.shiny-plot-output,
+.ratio16to9>.shiny-plot-output,
+.ratio2to1>.shiny-plot-output,
+.ratio1to1>.plotly,
+.ratio5to4>.plotly,
+.ratio5to2>.plotly,
+.ratio3to2>.plotly,
+.ratio16to9>.plotly,
+.ratio2to1>.plotly,
+.ratio1to1 img,
+.ratio5to4 img,
+.ratio5to2 img,
+.ratio3to2 img,
+.ratio2to1 img,
+.ratio16to9 img {
+	height: 100% !important;
+}
+
+.ratio16to9 {
+	padding-top: 56.25%;
+}
+
+.ratio2to1 {
+	padding-top: 50%;
+}
+
+.ratio1to1 {
+	padding-top: 100%;
+}
+.ratio5to4{
+	padding-top: 80%;
+}
+.ratio5to2{
+	padding-top: 40%;
+}
+.ratio3to2{
+	padding-top: 66.7%;
+}
+
+.pre-wrap pre{
+	white-space: pre-wrap;
+    white-space: -moz-pre-wrap;
+    white-space: -pre-wrap;
+    white-space: -o-pre-wrap;
+    word-wrap: break-word;
+}
+
+.hidden {
+	display: none !important;
+}
+
+#LOADING_IMAGE {
+    position: fixed;
+    z-index: 1020;
+    left: 0;
+    top: 0;
+    padding: 0;
+    width: 100%;
+    height: 100vh;
+	background-color: rgba(0,0,0,0.9);
+}
+
+#loading_img img{
+	min-width: 100% !important;
+	height: 100vh !important;
+}
+
+
+#loading_img {
+	width: 100% !important;
+	height: 100vh !important;
+	overflow-x: hidden;
+    /*-webkit-filter: blur(5px);
+    -moz-filter: blur(5px);
+    -o-filter: blur(5px);
+    -ms-filter: blur(5px);
+    filter: blur(5px);*/
+}
+
+#loading_info {
+	width: 500px;
+    height: 60%;
+    position: absolute;
+    right: 100px;
+    top: 30%;
+    z-index: 910;
+    color: #f2f2f2;
+    text-align: right;
+    padding: 20px;
+}
+
+
+li.control-sidebar-items {
+    display: block;
+    font-weight: 400;
+    font-size: 14px;
+    margin: 0;
+    padding: 0;
+}
+
+
+li.control-sidebar-items:hover {
+    background-color: rgb(44, 55, 60)
+}
+
+li.control-sidebar-items>a {
+    padding: 15px 0;
+}

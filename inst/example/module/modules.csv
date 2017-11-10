@@ -1,0 +1,2 @@
+category,module_id,label,source_path,active,packages,author,version,is_univariate,suma_enabled,order
+Test,example_module,First Module,"system.file('example/module/example_module.R', package = 'rafe')",TRUE,stringr,Zhengjia Wang,0.0.1,TRUE,TRUE,100
