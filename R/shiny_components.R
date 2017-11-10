@@ -37,7 +37,7 @@ InputComponent <- R6::R6Class(
         return()
       }
       self$module <- data_repository$get_module(module_id = module_id)
-      logger(self$module$id, 'asdadsadsadsadasd')
+      logger(self$module$id)
 
       if(is.function(self$init)){
         self$update <- function(session){
