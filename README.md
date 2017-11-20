@@ -5,7 +5,7 @@ R Analysis and Visualization of ECOG Data (Alpha version)
 `devtools::install_github('beauchamplab/rave')`
 
 Please make sure that your R has packages `devtools`, `tidyverse` installed.
-It is also recommended that other packages (`rhdf5`, `HDF5Array`) be also installed.
+It is also recommended that other packages (`rhdf5`, `HDF5Array`) be installed.
 
 ## Toy example
 ```
