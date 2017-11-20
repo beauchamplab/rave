@@ -9,7 +9,6 @@ Description: R Analysis and Visualization of ECOG Data
 License: GNU
 Encoding: UTF-8
 LazyData: true
-LazyData: true
 Imports:
 	stringr,
 	R.matlab,
