@@ -198,7 +198,7 @@ SHINY_EXECUTE = function(params, ...){
         mutate(Mask = Number %in% ind) ->
         electrodes
       plotly::plot_ly() %>%
-        add_markers(
+        plotly::add_markers(
           x = ~Coord_x,
           y = ~Coord_y,
           z = ~Coord_z,

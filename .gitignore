@@ -4,9 +4,10 @@
 .Ruserdata
 .git
 .dropbox
-temp
+temp/
 NAMESPACE_old
 desktop.ini
 src/*.o
 src/*.so
 src/*.dll
+adhoc/

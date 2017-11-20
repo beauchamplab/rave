@@ -97,7 +97,9 @@ init_app <- function(module_ids = NULL, suma = NULL, observables = list(), ...){
           div(
             id = 'loading_info',
             h1('RAVE'),
-            p('Please import data first.')
+            div(
+              HTML(readLines(system.file('assets/helloworld.html', package = 'rave')))
+              )
           )
         ),
         do.call(shinydashboard::tabItems, lapply(module_ids, function(module_id){
