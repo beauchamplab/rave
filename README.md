@@ -1,4 +1,4 @@
-# rave
+# RAVE
 R Analysis and Visualization of ECOG Data (Alpha version)
 
 ## Installation
@@ -26,7 +26,7 @@ init_app()
 
 ## Details
 Please check `vignettes/user_guide` for details such as 
-*data format*, *SUMA connection*, *options*. To know how to 
+*data format*, *SUMA connection*, *Matlab options*. To know how to 
 *write modules*, or *use command lines* (import subject data and perform 
 quick analysis), check `vignettes/rafe-cookbook`.
 
