@@ -4,7 +4,7 @@ require(shiny)
 require(magrittr)
 require(stringr)
 require(shiny)
-rave_prepare(subject = 'YAB_congruency1',
+rave_prepare(subject = 'YAB_Congruency_test',
              electrodes = 14,
              epoch = 'YAB',
              time_range = c(1, 2))
@@ -15,10 +15,11 @@ rave_inputs(
   compoundInput(
     inputId = 'GROUPS',
     label = 'Group',
-    value = {
+    components = {
       textInput('GROUP_NAME', 'Name', value = '', placeholder = 'Name')
       selectInput('GROUP', ' ', choices = '', multiple = TRUE)
-    }, inital_ncomp = 1
+    },
+    inital_ncomp = 1
   ),
 
   sliderInput('FREQUENCY', 'Frequencies', min = 1, max = 200, value = c(1,200), step = 1, round = TRUE),
@@ -50,58 +51,40 @@ rave_updates(
     selected = electrodes[1]
   ),
   GROUPS = list(
-    values = list(
+    initialize = list(
       GROUP = list(
         choices = unique(trials)
       )
     ),
-    value = c(
+    value = cache_input('GROUPS', list(
       list(
-        GROUP = unique(trials)
-      ),
-      list(
-        GROUP = unique(trials)
+        GROUP = trials[1]
       )
-    )
+    ))
   ),
 
   BASELINE = local({
     list(
       min = min(time_points),
       max = max(time_points),
-      value = c(min(time_points), 0)
+      value = cache_input('BASELINE', c(min(time_points), 0))
     )
   }),
   FREQUENCY = local({
     list(
       min = min(round(frequencies)),
       max = max(round(frequencies)),
-      value = range(round(frequencies))
+      value = cache_input('FREQUENCY', range(round(frequencies)))
     )
   }),
   TIME_RANGE = local({
     list(
       min = min(time_points),
       max = max(time_points),
-      value = c(0, max(time_points))
+      value = cache_input('TIME_RANGE', c(0, max(time_points)))
     )
   })
 )
-
-rave_ignore({
-
-  GROUPS = list(
-    list(
-      GROUP_NAME = 'G1',
-      GROUP = unique(trials)[-c(1:3)]
-    ),
-    list(
-      GROUP_NAME = 'G2',
-      GROUP = unique(trials)[1:3]
-    )
-  )
-
-})
 
 
 mean_o_trial <- function(el){
@@ -137,24 +120,23 @@ collapse_over_freq_and_trial <- function(el) {
 over_time_plot <- function() {
   validate(need((exists('has_data') && (has_data)), "No Condition Specified"))
 
+  do_poly <- function(x,y,col, alpha=50) {
+    polygon(c(x,rev(x)), rep(y, each=2), col=getAlphaRGB(col, alpha), border=NA)
+  }
+
   # make plot and color the baseline / analysis windows
-  ylim <- pretty(get_data_range(line_plot_data, 'lim'), min.n=2, n=4)
+  ylim <- pretty(range(sapply(line_plot_data, getElement, 'lim')))
 
   ns <- sapply(line_plot_data, getElement, 'N')
+
+  `%&%` <- function(s1,s2) paste0(s1,s2)
 
   title <- 'Freq ' %&% paste0(round(FREQUENCY), collapse=':') %&% ' || Ns ' %&% paste0(ns, collapse=', ')
 
   plot.clean(time_points, ylim, xlab='Time (s)', ylab='% Signal Change', main=title)
 
-  # draw polys ans labels for baseline and analysis ranges
-  mapply(function(x, y, clr, txt) {
-    do_poly(x, range(y), col=clr);
-    text(min(x), max(y), txt, col=clr, adj=c(0,1))
-  }, list(BASELINE, TIME_RANGE), list(ylim, ylim),
-     rave_colors[c('BASELINE_WINDOW', 'ANALYSIS_WINDOW')],
-    c('baseline', 'analysis')
-  )
-
+  do_poly(BASELINE, range(ylim), col='gray80'); text(min(BASELINE), max(ylim), 'baseline', col='gray60', adj=c(0,1))
+  do_poly(TIME_RANGE, range(ylim), col='salmon2'); text(min(TIME_RANGE), max(ylim), 'analysis window', col='salmon2', adj=c(0,1))
   abline(h=0, col='gray70')
 
   # draw each time series
@@ -170,8 +152,8 @@ over_time_plot <- function() {
     })
   }
 
-  rave_axis(1, pretty(time_points))
-  rave_axis(2, ylim)
+  axis(1, pretty(time_points))
+  axis(2, ylim, las=1)
 }
 
 windowed_comparison_plot <- function(){
@@ -184,9 +166,8 @@ windowed_comparison_plot <- function(){
 by_trial_heat_map <- function() {
   validate(need((exists('has_data') && (has_data)), "No Condition Specified"))
 
-  actual_lim = get_data_range(by_trial_heat_map_data)
-
-  # check if there is a plot range variable set
+  # check if there is a plot range variable set, otherwise:
+  actual_lim = sapply(by_trial_heat_map_data, getElement, 'range') %>% c %>% range %>% round
   if(!exists('max_zlim') | max_zlim==0) {
     max_zlim <- max(abs(actual_lim))
   }
@@ -197,25 +178,26 @@ by_trial_heat_map <- function() {
 
   get_ticks <- function(k) c(1, k, ceiling(k/2))
 
-  trial_hm_decorator <- function(x, y, main, ...) {
-      rave_axis(1, at=pretty(x), tcl=0)
-      rave_axis(2, at=get_ticks(max(y)), tcl=0)
-      abline(v=BASELINE, lty=3, lwd=2)
-      title(main=list(main, cex=rave_cex.main))
-  }
-
   lapply(by_trial_heat_map_data, function(comp){
     if(comp$has_t){
       with(comp, {
         dim(mean_o_freq)
         draw_img(t(mean_o_freq), x = time_points, y = 1:nrow(mean_o_freq), ylab='Trials',
-          zlim = c(-max_zlim, max_zlim), main = name, DECORATOR = trial_hm_decorator)
+          zlim = c(-max_zlim, max_zlim), main = name, DECORATOR = function(...){
+            rave_axis(1, at=pretty(time_points), mgpx=c(3, 0.75, 0))
+            rave_axis(2, at=get_ticks(nrow(mean_o_freq)))
+            abline(v=BASELINE, lty=3, lwd=2, col='black')
+          })
+        box()
       })
     }
   })
 
-
-  draw.color_bar(max_zlim)
+  cbar <- matrix(seq(-max_zlim, max_zlim, length=length(crp))) %>% t
+  par(mar=c(5.1, 5.1, 2, 2), cex.lab=1.6, cex.axis=1.6, las=1)
+  image(cbar, col=crp, axes=F, ylab='Mean % Signal Change',main='')
+  # title(main=list(paste0('[', paste0(actual_lim, collapse=':'), ']'), cex=rave_cex.main))
+  rave_axis(2, at=0:2/2, labels = c(-max_zlim, 0, max_zlim), tcl=0.3); box();
 }
 
 
@@ -227,8 +209,7 @@ heat_map_plot = function(){
   par(mar=c(5.1, 4.5, 2, 2), cex.lab=1.4, cex.axis=1.4, las=1)
 
   # check if there is a plot range variable set, otherwise:
-  actual_lim = get_data_range(heat_map_data)
-
+  actual_lim = sapply(heat_map_data, getElement, 'range') %>% c %>% range %>% round
   if(!exists('max_zlim') | max_zlim==0) {
     max_zlim <- max(abs(actual_lim))
   }
@@ -347,7 +328,7 @@ rave_execute({
     line_plot_data
 
   lapply(GROUPS, function(comp) {
-    has_t <- length(comp$GROUP)
+    has_t <- length(comp$group)
     trials <- collapse_over_freq_and_time(bl_power$subset(Trial = Trial %in% comp$GROUP))
     lim = range(trials)
     list(

@@ -113,44 +113,63 @@
   dev_log[parts] = crayon::bgYellow(dev_log[parts])
   dev_log[abrts] = crayon::silver(dev_log[abrts])
   dev_log[!(fins | parts | abrts)] = crayon::bgRed(dev_log[!(fins | parts | abrts)])
-  cat('TODO list - ', dev_log, '\nGithub - @rave-Dipterix', sep = '\n')
+  cat('Dev-cycle - ', dev_log, '\nGithub - @rave-Dipterix', sep = '\n')
+
+  last_ver = rave::rave_hist$get_or_save('..last_ver..')
+
+  ver = as.character(utils::packageVersion('rave'))
 
   is_dev = exists('..rave__dev..', envir = globalenv(), inherits = F)
-  ver = as.character(utils::packageVersion('rave'))
-  cat('\nrave -', ver)
-  last_ver = rave::rave_hist$get_or_save('..last_ver..')
-  if(is.null(last_ver) || utils::compareVersion(last_ver, as.character(ver)) < 0 || is_dev){
-    cat('\n  Making some changes...\n')
-    .mf = '../module_dev.csv'
-    if(file.exists(.mf) && !is_dev){
-      .mf = tools::file_path_as_absolute(.mf)
-    }else{
-      if(is_dev){
-        .mf = NULL
-      }else{
-        .mf = rave::rave_opts$get_options('module_lookup_file')
-      }
-      if(is.null(.mf) || !file.exists(.mf)){
-        .mf = '~/rave_modules/modules.csv'
-        dir.create('~/rave_modules/', showWarnings = F, recursive = T)
-        writeLines(
-          readLines(system.file('modules.csv', package = 'rave')),
-          .mf)
-      }
-      if(is_dev){
-        writeLines(
-          readLines(system.file('modules.csv', package = 'rave')),
-          .mf)
-      }
-      module_lookup_file = .mf
-      module_dir = dirname(module_lookup_file)
+  is_new = is.null(last_ver) || utils::compareVersion(last_ver, as.character(ver)) < 0
 
-      file.copy(system.file('modules', package = 'rave'),
-                module_dir, recursive = T, overwrite = T)
-
+  migrate_default_modules = function(
+    target_dir, look_up_file = rave::rave_opts$get_options('module_lookup_file')
+  ){
+    if(is.null(look_up_file) || !file.exists(look_up_file)){
+      look_up_file = system.file('modules.csv', package = 'rave')
     }
+    dir.create(target_dir, showWarnings = F, recursive = T)
+    new_modules = read.csv(look_up_file, stringsAsFactors = F)
+
+    target_mluf = file.path(target_dir, 'modules.csv')
+    pkg_module_dir = system.file('modules', package = 'rave')
+
+
+    if(file.exists(target_mluf)){
+      old_modules = read.csv(target_mluf, stringsAsFactors = F)
+      if(setequal(names(old_modules), names(new_modules))){
+        sel = (!old_modules$ModuleID %in% new_modules$ModuleID) & (sapply(old_modules$ScriptPath, file.exists))
+        if(length(sel) && sum(sel)){
+          old_modules = old_modules[sel, ]
+          new_modules = rbind(new_modules, old_modules)
+        }
+      }
+    }
+
+    write.csv(new_modules, target_mluf, row.names = F)
+
+    file.copy(pkg_module_dir, target_dir, overwrite = T, recursive = T)
+
+    rave::rave_opts$set_options(module_lookup_file = target_mluf)
+  }
+
+  if(is_dev){
+    .mf = '~/rave_modules/modules.csv'
+    migrate_default_modules('~/rave_modules/', NULL)
+  }else if(is_new){
+    look_up_file = rave::rave_opts$get_options('module_lookup_file')
+    if(is.null(look_up_file) || !file.exists(look_up_file)){
+      look_up_file = '~/rave_modules/modules.csv'
+      target_dir = '~/rave_modules/'
+    }else{
+      target_dir = dirname(look_up_file)
+    }
+    migrate_default_modules(target_dir, look_up_file)
+  }
+
+  if(is_new){
     rave::rave_opts$set_options(
-      module_lookup_file = .mf,
+      module_lookup_file = look_up_file,
       delay_input = 20,
       max_worker = parallel::detectCores() - 1
     )
