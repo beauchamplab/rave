@@ -75,8 +75,14 @@ format_stat <- function(nm, stats=c('b', 't', 'p')) {
 # helper function for t-tests that returns the values wanted by format_stat
 get_t <- function(...) with(t.test(...), c(estimate, statistic, p.value))
 
+
+format_f <-  function(lm.mod) {
+  with(summary(lm.mod), {
+    c(r.squared, fstatistic[1],
+      pf(fstatistic[1], fstatistic[2], fstatistic[3], lower.tail=FALSE))
+  }) %>% set_names(c('Rsq(All)', 'F(All)', 'p(All)'))
+}
+
 get_f <- function(formula, data) {
-    with(summary(lm(formula, data)), c(r.squared, fstatistic[1],
-              pf(fstatistic[1], fstatistic[2], fstatistic[3], lower.tail=FALSE))
-    ) %>% set_names(c('Rsq(All)', 'F(All)', 'p(All)'))
+  format_f(lm(formula, data))
 }

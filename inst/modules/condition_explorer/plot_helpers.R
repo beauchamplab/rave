@@ -7,6 +7,41 @@ source('./adhoc/condition_explorer/ecog_io_functions.R')
 
 `%&%` <- function(s1,s2) paste0(s1,s2)
 
+# check for containment, by default containiment is inclusive of the boundaries: min(rng) <= x <= max(rng)
+# specificy your own functions for lower bound and upper bound if you want
+# works with vector-valued x for default LB_ and UB_ functions
+# also works when length(rng) == 1
+is_within <- function(x, minmax) (x>=minmax[1]) & (x<=minmax[2])
+
+`%within%` <- function(a,b) {
+  is_within(a,b)
+}
+
+
+#
+# I'm thinking to put some constants here so that we get a general look/feel on our plots
+#
+rave_cex.main <- 1.5
+rave_cex.axis <- 1.3
+# putting this to 1.4 because 1.5 causes some clipping of the axis(2) label, we could also try to increase
+# the left margin to compensate
+rave_cex.lab <- 1.4
+
+rave_axis <- function(side, at, tcl=-0.3, labels=at, las=1, cex.axis=rave_cex.axis, cex.lab=rave_cex.lab, mgpy=c(3, .6, 0), mgpx=c(3, .75, 0), ...) {
+  if(length(side) > 1) {
+    return (invisible(sapply(side, rave_axis,
+      at=at, tcl=tcl, labels=labels, cex.axis=cex.axis, las=las, cex.lab=cex.lab, ...)
+    ))
+  }
+  mgp <- mgpy
+  if(side %% 2) mgp <- mgpx
+
+  invisible(axis(side, at=at, labels=labels, tcl=tcl, mgp=mgp, cex.axis=cex.axis, las=las, cex.lab=cex.lab, ...))
+}
+
+# rave_title
+
+
 
 # a default plot that can be used if the user hasn't specified data -- only use this until we get a better solution
 default_plot <- function() {
@@ -52,7 +87,14 @@ ebars.y = function(x, y, sem, length = 0.05, up = T, down = T, code = 2, ...) {
   }
 }
 
-ebar_polygon = function(x, y, sem, alpha=100, col='black', fill=col, stroke=col, border = NA, add_line=TRUE, lwd=1, ...) {
+
+do_poly <- function(x, y, col, alpha=50, ...) {
+  polygon(c(x,rev(x)), rep(y, each=2), col=getAlphaRGB(col, alpha), border=NA, ...)
+}
+
+ebar_polygon = function(x, y, sem, alpha=100, col='black', fill=col,
+  stroke=col, border = NA, add_line=TRUE, lwd=1, ...) {
+
   polygon(c(x, rev(x)), c(y + sem, rev(y - sem)), border = border, col = getAlphaRGB(fill, alpha))
 
   if(add_line) lines(x,y, col=stroke, lwd=lwd, ...)
@@ -64,22 +106,32 @@ getAlphaRGB = function(colname, alpha) {
   rgb(t(c), alpha = alpha, maxColorValue = 255)
 }
 
-plot.clean = function(xlim, ylim, x = 1, y = 1, type = "n", xlab="", ylab="", ...) {
-  plot(x, y, type = type, axes = F, ylab = ylab, xlab = xlab, xlim = range(xlim), ylim = range(ylim), ...)
+plot.clean = function(xlim, ylim, x = 1, y = 1, type = "n", xlab="", ylab="",
+  cex.main=rave_cex.main, cex.axis=rave_cex.axis, cex.lab=rave_cex.lab,...) {
+
+  plot(x, y, type = type, axes = F, ylab = ylab, xlab = xlab, xlim = range(xlim), ylim = range(ylim),
+    cex.main=cex.main, cex.axis=cex.axis, cex.lab=cex.lab, ...)
 }
 
 get_list_elements <- function(ll, name) sapply(ll, getElement, name)
 
-rave.axis <- function(side, at, tcl=-0.3, labels=at, las=1, cex.axis=1.5, mgpy=c(3, .5, 0), mgpx=c(3, .4, 0), ...) {
-  if(length(side) > 1) {
-    return (invisible(sapply(side, rave.axis,
-      at=at, tcl=tcl, labels=labels, cex.axis=cex.axis, las=las, ...)
-    ))
-  }
-  mgp <- mgpy
-  if(side %% 2) mgp <- mgpx
 
-  axis(side, at=at, labels=at, tcl=tcl, mgp=mgp, cex.axis=cex.axis, las=las, ...)
+abs_cdiff <- function(m) {
+  if(!is.matrix(m))
+    return (1)
+
+  abs(apply(m, 1, diff))
+}
+
+get_data_range <- function(ll, range_var='range') {
+  sapply(ll, getElement, range_var) %>%
+    c %>% range(na.rm=TRUE) %>% round
+}
+
+
+# barplot function that uses all the rave sizes and colors
+rave_barplot <- function(height, cex.axis=rave_cex.axis, cex.lab=rave_cex.lab, cex.names=rave_cex.lab, ...) {
+  barplot(height, cex.axis=cex.axis, cex.lab=cex.lab, cex.names=cex.names, las=1, ...)
 }
 
 
@@ -87,13 +139,18 @@ rave.axis <- function(side, at, tcl=-0.3, labels=at, las=1, cex.axis=1.5, mgpy=c
 # group_data is a list
 # this is a list to allow different N in each group
 # NB: the reason we use barplot here is that it takes care of the width between groups for us, even though by default we don't actually show the bars
-barplot.scatter = function(group_data, ylim, bar.cols=NA, bar.borders=NA, cols, ebar.cols='black', ebar.lwds=3, jitr_x,
-                            pchs=19, pt.alpha=200, xlab='Group', ylab='Mean % Signal Change', ...) {
+barplot.scatter = function(group_data, ylim, bar.cols=NA, bar.borders=NA, cols, ebar.cols='gray30', ebar.lwds=3, jitr_x,
+                            pchs=19, pt.alpha=175, xlab='Group', ylab='Mean % Signal Change', ebar.lend=2, ...) {
 
   nms <- group_data %>% get_list_elements('name')
 
-  gnames <- nms
-  if(any(duplicated(nms))) gnames <- paste0(LETTERS[seq_along(nms)], nms)
+  #yes, sometimes people use the same name for different groups, or don't give names. Let's create new names
+  gnames <- paste0(LETTERS[seq_along(nms)], nms)
+
+  # let's rename the group_data so we can refer to it using globally unique name
+  # possible downside: Does renaming cause a copy of group_data to be made? check the efficiency of this vs. creating a vector of names and just
+  # doing the lookup group_data[[which(gnames == name_i)]]
+  names(group_data) <- gnames
 
   ns <- group_data %>% get_list_elements('N')
 
@@ -102,48 +159,90 @@ barplot.scatter = function(group_data, ylim, bar.cols=NA, bar.borders=NA, cols, 
     'sigchange' = lapply(group_data, getElement, 'trials') %>% unlist
   )
 
-  mses <- with(flat_data, do.call(rbind, tapply(sigchange, group, m_se)))
+  # tapply is reordering the data to be based on alphabetical by group name, because it's a factor?
+  # mses <- with(flat_data, do.call(rbind, tapply(sigchange, group, m_se)))
+  # now mses is a list
+
+  # this doesn't handle the case where a group is empty
+  mses <- flat_data %>% split((.)$group) %>% lapply(function(x) with(x, m_se(sigchange)))
+
+  # if we are missing a mean for a particular group, then we need to add it in so that
+  # the plot later will work
+  mses <- sapply(gnames, function(ni) {
+    if(exists(ni, mses)) return (mses[[ni]])
+
+    return (c('mean'=NA, 'se'=NA))
+  }, simplify = FALSE, USE.NAMES = TRUE)
 
   yax <- do_if(missing(ylim), {
     pretty(flat_data$sigchange, high.u.bias = 100, n=4, min.n=3)
   }, ylim)
 
-  x <- barplot(mses[,1], las=1, ylim=range(yax) %>% stretch(.01), col=bar.cols, border=bar.borders,
-    ylab=ylab, names.arg=paste0(nms, ' (N=' %&% ns %&%')'), xlab=xlab, axes=F, ...)
 
-  rave.axis(2, at=yax)
+  #there are edge cases where length(mses) != length(names), take care of this with `ind` below
+  bp_names <- paste0(nms, ' (N=' %&% ns %&%')')
+
+  # this creates space for empty groups -- is this expected behavior? It is good to preserve the color
+  # mapping, but I'd rather not have the empty, space... so we need to preserve the colors but not the empty space
+
+  ind <- sapply(mses, function(x) not_NA(x['mean'])) %>% which
+
+  x <- rave_barplot(mses[ind] %>% sapply('[', 1), ylim=range(yax) %>% stretch(.01), col=bar.cols, border=bar.borders,
+    ylab=ylab, names.arg=bp_names[ind], xlab=xlab, axes=F, ...)
+
+  rave_axis(2, at=yax)
 
   if(min(yax) < 0) abline(h=0, col='lightgray')
 
+  #
+  # FIXME I don't like doing all this stats work in here, can this be pushed somewhere else?
+  #
+
   # if there are > 1 groups in the data, then do linear model, otherwise one-sample t-test
   if(length(unique(flat_data$group)) > 1) {
-      res <- with(flat_data, {
-        list( 'omni' = lm(sigchange ~ group -1) %>% summary,
-               'cond' = lm(sigchange ~ group) %>% summary
-            )
-      })
+      # we need to check if they have supplied all identical data sets
+      # the first condition being false should short-circuit so we don't get
+      # a non-conformable error for the second condition
+      if(all(0==diff(sapply(group_data, '[[', 'N'))) &
+          all(1e-10 > abs_cdiff(sapply(group_data, '[[', 'trials'))) )
+      {
+        title('Conditions are too similar to compare')
+      } else {
+        tryCatch({
+          res <- get_f(sigchange ~ group, flat_data)
 
-      title(H[0] ~ mu[i] == mu[j] * ', ' ~ i != j)
+          r1 <- ifelse(res[1] < 0.01, '<0.01', round(res[1],2))
+          r2 <- ifelse(res[2] < 0.1, '<0.1', round(res[2],1))
+          r3 <- format(res[3], digits=1)
+
+          title(bquote(H[0] ~ mu[i] == mu[j] * ';' ~ R^2 == .(r1) ~ ',' ~ F == .(r2) ~ ','~ p==.(r3)),
+            cex.main=rave_cex.main)
+
+        }, error=function(e) print(e))
+      }
+
   } else {
     res <- t.test(flat_data$sigchange)
 
-    title(bquote(H[0] ~ mu == 0))
-    #  '  p = ', res$p.value %>% format(digits=1)), cex.main=1.4)
+    m <- res$estimate %>% format(digits=2)
+    tstat <- res$statistic %>% format(digits=2)
+    pval <- res$p.value %>% format(digits=1)
+
+    title(bquote(H[0] * ':' ~ mu == 0 * ';' ~ bar(x)==.(m) * ',' ~ t==.(tstat) * ',' ~ p==.(pval)),
+      cex.main=rave_cex.main)
   }
 
-  #emphasize the means, this value +/- .4 should be set somwhere, right?
+  #emphasize the means
   lsize <- (1/3)*mean(unique(diff(x)))
+  # this means there is only 1 group. If there is one group, the barplot seems to get placed at 0.7, with
+  # the usr range being 0.16 - 1.24.
+  if(is.na(lsize)) lsize <- 1/3
 
   if(missing(jitr_x)) jitr_x <- 0.75*lsize
 
   if(missing(cols)) cols <- get_color(seq_along(group_data))
 
-  mapply(function(xi, mi) {
-    if(!is.na(mi))
-      lines(xi + c(-lsize, lsize), rep(mi, 2), lwd=3, lend=2)
-  }, x, mses[,1])
-
-  par_rep <- function(y) rep_len(y, nrow(mses))
+  par_rep <- function(y) rep_len(y, length(mses))
 
   cols %<>% par_rep
   pchs %<>% par_rep
@@ -151,19 +250,28 @@ barplot.scatter = function(group_data, ylim, bar.cols=NA, bar.borders=NA, cols, 
   ebar.cols %<>% par_rep
   bar.borders %<>% par_rep
 
+
+  # x may not be the same length as group_data because we're skipping empty groups
+  # we still want everything else to be based on group number
+  xi <- 1
   for(ii in seq_along(group_data)) {
-    if(!is.null(group_data[[ii]])) {
-      add_points(x[ii], group_data[[ii]]$trials, col=getAlphaRGB(cols[ii], pt.alpha), pch=pchs[ii], jitr_x=jitr_x)
-      ebars(x[ii], mses[ii,1], mses[ii,2], lwd=ebar.lwds, col=ebar.cols, code=0)
+    if(group_data[[ii]]$has_t) {
+      ni <- names(group_data)[ii]
+
+      lines(x[xi] + c(-lsize, lsize), rep(mses[[ni]][1], 2), lwd=3, lend=ebar.lend, col=ebar.cols[ii])
+
+      add_points(x[xi], group_data[[ii]]$trials,
+        col=getAlphaRGB(cols[ii], pt.alpha), pch=pchs[ii], jitr_x=jitr_x)
+
+      ebars.y(x[xi], mses[[ni]][1], mses[[ni]][2],
+        lwd=ebar.lwds, col=ebar.cols[ii], code=0, lend=ebar.lend)
+      xi <- xi+1
     }
   }
-
-  logger(mses)
 
   # in case people need to further decorate
   invisible(x)
 }
-
 
 jitr = function(x, len=length(x), r=0.35) {
   x + runif(len, -r, r)
@@ -176,7 +284,7 @@ add_points = function(x, y, jitr_x=.2, pch=19, ...) {
 # # # calcluation helpers
 
 # mean +/- se
-m_se <- function(x) c(mean(x), sd(x)/sqrt(length(x)))
+m_se <- function(x) c('mean'=mean(x), 'se'=sd(x)/sqrt(length(x)))
 mat_m_se <- function(m, DIM=2) apply(m, DIM, m_se)
 
 se <- function(x) sd(x) / sqrt(length(x))
@@ -212,16 +320,6 @@ clip_x <- function(x, lim) {
   x
 }
 
-# check for containment, by default containiment is inclusive of the boundaries: min(rng) <= x <= max(rng)
-# specificy your own functions for lower bound and upper bound if you want
-# works with vector-valued x for default LB_ and UB_ functions
-# also works when length(rng) == 1
-# is_within = function(x, rng, UB_FUNC=`<=`, LB_FUNC=`>=`) {
-#   (x %>% UB_FUNC(max(rng))) &
-#     (x %>% LB_FUNC(min(rng)))
-# }
-
-is_within <- function(x, minmax) (x>=minmax[1]) & (x<=minmax[2])
 
 stretch <- function(x, pct) {
   d <- pct * diff(range(x))

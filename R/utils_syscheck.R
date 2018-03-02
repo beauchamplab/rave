@@ -113,18 +113,41 @@
   dev_log[parts] = crayon::bgYellow(dev_log[parts])
   dev_log[abrts] = crayon::silver(dev_log[abrts])
   dev_log[!(fins | parts | abrts)] = crayon::bgRed(dev_log[!(fins | parts | abrts)])
-  cat('TODO list - ', dev_log, '\nOnce done, we will release on github - Dipterix', sep = '\n')
+  cat('TODO list - ', dev_log, '\nGithub - @rave-Dipterix', sep = '\n')
 
+  is_dev = exists('..rave__dev..', envir = globalenv(), inherits = F)
   ver = as.character(utils::packageVersion('rave'))
   cat('\nrave -', ver)
   last_ver = rave::rave_hist$get_or_save('..last_ver..')
-  if(is.null(last_ver) || utils::compareVersion(last_ver, as.character(ver)) < 0){
+  if(is.null(last_ver) || utils::compareVersion(last_ver, as.character(ver)) < 0 || is_dev){
     cat('\n  Making some changes...\n')
     .mf = '../module_dev.csv'
-    if(file.exists(.mf)){
+    if(file.exists(.mf) && !is_dev){
       .mf = tools::file_path_as_absolute(.mf)
     }else{
-      .mf = system.file('modules.csv', package = 'rave')
+      if(is_dev){
+        .mf = NULL
+      }else{
+        .mf = rave::rave_opts$get_options('module_lookup_file')
+      }
+      if(is.null(.mf) || !file.exists(.mf)){
+        .mf = '~/rave_modules/modules.csv'
+        dir.create('~/rave_modules/', showWarnings = F, recursive = T)
+        writeLines(
+          readLines(system.file('modules.csv', package = 'rave')),
+          .mf)
+      }
+      if(is_dev){
+        writeLines(
+          readLines(system.file('modules.csv', package = 'rave')),
+          .mf)
+      }
+      module_lookup_file = .mf
+      module_dir = dirname(module_lookup_file)
+
+      file.copy(system.file('modules', package = 'rave'),
+                module_dir, recursive = T, overwrite = T)
+
     }
     rave::rave_opts$set_options(
       module_lookup_file = .mf,

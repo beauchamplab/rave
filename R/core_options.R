@@ -9,7 +9,7 @@ opt <- list(
   module_export = './export',
   content_regex = 'e([0-9]+)[^0-9]*',
   content_format = 'mat',
-  module_lookup_file = './modules.csv',
+  module_lookup_file = '~/rave_modules/modules.csv',
   delay_input = 200,
   max_worker = 3L,
   export_path = './export',

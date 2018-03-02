@@ -1,3 +1,2 @@
 ModuleID,Name,ScriptPath,Active,Author,Version
-condition_explorer,Condition-John,../../RAVE_DEV/rave_chestnut_dev_2/adhoc/condition_explorer/main.R,FALSE,"[Zhengjia Wang]<dipterix.wang@gmail.com>, [John Magnotti]<john.Magnotti@bcm.edu>",0.1.0
-condition_explorer_another,Condition Explorer,../rave_dipterix_dev/adhoc/condition_explorer/sample_module.R,TRUE,"[John Magnotti]<john.Magnotti@bcm.edu>, [Zhengjia Wang]<dipterix.wang@gmail.com>",0.1.0
+condition_explorer_another,Condition Explorer,~/rave_modules/modules/condition_explorer/main.R,TRUE,"[John Magnotti]<john.Magnotti@bcm.edu>, [Zhengjia Wang]<dipterix.wang@gmail.com>",0.1.6

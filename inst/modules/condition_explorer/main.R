@@ -5,21 +5,12 @@ require(magrittr)
 require(stringr)
 require(shiny)
 rave_prepare(subject = 'YAB_congruency1',
-             electrodes = 13:14,
+             electrodes = 14,
              epoch = 'YAB',
-             time_range = c(0.5, 2.5))
+             time_range = c(1, 2))
 
 source('./adhoc/condition_explorer/plot_funcs.R')
-# electrode=13;from=-1;to=0;self=dat
-# d = self$fast_baseline(-100, 0, 13, print.time = T)
 
-# dat = ECoGRepository$new('YAB_Congruency', autoload = F)
-# dat$load_electrodes(51:53)
-# dat$epoch('test', 0.5, 2.50)
-# power = dat$power$power
-
-# bl = dat$baseline(-1,0, print.time = T)
-###########
 rave_inputs(
   compoundInput(
     inputId = 'GROUPS',
@@ -29,10 +20,7 @@ rave_inputs(
       selectInput('GROUP', ' ', choices = '', multiple = TRUE)
     }, inital_ncomp = 1
   ),
-  # textInput('GROUP_A_NAME', 'Group A Name', value = 'Group A', placeholder = 'Group A'),
-  # selectInput('GROUP_A', 'Group A', choices = '', multiple = TRUE),
-  # textInput('GROUP_B_NAME', 'Group B Name', placeholder = 'Group B'),
-  # selectInput('GROUP_B', 'Group B', choices = '', multiple = TRUE),
+
   sliderInput('FREQUENCY', 'Frequencies', min = 1, max = 200, value = c(1,200), step = 1, round = TRUE),
   sliderInput('BASELINE', 'Baseline Range', min = 0, max = 1, value = c(0,1), step = 0.01, round = -2),
   sliderInput('TIME_RANGE', 'Analysis Range', min = 0, max = 1, value = c(0,1), step = 0.01, round = -2),
@@ -51,7 +39,7 @@ rave_outputs(
   'Heat Map (Mean over Trials)' = plotOutput('heat_map_plot', brush = 'brushed', width = 12),
   'Activity over time (Mean over freq and trial)' = plotOutput('over_time_plot', width = 8),
    'Windowed Comparison (Mean over time and freq)' = plotOutput('windowed_comparison_plot', width = 4),
-  # 'Activity over time by trial (Mean over frequency)' = plotOutput('windowed_comparison_plot', width = 3),
+  'Activity over time per trial (Mean over frequency)' = plotOutput('by_trial_heat_map', width = 12),
   'Side Message' = textOutput('msg_out', width = 4),
   'Async Message' = textOutput('async_out', width = 4)
 )
@@ -62,21 +50,21 @@ rave_updates(
     selected = electrodes[1]
   ),
   GROUPS = list(
-    value = list(
+    values = list(
       GROUP = list(
-        choices = unique(trials),
-        selected = unique(trials)
+        choices = unique(trials)
+      )
+    ),
+    value = c(
+      list(
+        GROUP = unique(trials)
+      ),
+      list(
+        GROUP = unique(trials)
       )
     )
   ),
-  # GROUP_A = list(
-  #   choices = unique(trials),
-  #   selected = trials[1]
-  # ),
-  # GROUP_B = list(
-  #   choices = unique(trials),
-  #   selected = NULL
-  # ),
+
   BASELINE = local({
     list(
       min = min(time_points),
@@ -106,61 +94,67 @@ rave_ignore({
     list(
       GROUP_NAME = 'G1',
       GROUP = unique(trials)[-c(1:3)]
-    )#,
-    # list(
-    #   GROUP_NAME = 'G2',
-    #   GROUP = unique(trials)[1:3]
-    # )
+    ),
+    list(
+      GROUP_NAME = 'G2',
+      GROUP = unique(trials)[1:3]
+    )
   )
 
 })
 
 
-`%within%` <- function(a,b) {
-  is_within(a,b)
-}
-
 mean_o_trial <- function(el){
-  apply(el$data[,,,1], 2,colMeans)
+  apply(el$data[,,,1], 2, colMeans)
 }
 
-collapse_over_freq_and_time <- function(el) {
+collapse_over_freq_and_time <- function(el, FUN=mean) {
   if(prod(dim(el))<1) return(NULL)
 
   (el$subset(Frequency = (Frequency %within% FREQUENCY), Time = (Time %within% TIME_RANGE))) %>%
-    content %>% apply(1, mean)
+    content %>% apply(1, FUN)
+}
+
+collapse_over_freq <- function(el) {
+    if(prod(dim(el))<1) return(matrix(NA, ncol=2, nrow=1))
+
+  (el$subset(Frequency = (Frequency %within% FREQUENCY))) %>%
+    content %>%
+    apply(1, colMeans) %>%
+    t
 }
 
 collapse_over_freq_and_trial <- function(el) {
   if(prod(dim(el))<1) return(matrix(NA, ncol=2, nrow=1))
 
   (el$subset(Frequency = (Frequency %within% FREQUENCY))) %>%
-    content %>% apply(3, rowMeans) %>%
-    apply(2, function(x) c(mean(x), sd(x)/length(x))) %>% t
+    content %>%
+    apply(3, rowMeans) %>%
+    apply(2, m_se) %>%
+    t
 }
-
-
 
 over_time_plot <- function() {
   validate(need((exists('has_data') && (has_data)), "No Condition Specified"))
 
-  do_poly <- function(x,y,col, alpha=50) {
-    polygon(c(x,rev(x)), rep(y, each=2), col=getAlphaRGB(col, alpha), border=NA)
-  }
-
   # make plot and color the baseline / analysis windows
-  ylim <- pretty(range(sapply(line_plot_data, getElement, 'lim')))
+  ylim <- pretty(get_data_range(line_plot_data, 'lim'), min.n=2, n=4)
 
   ns <- sapply(line_plot_data, getElement, 'N')
-
-  `%&%` <- function(s1,s2) paste0(s1,s2)
 
   title <- 'Freq ' %&% paste0(round(FREQUENCY), collapse=':') %&% ' || Ns ' %&% paste0(ns, collapse=', ')
 
   plot.clean(time_points, ylim, xlab='Time (s)', ylab='% Signal Change', main=title)
 
-  do_poly(BASELINE, range(ylim), col='gray80'); text(min(BASELINE), max(ylim), 'baseline', col='gray60', adj=c(0,1))
-  do_poly(TIME_RANGE, range(ylim), col='salmon2'); text(min(TIME_RANGE), max(ylim), 'analysis window', col='salmon2', adj=c(0,1))
+  # draw polys ans labels for baseline and analysis ranges
+  mapply(function(x, y, clr, txt) {
+    do_poly(x, range(y), col=clr);
+    text(min(x), max(y), txt, col=clr, adj=c(0,1))
+  }, list(BASELINE, TIME_RANGE), list(ylim, ylim),
+     rave_colors[c('BASELINE_WINDOW', 'ANALYSIS_WINDOW')],
+    c('baseline', 'analysis')
+  )
+
   abline(h=0, col='gray70')
 
   # draw each time series
@@ -176,10 +170,9 @@ over_time_plot <- function() {
     })
   }
 
-  axis(1, pretty(time_points))
-  axis(2, ylim, las=1)
+  rave_axis(1, pretty(time_points))
+  rave_axis(2, ylim)
 }
-
 
 windowed_comparison_plot <- function(){
   validate(need((exists('has_data') && (has_data)), "No Condition Specified"))
@@ -188,16 +181,54 @@ windowed_comparison_plot <- function(){
 }
 
 
-heat_map_plot = function(){
+by_trial_heat_map <- function() {
   validate(need((exists('has_data') && (has_data)), "No Condition Specified"))
 
+  actual_lim = get_data_range(by_trial_heat_map_data)
+
+  # check if there is a plot range variable set
+  if(!exists('max_zlim') | max_zlim==0) {
+    max_zlim <- max(abs(actual_lim))
+  }
 
   par(cex.lab=1.4, cex.axis=1.4, las=1)
   layout(matrix(1:(has_data+1), nrow=1), widths=c(rep(4, has_data), 1) )
   par(mar=c(5.1, 4.5, 2, 2), cex.lab=1.4, cex.axis=1.4, las=1)
 
-  # check if their is a plot range variable set, otherwise:
-  actual_lim = sapply(heat_map_data, getElement, 'range') %>% c %>% range %>% round
+  get_ticks <- function(k) c(1, k, ceiling(k/2))
+
+  trial_hm_decorator <- function(x, y, main, ...) {
+      rave_axis(1, at=pretty(x), tcl=0)
+      rave_axis(2, at=get_ticks(max(y)), tcl=0)
+      abline(v=BASELINE, lty=3, lwd=2)
+      title(main=list(main, cex=rave_cex.main))
+  }
+
+  lapply(by_trial_heat_map_data, function(comp){
+    if(comp$has_t){
+      with(comp, {
+        dim(mean_o_freq)
+        draw_img(t(mean_o_freq), x = time_points, y = 1:nrow(mean_o_freq), ylab='Trials',
+          zlim = c(-max_zlim, max_zlim), main = name, DECORATOR = trial_hm_decorator)
+      })
+    }
+  })
+
+
+  draw.color_bar(max_zlim)
+}
+
+
+heat_map_plot = function(){
+  validate(need((exists('has_data') && (has_data)), "No Condition Specified"))
+
+  par(cex.lab=1.4, cex.axis=1.4, las=1)
+  layout(matrix(1:(has_data+1), nrow=1), widths=c(rep(4, has_data), 1) )
+  par(mar=c(5.1, 4.5, 2, 2), cex.lab=1.4, cex.axis=1.4, las=1)
+
+  # check if there is a plot range variable set, otherwise:
+  actual_lim = get_data_range(heat_map_data)
+
   if(!exists('max_zlim') | max_zlim==0) {
     max_zlim <- max(abs(actual_lim))
   }
@@ -205,7 +236,7 @@ heat_map_plot = function(){
   lapply(heat_map_data, function(comp){
     if(comp$has_t){
       with(comp, {
-        draw_img(clip_x(mean_o_trials, c(-max_zlim, max_zlim)), time = time_points, frequencies = frequencies,
+        draw_img(clip_x(mean_o_trials, c(-max_zlim, max_zlim)), x = time_points, y = frequencies,
           zlim = c(-max_zlim, max_zlim), main = name)
       })
     }
@@ -250,6 +281,7 @@ async_out = function(){
   validate(need(exists('async_msg', envir = environment()), 'Press "Force run" Button.'))
   async_msg
 }
+
 rave_execute({
   assertthat::assert_that(
     length(electrode) == 1,
@@ -264,16 +296,16 @@ rave_execute({
     key = list(electrode, BASELINE, length(alltrials) > 0),
     val = .repository$fast_baseline(from, to, electrode)
   )
-  # bl_power <- .repository$fast_baseline(from, to, electrode)
 
   lapply(GROUPS, function(comp){
     power = bl_power$subset(Trial = Trial %in% comp$GROUP)
+
     has_t = length(comp$GROUP) > 0
     mean_o_trials = mean_o_trial(power)
     range = range(mean_o_trials)
     list(
       name = comp$GROUP_NAME,
-      power = power,
+      # power = power,
       has_t = has_t,
       mean_o_trials = mean_o_trials,
       range = range
@@ -281,29 +313,41 @@ rave_execute({
   }) ->
     heat_map_data
 
+  # this can be used elsewhere
   has_data = sum(unlist(lapply(heat_map_data, function(x){x$has_t})))
+
+  lapply(GROUPS, function(comp){
+    power = bl_power$subset(Trial = Trial %in% comp$GROUP)
+    has_t = length(comp$GROUP) > 0
+    mean_o_freq = collapse_over_freq(power)
+    range = range(mean_o_freq)
+    list(
+      name = comp$GROUP_NAME,
+      has_t = has_t,
+      mean_o_freq = mean_o_freq,
+      range = range
+    )
+  })-> by_trial_heat_map_data
 
   pm <- function(x,d)c(x-d,x+d)
 
   # pre-process for over time plot
   lapply(GROUPS, function(comp){
-    has_t = length(comp$GROUP) > 0
-    pow <- bl_power$subset(Trial = Trial %in% comp$GROUP)
-    mse_o_trials = collapse_over_freq_and_trial(pow)
-    lim = range(pm(mse_o_trials[,1], mse_o_trials[,2]))
-    N = dim(pow)[1]
+    power <- bl_power$subset(Trial = Trial %in% comp$GROUP)
+    mse = collapse_over_freq_and_trial(power)
+
     list(
       name = comp$GROUP_NAME,
-      mse = mse_o_trials,
-      has_t = has_t,
-      lim = lim,
-      N=N
+      mse = mse,
+      has_t = length(comp$GROUP) > 0,
+      lim = range(pm(mse[,1], mse[,2])),
+      N=dim(power)[1]
     )
   }) ->
     line_plot_data
 
   lapply(GROUPS, function(comp) {
-    has_t <- length(comp$group)
+    has_t <- length(comp$GROUP)
     trials <- collapse_over_freq_and_time(bl_power$subset(Trial = Trial %in% comp$GROUP))
     lim = range(trials)
     list(
@@ -322,7 +366,7 @@ rave_execute({
 }, async = {
   logger('Aync test')
   # rm(list = ls(all.names = T))
-  Sys.sleep(5)
+  Sys.sleep(0.5)
   aaa = heat_map_plot
   bbb = `%>%`
   nms = ls(all.names = T)
@@ -332,6 +376,9 @@ rave_execute({
 
 if(FALSE) {
   heat_map_plot()
+
+  windowed_comparison_plot()
+
 }
 
 
