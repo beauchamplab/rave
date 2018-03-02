@@ -118,11 +118,18 @@ rave_opts <- Options$new(conf_path = '~/.rave.yaml', save_default = T)
 #' @export
 rave_setup <- function(func = NULL){
   if(!is.function(func)){
-    if(rave_opts$get_options('test_mode')){
-      # future::plan(future::sequential)
+    if(length(..setup_env$setup_func) == 0){
       future::plan(future::multiprocess, workers = rave_opts$get_options('max_worker'))
-    }else{
-      future::plan(future::multiprocess, workers = rave_opts$get_options('max_worker'))
+      # check crayon
+      if(exists('RStudio.Version') && is.function(RStudio.Version)){
+        rsver = as.character(RStudio.Version()$version)
+        if(utils::compareVersion('1.1', rsver) > 0){
+          warning("Please install newest version of RStudio")
+          rave::rave_opts$set_options(crayon_enabled = FALSE)
+        }
+      }else{
+        rave::rave_opts$set_options(crayon_enabled = FALSE)
+      }
     }
   }else{
     ..setup_env$setup_func[[length(..setup_env$setup_func) + 1]] = func
