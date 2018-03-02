@@ -14,11 +14,14 @@ It is also recommended that other packages (`rhdf5`, `HDF5Array`) be installed.
 IMPORTANT: This is unstable versionof RAVE
 
 `devtools::install_github('beauchamplab/rave@rave-dipterix')`
+- or -
+`devtools::install_github('beauchamplab/rave', ref = 'rave-dipterix')`
 
 Please make sure that you have latest `yaml` package installed. Upon failure, you might want to try: `install.packages('yaml')`.
 All other dependencies should be installed automatically
 
 Newest Update: (As of 03/02/2018)
+
 *To be added*
 
 
