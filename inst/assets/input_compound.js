@@ -1,39 +1,4 @@
 /*
-** Javascript to Set control sidebars
-** Author: Zhengjia Wang
-** Date 6/2/2017
-*/
-
-
-var AdminLTEOptions = {
-  sidebarExpandOnHover: true,
-  controlSidebarOptions: {
-    //Which button should trigger the open/close event
-    toggleBtnSelector: "[data-toggle='control-sidebar']",
-    //The sidebar selector, use body
-    selector: "body",
-    //Enable slide over content
-    slide: true
-  }
-};
-
-$(document).ready(function(){
-	// Whenever the sidebar expand/collapse button is clicked:
-	$(document).on("click", ".force-recalculate", function() {
-	  // 1) Trigger the resize event (so images are responsive and resize)
-	  $(window).trigger("resize");
-	});
-});
-
-
-Shiny.addCustomMessageHandler("alertmessage",
-  function(message) {
-    alert(message);
-  }
-);
-
-
-/*
 * Author: Zhengjia Wang
 * Date: 2/19/2018
 * This js file defines a customized shiny input component - compoundInput
@@ -123,10 +88,6 @@ var bindings = {
   }
 };
 
-var getInnerId = function(inputId, subId, ind){
-  return(inputId + '_' + subId + '_' + String(ind));
-};
-
 var addremove = function(){
   var val = $(this).attr('data-value'),
       target = $(this).attr('data-target'),
@@ -168,7 +129,7 @@ binding.initialize = function(el){
         tmp.triggered = Math.random();
         elui.trigger('data-value-changed-slow');
       };
-  for(var metaid in meta){
+  for(metaid in meta){
     var meta_func = meta[metaid],
         bds = bindings[meta_func];
     if(typeof(bds) !== 'undefined'){
@@ -176,7 +137,7 @@ binding.initialize = function(el){
           instant_evt = bds.instant;
 
       for(ind = 1; ind <= maxcomp; ind++){
-        innerid = '#' + getInnerId(elid, metaid, ind);
+        innerid = '#' + elid + '_' + metaid + '_' + String(ind);
         if(typeof(debounded_evt) !== 'undefined'){
           $(innerid).on(debounded_evt, slow_callback);
         }
@@ -210,10 +171,10 @@ binding.getValue = function(el) {
 
   for(ind = 1; ind <= ncomp; ind++){
     var val = {};
-    for(var subId in meta){
+    for(subId in meta){
       var func_name = meta[subId],
           bd = bindings[func_name],
-          ns_id = '#' + getInnerId(inputId, subId, ind);
+          ns_id = '#' + inputId + '_' + subId + '_' + String(ind);
       if(typeof(bd) !== 'undefined'){
         var bn = bd.binding_name,
             subel = bd.scope,
@@ -239,65 +200,10 @@ binding.getValue = function(el) {
   };
 };
 
-var is_undefined = function(e){
-  return(typeof(e) === 'undefined');
-};
-
-binding.receiveMessage = function(el, value) {
-
-  var ui = $(el),
-      re = [],
-      ncomp = parseInt(ui.attr('data-value')),
-      maxcomp = parseInt(ui.attr('data-max')),
-      inputId = ui.attr('id'),
-      meta = JSON.parse(ui.find(".rave-ui-compound-meta ").text()),
-      which = $.makeArray(value.which),
-      updates = value.value;
-
-  if(is_undefined(updates) || is_undefined(which)){
-    return(null);
-  }
-
-  for(var subId in updates){
-    var shiny_func = meta[subId],
-        subvalue = updates[subId];
-
-    if(!is_undefined(shiny_func)){
-      bd = bindings[shiny_func];
-      if(!is_undefined(bd)){
-        var bn = bd.binding_name,
-            shinybinds = Shiny.inputBindings.bindingNames[bn];
-        if(!is_undefined(shinybinds)){
-          for(var ind = 1; ind <= maxcomp; ind++){
-            var innerId = getInnerId(inputId, subId, ind),
-                subel = ui.find('#' +innerId);
-            if(which.indexOf(ind) >= 0){
-              if(subel.length == 1){
-                try{
-                  shinybinds.binding.receiveMessage(subel[0], subvalue);
-                }catch(error) {
-                  console.log(error);
-                }
-              }
-            }else{
-              /*
-              tmpvalue = $.extend(false, subvalue, {'value': null});
-              if(tmpvalue.hasOwnProperty('options')){
-                tmpvalue.options = tmpvalue.options.split(' selected>').join('>');
-              }
-              delete(tmpvalue.value);
-              */
-            }
-
-          }
-        }
-
-      }
-    }
-
-
-
-  }
+binding.setValue = function(el, value) {
+  /* value is
+  id: value
+  */
 };
 
 binding.getState = function(el) {
@@ -308,10 +214,12 @@ binding.getState = function(el) {
 
 binding.subscribe = function(el, callback) {
   $(el).on("data-value-changed-slow", function(e) {
+    console.log('slow');
     callback(true);
   });
 
   $(el).on("data-value-changed-instant", function(e) {
+    console.log('instant');
     callback(false);
   });
 };
@@ -334,6 +242,3 @@ binding.getRatePolicy = function() {
 
 Shiny.inputBindings.register(binding, "rave.compoundInput");
 })();
-
-
-
