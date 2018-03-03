@@ -9,13 +9,12 @@ In this section, you'll install R, RStudio, devtools and all other dependencies.
 
 **R** is a functional programming language that *RAVE* uses. **Devtools** are necessary to enable advanced features. **RStudio** is an *IDE (Intergrated Development Environment)* for easy and better code management especially designed for R. If you are hosting a server in RAVE, or prefer to using command lines, RStudio is not necessary.
 
-You need to check two things before installtion:
+You need to check your operating system before installtion:
 
-* Operating System
-  + [Mac OS](#macos)
-  + [Windows (Windows 10, with Bash enabled)](#windows)
-  + Linux (Ubuntu-Like)
-  + Linux (Others)
++ [Mac OS](#macos)
++ [Windows (Windows 10, with Bash enabled)](#windows)
++ Linux (Ubuntu-Like)
++ Linux (Others)
 
 
 #### MacOS
@@ -27,28 +26,43 @@ On Windows, RAVE is limited because *AFNI* doesn't support windows. However, mos
 It's easy to install on Windows. 
 
 1. First, go to Cran-R official website and download install the latest R:
+
 [https://cran.r-project.org/bin/windows/base/](https://cran.r-project.org/bin/windows/base/)
 
 2. After installing R, download and install *Rtools*. Please install the latest version:
+
 [https://cran.r-project.org/bin/windows/Rtools/](https://cran.r-project.org/bin/windows/Rtools/)
 
 3. RStudio
+
 [https://www.rstudio.com/products/rstudio/download/](https://www.rstudio.com/products/rstudio/download/)
 
+### 2. Install R dependencies
 
-### 2. Install RAVE
+If you have installed RStudio, open it, or if you are using terminal/command line, type `R` to enter R.
 
-TODO
+Inside of R, install `devtools` and `yaml` by typing the following commands:
 
+```
+install.packages(c('devtools', 'yaml'))
+```
 
-### Stable version
+### 3. Install RAVE (As of Date: 3/3/2018)
+
+There are three versions of RAVE, **Alpha**, **Beta** version. To see the difference, please check [RAVE updates]()
+
+#### Alpha version (NOT recommended now)
+
+This version was last updated at *Dec/2017* and is no-longer supported. This version is only developed for [Beauchamp's Lab](https://openwetware.org/wiki/Beauchamp). However, you can still see the [demo here](http://34.214.213.191:8080/)
+
 `devtools::install_github('beauchamplab/rave')`
 
 Please make sure that your R has packages `devtools`, `tidyverse` installed.
 It is also recommended that other packages (`rhdf5`, `HDF5Array`) be installed.
 
 ### Beta Version
-IMPORTANT: This is unstable versionof RAVE
+
+IMPORTANT: I'm Still maturing this version. However, it's runnable and contains more features than the alpha version. Please go to [RAVE_dev-cycle]() to see the todo-list.
 
 `devtools::install_github('beauchamplab/rave@rave-dipterix')`
 - or -
