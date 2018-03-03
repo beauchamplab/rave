@@ -85,35 +85,10 @@
   ui_register_function('shiny::imageOutput', shiny::renderImage, default_args = list(deleteFile = FALSE))
   ui_register_function('shiny::htmlOutput', shiny::renderText)
   ui_register_function('shiny::textOutput', shiny::renderText)
-  rave::rave_setup()
 
 
 
-  # For dev:
-  dev_log = c(
-    '0. [Finished] Added version check',
-    '1. [Finished] Remembers and restore the global inputs',
-    '      a. [Finished] Cache inputs and overrides when re-init modules',
-    '      b. [Finished] Fix updateCompountInput',
-    '      c. [Finished] When switch to other modules, update globals',
-    '            I.   [Finished] Re-write cache function',
-    '            II.  [Finished] Expose fake cache_input',
-    '            III. [Aborted] Inplement interactive inputs',
-    '2. [Finished] On session ended, clean up memory.',
-    '3a. [Finished] (buggy) Export as reports',
-    '3b. SUMA export',
-    '4. [Finished] Import modules as RMD files.',
-    '5. Support data types: power? phase?',
-    '6. [Partial] Do per elecctrodes'
-  )
-  fins = stringr::str_detect(dev_log, '\\[Finished\\]')
-  parts = stringr::str_detect(dev_log, '\\[Partial\\]')
-  abrts = stringr::str_detect(dev_log, '\\[Aborted\\]')
-  dev_log[fins] = crayon::green(dev_log[fins])
-  dev_log[parts] = crayon::bgYellow(dev_log[parts])
-  dev_log[abrts] = crayon::silver(dev_log[abrts])
-  dev_log[!(fins | parts | abrts)] = crayon::bgRed(dev_log[!(fins | parts | abrts)])
-  cat('Dev-cycle - ', dev_log, '\nGithub - @rave-Dipterix', sep = '\n')
+
 
   last_ver = rave::rave_hist$get_or_save('..last_ver..')
 
@@ -122,60 +97,84 @@
   is_dev = exists('..rave__dev..', envir = globalenv(), inherits = F)
   is_new = is.null(last_ver) || utils::compareVersion(last_ver, as.character(ver)) < 0
 
-  migrate_default_modules = function(
-    target_dir, look_up_file = rave::rave_opts$get_options('module_lookup_file')
-  ){
-    if(is.null(look_up_file) || !file.exists(look_up_file)){
-      look_up_file = system.file('modules.csv', package = 'rave')
-    }
-    dir.create(target_dir, showWarnings = F, recursive = T)
-    new_modules = read.csv(look_up_file, stringsAsFactors = F)
-
-    target_mluf = file.path(target_dir, 'modules.csv')
-    pkg_module_dir = system.file('modules', package = 'rave')
-
-
-    if(file.exists(target_mluf)){
-      old_modules = read.csv(target_mluf, stringsAsFactors = F)
-      if(setequal(names(old_modules), names(new_modules))){
-        sel = (!old_modules$ModuleID %in% new_modules$ModuleID) & (sapply(old_modules$ScriptPath, file.exists))
-        if(length(sel) && sum(sel)){
-          old_modules = old_modules[sel, ]
-          new_modules = rbind(new_modules, old_modules)
-        }
-      }
-    }
-
-    write.csv(new_modules, target_mluf, row.names = F)
-
-    file.copy(pkg_module_dir, target_dir, overwrite = T, recursive = T)
-
-    rave::rave_opts$set_options(module_lookup_file = target_mluf)
-  }
-
   if(is_dev){
-    .mf = '~/rave_modules/modules.csv'
-    migrate_default_modules('~/rave_modules/', NULL)
-  }else if(is_new){
-    look_up_file = rave::rave_opts$get_options('module_lookup_file')
-    if(is.null(look_up_file) || !file.exists(look_up_file)){
-      look_up_file = '~/rave_modules/modules.csv'
-      target_dir = '~/rave_modules/'
-    }else{
-      target_dir = dirname(look_up_file)
-    }
-    migrate_default_modules(target_dir, look_up_file)
+    # For dev:
+    dev_log = c(
+      '0. [Finished] Added version check',
+      '1. [Finished] Remembers and restore the global inputs',
+      '      a. [Finished] Cache inputs and overrides when re-init modules',
+      '      b. [Finished] Fix updateCompountInput',
+      '      c. [Finished] When switch to other modules, update globals',
+      '            I.   [Finished] Re-write cache function',
+      '            II.  [Finished] Expose fake cache_input',
+      '            III. [Aborted] Inplement interactive inputs',
+      '2. [Finished] On session ended, clean up memory.',
+      '3a. [Finished] (buggy) Export as reports',
+      '3b. SUMA export',
+      '4. [Finished] Import modules as RMD files.',
+      '5. Support data types: power? phase?',
+      '6. [Partial] Do per elecctrodes'
+    )
+    fins = stringr::str_detect(dev_log, '\\[Finished\\]')
+    parts = stringr::str_detect(dev_log, '\\[Partial\\]')
+    abrts = stringr::str_detect(dev_log, '\\[Aborted\\]')
+    dev_log[fins] = crayon::green(dev_log[fins])
+    dev_log[parts] = crayon::bgYellow(dev_log[parts])
+    dev_log[abrts] = crayon::silver(dev_log[abrts])
+    dev_log[!(fins | parts | abrts)] = crayon::bgRed(dev_log[!(fins | parts | abrts)])
+    cat('Dev-cycle - ', dev_log, '\nGithub - @rave-Dipterix', sep = '\n')
+
   }
 
+
+  first_time = is_dev || is_new
+
+  rave::arrange_modules(
+    look_up_file = rave::rave_opts$get_options('module_lookup_file'),
+    target_dir = NULL,
+    is_new = first_time
+  ) ->
+    is_changed_module
+
+  rave::arrange_data_dir(is_dev = is_dev) ->
+    is_changed_data
+
+
+  # additional settings
   if(is_new){
     rave::rave_opts$set_options(
-      module_lookup_file = look_up_file,
       delay_input = 20,
       max_worker = parallel::detectCores() - 1
     )
     rave::rave_opts$save_settings()
-    rave::rave_hist$save(`..last_ver..` = ver)
   }
+
+  capture.output(rave::rave_hist$save(`..last_ver..` = ver))
+
+
+
+
+
+  rave::rave_setup()
+
+  rave::logger("RAVE - (Code: Dipterix) is loaded!", level = 'INFO')
+
+  if(is_changed_module || is_changed_data){
+    message('--------------------')
+    rave::logger("Your settings are changed, please check ... ", level = 'INFO')
+  }
+
+  nms = list(
+    'Module File:        \t' =  rave::rave_opts$get_options('module_lookup_file'),
+    'Data Repository:    \t' = rave::rave_opts$get_options('data_dir'),
+    'Raw-data Repository:\t' = rave::rave_opts$get_options('raw_data_dir')
+  )
+
+  for(nm in names(nms)){
+    rave::logger(nm, nms[[nm]], level = 'INFO')
+  }
+
+  rave::logger("Type '?rave_options' for details", level = 'INFO')
 }
 
 

@@ -4,6 +4,7 @@ opt <- list(
   debug = FALSE,
   raw_data_dir = '../Researches/rave/adhoc/Dipterix/Data/ECoG/neuralData/originalData/',
   data_dir = '../rafe/hdf5_data/',
+  module_root_dir = '~/rave_modules',
   big_object_size = 500000,
   server_time_zone = 'America/Chicago',
   module_export = './export',
