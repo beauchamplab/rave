@@ -15,7 +15,7 @@
 ## Results:
 
 ```{r, echo = FALSE, message = FALSE, warning = F, error = F}
-rave_opts$set_options(logger_enabled = FALSE)
+rave_options(logger_enabled = FALSE)
 if(!exists('par.settings')){
   par.settings = par()
 }

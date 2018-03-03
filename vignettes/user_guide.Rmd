@@ -81,11 +81,11 @@ if(!file.exists(modules$source_path[1])){
 In order to let `r pkgname` know where it can find data directory as well as modules, we need to set options
 
 ```
-rave_opts$set_options(
+rave_options(
   data_dir = './data',                           # Path to data directory
   module_lookup_file = './module/modules.csv'    # Path to modules.csv
 )
-rave_opts$save_settings()                        # Save settings if you are 
+rave_settings()                                  # Save settings if you are 
                                                  # using MacOS/Linux
                                                  # Your settings will be loaded
                                                  # automatically next time
@@ -105,57 +105,57 @@ init_app()
 
 Similar to system variable, or AFNI global environment, `r pkgname` also has an option `rave_opts` that controls the global variables such as data directory SUMA location, and output path etc. It's easy to change and save.
 
-Here are the options (*all values should be characters*). You can get their values by `rave_opts$get_options("[KEY]")` and set values by `rave_opts$set_options([KEY]="[VALUE]")`
+Here are the options (*all values should be characters*). You can get their values by `rave_options("[KEY]")` and set values by `rave_options([KEY]="[VALUE]")`
 
-`debug`: Reserved for development. (Default '`r rave_opts$get_options('debug')`')
+`debug`: Reserved for development. (Default '`r rave_options('debug')`')
 
 `data_dir`: Path to data directory containing subjects' ECoG data
 
-`big_object_size`: [*Deprecated*] Parallel computing support if folk-clusters are disabled. (Default '`r rave_opts$get_options('big_object_size')`')
+`big_object_size`: [*Deprecated*] Parallel computing support if folk-clusters are disabled. (Default '`r rave_options('big_object_size')`')
 
-`server_time_zone`: Time zone. (Default '`r rave_opts$get_options('server_time_zone')`')
+`server_time_zone`: Time zone. (Default '`r rave_options('server_time_zone')`')
 
-`module_export`: Path where the modules will be exported to. (Default '`r rave_opts$get_options('module_export')`')
+`module_export`: Path where the modules will be exported to. (Default '`r rave_options('module_export')`')
 
-`content_regex`: Regular expression of name for electrodes. Default value is suggested. (Default '`r rave_opts$get_options('content_regex')`')
+`content_regex`: Regular expression of name for electrodes. Default value is suggested. (Default '`r rave_options('content_regex')`')
 
-`content_format`: Postfix for electrodes, by default is *mat*. Other formats are under development. (Default '`r rave_opts$get_options('content_format')`')
+`content_format`: Postfix for electrodes, by default is *mat*. Other formats are under development. (Default '`r rave_options('content_format')`')
 
-`module_lookup_file`: Index file path for modules. This file is used to manage modules. (Default '`r rave_opts$get_options('module_lookup_file')`')
+`module_lookup_file`: Index file path for modules. This file is used to manage modules. (Default '`r rave_options('module_lookup_file')`')
 
-`delay_input`: Measured in milliseconds. How long does `r pkgname` wait to update outputs after inputs are changed. This option prevents `r pkgname` from firing updates too frequently. Suggested value is from '20' to '200'. (Default '`r rave_opts$get_options('delay_input')`')
+`delay_input`: Measured in milliseconds. How long does `r pkgname` wait to update outputs after inputs are changed. This option prevents `r pkgname` from firing updates too frequently. Suggested value is from '20' to '200'. (Default '`r rave_options('delay_input')`')
 
-`max_worker`: How many active background jobs are allowed at the same time. (Default '`r rave_opts$get_options('max_worker')`')
+`max_worker`: How many active background jobs are allowed at the same time. (Default '`r rave_options('max_worker')`')
 
-`export_path`: Path to export modules/results. (Default '`r rave_opts$get_options('export_path')`')
+`export_path`: Path to export modules/results. (Default '`r rave_options('export_path')`')
 
-`temp_dir`: Path to temporary directory. (Default '`r rave_opts$get_options('temp_dir')`')
+`temp_dir`: Path to temporary directory. (Default '`r rave_options('temp_dir')`')
 
-`suma_monitor_dir`: Directory to monitor inputs from SUMA. (Default '`r rave_opts$get_options('suma_monitor_dir')`')
+`suma_monitor_dir`: Directory to monitor inputs from SUMA. (Default '`r rave_options('suma_monitor_dir')`')
 
-`suma_to_niml`: Command to generate NIML data. (Default '`r rave_opts$get_options('suma_to_niml')`')
+`suma_to_niml`: Command to generate NIML data. (Default '`r rave_options('suma_to_niml')`')
 
-`suma_send_niml`: [*Deprecated*] Command to send NIML generated to SUMA (*WARNING: this command is currently diabled due to some bugs in X11. Those bugs might crush SUMA*). (Default '`r rave_opts$get_options('suma_send_niml')`')
+`suma_send_niml`: [*Deprecated*] Command to send NIML generated to SUMA (*WARNING: this command is currently diabled due to some bugs in X11. Those bugs might crush SUMA*). (Default '`r rave_options('suma_send_niml')`')
 
-`suma_nodes_per_electrodes`: How many nodes in `electrodes_*.gii` stands for one electrode. (Default '`r rave_opts$get_options('suma_nodes_per_electrodes')`')
+`suma_nodes_per_electrodes`: How many nodes in `electrodes_*.gii` stands for one electrode. (Default '`r rave_options('suma_nodes_per_electrodes')`')
 
-`suma_parallel_cores`: For parallel computing, how many CPU cores will be used to calculate SUMA values. (Default '`r rave_opts$get_options('suma_parallel_cores')`')
+`suma_parallel_cores`: For parallel computing, how many CPU cores will be used to calculate SUMA values. (Default '`r rave_options('suma_parallel_cores')`')
 
-`suma_gifti_name_regex`: Regular expression to find GIFTY files that store electrodes. (Default '`r rave_opts$get_options('suma_gifti_name_regex')`')
+`suma_gifti_name_regex`: Regular expression to find GIFTY files that store electrodes. (Default '`r rave_options('suma_gifti_name_regex')`')
 
-`dyld_library_path`: Google *"AFNI dyld_library_path"*". (Default '`r rave_opts$get_options('dyld_library_path')`')
+`dyld_library_path`: Google *"AFNI dyld_library_path"*". (Default '`r rave_options('dyld_library_path')`')
 
-`suma_path`: Where to find `suma` command. (Default '`r rave_opts$get_options('suma_path')`')
+`suma_path`: Where to find `suma` command. (Default '`r rave_options('suma_path')`')
 
-`suma_spec_file`: Name for spec file in subjects' folder. (Default '`r rave_opts$get_options('suma_spec_file')`')
+`suma_spec_file`: Name for spec file in subjects' folder. (Default '`r rave_options('suma_spec_file')`')
 
-`unbuffer_path`: Where to find `unbuffer` command (On `MacOS`, please install `expect` package. Default '`r rave_opts$get_options('unbuffer_path')`')
+`unbuffer_path`: Where to find `unbuffer` command (On `MacOS`, please install `expect` package. Default '`r rave_options('unbuffer_path')`')
 
-`matlab_path`: Where to find Matlab. (Default '`r rave_opts$get_options('matlab_path')`')
+`matlab_path`: Where to find Matlab. (Default '`r rave_options('matlab_path')`')
 
-`use_rhdf5`: This feature is still under development. (Default '`r rave_opts$get_options('use_rhdf5')`')
+`use_rhdf5`: This feature is still under development. (Default '`r rave_options('use_rhdf5')`')
 
-`batch_bytes`: This number controls memory usage, only valid if `use_rhdf5=FALSE`. Set this option as large as possible. However, it should not exceed half of the RAM. For example, you are running `r pkgname` on a 64GB-RAM machine, this value is suggested to be `32000000000`. (*32000000000 Bytes = 32GB*). (Default '`r rave_opts$get_options('batch_bytes')`')
+`batch_bytes`: This number controls memory usage, only valid if `use_rhdf5=FALSE`. Set this option as large as possible. However, it should not exceed half of the RAM. For example, you are running `r pkgname` on a 64GB-RAM machine, this value is suggested to be `32000000000`. (*32000000000 Bytes = 32GB*). (Default '`r rave_options('batch_bytes')`')
 
 
 

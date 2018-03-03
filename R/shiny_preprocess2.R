@@ -1206,7 +1206,7 @@ rave_pre_process <- function(
           numericInput(ns('wave_num'), 'Number of Wavelet Cycles: ', value = 7, step = 1, min = 1),
           numericInput(ns('target_srate'), 'Target Sample Rate', value = 100, min = 10, max = isolate(user_data$srate), step = 1),
           checkboxInput(ns('save_original'), 'Save Original (Not Recommended)', value = FALSE),
-          numericInput(ns('ncores'), 'Parallel, Number of Cores:', value = future::availableCores(), min = 1, max = rave_opts$get_options('max_worker'), step = 1),
+          numericInput(ns('ncores'), 'Parallel, Number of Cores:', value = future::availableCores(), min = 1, max = rave_options('max_worker'), step = 1),
           actionButton(ns('do_wavelet'), 'Run Wavelet'),
           p(tags$small('Wavelet will run several hours.'))
         )

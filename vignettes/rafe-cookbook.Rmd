@@ -56,7 +56,7 @@ Let's load a subject without lauching any browsers. This step helps us understan
 # Play with a toy dataset
 
 # STEP 1: Set options
-rave_opts$set_options(
+rave_options(
   data_dir = system.file('example/data', package = 'rave')
 ) -> opt;  # Assign to avoid printing
 
@@ -216,7 +216,7 @@ knitr::kable(module_index)
 2. Register index file `modules.csv` to `r pkgname`:
 
 ```
-rave_opts$set_options(
+rave_options(
   module_lookup_file =
     '`r system.file('example/module/modules.csv', package = 'rave')`'
 )
@@ -228,7 +228,7 @@ Now let's lauch the web UI
 # Specify data directory
 # Specify module index file
 # 
-rave_opts$set_options(
+rave_options(
   data_dir = system.file('example/data', package = 'rave'),
   module_lookup_file = system.file('example/module/modules.csv', package = 'rave')
 ) -> opt;

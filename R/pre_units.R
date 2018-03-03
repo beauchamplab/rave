@@ -4,7 +4,7 @@
 preprocess = function(
   process_name = 'notch', project_name, subject_code, block_num, chls, srate = 2000,
   frequencies = seq(4, 200, by = 4), wave_num = 7, compress = 2,
-  data_dir = rave_opts$get_options('data_dir')
+  data_dir = rave_options('data_dir')
 ){
 
   # assume save_dir exists
@@ -66,8 +66,8 @@ preprocess = function(
       # Save notch image
       png(
         filename = file.path(vis_dir, sprintf('notch_%s_ch_%d.png', block_num, chl)),
-        width = as.numeric(rave_opts$get_options('image_width')),
-        height = as.numeric(rave_opts$get_options('image_height'))
+        width = as.numeric(rave_options('image_width')),
+        height = as.numeric(rave_options('image_height'))
       )
       pre_inspect(
         process_name = process_name,
@@ -123,8 +123,8 @@ preprocess = function(
       # Save CAR per-channel image
       png(
         filename = file.path(vis_dir, sprintf('CAR_%s_ch_%d.png', block_num, chl)),
-        width = as.numeric(rave_opts$get_options('image_width')),
-        height = as.numeric(rave_opts$get_options('image_height'))
+        width = as.numeric(rave_options('image_width')),
+        height = as.numeric(rave_options('image_height'))
       )
       pre_inspect(
         process_name = process_name,
@@ -179,7 +179,7 @@ pre_inspect = function(
   process_name = 'notch', project_name, subject_code, block_num, chls, srate = 2000,
   compress = 20, window = 128, noverlap = 8, xlim = c(0, 300), xbins = 200, boundary = -1, ...
 ){
-  data_dir = rave_opts$get_options('data_dir')
+  data_dir = rave_options('data_dir')
   # assume save_dir exists
   subject_dir = file.path(data_dir, sprintf('%s_%s', subject_code, project_name), 'preprocess')
 
@@ -328,7 +328,7 @@ pre_inspect = function(
 #' Concatenate final results of wavelet output and perform cumsum
 #' TODO: add process of pdiode data
 pre_concat <- function(project_name, subject_code, blocks, chl, srate = 1000, target_srate = 100){
-  data_dir = rave_opts$get_options('data_dir')
+  data_dir = rave_options('data_dir')
 
   # assume save_dir exists
   source_dir = file.path(data_dir, sprintf('%s_%s', subject_code, project_name), 'preprocess')

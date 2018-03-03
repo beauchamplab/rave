@@ -110,26 +110,49 @@ Options <- R6::R6Class(
   )
 )
 
+# export
+# rave_opts <- Options$new(conf_path = '~/.rave.yaml', save_default = T)
+
 #' @export
-rave_opts <- Options$new(conf_path = '~/.rave.yaml', save_default = T)
+save_options <- function(){
+  ..setup_env$rave_opts$save_settings()
+}
 
+#' @export
+rave_options <- function(..., .save = T){
+  if(!exists('rave_opts', envir = ..setup_env, inherits = F)){
+    ..setup_env$rave_opts <- Options$new(conf_path = '~/.rave.yaml', save_default = T)
+  }
+  args = list(...)
+  if(length(args) && length(names(args))){
+    # set options
+    re = ..setup_env$rave_opts$set_options(...)
 
-..setup_env = new.env(parent = emptyenv())
-..setup_env$setup_func = list()
+    if(.save){
+      ..setup_env$rave_opts$save_settings()
+    }
+  }else{
+    # get options
+    re = ..setup_env$rave_opts$get_options(...)
+  }
+
+  return(re)
+}
+
 #' @export
 rave_setup <- function(func = NULL){
   if(!is.function(func)){
     if(length(..setup_env$setup_func) == 0){
-      future::plan(future::multiprocess, workers = rave_opts$get_options('max_worker'))
+      future::plan(future::multiprocess, workers = rave_options('max_worker'))
       # check crayon
       if(exists('RStudio.Version') && is.function(RStudio.Version)){
         rsver = as.character(RStudio.Version()$version)
         if(utils::compareVersion('1.1', rsver) > 0){
           warning("Please install newest version of RStudio")
-          rave::rave_opts$set_options(crayon_enabled = FALSE)
+          rave::rave_options(crayon_enabled = FALSE)
         }
       }else{
-        rave::rave_opts$set_options(crayon_enabled = FALSE)
+        rave::rave_options(crayon_enabled = FALSE)
       }
     }
   }else{

@@ -84,7 +84,7 @@ shinirize <- function(module, session = shiny::getDefaultReactiveDomain(), test.
       reactive({
         local_data$last_input
       }) %>%
-        debounce(rave_opts$get_options('delay_input')) ->
+        debounce(rave_options('delay_input')) ->
         check_inputs
 
       reactive({
@@ -220,7 +220,7 @@ shinirize <- function(module, session = shiny::getDefaultReactiveDomain(), test.
                       tmp_env$obj_size = 0
                     })
                   }) -> junk
-                  if(tmp_env$obj_size < rave_opts$get_options('big_object_size')){
+                  if(tmp_env$obj_size < rave_options('big_object_size')){
                     if(is.function(obj)){
                       environment(obj) <- execenv$runtime_env
                     }

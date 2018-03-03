@@ -2,7 +2,7 @@
 
 #' @export
 save_meta <- function(data, meta_type, project_name, subject_code){
-  data_dir = rave_opts$get_options('data_dir')
+  data_dir = rave_options('data_dir')
   meta_dir = file.path(data_dir, sprintf('%s_%s', subject_code, project_name), 'rave', 'meta')
 
   if(!dir.exists(meta_dir)){
@@ -32,7 +32,7 @@ save_meta <- function(data, meta_type, project_name, subject_code){
 
 #' @export
 load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_name){
-  data_dir = rave_opts$get_options('data_dir')
+  data_dir = rave_options('data_dir')
   if(missing(subject_id)){
     meta_dir = file.path(data_dir, sprintf('%s_%s', subject_code, project_name), 'rave', 'meta')
   }else{

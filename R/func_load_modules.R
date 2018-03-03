@@ -3,7 +3,7 @@
 #' @export
 load_modules <- function(lookup_file = NULL){
   if(is.null(lookup_file) || !file.exists(lookup_file)){
-    lookup_file = rave_opts$get_options('module_lookup_file')
+    lookup_file = rave_options('module_lookup_file')
   }
   assertthat::assert_that(file.exists(lookup_file), msg = sprintf('Module look-up file not found! [%s]', lookup_file))
   module_info = read.csv(lookup_file, stringsAsFactors = F)

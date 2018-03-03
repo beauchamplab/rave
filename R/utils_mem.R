@@ -59,7 +59,7 @@ trim_env <- function(
     return()
   }
   if(large_size == -1){
-    large_size = rave_opts$get_options('big_object_size')
+    large_size = rave_options('big_object_size')
   }
 
   obj_sizes = safe_env_size(env, sum_up = F)

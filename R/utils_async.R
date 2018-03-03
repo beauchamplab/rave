@@ -59,7 +59,7 @@ async_start <- function(){
 #' @export
 async <- function(expr, name = NULL, envir = parent.frame(), plan = future::multisession){
   if(!is.null(plan)){
-    future::plan(plan, workers = rave_opts$get_options('max_worker'))
+    future::plan(plan, workers = rave_options('max_worker'))
   }
   if(is.null(name)){
     future::future(substitute(expr), envir = envir, substitute = F) ->

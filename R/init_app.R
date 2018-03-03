@@ -10,7 +10,7 @@ init_app <- function(modules = NULL, ...){
   }, error = function(e){})
 
   test.mode = list(...)[['test.mode']]
-  if(is.null(test.mode)) test.mode = rave_opts$get_options('test_mode')
+  if(is.null(test.mode)) test.mode = rave_options('test_mode')
   if(length(modules) == 0){
     modules = load_modules()
   }
@@ -51,7 +51,7 @@ init_app <- function(modules = NULL, ...){
 
     # Global variable, timer etc.
     async_timer = reactiveTimer(500)
-    input_timer = reactiveTimer(rave_opts$get_options('delay_input') / 2)
+    input_timer = reactiveTimer(rave_options('delay_input') / 2)
     global_reactives = reactiveValues(
       check_results = NULL,
       check_inputs = NULL,

@@ -22,7 +22,7 @@ SingleElectrode <- R6::R6Class(
 
     initialize = function(subject, electrode){
       # locate source file
-      data_dir = rave_opts$get_options('data_dir')
+      data_dir = rave_options('data_dir')
       subject_dir = file.path(data_dir, subject, 'rave')
       cache_path = file.path(subject_dir, 'cache', sprintf('chl_%d.h5', electrode))
 
@@ -91,7 +91,7 @@ SingleElectrode <- R6::R6Class(
 #'         electrodes = self$electrodes
 #'       }
 #'
-#'       if(rave_opts$get_options('use_rhdf5') == 'TRUE' && requireNamespace('rhdf5')){
+#'       if(rave_options('use_rhdf5') == 'TRUE' && requireNamespace('rhdf5')){
 #'         h5file = file.path(self$subject$cache_dir, 'all.h5')
 #'
 #'         if(to_ram){
@@ -172,7 +172,7 @@ SingleElectrode <- R6::R6Class(
 #'     },
 #'     load = function(electrodes, async = FALSE){  # async depricated
 #'
-#'       if(rave_opts$get_options('use_rhdf5') == 'TRUE' && requireNamespace('rhdf5')){
+#'       if(rave_options('use_rhdf5') == 'TRUE' && requireNamespace('rhdf5')){
 #'         self$electrodes = self$subject$filter_valid_electrodes(electrodes)
 #'         return()
 #'       }

@@ -111,8 +111,8 @@ mini_channel_inspection <- function(process_name, project_name, subject_code, bl
       if(!cache %in% result$cached_imgs){
         png(
           filename = file.path(vis_dir, cache),
-          width = as.numeric(rave_opts$get_options('image_width')),
-          height = as.numeric(rave_opts$get_options('image_height'))
+          width = as.numeric(rave_options('image_width')),
+          height = as.numeric(rave_options('image_height'))
         )
         pre_inspect(
           process_name = process_name,

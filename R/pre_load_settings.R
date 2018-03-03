@@ -14,7 +14,7 @@
 pre_load_settings <- function(
   subject_code, setting_file = 'variables.txt'
 ){
-  raw_data_dir = rave_opts$get_options('raw_data_dir')
+  raw_data_dir = rave_options('raw_data_dir')
   # Check data validity
   sf = file.path(raw_data_dir, 'neuralData', 'originalData', subject_code, setting_file)
   if(!file.exists(sf)){

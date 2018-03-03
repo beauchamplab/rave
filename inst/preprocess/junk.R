@@ -10,9 +10,7 @@ source('./adhoc/Dipterix/preprocess/pre_wavelet.R')
 
 require(rave)
 require(tidyverse)
-rave_opts$set_options(
-  raw_data_dir = './adhoc/Dipterix/Data/ECoG/'
-)
+
 
 subject_code = 'YAB'
 block_num = '008'

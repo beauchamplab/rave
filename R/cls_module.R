@@ -37,7 +37,7 @@ getDefaultDataRepository <- function(
   session_based = NULL
 ){
   if(is.null(session_based)){
-    session_based = rave_opts$get_options('session_based_datarepo')
+    session_based = rave_options('session_based_datarepo')
   }
   if(missing(session_id)){
     if(!session_based){
@@ -586,7 +586,7 @@ ExecEnvir <- R6::R6Class(
                 return(0)
               })
             }) -> s
-            nms = nms[s > rave_opts$get_options('big_object_size')]
+            nms = nms[s > rave_options('big_object_size')]
             if(length(nms)){
               rm(list = nms, envir = env)
             }

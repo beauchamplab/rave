@@ -1,9 +1,9 @@
 #' @import crayon
 #' @export
 logger <- function(..., level = 'DEBUG'){
-  ld = !rave_opts$get_options('logger_enabled')
-  lv = rave_opts$get_options('logger_level')
-  ce = rave_opts$get_options('crayon_enabled')
+  ld = !rave_options('logger_enabled')
+  lv = rave_options('logger_level')
+  ce = rave_options('crayon_enabled')
 
 
   levels = c('DEBUG','INFO','WARNING','ERROR','FATAL')

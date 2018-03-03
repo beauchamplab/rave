@@ -2,8 +2,8 @@
 
 #' @export
 arrange_data_dir <- function(is_dev = FALSE){
-  data_dir = rave::rave_opts$get_options('data_dir')
-  raw_dir = rave::rave_opts$get_options('raw_data_dir')
+  data_dir = rave::rave_options('data_dir')
+  raw_dir = rave::rave_options('raw_data_dir')
   is_changed = FALSE
 
   if(!dir.exists(data_dir) || is_dev){
@@ -13,7 +13,7 @@ arrange_data_dir <- function(is_dev = FALSE){
     # move example data to it
     message("--------------------")
     message("Original data directory NOT found! Trying to generate default data repository")
-    message("Original data repository - [", rave::rave_opts$get_options('data_dir'), '] (invalid/not exist)')
+    message("Original data repository - [", rave::rave_options('data_dir'), '] (invalid/not exist)')
     message("New data repository - [", data_dir, ']')
 
     # Russian rocket: RE-DO whenever fails
@@ -21,7 +21,7 @@ arrange_data_dir <- function(is_dev = FALSE){
 
     is_changed = T
   }
-  rave::rave_opts$set_options(data_dir = tools::file_path_as_absolute(data_dir))
+  rave_options(data_dir = tools::file_path_as_absolute(data_dir))
 
 
   if(!dir.exists(raw_dir) || is_dev){
@@ -31,7 +31,7 @@ arrange_data_dir <- function(is_dev = FALSE){
     # move example data to it
     message("--------------------")
     message("Original raw-data directory NOT found! Trying to generate default raw-data repository")
-    message("Original raw-data repository - [", rave::rave_opts$get_options('raw_data_dir'), '] (invalid/not exist)')
+    message("Original raw-data repository - [", rave::rave_options('raw_data_dir'), '] (invalid/not exist)')
     message("New raw-data repository - [", raw_dir, ']')
 
     # Russian rocket: RE-DO whenever fails
@@ -39,15 +39,14 @@ arrange_data_dir <- function(is_dev = FALSE){
 
     is_changed = T
   }
-  rave::rave_opts$set_options(raw_data_dir = tools::file_path_as_absolute(raw_dir))
+  rave_options(raw_data_dir = tools::file_path_as_absolute(raw_dir))
 
-  rave::rave_opts$save_settings()
   return(is_changed)
 }
 
 #' @export
 arrange_modules <- function(
-  look_up_file = rave::rave_opts$get_options('module_lookup_file'),
+  look_up_file = rave::rave_options('module_lookup_file'),
   target_dir = NULL,
   is_new = FALSE
 ){
@@ -104,7 +103,7 @@ arrange_modules <- function(
   }
   write.csv(new_modules, look_up_file)
   look_up_file = tools::file_path_as_absolute(look_up_file)
-  rave::rave_opts$set_options(module_lookup_file = look_up_file, module_root_dir = target_dir)
+  rave::rave_options(module_lookup_file = look_up_file, module_root_dir = target_dir)
 
   message("--------------------")
   message('Active modules: \n', paste0(' - ', new_modules$Name[new_modules$Active], collapse = '\n'),
@@ -114,7 +113,6 @@ arrange_modules <- function(
   new_repo = system.file('modules', package = 'rave')
   file.copy(new_repo, target_dir, overwrite = T, recursive = T)
 
-  rave_opts$save_settings()
 
   return(is_changed)
 }

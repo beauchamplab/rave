@@ -1,6 +1,6 @@
 # data selector
 shiny_data_selector <- function(moduleId){
-  subject_choices = list.dirs(rave_opts$get_options('data_dir'), full.names = F, recursive = F)
+  subject_choices = list.dirs(rave_options('data_dir'), full.names = F, recursive = F)
   lapply(subject_choices, function(subject_id){
     tryCatch({
       subject = Subject$new(subject_id = subject_id)

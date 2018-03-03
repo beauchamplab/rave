@@ -995,7 +995,7 @@ init_preprocess = function(){
               user_data$subject$subject_code,
               user_data$subject$blocks,
               vc, user_data$subject$srate,
-              ncores = rave_opts$get_options('max_worker'), plan = future::multisession
+              ncores = rave_options('max_worker'), plan = future::multisession
             ) ->
               check
 

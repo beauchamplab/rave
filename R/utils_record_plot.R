@@ -1,7 +1,7 @@
 save_plot <- function(expr,
                       path,
-                      width = as.numeric(rave_opts$get_options('image_width')),
-                      height = as.numeric(rave_opts$get_options('image_height')), ...){
+                      width = as.numeric(rave_options('image_width')),
+                      height = as.numeric(rave_options('image_height')), ...){
   png(filename = path, width = width, height = height, ...)
 
   f <- ~expr

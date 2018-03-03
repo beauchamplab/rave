@@ -6,8 +6,8 @@ NULL
 get_dir <- function(subject_code, project_name, block_num, mkdirs = NULL, subject_id){
   re = list()
 
-  re$data_dir = rave_opts$get_options('data_dir')
-  re$raw_data_dir = rave_opts$get_options('raw_data_dir')
+  re$data_dir = rave_options('data_dir')
+  re$raw_data_dir = rave_options('raw_data_dir')
 
   if(!(missing(subject_code) || missing(project_name))){
     re$subject_name = paste0(subject_code, '_', project_name)

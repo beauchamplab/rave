@@ -130,7 +130,7 @@
   first_time = is_dev || is_new
 
   rave::arrange_modules(
-    look_up_file = rave::rave_opts$get_options('module_lookup_file'),
+    look_up_file = rave::rave_options('module_lookup_file'),
     target_dir = NULL,
     is_new = first_time
   ) ->
@@ -142,11 +142,11 @@
 
   # additional settings
   if(is_new){
-    rave::rave_opts$set_options(
+    rave::rave_options(
       delay_input = 20,
       max_worker = parallel::detectCores() - 1
     )
-    rave::rave_opts$save_settings()
+    rave::save_options()
   }
 
   capture.output(rave::rave_hist$save(`..last_ver..` = ver))
@@ -165,9 +165,9 @@
   }
 
   nms = list(
-    'Module File:        \t' =  rave::rave_opts$get_options('module_lookup_file'),
-    'Data Repository:    \t' = rave::rave_opts$get_options('data_dir'),
-    'Raw-data Repository:\t' = rave::rave_opts$get_options('raw_data_dir')
+    'Module File:        \t' =  rave::rave_options('module_lookup_file'),
+    'Data Repository:    \t' = rave::rave_options('data_dir'),
+    'Raw-data Repository:\t' = rave::rave_options('raw_data_dir')
   )
 
   for(nm in names(nms)){

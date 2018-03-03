@@ -166,7 +166,7 @@ ECoGRepository <- R6::R6Class(
       })
       if(parallel){
         if(is.null(cl)){
-          cl = parallel::makeForkCluster(nnodes = min(rave_opts$get_options('max_worker'), parallel::detectCores()))
+          cl = parallel::makeForkCluster(nnodes = min(rave_options('max_worker'), parallel::detectCores()))
           on.exit({parallel::stopCluster(cl)})
         }
 

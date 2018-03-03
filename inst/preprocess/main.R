@@ -85,7 +85,7 @@
 # bulk_CAR(project_name, subject_code, blocks, channels)
 #
 # # wavelet
-# bulk_wavelet(project_name, subject_code, blocks, channels, data_dir = rave_opts$get_options('data_dir'),
+# bulk_wavelet(project_name, subject_code, blocks, channels, data_dir = rave_options('data_dir'),
 #              srate = 2000, frequencies = seq(4, 200, by = 4), wave_num = 7, compress = 2)
 #
 #
