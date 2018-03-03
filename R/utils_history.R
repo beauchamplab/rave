@@ -78,7 +78,6 @@ RAVEHistory <- R6::R6Class(
   )
 )
 
-#' @export
-rave_hist = RAVEHistory$new()
+
 
 

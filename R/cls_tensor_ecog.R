@@ -53,6 +53,6 @@ content <- function(x, ...){
 }
 
 #' @export
-subset.Tensor <- function(obj, ...){
-  obj$subset(...)
+subset.Tensor <- function(obj, ..., .env = parent.frame()){
+  obj$subset(...,.env = .env)
 }
