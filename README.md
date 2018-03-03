@@ -9,7 +9,7 @@ You need to check two things before installtion:
 
 * Operating System
   + [Mac OS](#anchor-macos)
-  + [Windows (Windows 10, with Bash enabled)](#anchor-windows)
+  + [Windows (Windows 10, with Bash enabled)](#windows)
   + Linux (Ubuntu-Like)
   + Linux (Others)
 
