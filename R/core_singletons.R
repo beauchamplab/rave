@@ -1,4 +1,4 @@
-#' @include utils_history
+#' @include utils_history.R
 
 # singletons
 

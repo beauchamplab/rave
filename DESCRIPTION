@@ -4,10 +4,111 @@ Type: Package
 Title: R Analysis and Visualization of ECOG Data
 Version: 0.1.4.0002
 Author: Beauchamplab
-Maintainer: beauchamp lab <beauchamplab@gmail.com>
-Description: R Analysis and Visualization of ECOG Data
-    This package is under development.
+Maintainer: Zhengjia Wang <dipterix.wang@gmail.com>,
+            Beauchamplab <beauchamplab@gmail.com>
+Description: R Analysis and Visualization of ECOG Data 
+    (Internal code: "Dipterix")
+    RAVE provides cross-platform analysis and visualizations for neuroscience 
+    ECoG data by "Just click buttons". This package include: (a) pre-processing 
+    of ECoG raw data into HDF5 format (a cross-platform data format that can be 
+    used for R, Matlab, Python, Java and C); (b) ECoG epoch and visualizations
+    in real time; (c) Users can write customized analysis in R and easily 
+    insert into RAVE for interactive visualizations. 
+    Also RAVE follows BIDS (http://bids.neuroimaging.io/) format.
 License: GNU
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
+Imports:
+    R.matlab (>= 3.6.1),
+    R6 (>= 2.2.2),
+    crayon (>= 1.3.4),
+    future (>= 1.6.2),
+    grid,
+    magrittr (>= 1.5),
+    miniUI,
+    parallel,
+    shiny (>= 1.0.5),
+    signal (>= 0.7-6),
+    stringr (>= 1.2.0),
+    tidyverse (>= 1.2.1),
+    yaml (>= 2.1.16)
+Suggests:
+    pryr (>= 0.1.3),
+    assertthat (>= 0.2.0),
+    lazyeval (>= 0.2.1.8000),
+    shinydashboard (>= 0.6.1),
+    fftw (>= 1.0-4),
+    fftwtools (>= 0.9-8),
+    plotly (>= 4.7.1),
+    digest (>= 0.6.14),
+    gridBase (>= 0.4-7),
+    shinyjs (>= 1.0),
+    ff (>= 2.2-13),
+    rlang (>= 0.1.6.9000),
+    V8 (>= 1.5)
+Collate: 
+    'RcppExports.R'
+    'bulk_preprocess.R'
+    'cls_ecog_repo.R'
+    'cls_electrode.R'
+    'cls_module.R'
+    'cls_subject.R'
+    'cls_subjectinfo.R'
+    'cls_tensor.R'
+    'cls_tensor_ecog.R'
+    'controllers.R'
+    'core_default_setups.R'
+    'core_options.R'
+    'utils_history.R'
+    'core_singletons.R'
+    'func_cache.R'
+    'func_iter_results.R'
+    'func_load_modules.R'
+    'func_makemodule.R'
+    'func_rave_prepare.R'
+    'func_shinirize.R'
+    'init_app.R'
+    'io_raw_signal.R'
+    'lib_hdf5_io.R'
+    'lib_notch_filter.R'
+    'lib_plot_car.R'
+    'lib_plot_notch.R'
+    'lib_plot_signal.R'
+    'lib_resample.R'
+    'lib_wavelet.R'
+    'load_meta.R'
+    'mini_channel_inspection.R'
+    'mini_events_gen.R'
+    'mini_parallel_plots.R'
+    'mini_subject_info.R'
+    'pre_adhoc.R'
+    'pre_common_ang_ref.R'
+    'pre_load_settings.R'
+    'pre_notch.R'
+    'pre_process.R'
+    'pre_units.R'
+    'pre_wavelet.R'
+    'save_meta.R'
+    'server.R'
+    'shiny_customize.R'
+    'shiny_dashboard.R'
+    'shiny_data_selector.R'
+    'shiny_preprocess.R'
+    'shiny_preprocess2.R'
+    'singleelectrode.R'
+    'utils_async.R'
+    'utils_checkvalid.R'
+    'utils_dir.R'
+    'utils_execfunc.R'
+    'utils_ff_mann.R'
+    'utils_h5_mann.R'
+    'utils_lapply.R'
+    'utils_logger.R'
+    'utils_mem.R'
+    'utils_parse.R'
+    'utils_parse_call.R'
+    'utils_progress.R'
+    'utils_record_plot.R'
+    'utils_syscheck.R'
+    'vis_channel.R'
