@@ -1,6 +1,5 @@
-
-.onAttach <- function(libname, pkgname){
-
+#' @export
+rave_install_dependencies <- function(){
   # For production
   cran_pkgs = c('pryr', 'assertthat', 'lazyeval', 'shinydashboard', 'fftw', 'yaml',
                 'fftwtools', 'plotly', 'digest', 'gridBase', 'shinyjs', 'ff',
@@ -30,6 +29,15 @@
     source("https://bioconductor.org/biocLite.R")
     biocLite(bioc_pkgs, suppressUpdates = T, suppressAutoUpdate = T)
   }
+}
+
+rave_install_dependencies()
+
+
+
+.onAttach <- function(libname, pkgname){
+
+  rave::rave_install_dependencies()
 
   shiny::registerInputHandler("rave.compoundInput", function(data, shinysession, name) {
     if (is.null(data)){
