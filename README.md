@@ -1,34 +1,44 @@
 # RAVE
 R Analysis and Visualization of ECOG Data (Alpha version)
 
-# Installation
+## Installation
 
-## Environment Setup
+### 1. Environment Setup
+
+In this section, you'll install R, RStudio, devtools and all other dependencies.
+
+**R** is a functional programming language that *RAVE* uses. **Devtools** are necessary to enable advanced features. **RStudio** is an *IDE (Intergrated Development Environment)* for easy and better code management especially designed for R. If you are hosting a server in RAVE, or prefer to using command lines, RStudio is not necessary.
 
 You need to check two things before installtion:
 
 * Operating System
-  + [Mac OS](#anchor-macos)
+  + [Mac OS](#macos)
   + [Windows (Windows 10, with Bash enabled)](#windows)
   + Linux (Ubuntu-Like)
   + Linux (Others)
 
 
-#anchor-macos
-### MacOS
+#### MacOS
 
-#anchor-windows
-### Windows
+#### Windows
 
-On windows, RAVE is limited because *AFNI* doesn't support windows. However, most of RAVE functions should work. To install RAVE, you need to have *bash* enabled on windows 10.
+On Windows, RAVE is limited because *AFNI* doesn't support windows. However, most of RAVE functions should work. To install RAVE, you need to have *bash* enabled on Windows 10.
+
+It's easy to install on Windows. 
+
+1. First, go to Cran-R official website and download install the latest R:
+[https://cran.r-project.org/bin/windows/base/](https://cran.r-project.org/bin/windows/base/)
+
+2. After installing R, download and install *Rtools*. Please install the latest version:
+[https://cran.r-project.org/bin/windows/Rtools/](https://cran.r-project.org/bin/windows/Rtools/)
+
+3. RStudio
+[https://www.rstudio.com/products/rstudio/download/](https://www.rstudio.com/products/rstudio/download/)
 
 
-## Install R, Rstudio, RTools
+### 2. Install RAVE
 
-
-
-
-
+TODO
 
 
 ### Stable version
