@@ -1,27 +1,4 @@
-#' @export
-rave_install_dependencies <- function(){
-  # For production
-  cran_pkgs = c('pryr', 'assertthat', 'lazyeval', 'shinydashboard', 'fftw', 'yaml',
-                'fftwtools', 'plotly', 'digest', 'gridBase', 'shinyjs', 'ff',
-                'devtools', 'rlang', 'V8')
-
-  cran_pkgs = cran_pkgs[!cran_pkgs %in% utils::installed.packages()[,1]]
-  if(length(cran_pkgs)){
-    message("Installing Dependencies from CRAN...")
-    install.packages(cran_pkgs, repos='http://cran.us.r-project.org')
-  }
-
-  # if(!'promises' %in% utils::installed.packages()[,1]){
-  #   message("Installing Dependencies from GITHUB [rstudio/promises]")
-  #   devtools::install_github("rstudio/promises")
-  # }
-
-  # check shiny 1.1 installed
-  # if(utils::packageVersion('shiny') < as.package_version('1.0.5.9000')){
-  #   message("Installing Dependencies from GITHUB [rstudio/shiny@async]")
-  #   devtools::install_github("rstudio/shiny@async")
-  # }
-
+setLoadActions(function(ns){
   bioc_pkgs = c('HDF5Array', 'rhdf5')
   bioc_pkgs = bioc_pkgs[!bioc_pkgs %in% utils::installed.packages()[,1]]
   if(length(bioc_pkgs)){
@@ -29,15 +6,10 @@ rave_install_dependencies <- function(){
     source("https://bioconductor.org/biocLite.R")
     biocLite(bioc_pkgs, suppressUpdates = T, suppressAutoUpdate = T)
   }
-}
-
-rave_install_dependencies()
-
+})
 
 
 .onAttach <- function(libname, pkgname){
-
-  rave::rave_install_dependencies()
 
   shiny::registerInputHandler("rave.compoundInput", function(data, shinysession, name) {
     if (is.null(data)){
