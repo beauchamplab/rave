@@ -1,7 +1,34 @@
 # RAVE
 R Analysis and Visualization of ECOG Data (Alpha version)
 
-## Installation
+# Installation
+
+## Environment Setup
+
+You need to check two things before installtion:
+
+* Operating System
+  + [Mac OS](#anchor-macos)
+  + [Windows (Windows 10, with Bash enabled)](#anchor-windows)
+  + Linux (Ubuntu-Like)
+  + Linux (Others)
+
+
+#anchor-macos
+### MacOS
+
+#anchor-windows
+### Windows
+
+On windows, RAVE is limited because *AFNI* doesn't support windows. However, most of RAVE functions should work. To install RAVE, you need to have *bash* enabled on windows 10.
+
+
+## Install R, Rstudio, RTools
+
+
+
+
+
 
 
 ### Stable version
