@@ -39,12 +39,23 @@ It's easy to install on Windows.
 
 ### 2. Install R dependencies
 
+There are two ways to install RAVE. 
+
+The first one is to install script from github, but this requires some preliminary work, since 
+RAVE is using Bioconductor package `rhdf5` and (potentially) `HDF5Array`, and they can not be installed by R default installation command `install.packages`. However, once RAVE is installed via this method, you can use it anywhere just like a normal R package. Therefore if you use R quite often, this is **strongly recommended**.
+
+The second method is to install by using `Packrat` (you might need to have RStudio installed), an R package that is designed for reproducible projects. This approach has its limit: you will have to load RAVE each time you are starting a new project. And it can only work within projects. Therefore it's not recommended (Think of virtualenv for python). However, if you are running a RAVE server, then this would be a good choice, because it's fast.
+
+Let's start with the first approach:
+
 If you have installed RStudio, open it, or if you are using terminal/command line, type `R` to enter R.
 
-Inside of R, install `devtools` and `yaml` by typing the following commands:
+Inside of R, install `devtools` and `rhdf5` by typing the following commands:
 
 ```
-install.packages(c('devtools', 'yaml'))
+install.packages('devtools')
+source("https://bioconductor.org/biocLite.R")
+biocLite(c("rhdf5", "HDF5Array"), suppressUpdates = T, suppressAutoUpdate = T)
 ```
 
 ### 3. Install RAVE (As of Date: 3/3/2018)
@@ -64,8 +75,12 @@ It is also recommended that other packages (`rhdf5`, `HDF5Array`) be installed.
 
 IMPORTANT: I'm Still maturing this version. However, it's runnable and contains more features than the alpha version. Please go to [RAVE_dev-cycle]() to see the todo-list.
 
+To install this version of RAVE, simply enter the following command:
+
 `devtools::install_github('beauchamplab/rave@rave-dipterix')`
-- or -
+
+or -
+
 `devtools::install_github('beauchamplab/rave', ref = 'rave-dipterix')`
 
 Please make sure that you have latest `yaml` package installed. Upon failure, you might want to try: `install.packages('yaml')`.
