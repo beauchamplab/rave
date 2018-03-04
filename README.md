@@ -39,16 +39,27 @@ It's easy to install on Windows.
 
 ### 2. Install R dependencies
 
+**If you have installed RStudio, open it, or if you are using terminal/command line, type `R` to enter R.**
+
 There are two ways to install RAVE. 
 
-The first one is to install script from github, but this requires some preliminary work, since 
-RAVE is using Bioconductor package `rhdf5` and (potentially) `HDF5Array`, and they can not be installed by R default installation command `install.packages`. However, once RAVE is installed via this method, you can use it anywhere just like a normal R package. Therefore if you use R quite often, this is **strongly recommended**.
+#### If you want to install recommended version of RAVE
 
-The second method is to install by using `Packrat` (you might need to have RStudio installed), an R package that is designed for reproducible projects. This approach has its limit: you will have to load RAVE each time you are starting a new project. And it can only work within projects. Therefore it's not recommended (Think of virtualenv for python). However, if you are running a RAVE server, then this would be a good choice, because it's fast.
+I have written a very simple and easy script for you. Open R, or RStudio, enter:
 
-Let's start with the first approach:
+```
+source('https://raw.githubusercontent.com/dipterix/instrave/master/R/hello.R')
+```
 
-If you have installed RStudio, open it, or if you are using terminal/command line, type `R` to enter R.
+Then you will see that `RAVE` is installed and attached. Type 
+
+```
+init_app()
+```
+
+to enjoy :)
+
+#### If you failed in the first method and want to install specific version of RAVE
 
 Inside of R, install `devtools` and `rhdf5` by typing the following commands:
 
@@ -58,7 +69,7 @@ source("https://bioconductor.org/biocLite.R")
 biocLite(c("rhdf5", "HDF5Array"), suppressUpdates = T, suppressAutoUpdate = T)
 ```
 
-### 3. Install RAVE (As of Date: 3/3/2018)
+Next, install RAVE,
 
 There are three versions of RAVE, **Alpha**, **Beta** version. To see the difference, please check [RAVE updates]()
 
@@ -68,8 +79,8 @@ This version was last updated at *Dec/2017* and is no-longer supported. This ver
 
 `devtools::install_github('beauchamplab/rave')`
 
-Please make sure that your R has packages `devtools`, `tidyverse` installed.
-It is also recommended that other packages (`rhdf5`, `HDF5Array`) be installed.
+*Please make sure that your R has packages `devtools`, `tidyverse` installed.*
+*It is also recommended that other packages (`rhdf5`, `HDF5Array`) be installed.*
 
 ### Beta Version
 
@@ -86,12 +97,33 @@ or -
 Please make sure that you have latest `yaml` package installed. Upon failure, you might want to try: `install.packages('yaml')`.
 All other dependencies should be installed automatically
 
-Newest Update: (As of 03/02/2018)
-
-*To be added*
-
 
 ## Toy example
+
+*Depending on the version of `RAVE` that you have installed*
+
+### Beta version
+
+Beta version is very easy. This version comes with some "real" data
+
+To play with **preprocess**, type the following R command 
+
+```
+rave_pre_process()
+```
+
+In the `subject code`, type `Subject` and press `load` button
+
+To play with **Main**, type:
+
+```
+init_app()
+```
+
+### Alpha version
+
+If you have installed `Alpha` version, you can use the following code to launch
+
 ```
 # Load packages
 library(rave)
