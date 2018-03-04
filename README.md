@@ -82,7 +82,7 @@ This version was last updated at *Dec/2017* and is no-longer supported. This ver
 *Please make sure that your R has packages `devtools`, `tidyverse` installed.*
 *It is also recommended that other packages (`rhdf5`, `HDF5Array`) be installed.*
 
-### Beta Version
+#### Beta Version
 
 IMPORTANT: I'm Still maturing this version. However, it's runnable and contains more features than the alpha version. Please go to [RAVE_dev-cycle]() to see the todo-list.
 
@@ -140,7 +140,6 @@ rave_opts$set_options(
 init_app()
 ```
 
-## Details (if you are under stable version)
 Please check `vignettes/user_guide` for details such as 
 *data format*, *SUMA connection*, *Matlab options*. To know how to 
 *write modules*, or *use command lines* (import subject data and perform 
