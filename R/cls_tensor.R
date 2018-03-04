@@ -1,7 +1,6 @@
 
 #' @import R6
 #' @export
-#' @exportClass Tensor
 Tensor <- R6::R6Class(
   classname = 'Tensor',
   public = list(

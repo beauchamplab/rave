@@ -1,5 +1,4 @@
 #' @export
-#' @exportClass ECoGTensor
 ECoGTensor <- R6::R6Class(
   classname = 'ECoGTensor',
   inherit = Tensor

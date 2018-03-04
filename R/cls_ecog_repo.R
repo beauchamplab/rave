@@ -2,7 +2,6 @@
 #' @import tidyverse
 #' @import stringr
 #' @export
-#' @exportClass ECoGRepository
 ECoGRepository <- R6::R6Class(
   classname = 'ECoGRepository',
   portable = TRUE,

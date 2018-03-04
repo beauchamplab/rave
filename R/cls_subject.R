@@ -1,7 +1,6 @@
 # subject class
 
 #' @export
-#' @exportClass Subject
 Subject <- R6::R6Class(
   classname = 'Subject',
   private = list(

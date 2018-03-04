@@ -11,17 +11,6 @@ local({
     install.packages(cran_pkgs, repos='http://cran.us.r-project.org')
   }
 
-  # if(!'promises' %in% utils::installed.packages()[,1]){
-  #   message("Installing Dependencies from GITHUB [rstudio/promises]")
-  #   devtools::install_github("rstudio/promises")
-  # }
-
-  # check shiny 1.1 installed
-  # if(utils::packageVersion('shiny') < as.package_version('1.0.5.9000')){
-  #   message("Installing Dependencies from GITHUB [rstudio/shiny@async]")
-  #   devtools::install_github("rstudio/shiny@async")
-  # }
-
   bioc_pkgs = c('HDF5Array', 'rhdf5')
   bioc_pkgs = bioc_pkgs[!bioc_pkgs %in% utils::installed.packages()[,1]]
   if(length(bioc_pkgs)){
