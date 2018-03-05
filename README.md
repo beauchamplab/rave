@@ -1,5 +1,5 @@
 # RAVE
-R Analysis and Visualization of ECOG Data (Alpha version)
+R Analysis and Visualization of ECOG Data
 
 ## Installation
 
@@ -37,19 +37,21 @@ It's easy to install on Windows.
 
 [https://www.rstudio.com/products/rstudio/download/](https://www.rstudio.com/products/rstudio/download/)
 
-### 2. Install R dependencies
+### 2. Install R dependencies and RAVE
 
 **If you have installed RStudio, open it, or if you are using terminal/command line, type `R` to enter R.**
 
 There are two ways to install RAVE. 
 
-#### If you want to install recommended version of RAVE
+#### If you want to install recommended version of RAVE (strongly recommended)
 
 I have written a very simple and easy script for you. Open R, or RStudio, enter:
 
 ```
 source('https://raw.githubusercontent.com/dipterix/instrave/master/R/hello.R')
 ```
+
+If you fail, don't worry, try it several times, since there are so many packages to be installed and "turn R off and on again" is the easiest way to clean the installation environment :) However, if you try more than five times and still get errors, this might be an issue. Please report the issue on Github or contact me via my [email](dipterix.wang@gmail.com).
 
 Then you will see that `RAVE` is installed and attached. Type 
 
@@ -59,7 +61,7 @@ init_app()
 
 to enjoy :)
 
-#### If you failed in the first method and want to install specific version of RAVE
+#### If you want to install specific version of RAVE
 
 Inside of R, install `devtools` and `rhdf5` by typing the following commands:
 
@@ -71,7 +73,7 @@ biocLite(c("rhdf5", "HDF5Array"), suppressUpdates = T, suppressAutoUpdate = T)
 
 Next, install RAVE,
 
-There are three versions of RAVE, **Alpha**, **Beta** version. To see the difference, please check [RAVE updates]()
+There are two versions of RAVE, **Alpha**, **Beta** version. To see the difference, please check [RAVE updates]()
 
 #### Alpha version (NOT recommended now)
 
