@@ -314,6 +314,23 @@ ExecEnvir <- R6::R6Class(
         self$static_env$.__tmp_file = file
         eval(quote(base::source(.__tmp_file, local = T)), self$static_env)
       }
+
+      self$wrapper_env$require = function(package, ..., character.only = TRUE){
+        p = as.character(substitute(package))
+        if(!p %in% installed.packages()[,1]){
+          try({
+            logger("Installing Package ", p, level = 'WARNING')
+            install.packages(p, type = 'binary')
+          })
+        }
+        do.call('require', args = c(list(
+          package = p,
+          character.only = TRUE
+        ),
+        list(...)))
+      }
+
+      self$wrapper_env$library = self$wrapper_env$require
     },
     reset = function(inputs){
       if(shiny::is.reactivevalues(inputs)){
