@@ -31,7 +31,6 @@ Imports:
     shiny (>= 1.0.5),
     signal (>= 0.7-6),
     stringr (>= 1.2.0),
-    tidyverse (>= 1.2.1),
     yaml (>= 2.1.16),
     pryr (>= 0.1.3),
     assertthat (>= 0.2.0),
