@@ -19,6 +19,24 @@ You need to check your operating system before installtion:
 
 #### MacOS
 
+1. First, go to Cran-R official website and download install the latest R:
+
+[https://cran.r-project.org/bin/macosx/](https://cran.r-project.org/bin/macosx/)
+
+2. After installing R, make sure that you install Xcode from the Mac App Store:
+
+The best way is to google **How to install Xcode**. Moncef Belyamani has a great article [here](https://www.moncefbelyamani.com/how-to-install-xcode-homebrew-git-rvm-ruby-on-mac/).
+
+Or if you have `AFNI` installed, you must have Xcode installed, then you need xcode command line tool. Open terminal (from Application), enter
+
+```
+xcode-select --install
+```
+
+3. RStudio
+
+[https://www.rstudio.com/products/rstudio/download/](https://www.rstudio.com/products/rstudio/download/)
+
 #### Windows
 
 On Windows, RAVE is limited because *AFNI* doesn't support windows. However, most of RAVE functions should work. To install RAVE, you need to have *bash* enabled on Windows 10.
