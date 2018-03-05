@@ -51,7 +51,7 @@ I have written a very simple and easy script for you. Open R, or RStudio, enter:
 source('https://raw.githubusercontent.com/dipterix/instrave/master/R/hello.R')
 ```
 
-If you fail, don't worry, try it several times, since there are so many packages to be installed and "turn R off and on again" is the easiest way to clean the installation environment :) However, if you try more than five times and still get errors, this might be an issue. Please report the issue on Github or contact me via my [email](dipterix.wang@gmail.com).
+If you fail, don't worry, try it several times, since there are so many packages to be installed and "turn R off and on again" is the easiest way to clean the installation environment :) However, if you try more than five times and still get errors, this might be an issue. Please report the issue on Github or contact me via my [email](mailto:dipterix.wang@gmail.com?Subject=[RAVE_Issues_Github]&Body=Hi%20Dipterix).
 
 Then you will see that `RAVE` is installed and attached. Type 
 
