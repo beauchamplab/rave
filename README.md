@@ -1,7 +1,7 @@
 # RAVE
 R Analysis and Visualization of ECOG Data
 
-## Installation
+## A. Installation
 
 ### 1. Environment Setup
 
@@ -61,7 +61,7 @@ It's easy to install on Windows.
 
 There are two ways to install RAVE. 
 
-#### If you want to install recommended version of RAVE (strongly recommended)
+#### 2.1 If you want to install recommended version of RAVE (strongly recommended)
 
 I have written a very simple and easy script for you. Open R, or RStudio, enter:
 
@@ -79,7 +79,7 @@ init_app()
 
 to enjoy :)
 
-#### If you want to install specific version of RAVE
+#### 2.2 If you want to install specific version of RAVE
 
 Inside of R, install `devtools` and `rhdf5` by typing the following commands:
 
@@ -118,7 +118,7 @@ Please make sure that you have latest `yaml` package installed. Upon failure, yo
 All other dependencies should be installed automatically
 
 
-## Toy example
+## B. Toy example
 
 *Depending on the version of `RAVE` that you have installed*
 
