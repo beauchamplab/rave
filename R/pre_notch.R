@@ -4,13 +4,6 @@
 # project_name='Congruency'; subject_code='YAB'; blocks = c('008', '010'); channels = 1:84; srate = 2000
 # # frequencies = seq(4, 200, by = 4) wave_num = 7, compress = 2
 #
-# require(rave)
-# require(stringr)
-# require(signal)
-# require(rhdf5)
-# require(stringr)
-# require(tidyverse)
-# require(future)
 #
 # bulk_notch(project_name, subject_code, blocks, channels, srate, replace = F, save_plot = F, new_cache = F)
 
