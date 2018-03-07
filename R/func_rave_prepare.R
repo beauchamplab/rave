@@ -1,6 +1,6 @@
 # functions to create environment
 #' @export
-rave_prepare = function(
+rave_prepare <- function(
   subject, electrodes,
   epoch , time_range,
   attach = T, quiet = F,
@@ -26,10 +26,10 @@ rave_prepare = function(
 
 
   env$subject = repo$subject
-  env$power = repo$power$power
-  env$phase = repo$phase$phase
+  env$power = repo$power$get('power')
+  env$phase = repo$phase$get('phase')
   env$valid_electrodes = repo$subject$filter_valid_electrodes
-  meta = repo$power$power$dimnames
+  meta = repo$power$get('power')$dimnames
   env$time_points = meta$Time
   env$trials = meta$Trial
   env$frequencies = meta$Frequency

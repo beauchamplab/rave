@@ -242,6 +242,12 @@ shinirize <- function(module, session = shiny::getDefaultReactiveDomain(), test.
         }
       })
 
+      observeEvent(input$.gen_niml, {
+        res = execenv$calculate_niml()
+        base::print(res)
+        base::print('---------')
+      })
+
       observeEvent(input$.gen_report, {
 
         curr_e = rave:::deparse_selections(get('electrodes', envir = data_env, inherits = F))

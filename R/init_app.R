@@ -4,7 +4,7 @@
 #' @import shiny
 #' @import magrittr
 #' @export
-init_app <- function(modules = NULL, ...){
+init_app <- function(modules = NULL, launch.browser = T, ...){
   tryCatch({
     rave_prepare()
   }, error = function(e){})
@@ -105,7 +105,7 @@ init_app <- function(modules = NULL, ...){
     }
 
   }
-  shinyApp(ui = ui, server = server, options = list(...))
+  shinyApp(ui = ui, server = server, options = list(launch.browser = launch.browser, ...))
 }
 
 

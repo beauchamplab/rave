@@ -208,29 +208,19 @@ barplot.scatter = function(group_data, ylim, bar.cols=NA, bar.borders=NA, cols, 
       {
         title('Conditions are too similar to compare')
       } else {
-        tryCatch({
-          res <- get_f(sigchange ~ group, flat_data)
+          res <- get_f(sigchange ~ group, flat_data) %>% pretty
 
-          r1 <- ifelse(res[1] < 0.01, '<0.01', round(res[1],2))
-          r2 <- ifelse(res[2] < 0.1, '<0.1', round(res[2],1))
-          r3 <- format(res[3], digits=1)
-
-          title(bquote(H[0] ~ mu[i] == mu[j] * ';' ~ R^2 == .(r1) ~ ',' ~ F == .(r2) ~ ','~ p==.(r3)),
+          title(bquote(H[0] ~ mu[i] == mu[j] * ';' ~ R^2 == .(res[1]) ~ ',' ~ F == .(res[2]) ~ ','~ p==.(res[3])),
             cex.main=rave_cex.main)
-
-        }, error=function(e) print(e))
       }
 
   } else {
-    res <- t.test(flat_data$sigchange)
+    res <- flat_data$sigchange %>% get_t %>% pretty
 
-    m <- res$estimate %>% format(digits=2)
-    tstat <- res$statistic %>% format(digits=2)
-    pval <- res$p.value %>% format(digits=1)
-
-    title(bquote(H[0] * ':' ~ mu == 0 * ';' ~ bar(x)==.(m) * ',' ~ t==.(tstat) * ',' ~ p==.(pval)),
+    title(bquote(H[0] * ':' ~ mu == 0 * ';' ~ bar(x)==.(res[1]) * ',' ~ t==.(res[2]) * ',' ~ p==.(res[3])),
       cex.main=rave_cex.main)
   }
+
 
   #emphasize the means
   lsize <- (1/3)*mean(unique(diff(x)))
@@ -242,6 +232,9 @@ barplot.scatter = function(group_data, ylim, bar.cols=NA, bar.borders=NA, cols, 
 
   if(missing(cols)) cols <- get_color(seq_along(group_data))
 
+
+  # Ensure all parameters are sufficiently long. This feels extravagant, but needed because we're indexing into these variables
+  # and we don't want to reach beyond the end
   par_rep <- function(y) rep_len(y, length(mses))
 
   cols %<>% par_rep
@@ -249,7 +242,6 @@ barplot.scatter = function(group_data, ylim, bar.cols=NA, bar.borders=NA, cols, 
   bar.cols %<>% par_rep
   ebar.cols %<>% par_rep
   bar.borders %<>% par_rep
-
 
   # x may not be the same length as group_data because we're skipping empty groups
   # we still want everything else to be based on group number
@@ -273,44 +265,13 @@ barplot.scatter = function(group_data, ylim, bar.cols=NA, bar.borders=NA, cols, 
   invisible(x)
 }
 
-jitr = function(x, len=length(x), r=0.35) {
+jitr = function(x, len=length(x), r=(1/3)*len) {
   x + runif(len, -r, r)
 }
 
 add_points = function(x, y, jitr_x=.2, pch=19, ...) {
   points(jitr(x, length(y), r=jitr_x), y, pch=pch, ...)
 }
-
-# # # calcluation helpers
-
-# mean +/- se
-m_se <- function(x) c('mean'=mean(x), 'se'=sd(x)/sqrt(length(x)))
-mat_m_se <- function(m, DIM=2) apply(m, DIM, m_se)
-
-se <- function(x) sd(x) / sqrt(length(x))
-
-#mean +/- sd
-m_sd <- function(x) c(mean(x), sd(x))
-
-not_null <- function(x) !is.null(x)
-
-do_if <- function(boolean_expression, if_clause, else_clause=NULL) {
-  if(boolean_expression)
-    return (if_clause)
-
-  return (else_clause)
-}
-
-
-# make it easier to say not is.na in a pipe'd context
-not_NA = function(x) !is.na(x)
-
-
-# needed to simplify long expressions
-colDiff <- function(m, ord=1:2) m[,ord[1]] - m[,ord[2]]
-
-# 0-1 scale the data so we can manage the plot ranges easily
-scl01 <- function(x) (x-min(x)) / diff(range(x))
 
 # ensure data are within some bounds
 clip_x <- function(x, lim) {
@@ -320,8 +281,46 @@ clip_x <- function(x, lim) {
   x
 }
 
-
+# useful for plotting when you want to go a bit beyond the data
 stretch <- function(x, pct) {
   d <- pct * diff(range(x))
   c(min(x)-d, max(x)+d)
 }
+
+
+# # # calcluation helpers
+
+# mean +/- se
+m_se <- function(x) c('mean'=mean(x), 'se'=se(x))
+mat_m_se <- function(m, DIM=2) apply(m, DIM, m_se)
+
+se <- function(x, na.rm=FALSE) sd(x, na.rm=na.rm) / sqrt(sum(not_NA(x)))
+
+#mean +/- sd
+m_sd <- function(x, na.rm=FALSE) c('mean'=mean(x,na.rm=na.rm), 'sd'=sd(x,na.rm=na.rm))
+
+not_null <- function(x) !is.null(x)
+
+do_if <- function(boolean_expression, if_clause, else_clause=NULL) {
+  if(all(boolean_expression))
+    return (if_clause)
+
+  return (else_clause)
+}
+
+# easy way to get +/- from a long vector
+pm <- function(x,d)c(x-d,x+d)
+
+
+# make it easier to say not is.na in a pipe'd context
+not_NA = function(x) !is.na(x)
+
+# needed to simplify long expressions
+colDiff <- function(m, ord=1:2) m[,ord[1]] - m[,ord[2]]
+
+# 0-1 scale the data so we can manage the plot ranges easily
+scl01 <- function(x) (x-min(x)) / diff(range(x))
+
+#enforce sum to 1, ignoring NA in the sum, but keeping them in the output
+pscl <- function(x) x /sum(x, na.rm=TRUE)
+

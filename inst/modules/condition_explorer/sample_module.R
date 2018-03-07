@@ -9,13 +9,13 @@ rave_prepare(subject = 'YAB_congruency1',
              epoch = 'YAB',
              time_range = c(1, 2))
 
-source('plot_funcs.R')
+source('./adhoc/condition_explorer/plot_funcs.R')
 
 rave_inputs(
   compoundInput(
     inputId = 'GROUPS',
     label = 'Group',
-    components = {
+    value = {
       textInput('GROUP_NAME', 'Name', value = '', placeholder = 'Name')
       selectInput('GROUP', ' ', choices = '', multiple = TRUE)
     }, inital_ncomp = 1
@@ -38,7 +38,7 @@ rave_inputs(
 rave_outputs(
   'Heat Map (Mean over Trials)' = plotOutput('heat_map_plot', brush = 'brushed', width = 12),
   'Activity over time (Mean over freq and trial)' = plotOutput('over_time_plot', width = 8),
-  'Windowed Comparison (Mean over time and freq)' = plotOutput('windowed_comparison_plot', width = 4),
+   'Windowed Comparison (Mean over time and freq)' = plotOutput('windowed_comparison_plot', width = 4),
   'Activity over time per trial (Mean over frequency)' = plotOutput('by_trial_heat_map', width = 12),
   'Side Message' = textOutput('msg_out', width = 4),
   'Async Message' = textOutput('async_out', width = 4)
@@ -113,7 +113,7 @@ collapse_over_freq_and_time <- function(el, FUN=mean) {
 }
 
 collapse_over_freq <- function(el) {
-  if(prod(dim(el))<1) return(matrix(NA, ncol=2, nrow=1))
+    if(prod(dim(el))<1) return(matrix(NA, ncol=2, nrow=1))
 
   (el$subset(Frequency = (Frequency %within% FREQUENCY))) %>%
     content %>%
@@ -148,8 +148,8 @@ over_time_plot <- function() {
     do_poly(x, range(y), col=clr);
     text(min(x), max(y), txt, col=clr, adj=c(0,1))
   }, list(BASELINE, TIME_RANGE), list(ylim, ylim),
-  rave_colors[c('BASELINE_WINDOW', 'ANALYSIS_WINDOW')],
-  c('baseline', 'analysis')
+     rave_colors[c('BASELINE_WINDOW', 'ANALYSIS_WINDOW')],
+    c('baseline', 'analysis')
   )
 
   abline(h=0, col='gray70')
@@ -186,7 +186,7 @@ by_trial_heat_map <- function() {
   # the y variable is changing each time, so we provide a function that will be used to calculate the
   # y variable on a per map basis
   draw_many_heat_maps(by_trial_heat_map_data, x=time_points, y=function(m) 1:ncol(m),
-                      ylab='Trials', DECORATOR = trial_hm_decorator)
+    ylab='Trials', DECORATOR = trial_hm_decorator)
 }
 
 heat_map_plot = function(){
@@ -229,7 +229,7 @@ rave_execute({
 
   bl_power = cache(
     key = list(electrode, BASELINE, length(alltrials) > 0),
-    val = .repository$baseline(from, to, electrode)
+    val = .repository$fast_baseline(from, to, electrode)
   )
 
   lapply(GROUPS, function(comp){
@@ -312,8 +312,6 @@ if(FALSE) {
 
 }
 
-niml_default = function(){
-  return(1:3)
-}
+
 
 rave_prepare()

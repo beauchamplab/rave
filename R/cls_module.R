@@ -331,6 +331,11 @@ ExecEnvir <- R6::R6Class(
       }
 
       self$wrapper_env$library = self$wrapper_env$require
+
+      # self$wrapper_env$rave_niml = function(expr, ...){
+      #   niml_result = eval(substitute(expr), envir = list(), enclos = self$runtime_env)
+      #   niml_result
+      # }
     },
     reset = function(inputs){
       if(shiny::is.reactivevalues(inputs)){
@@ -340,6 +345,21 @@ ExecEnvir <- R6::R6Class(
       for(nm in self$input_ids){
         assign(nm, inputs[[nm]], envir = self$runtime_env)
       }
+    },
+    calculate_niml = function(){
+      param = sapply(self$input_ids, get, envir = self$runtime_env, simplify = F, USE.NAMES = T)
+      iter_results(
+        module = private$module_env,
+        inputId = 'electrode',
+        valueList = as.list(private$data_env$electrodes),
+        outputs = 'niml_default',
+        param = param,
+        plan = NULL, async = FALSE,
+        iter_over_electrodes = T,
+        execute = T
+      ) ->
+        res
+      return(res)
     },
     names = function(x){
       if(is.list(x)){
@@ -723,6 +743,7 @@ ExecEnvir <- R6::R6Class(
               h4('Export'),
               hr(),
               actionButton(self$ns('.gen_report'), 'Export Report'),
+              actionButton(self$ns('.gen_niml'), 'Export NIML for SUMA'),
               actionButton(self$ns('.force_run'), 'Force Run')
             )
           ),
@@ -887,6 +908,8 @@ rave_execute <- function(..., .env = globalenv()){
     lazyeval::lazy_eval(dots[[i]])
   }
 }
+
+
 
 #' @export
 cache_input <- function(key, val, read_only = T){

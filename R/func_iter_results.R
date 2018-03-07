@@ -4,7 +4,7 @@ do_nothing <- function(...){
 }
 
 #' @export
-iter_results = function(
+iter_results <- function(
   module, inputId,
   valueList, outputs, param = NULL, plan = NULL, async = FALSE,
   iter_over_electrodes = T, execute = T,
@@ -94,6 +94,7 @@ iter_results = function(
   if(execute){
     lapply(valueList, function(val){
       funcs = run(val)
+
       if(length(funcs)){
         names(funcs) = outputs
         base::cat(label, "-", rave:::safe_str_c(val, collapse = ', '))
@@ -104,11 +105,15 @@ iter_results = function(
             funcs[[nm]]()
           }, error = function(e){
             cat(capture.output(traceback(e)), sep = '\n')
-          })
-
-        })
+            return(NULL)
+          }) ->
+            re
+          return(re)
+        }) ->
+          re
+        return(re)
       }
-      funcs
+      return(NULL)
     }) ->
       re
     return(invisible(re))

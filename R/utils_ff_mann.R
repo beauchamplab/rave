@@ -1,4 +1,5 @@
-as_ff <- function(value, directory = './', name = NULL, ...){
+
+as_ff <- function(value, directory = './', name = NULL, readonly = FALSE, ...){
   if(is.null(name)){
     name <- as.character(substitute(value))
   }
@@ -16,10 +17,10 @@ as_ff <- function(value, directory = './', name = NULL, ...){
   x <- ff::as.ff(value, finalizer = 'close', ...)
   ff::close.ff(x)
 
-  return(save_ff(name, x, directory))
+  return(save_ff(name, x, directory, readonly = readonly))
 }
 
-load_ff = function(name, directory = NULL){
+load_ff = function(name, directory = NULL, readonly = FALSE){
   requireNamespace('ff')
   if(!file.exists(getOption('fftempdir'))){
     dir.create(getOption('fftempdir'), recursive = T)
@@ -32,12 +33,16 @@ load_ff = function(name, directory = NULL){
   x <- get(names[1], envir = environment())
   ff::close.ff(x)
   bit::physical(x)$filename <- normalizePath(file.path(directory, sprintf('%s.%s', name, getOption('ffextension', 'ff'))))
+  bit::physical(x)$readonly <- readonly
+  bit::physical(x)$finonexit <- FALSE
 
+  # add to pointer list
+  ..setup_env$ff_pointers$add(x)
   return(x)
 }
 
 
-save_ff <- function(name, x, directory){
+save_ff <- function(name, x, directory, readonly = FALSE){
   # make sure when we close ff file, it won't be deleted
   options(fffinonexit = FALSE)
 
@@ -49,16 +54,25 @@ save_ff <- function(name, x, directory){
   path_to <- file.path(directory, sprintf('%s.%s', name, getOption('ffextension', 'ff')))
 
   # move
-  file.copy(path_from, path_to)
-  unlink(path_from)
+  if(file.exists(path_to)){
+    path_to = normalizePath(path_to)
+  }
+  if(path_to != path_from){
+    logger('Saving ff file to ', path_to)
+    file.copy(path_from, path_to)
+    unlink(path_from)
+  }
 
   # re-assign path
   # tools has inner method that can get absolute path
   # However, if file does not exists, error will b raised (if file not moved, error!)
   bit::physical(x)$filename <- normalizePath(path_to)
+  bit::physical(x)$readonly <- readonly
+  bit::physical(x)$finonexit <- FALSE
 
 
   assign(name, x, envir = environment())
+  ..setup_env$ff_pointers$add(x)
   save(list = name, file = file.path(directory, sprintf('%s.RData', name)), envir = environment())
   return(get(name, envir = environment()))
 }
