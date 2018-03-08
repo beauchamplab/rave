@@ -85,21 +85,6 @@ rave_updates(
   })
 )
 
-rave_ignore({
-
-  GROUPS = list(
-    list(
-      GROUP_NAME = 'G1',
-      GROUP = unique(trials)[-c(1:3)]
-    ),
-    list(
-      GROUP_NAME = 'G2',
-      GROUP = unique(trials)[1:3]
-    )
-  )
-
-})
-
 
 mean_o_trial <- function(el){
   apply(el$data[,,,1], 2, colMeans)
@@ -229,7 +214,7 @@ rave_execute({
 
   bl_power = cache(
     key = list(electrode, BASELINE, length(alltrials) > 0),
-    val = .repository$baseline(from, to, electrode)
+    val = baseline(from, to, electrode)
   )
 
   lapply(GROUPS, function(comp){

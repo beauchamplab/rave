@@ -76,7 +76,11 @@ shiny_data_selector <- function(moduleId){
             fluidRow(
               column(6, numericInput(ns('pre'), 'Before', value = e_range[1], min = 0, step = 0.01)),
               column(6, numericInput(ns('post'), 'After', value = e_range[2], min = 0, step = 0.01))
-            )
+            ),
+            checkboxGroupInput(ns('data_types'), 'Data Types',
+                               selected = 'power',
+                               choiceNames = c('Power Data', 'Phase Data'),
+                               choiceValues = c('power', 'phase'))
           ),
           shinydashboard::tabBox(
             width = 8,
@@ -140,12 +144,18 @@ shiny_data_selector <- function(moduleId){
     })
     observeEvent(input$data_import, {
       electrodes = get_selected_electrodes()
+      data_types = input$data_types
+      if(length(data_types) == 0){
+        showNotification('You must choose at lease one data type', type = 'error')
+        return(NULL)
+      }
       rave_prepare(
         subject = input$subject_id,
         electrodes = electrodes,
         epoch = input$epoch,
         time_range = c(input$pre, input$post),
-        attach = F
+        attach = F,
+        data_types = data_types
       )
       # register
       local_data$current_subject_id = input$subject_id

@@ -21,18 +21,26 @@ has.class <- function(obj, class, all.match = T, element.wise = F){
   }
 }
 
+#' @export
 Map <- R6::R6Class(
   'Map',
   portable = FALSE,
   cloneable = F,
   private = list(
     env = NULL,
-    class_type = NULL
+    class_type = NULL,
+    .finalize = NULL
   ),
   public = list(
-    initialize = function(class_type = NULL) {
+    finalize = function(){
+      if(is.function(private$.finalize)){
+        private$.finalize()
+      }
+    },
+    initialize = function(class_type = NULL, finalize = NULL) {
       private$env <- new.env(parent=emptyenv())
       private$class_type = class_type
+      private$.finalize = finalize
     },
     add = function(value){
       if(!has.class(value, class = private$class_type)){
@@ -99,9 +107,12 @@ Map <- R6::R6Class(
   )
 )
 
+#' @export
 as.list.Map <- function(map) {
   map$values()
 }
+
+#' @export
 length.Map <- function(map) {
   map$size()
 }

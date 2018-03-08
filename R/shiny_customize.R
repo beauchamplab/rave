@@ -65,6 +65,16 @@ compoundInput <- function(
 
 }
 
+fake_session <- function(rave_id = '__fake_session__'){
+  fakesession = new.env()
+  fakesession$sendInputMessage = function(inputId, message){
+    return(message)
+  }
+  fakesession$userData = new.env(parent = emptyenv())
+  fakesession$userData$rave_id = rave_id
+  fakesession
+}
+
 
 with_fake_session <- function(func, ...){
   fakesession = new.env()

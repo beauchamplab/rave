@@ -238,7 +238,7 @@ ModuleEnvir <- R6::R6Class(
 ExecEnvir <- R6::R6Class(
   classname = 'ExecEnvir',
   portable = FALSE,
-  cloneable = FALSE,
+  cloneable = TRUE,
   private = list(
     module_env = NULL,
     data_env = NULL,
@@ -332,10 +332,6 @@ ExecEnvir <- R6::R6Class(
 
       self$wrapper_env$library = self$wrapper_env$require
 
-      # self$wrapper_env$rave_niml = function(expr, ...){
-      #   niml_result = eval(substitute(expr), envir = list(), enclos = self$runtime_env)
-      #   niml_result
-      # }
     },
     reset = function(inputs){
       if(shiny::is.reactivevalues(inputs)){
@@ -346,20 +342,60 @@ ExecEnvir <- R6::R6Class(
         assign(nm, inputs[[nm]], envir = self$runtime_env)
       }
     },
-    calculate_niml = function(){
+    copy = function(
+      session_id = '__fake_runtime_env__'
+    ){
+      # deep clone, but sharing the data, module environment
+      fakesession = fake_session(rave_id = session_id)
+      data_env = private$data_env
+
+      new = private$module_env$get_or_new_exec_env(
+        data_env = data_env, session = fakesession
+      )
+
+      capture.output(
+        private$module_env$load_script(session = fakesession)
+      )
+
+      # migrate runtime_env, params only
+      lapply(self$input_ids, function(nm){
+        new$runtime_env[[nm]] = self$runtime_env[[nm]]
+      })
+
+      return(new)
+    },
+    execute_with = function(param, async = FALSE, plan = NULL){
+      lapply(names(param), function(nm){
+        assign(nm, param[[nm]], envir = self$runtime_env)
+      })
+      res = private$execute(plan = plan, async = async)
+      if(async){
+        logger('Execute_with async not implemented.')
+      }
+      return(invisible(self$runtime_env))
+    },
+    calculate_niml = function(inputId = 'electrode', func_name = 'niml_default'){
       param = sapply(self$input_ids, get, envir = self$runtime_env, simplify = F, USE.NAMES = T)
-      iter_results(
-        module = private$module_env,
-        inputId = 'electrode',
-        valueList = as.list(private$data_env$electrodes),
-        outputs = 'niml_default',
-        param = param,
-        plan = NULL, async = FALSE,
-        iter_over_electrodes = T,
-        execute = T
-      ) ->
-        res
-      return(res)
+      new = self$copy()
+      elecs = private$data_env$electrodes
+      parallel::mclapply(elecs, function(e){
+        pm = param
+        pm[[inputId]] = e
+        new$execute_with(pm, async = F, plan = NULL)
+        func = get(func_name, envir = new$runtime_env, inherits = T)
+        return(func())
+      }) ->
+        fs
+      dat = t(vapply(fs, '[', as.vector(fs[[1]])))
+      nm = names(fs[[1]])
+      if(length(nm)){
+        nm = stringr::str_trim(nm)
+        nm[nm == ''] = paste0('Unamed_', which(nm == ''))
+        nm = stringr::str_replace_all(nm, '[^a-zA-Z0-9]', '_')
+      }
+
+      colnames(dat) = nm
+      return(dat)
     },
     names = function(x){
       if(is.list(x)){

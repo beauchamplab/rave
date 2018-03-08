@@ -16,7 +16,7 @@ as_ff <- function(value, directory = './', name = NULL, readonly = FALSE, ...){
 
   x <- ff::as.ff(value, finalizer = 'close', ...)
   ff::close.ff(x)
-
+  ..setup_env$ff_pointers$add(x)
   return(save_ff(name, x, directory, readonly = readonly))
 }
 
@@ -51,6 +51,8 @@ save_ff <- function(name, x, directory, readonly = FALSE){
 
   # get physical paths
   path_from <- bit::physical(x)$filename
+  path_from = normalizePath(path_from)
+
   path_to <- file.path(directory, sprintf('%s.%s', name, getOption('ffextension', 'ff')))
 
   # move
