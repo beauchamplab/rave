@@ -392,9 +392,10 @@ ExecEnvir <- R6::R6Class(
         nm = stringr::str_trim(nm)
         nm[nm == ''] = paste0('Unamed_', which(nm == ''))
         nm = stringr::str_replace_all(nm, '[^a-zA-Z0-9]', '_')
+        colnames(dat) = nm
       }
 
-      colnames(dat) = nm
+
       return(dat)
     },
     names = function(x){

@@ -244,8 +244,19 @@ shinirize <- function(module, session = shiny::getDefaultReactiveDomain(), test.
 
       observeEvent(input$.gen_niml, {
         res = execenv$calculate_niml()
-        base::print(res)
-        base::print('---------')
+        write.niml(
+          res,
+          electrode_numbers = data_env$electrodes,
+          value_labels = NULL,
+          prefix = sprintf('[%s]', MODULE_LABEL),
+          add_electrodes_as_column = TRUE,
+          value_file = '__vals.dat',
+          index_file = '__ind.dat',
+          faces_per_electrode = rave_options('suma_nodes_per_electrodes'),
+          AFNI_PATH = rave_options('suma_path'),
+          work_dir = data_env$subject$dirs$suma_out_dir) ->
+          cmd
+        system(cmd)
       })
 
       observeEvent(input$.gen_report, {

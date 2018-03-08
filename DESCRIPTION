@@ -108,6 +108,7 @@ Collate:
     'utils_lapply.R'
     'utils_logger.R'
     'utils_mem.R'
+    'utils_niml.R'
     'utils_parse.R'
     'utils_parse_call.R'
     'utils_progress.R'
