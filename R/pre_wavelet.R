@@ -66,7 +66,7 @@ bulk_wavelet <- function(
           if(compress > 1){
             s = rave::decimate_fir(s, compress)
           }
-
+          gc()
           re = rave::wavelet(s, freqs = frequencies, srate = srate / compress, wave_num = wave_num)
 
           cname_power = sprintf('wavelet/power/%s', block_num)
