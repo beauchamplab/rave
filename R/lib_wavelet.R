@@ -16,13 +16,90 @@
 #' Translated from Matlab script written by Brett Foster,
 #' Stanford Memory Lab, Feb. 2015
 #'
-#' Last edited: Zhengjia Wang - Feb, 2018
+#' Last edited: Zhengjia Wang - Mar, 2018
 #' Changes:
-#'   Uses fftwtools instead of native functions
+#'   1. Uses fftwtools instead of native functions
 #'   manually calculate convolutions
 #'   Save 50% runtime
+#'   2. Adjusted window length
+#'   3. Return power spec instead of spectrum
+#'   4. Use mvfftw instead of fftw, speed up by another 50%
 #' @export
 wavelet <- function(data, freqs, srate, wave_num){
+  srate = round(srate);
+  wavelet_cycles = wave_num;
+  lowest_freq = freqs[1];
+
+  f_l = length(freqs)
+  d_l = length(data)
+
+  # normalize data, and fft
+  fft_data = fftwtools::fftw_r2c(data - mean(data))
+
+  # wavelet window calc - each columns of final wave is a wavelet kernel (after fft)
+  sapply(freqs, function(fq){
+    # standard error
+    st = wave_num / (2 * pi * fq)
+
+    # calculate window size
+    wavelet_win = seq(-3 * st, 3 * st, by = 1/srate)
+
+    # half of window length
+    w_l_half = (length(wavelet_win) - 1) / 2
+
+    # wavelet 1: calc sinus in complex domain
+    tmp_sine = exp((0+1i) * 2 * pi * fq / srate * (-w_l_half:w_l_half))
+
+    # Gaussian normalization part
+    A = 1/sqrt(st*sqrt(pi))
+
+    # wavelet 2: calc gaussian wrappers
+    tmp_gaus_win = A * exp(-wavelet_win^2/(2 * (wavelet_cycles/(2 * pi * fq))^2))
+
+    # wave kernel
+    tmp_wavelet = tmp_sine * tmp_gaus_win
+
+    # padding
+    w_l = length(tmp_wavelet)
+    n_pre  = ceiling(d_l / 2) - floor(w_l/2)
+    n_post = d_l - n_pre - w_l
+    wvi = c(rep(0, n_pre), tmp_wavelet, rep(0, n_post))
+    fft_wave = Conj(fftwtools::fftw_c2c(wvi))
+
+    fft_wave
+  }) ->
+    fft_waves
+
+
+  # Convolution Notice that since we don't pad zeros to data
+  # d_l is nrows of wave_spectrum. However, if wave_spectrum is changed
+  # we should not use d_l anymore. instead, use nrow(fft_waves)
+  wave_len = nrow(fft_waves)
+  # wave_spectrum = apply(fft_waves * fft_data, 2, fftwtools::fftw_c2c, inverse = 1) / wave_len
+  wave_spectrum = fftwtools::mvfftw_c2c(fft_waves * fft_data, inverse = 1) / wave_len
+
+
+  ind = (1:(ceiling(wave_len / 2)))
+  # Normalizing and re-order
+  wave_spectrum = t(rbind(wave_spectrum[-ind, ], wave_spectrum[ind, ])) / sqrt(srate / 2)
+
+
+
+  # extract amplitude and phase data
+  # BF: apply amplitude normalization in function?
+  coef = Mod(wave_spectrum);
+  power = coef^2
+  phase = Arg(wave_spectrum);
+
+  list(
+    coef = coef,
+    power = power,
+    phase = phase
+  )
+}
+
+
+wavelet.old <- function(data, freqs, srate, wave_num){
   srate = round(srate);
   wavelet_cycles = wave_num;
   lowest_freq = freqs[1];
@@ -152,7 +229,7 @@ wavelet <- function(data, freqs, srate, wave_num){
   )
 }
 
-wavelet.old <- function(data, freqs, srate, wave_num){
+wavelet.too.old <- function(data, freqs, srate, wave_num){
   srate = round(srate);
 
   # wavelet cycles

@@ -21,9 +21,12 @@ Inputs:
 Translated from Matlab script written by Brett Foster,
 Stanford Memory Lab, Feb. 2015
 
-Last edited: Zhengjia Wang - Feb, 2018
+Last edited: Zhengjia Wang - Mar, 2018
 Changes:
-  Uses fftwtools instead of native functions
+  1. Uses fftwtools instead of native functions
   manually calculate convolutions
   Save 50% runtime
+  2. Adjusted window length
+  3. Return power spec instead of spectrum
+  4. Use mvfftw instead of fftw, speed up by another 50%
 }

@@ -1,6 +1,6 @@
 
 
-
+# @deprecated
 preprocess = function(
   process_name = 'notch', project_name, subject_code, block_num, chls, srate = 2000,
   frequencies = seq(4, 200, by = 4), wave_num = 7, compress = 2,

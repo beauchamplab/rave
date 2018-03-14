@@ -75,7 +75,7 @@ bulk_wavelet <- function(
 
           if(save_original){
             rhdf5::H5close()
-            save_h5(re$amp, file = save, name = cname_power,
+            save_h5(re$power, file = save, name = cname_power,
                     chunk = c(length(frequencies), 1024), replace = replace, ctype = 'double')
 
             save_h5(re$phase, file = save, name = cname_phase,
@@ -84,22 +84,23 @@ bulk_wavelet <- function(
           rhdf5::H5close()
 
 
-          # down-sample amp and phase to 100Hz
+          # down-sample power and phase to 100Hz
           q = srate / target_srate / compress
-          amp = t(apply(re$amp, 1, rave::decimate_fir, q = q))
+          ind = seq(1, ncol(re$power), by = q)
+          power = re$power[, ind]
           cfile = file.path(dirs$cache_dir, sprintf('%d.h5', chl))
-          save_h5(amp, file = cfile, name = cname_power,
+          save_h5(power, file = cfile, name = cname_power,
                   chunk = c(length(frequencies), 1024), replace = replace, ctype = 'double')
           rhdf5::H5close()
 
           # phase
-          phs = t(apply(re$phase, 1, rave::decimate_fir, q = q))
+          phs = re$phase[, ind]
           save_h5(phs, file = cfile, name = cname_phase,
                   chunk = c(length(frequencies), 1024), replace = replace, ctype = 'double')
           rhdf5::H5close()
 
           # cumsum
-          cumsum = t(apply(amp, 1, cumsum))
+          cumsum = t(apply(power, 1, cumsum))
           save_h5(cumsum, file = cfile, name = cname_cumsum,
                   chunk = c(length(frequencies), 1024), replace = replace, ctype = 'double')
           rhdf5::H5close()
@@ -111,7 +112,7 @@ bulk_wavelet <- function(
               tp = rbind(tp,
                          data.frame(
                            Block = paste(block_num),
-                           Time = seq(1, ncol(amp)) / target_srate,
+                           Time = seq(1, ncol(power)) / target_srate,
                            stringsAsFactors = F
                          ))
               rave::save_meta(tp, 'time_points', project_name = project_name, subject_code = subject_code)
@@ -122,90 +123,9 @@ bulk_wavelet <- function(
       }, envir = environment(), plan = NULL) -> f
 
       fs = c(fs, f)
-      progress$inc(sprintf('Channel - %d', i))
+      progress$inc(sprintf('Channel - %d', chl))
     }
   }
-
-  # for(i in 1:ncores){
-  #   chls = schedule[,i]
-  #   chls = chls[!is.na(chls)]
-  #   if(length(chls) > 0){
-  #     async({
-  #       require(rave)
-  #       require(signal)
-  #       require(rhdf5)
-  #       require(stringr)
-  #       for(chl in chls){
-  #         for(block_num in blocks){
-  #           logger('Performing wavelet - channel: ', chl)
-  #
-  #           save = channel_file(chl)
-  #
-  #           s = rhdf5::h5read(save, name = sprintf('CAR/%s', block_num))
-  #
-  #           if(compress > 1){
-  #             s = rave::decimate_fir(s, compress)
-  #           }
-  #
-  #           re = rave::wavelet(s, freqs = frequencies, srate = srate / compress, wave_num = wave_num)
-  #
-  #           cname_power = sprintf('wavelet/power/%s', block_num)
-  #           cname_phase = sprintf('wavelet/phase/%s', block_num)
-  #           cname_cumsum = sprintf('wavelet/cumsum/%s', block_num)
-  #
-  #           if(save_original){
-  #             rhdf5::H5close()
-  #             save_h5(re$amp, file = save, name = cname_power,
-  #                     chunk = c(length(frequencies), 1024), replace = replace, ctype = 'double')
-  #
-  #             save_h5(re$phase, file = save, name = cname_phase,
-  #                     chunk = c(length(frequencies), 1024), replace = replace, ctype = 'double')
-  #           }
-  #           rhdf5::H5close()
-  #
-  #
-  #           # down-sample amp and phase to 100Hz
-  #           q = srate / target_srate / compress
-  #           amp = t(apply(re$amp, 1, rave:::decimate_fir, q = q))
-  #           cfile = file.path(dirs$cache_dir, sprintf('%d.h5', chl))
-  #           save_h5(amp, file = cfile, name = cname_power,
-  #                   chunk = c(length(frequencies), 1024), replace = replace, ctype = 'double')
-  #           rhdf5::H5close()
-  #
-  #           # phase
-  #           phs = t(apply(re$phase, 1, rave::decimate_fir, q = q))
-  #           save_h5(phs, file = cfile, name = cname_phase,
-  #                   chunk = c(length(frequencies), 1024), replace = replace, ctype = 'double')
-  #           rhdf5::H5close()
-  #
-  #           # cumsum
-  #           cumsum = t(apply(amp, 1, cumsum))
-  #           save_h5(cumsum, file = cfile, name = cname_cumsum,
-  #                   chunk = c(length(frequencies), 1024), replace = replace, ctype = 'double')
-  #           rhdf5::H5close()
-  #
-  #           # save time_points info
-  #           if(chl == channels[1]){
-  #             tp = rave:::load_meta('time_points', project_name = project_name, subject_code = subject_code)
-  #             if(is.null(tp) || !block_num %in% tp$Block){
-  #               tp = rbind(tp,
-  #                          data.frame(
-  #                            Block = paste(block_num),
-  #                            Time = seq(1, ncol(amp)) / target_srate,
-  #                            stringsAsFactors = F
-  #                          ))
-  #               rave:::save_meta(tp, 'time_points', project_name = project_name, subject_code = subject_code)
-  #             }
-  #           }
-  #         }
-  #       }
-  #       return(TRUE)
-  #     }, envir = environment(), plan = NULL) -> f
-  #
-  #     fs = c(fs, f)
-  #   }
-  # }
-
 
   check <- function(){
     lapply(fs, function(ft){
