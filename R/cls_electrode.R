@@ -57,20 +57,25 @@ Electrode <- R6::R6Class(
         for(name in c('power', 'phase', 'cumsum')){
           li = get(name, envir = private)
           for(b in blocks){
-            cached_name = sprintf('%d_%s.%s', self$electrode, b, name)
-            cached_file = file.path(cached_dir, sprintf('%s.ff', cached_name))
-            if(file.exists(cached_file)){
-              li[[b]] = rave:::load_ff(name = cached_name, directory = cached_dir)
-            }else{
-              li[[b]] =
-                rave:::as_ff(
-                  h5read(file, sprintf('/wavelet/%s/%s', name, b)),
-                  directory = cached_dir,
-                  name = cached_name
-                )
-            }
+            dname = sprintf('/wavelet/%s/%s', name, b)
+            li[[b]] = LazyH5$new(
+              file_path = file,
+              data_name = dname
+            )
+            # cached_name = sprintf('%d_%s.%s', self$electrode, b, name)
+            # cached_file = file.path(cached_dir, sprintf('%s.ff', cached_name))
+            # if(file.exists(cached_file)){
+            #   li[[b]] = rave:::load_ff(name = cached_name, directory = cached_dir)
+            # }else{
+            #   li[[b]] =
+            #     rave:::as_ff(
+            #       h5read(file, sprintf('/wavelet/%s/%s', name, b)),
+            #       directory = cached_dir,
+            #       name = cached_name
+            #     )
+            # }
           }
-          assign(name, li, envir = private)
+          private[[name]] = li
         }
 
 
@@ -107,16 +112,30 @@ Electrode <- R6::R6Class(
       sample = matrix(rep(0, dim_2 * dim_3), c(dim_2, dim_3))
 
       logger('Epoching electrode: ', self$electrode, ' (', self$subject_id, ') - ', name)
-      vapply(ep, function(row){
+
+
+      lapply(ep, function(row){
         block = row[['Block']]
         i = round(row[['Onset']] * private$subject$sample_rate)
         # logger('Epoching: Block - ', block, ' On-set Point - ', i)
-        tmp[[block]][, i + seq(-pre, post)]
-      }, sample) ->
-        data
+        return(list(
+          ind = i + seq(-pre, post),
+          block = row$Block
+        ))
+      }) ->
+        indices
+      placehold = array(NA, dim = c(length(ep), dim_2, dim_3))
+      bvec = sapply(indices,'[[', 'block')
+      for(b in unique(bvec)){
+        sel = bvec == b
+        subinds = as.vector(sapply(indices[sel], '[[', 'ind'))
+        a = tmp[[b]][,subinds]
+        dim(a) = c(nrow(a), dim_3, sum(sel))
+        placehold[sel,,] = aperm(a, c(3, 1, 2))
+      }
       # assign dim names
       data = rave:::ECoGTensor$new(
-        data = aperm(data, c(3,1,2)),
+        data = placehold,
         dimnames = list(
           epochs$Stimulus,
           freqs$Frequency,
@@ -144,18 +163,37 @@ Electrode <- R6::R6Class(
       sample = matrix(rep(0, dim_2 * dim_3), c(dim_2, dim_3))
 
       logger('Epoching electrode: ', self$electrode, ' (', self$subject_id, ') - ', name)
-      vapply(ep, function(row){
+      # vapply(ep, function(row){
+      #   block = row[['Block']]
+      #   i = round(row[['Onset']] * private$subject$sample_rate)
+      #   # logger('Epoching: Block - ', block, ' On-set Point - ', i)
+      #   tmp[[block]][, i + seq(-pre, post)]
+      # }, sample) ->
+      #   data
+      #
+      # data = aperm(data, c(3,1,2))
+
+      lapply(ep, function(row){
         block = row[['Block']]
         i = round(row[['Onset']] * private$subject$sample_rate)
-        # logger('Epoching: Block - ', block, ' On-set Point - ', i)
-        tmp[[block]][, i + seq(-pre, post)]
-      }, sample) ->
-        data
-
-      data = aperm(data, c(3,1,2))
+        return(list(
+          ind = i + seq(-pre, post),
+          block = row$Block
+        ))
+      }) ->
+        indices
+      placehold = array(NA, dim = c(length(ep), dim_2, dim_3))
+      bvec = sapply(indices,'[[', 'block')
+      for(b in unique(bvec)){
+        sel = bvec == b
+        subinds = as.vector(sapply(indices[sel], '[[', 'ind'))
+        a = tmp[[b]][,subinds]
+        dim(a) = c(nrow(a), dim_3, sum(sel))
+        placehold[sel,,] = aperm(a, c(3, 1, 2))
+      }
 
       # assign dim names
-      data = rave:::ECoGTensor$new(data = data, dimnames = list(
+      data = rave:::ECoGTensor$new(data = placehold, dimnames = list(
         epochs$Stimulus,
         freqs$Frequency,
         time_points
