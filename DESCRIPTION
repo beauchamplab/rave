@@ -42,7 +42,6 @@ Imports:
     digest (>= 0.6.13),
     gridBase (>= 0.4-7),
     shinyjs (>= 1.0),
-    ff (>= 2.2-13),
     rlang (>= 0.1.6.9000),
     V8 (>= 1.5),
     httpuv (>= 1.3.6.1)

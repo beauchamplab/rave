@@ -99,8 +99,7 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
           x$clean(session_id = session_id)
         })
         logger('Clean up data repository.')
-        env = getDefaultDataRepository(session_id = session_id)
-        env$.clean()
+        data_repository[[session_id]]$.clean()
       })
     }
 
