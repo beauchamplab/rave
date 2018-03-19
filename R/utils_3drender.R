@@ -35,6 +35,7 @@ render_3d_electrodes <- function(
         data = tbl[tbl$EpilepsyChan, ],
         name = "Epilepsey",
         mode = 'markers',
+        hoverinfo = 'text',
         marker = list(
           symbol = 'cross',
           opacity = 0.5,
@@ -108,6 +109,7 @@ render_3d_electrodes <- function(
           data = tbl[tbl$Channel %in% loaded_electrodes, ],
           name = "Good [loaded]",
           mode = 'markers',
+          hoverinfo = 'text',
           marker = list(
             symbol = 'circle',
             color = "#FC8D62"
@@ -116,5 +118,5 @@ render_3d_electrodes <- function(
         p
     }
   }
-  print(p)
+  return(p)
 }
