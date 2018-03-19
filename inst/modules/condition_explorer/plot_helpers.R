@@ -3,7 +3,7 @@
 #
 
 # this has some nice formatters in it
-source('./adhoc/condition_explorer/ecog_io_functions.R')
+source('ecog_io_functions.R')
 
 `%&%` <- function(s1,s2) paste0(s1,s2)
 

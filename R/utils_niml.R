@@ -34,8 +34,12 @@ is_within <- function(x, minmax) (x>=minmax[1]) & (x<=minmax[2])
 # system() within R
 write.niml <- function(values_matrix, electrode_numbers=NULL, value_labels=NULL, prefix='', add_electrodes_as_column=TRUE,
                        value_file='__vals.dat', index_file='__ind.dat',
-                       faces_per_electrode=42, AFNI_PATH = '~/abin/',
+                       faces_per_electrode=42, AFNI_PATH,
                        work_dir = './') {
+
+  if(missing(AFNI_PATH)){
+    AFNI_PATH = try_normalizePath(rave_options('suma_path'))
+  }
 
   fname = prefix %&% '_' %&% str_replace_all(Sys.time(), '\\ |:', '_')
   niml_fname <- fname %&% '.niml.dset'
@@ -89,6 +93,20 @@ write.niml <- function(values_matrix, electrode_numbers=NULL, value_labels=NULL,
 
   logger('For full cleanup, AFTER running the ConvertDset command, delete: ' %&% value_file %&% ' and ' %&% index_file)
 
+  system2(
+    'ConvertDset',
+    args = c(
+      '-o_niml', '',
+      '-input', sprintf('"%s"', value_file),
+      '-i_1D -node_index_1D', sprintf('"%s"', index_file),
+      '-dset_labels', sprintf("'%s'", paste0(value_labels, collapse=' ')),
+      '-prefix', sprintf('"%s"', niml_fname)
+    ),
+    env = c(sprintf('PATH=$PATH:"%s"', AFNI_PATH),
+            'DYLD_LIBRARY_PATH=/opt/X11/lib/flat_namespace'),
+    wait = F
+  )
+
   return (cmd)
 }
 
@@ -131,3 +149,33 @@ pretty.tres <- function(tres) {
   mapply(format, tres, digits=c(2,2,1)) %>%
     set_names(c('m', 't', 'p'))
 }
+
+
+
+
+
+# By Dipterix
+launch_suma <- function(
+  root_dir, spec_file
+){
+  if(missing(spec_file)){
+    spec_file = rave_options('suma_spec_file')
+  }
+  # make everything absolute
+  suma_path = try_normalizePath(rave_options('suma_path'))
+  spec_file = try_normalizePath(file.path(root_dir, spec_file))
+
+  wd = getwd()
+  on.exit({setwd(wd)})
+  if(dir.exists(root_dir)){
+    setwd(root_dir)
+    system2('suma',
+            args = c('-spec', sprintf('"%s"', spec_file)),
+            env = c(sprintf('PATH=$PATH:"%s"', suma_path),
+                    'DYLD_LIBRARY_PATH=/opt/X11/lib/flat_namespace'),
+            wait = F)
+  }
+
+  setwd(wd)
+}
+

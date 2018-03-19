@@ -243,20 +243,76 @@ shinirize <- function(module, session = shiny::getDefaultReactiveDomain(), test.
       })
 
       observeEvent(input$.gen_niml, {
-        res = execenv$calculate_niml()
-        write.niml(
-          res,
-          electrode_numbers = data_env$electrodes,
-          value_labels = NULL,
-          prefix = sprintf('[%s]', MODULE_LABEL),
-          add_electrodes_as_column = TRUE,
-          value_file = '__vals.dat',
-          index_file = '__ind.dat',
-          faces_per_electrode = rave_options('suma_nodes_per_electrodes'),
-          AFNI_PATH = rave_options('suma_path'),
-          work_dir = data_env$subject$dirs$suma_out_dir) ->
-          cmd
-        system(cmd)
+        input_labels = str_c(unlist(execenv$input_labels))
+        sel = str_detect(input_labels, 'lectrode')
+        if(sum(sel)){
+          sel = input_labels[sel][1]
+        }else{
+          sel = input_labels[1]
+        }
+        niml_func = names(as.list(execenv$static_env))
+        is_niml_func = vapply(niml_func, function(x){
+          is.function(execenv$static_env[[x]]) && str_detect(x, 'niml_')
+        }, FUN.VALUE = logical(1))
+        niml_func = niml_func[is_niml_func]
+
+        if(length(niml_func)){
+          showModal(
+            modalDialog(
+              title = '',
+              easyClose = T,
+              footer = tagList(
+                modalButton('Cancel'),
+                actionButton(execenv$ns('.gen_niml_ready'), 'OK')
+              ),
+              fluidRow(
+                column(
+                  width = 12,
+                  selectInput(
+                    execenv$ns('.gen_niml_var'), label = 'Which variable is for electrodes?',
+                    choices = input_labels,
+                    selected = sel, multiple = F
+                  ),
+                  selectInput(
+                    execenv$ns('.gen_niml_func'), label = 'Which function to apply?',
+                    choices = niml_func
+                  )
+                )
+              )
+            )
+          )
+        }else{
+          showNotification(p('No NIML export function detected.'), type = 'warning')
+        }
+
+      })
+
+      observeEvent(input$.gen_niml_ready, {
+        var = input$.gen_niml_var
+        input_labels = execenv$input_labels
+        in_id = names(input_labels)[str_c(unlist(input_labels)) == var]
+        fun_name = input$.gen_niml_func
+
+        tryCatch({
+          res = execenv$calculate_niml(inputId = in_id, func_name = fun_name)
+          write.niml(
+            res,
+            electrode_numbers = data_env$electrodes,
+            value_labels = NULL,
+            prefix = sprintf('[%s]', MODULE_LABEL),
+            add_electrodes_as_column = TRUE,
+            value_file = '__vals.dat',
+            index_file = '__ind.dat',
+            faces_per_electrode = rave_options('suma_nodes_per_electrodes'),
+            AFNI_PATH = rave_options('suma_path'),
+            work_dir = data_env$subject$dirs$suma_out_dir) ->
+            cmd
+          showNotification(p('NIML file generated. Please open it in SUMA'), type = 'message')
+        }, error = function(e){
+          showNotification(p('NIML file failed: (message)', br(), e$message), type = 'error')
+        })
+
+        removeModal()
       })
 
       observeEvent(input$.gen_report, {

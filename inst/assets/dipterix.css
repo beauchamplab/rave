@@ -159,3 +159,7 @@ li.control-sidebar-items:hover {
 li.control-sidebar-items>a {
     padding: 15px 0;
 }
+
+.full-width-table table{
+  width: 100% !important;
+}
