@@ -208,30 +208,31 @@ Electrode <- R6::R6Class(
     get_data = function(block_num, time = NULL,
                         frequencies = NULL, name = 'power',
                         time_point = NULL,
-                        use_ff = T){
+                        use_ff = F){
       if(is.null(time_point) && !is.null(time)){
         time_point = round(time_point * private$subject$sample_rate)
       }
       if(name %in% c('power', 'cumsum', 'phase')){
-        if(!use_ff){
-          cache_dir = private$dir$cache_dir
-          file = file.path(cache_dir, sprintf("%d.h5", self$electrode))
-          file_ls = h5ls(file)
-          re = h5read(file, name = sprintf('/wavelet/%s/%s', name, block_num),
-                      index = list(frequencies, time_point))
-          H5close()
-          return(re)
-        }else{
-          li = get(name, envir = private)
-          if(is.null(frequencies)){
-            frequencies = 1:(dim(li[[block_num]])[1])
-          }
-          if(length(time_point) == 0){
-            return(li[[block_num]][frequencies, ])
-          }else{
-            return(li[[block_num]][frequencies, time_point])
-          }
-        }
+        return(private[[name]][[block_num]][frequencies, time_point])
+        # if(!use_ff){
+        #   cache_dir = private$dir$cache_dir
+        #   file = file.path(cache_dir, sprintf("%d.h5", self$electrode))
+        #   file_ls = h5ls(file)
+        #   re = h5read(file, name = sprintf('/wavelet/%s/%s', name, block_num),
+        #               index = list(frequencies, time_point))
+        #   H5close()
+        #   return(re)
+        # }else{
+        #   return(private[[name]][[block_num]][frequencies, time_point])
+          # if(!is.null(frequencies) && !is.null()){
+          #   private[[name]][[block_num]][]
+          # }
+          # if(length(time_point) == 0){
+          #   return(li[[block_num]][frequencies, ])
+          # }else{
+          #   return(li[[block_num]][frequencies, time_point])
+          # }
+        # }
       }
 
       return(NULL)

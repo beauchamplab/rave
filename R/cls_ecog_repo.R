@@ -117,6 +117,8 @@ ECoGRepository <- R6::R6Class(
     epoch = function(epoch_name, pre, post, electrodes = NULL, names = c('power')){
       if(is.null(electrodes)){
         electrodes = self$subject$valid_electrodes
+      }else{
+        electrodes = electrodes[electrodes %in% self$subject$valid_electrodes]
       }
       electrodes = electrodes[paste(electrodes) %in% self$raw$keys()]
       assertthat::assert_that(length(electrodes) > 0, msg = 'No electrode loaded.')
@@ -139,28 +141,48 @@ ECoGRepository <- R6::R6Class(
       self$epochs$set('signature', digest)
       freqs = load_meta(subject_id = self$subject$subject_id, meta_type = 'frequencies')
 
-      progress = progress(title = 'Loading data...', max = length(electrodes))
+      progress = progress(title = 'Loading data...', max = length(electrodes)+1)
       on.exit({progress$close()})
 
-      lapply(electrodes, function(e){
-
+      epoch_data = self$epochs$get('epoch_data')
+      rave_setup()
+      for(e in electrodes){
         e_str = str_c(e)
         progress$inc(sprintf('Electrode - %s', e_str))
         raw_e = self$get_electrode(electrode = e, name = 'raw')$raw
         for(name in names){
-          self[[name]]$set(
-            key = e_str,
-            value = raw_e$fast_epoch(
-              epochs = self$epochs$get('epoch_data'),
+          future::futureAssign(
+            e_str, raw_e$fast_epoch(
+              epochs = epoch_data,
               freqs = freqs,
               pre = pre, post = post, name = name
-            )
+            ), assign.env = self[[name]]$private$env
           )
         }
+      }
 
-      })
+      # lapply(electrodes, function(e){
+      #
+      #   e_str = str_c(e)
+      #   progress$inc(sprintf('Electrode - %s', e_str))
+      #   raw_e = self$get_electrode(electrode = e, name = 'raw')$raw
+      #   for(name in names){
+      #     self[[name]]$set(
+      #       key = e_str,
+      #       value = raw_e$fast_epoch(
+      #         epochs = self$epochs$get('epoch_data'),
+      #         freqs = freqs,
+      #         pre = pre, post = post, name = name
+      #       )
+      #     )
+      #   }
+      #
+      # })
+
 
       # bind electrodes
+      progress$inc('Finalizing...')
+
       for(name in names){
         sample = self[[name]]$get(as.character(electrodes[1]))
         vapply(electrodes, function(e){
