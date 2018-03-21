@@ -107,11 +107,14 @@ ECoGRepository <- R6::R6Class(
 
       if(length(electrodes) > 0){
         logger('Loading electrodes')
+        progress = progress(title = 'Checking data...', max = length(electrodes))
         for(e in electrodes){
           e_str = paste(e)
+          progress$inc(sprintf('Electrode - %s', e_str))
           self$raw$set(key = e_str, value = Electrode$new(subject = self$subject, electrode = e))
         }
         logger('Loaded.')
+        progress$close()
       }
     },
     epoch = function(epoch_name, pre, post, electrodes = NULL, names = c('power')){
@@ -152,11 +155,11 @@ ECoGRepository <- R6::R6Class(
         raw_e = self$get_electrode(electrode = e, name = 'raw')$raw
         for(name in names){
           future::futureAssign(
-            e_str, raw_e$fast_epoch(
+            e_str, {rm(list = ls(all.names = T)); raw_e$fast_epoch(
               epochs = epoch_data,
               freqs = freqs,
               pre = pre, post = post, name = name
-            ), assign.env = self[[name]]$private$env
+            )}, assign.env = self[[name]]$private$env
           )
         }
       }
