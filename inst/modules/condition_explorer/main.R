@@ -1,304 +1,192 @@
+# rm(list=ls()); gc()
 require(rave)
-require(fields)
-require(shiny)
 require(magrittr)
 require(stringr)
-require(shiny)
-rave_prepare(subject = 'YAB_congruency1',
-             electrodes = 14,
-             epoch = 'YAB',
+
+
+# give us some defaults to play with while we're working on the module code
+rave_prepare(subject = 'KC_congruency1',
+             electrodes = 73,
+             epoch = 'KC',
              time_range = c(1, 2))
 
-source('plot_funcs.R')
+source('rave_calculators.R')
+source('condition_explorer_ui.R')
+source('condition_explorer_plots.R')
 
-rave_inputs(
-  compoundInput(
-    inputId = 'GROUPS',
-    label = 'Group',
-    components = {
-      textInput('GROUP_NAME', 'Name', value = '', placeholder = 'Name')
-      selectInput('GROUP', ' ', choices = '', multiple = TRUE)
-    }, inital_ncomp = 1
-  ),
+rave_ignore({
 
-  sliderInput('FREQUENCY', 'Frequencies', min = 1, max = 200, value = c(1,200), step = 1, round = TRUE),
-  sliderInput('BASELINE', 'Baseline Range', min = 0, max = 1, value = c(0,1), step = 0.01, round = -2),
-  sliderInput('TIME_RANGE', 'Analysis Range', min = 0, max = 1, value = c(0,1), step = 0.01, round = -2),
+    # rave_options(data_dir = '/Volumes/data/rave_data/data/',
+    #              module_lookup_file = '~/Dropbox/RAVE_DEV/module_dev.csv',
+    #              crayon_enabled=TRUE)
 
-  selectInput('electrode', 'Electrode', choices = '', multiple = F),
-  numericInput('max_zlim', 'Maximum Plot Range', value = 0, min = 0, step = 1),
-
-  .tabsets = list(
-    'Global Variables' = c(
-      'GROUPS', 'FREQUENCY', 'BASELINE', 'TIME_RANGE'
+    GROUPS = list(
+        list(
+            GROUP_NAME = 'G1',
+            GROUP = unique(trials)[-c(1:3)]
+        ),
+        list(
+            GROUP_NAME = 'G2',
+            GROUP = unique(trials)[1:3]
+        )
     )
-  )
-)
 
-rave_outputs(
-  'Heat Map (Mean over Trials)' = plotOutput('heat_map_plot', brush = 'brushed', width = 12),
-  'Activity over time (Mean over freq and trial)' = plotOutput('over_time_plot', width = 8),
-  'Windowed Comparison (Mean over time and freq)' = plotOutput('windowed_comparison_plot', width = 4),
-  'Activity over time per trial (Mean over frequency)' = plotOutput('by_trial_heat_map', width = 12),
-  'Side Message' = textOutput('msg_out', width = 4),
-  'Async Message' = textOutput('async_out', width = 4)
-)
+})
 
-rave_updates(
-  electrode = list(
-    choices = electrodes,
-    selected = electrodes[1]
-  ),
-  GROUPS = list(
-    initialize = list(
-      GROUP = list(
-        choices = unique(trials)
-      )
-    ),
-    value = cache_input('GROUPS', list(
-      list(
-        GROUP = trials[1]
-      )
-    ))
-  ),
-
-  BASELINE = local({
-    list(
-      min = min(time_points),
-      max = max(time_points),
-      value = cache_input('BASELINE', c(min(time_points), 0))
-    )
-  }),
-  FREQUENCY = local({
-    list(
-      min = min(round(frequencies)),
-      max = max(round(frequencies)),
-      value = cache_input('FREQUENCY', range(round(frequencies)))
-    )
-  }),
-  TIME_RANGE = local({
-    list(
-      min = min(time_points),
-      max = max(time_points),
-      value = cache_input('TIME_RANGE', c(0, max(time_points)))
-    )
-  })
-)
-
-
-mean_o_trial <- function(el){
-  apply(el$data[,,,1], 2, colMeans)
-}
-
-collapse_over_freq_and_time <- function(el, FUN=mean) {
-  if(prod(dim(el))<1) return(NULL)
-
-  (el$subset(Frequency = (Frequency %within% FREQUENCY), Time = (Time %within% TIME_RANGE))) %>%
-    content %>% apply(1, FUN)
-}
-
-collapse_over_freq <- function(el) {
-  if(prod(dim(el))<1) return(matrix(NA, ncol=2, nrow=1))
-
-  (el$subset(Frequency = (Frequency %within% FREQUENCY))) %>%
-    content %>%
-    apply(1, colMeans) %>%
-    t
-}
-
-collapse_over_freq_and_trial <- function(el) {
-  if(prod(dim(el))<1) return(matrix(NA, ncol=2, nrow=1))
-
-  (el$subset(Frequency = (Frequency %within% FREQUENCY))) %>%
-    content %>%
-    apply(3, rowMeans) %>%
-    apply(2, m_se) %>%
-    t
-}
-
+# time series plot
 over_time_plot <- function() {
-  validate(need((exists('has_data') && (has_data)), "No Condition Specified"))
+    validate(need((exists('has_data') && (has_data)), "No Condition Specified"))
 
-  # make plot and color the baseline / analysis windows
-  ylim <- pretty(get_data_range(line_plot_data, 'lim'), min.n=2, n=4)
-
-  ns <- sapply(line_plot_data, getElement, 'N')
-
-  title <- 'Freq ' %&% paste0(round(FREQUENCY), collapse=':') %&% ' || Ns ' %&% paste0(ns, collapse=', ')
-
-  plot.clean(time_points, ylim, xlab='Time (s)', ylab='% Signal Change', main=title)
-
-  # draw polys ans labels for baseline and analysis ranges
-  mapply(function(x, y, clr, txt) {
-    do_poly(x, range(y), col=clr);
-    text(min(x), max(y), txt, col=clr, adj=c(0,1))
-  }, list(BASELINE, TIME_RANGE), list(ylim, ylim),
-  rave_colors[c('BASELINE_WINDOW', 'ANALYSIS_WINDOW')],
-  c('baseline', 'analysis')
-  )
-
-  abline(h=0, col='gray70')
-
-  # draw each time series
-  for(ii in seq_along(line_plot_data)) {
-    with(line_plot_data[[ii]], {
-      if(has_t) {
-        ebar_polygon(time_points, mse[,1], mse[,2], add_line = TRUE, col=get_color(ii))
-
-        ypos <- ii / length(line_plot_data) * .9 * max(ylim)
-
-        text(max(BASELINE), ypos, name, col=get_color(ii), font=2)
-      }
-    })
-  }
-
-  rave_axis(1, pretty(time_points))
-  rave_axis(2, ylim)
+    time_series_plot(line_plot_data)
 }
 
+# by trial plot with statistics
 windowed_comparison_plot <- function(){
-  validate(need((exists('has_data') && (has_data)), "No Condition Specified"))
+    validate(need((exists('has_data') && (has_data)), "No Condition Specified"))
 
-  barplot.scatter(scatter_bar_data)
+    trial_scatter_plot(scatter_bar_data)
 }
 
-# the only difference between this plot and the time x freq plot
-# is the data and the decoration, but use the helper function
+#basic time frequency plot
+heat_map_plot = function(){
+    validate(need((exists('has_data') && (has_data)), "No Condition Specified"))
+
+    draw_many_heat_maps(heat_map_data, time_points, frequencies)
+}
+
+# the only difference between this plot and the time x freq heat_map_plot
+# is the data and the decoration. Use the core heatmap function
 # to enforce consistent look/feel
 by_trial_heat_map <- function() {
-  validate(need((exists('has_data') && (has_data)), "No Condition Specified"))
+    validate(need((exists('has_data') && (has_data)), "No Condition Specified"))
 
-  # the y variable is changing each time, so we provide a function that will be used to calculate the
-  # y variable on a per map basis
-  draw_many_heat_maps(by_trial_heat_map_data, x=time_points, y=function(m) 1:ncol(m),
-                      ylab='Trials', DECORATOR = trial_hm_decorator)
+    # the y variable is changing each time,
+    # so we provide a function that will be used to calculate the
+    # y variable on a per map basis
+    draw_many_heat_maps(by_trial_heat_map_data, x=time_points, y=function(m) seq_len(dim(m)[2L]),
+                        ylab='Trials', DECORATOR = trial_hm_decorator)
 }
 
-heat_map_plot = function(){
-  validate(need((exists('has_data') && (has_data)), "No Condition Specified"))
-
-  draw_many_heat_maps(heat_map_data, time_points, frequencies)
-}
-
-brushed = function(event, env){
-  if(is.null(event)){
-    msg = 'Please Choose on plot'
-  } else{
-    fmax = max(power$dimnames$Frequency)
-    tmax = max(power$dimnames$Time)
-    tmin = min(power$dimnames$Time)
-    msg = sprintf('Frequency range: %.1fHz - %.1fHz',
-                  event$ymin * fmax, event$ymax * fmax, event$xmin * (tmax-tmin), event$xmax * (tmax-tmin))
-  }
-  env$msg = msg
-}
-
-msg_out = function(){
-  #env$msg
+msg_out = function() {
+    return('')#sprintf('length: %d', length(heat_map_data)))
 }
 
 async_out = function(){
-  validate(need(exists('async_msg', envir = environment()), 'Press "Force run" Button.'))
-  async_msg
+    validate(need(exists('async_msg', envir = environment()), 'Press "Force run" Button.'))
+    async_msg
 }
 
 rave_execute({
-  assertthat::assert_that(
-    length(electrode) == 1,
-    msg = 'No electrode selected'
-  )
-  electrode = as.integer(electrode)
-  from = BASELINE[1]
-  to = BASELINE[2]
-  alltrials = sort(unique(unlist(lapply(GROUPS, function(x){x$GROUP}))))
+    assertthat::assert_that(length(electrode) == 1,msg = 'No electrode selected')
 
-  bl_power = cache(
-    key = list(electrode, BASELINE, length(alltrials) > 0),
-    val = baseline(from, to, electrode)
-  )
+    electrode = as.integer(electrode)
 
-  lapply(GROUPS, function(comp){
-    power = bl_power$subset(Trial = Trial %in% comp$GROUP)
+    #baseline all available trials
 
-    has_t = length(comp$GROUP) > 0
-    mean_o_trials = mean_o_trial(power)
-    list(
-      name = comp$GROUP_NAME,
-      has_t = has_t,
-      data = mean_o_trials,
-      range = range(mean_o_trials)
+    has_trials <- vapply(GROUPS, function(g) length(g$GROUP) > 0, TRUE)
+    any_trials = any(has_trials)
+
+    bl_power = cache(
+        key = list(electrode, BASELINE, any_trials),
+        val = baseline(BASELINE[1],  BASELINE[2], electrode)
     )
-  }) ->
-    heat_map_data
 
-  # this can be used elsewhere
-  has_data = sum(unlist(lapply(heat_map_data, getElement, 'has_t')))
+    # we were repeating a lot of calculations and looping over GROUPS too many times
+    # let's clean that up
 
-  lapply(GROUPS, function(comp){
-    power = bl_power$subset(Trial = Trial %in% comp$GROUP)
-    has_t = length(comp$GROUP) > 0
-    mean_o_freq = collapse_over_freq(power)
-    range = range(mean_o_freq)
-    list(
-      name = comp$GROUP_NAME,
-      has_t = has_t,
-      data = t(mean_o_freq),
-      range = range
-    )
-  })-> by_trial_heat_map_data
+    has_trials <- unlist(lapply(GROUPS, function(g) length(g$GROUP) > 0))
 
-  # pre-process for over time plot
-  lapply(GROUPS, function(comp){
-    power <- bl_power$subset(Trial = Trial %in% comp$GROUP)
-    mse = collapse_over_freq_and_trial(power)
+    #helper file to build lists with common elements pre-populated
+    build_list <- function() {
+        ##NB: this is faster than using replicate(length(has_trials))
+        lapply(seq_len(length(has_trials)), function(ii)
+            list('has_trials' = has_trials[ii],
+                 'name' = GROUPS[[ii]]$GROUP_NAME))
+    }
 
-    list(
-      name = comp$GROUP_NAME,
-      mse = mse,
-      has_t = length(comp$GROUP) > 0,
-      lim = range(pm(mse[,1], mse[,2])),
-      N=dim(power)[1]
-    )
-  }) ->
-    line_plot_data
+    # declare all our variables with pre-populated 'has_trials' and 'name' variables
+    build_list() ->
+        scatter_bar_data -> line_plot_data -> by_trial_heat_map_data -> heat_map_data
 
-  lapply(GROUPS, function(comp) {
-    has_t <- length(comp$GROUP)
-    trials <- collapse_over_freq_and_time(bl_power$subset(Trial = Trial %in% comp$GROUP))
-    lim = range(trials)
-    list(
-      name = comp$GROUP_NAME,
-      trials = trials,
-      N = length(trials),
-      has_t = has_t,
-      lim = lim
-    )
-  }) ->
-    scatter_bar_data
+    flat_data <- data.frame()
+    # now we loop through only those groups with data
+    for(ii in which(has_trials)) {
+        power = bl_power$subset(Trial = Trial %in% GROUPS[[ii]]$GROUP)
+
+        #helper function to clean up the syntax below, value here should be a function
+        # we're relying on power being defined above, so don't move this function out of this scope
+        `add_data<-` <- function(x, value) {
+            x[c('data', 'range', 'N')] <- list(value, .fast_range(value), dim(power)[1L])
+            x
+        }
+
+        add_data(heat_map_data[[ii]]) <- collapse_over_trial(power)
+        add_data(by_trial_heat_map_data[[ii]]) <- collapse_over_freq(power)
+
+        add_data(line_plot_data[[ii]]) <- collapse_over_freq_and_trial(power)
+        # we want to make a special range for the line plot data that takes into account mean +/- SE
+        line_plot_data[[ii]]$range <- .fast_range(pm(line_plot_data[[ii]]$data[,1],
+                                                     line_plot_data[[ii]]$data[,2]))
+
+        add_data(scatter_bar_data[[ii]]) <- collapse_over_freq_and_time(power)
+
+        # for the scatter_bar_data we also need to get m_se within condition
+        scatter_bar_data[[ii]]$mse <- .fast_mse(scatter_bar_data[[ii]]$data)
+
+        flat_data %<>% rbind(data.frame('group'=ii, 'y' = scatter_bar_data[[ii]]$data))
+    }
+    flat_data$group %<>% factor
+
+
+    # this can be used elsewhere
+    has_data = sum(unlist(lapply(heat_map_data, getElement, 'has_trials')))
+
+    # calculate some statistics
+
+    # calculate the statistics here so that we can add them to the niml_out
+    # if there are > 1 groups in the data, then do linear model, otherwise one-sample t-test
+    if(length(unique(flat_data$group)) > 1) {
+        # we need to check if they have supplied all identical data sets
+
+        # easy way is to check that the trials are the same?
+        sapply(GROUPS, '[[', 'GROUP')
+
+        g1 <- GROUPS[[which(has_trials)[1]]]$GROUP
+        if(all(sapply(which(has_trials)[-1], function(ii) identical(GROUPS[ii]$GROUP, g1)))) {
+            result_for_suma <- get_t(flat_data$y[flat_data$group==flat_data$group[1]])
+            title <- bquote('Non-unique conditions.' ~H[0] * ':' ~ mu == 0 * ';' ~ bar(x)==.(result_for_suma[1]) * ',' ~ t==.(result_for_suma[2]) * ',' ~ p==.(result_for_suma[3]))
+        } else {
+            result_for_suma <- get_f(y ~ group, flat_data) %>% pretty
+            title <- bquote(H[0] ~ mu[i] == mu[j] * ';' ~ R^2 == .(result_for_suma[1]) ~ ',' ~ F == .(result_for_suma[2]) ~ ','~ p==.(result_for_suma[3]))
+        }
+    } else {
+        result_for_suma <- flat_data$y %>% get_t %>% pretty
+        title <- bquote(H[0] * ':' ~ mu == 0 * ';' ~ bar(x)==.(result_for_suma[1]) * ',' ~ t==.(result_for_suma[2]) * ',' ~ p==.(result_for_suma[3]))
+    }
+
+    attr(scatter_bar_data, 'stats') <- list('result' = result_for_suma, 'title'=title)
+
 },{
-  if(.is_async){
-    async_msg = 'Running in the background'
-  }
+    if(.is_async){
+        async_msg = 'Running in the background'
+    }
 }, async = {
-  logger('Aync test')
-  # rm(list = ls(all.names = T))
-  Sys.sleep(0.5)
-  aaa = heat_map_plot
-  bbb = `%>%`
-  nms = ls(all.names = T)
-  async_msg = paste(search(), collapse = ', ')
+    logger('Aync test')
+    # rm(list = ls(all.names = T))
+    Sys.sleep(0.5)
+    aaa = heat_map_plot
+    bbb = `%>%`
+    nms = ls(all.names = T)
+    async_msg = paste(search(), collapse = ', ')
 }
 )
 
-if(FALSE) {
-  heat_map_plot()
-
-  windowed_comparison_plot()
-
-}
-
 niml_default = function(){
-  return(1:3)
+    return(result_for_suma)
 }
 
-rave_prepare()
+if(FALSE) {
+    heat_map_plot()
+    windowed_comparison_plot()
+}
+
