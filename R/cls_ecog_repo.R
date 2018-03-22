@@ -155,11 +155,16 @@ ECoGRepository <- R6::R6Class(
         raw_e = self$get_electrode(electrode = e, name = 'raw')$raw
         for(name in names){
           future::futureAssign(
-            e_str, {rm(list = ls(all.names = T)); raw_e$fast_epoch(
-              epochs = epoch_data,
-              freqs = freqs,
-              pre = pre, post = post, name = name
-            )}, assign.env = self[[name]]$private$env
+            e_str, {
+              rm(list = ls(all.names = T));
+              raw_e$fast_epoch(
+                epochs = epoch_data,
+                freqs = freqs,
+                pre = pre, post = post, name = name
+              ) -> elc;
+              rhdf5::H5close();
+              return(elc)
+            }, assign.env = self[[name]]$private$env
           )
         }
       }
