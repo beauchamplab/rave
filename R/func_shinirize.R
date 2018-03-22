@@ -299,7 +299,7 @@ shinirize <- function(module, session = shiny::getDefaultReactiveDomain(), test.
             res,
             electrode_numbers = data_env$electrodes,
             value_labels = NULL,
-            prefix = sprintf('[%s]', MODULE_LABEL),
+            prefix = sprintf('%s', MODULE_LABEL),
             add_electrodes_as_column = TRUE,
             value_file = '__vals.dat',
             index_file = '__ind.dat',

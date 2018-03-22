@@ -67,6 +67,8 @@ write.niml <- function(values_matrix, electrode_numbers=NULL, value_labels=NULL,
   indices <- rep(electrode_numbers, each=faces_per_electrode)
   values <- values_matrix[rep(1:nrow(values_matrix), each=faces_per_electrode),]
 
+  values = matrix(as.numeric(values), ncol = length(value_labels), byrow = F)
+
   # Turn the electrode ID into an ascending vertex ID,
   # this is aware that electrode numbers may not be sequential and AFNI starts at 0
   indices = (indices - 1) * faces_per_electrode + seq(0, faces_per_electrode - 1)
@@ -75,6 +77,7 @@ write.niml <- function(values_matrix, electrode_numbers=NULL, value_labels=NULL,
   if(!dir.exists(work_dir)){
     dir.create(work_dir, recursive = T)
   }
+  work_dir = try_normalizePath(work_dir)
   value_file = file.path(work_dir, value_file)
   index_file = file.path(work_dir, index_file)
   niml_fname = file.path(work_dir, niml_fname)
@@ -93,12 +96,24 @@ write.niml <- function(values_matrix, electrode_numbers=NULL, value_labels=NULL,
 
   logger('For full cleanup, AFTER running the ConvertDset command, delete: ' %&% value_file %&% ' and ' %&% index_file)
 
+  print(list(
+    args = c(
+      '-o_niml', '',
+      '-input', sprintf('"%s"', value_file),
+      '-i_1D -node_index_1D', sprintf('"%s"', index_file),
+      '-dset_labels', sprintf("'%s'", paste0(value_labels, collapse=' ')),
+      '-prefix', sprintf('"%s"', niml_fname)
+    ),
+    env = c(sprintf('PATH=$PATH:"%s"', AFNI_PATH),
+            'DYLD_LIBRARY_PATH=/opt/X11/lib/flat_namespace')
+  ))
   system2(
     'ConvertDset',
     args = c(
       '-o_niml', '',
       '-input', sprintf('"%s"', value_file),
-      '-i_1D -node_index_1D', sprintf('"%s"', index_file),
+      '-i_1D', '',
+      '-node_index_1D', sprintf('"%s"', index_file),
       '-dset_labels', sprintf("'%s'", paste0(value_labels, collapse=' ')),
       '-prefix', sprintf('"%s"', niml_fname)
     ),
