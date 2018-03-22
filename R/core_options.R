@@ -144,24 +144,27 @@ rave_setup <- function(func = NULL){
   if(!is.function(func)){
     if(length(..setup_env$setup_func) == 0){
       n_workers = max(rave_options('max_worker'), 1)
-      if(stringr::str_detect(stringr::str_to_lower(Sys.info()['sysname']), 'win[3d]')){
-        mcl = parallel::makeCluster
-      }else{
-        mcl = parallel::makeForkCluster
-      }
+      # if(stringr::str_detect(stringr::str_to_lower(Sys.info()['sysname']), 'win[3d]')){
+      #   mcl = parallel::makeCluster
+      # }else{
+      #   mcl = parallel::makeForkCluster
+      # }
 
 
-      if(is(..setup_env$workers, 'cluster')){
-        parallel::stopCluster(..setup_env$workers)
-      }
-      ..setup_env$workers = mcl(n_workers)
+      # if(is(..setup_env$workers, 'cluster')){
+      #   parallel::stopCluster(..setup_env$workers)
+      # }
+      # ..setup_env$workers = mcl(n_workers)
 
-      future::plan(future::cluster, workers = ..setup_env$workers)
+      # future::plan(future::cluster, workers = ..setup_env$workers)
+
+      future::plan(future::multiprocess, workers = n_workers)
+
       # check crayon
       if(rave::rave_options('crayon_enabled')){
         if(exists('RStudio.Version') && is.function(RStudio.Version)){
           rsver = as.character(RStudio.Version()$version)
-          if(utils::compareVersion('1.1', rsver) <= 0){
+          if(utils::compareVersion('1.1', rsver)  > 0){
             warning("Please install newest version of RStudio")
             rave::rave_options(crayon_enabled = FALSE, .save = F)
           }

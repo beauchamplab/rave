@@ -42,7 +42,11 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
     if(meta_type == 'electrodes'){
       file = file.path(meta_dir, 'electrodes.csv')
       if(file.exists(file)){
-        return(read.csv(file, stringsAsFactors = F))
+        tbl = read.csv(file, stringsAsFactors = F)
+        if(!'Label' %in% names(tbl)){
+          tbl$Label = NA
+        }
+        return(tbl)
       }
     }else if(meta_type == 'time_points'){
       file = file.path(meta_dir, 'time_points.csv')
