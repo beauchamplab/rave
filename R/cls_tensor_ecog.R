@@ -1,7 +1,32 @@
 #' @export
 ECoGTensor <- R6::R6Class(
   classname = 'ECoGTensor',
-  inherit = Tensor
+  inherit = Tensor,
+  public = list(
+    flatten = function(include_index = T, value_name = 'value'){
+      nrow = prod(self$dim)
+      re = data.frame(V = as.vector(self$data))
+      names(re) = value_name
+      if(include_index){
+        for(i in 1:length(self$varnames)){
+          vn = self$varnames[i]
+          if(i > 1){
+            each = prod(self$dim[1: (i - 1)])
+          }else{
+            each = 1
+          }
+          times = nrow / self$dim[i] / each
+
+          re[[vn]] = rep(self$dimnames[[i]], each = each, times = times)
+          if(i == 1){
+            re[['Trial_Number']] = rep(1:self$dim[1], each = 1, times = times)
+          }
+        }
+        re = cbind(re[-1], re[1])
+      }
+      re
+    }
+  )
 )
 
 #' @export

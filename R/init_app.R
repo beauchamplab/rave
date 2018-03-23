@@ -8,6 +8,19 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
   tryCatch({
     rave_prepare()
   }, error = function(e){})
+  tryCatch({
+    # get yaml file from dipterix repo
+    img_list = yaml::read_yaml('https://raw.githubusercontent.com/dipterix/instrave/master/mask_img/index.yaml')
+    img_list = sample(img_list, 1)[[1]]
+  }, error = function(e){
+    return(list(
+      name = 'Beauchamplab',
+      src = system.file('beauchamplab.png', package = 'rave'),
+      text = "Beauchamp's lab @CAMRI, BCM, 2018"
+    ))
+  }) ->
+    img_list
+
 
   test.mode = list(...)[['test.mode']]
   if(is.null(test.mode)) test.mode = rave_options('test_mode')
@@ -81,7 +94,12 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
     initial_mask = tagList(
       h2('R Analysis and Visualizations for Electrocorticography Data'),
       hr(),
-      p('Lannister send their regards')
+      p(
+        img(src = sprintf("%s/%s", 'https://raw.githubusercontent.com/dipterix/instrave/master/mask_img', img_list$src), alt = img_list$name),
+        br(),
+        HTML("<span>&#8220;", img_list$text, "&#8221;</span>"),br(),
+        span('- ', img_list$name)
+      )
     )
   )
 

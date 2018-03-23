@@ -147,6 +147,11 @@ li.control-sidebar-items>a {
   float: right;
 }
 
+#__rave__mask__ .loading_info img {
+  max-width: 100%;
+  max-height: 400px;
+}
+
 /*
 #loading_img img{
 	min-width: 100% !important;
