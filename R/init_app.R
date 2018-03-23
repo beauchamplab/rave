@@ -77,6 +77,11 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
           uiOutput(str_c(m$module_id, '_UI'))
         )
       }))
+    ),
+    initial_mask = tagList(
+      h2('R Analysis and Visualizations for Electrocorticography Data'),
+      hr(),
+      p('Lannister send their regards')
     )
   )
 
@@ -85,7 +90,7 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
 
     # Global variable, timer etc.
     async_timer = reactiveTimer(500)
-    input_timer = reactiveTimer(rave_options('delay_input') / 2)
+    # input_timer = reactiveTimer(rave_options('delay_input') / 2)
     global_reactives = reactiveValues(
       check_results = NULL,
       check_inputs = NULL,
@@ -95,9 +100,9 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
     observeEvent(async_timer(), {
       global_reactives$check_results = Sys.time()
     })
-    observeEvent(input_timer(), {
-      global_reactives$check_inputs = Sys.time()
-    })
+    # observeEvent(input_timer(), {
+    #   global_reactives$check_inputs = Sys.time()
+    # })
     ##################################################################
     # Module to load data
     callModule(module = data_selector$server, id = 'DATA_SELECTOR', session = session, global_reactives = global_reactives)
@@ -110,6 +115,7 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
     observe({
       if(global_reactives$has_data){
         global_reactives$execute_module = input$sidebar
+        shinyjs::hide(id = '__rave__mask__')
       }
     })
 
