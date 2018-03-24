@@ -3,13 +3,26 @@
 get_people = function(){
   tryCatch({
     # get yaml file from dipterix repo
-    img_list = yaml::read_yaml('https://raw.githubusercontent.com/dipterix/instrave/master/mask_img/index.yaml')
+    genv = globalenv()
+    if(!is.null(genv[['..all_index']])){
+      img_list = genv[['..all_index']]
+    }else{
+      img_list = yaml::read_yaml('https://raw.githubusercontent.com/dipterix/instrave/master/mask_img/index.yaml')
+      genv[['..all_index']] = img_list
+    }
+
+    if(!is.null(genv[['..last_index']])){
+      img_list = img_list[-genv[['..last_index']][['index']]]
+    }
     img_list = sample(img_list, 1)[[1]]
+    genv[['..last_index']] = img_list
+    return(img_list)
   }, error = function(e){
     return(list(
       name = 'Beauchamplab',
       src = system.file('beauchamplab.png', package = 'rave'),
-      text = "Beauchamp's lab @CAMRI, BCM, 2018"
+      text = "Beauchamp's lab @CAMRI, BCM, 2018",
+      index = 0
     ))
   })
 }
