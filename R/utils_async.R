@@ -87,3 +87,52 @@ get_async_result <- function(name, remove = T){
     return(NULL)
   }
 }
+
+
+
+#' @export
+lapply_async <- function(x, fun, ..., .ncores = 0, .future_plan = future::multiprocess,
+                         .call_back = NULL, .packages = NULL, .envir = environment(), .globals = TRUE, .gc = TRUE){
+  if(.ncores <= 0){
+    .ncores = rave_options('max_worker')
+  }
+  if(is.null(.packages)){
+    .packages = stringr::str_match(search(), 'package:(.*)')
+    .packages = .packages[,2]
+    .packages = rev(.packages[!is.na(.packages)])
+  }
+  .niter = length(x)
+  .ncores = as.integer(.ncores)
+  .ncores = min(.ncores, .niter)
+  future::plan(.future_plan, workers = .ncores)
+
+  .future_list = list()
+  .future_values = list()
+
+  .i = 0
+  while(.i < .niter){
+    .i = .i+1
+    .x = x[[.i]]
+
+    .future_list[[length(.future_list) + 1]] = future::future({
+      fun(.x)
+    }, envir = .envir, substitute = T, lazy = F, globals = .globals, .packages = .packages, gc = .gc)
+
+    if(length(.future_list) >= .ncores){
+      # wait for one of futures resolved
+      .future_values[[1 + length(.future_values)]] = future::value(.future_list[[1]])
+      .future_list[[1]] = NULL
+      gc()
+    }
+
+    if(is.function(.call_back)){
+      try({
+        .call_back(.i)
+      })
+    }
+  }
+
+  return(c(.future_values, future::values(.future_list)))
+}
+
+

@@ -124,24 +124,25 @@ Electrode <- R6::R6Class(
         ))
       }) ->
         indices
-      placehold = array(NA, dim = c(length(ep), dim_2, dim_3))
+      placehold = array(NA, dim = c(length(ep), dim_2, dim_3, 1))
       bvec = sapply(indices,'[[', 'block')
       for(b in unique(bvec)){
         sel = bvec == b
         subinds = as.vector(sapply(indices[sel], '[[', 'ind'))
         a = tmp[[b]][,subinds]
         dim(a) = c(nrow(a), dim_3, sum(sel))
-        placehold[sel,,] = aperm(a, c(3, 1, 2))
+        placehold[sel,,,1] = aperm(a, c(3, 1, 2))
       }
       # assign dim names
-      data = rave:::ECoGTensor$new(
+      data = ECoGTensor$new(
         data = placehold,
         dimnames = list(
-          epochs$Stimulus,
-          freqs$Frequency,
-          time_points
+          Trial = epochs$Stimulus,
+          Frequency = freqs$Frequency,
+          Time = time_points,
+          Electrode = electrode
         ),
-        varnames = c('Trial', 'Frequency', 'Time'))
+        varnames = c('Trial', 'Frequency', 'Time', 'Electrode'))
     },
     epoch = function(epoch_name, pre, post, name = 'power'){
       pre = round(pre * private$subject$sample_rate)
@@ -182,22 +183,23 @@ Electrode <- R6::R6Class(
         ))
       }) ->
         indices
-      placehold = array(NA, dim = c(length(ep), dim_2, dim_3))
+      placehold = array(NA, dim = c(length(ep), dim_2, dim_3, 1))
       bvec = sapply(indices,'[[', 'block')
       for(b in unique(bvec)){
         sel = bvec == b
         subinds = as.vector(sapply(indices[sel], '[[', 'ind'))
         a = tmp[[b]][,subinds]
         dim(a) = c(nrow(a), dim_3, sum(sel))
-        placehold[sel,,] = aperm(a, c(3, 1, 2))
+        placehold[sel,,, 1] = aperm(a, c(3, 1, 2))
       }
 
       # assign dim names
       data = rave:::ECoGTensor$new(data = placehold, dimnames = list(
         epochs$Stimulus,
         freqs$Frequency,
-        time_points
-      ), varnames = c('Trial', 'Frequency', 'Time'))
+        time_points,
+        electrode
+      ), varnames = c('Trial', 'Frequency', 'Time', 'Electrode'))
 
       # private$cache[[cache_name]] = data
       # if(length(private$cache) > 3){

@@ -25,6 +25,51 @@ ECoGTensor <- R6::R6Class(
         re = cbind(re[-1], re[1])
       }
       re
+    },
+    initialize = function(data, dim, dimnames, varnames){
+
+      if(!missing(dim)){
+        self$dim = dim
+        if(!assertthat::are_equal(dim(data), dim)){
+          logger('Dimension does not match', level = 'WARNING')
+        }
+      }else if(!is.null(base::dim(data))){
+        self$dim = base::dim(data)
+      }else{
+        self$dim = length(data)
+      }
+
+      if(!missing(dimnames)){
+        self$dimnames = dimnames
+      }else if(!is.null(base::dimnames(data))){
+        self$dimnames = base::dimnames(data)
+      }else{
+        self$dimnames = lapply(1:length(varnames), function(v){
+          1:(self$dim[v])
+        })
+      }
+
+      names(self$dimnames) = varnames
+      tryCatch({
+        if('Frequency' %in% varnames){
+          self$dimnames$Frequency = as.numeric(self$dimnames$Frequency)
+        }
+      }, error = function(e){})
+      tryCatch({
+        if('Time' %in% varnames){
+          self$dimnames$Time = as.numeric(self$dimnames$Time)
+        }
+      }, error = function(e){})
+      tryCatch({
+        if('Electrode' %in% varnames){
+          self$dimnames$Electrode = as.numeric(self$dimnames$Electrode)
+        }
+      }, error = function(e){})
+
+
+      dimnames(data) = self$dimnames
+
+      self$data = data
     }
   )
 )

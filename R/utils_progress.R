@@ -16,7 +16,7 @@ progress <- function(
     #   options(rave.logger.disabled = FALSE)
     # }
     progress = NULL
-    inc = function(...){}
+    inc = logger
     close = function(){}
   }else{
     progress = Progress$new(
