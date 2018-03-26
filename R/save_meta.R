@@ -12,10 +12,19 @@ save_meta <- function(data, meta_type, project_name, subject_code){
   if(meta_type == 'electrodes'){
     names(data)[1:4] = c('Channel', 'EpilepsyChan', 'BadChan', 'ExcludedChan')
     if(!'Coord_x' %in% names(data)){
-      data$Coord_x = 0
-      data$Coord_y = 0
-      data$Coord_z = 0
-      data$Label = ''
+      # try not to overwrite original data
+      old_data = load_meta(meta_type, project_name, subject_code)
+      if(is.data.frame(old_data) && nrow(old_data) == nrow(data) && length(setdiff(old_data$Channel, old_data$Channel)) == 0){
+        data$Coord_x = old_data$Coord_x
+        data$Coord_y = old_data$Coord_y
+        data$Coord_z = old_data$Coord_z
+        data$Label = old_data$Label
+      }else{
+        data$Coord_x = 0
+        data$Coord_y = 0
+        data$Coord_z = 0
+        data$Label = ''
+      }
     }
 
     write.csv(data, file = file.path(meta_dir, 'electrodes.csv'), row.names = F)

@@ -299,17 +299,15 @@ shinirize <- function(module, session = shiny::getDefaultReactiveDomain(), test.
             res,
             electrode_numbers = data_env$electrodes,
             value_labels = NULL,
-            prefix = sprintf('%s', MODULE_LABEL),
+            prefix = sprintf('%s', str_replace_all(MODULE_LABEL, '[^A-Za-z0-9_]', '_')),
             add_electrodes_as_column = TRUE,
             value_file = '__vals.dat',
             index_file = '__ind.dat',
-            faces_per_electrode = rave_options('suma_nodes_per_electrodes'),
-            AFNI_PATH = rave_options('suma_path'),
             work_dir = data_env$subject$dirs$suma_out_dir) ->
             cmd
           showNotification(p('NIML file generated. Please open it in SUMA'), type = 'message')
         }, error = function(e){
-          showNotification(p('NIML file failed: (message)', br(), e$message), type = 'error')
+          showNotification(p('NIML file failed: (message)', br(), e$message, br(), 'Please check console for error messages.'), type = 'error')
         })
 
         removeModal()

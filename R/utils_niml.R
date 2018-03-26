@@ -34,12 +34,10 @@ is_within <- function(x, minmax) (x>=minmax[1]) & (x<=minmax[2])
 # system() within R
 write.niml <- function(values_matrix, electrode_numbers=NULL, value_labels=NULL, prefix='', add_electrodes_as_column=TRUE,
                        value_file='__vals.dat', index_file='__ind.dat',
-                       faces_per_electrode=42, AFNI_PATH,
-                       work_dir = './') {
+                       work_dir = './', ...) {
 
-  if(missing(AFNI_PATH)){
-    AFNI_PATH = try_normalizePath(rave_options('suma_path'))
-  }
+  AFNI_PATH = try_normalizePath(rave_options('suma_path'))
+  faces_per_electrode = rave_options('suma_nodes_per_electrodes')
 
   fname = prefix %&% '_' %&% str_replace_all(Sys.time(), '\\ |:', '_')
   niml_fname <- fname %&% '.niml.dset'
@@ -52,10 +50,11 @@ write.niml <- function(values_matrix, electrode_numbers=NULL, value_labels=NULL,
   set_if_null(value_labels) <- 'Val_' %&% (1:ncol(values_matrix))
 
   # if electrode_numbers weren't passed in, maybe there are row.names?
-  set_if_null(electrode_numbers) <- row.names(values_matrix)
-
-  # if electrode numbers are present, ensure they are all integer values
-  if(!all(is.integer(electrode_numbers))) electrode_numbers <- 1:nrow(values_matrix)
+  if(length(electrode_numbers) == 0){
+    electrode_numbers = 1:nrow(values_matrix)
+  }else{
+    electrode_numbers = as.numeric(electrode_numbers)
+  }
 
   # adding the electrode number as a column is a nice thing to do
   if(add_electrodes_as_column){

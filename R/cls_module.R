@@ -378,25 +378,39 @@ ExecEnvir <- R6::R6Class(
       param = sapply(self$input_ids, get, envir = self$runtime_env, simplify = F, USE.NAMES = T)
       new = self$copy()
       elecs = private$data_env$electrodes
-      parallel::mclapply(elecs, function(e){
-        pm = param
-        pm[[inputId]] = e
-        new$execute_with(pm, async = F, plan = NULL)
-        func = get(func_name, envir = new$runtime_env, inherits = T)
-        return(func())
-      }) ->
-        fs
-      dat = t(vapply(fs, '[', as.vector(fs[[1]])))
-      nm = names(fs[[1]])
-      if(length(nm)){
-        nm = stringr::str_trim(nm)
-        nm[nm == ''] = paste0('Unamed_', which(nm == ''))
-        nm = stringr::str_replace_all(nm, '[^a-zA-Z0-9]', '_')
-        colnames(dat) = nm
-      }
+      progress = rave:::progress('Export to NIML for SUMA.', max = length(elecs))
+      on.exit({progress$close()})
+
+      tryCatch({
+        lapply_async(elecs, function(e){
+          pm = param
+          pm[[inputId]] = e
+          new$execute_with(pm, async = F, plan = NULL)
+          func = get(func_name, envir = new$runtime_env, inherits = T)
+          return(func())
+        }, .ncores = rave_options('max_worker'), .call_back = function(i){
+          progress$inc(sprintf('Calculating %d (%d of %d)', elecs[i], i, length(elecs)))
+        }) ->
+          fs
+
+        nelem = length(as.vector(fs[[1]]))
+        nm = names(fs[[1]])
+        dat = t(vapply(fs, function(x){as.numeric(x)}, numeric(nelem)))
+        if(length(nm)){
+          nm = stringr::str_trim(nm)
+          nm[nm == ''] = paste0('Unamed_', which(nm == ''))
+          nm = stringr::str_replace_all(nm, '[^a-zA-Z0-9]', '_')
+          colnames(dat) = nm
+        }
+        return(dat)
+      }, error = function(e){
+        logger(str_c(capture.output({traceback()}), collapse = '\n'), level = 'ERROR')
+        return(NULL)
+      })
 
 
-      return(dat)
+
+
     },
     names = function(x){
       if(is.list(x)){
