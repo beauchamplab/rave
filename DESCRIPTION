@@ -7,7 +7,7 @@ Author: Beauchamplab
 Maintainer: Zhengjia Wang <dipterix.wang@gmail.com>,
             Beauchamplab <beauchamplab@gmail.com>
 Description: R Analysis and Visualization of ECOG Data 
-    (Internal code: "Dipterix")
+    (Internal code version: "Dipterix")
     RAVE provides cross-platform analysis and visualizations for neuroscience 
     ECoG data by "Just click buttons". This package include: (a) pre-processing 
     of ECoG raw data into HDF5 format (a cross-platform data format that can be 

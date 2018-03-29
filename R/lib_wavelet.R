@@ -1,4 +1,94 @@
+wavelet_kernels <- function(freqs, srate, wave_num){
+  srate = round(srate);
+  # calculate wavelet cycles for each frequencies
+  ratio = (log(max(wave_num)) - log(min(wave_num))) / (log(max(freqs)) - log(min(freqs)))
+  wavelet_cycles = exp((log(freqs) - log(min(freqs))) * ratio + log(min(wave_num)))
 
+  f_l = length(freqs)
+
+
+  # wavelet window calc - each columns of final wave is a wavelet kernel (after fft)
+  # sts = wavelet_cycles / (2 * pi * freqs)
+  # wavelet_wins = cbind(-3 * sts, 3 * sts)
+
+  lapply(1:f_l, function(ii){
+    fq = freqs[ii]
+    cycles = wavelet_cycles[ii]
+    # standard error
+    st = cycles / (2 * pi * fq)
+
+    # calculate window size
+    wavelet_win = seq(-3 * st, 3 * st, by = 1/srate)
+
+    # half of window length
+    w_l_half = (length(wavelet_win) - 1) / 2
+
+    # wavelet 1: calc sinus in complex domain
+    tmp_sine = exp((0+1i) * 2 * pi * fq / srate * (-w_l_half:w_l_half))
+
+    # Gaussian normalization part
+    A = 1/sqrt(st*sqrt(pi))
+
+    # wavelet 2: calc gaussian wrappers
+    tmp_gaus_win = A * exp(-wavelet_win^2/(2 * (cycles/(2 * pi * fq))^2))
+
+    # wave kernel
+    tmp_wavelet = tmp_sine * tmp_gaus_win
+
+    tmp_wavelet
+  }) ->
+    fft_waves
+
+  max_l = as.integer(max(sapply(fft_waves, length)) + 0.1 * srate)
+  sapply(fft_waves, function(s){
+    l = (max_l - length(s))
+    pre = floor(l / 2)
+    post = ceiling(l / 2)
+    c(rep(NA, pre), s, rep(NA, post))
+  }) ->
+    s
+  s_re = Re(s)
+  s_im = Im(s)
+  ind = exp(seq(log(min(freqs)), log(max(freqs)), length.out = 10))
+  sapply(ind, function(i){
+    which.min(abs(i - freqs))
+  }) ->
+    ind
+  ind = unique(sort(ind))
+  gap = (1:length(ind)) * 1.8 * max(abs(s_re), na.rm = T)
+  tmp_re = t(t(s_re[, ind]) + gap)
+  tmp_im = t(t(s_im[, ind]) + gap)
+  tmp = rbind(tmp_re)
+  x_all = (1:max_l) / srate; x_re = x_all; x_im = x_re + max(x_all)
+  matplot(y = tmp_re, x = x_re, type='l', col = 'black',
+          xlim = c(0, max(x_im)), ylim = c(min(tmp_re, na.rm = T), max(gap) + 1.5 * min(gap)),
+          lty = 1, cex.lab = 1.4, cex.main = 1.6, xlab = 'Wavelet Length (s)', cex.axis = 1.2,
+          ylab = 'Frequency (Hz)', main = 'Wavelet Kernels (Real & Imaginary)', yaxt="n", xaxt="n")
+
+  matlines(y = tmp_im, x = x_im, type='l', col = 'black', lty = 1)
+
+  n_halftickers = 7
+  x_actual = c(x_re, x_im)
+  x_label = c(x_all, x_all) - mean(x_all)
+  xind = seq(1, length(x_re), length.out = n_halftickers); xind = c(xind, xind + length(x_re))
+  xind = as.integer(xind[-n_halftickers])
+  x_label = x_label[xind]; x_label[n_halftickers] = abs(x_label[n_halftickers])
+  x_label = sprintf('%.2f', x_label)
+  x_label[n_halftickers] = paste0('\u00B1', x_label[n_halftickers])
+  x_text = median(x_actual)
+
+  axis(1, at=x_actual[xind], x_label, cex.axis = 1.2)
+  axis(2, at=gap, freqs[ind], cex.axis = 1.2, las = 1)
+  abline(h = gap, col = 'grey80', lty = 2)
+  leading_mod = sapply(ind, function(ii){
+    x = s[,ii]
+    cycles = wavelet_cycles[ii]
+    x = x[!is.na(x)] #Mod(x[1]) / max(Mod(x)) * 100  #= 1.111%
+    sprintf('%.2f s | %.1f', length(x) / srate, cycles)
+  })
+  text(x = x_text, y = gap, leading_mod)
+  text(x = x_text, y = min(gap) + max(gap), 'Wave Length | # of Cycles')
+}
 
 #' @title Wavelet Transformation With Phase
 #' @details
@@ -33,7 +123,7 @@ wavelet <- function(data, freqs, srate, wave_num){
   # Instead of using fixed wave_cycles, use flex cycles
   # lower num_cycle is good for low freq, higher num_cycle is good for high freq.
   # wavelet_cycles = wave_num;
-  lowest_freq = freqs[1];
+  # lowest_freq = freqs[1];
 
   f_l = length(freqs)
   d_l = length(data)
@@ -42,6 +132,9 @@ wavelet <- function(data, freqs, srate, wave_num){
   fft_data = fftwtools::fftw_r2c(data - mean(data))
 
   # wavelet window calc - each columns of final wave is a wavelet kernel (after fft)
+  # sts = wavelet_cycles / (2 * pi * freqs)
+  # wavelet_wins = cbind(-3 * sts, 3 * sts)
+
   sapply(1:f_l, function(ii){
     fq = freqs[ii]
     cycles = wavelet_cycles[ii]

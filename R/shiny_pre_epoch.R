@@ -56,7 +56,8 @@ rave_pre_epoch <- function(module_id = 'EPOCH_M', sidebar_width = 2){
       epoch_tmp = default_epoch,
       dat = NULL,
       plot_signal = NULL,
-      thred = NULL
+      thred = NULL,
+      selected_rows = NULL
     )
 
     output$inner_ui <- renderUI({
@@ -91,7 +92,6 @@ rave_pre_epoch <- function(module_id = 'EPOCH_M', sidebar_width = 2){
       s = user_data$subject
       if(is(s, 'SubjectInfo2') && length(input$epoch_file)){
         epoch_raw = file.path(s$dirs$pre_subject_dir, input$current_block, input$epoch_file)
-        print(epoch_raw)
         dat = R.matlab::readMat(epoch_raw)
         local_data$dat = dat
         choices = names(dat)
@@ -109,28 +109,35 @@ rave_pre_epoch <- function(module_id = 'EPOCH_M', sidebar_width = 2){
 
 
     observe({
-      tbl = isolate(local_data$epoch_table)
+      tbl = local_data$epoch_tmp
       sel = input$epoch_table_rows_selected
+
+      tmp_sel = isolate(local_data$selected_rows)
       if(length(sel)){
-        new_tbl = tbl[-sel,]
-        n_trial = nrow(new_tbl)
-        if(n_trial){
-          new_tbl$Trial = 1:n_trial
+        tmp_sel = tmp_sel[-sel]
+        if(length(tmp_sel)){
+          DT::selectRows(epoch_tmp_proxy, as.numeric(tmp_sel))
+        }else{
+          DT::reloadData(epoch_tmp_proxy, resetPaging = F, clearSelection = 'all')
         }
-        local_data$epoch_table = new_tbl
       }
     })
 
     observe({
       tmp = local_data$epoch_tmp
       tbl = isolate(local_data$epoch_saved)
-      sel = input$epoch_tmp_rows_selected
+      sel = local_data$selected_rows
       if(length(sel)){
         new_tbl = rbind(tbl, tmp[sel, ])
         new_tbl = new_tbl[order(new_tbl$Block, new_tbl$Onset), ]
         new_tbl$Trial = 1:nrow(new_tbl)
         local_data$epoch_table = new_tbl
       }
+    })
+
+    observe({
+      # TODO: add toggle
+      local_data$selected_rows = input$epoch_tmp_rows_selected
     })
 
     observe({
@@ -207,7 +214,6 @@ rave_pre_epoch <- function(module_id = 'EPOCH_M', sidebar_width = 2){
     observeEvent(input$console_plot_clicked, {
       e = input$console_plot_clicked
       if(!is.null(e)){
-        print(e)
         local_data$thred = e$y
       }
     })
@@ -217,6 +223,8 @@ rave_pre_epoch <- function(module_id = 'EPOCH_M', sidebar_width = 2){
       tbl
     })
 
+    epoch_tmp_proxy = DT::dataTableProxy('epoch_tmp')
+    # proxy %>% selectRows(as.numeric(input$rows))
 
     output$epoch_tmp <- DT::renderDataTable({
       tbl = local_data$epoch_tmp

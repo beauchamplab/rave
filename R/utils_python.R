@@ -59,3 +59,14 @@ py_console <- function(compiler_path = '', virtualenv = rave_options('py_virtual
   reticulate::repl_python(...)
 }
 
+#' @export
+py_save <- function(..., file){
+  names = as.character(substitute(list(...)))[-1L]
+  args = list(...)
+  if(length(names) > 1){
+    names(args) = names
+  }else{
+    args = args[[1]]
+  }
+  reticulate::py_save_object(args, file)
+}

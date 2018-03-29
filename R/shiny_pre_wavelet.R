@@ -15,14 +15,23 @@ rave_pre_wavelet <- function(module_id = 'WAVELET_M', sidebar_width = 2, longtim
         uiOutput(ns('pw_panel'))
       )
     ),
-    shinydashboard::box(
+    shinydashboard::tabBox(
+      id = ns('main'),
       width = 12 - sidebar_width,
-      title = 'Post-Wavelet Inspection (Power & Phase)',
-      h5('Power Plot'),
-      plotOutput(ns('power_plot'), height = '35vh'),
-      hr(),
-      h5('Phase Plot (only display several frequencies)'),
-      plotOutput(ns('phase_plot'), height = '70vh')
+      tabPanel(
+        title = 'Wavelet Kernels',
+        h5('Wavelet Window'),
+        plotOutput(ns('wave_windows_plot'), height = '35vh')
+      ),
+      tabPanel(
+        title = 'Post-Wavelet Inspection (Power & Phase)',
+        h5('Power Plot'),
+        plotOutput(ns('power_plot'), height = '40vh'),
+        hr(),
+        h5('Phase Plot (only display several frequencies)'),
+        plotOutput(ns('phase_plot'), height = '40vh')
+      )
+
     )
   )
 
@@ -128,14 +137,14 @@ rave_pre_wavelet <- function(module_id = 'WAVELET_M', sidebar_width = 2, longtim
         tags$blockquote(user_data$subject$logger$get_or_save('CAR_plan')),
         p('Ready?'),
         footer = tagList(
-          actionButton(ns("wave_cacnel"), "Cancel"),
+          actionButton(ns("wave_cancel"), "Cancel"),
           actionButton(ns("ok"), "Sure!")
         )
       )
       showModal(modal)
     })
 
-    observeEvent(input$wave_cacnel, {
+    observeEvent(input$wave_cancel, {
       if(user_data$doing_wavelet){
         session$sendCustomMessage(
           type = 'alertmessage', message = str_c(
@@ -320,6 +329,22 @@ rave_pre_wavelet <- function(module_id = 'WAVELET_M', sidebar_width = 2, longtim
         rave:::plot_signals(data, sample_rate = local_data$last_wavelet$target_srate,
                             channel_names = paste(freq[sub_ind], 'Hz'), space = 7, start_time = start, ylab = 'Frequency')
       }
+    })
+
+    output$wave_windows_plot <- renderPlot({
+      wave_num = input$wave_num
+      freq_range = input$freq_range
+      fstep = input$freq_step
+      srate = user_data$srate
+
+      validate(
+        need(length(wave_num) > 0, 'Specify number of wavelet cycles'),
+        need(length(freq_range) > 0 && freq_range[1] < freq_range[2], 'Specify valid frequency range'),
+        need(length(fstep) > 0 && fstep > 0, 'Specify valid frequency steps'),
+        need(length(srate) > 0, 'Wait, have you loaded subject yet?')
+      )
+      freqs = seq(freq_range[1], freq_range[2], by = fstep)
+      wavelet_kernels(freqs, srate, wave_num)
     })
   }
 
