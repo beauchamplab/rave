@@ -155,3 +155,14 @@ Tensor <- R6::R6Class(
     }
   )
 )
+
+
+#' @export
+r_to_py.Tensor <- function(obj, convert = FALSE){
+  reticulate::r_to_py(c(
+    obj$dimnames,
+    list(
+      data = obj$data
+    )),
+    convert = convert)
+}

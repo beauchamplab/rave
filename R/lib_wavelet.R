@@ -27,7 +27,12 @@
 #' @export
 wavelet <- function(data, freqs, srate, wave_num){
   srate = round(srate);
-  wavelet_cycles = wave_num;
+  # calculate wavelet cycles for each frequencies
+  ratio = (log(max(wave_num)) - log(min(wave_num))) / (log(max(freqs)) - log(min(freqs)))
+  wavelet_cycles = exp((log(freqs) - log(min(freqs))) * ratio + log(min(wave_num)))
+  # Instead of using fixed wave_cycles, use flex cycles
+  # lower num_cycle is good for low freq, higher num_cycle is good for high freq.
+  # wavelet_cycles = wave_num;
   lowest_freq = freqs[1];
 
   f_l = length(freqs)
@@ -37,9 +42,11 @@ wavelet <- function(data, freqs, srate, wave_num){
   fft_data = fftwtools::fftw_r2c(data - mean(data))
 
   # wavelet window calc - each columns of final wave is a wavelet kernel (after fft)
-  sapply(freqs, function(fq){
+  sapply(1:f_l, function(ii){
+    fq = freqs[ii]
+    cycles = wavelet_cycles[ii]
     # standard error
-    st = wave_num / (2 * pi * fq)
+    st = cycles / (2 * pi * fq)
 
     # calculate window size
     wavelet_win = seq(-3 * st, 3 * st, by = 1/srate)
@@ -54,7 +61,7 @@ wavelet <- function(data, freqs, srate, wave_num){
     A = 1/sqrt(st*sqrt(pi))
 
     # wavelet 2: calc gaussian wrappers
-    tmp_gaus_win = A * exp(-wavelet_win^2/(2 * (wavelet_cycles/(2 * pi * fq))^2))
+    tmp_gaus_win = A * exp(-wavelet_win^2/(2 * (cycles/(2 * pi * fq))^2))
 
     # wave kernel
     tmp_wavelet = tmp_sine * tmp_gaus_win

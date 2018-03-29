@@ -2,7 +2,7 @@
 
 bulk_wavelet <- function(
   project_name, subject_code, blocks, channels, srate, target_srate = 100,
-  frequencies = seq(4, 200, by = 4), wave_num = 7, compress = 1, replace = F, save_original = F,
+  frequencies = seq(4, 200, by = 4), wave_num = c(3,14), compress = 1, replace = F, save_original = F,
   ncores = future::availableCores() - 2, plan = NULL, ...
 ){
   # This function takes long to execute, parallel is highly recommended

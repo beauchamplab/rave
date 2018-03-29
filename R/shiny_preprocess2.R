@@ -24,6 +24,7 @@ rave_pre_process <- function(
   NOTCH_MODULE <- rave_pre_notch(sidebar_width = sidebar_width, longtimer_env = longtimer_env)
   CAR_MODULE <- rave_pre_car(sidebar_width = sidebar_width)
   WAVELET_MODULE <- rave_pre_wavelet(sidebar_width = sidebar_width, longtimer_env = longtimer_env)
+  EPOCH_MODULE <- rave_pre_epoch(sidebar_width = sidebar_width)
 
   # UI
   {
@@ -41,7 +42,9 @@ rave_pre_process <- function(
           shinydashboard::menuItem('CAR',
                                    tabName = 'CAR'),
           shinydashboard::menuItem('Wavelet',
-                                   tabName = 'WAVELET')
+                                   tabName = 'WAVELET'),
+          shinydashboard::menuItem('Epoch (Under construction)',
+                                   tabName = 'EPOCH')
         )
       ),
       body = shinydashboard::dashboardBody(
@@ -70,6 +73,10 @@ rave_pre_process <- function(
           shinydashboard::tabItem(
             'WAVELET',
             WAVELET_MODULE$body
+          ),
+          shinydashboard::tabItem(
+            'EPOCH',
+            EPOCH_MODULE$body
           )
         )
       )
@@ -103,6 +110,7 @@ rave_pre_process <- function(
     callModule(NOTCH_MODULE$server, id = 'NOTCH_M', user_data = user_data)
     callModule(CAR_MODULE$server, id = 'CAR_M', user_data = user_data)
     callModule(WAVELET_MODULE$server, id = 'WAVELET_M', user_data = user_data)
+    callModule(EPOCH_MODULE$server, id = 'EPOCH_M', user_data = user_data)
 
 
 

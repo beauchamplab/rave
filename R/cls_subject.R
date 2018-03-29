@@ -61,3 +61,17 @@ Subject <- R6::R6Class(
     }
   )
 )
+
+
+
+#' @export
+r_to_py.Subject <- function(obj, convert = FALSE){
+  reticulate::r_to_py(list(
+    subject_id = obj$id,
+    electrodes = obj$electrodes,
+    frequencies = obj$frequencies,
+    sample_rate = obj$meta$sample_rate,
+    valid_electrodes = obj$valid_electrodes,
+    dirs = obj$dirs[c('rave_dir', 'meta_dir', 'cache_dir', 'suma_dir', 'suma_out_dir')]
+  ), convert = convert)
+}

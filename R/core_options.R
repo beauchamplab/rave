@@ -25,9 +25,11 @@ opt <- list(
   dyld_library_path = '/opt/X11/lib/flat_namespace',
   suma_path = '~/abin',
   suma_spec_file = 'test.spec',
-  unbuffer_path = '/usr/local/bin',  # if you want to use expect package, which has no buffer, otherwise set to ""
 
   matlab_path = '/Applications/MATLAB_R2016b.app/bin',
+  py2_path = Sys.which('python'),
+  py3_path = Sys.which('python'),
+  py_virtualenv = '',
 
   # images
   image_width = 1280L,

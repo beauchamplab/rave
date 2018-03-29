@@ -50,7 +50,7 @@ rave_pre_wavelet <- function(module_id = 'WAVELET_M', sidebar_width = 2, longtim
         textInput(ns('wave_electrodes'), 'Channels:', value = vc_txt, placeholder = 'Select at least one electrode.'),
         sliderInput(ns('freq_range'), 'Frequency Range (Hz):', value = c(2,200), step = 1, round = TRUE, min = 1, max = 300),
         numericInput(ns('freq_step'), 'Frequency Step Size (Hz): ', value = 2, step = 1, min = 1),
-        numericInput(ns('wave_num'), 'Number of Wavelet Cycles: ', value = 7, step = 1, min = 1),
+        sliderInput(ns('wave_num'), 'Number of Wavelet Cycles: ', value = c(3,20), step = 1, min = 1, max = 30, round = T),
         numericInput(ns('target_srate'), 'Target Sample Rate', value = 100, min = 10, max = isolate(user_data$srate), step = 1),
         checkboxInput(ns('save_original'), 'Save Original (Not Recommended)', value = FALSE),
         numericInput(ns('ncores'), 'Parallel, Number of Cores:', value = future::availableCores(), min = 1, max = rave_options('max_worker'), step = 1),
@@ -154,7 +154,7 @@ rave_pre_wavelet <- function(module_id = 'WAVELET_M', sidebar_width = 2, longtim
       }
       target_srate = round(input$target_srate)
       target_srate = min(max(10, target_srate), user_data$srate)
-      wave_num = max(1, round(input$wave_num))
+      wave_num = input$wave_num
       save_original = input$save_original
       ncores = max(1, round(input$ncores))
       frequencies = seq(input$freq_range[1],input$freq_range[2], by = input$freq_step)
@@ -311,7 +311,7 @@ rave_pre_wavelet <- function(module_id = 'WAVELET_M', sidebar_width = 2, longtim
       start = local_data$start
       ind = seq(1, local_data$default_step * local_data$last_wavelet$target_srate) +
         local_data$start * local_data$last_wavelet$target_srate
-      f_ind = freq < 0.9 * local_data$last_wavelet$target_srate
+      f_ind = freq <= 0.5 * local_data$last_wavelet$target_srate
       sep = max(round(sum(f_ind) / 10), 1)
       sub_ind = seq(1, sum(f_ind), by = sep)
       data = local_data$phase[sub_ind, ind]
