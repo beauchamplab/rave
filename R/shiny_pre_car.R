@@ -119,9 +119,9 @@ rave_pre_car <- function(module_id = 'CAR_M', sidebar_width = 2){
       max_time = dim(local_data$s_20[[1]])[2] / isolate(user_data$srate) * 20
       tagList(
         selectInput(ns('current_block'), 'Block:', choices = names(local_data$s_20)),
-        numericInput(ns('start_time'), 'Start Time:', value = 0, min = 0, max = max_time, step = 1),
+        numericInput(ns('start_time'), 'Start Time:', value = 0, min = 0, max = max_time, step = 1L),
         numericInput(ns('duration'), 'Duration:', value = 25, min = 1, max = 40),
-        numericInput(ns('space'), 'Voltage Scale', value = 0, step = 1, min = 0),
+        numericInput(ns('space'), 'Voltage Scale', value = 0, step = 1L, min = 0),
         div(
           actionButton(ns('prev'), 'Previous'),
           actionButton(ns('nxt'), 'Next')

@@ -26,7 +26,7 @@ rave_inputs(
   sliderInput('TIME_RANGE', 'Analysis Range', min = 0, max = 1, value = c(0,1), step = 0.01, round = -2),
 
   selectInput('electrode', 'Electrode', choices = '', multiple = F),
-  numericInput('max_zlim', 'Maximum Plot Range', value = 0, min = 0, step = 1),
+  numericInput('max_zlim', 'Maximum Plot Range', value = 0, min = 0, step = 1L),
 
   .tabsets = list(
     'Global Variables' = c(

@@ -14,7 +14,7 @@ init_preprocess = function(){
           textInput('subject_code', 'Subject Code'),
           selectInput('blocks', 'Blocks', selected = NULL, choices = '', multiple = T),
           textInput('channels', 'Channels', placeholder = 'E.g. 1-84'),
-          numericInput('srate', 'Sample Rate', value = 2000, step = 1, min = 1),
+          numericInput('srate', 'Sample Rate', value = 2000, step = 1L, min = 1L),
           textInput('exclchan', 'Excluded Channels', placeholder = 'E.g. 51,44-45'),
           textInput('badchan', 'Bad Channels', placeholder = 'E.g. 3,4,5,11-20'),
           textInput('epichan', 'Epilepsy Channels', placeholder = 'E.g. 1-10'),

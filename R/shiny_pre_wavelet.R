@@ -21,7 +21,7 @@ rave_pre_wavelet <- function(module_id = 'WAVELET_M', sidebar_width = 2, longtim
       tabPanel(
         title = 'Wavelet Kernels',
         h5('Wavelet Window'),
-        plotOutput(ns('wave_windows_plot'), height = '35vh')
+        plotOutput(ns('wave_windows_plot'), height = '80vh')
       ),
       tabPanel(
         title = 'Post-Wavelet Inspection (Power & Phase)',
@@ -57,12 +57,12 @@ rave_pre_wavelet <- function(module_id = 'WAVELET_M', sidebar_width = 2, longtim
         tags$blockquote(vc_txt),
         hr(),
         textInput(ns('wave_electrodes'), 'Channels:', value = vc_txt, placeholder = 'Select at least one electrode.'),
-        sliderInput(ns('freq_range'), 'Frequency Range (Hz):', value = c(2,200), step = 1, round = TRUE, min = 1, max = 300),
-        numericInput(ns('freq_step'), 'Frequency Step Size (Hz): ', value = 2, step = 1, min = 1),
-        sliderInput(ns('wave_num'), 'Number of Wavelet Cycles: ', value = c(3,20), step = 1, min = 1, max = 30, round = T),
-        numericInput(ns('target_srate'), 'Target Sample Rate', value = 100, min = 10, max = isolate(user_data$srate), step = 1),
+        sliderInput(ns('freq_range'), 'Frequency Range (Hz):', value = c(2,200), step = 1L, round = TRUE, min = 1L, max = 300L),
+        numericInput(ns('freq_step'), 'Frequency Step Size (Hz): ', value = 2, step = 1L, min = 1L),
+        sliderInput(ns('wave_num'), 'Number of Wavelet Cycles: ', value = c(3,20), step = 1L, min = 1L, max = 30L, round = T),
+        numericInput(ns('target_srate'), 'Target Sample Rate', value = 100, min = 10L, max = isolate(user_data$srate), step = 1L),
         checkboxInput(ns('save_original'), 'Save Original (Not Recommended)', value = FALSE),
-        numericInput(ns('ncores'), 'Parallel, Number of Cores:', value = future::availableCores(), min = 1, max = rave_options('max_worker'), step = 1),
+        numericInput(ns('ncores'), 'Parallel, Number of Cores:', value = future::availableCores(), min = 1L, max = rave_options('max_worker'), step = 1L),
         actionButton(ns('do_wavelet'), 'Run Wavelet'),
         p(tags$small('Wavelet will run several hours.'))
       )

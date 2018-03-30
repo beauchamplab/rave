@@ -60,12 +60,17 @@ wavelet_kernels <- function(freqs, srate, wave_num){
   tmp_im = t(t(s_im[, ind]) + gap)
   tmp = rbind(tmp_re)
   x_all = (1:max_l) / srate; x_re = x_all; x_im = x_re + max(x_all)
-  matplot(y = tmp_re, x = x_re, type='l', col = 'black',
+  grid::grid.newpage()
+  lay <- rbind(c(1,1),
+               c(2,3))
+
+  graphics::layout(mat = lay)
+  matplot(y = tmp_re, x = x_re, type='l', col = 'red',
           xlim = c(0, max(x_im)), ylim = c(min(tmp_re, na.rm = T), max(gap) + 1.5 * min(gap)),
-          lty = 1, cex.lab = 1.4, cex.main = 1.6, xlab = 'Wavelet Length (s)', cex.axis = 1.2,
+          lty = 1, cex.lab = 1.4, cex.main = 1.6, xlab = 'Wavelet Length (seconds)', cex.axis = 1.2,
           ylab = 'Frequency (Hz)', main = 'Wavelet Kernels (Real & Imaginary)', yaxt="n", xaxt="n")
 
-  matlines(y = tmp_im, x = x_im, type='l', col = 'black', lty = 1)
+  matlines(y = tmp_im, x = x_im, type='l', col = 'red', lty = 1)
 
   n_halftickers = 7
   x_actual = c(x_re, x_im)
@@ -84,10 +89,29 @@ wavelet_kernels <- function(freqs, srate, wave_num){
     x = s[,ii]
     cycles = wavelet_cycles[ii]
     x = x[!is.na(x)] #Mod(x[1]) / max(Mod(x)) * 100  #= 1.111%
-    sprintf('%.2f s | %.1f', length(x) / srate, cycles)
+    c(length(x) / srate, cycles)
   })
-  text(x = x_text, y = gap, leading_mod)
-  text(x = x_text, y = min(gap) + max(gap), 'Wave Length | # of Cycles')
+  text(x = x_text, y = gap, '|', cex = 1.2)
+  text(x = x_text, y = gap, sprintf('%.3f', leading_mod[1,]), cex = 1.2, pos = 2)
+  text(x = x_text, y = gap, sprintf('%.2f', leading_mod[2,]), cex = 1.2, pos = 4)
+  y_mini_title = min(gap) + max(gap)
+  text(x = x_text, y = y_mini_title, '|', cex = 1.4)
+  text(x = x_text, y = y_mini_title, 'Wave Length', cex = 1.4, pos = 2)
+  text(x = x_text, y = y_mini_title, '# of Cycles', cex = 1.4, pos = 4)
+
+  # plot freq over wavelength and wave cycles
+  wave_len = sapply(fft_waves, length) / srate
+  plot(wave_len, freqs, type = 'l', xlab = 'Wavelet Length (seconds)',
+       ylab = 'Frequency (Hz)', main = 'Frequency vs. Wavelet Length',
+       las = 1, cex.lab = 1.4, cex.main = 1.6, cex.axis = 1.2, col = 'grey80')
+  points(wave_len, freqs, col = 'red', pch = '.')
+
+  plot(wavelet_cycles, freqs, type = 'l', xlab = 'Wavelet Cycle',
+       ylab = '', main = 'Frequency vs. Wavelet Cycle',
+       las = 1, cex.lab = 1.4, cex.main = 1.6, cex.axis = 1.2, col = 'grey80')
+  points(wavelet_cycles, freqs, col = 'red', pch = '.')
+
+  invisible(fft_waves)
 }
 
 #' @title Wavelet Transformation With Phase

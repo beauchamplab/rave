@@ -228,7 +228,7 @@ global_panel = function(ns, show_all = FALSE){
         textInput(ns('subject_code'), 'Subject Code'),
         selectInput(ns('blocks'), 'Blocks', selected = NULL, choices = '', multiple = T),
         textInput(ns('channels'), 'Channels', placeholder = 'E.g. 1-84'),
-        numericInput(ns('srate'), 'Sample Rate', value = 2000, step = 1, min = 1),
+        numericInput(ns('srate'), 'Sample Rate', value = 2000, step = 1L, min = 1L),
         textInput(ns('exclchan'), 'Excluded Channels', placeholder = 'E.g. 51,44-45'),
         textInput(ns('badchan'), 'Bad Channels', placeholder = 'E.g. 3,4,5,11-20'),
         textInput(ns('epichan'), 'Epilepsy Channels', placeholder = 'E.g. 1-10'),
