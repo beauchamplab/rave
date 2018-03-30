@@ -98,13 +98,24 @@ rave_pre_epoch <- function(module_id = 'EPOCH_M', sidebar_width = 2){
         tagList(
           selectInput(ns('plot_var'), 'Variable to be ploted:', choices = choices),
           numericInput(ns('sample_rate'), 'Variable sample rate', min = 0, value = 30000),
-          numericInput(ns('lag'), 'Delta:', value = 0L, step = 1L),
           numericInput(ns('plot_range'), 'Plot range:', min = 0, value = 0)
         )
       }else{
         NULL
       }
 
+    })
+
+    output$inner_ui4 <- renderUI({
+      if(length(input$plot_var)){
+        tagList(
+          numericInput(ns('lag'), 'Difference:', value = 0L, step = 1L),
+          checkboxInput(ns('is_symmetric'), 'Symmetric', value = FALSE),
+          numericInput(ns('symmetric'), 'Symmetric by:', value = 0),
+          selectInput(ns('direction'), 'Threshold Direction', choices = c('Above', 'Below'), selected = 'Above'),
+          numericInput(ns('min_trial_duration'), 'Minimal trial duration (s):', min = 0L, value = 0L)
+        )
+      }
     })
 
 
@@ -154,6 +165,11 @@ rave_pre_epoch <- function(module_id = 'EPOCH_M', sidebar_width = 2){
           }else if(lag < 0){
             s = c(s, rep(NA, -lag)) - c(rep(NA, -lag), s)
             s[is.na(s)] = 0
+          }
+
+          if(input$is_symmetric){
+            sym = input$symmetric
+            s = abs(s - sym)
           }
 
           local_data$plot_data = s
@@ -234,8 +250,13 @@ rave_pre_epoch <- function(module_id = 'EPOCH_M', sidebar_width = 2){
     observe({
       s = local_data$plot_data
       thred = local_data$thred
-      tp = rave:::deparse_selections(which(s > thred))
-      tp = as.integer(str_extract(str_split(tp, ',', simplify = T), '^[0-9]*'))
+      if(input$direction == 'Above'){
+        sel = s >= thred
+      }else{
+        sel = s <= thred
+      }
+      tp = rave:::deparse_selections(which(sel), concatenate = F, max_lag = 1)
+      tp = as.integer(str_extract(tp, '^[0-9]*'))
       if(length(tp) && !any(is.na(tp))){
         local_data$epoch_tmp = data.frame(
           Block = input$current_block,

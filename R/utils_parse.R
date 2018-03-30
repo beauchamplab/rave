@@ -40,16 +40,17 @@ parse_selections <- function(text, sep = ',', sort = F, unique = T){
 
 
 #' @import stringr
-deparse_selections <- function(nums, link = '-', concatenate = T){
+deparse_selections <- function(nums, link = '-', concatenate = T, max_lag = 1){
   if(length(nums) == 0){
     return('')
   }
+  alag = 1:max(1, max_lag)
   nums = sort(unique(nums))
   lg = c(NA, nums)[1:length(nums)]
   ind = nums - lg; ind[1] = 0
   ind2 = c(ind[-1], -1)
 
-  apply(cbind(nums[ind != 1], nums[ind2 != 1]), 1,function(x){
+  apply(cbind(nums[!ind %in% alag], nums[!ind2 %in% alag]), 1,function(x){
     if(x[1] == x[2]){
       str_c(x[1])
     }else{
