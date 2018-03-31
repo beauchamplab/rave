@@ -1,4 +1,4 @@
-rave_pre_wavelet <- function(module_id = 'WAVELET_M', sidebar_width = 2, longtimer_env = new.env()){
+rave_pre_wavelet <- function(module_id = 'WAVELET_M', sidebar_width = 2){
   ns = shiny::NS(module_id)
   gp = global_panel(ns)
 
@@ -50,7 +50,7 @@ rave_pre_wavelet <- function(module_id = 'WAVELET_M', sidebar_width = 2, longtim
 
     output$wavelet_panel <- renderUI({
       vc = user_data$valid_channels
-      validate(need(length(vc) > 0, 'Please calculate CAR first.'))
+      validate(need(length(vc) > 0, 'Please calculate Notch filter first.'))
       vc_txt = rave:::deparse_selections(vc)
       tagList(
         p('Here are the channels that can be transformed:'),
@@ -93,15 +93,6 @@ rave_pre_wavelet <- function(module_id = 'WAVELET_M', sidebar_width = 2, longtim
                need(
                  !is.null(local_data$last_wavelet) &&
                    local_data$wave_finished, "Wavelet not started/finished."))
-      # user_data$subject$logger$save(last_wavelet = list(
-      #   channels = user_data$valid_channels,
-      #   car_plan = user_data$subject$logger$get_or_save('CAR_plan'),
-      #   succeed = FALSE,
-      #   target_srate = target_srate,
-      #   frequencies = frequencies,
-      #   wave_num = wave_num,
-      #   save_original = save_original
-      # ))
 
       l = local_data$last_wavelet
       tagList(
@@ -203,6 +194,17 @@ rave_pre_wavelet <- function(module_id = 'WAVELET_M', sidebar_width = 2, longtim
           subject_code = user_data$subject_code
         )
         user_data$doing_wavelet = TRUE
+
+        user_data$subject$logger$save(last_wavelet = list(
+          channels = user_data$valid_channels,
+          car_plan = user_data$subject$logger$get_or_save('CAR_plan'),
+          succeed = FALSE,
+          target_srate = target_srate,
+          frequencies = frequencies,
+          wave_num = wave_num,
+          save_original = save_original
+        ))
+
         rave:::bulk_wavelet(
           project_name = user_data$project_name,
           subject_code = user_data$subject_code,
@@ -217,32 +219,15 @@ rave_pre_wavelet <- function(module_id = 'WAVELET_M', sidebar_width = 2, longtim
           save_original = save_original,
           ncores = ncores,
           plan = fpl
-        ) -> check
-        # check = function(){return(rep(TRUE,4))}
-        user_data$subject$logger$save(last_wavelet = list(
-          channels = user_data$valid_channels,
-          car_plan = user_data$subject$logger$get_or_save('CAR_plan'),
-          succeed = FALSE,
-          target_srate = target_srate,
-          frequencies = frequencies,
-          wave_num = wave_num,
-          save_original = save_original
-        ))
-        longtimer_env$wavelet_check = function(){
-          res = check()
-          r = (unlist(res) != FALSE)
-          if(sum(r) == length(r)){
-            showNotification(p('Wavelet Finished!'), duration = NULL, type = 'message')
-            last_wavelet = user_data$subject$logger$get_or_save('last_wavelet')
-            last_wavelet[['succeed']] = TRUE
-            user_data$subject$logger$save(last_wavelet = last_wavelet)
-            local_data$refresh = Sys.time()
-            rm('wavelet_check', envir = longtimer_env)
-            removeModal()
-            rave_setup()
-            user_data$doing_wavelet = FALSE
-          }
-        }
+        )
+
+        showNotification(p('Wavelet Finished!'), duration = NULL, type = 'message')
+        last_wavelet = user_data$subject$logger$get_or_save('last_wavelet')
+        last_wavelet[['succeed']] = TRUE
+        user_data$subject$logger$save(last_wavelet = last_wavelet)
+        local_data$refresh = Sys.time()
+        removeModal()
+        user_data$doing_wavelet = FALSE
 
       }else{
         showNotification(p('No valid frequencies found!'), type = 'error')

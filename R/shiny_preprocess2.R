@@ -14,16 +14,13 @@ rave_pre_process <- function(
   rave_setup()
   default_project_name = rave_hist$get_or_save('.rave_pre_project_name', '', save = FALSE)
   default_subject_code = rave_hist$get_or_save('.rave_pre_subject_code', '', save = FALSE)
-  # 10s timer
-  longtimer = shiny::reactiveTimer(10000)
-  longtimer_env = new.env()
-
 
   # Init Modules
   OVERVIEW_MODUDLE <- rave_pre_overview(sidebar_width = sidebar_width)
-  NOTCH_MODULE <- rave_pre_notch(sidebar_width = sidebar_width, longtimer_env = longtimer_env)
+  NOTCH_MODULE <- rave_pre_notch(sidebar_width = sidebar_width)
   CAR_MODULE <- rave_pre_car(sidebar_width = sidebar_width)
-  WAVELET_MODULE <- rave_pre_wavelet(sidebar_width = sidebar_width, longtimer_env = longtimer_env)
+  WAVELET_MODULE <- rave_pre_wavelet(sidebar_width = sidebar_width)
+  EPOCH_MODULE <- rave_pre_epoch(sidebar_width = sidebar_width)
   EPOCH_MODULE <- rave_pre_epoch(sidebar_width = sidebar_width)
 
   # UI
@@ -185,20 +182,6 @@ rave_pre_process <- function(
                                message = rave:::deparse_selections(user_data$epichan))
       }
     }, priority = -1000L)
-
-
-    longtimer_env$default = function(){
-      user_data$long_refresh = Sys.time()
-    }
-    observeEvent(longtimer(),{
-      names = ls(envir = longtimer_env)
-      for(nm in names){
-        func = get(nm, envir = longtimer_env)
-        if(is.function(func)){
-          func()
-        }
-      }
-    })
 
 
 

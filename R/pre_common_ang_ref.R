@@ -30,8 +30,16 @@ pre_car2 <- function(
     })
     H5close()
     show_progress(details = sprintf('Calculating block - %s', b))
-    avg = rowMeans(all_channels[, 1:nvalid, drop = FALSE])
+    if(nvalid >= 1){
+      avg = rowMeans(all_channels[, 1:nvalid, drop = FALSE])
+    }else{
+      avg = rep(0, nrow(all_channels))
+    }
     all_channels = all_channels - avg
+    rave:::save_h5(
+      x = avg, file = file.path(pre_dir, 'chl_0.h5'),
+      name = sprintf('/CAR/%s', b), chunk = 1024, replace = T
+    )
     for(ii in 1:length(all_c)){
       chl = all_c[ii]
       show_progress(details = sprintf('Writing: Block %s - Channel %d', b, chl))

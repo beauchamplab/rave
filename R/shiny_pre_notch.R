@@ -1,4 +1,4 @@
-rave_pre_notch <- function(module_id = 'NOTCH_M', sidebar_width = 2, longtimer_env = new.env()){
+rave_pre_notch <- function(module_id = 'NOTCH_M', sidebar_width = 2){
   ns = shiny::NS(module_id)
   gp = global_panel(ns)
 
@@ -228,24 +228,17 @@ rave_pre_notch <- function(module_id = 'NOTCH_M', sidebar_width = 2, longtimer_e
         channels = user_data$channels,
         srate = user_data$srate,
         progress = progress
-      ) ->
-        check
+      )
 
-      longtimer_env$notch_check = function(){
-        res = check()
-        r = (unlist(res) != FALSE)
-        if(sum(r) == length(r)){
-          showNotification(p('Notch Finished!'), duration = NULL, type = 'message')
-          # save subject
-          user_data$subject$logger$save(notch_filtered = user_data$channels)
-          user_data$has_notch = T
-          local_data$is_notch = F
-          # dismiss
-          shiny::removeModal()
-          rave_setup()
-          rm('notch_check', envir = longtimer_env)
-        }
-      }
+      showNotification(p('Notch Finished!'), duration = NULL, type = 'message')
+      # save subject
+      user_data$subject$logger$save(notch_filtered = user_data$channels)
+      user_data$has_notch = T
+      local_data$is_notch = F
+      user_data$valid_channels = user_data$channels
+      user_data$subject$logger$save(CAR_plan = sprintf('Exc[%s]Bad[]Epi[]', rave:::deparse_selections(user_data$channels)))
+      # dismiss
+      shiny::removeModal()
     })
   }
 
