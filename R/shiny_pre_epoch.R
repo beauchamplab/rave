@@ -1,3 +1,5 @@
+
+
 rave_pre_epoch <- function(module_id = 'EPOCH_M', sidebar_width = 2){
   ns = shiny::NS(module_id)
 
@@ -83,11 +85,8 @@ rave_pre_epoch <- function(module_id = 'EPOCH_M', sidebar_width = 2){
       epoch_page = 1,
       sample_rate = 30000,
       epoch_file = NULL,
-      page = 1
+      epoch_table_start = 0
     )
-    observe({
-      print(lapply(local_data$epochs, nrow))
-    })
 
     generate_epoch = function(epochs){
       tbl = default_epoch
@@ -101,7 +100,6 @@ rave_pre_epoch <- function(module_id = 'EPOCH_M', sidebar_width = 2){
           }
         }
       }
-      print(tbl)
       tbl
     }
     output$epoch_preview <- DT::renderDataTable({
@@ -188,16 +186,15 @@ rave_pre_epoch <- function(module_id = 'EPOCH_M', sidebar_width = 2){
 
     output$inner_ui3 <- renderUI({
       s = user_data$subject
-      sample_rate = get_val(isolate(local_data$sample_rate), default = 30000)
+
       if(is(s, 'SubjectInfo2') && length(input$epoch_file)){
         epoch_raw = file.path(s$dirs$pre_subject_dir, input$current_block, input$epoch_file)
         dat = R.matlab::readMat(epoch_raw)
         local_data$dat = dat
-        choices = names(dat)
+        choices = c(names(dat), 'Customized')
         tagList(
-          selectInput(ns('plot_var'), 'Variable to be ploted:', choices = choices),
-          numericInput(ns('sample_rate'), 'Variable sample rate', min = 0, value = sample_rate),
-          numericInput(ns('plot_range'), 'Plot range:', min = 0, value = 0)
+          selectInput(ns('plot_var'), 'Variable to be ploted:', choices = choices,
+                      selected = isolate(local_data$plot_var))
         )
       }else{
         NULL
@@ -206,8 +203,32 @@ rave_pre_epoch <- function(module_id = 'EPOCH_M', sidebar_width = 2){
     })
 
     output$inner_ui4 <- renderUI({
-      if(length(input$plot_var)){
+      plot_var = input$plot_var
+      dat = local_data$dat
+
+      if(length(plot_var)){
+
+        vars = paste('-', names(dat), collapse = ',\n')
+        if(plot_var == 'Customized'){
+          sample_rate = 100
+        }else{
+          # guess if sample rate is too low
+          sample_rate = get_val(isolate(local_data$sample_rate), default = 30000)
+          ecog_srate = user_data$subject$srate
+          if(sample_rate < ecog_srate){
+            sample_rate = ecog_srate
+          }
+        }
+
         tagList(
+          div(
+            class = ifelse(plot_var == 'Customized', '', 'hidden'),
+            textAreaInput(ns('custom_code'), 'Customized Code: ',
+                          rows = 10, resize = 'vertical',
+                          placeholder = sprintf('Use the following variable(s):%s', vars))
+          ),
+          numericInput(ns('sample_rate'), 'Variable sample rate', min = 0, value = sample_rate),
+          numericInput(ns('plot_range'), 'Plot range:', min = 0, value = 0),
           numericInput(ns('lag'), 'Difference:', value = 0L, step = 1L),
           checkboxInput(ns('is_symmetric'), 'Symmetric', value = FALSE),
           numericInput(ns('symmetric'), 'Symmetric by:', value = 0),
@@ -251,6 +272,7 @@ rave_pre_epoch <- function(module_id = 'EPOCH_M', sidebar_width = 2){
       local_data$sample_rate = input$sample_rate
       local_data$selected_rows = input$epoch_tmp_rows_selected
       local_data$epoch_file = input$epoch_file
+      local_data$plot_var = input$plot_var
     })
 
     observeEvent(input$clear_sel, {
@@ -278,6 +300,7 @@ rave_pre_epoch <- function(module_id = 'EPOCH_M', sidebar_width = 2){
 
       tmp_sel = isolate(local_data$selected_rows)
       if(length(sel)){
+        local_data$epoch_table_start = max(min(sel)-2, 0)
 
         row_sel = tbl$Row[sel]
         row_sel = row_sel[!is.na(row_sel)]
@@ -315,10 +338,11 @@ rave_pre_epoch <- function(module_id = 'EPOCH_M', sidebar_width = 2){
       tbl = local_data$epoch_table
       validate(need(!zero_length(e, srate, raw_s), ''))
 
-      print(e)
       xrange = c(e$xmin, e$xmax)
+
       yrange = c(e$ymin, e$ymax)
       tp = as.integer(xrange * srate)
+      tp[1] = max(1, tp[1])
       tp[2] = max(tp[2], tp[1] + 10)
       ind = as.integer(seq(tp[1], tp[2], length.out = min(diff(tp) + 1, 20000)))
 
@@ -337,6 +361,7 @@ rave_pre_epoch <- function(module_id = 'EPOCH_M', sidebar_width = 2){
       )
       if(nonset > 0){
         abline(v = tbl$Onset[win], col = 'red')
+        local_data$epoch_table_start = max(which(win)[1] - 1, 0)
       }
     })
 
@@ -376,6 +401,29 @@ rave_pre_epoch <- function(module_id = 'EPOCH_M', sidebar_width = 2){
       }
     }, priority = 0L)
 
+    observe({
+      plot_var = input$plot_var
+      dat = local_data$dat
+      local_data$custom_signal = NULL
+      if(!zero_length(plot_var, dat) && plot_var == 'Customized'){
+        tryCatch({
+          env = new.env(parent = globalenv())
+          srate = as.integer(input$sample_rate)
+          env$to_signal <- function(time, value = 1){
+            ind = round(time * srate)
+            s = rep(0, max(ind) + srate)
+            s[ind] = value
+            s
+          }
+          env$.code = parse(text = input$custom_code)
+          local_data$custom_signal = eval(env$.code, envir = dat, enclos = env)
+        }, error = function(e){
+          logger(e$message, level = 'WARNING')
+          return(NULL)
+        })
+      }
+
+    }, priority = 100L)
 
     observe({
       local_data$plot_signal = NULL
@@ -384,7 +432,14 @@ rave_pre_epoch <- function(module_id = 'EPOCH_M', sidebar_width = 2){
       plot_var = input$plot_var
       is_sym = get_val(input$is_symmetric, default = F)
       if(!zero_length(local_data$dat, plot_var, lag, na.rm = 3)){
-        raw_s = s =local_data$dat[[plot_var]]
+        if(plot_var == 'Customized'){
+          raw_s = s = local_data$custom_signal
+        }else{
+          raw_s = s = local_data$dat[[plot_var]]
+        }
+        if(length(s) == 0){
+          return()
+        }
         if(lag > 0){
           s = s[1:(length(s) - lag)] - s[-(1:lag)]
         }else if(lag < 0){
@@ -481,7 +536,9 @@ rave_pre_epoch <- function(module_id = 'EPOCH_M', sidebar_width = 2){
         tbl$Trial = 1:nrow(tbl)
         tbl$Since_Last_Onset = c(NA, diff(tbl$Onset))
         DT::formatRound(
-          DT::datatable(tbl),
+          DT::datatable(tbl, options = list(
+            displayStart = min(max(0, local_data$epoch_table_start), nrow(tbl)-1)
+          )),
           columns=c('Onset', 'Since_Last_Onset'), digits=4
         )
       }else{
