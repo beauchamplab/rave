@@ -1,6 +1,4 @@
-dropNulls <- function (x) {
-  x[!vapply(x, is.null, FUN.VALUE = logical(1))]
-}
+
 
 dropInvalid <- function(x, deep = FALSE, nulls = c('')){
   if(deep && is.list(x)){

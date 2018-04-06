@@ -1,21 +1,6 @@
-clear_env <- function(env, all.names = T){
-  if(is.environment(env)){
-    rm(list = ls(envir = env, all.names = all.names), envir = env)
-  }
-}
 
-safe_str_c <- function(..., sep = '', collapse = NULL){
-  tryCatch({
-    args = dropNulls(list(...))
-    if(length(args)){
-      stringr::str_c(..., sep = sep, collapse = collapse)
-    }else{
-      return('NULL')
-    }
-  }, error = function(e){
-    return('')
-  })
-}
+
+
 
 safe_object_size <- function(obj, env = NULL){
   if(is.character(obj) && !is.null(env)){
@@ -95,74 +80,4 @@ copy_env <- function(from_env, to_env, deep = FALSE){
 }
 
 
-
-zero_length <- function(..., any = T, na.rm = F){
-  parent_env = parent.frame()
-  args = as.list(match.call())[-1]
-  len = length(args)
-  if('any' %in% names(args)){
-    len = len - 1
-    args = args[1:len]
-  }
-  reNull = function(...){return(NULL)}
-  for(i in 1:len){
-    tryCatch({
-      obj = eval(args[[i]], envir = parent_env)
-      if(na.rm == TRUE || na.rm == i){
-        obj = obj[!is.na(obj)]
-      }
-      obj
-    }, error = reNull) ->
-      obj
-    if(any && length(obj) == 0){
-      return(TRUE)
-    }
-    if(!any && length(obj) > 0){
-      return(FALSE)
-    }
-  }
-  return(!any)
-}
-
-is_invalid <- function(x, any = F, .invalids = c('null', 'na')){
-  for(func in paste0('is.', .invalids)){
-    res = do.call(func, args = list(x))
-    if(length(res) > 1){
-      if(any){
-        res = any(res)
-      }else{
-        res = all(res)
-      }
-    }
-    if(res){
-      return(TRUE)
-    }
-  }
-  return(FALSE)
-}
-
-is.blank <- function(s){
-  (is.na(s) | s == '')
-}
-
-get_val <- function(x, key = NULL, ..., .invalids = c('null', 'na')){
-
-  if(is.null(key)){
-    val = x
-  }else{
-    val = x[[key]]
-  }
-  if(is_invalid(val, .invalids = .invalids)){
-    args = list(...)
-    len = length(args)
-    if(len){
-      if(len == 1){
-        val = args[[1]]
-      }else{
-        val = args
-      }
-    }
-  }
-  return(val)
-}
 

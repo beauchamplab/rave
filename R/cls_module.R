@@ -691,7 +691,7 @@ ExecEnvir <- R6::R6Class(
     },
     cache = function(key, val, global = FALSE, replace = FALSE,
                      session = shiny::getDefaultReactiveDomain()){
-      .key = str_c(unlist(key, recursive = T, use.names = F), collapse = ', ')
+      # .key = str_c(unlist(key, recursive = T, use.names = F), collapse = ', ')
       key = as.character(digest::digest(key))
       if(global){
         env = getDefaultCacheEnvironment(session = session)
@@ -718,9 +718,12 @@ ExecEnvir <- R6::R6Class(
       try({
         val = lazyeval::lazy_eval(expr, data = list())
       })
-      str_val = safe_str_c(val, collapse = ', ')
+      str_val = ''#safe_str_c(val, collapse = ', ')
+      # if(str_length(str_val) > 10){
+      #   str_val = str_sub(str_val, end = 10L)
+      # }
 
-      logger('Caching', ifelse(global, ' (global)', ''), ' - [', .key,'] - ', str_val)
+      # logger('Caching', ifelse(global, ' (global)', ''), ' - [', .key,'] - ', str_val)
       assign(key, val, envir = env)
       env$.keys = unique(c(env$.keys, key))
       return(val)

@@ -1,7 +1,5 @@
 rave_pre_wavelet <- function(module_id = 'WAVELET_M', sidebar_width = 2){
   ns = shiny::NS(module_id)
-  gp = global_panel(ns)
-
   body = fluidRow(
     shinydashboard::tabBox(
       id = ns('sidebar'),
@@ -46,7 +44,6 @@ rave_pre_wavelet <- function(module_id = 'WAVELET_M', sidebar_width = 2){
       power = NULL,
       default_step = 6
     )
-    gp$reactive_func(input = input, user_data = user_data, local_data = local_data, session = session)
 
     output$wavelet_panel <- renderUI({
       vc = user_data$valid_channels

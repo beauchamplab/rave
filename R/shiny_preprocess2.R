@@ -4,7 +4,7 @@
 #' @import stringr
 #' @export
 rave_pre_process <- function(
-  sidebar_width = 2,
+  sidebar_width = 3,
   launch.browser = T,
   host = '127.0.0.1',
   quiet = T,
@@ -21,7 +21,7 @@ rave_pre_process <- function(
   CAR_MODULE <- rave_pre_car(sidebar_width = sidebar_width)
   WAVELET_MODULE <- rave_pre_wavelet(sidebar_width = sidebar_width)
   EPOCH_MODULE <- rave_pre_epoch(sidebar_width = sidebar_width)
-  EPOCH_MODULE <- rave_pre_epoch(sidebar_width = sidebar_width)
+  # REF_MODULE <- rave_pre_ref(sidebar_width = sidebar_width)
 
   # UI
   {
@@ -38,6 +38,8 @@ rave_pre_process <- function(
                                    tabName = 'NOTCH'),
           shinydashboard::menuItem('CAR',
                                    tabName = 'CAR'),
+          # shinydashboard::menuItem('Customized Ref (Under construction)',
+          #                          tabName = 'REF'),
           shinydashboard::menuItem('Wavelet',
                                    tabName = 'WAVELET'),
           shinydashboard::menuItem('Epoch (Under construction)',
@@ -67,6 +69,10 @@ rave_pre_process <- function(
             'CAR',
             CAR_MODULE$body
           ),
+          # shinydashboard::tabItem(
+          #   'REF',
+          #   REF_MODULE$body
+          # ),
           shinydashboard::tabItem(
             'WAVELET',
             WAVELET_MODULE$body
@@ -108,6 +114,7 @@ rave_pre_process <- function(
     callModule(CAR_MODULE$server, id = 'CAR_M', user_data = user_data)
     callModule(WAVELET_MODULE$server, id = 'WAVELET_M', user_data = user_data)
     callModule(EPOCH_MODULE$server, id = 'EPOCH_M', user_data = user_data)
+    # callModule(REF_MODULE$server, id = 'REF_M', user_data = user_data)
 
 
 

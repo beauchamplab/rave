@@ -5,12 +5,12 @@ NULL
 
 
 
-#' @description Notch filter
-#' @details This function is R version of notch.m, .eeglab toolbox, originally
+#' Notch filter
+#' @details This function is alternative R version of notch filter, originally
 #' writen by Mohammad Dastjerdi, Parvizi Lab, Stanford, revised by Brett Foster,
 #'  BCM, Sep 2009, and migrated from Matlab to R by Zhengjia Wang, Rice U, Jan
 #'  2018
-#' @param s signal in time ot frequency domain
+#' @param s signal in time or frequency domain
 #' @param sample_rate signal sample rate
 #' @param lb filter lower bound (Hz)
 #' @param ub filter upper bound (Hz)
@@ -55,13 +55,16 @@ notch_filter <- function(s, sample_rate, lb, ub, domain = 1){
 
 }
 
-#' @description Filter 60 Hz line noise out from ECoG channels
+#' Filter line noise out from ECoG channels
 #' @param s signal, time domain
 #' @param sample_rate signal sample rate
 #' @param bands bands that will be filtered out
 #' @param width along with bands, half of the filter width. For example,if bands
 #' is 60Hz and width is 1Hz, then the notch filter lower bound is 60-1=59Hz and
 #' upper bound is 60+1=61Hz.
+#' @examples
+#' s <- rnorm(100000)
+#' notch_channel(s, 1000, c(60, 120, 180, c(1,2,2))
 notch_channel <- function(s, sample_rate, bands = c(60, 120, 180), width = c(1,2,2)){
   s = as.vector(s)
   lbs = bands - width

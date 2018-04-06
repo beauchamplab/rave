@@ -1,22 +1,4 @@
-`set_if_null<-` <- function(x, values) {
-  if(is.null(x)) return(values)
-  return (x)
-}
 
-
-#' @export
-`%&%` <- function(s1,s2) paste0(s1,s2)
-
-# check for containment, by default containiment is inclusive of the boundaries: min(rng) <= x <= max(rng)
-# specificy your own functions for lower bound and upper bound if you want
-# works with vector-valued x for default LB_ and UB_ functions
-# also works when length(rng) == 1
-is_within <- function(x, minmax) (x>=minmax[1]) & (x<=minmax[2])
-
-#' @export
-`%within%` <- function(a,b) {
-  is_within(a,b)
-}
 
 
 #
@@ -64,6 +46,10 @@ write.niml <- function(values_matrix, electrode_numbers=NULL, value_labels=NULL,
 
   # duplicate indices and values to match #faces in SUMA spheres
   indices <- rep(electrode_numbers, each=faces_per_electrode)
+
+  values_matrix = as.numeric(values_matrix)
+  values_matrix[is.na(values_matrix)] = 0
+
   values <- values_matrix[rep(1:nrow(values_matrix), each=faces_per_electrode),]
 
   values = matrix(as.numeric(values), ncol = length(value_labels), byrow = F)

@@ -48,7 +48,6 @@ Imports:
     DT (>= 0.4),
     reticulate (>= 1.6)
 Collate: 
-    'RcppExports.R'
     'utils_syscheck.R'
     'aaa.R'
     'bulk_preprocess.R'
@@ -102,6 +101,7 @@ Collate:
     'shiny_pre_epoch.R'
     'shiny_pre_notch.R'
     'shiny_pre_overview.R'
+    'shiny_pre_reference.R'
     'shiny_pre_wavelet.R'
     'shiny_preprocess.R'
     'shiny_preprocess2.R'
@@ -113,6 +113,7 @@ Collate:
     'utils_dir.R'
     'utils_execfunc.R'
     'utils_ff_mann.R'
+    'utils_general.R'
     'utils_h5_mann.R'
     'utils_lapply.R'
     'utils_logger.R'
@@ -125,3 +126,4 @@ Collate:
     'utils_python.R'
     'utils_record_plot.R'
     'vis_channel.R'
+    'zzz.R'

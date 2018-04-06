@@ -1,3 +1,4 @@
+#' To be junked
 eval_fun <- function(func, args = list(), env = parent.frame()){
   tryCatch({
     if(is.null(env)){
