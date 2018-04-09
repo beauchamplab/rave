@@ -5,9 +5,21 @@
   return (x)
 }
 
-#' Functions that wraps lapply with tagList
-tags_apply <- function(X, expr){
-  lapply_expr(X, expr, wrapper = shiny::tagList, env = environment())
+
+# Module exec environment
+add_to_session <- function(
+  session,
+  key = 'rave_id',
+  val = paste(sample(c(letters, LETTERS, 0:9), 20), collapse = ''),
+  override = FALSE
+){
+  if(!is.null(session)){
+    if(override || !exists(key, envir = session$userData)){
+      assign(key, val, envir = session$userData)
+    }
+    return(get(key, envir = session$userData))
+  }
+  return(NULL)
 }
 
 ################### Exported methods
@@ -143,8 +155,8 @@ is_within <- function(x, ref, strict = FALSE){
 #' @importFrom rlang quo
 #' @importFrom rlang eval_tidy
 #' @export
-lapply_expr <- function(X, expr, wrapper = NULL, env = environment()){
-  expr = substitute(expr, env = env) # prevent pre-eval of expr
+lapply_expr <- function(X, expr, wrapper = NULL, env = parent.frame()){
+  expr = substitute(expr, env = environment()) # prevent pre-eval of expr
   ..nms = unique(names(X))
   if(length(..nms) != 1 || ..nms == '') ..nms = '.x'
   lapply(X, function(..x){
@@ -152,7 +164,7 @@ lapply_expr <- function(X, expr, wrapper = NULL, env = environment()){
       ..x = list(..x)
       names(..x) = ..nms
     }
-    eval_tidy(quo(!!expr), data = ..x)
+    eval_tidy(as_quosure(expr, env = env), data = ..x)
   }) ->
     re
   if(is.function(wrapper)){
@@ -191,6 +203,7 @@ lapply_expr <- function(X, expr, wrapper = NULL, env = environment()){
 #' @importFrom rlang fn_body
 #' @importFrom rlang quo
 #' @importFrom rlang eval_tidy
+#' @export
 eval_within <- function(FUN, env = parent.frame(), ..., .args = list(), .tidy = F){
   args = c(.args, list(...))
   if(is.null(env)){
@@ -413,6 +426,110 @@ try_normalizePath <- function(path, sep = c('/', '\\\\')){
       return(path)
     }
   }
+}
+
+
+safe_object_size <- function(obj, env = NULL){
+  if(is.character(obj) && !is.null(env)){
+    obj = get(obj, envir = env, inherits = F)
+  }
+  tryCatch({
+    pryr::object_size(obj)},
+    error = function(e){
+      return(0L)
+    })->
+    re
+  re
+}
+
+
+#' Cache object
+#' @usage cache(key, val, global = FALSE, swap = FALSE, file = tempfile(), name = 'data')
+#' @param key Any R object, a named list would be the best.
+#' @param val Value to cache, if key exists, then value will not be evaluated nor saved
+#' @param global option for shiny app, where if global, then the the cache will ignore sessions.
+#' @param swap When object size is too large, do you want to save it to local disk?
+#' @param file,name If you use swap=T, see \code{\link{save_h5}}
+#' @seealso \code{\link{clear_cache}}
+#' @examples
+#' \dontrun{
+#' cache('a', 1) # returns 1
+#' cache('a', 2) # still returns 1
+#'
+#' # clear cache
+#' clear_cache()
+#' cache('a', 2) # Now returns 2
+#'
+#' # Not run because a is cached
+#' cache('a', 2)
+#' cache('a', {Sys.sleep(10); 1})
+#'
+#' # Use swap
+#'
+#' y = cache('aa', 1:1000000, swap = T)
+#' pryr::object_size(1:1000000)
+#' pryr::object_size(y)
+#' y[1:5]
+#' }
+#' @importFrom digest digest
+#' @export
+cache <- function(key, val, global = FALSE, replace = FALSE, session = NULL, swap = FALSE, file = tempfile(), name = 'data'){
+  if(global){
+    session = NULL
+  }else{
+    session %?<-% shiny::getDefaultReactiveDomain()
+  }
+  cache_env = getDefaultCacheEnvironment(session = session)
+
+  k = digest(key)
+  if(replace){
+    cache_env[[k]] <- val
+  }else{
+    cache_env[[k]] %?<-% val
+  }
+
+  if(swap && any(
+    is.matrix(cache_env[[k]]),
+    is.array(cache_env[[k]]),
+    is.vector(cache_env[[k]])
+    ) &&
+    is.numeric(cache_env[[k]])
+  ){
+    f = file
+    name = 'junk'
+    save_h5(cache_env[[k]], f, name = name, chunk = NULL, replace = T, new_file = T, level = 0)
+    cache_env[[k]] = load_h5(f, name = name)
+  }
+
+  return(cache_env[[k]])
+}
+
+
+#' @title Clear cache
+#' @seealso \code{\link{cache}}
+#' @usage clear_cache(all = FALSE)
+#' @param all Clear all cache? Don't turn it on in shiny app. This is for debug use.
+#' @export
+clear_cache <- function(all = FALSE, session = NULL){
+  session %?<-% shiny::getDefaultReactiveDomain()
+  cache_env = getDefaultCacheEnvironment(session = session)
+  clear_env(cache_env)
+  if(all){
+    cache_env = getDefaultCacheEnvironment(session = NULL)
+    clear_env(cache_env)
+  }
+}
+
+
+
+#' @export
+getDefaultCacheEnvironment <- function(
+  session = shiny::getDefaultReactiveDomain()
+){
+  data_env = getDefaultDataRepository(session = session, session_based = T)
+  data_env$.cache_env %?<-% new.env(parent = baseenv())
+  data_env$.cache_env$.keys = c()
+  return(data_env$.cache_env)
 }
 
 ################################################### High performance functions

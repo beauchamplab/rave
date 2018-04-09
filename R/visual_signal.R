@@ -1,0 +1,357 @@
+#' Signal Inspection Plots
+#' @param s1 Signal for inspection
+#' @param s2 Signal to compare, default NULL
+#' @param sc compressed signal to speedup , if not provided, then either s1 is used,
+#' or s1 will be compressed to 100Hz, see also \code{try_compress}
+#' @param srate Sample rate of s1, I assume that s2 and s1 have the same sample rate
+#' @param name Analysis name, for e.g. 'CAR', 'Notch', etc.
+#' @param try_compress If length(s1) is big, R might take long to run, a solution is to
+#' down-sample s1 first (like what matlab does), and then plot compressed
+#' signal. However, some information will be lost during this process.
+#' \code{try_compress=FALSE} indicates that you want raw signal (s1) rather than
+#' compressed signal
+#' @param max_freq Max frequency to be ploted, should be smaller than srate/2
+#' @param flim log10-Frequency range to plot (left bottom plot y range)
+#' @param window Window length to draw periodogram
+#' @param noverlap Number of data points that each adjacent windows overlap?
+#' @param std Error bar (red line) be draw at std * sd(s1), by default is 3, which
+#' means 3 standard deviation
+#' @param main Plot title
+#' @param col Two elements: the first is for s1, second is for s2.
+#' @param cex Label, title size. See \code{\link[graphics]{plot.default}}
+#' @param lwd Line size for the top plot. See \code{\link[graphics]{plot.default}}
+#' @examples
+#' time <- seq(0, 300, 1/2000)
+#' s2 <- sin(pi/30 * time + rcauchy(length(time)) / 1000) + rnorm(length(time))
+#' diagnose_signal(s2, srate = 2000, flim = c(-4,-1))
+#'
+#' # Apply notch filter
+#' s1 = notch_filter(s2, 2000, 58,62)
+#' diagnose_signal(s1, s2, srate = 2000, flim = c(-4,-1))
+#'
+#' @export
+diagnose_signal <- function(
+  s1, s2 = NULL, sc = NULL, srate, name = '', try_compress = TRUE,
+  max_freq = 300, window = 128, noverlap = 8, std = 3,
+  cex = 1.5, lwd = 0.5, flim = NULL,
+  main = 'Channel Inspection', col = c('black', 'red'),
+  ...){
+
+  # is sc not specified, and srate is too high, compress s1
+  if(try_compress && (is.null(sc) || (srate > 200 && length(s1) / srate > 300))){
+    sratec = 100
+    sc <- s1[round(seq(1, length(s1), by = srate/sratec))]
+  }else{
+    sc %?<-% s1
+    sratec = srate / length(s1) * length(sc)
+  }
+  max_freq = min(max_freq, floor(srate/ 2))
+  xlim = c(0, max_freq)
+
+  # Calculate boundary to draw
+  boundary = std* sd(s1)
+  ylim = max(abs(s1), boundary)
+
+  # Grid layout
+  grid::grid.newpage()
+  lay <- rbind(c(1,1,1), c(2,3,4))
+  graphics::layout(mat = lay)
+
+  # First plot: plot sc directly with col[1]
+  plot(seq_along(sc) / sratec, sc, xlab = 'Time (seconds)', ylab = 'Voltage',
+       main = main, lwd = lwd,
+       type = 'l', ylim = c(-ylim-1, ylim+1), yaxt="n", col = col[1],
+       cex.axis = cex, cex.lab = cex, cex.main = cex, cex.sub = cex)
+  abline(h = c(-1,1) * boundary, col = 'red')
+  ticks<-c(-ylim, -boundary,0,boundary, ylim)
+  axis(2,at=ticks,labels=round(ticks), las = 1,
+       cex.axis = cex, cex.lab = cex, cex.main = cex, cex.sub = cex)
+
+  # plot 2, 3 too slow, need to be faster - pwelch periodogram
+  if(!is.null(s2)){
+    pwelch(s2, fs = srate, window = window,
+           noverlap = noverlap, plot = 1, col = col[2], cex = cex, ylim = flim,
+           log = 'y', xlim = xlim, spec_func = rave:::spectrum.pgram, max_freq = max_freq)
+    pwelch(s1, fs = srate, window = window, noverlap = noverlap, cex = cex, ylim = flim,
+           plot = 2, col = col[1], log = 'y', xlim = xlim, spec_func = spectrum.pgram, max_freq = max_freq)
+    legend('topright', sprintf('%s %s', c('Before', 'After'), name), col = rev(col), lty = 1, cex = cex)
+  }else{
+    pwelch(s1, fs = srate, window = window,
+           noverlap = noverlap, plot = 1, col = col[1], cex = cex, ylim = flim,
+           log = 'y', xlim = xlim, spec_func = rave:::spectrum.pgram, max_freq = max_freq)
+    legend('topright', name, col = col[1], lty = 1, cex = cex)
+  }
+
+
+  log_xlim = log10(sapply(xlim, max, 1))
+  if(!is.null(s2)){
+    pwelch(s2, fs = srate, window = window,
+           noverlap = noverlap, plot = 1, col = col[2], cex = cex, ylim = flim,
+           log = 'xy', xlim = log_xlim, spec_func = rave:::spectrum.pgram, max_freq = max_freq)
+    pwelch(s1, fs = srate, window = window, noverlap = noverlap, cex = cex, ylim = flim,
+           plot = 2, col = col[1], log = 'xy', xlim = log_xlim, spec_func = spectrum.pgram, max_freq = max_freq)
+    legend('topright', c('Before ', 'After ') %&% name, col = rev(col), lty = 1, cex = cex)
+  }else{
+    pwelch(s1, fs = srate, window = window,
+           noverlap = noverlap, plot = 1, col = col[1], cex = cex, ylim = flim,
+           log = 'xy', xlim = log_xlim, spec_func = rave:::spectrum.pgram, max_freq = max_freq)
+    legend('topright', name, col = col[1], lty = 1, cex = cex)
+  }
+
+
+  # Plot 4:
+  hist(s1, nclass = 100,
+       xlab = 'Signal Voltage Histogram', main = 'Histogram ' %&% name,
+       cex.axis = cex, cex.lab = cex, cex.main = cex, cex.sub = cex)
+
+}
+
+
+
+
+
+#' Welch Periodogram
+#' @details This function is modified from \code{pwelch} function from "oce"
+#' package and is designed for visualizing ECoG voltage data.
+#' @param x signal
+#' @param fs sample rate
+#' @param window window length, default 128
+#' @param noverlap overlap between two adjacent windows, by default is 8
+#' @param log '', 'x', 'y', 'xy', indicates which axis should be log10 value.
+#' @param plot logical, plot the result or not
+#' @param ... will be passed to plot
+#' @export
+pwelch <- function (
+  x, fs, window = 64, noverlap = 8,
+  col = 'black', xlim = NULL, ylim = NULL, main = 'Welch periodogram',
+  plot = TRUE, log = 'xy', spec_func = spectrum, cex = 1, ...) {
+
+  hamming.local <- function(n) {
+    n <- round(n)
+    if (n < 0)
+      stop("n must round to a positive integer")
+    if (n == 1)
+      c <- 1
+    else {
+      n <- n - 1
+      pi <- 4 * atan2(1, 1)
+      c <- 0.54 - 0.46 * cos(2 * pi * (0:n)/n)
+    }
+    c
+  }
+  detrend <- function (x, y)
+  {
+    if (missing(x))
+      stop("must give x")
+    n <- length(x)
+    if (missing(y)) {
+      y <- x
+      x <- seq_along(y)
+    }
+    else {
+      if (length(y) != n)
+        stop("x and y must be of same length, but they are ",
+             n, " and ", length(y))
+    }
+    first <- which(is.finite(y))[1]
+    last <- 1 + length(y) - which(is.finite(rev(y)))[1]
+    if (x[first] == x[last])
+      stop("the first and last x values must be distinct")
+    b <- (y[first] - y[[last]])/(x[first] - x[[last]])
+    a <- y[first] - b * x[first]
+    list(Y = y - (a + b * x), a = a, b = b)
+  }
+
+  x <- as.vector(x)
+  x.len = length(x)
+  window <- hamming.local(floor(x.len/window))
+
+  normalization <- mean(window^2)
+  window.len <- length(window)
+
+  step <- max(floor(window.len - noverlap + 1), 0)
+
+
+  psd <- NULL
+  nrow <- 0
+  start <- 1
+  end <- window.len
+  args <- list(...)
+  names.args <- names(args)
+  if (!("taper" %in% names.args))
+    args$taper <- 0
+  if (!("plot" %in% names.args))
+    args$plot <- FALSE
+  if (!("demean" %in% names.args))
+    args$demean <- TRUE
+  if (!("detrend" %in% names.args))
+    args$detrend <- TRUE
+
+  xx <- ts(window * detrend(x[start:end])$Y, frequency = fs)
+  s <- do.call(spec_func, args = c(args, list(x = xx)))
+  freq <- s$freq
+
+  rowMeans(sapply(seq(window.len, x.len, by = window.len), function(end){
+    start = end - window.len + 1
+    xx <- ts(window * detrend(x[start:end])$Y, frequency = fs)
+    args$x <- xx
+    s <- do.call(spec_func, args = args)
+    s$spec / normalization
+  })) ->
+    spec
+  res <- list(freq = freq, spec = spec, method = "Welch",
+              df = s$df * (x.len/length(window)),
+              bandwidth = s$bandwidth, demean = FALSE, detrend = TRUE)
+  class(res) <- "spec"
+  if (plot) {
+    if(log == 'xy'){
+      xlab = 'Log10(frequency)'
+      ylab = 'Log10(spectrum)'
+      freq = log10(freq)
+      spec = log10(spec)
+    }else if(log == 'y'){
+      xlab = 'frequency'
+      ylab = 'Log10(spectrum)'
+      spec = log10(spec)
+    }else if(log == 'x'){
+      xlab = 'Log10(frequency)'
+      ylab = 'spectrum'
+      freq = log10(freq)
+    }else{
+      xlab = 'frequency'
+      ylab = 'spectrum'
+    }
+    if(plot == 2){
+      points(freq, spec, type = 'l', col = col)
+    }else{
+      plot(freq, spec, type = 'l', col = col, xlab = xlab, ylab = ylab,
+           xlim = xlim, ylim = ylim, main = main, las = 1,
+           cex.axis = cex, cex.lab = cex, cex.main = cex, cex.sub = cex)
+    }
+  }
+  return(invisible(res))
+}
+
+
+
+#' Plot signals line by line
+#' @usage plot_signals(signals, sample_rate = 1, col = 1, space = 0.999,
+#' space_mode = 'quantile',start_time = 0, time_range = NULL, compress = 1,
+#' channel_names = NULL, ylab = 'Channel')
+#' @param signals signals to plot, with each row one signal
+#' @param sample_rate sample rate
+#' @param col Color, either length of 1 or number of signals. Can be numeric or color name
+#' @param space space between to signals. If \code{space_mode='quantile'}, then
+#' space is determined by quantile of signal (0 - 1). If \code{space_mode='absoute'}, then
+#' space will be as is.
+#' @param start_time Time in seconds at which time point the signal should be drawn
+#' @param duration length of 1. Time in seconds the duration of time to be drawn.
+#' Default is NULL (Total time span)
+#' @param compress FALSE means no compression for signals, TRUE is auto-detection,
+#' 2, 3, 4,... means compress signals by x and then plot. (usually compress signal to save time)
+#' @param channel_names Names for each signals. Will be Y tick labels
+#' @param ylab Y axis label
+#' @param plot,xlim,... Depricated.
+#' @export
+plot_signals <- function(
+  signals, sample_rate = 1, col = 1, space = 1, space_mode = 'quantile',
+  start_time = 0, duration = NULL, compress = TRUE,
+  channel_names = NULL, ylab = 'Channel',
+  plot = 'base', xlim = NULL,  ...
+){
+  if(space_mode == 'quantile'){
+    space = quantile(signals, space) *2
+  }
+  compress = round(compress)
+  if(compress == 1){
+    if(length(duration)){
+      n_tp = round(duration * sample_rate)
+    }else{
+      n_tp = round(ncol(signals) - start_time * sample_rate)
+    }
+    if(n_tp > 3000){
+      compress = (n_tp / 3000)
+    }
+  }
+
+
+  if(compress > 1){
+    sample_rate = sample_rate / compress
+    signals = signals[, round(seq(1, ncol(signals), by = compress))]
+  }
+  ns = nrow(signals)       # Number of channels
+  nt = ncol(signals)       # Total time points
+  if(length(col) == 1){
+    col = rep(col, ns)     # Color for each channels
+  }
+  y0 = (1:ns) * space      # Re-calculate zero lines for each channels
+  r = y0 + signals         # Re-calculate channel positions
+  Time = (seq_len(nt) -1) / sample_rate   # True time in seconds
+
+  start_time = min(start_time, range(Time)[2]-10/sample_rate)
+  if(is.null(duration)){
+    time_range = c(start_time, range(Time)[2])      # duration is max range by default
+  }else{
+    time_range = c(start_time, start_time + duration)
+  }
+
+  tsl = Time %within% time_range
+
+  r = r[,tsl]
+  Time = Time[tsl]
+  nt = ncol(r)
+
+  if(is.null(channel_names)){
+    channel_names = paste(1:ns)   # Assign channel names
+    if(length(y0) > 30){
+      ind = seq(0, length(y0), by = 5)
+      ind = unique(c(1, ind[-1], length(y0)))
+      if(tail(diff(ind), 1) == 1){
+        ind = ind[-(length(ind) - 1)]
+      }
+      y0 = y0[ind]
+      channel_names = channel_names[ind]
+    }
+  }
+
+  matplot(Time, t(r), type='l', col = col, lty=1, lwd = 0.5,
+          frame.plot = FALSE, yaxt = 'n', xlab = 'Time(s)', ylab = ylab)
+  axis(2, at = y0, labels = channel_names, pos = start_time, las=1)
+
+  return(list(
+    space = space,
+    compress = compress,
+    time_range = time_range
+  ))
+  # if(plot == 'base'){
+  #
+  # } else{
+  #   tmp = data.frame(
+  #     Time = rep(Time, ns),
+  #     Signals = as.vector(t(r)),
+  #     Channel = rep(channel_names, each = nt),
+  #     ChannelType = paste(rep(col, each = nt))
+  #   )
+  #
+  #   ggplot2::ggplot(tmp) + ggplot2::aes(x = Time, y = Signals, group = Channel, color = ChannelType) +
+  #     ggplot2::geom_line() +
+  #     ggplot2::theme_bw() +
+  #     ggplot2::theme(axis.line = ggplot2::element_line(colour = "black"),
+  #           panel.grid.major = ggplot2::element_blank(),
+  #           panel.grid.minor = ggplot2::element_blank(),
+  #           panel.border = ggplot2::element_blank(),
+  #           panel.background = ggplot2::element_blank(),
+  #           legend.position="none") +
+  #     ggplot2::scale_y_continuous(breaks = y0, labels = channel_names) +
+  #     ggplot2::scale_x_continuous(expand = c(0,0.5)) +
+  #     ggplot2::scale_color_manual(values=c("#6ea4ca", "#d63d0a", '#272d5a')) ->
+  #     p
+  #
+  #   if(plot %in% c('plotly', 'ggplotly')){
+  #     p = plotly::ggplotly(p, tooltip = 'group')
+  #   }
+  #
+  #   return(p)
+  # }
+
+}

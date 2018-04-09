@@ -26,11 +26,20 @@
   \item \code{\link{clear_env}} Remove all variables within environment
   \item \code{\link{eval_dirty}} Naive evaluate expressions with side effects, also see \code{\link[rlang]{eval_tidy}}
   \item \code{\link{eval_within}} Evaluate function as if it's run within specified environment
-
 }
 }
 
-\section{Part 4 - Validity checks, or others}{
+\section{Part 4 - File IO, cache, etc}{
+
+\enumerate{
+  \item \code{\link{load_h5}} Load HDF5 file via rhdf5 package with lazy mode
+  \item \code{\link{save_h5}} Save data to HDF5 file with no validity checking
+  \item \code{\link{cache}} Cache any R objects in case to save calculation time
+  \item \code{\link{clear_cache}} Clear cache environment
+}
+}
+
+\section{Part 5 - Validity checks, or others}{
 
 \enumerate{
   \item \code{\link{get_val}} Similar to \%?<-\%, get key from list, returns default values if the key is invalid

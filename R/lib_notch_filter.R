@@ -16,6 +16,7 @@ NULL
 #' @param ub filter upper bound (Hz)
 #' @param domain 1 if the input signal is in the time domain, 0 if it is in the frequency domain
 #' @return filtered signal in time domain
+#' @export
 notch_filter <- function(s, sample_rate, lb, ub, domain = 1){
   max_freq <- sample_rate / 2
   n = length(s)

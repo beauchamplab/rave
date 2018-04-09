@@ -1,33 +1,4 @@
-# Module exec environment
-add_to_session <- function(
-  session,
-  key = 'rave_id',
-  val = paste(sample(c(letters, LETTERS, 0:9), 20), collapse = ''),
-  override = FALSE
-){
-  if(!is.null(session)){
-    if(override || !exists(key, envir = session$userData)){
-      assign(key, val, envir = session$userData)
-    }
-    return(get(key, envir = session$userData))
-  }
-  return(NULL)
-}
-
 data_repository = new.env()
-
-
-#' @export
-getDefaultCacheEnvironment <- function(
-  session = shiny::getDefaultReactiveDomain()
-){
-  data_env = getDefaultDataRepository(session = session, session_based = T)
-  if(!exists('.cache_env', envir = data_env, inherits = F)){
-    data_env$.cache_env = new.env(parent = baseenv())
-    data_env$.cache_env$.keys = c()
-  }
-  return(data_env$.cache_env)
-}
 
 
 #' @export

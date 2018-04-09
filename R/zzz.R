@@ -14,6 +14,36 @@ rave_life_cycle <- function(topic = 'general'){
 #' \link[rave]{rave_life_cycle_util}
 NULL
 
+#' @name rave_life_cycle_python
+#' @title RAVE development cycle - Python Support
+#' @author Zhengjia Wang
+#'
+#' @section Part 1 - Install Python
+#' \enumerate{
+#'   \item \code{\link{py_console}}
+#' }
+
+
+#' @name rave_life_cycle_signal
+#' @title RAVE development cycle - Signal Processing
+#' @author Zhengjia Wang
+#'
+#' @section Part 1 - Transformations:
+#' \enumerate{
+#'   \item \code{\link{notch_filter}} Matlab-compatible notch filter
+#'   \item \code{\link{wavelet}} Wavelet function compatible with Matlab Fieldtrip package
+#' }
+#'
+#' @section Part 2 - Visualizations:
+#' \enumerate{
+#'   \item \code{\link{diagnose_signal}} Inspect signal(s) with four plots: Time series, 2 x Welch periodogram, Histogram
+#'   \item \code{\link{pwelch}} Welch periodogram for signals
+#'   \item \code{\link{plot_signals}} Plot and compare signals line by line
+#' }
+NULL
+
+
+
 #' @name rave_life_cycle_util
 #' @title RAVE development cycle - Utils
 #' @author Zhengjia Wang
@@ -36,10 +66,17 @@ NULL
 #'   \item \code{\link{clear_env}} Remove all variables within environment
 #'   \item \code{\link{eval_dirty}} Naive evaluate expressions with side effects, also see \code{\link[rlang]{eval_tidy}}
 #'   \item \code{\link{eval_within}} Evaluate function as if it's run within specified environment
-#'
 #' }
 #'
-#' @section Part 4 - Validity checks, or others:
+#' @section Part 4 - File IO, cache, etc:
+#' \enumerate{
+#'   \item \code{\link{load_h5}} Load HDF5 file via rhdf5 package with lazy mode
+#'   \item \code{\link{save_h5}} Save data to HDF5 file with no validity checking
+#'   \item \code{\link{cache}} Cache any R objects in case to save calculation time
+#'   \item \code{\link{clear_cache}} Clear cache environment
+#' }
+#'
+#' @section Part 5 - Validity checks, or others:
 #' \enumerate{
 #'   \item \code{\link{get_val}} Similar to \%?<-\%, get key from list, returns default values if the key is invalid
 #'   \item \code{\link{is_invalid}} Check validity of data
