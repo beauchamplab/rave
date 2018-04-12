@@ -152,7 +152,7 @@ is_within <- function(x, ref, strict = FALSE){
 #'   htmltools::tags$li(sprintf('line: %d', .x))
 #' }, wrapper = htmltools::tags$ul)
 #' @importFrom rlang !!
-#' @importFrom rlang quo
+#' @importFrom rlang as_quosure
 #' @importFrom rlang eval_tidy
 #' @export
 lapply_expr <- function(X, expr, wrapper = NULL, env = parent.frame()){
@@ -263,6 +263,11 @@ is.blank <- function(s){
 #' is_invalid('', .invalids = 'blank')
 #' @export
 is_invalid <- function(x, any = F, .invalids = c('null', 'na')){
+  if('null' %in% .invalids){
+    if(is.null(x) || !length(x)){
+      return(TRUE)
+    }
+  }
   for(func in paste0('is.', .invalids)){
     res = do.call(func, args = list(x))
     if(length(res) > 1){

@@ -18,11 +18,11 @@ NULL
 #' @title RAVE development cycle - Python Support
 #' @author Zhengjia Wang
 #'
-#' @section Part 1 - Install Python
+#' @section Part 1 - Install Python:
 #' \enumerate{
 #'   \item \code{\link{py_console}}
 #' }
-
+NULL
 
 #' @name rave_life_cycle_signal
 #' @title RAVE development cycle - Signal Processing

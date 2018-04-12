@@ -31,7 +31,9 @@ Default is NULL (Total time span)}
 
 \item{ylab}{Y axis label}
 
-\item{plot, xlim, ...}{Depricated.}
+\item{plot, xlim}{Depricated.}
+
+\item{...}{pass to matplot}
 }
 \description{
 Plot signals line by line

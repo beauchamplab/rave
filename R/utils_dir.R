@@ -16,20 +16,20 @@ get_dir <- function(subject_code, project_name, block_num, mkdirs = NULL, subjec
   }
   if(!is.null(re$subject_name)){
 
-    re$subject_dir = file.path(re$data_dir, re$subject_name)
-    re$preprocess_dir = file.path(re$data_dir, re$subject_name, 'preprocess')
-    re$pre_visual_dir = file.path(re$data_dir, re$subject_name, 'preprocess', 'visualizations')
-    re$rave_dir = file.path(re$data_dir, re$subject_name, 'rave')
-    re$meta_dir = file.path(re$data_dir, re$subject_name, 'rave', 'meta')
-    re$cache_dir = file.path(re$data_dir, re$subject_name, 'rave', 'cache')
-    re$suma_dir = file.path(re$data_dir, re$subject_name, 'suma')
-    re$suma_out_dir = file.path(re$data_dir, re$subject_name, 'suma', 'rave')
+    re$subject_dir = (file.path(re$data_dir, re$subject_name))
+    re$preprocess_dir = (file.path(re$data_dir, re$subject_name, 'preprocess'))
+    re$pre_visual_dir = (file.path(re$data_dir, re$subject_name, 'preprocess', 'visualizations'))
+    re$rave_dir = (file.path(re$data_dir, re$subject_name, 'rave'))
+    re$meta_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'meta'))
+    re$cache_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'cache'))
+    re$suma_dir = (file.path(re$data_dir, re$subject_name, 'suma'))
+    re$suma_out_dir = (file.path(re$data_dir, re$subject_name, 'suma', 'rave'))
 
     if(!missing(subject_code)){
-      re$pre_subject_dir = file.path(re$raw_data_dir, subject_code)
+      re$pre_subject_dir = (file.path(re$raw_data_dir, subject_code))
 
       if(!missing(block_num)){
-        re$block_dir = file.path(re$raw_data_dir, subject_code, block_num)
+        re$block_dir = (file.path(re$raw_data_dir, subject_code, block_num))
       }
     }
   }

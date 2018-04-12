@@ -3,8 +3,13 @@
 \name{rave_life_cycle_python}
 \alias{rave_life_cycle_python}
 \title{RAVE development cycle - Python Support}
-\author{
-Zhengjia Wang
+\section{Part 1 - Install Python}{
 
+\enumerate{
+  \item \code{\link{py_console}}
+}
+}
+
+\author{
 Zhengjia Wang
 }

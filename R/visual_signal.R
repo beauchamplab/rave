@@ -33,8 +33,9 @@
 diagnose_signal <- function(
   s1, s2 = NULL, sc = NULL, srate, name = '', try_compress = TRUE,
   max_freq = 300, window = 128, noverlap = 8, std = 3,
-  cex = 1.5, lwd = 0.5, flim = NULL,
+  cex = 1.5, lwd = 0.5, flim = NULL, nclass = 100,
   main = 'Channel Inspection', col = c('black', 'red'),
+  which = NULL, start_time = 0, boundary = NULL,
   ...){
 
   # is sc not specified, and srate is too high, compress s1
@@ -49,61 +50,70 @@ diagnose_signal <- function(
   xlim = c(0, max_freq)
 
   # Calculate boundary to draw
-  boundary = std* sd(s1)
+  if(is.null(boundary)){
+    boundary = std* sd(s1)
+  }
   ylim = max(abs(s1), boundary)
 
   # Grid layout
-  grid::grid.newpage()
-  lay <- rbind(c(1,1,1), c(2,3,4))
-  graphics::layout(mat = lay)
+  if(length(which) == 0){
+    grid::grid.newpage()
+    lay <- rbind(c(1,1,1), c(2,3,4))
+    graphics::layout(mat = lay)
+  }
 
   # First plot: plot sc directly with col[1]
-  plot(seq_along(sc) / sratec, sc, xlab = 'Time (seconds)', ylab = 'Voltage',
-       main = main, lwd = lwd,
-       type = 'l', ylim = c(-ylim-1, ylim+1), yaxt="n", col = col[1],
-       cex.axis = cex, cex.lab = cex, cex.main = cex, cex.sub = cex)
-  abline(h = c(-1,1) * boundary, col = 'red')
-  ticks<-c(-ylim, -boundary,0,boundary, ylim)
-  axis(2,at=ticks,labels=round(ticks), las = 1,
-       cex.axis = cex, cex.lab = cex, cex.main = cex, cex.sub = cex)
+  if(length(which) == 0 || 1 %in% which){
+    plot(start_time + (seq_along(sc) / sratec), sc, xlab = 'Time (seconds)', ylab = 'Voltage',
+         main = main, lwd = lwd,
+         type = 'l', ylim = c(-ylim-1, ylim+1), yaxt="n", col = col[1],
+         cex.axis = cex, cex.lab = cex, cex.main = cex, cex.sub = cex, ...)
+    abline(h = c(-1,1) * boundary, col = 'red')
+    ticks<-c(-ylim, -boundary,0,boundary, ylim)
+    axis(2,at=ticks,labels=round(ticks), las = 1,
+         cex.axis = cex, cex.lab = cex, cex.main = cex, cex.sub = cex)
+  }
 
   # plot 2, 3 too slow, need to be faster - pwelch periodogram
-  if(!is.null(s2)){
-    pwelch(s2, fs = srate, window = window,
-           noverlap = noverlap, plot = 1, col = col[2], cex = cex, ylim = flim,
-           log = 'y', xlim = xlim, spec_func = rave:::spectrum.pgram, max_freq = max_freq)
-    pwelch(s1, fs = srate, window = window, noverlap = noverlap, cex = cex, ylim = flim,
-           plot = 2, col = col[1], log = 'y', xlim = xlim, spec_func = spectrum.pgram, max_freq = max_freq)
-    legend('topright', sprintf('%s %s', c('Before', 'After'), name), col = rev(col), lty = 1, cex = cex)
-  }else{
-    pwelch(s1, fs = srate, window = window,
-           noverlap = noverlap, plot = 1, col = col[1], cex = cex, ylim = flim,
-           log = 'y', xlim = xlim, spec_func = rave:::spectrum.pgram, max_freq = max_freq)
-    legend('topright', name, col = col[1], lty = 1, cex = cex)
+  if(length(which) == 0 || 2 %in% which){
+    if(!is.null(s2)){
+      pwelch(s2, fs = srate, window = window,
+             noverlap = noverlap, plot = 1, col = col[2], cex = cex, ylim = flim,
+             log = 'y', xlim = xlim, spec_func = rave:::spectrum.pgram, max_freq = max_freq)
+      pwelch(s1, fs = srate, window = window, noverlap = noverlap, cex = cex, ylim = flim,
+             plot = 2, col = col[1], log = 'y', xlim = xlim, spec_func = spectrum.pgram, max_freq = max_freq)
+      legend('topright', sprintf('%s %s', c('Before', 'After'), name), col = rev(col), lty = 1, cex = cex * 0.8)
+    }else{
+      pwelch(s1, fs = srate, window = window,
+             noverlap = noverlap, plot = 1, col = col[1], cex = cex, ylim = flim,
+             log = 'y', xlim = xlim, spec_func = rave:::spectrum.pgram, max_freq = max_freq)
+    }
   }
 
 
-  log_xlim = log10(sapply(xlim, max, 1))
-  if(!is.null(s2)){
-    pwelch(s2, fs = srate, window = window,
-           noverlap = noverlap, plot = 1, col = col[2], cex = cex, ylim = flim,
-           log = 'xy', xlim = log_xlim, spec_func = rave:::spectrum.pgram, max_freq = max_freq)
-    pwelch(s1, fs = srate, window = window, noverlap = noverlap, cex = cex, ylim = flim,
-           plot = 2, col = col[1], log = 'xy', xlim = log_xlim, spec_func = spectrum.pgram, max_freq = max_freq)
-    legend('topright', c('Before ', 'After ') %&% name, col = rev(col), lty = 1, cex = cex)
-  }else{
-    pwelch(s1, fs = srate, window = window,
-           noverlap = noverlap, plot = 1, col = col[1], cex = cex, ylim = flim,
-           log = 'xy', xlim = log_xlim, spec_func = rave:::spectrum.pgram, max_freq = max_freq)
-    legend('topright', name, col = col[1], lty = 1, cex = cex)
+  if(length(which) == 0 || 3 %in% which){
+    log_xlim = log10(sapply(xlim, max, 1))
+    if(!is.null(s2)){
+      pwelch(s2, fs = srate, window = window,
+             noverlap = noverlap, plot = 1, col = col[2], cex = cex, ylim = flim,
+             log = 'xy', xlim = log_xlim, spec_func = rave:::spectrum.pgram, max_freq = max_freq)
+      pwelch(s1, fs = srate, window = window, noverlap = noverlap, cex = cex, ylim = flim,
+             plot = 2, col = col[1], log = 'xy', xlim = log_xlim, spec_func = spectrum.pgram, max_freq = max_freq)
+      legend('topright', c('Before ', 'After ') %&% name, col = rev(col), lty = 1, cex = cex * 0.8)
+    }else{
+      pwelch(s1, fs = srate, window = window,
+             noverlap = noverlap, plot = 1, col = col[1], cex = cex, ylim = flim,
+             log = 'xy', xlim = log_xlim, spec_func = rave:::spectrum.pgram, max_freq = max_freq)
+    }
   }
 
 
-  # Plot 4:
-  hist(s1, nclass = 100,
-       xlab = 'Signal Voltage Histogram', main = 'Histogram ' %&% name,
-       cex.axis = cex, cex.lab = cex, cex.main = cex, cex.sub = cex)
-
+  if(length(which) == 0 || 4 %in% which){
+    # Plot 4:
+    hist(s1, nclass = nclass,
+         xlab = 'Signal Voltage Histogram', main = 'Histogram ' %&% name,
+         cex.axis = cex, cex.lab = cex, cex.main = cex, cex.sub = cex)
+  }
 }
 
 
@@ -251,12 +261,13 @@ pwelch <- function (
 #' 2, 3, 4,... means compress signals by x and then plot. (usually compress signal to save time)
 #' @param channel_names Names for each signals. Will be Y tick labels
 #' @param ylab Y axis label
-#' @param plot,xlim,... Depricated.
+#' @param ... pass to matplot
+#' @param plot,xlim Depricated.
 #' @export
 plot_signals <- function(
   signals, sample_rate = 1, col = 1, space = 1, space_mode = 'quantile',
   start_time = 0, duration = NULL, compress = TRUE,
-  channel_names = NULL, ylab = 'Channel',
+  channel_names = NULL, ylab = 'Channel', time_shift = 0,
   plot = 'base', xlim = NULL,  ...
 ){
   if(space_mode == 'quantile'){
@@ -269,8 +280,8 @@ plot_signals <- function(
     }else{
       n_tp = round(ncol(signals) - start_time * sample_rate)
     }
-    if(n_tp > 3000){
-      compress = (n_tp / 3000)
+    if(n_tp > 10000){
+      compress = (n_tp / 10000)
     }
   }
 
@@ -314,9 +325,9 @@ plot_signals <- function(
     }
   }
 
-  matplot(Time, t(r), type='l', col = col, lty=1, lwd = 0.5,
-          frame.plot = FALSE, yaxt = 'n', xlab = 'Time(s)', ylab = ylab)
-  axis(2, at = y0, labels = channel_names, pos = start_time, las=1)
+  matplot(time_shift + Time, t(r), type='l', col = col, lty=1, lwd = 0.5,
+          frame.plot = FALSE, yaxt = 'n', xlab = 'Time(s)', ylab = ylab, ...)
+  axis(2, at = y0, labels = channel_names, pos = start_time + time_shift, las=1)
 
   return(list(
     space = space,
