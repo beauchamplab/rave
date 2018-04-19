@@ -1,3 +1,78 @@
+# to be tested
+#' @export
+to_color <- function(x, default_length = 1, palette = NULL, shift = 2){
+  if(length(x) == 1 && default_length > 1){
+    x = rep(x, default_length)
+  }
+  shift = max(0, shift)
+
+  env = new.env()
+  env$text = paste(x)
+
+  if(is.null(palette)){
+    # if x is numeric but in factors
+    z = x
+    if(is.factor(x)){
+      tryCatch({
+        as.numeric(paste(x))
+      }, error = function(e){
+        NA
+      }, warning = function(e){
+        NA
+      }) ->
+        z
+      if(sum(is.na(z))){
+        z = x
+      }
+    }
+    if(is.numeric(z)){
+      # z is not a integer or improper
+      if(sum(z < 1) || sum(abs(z - round(z))) > 1e-4){
+        x = paste('X', x)
+      }else{
+        x = z + shift
+      }
+    }
+
+
+    tryCatch({
+      col2rgb(x, alpha = 1) / 255
+    }, error = function(e){
+      x = as.numeric(as.factor(x)) + shift
+      col2rgb(x, alpha = 1) / 255
+    }) ->
+      cols
+    env$colors = apply(cols, 2, function(y){
+      do.call(rgb, as.list(y))
+    })
+
+
+  }else{
+    if(!is.factor(x)){
+      x = as.factor(x)
+    }
+    x = as.numeric(x)
+    ncols = length(unique(x))
+    if(is.function(palette)){
+      palette = palette(ncols)
+    }
+
+    assertthat::assert_that(ncols >= length(palette), msg = 'Palette does not have enough length.')
+    env$colors = palette[x]
+  }
+
+  # generate text
+  env$palette = with(env, {
+    unique(cbind(text, colors), MARGIN = 1)
+  })
+
+  return(as.list(env))
+
+}
+
+
+
+############################################### Internal
 # utils, will be moved to rutabaga
 
 `set_if_null<-` <- function(x, values) {

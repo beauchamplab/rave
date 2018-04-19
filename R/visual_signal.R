@@ -265,10 +265,10 @@ pwelch <- function (
 #' @param plot,xlim Depricated.
 #' @export
 plot_signals <- function(
-  signals, sample_rate = 1, col = 1, space = 1, space_mode = 'quantile',
+  signals, sample_rate = 1, col = 1, space = 0.995, space_mode = 'quantile',
   start_time = 0, duration = NULL, compress = TRUE,
-  channel_names = NULL, ylab = 'Channel', time_shift = 0,
-  plot = 'base', xlim = NULL,  ...
+  channel_names = NULL, ylab = 'Channel', time_shift = 0, lwd = 0.5,
+  new_plot = T, plot = 'base', xlim = NULL,  ...
 ){
   if(space_mode == 'quantile'){
     space = quantile(signals, space) *2
@@ -325,44 +325,19 @@ plot_signals <- function(
     }
   }
 
-  matplot(time_shift + Time, t(r), type='l', col = col, lty=1, lwd = 0.5,
-          frame.plot = FALSE, yaxt = 'n', xlab = 'Time(s)', ylab = ylab, ...)
-  axis(2, at = y0, labels = channel_names, pos = start_time + time_shift, las=1)
+  if(new_plot){
+    matplot(time_shift + Time, t(r), type='l', col = col, lty=1, lwd = lwd,
+            frame.plot = FALSE, yaxt = 'n', xlab = 'Time(s)', ylab = ylab, ...)
+    axis(2, at = y0, labels = channel_names, pos = start_time + time_shift, las=1)
+  }else{
+    matpoints(time_shift + Time, t(r), type='l', col = col, lty=1, lwd = lwd)
+  }
 
   return(list(
     space = space,
+    space_mode = space_mode,
     compress = compress,
     time_range = time_range
   ))
-  # if(plot == 'base'){
-  #
-  # } else{
-  #   tmp = data.frame(
-  #     Time = rep(Time, ns),
-  #     Signals = as.vector(t(r)),
-  #     Channel = rep(channel_names, each = nt),
-  #     ChannelType = paste(rep(col, each = nt))
-  #   )
-  #
-  #   ggplot2::ggplot(tmp) + ggplot2::aes(x = Time, y = Signals, group = Channel, color = ChannelType) +
-  #     ggplot2::geom_line() +
-  #     ggplot2::theme_bw() +
-  #     ggplot2::theme(axis.line = ggplot2::element_line(colour = "black"),
-  #           panel.grid.major = ggplot2::element_blank(),
-  #           panel.grid.minor = ggplot2::element_blank(),
-  #           panel.border = ggplot2::element_blank(),
-  #           panel.background = ggplot2::element_blank(),
-  #           legend.position="none") +
-  #     ggplot2::scale_y_continuous(breaks = y0, labels = channel_names) +
-  #     ggplot2::scale_x_continuous(expand = c(0,0.5)) +
-  #     ggplot2::scale_color_manual(values=c("#6ea4ca", "#d63d0a", '#272d5a')) ->
-  #     p
-  #
-  #   if(plot %in% c('plotly', 'ggplotly')){
-  #     p = plotly::ggplotly(p, tooltip = 'group')
-  #   }
-  #
-  #   return(p)
-  # }
 
 }

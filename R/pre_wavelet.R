@@ -254,7 +254,7 @@ bulk_wavelet <- function(
       rhdf5::H5close()
 
       # coef
-      coef = re$phase[, ind]
+      coef = re$coef[, ind]
       save_h5(coef, file = cfile, name = cname_coef,
               chunk = c(length(frequencies), 1024), replace = replace, ctype = 'double')
       rhdf5::H5close()

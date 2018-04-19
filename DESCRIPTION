@@ -88,6 +88,7 @@ Collate:
     'pre_load_settings.R'
     'pre_notch.R'
     'pre_overview.R'
+    'pre_post_reference.R'
     'pre_process.R'
     'pre_reference.R'
     'pre_units.R'
