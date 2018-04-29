@@ -35,6 +35,14 @@ save_meta <- function(data, meta_type, project_name, subject_code){
   }else if(meta_type == 'frequencies'){
     names(data) = c('Frequency')
     safe_write_csv(data, file = file.path(meta_dir, 'frequencies.csv'), row.names = F)
+  }else if(meta_type == 'time_excluded'){
+    if(!is.data.frame(data)){
+      data = as.data.frame(data, stringsAsFactors = F)
+    }
+    if(nrow(data)){
+      names(data) = c('Block', 'Start', 'End')
+      safe_write_csv(data, file = file.path(meta_dir, 'time_excluded.csv'), row.names = F)
+    }
   }
 
 

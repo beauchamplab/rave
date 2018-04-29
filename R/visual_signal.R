@@ -114,6 +114,11 @@ diagnose_signal <- function(
          xlab = 'Signal Voltage Histogram', main = 'Histogram ' %&% name,
          cex.axis = cex, cex.lab = cex, cex.main = cex, cex.sub = cex)
   }
+
+  return(list(
+    ylim = ylim,
+    boundary = boundary
+  ))
 }
 
 
@@ -267,11 +272,11 @@ pwelch <- function (
 plot_signals <- function(
   signals, sample_rate = 1, col = 1, space = 0.995, space_mode = 'quantile',
   start_time = 0, duration = NULL, compress = TRUE,
-  channel_names = NULL, ylab = 'Channel', time_shift = 0, lwd = 0.5,
+  channel_names = NULL, ylab = 'Channel', time_shift = 0, lwd = 0.5,cex = 2,
   new_plot = T, plot = 'base', xlim = NULL,  ...
 ){
   if(space_mode == 'quantile'){
-    space = quantile(signals, space) *2
+    space = quantile(signals, space, na.rm = T) *2
   }
   compress = round(compress)
   if(compress == 1){
@@ -327,8 +332,9 @@ plot_signals <- function(
 
   if(new_plot){
     matplot(time_shift + Time, t(r), type='l', col = col, lty=1, lwd = lwd,
-            frame.plot = FALSE, yaxt = 'n', xlab = 'Time(s)', ylab = ylab, ...)
-    axis(2, at = y0, labels = channel_names, pos = start_time + time_shift, las=1)
+            frame.plot = FALSE, yaxt = 'n', xlab = 'Time(s)', ylab = ylab,
+            cex.main = cex, cex.axis = cex * 0.7, cex.lab = cex * 0.8, ...)
+    axis(2, at = y0, labels = channel_names, pos = start_time + time_shift, las=1, cex.axis = cex * 0.7)
   }else{
     matpoints(time_shift + Time, t(r), type='l', col = col, lty=1, lwd = lwd)
   }

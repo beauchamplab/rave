@@ -24,7 +24,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
       user_data$reset
       validate(
         need(utils$has_subject(), 'Load subject first.'),
-        need(utils$is_notch_filtered(), 'Apply notch filter first.')
+        need(utils$notch_filtered(), 'Apply notch filter first.')
       )
       channels = utils$get_channels()
       vc_txt = rave:::deparse_selections(channels)
@@ -86,6 +86,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
         ncores = round(input$ncores)
       )
 
+      utils$reset()
 
       local_data$is_wavelet = FALSE
       showNotification(p('Wavelet finished!'), type = 'message')

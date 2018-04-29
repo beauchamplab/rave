@@ -76,7 +76,7 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
       if(!utils$has_subject()){
         return(p('Please load subject first.'))
       }
-      if(!utils$is_notch_filtered()){
+      if(!utils$notch_filtered()){
         last = get_val(utils$last_inputs(), 'last_notch_freq', default = 60)
 
         return(tagList(
@@ -169,7 +169,7 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
         local_data$current_chl = chl
 
 
-        local_data$excluded_time = utils$get_excluded_time(block, chl)
+        local_data$excluded_time = utils$get_excluded_time(block)
         local_data$new_sel = NULL
         updateSelectInput(session, 'chl_type', selected = CHANNEL_TYPES[ctype])
       }else{
@@ -186,7 +186,6 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
 
     observeEvent(input$stage, {
       block = input$block
-      chl = as.integer(input$chl)
 
       tbl = local_data$excluded_time
       tbl %?<-% data.frame()
@@ -197,9 +196,9 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
           data.frame(Start = xlim[1], End = xlim[2], Staged = TRUE),
           tbl
         )
-        utils$set_excluded_time(tbl, block, chl)
+        utils$set_excluded_time(tbl, block)
       }
-      local_data$excluded_time = utils$get_excluded_time(block, chl)
+      local_data$excluded_time = utils$get_excluded_time(block)
     })
 
     observeEvent(input$clear, {
@@ -207,8 +206,6 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
       xlim = local_data$new_sel
       tbl = isolate(local_data$excluded_time)
       block = input$block
-      chl = as.integer(input$chl)
-
 
       if(length(s)){
         if(!is.null(xlim) && !(xlim[1] %in% tbl$Start && xlim[2] %in% tbl$End)){
@@ -216,8 +213,8 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
         }
         if(length(s)){
           tbl = tbl[-s,]
-          utils$set_excluded_time(tbl, block, chl)
-          local_data$excluded_time = utils$get_excluded_time(block, chl)
+          utils$set_excluded_time(tbl, block)
+          local_data$excluded_time = utils$get_excluded_time(block)
         }
       }
     })
@@ -403,6 +400,8 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
         centers = local_data$center_freqs,
         widths = local_data$band_width
       )
+
+      utils$reset()
 
       local_data$is_notch = FALSE
       showNotification(p('Notch filter finished'), type='message')

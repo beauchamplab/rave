@@ -125,3 +125,4 @@ MVCAdapter <- R6::R6Class(
     obj[['get']](key)
   }
 }
+

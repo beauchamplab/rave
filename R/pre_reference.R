@@ -62,7 +62,6 @@ rave_pre_ref3 <- function(module_id = 'REF_M', sidebar_width = 2){
       # channel_plots
       reset = Sys.time()
     )
-    assign('ld', local_data, envir = globalenv())
 
     refresh = function(){
       local_data$ref_table = data.frame()
@@ -121,16 +120,20 @@ rave_pre_ref3 <- function(module_id = 'REF_M', sidebar_width = 2){
         tbl$Duration = tbl$End - tbl$Start
         tbl = tbl[tbl$Block %in% input$block,]
         gct_env$tbl = tbl
+        return(
+          DT::datatable(tbl, selection = list(mode = 'single', target = 'row'),
+                        rownames = F, editable = T,
+                        options = list(
+                          pageLength = 20
+                        )) %>%
+            DT::formatRound(c('Start', 'End', 'Duration'), 2)
+        )
       }else{
         gct_env$tbl = NULL
+        return(data.frame())
       }
 
-      DT::datatable(tbl, selection = list(mode = 'single', target = 'row'),
-                    rownames = F, editable = T,
-                    options = list(
-                      pageLength = 20
-                    )) %>%
-        DT::formatRound(c('Start', 'End', 'Duration'), 2)
+
     })
 
 
@@ -633,6 +636,8 @@ rave_pre_ref3 <- function(module_id = 'REF_M', sidebar_width = 2){
 
     observeEvent(input$doit, {
       utils$apply_ref()
+
+      utils$reset()
 
       removeModal()
     })

@@ -116,7 +116,7 @@ Electrode <- R6::R6Class(
 
       lapply(ep, function(row){
         block = row[['Block']]
-        i = round(row[['Onset']] * private$subject$sample_rate)
+        i = round(row[['Time']] * private$subject$sample_rate)
         # logger('Epoching: Block - ', block, ' On-set Point - ', i)
         return(list(
           ind = i + seq(-pre, post),
@@ -137,7 +137,7 @@ Electrode <- R6::R6Class(
       data = ECoGTensor$new(
         data = placehold,
         dimnames = list(
-          Trial = epochs$Stimulus,
+          Trial = epochs$Trial,
           Frequency = freqs$Frequency,
           Time = time_points,
           Electrode = electrode
@@ -166,7 +166,7 @@ Electrode <- R6::R6Class(
       logger('Epoching electrode: ', self$electrode, ' (', self$subject_id, ') - ', name)
       # vapply(ep, function(row){
       #   block = row[['Block']]
-      #   i = round(row[['Onset']] * private$subject$sample_rate)
+      #   i = round(row[['Time']] * private$subject$sample_rate)
       #   # logger('Epoching: Block - ', block, ' On-set Point - ', i)
       #   tmp[[block]][, i + seq(-pre, post)]
       # }, sample) ->
@@ -176,7 +176,7 @@ Electrode <- R6::R6Class(
 
       lapply(ep, function(row){
         block = row[['Block']]
-        i = round(row[['Onset']] * private$subject$sample_rate)
+        i = round(row[['Time']] * private$subject$sample_rate)
         return(list(
           ind = i + seq(-pre, post),
           block = row$Block
@@ -195,7 +195,7 @@ Electrode <- R6::R6Class(
 
       # assign dim names
       data = rave:::ECoGTensor$new(data = placehold, dimnames = list(
-        epochs$Stimulus,
+        epochs$Trial,
         freqs$Frequency,
         time_points,
         electrode

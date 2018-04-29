@@ -1,3 +1,31 @@
+#' For each element e1 ind1, find next element e2 in ind2 with e1<e2
+#' @export
+align_index = function(ind1, ind2, max_lag = 0){
+  if(zero_length(ind1, ind2)){
+    return(NULL)
+  }
+
+  if(max_lag == 0){
+    max_lag = max(c(ind1, ind2))
+  }
+
+  compare = function(a,b){
+    a < b & (b-a) < max_lag
+  }
+
+  o = outer(ind1, ind2, compare);o
+  i = apply(o, 1, function(x){
+    ifelse(sum(x) == 0, 0, min(which(x)))
+  })
+  sel = i>0
+  if(sum(sel)){
+    cbind(ind1[sel], ind2[i[sel]])
+  }else{
+    NULL
+  }
+}
+
+
 # to be tested
 #' @export
 to_color <- function(x, default_length = 1, palette = NULL, shift = 2){
@@ -70,7 +98,161 @@ to_color <- function(x, default_length = 1, palette = NULL, shift = 2){
 
 }
 
+crop_data <- function(x, range){
+  assertthat::assert_that(length(range) == 2, msg = 'Range must have length 2.')
+  minr = min(range)
+  maxr = max(range)
+  x[x <= minr] = minr
+  x[x >= maxr] = maxr
+  x
+}
 
+
+test_colors <- function(cols){
+  plot(seq_along(cols), col = cols , pch = 20)
+}
+
+
+#' @export
+rave_palette <- function(n=1000, one_sided = F, colors = c(
+  '#1a237e', '#42b3d5', '#dcedc8', '#ffffff', '#ffecb3', '#e85285', '#6a1b9a'
+), width = c(0.5,1,4), alpha = T
+){
+
+  width = c(rev(width), width)
+  len = seq_along(width)
+  nn = round(width / sum(width) * n * (2-(one_sided == 0)))
+
+  cols = lapply(len, function(ii){
+    colorRampPalette(colors[ii + c(0,1)], interpolate = 'spline', alpha = alpha)(nn[ii])
+  })
+
+
+  m = length(width) / 2
+
+  if(one_sided == 0){
+    cols = c(
+      unlist(cols[1:m]), colors[m+1], unlist(cols[-(1:m)])
+    )
+    return(cols)
+  }else if(one_sided > 0){
+    cols = c(colors[m+1], unlist(cols[-(1:m)])
+    )
+    return(cols)
+  }else{
+    cols = c(unlist(cols[1:m]), colors[m+1])
+    return(cols)
+  }
+}
+
+# test_colors(rave_palette(1001))
+
+#' @export
+image_plot = function(z, x, y, crop = NULL, symmetric = F, precision = 1, main = '', sub_titles = NULL, col = rave_palette(), nrow = 1,
+                      cex.main = 2, cex.lab = 1.6, cex.axis = 1.4, las = 1, panel.last = NULL, ...){
+
+  miss_x = missing(x)
+  old.par = par(no.readonly = TRUE)
+  on.exit({
+    suppressWarnings(par(old.par))
+  })
+  mai = old.par$mai
+
+  # if z is a list
+  is_crop = length(crop) == 2
+  if(!is.list(z)){
+    z = list(z)
+  }
+
+  z_len = length(z)
+  sub_titles %?<-% names(z)
+  if(length(sub_titles) != z_len){
+    sub_titles = rep('', z_len)
+  }
+  sub_titles = paste0('\n', sub_titles)
+  zlim_actual = range(sapply(z, range))
+
+  if(is_crop){
+    z = lapply(z, crop_data, range = crop)
+    zlim = range(crop)
+  }else{
+    zlim = range(sapply(z, range))
+  }
+
+
+
+  if(symmetric){
+    zlim = max(abs(zlim))
+    zlim = c(-zlim, zlim)
+  }
+
+
+  layout_matrix = matrix(nrow + c(
+    seq_len(z_len),
+    seq_len(ceiling(z_len/nrow) * nrow - z_len) + z_len
+    ), nrow = nrow)
+  layout_matrix = cbind(layout_matrix, seq_len(nrow))
+
+  grid.newpage()
+  graphics::layout(layout_matrix, widths = c(rep(1, ncol(layout_matrix) - 1), lcm(3)))
+
+  # Legend first!
+  par(mai = c(mai[1], 0, mai[3], 0.8))
+  scales = seq(zlim[1], zlim[2], length.out = length(col))
+
+  numeric_format = sprintf('%%.%df', precision)
+
+  replicate(nrow, {
+    image(x = 0, y = scales, z = t(scales),
+          col = col, xaxt = 'n', yaxt = 'n', xlab = '', ylab = '')
+    axis(4, at = c(zlim, 0), labels = sprintf(numeric_format, c(zlim, 0)), las = las, cex.axis = cex.axis)
+  })
+
+  title(main = '\n' %&% main, outer = T, cex.main = cex.main, adj = 0)
+  sub = "Value Range: [" %&% paste(sprintf(numeric_format, zlim_actual), collapse = ', ') %&% ']'
+  title(main = '\n\n' %&% sub, adj = 1, outer = T, cex.main = cex.main * 0.8)
+
+  parent_env = parent.frame()
+
+
+  lapply(seq_len(length(z)), function(ii){
+
+    if(ii %in% (layout_matrix[,1] - nrow)){
+      par(mai = c(mai[1], mai[2], mai[3], 0.2))
+    }else{
+      par(mai = c(mai[1], 0.3, mai[3], 0.2))
+    }
+    # image(z = z[[ii]], zlim = zlim, col = col, las = las, cex.lab = cex.lab, cex.axis = cex.axis)
+    if(!miss_x){
+      image(x = x, y = y, z = z[[ii]], zlim = zlim, col = col, las = las, cex.lab = cex.lab,
+            cex.axis = cex.axis, cex.main = cex.main * 0.8,
+            main = sub_titles[ii], ...)
+    }else{
+      image(z = z[[ii]], zlim = zlim, las = las, col = col, cex.lab = cex.lab,
+            cex.axis = cex.axis, cex.main = cex.main * 0.8, main = sub_titles[ii], ...)
+    }
+
+    eval(panel.last, envir = parent_env)
+  })
+  invisible()
+
+}
+
+diff_arg = function(x, srate, freq){
+  delta = freq * 2 * pi / srate
+  dif = c(delta, diff(x)) - delta
+  di = exp(1i * dif)
+  da = Arg(di)
+  return(da)
+}
+
+is.na <- function(x, ...){
+  if(!length(x)){
+    return(logical(0L))
+  }else{
+    return(base::is.na(x))
+  }
+}
 
 ############################################### Internal
 # utils, will be moved to rutabaga
@@ -492,17 +674,19 @@ try_normalizePath <- function(path, sep = c('/', '\\\\')){
     attr(path, 'is_absolute') = TRUE
     return(path)
   }else{
-    p = unlist(str_split(path, pattern = paste(sprintf('(%s)', sep), collapse = '|')))
-    p = p[p != '']
-    pre = p[-length(p)]
-    if(length(pre)){
-      post = p[length(p)]
-      pre = try_normalizePath(str_c(pre, collapse = '/'), sep = sep)
-      path = file.path(pre, post, fsep = '/')
-      attr(path, 'is_absolute') = attr(pre, 'is_absolute')
+    # if dirname = itself
+    dirname = dirname(path)
+    if(dirname == path){
+      attr(path, 'is_absolute') = FALSE
       return(path)
     }else{
-      attr(path, 'is_absolute') = FALSE
+      pre = try_normalizePath(dirname, sep = sep)
+
+      p = unlist(str_split(path, pattern = paste(sprintf('(%s)', sep), collapse = '|')))
+      fname = tail(p, 1)
+
+      path = file.path(pre, fname, fsep = '/')
+      attr(path, 'is_absolute') = attr(pre, 'is_absolute')
       return(path)
     }
   }
