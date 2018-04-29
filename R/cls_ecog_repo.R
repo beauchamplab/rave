@@ -258,8 +258,8 @@ ECoGRepository <- R6::R6Class(
       from = round(from * srate)
       to = round(to * srate)
       epoch = self$epochs$get('epoch_data')
-      epoch$start = round(epoch$Onset * srate) + from
-      # epoch$end = round(epoch$Onset * srate) + to
+      epoch$start = round(epoch$Time * srate) + from
+      # epoch$end = round(epoch$Time * srate) + to
       epoch$end = epoch$start + (to - from)
 
       if(is.null(e_power)){

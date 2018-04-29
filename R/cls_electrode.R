@@ -137,7 +137,7 @@ Electrode <- R6::R6Class(
       data = ECoGTensor$new(
         data = placehold,
         dimnames = list(
-          Trial = epochs$Trial,
+          Trial = epochs$Label,
           Frequency = freqs$Frequency,
           Time = time_points,
           Electrode = electrode
@@ -195,7 +195,7 @@ Electrode <- R6::R6Class(
 
       # assign dim names
       data = rave:::ECoGTensor$new(data = placehold, dimnames = list(
-        epochs$Trial,
+        epochs$Label,
         freqs$Frequency,
         time_points,
         electrode

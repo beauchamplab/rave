@@ -29,10 +29,27 @@ Subject <- R6::R6Class(
 
       self$meta[['electrode']] = read.csv(file.path(meta_dir, 'electrodes.csv'), stringsAsFactors = F)
       self$meta[['frequency']] = read.csv(file.path(meta_dir, 'frequencies.csv'), stringsAsFactors = F)
-      self$meta[['time']] = read.csv(file.path(meta_dir, 'time_points.csv'), stringsAsFactors = F, colClasses = c('character', 'numeric'))
-      tm = self$meta[['time']]$Time[1:2]
-      self$meta[['sample_rate']] = 1 / (tm[2] - tm[1])
-      # self$meta[['info']] = load_meta('info', subject_id = subject_id)
+
+      time_points = read.csv(file.path(meta_dir, 'time_points.csv'), stringsAsFactors = F, colClasses = c('character', 'numeric'))
+      time_points$Valid = T
+
+      tm = time_points$Time[1:2]
+      self$meta[['sample_rate']] = sample_rate = 1 / (tm[2] - tm[1])
+
+      time_excluded_path = file.path(meta_dir, 'time_excluded.csv')
+      if(file.exists(time_excluded_path)){
+        time_excluded = read.csv(file.path(meta_dir, 'time_excluded.csv'), stringsAsFactors = F, colClasses = c('character', 'numeric', 'numeric'))
+        for(i in 1:nrow(time_excluded)){
+          b = time_excluded$Block[i]
+          s = time_excluded$Start[i]
+          e = time_excluded$End[i]
+          sel = time_points$Block == b & time_points$Time %within% c(s, e)
+          if(sum(sel)){
+            time_points$Valid[sel] = FALSE
+          }
+        }
+      }
+      self$meta[['time']] = time_points
     },
     filter_valid_electrodes = function(electrodes){
       electrodes[electrodes %in% self$valid_electrodes]

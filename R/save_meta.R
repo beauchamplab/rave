@@ -81,12 +81,32 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
     }else if(meta_type == 'epoch'){
       epoch_file = file.path(meta_dir, sprintf('epoch_%s.csv', meta_name))
       epochs = read.csv(epoch_file, header = T, stringsAsFactors = F,
-                        colClasses = c('character', 'numeric', 'character'))
+                        colClasses = c('character', 'numeric', 'numeric'))
+      if(!'Label' %in% names(epochs)){
+        trial_path = file.path(meta_dir, 'trials.csv')
+        if(file.exists(trial_path)){
+          trials = read.csv(trial_path, stringsAsFactors = F)
+          epochs = merge(epochs, trials, by = 'Trial', all.x = T, sort = F, suffixes = c('', '_y'))
+          epochs = epochs[, c('Block', 'Time', 'Trial', 'Label')]
+          epochs$Label[is.na(epochs$Label)] = 'NotAvailable'
+        }else{
+          epochs$Label = 'NotAvailable'
+        }
+      }
+      epochs$Label = as.character(epochs$Label)
       return(epochs)
     }else if(meta_type == 'info'){
       info_file = file.path(meta_dir, 'info.yaml')
       info = yaml::yaml.load_file(info_file)
       return(info)
+    }else if(meta_type == 'time_excluded'){
+      file = file.path(meta_dir, 'time_excluded.csv')
+      if(!file.exists(file)){
+        return(NULL)
+      }
+      time_excluded = read.csv(file, header = T, stringsAsFactors = F,
+                        colClasses = c('character', 'numeric', 'numeric'))
+      return(time_excluded)
     }
   }
 
