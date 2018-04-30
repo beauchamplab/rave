@@ -1,4 +1,11 @@
-data_repository = new.env()
+#' Environment for ECoG data and modules
+#' As of rave-Ent, data_repository nolonger succeed from globalenv()
+#' Instead, its parent is now baseenv()
+#' All packages needed are imported via loadnamespace within modules
+#' This will help create a clean environment for modules.
+NULL
+
+data_repository = new.env(parent = baseenv())
 
 
 #' @export
@@ -21,7 +28,7 @@ getDefaultDataRepository <- function(
     session_id = '.TEMP'
   }
   if(!exists(session_id, envir = data_repository)){
-    e = new.env(parent = globalenv())
+    e = new.env(parent = baseenv())
     e$.clean = function(){
       if(is.null(session)){
         return(invisible())
@@ -116,10 +123,23 @@ ModuleEnvir <- R6::R6Class(
       return(private$exec_env[[session_id]])
     },
     load_script = function(session = shiny::getDefaultReactiveDomain()){
+      # read in script, get package info
+      src = readLines(self$script_path)
+      # add package information into static_env
+      additional_pkgs = str_match(src, '(require|library)\\(([a-zA-Z0-9_]*)')[,3]
+      additional_pkgs = additional_pkgs[!is.na(additional_pkgs)]
+
+      loaded_pkgs = str_match(search(), '^package:(.+)')[,2]
+      loaded_pkgs = rev(loaded_pkgs[!is.na(loaded_pkgs)])
+
+      all_packages = c(loaded_pkgs, self$packages, additional_pkgs)
+
+
+
       # get
       static_env = self$get_or_new_exec_env(session = session)$static_env
       runtime_env = self$get_or_new_exec_env(session = session)$runtime_env
-      src = readLines(self$script_path)
+
       parsed = parse(text = src)
       for(i in 1:length(parsed)){
         comp = lazyeval::as.lazy(str_c(parsed[i]), env = static_env)
@@ -141,11 +161,6 @@ ModuleEnvir <- R6::R6Class(
         }
       }
 
-      # add package information into static_env
-      additional_pkgs = str_match(src, '(require|library)\\(([a-zA-Z0-9_]*)')[,3]
-      additional_pkgs = additional_pkgs[!is.na(additional_pkgs)]
-
-      static_env$..packages = c(additional_pkgs, self$packages)
 
     },
     cache = function(key, val, session, replace = FALSE){
@@ -247,12 +262,16 @@ ExecEnvir <- R6::R6Class(
       clear_env(self$wrapper_env)
     },
     initialize = function(data_env = rave::getDefaultDataRepository(),
-                          session = shiny::getDefaultReactiveDomain()){
-      private$data_env = data_env
+                          session = shiny::getDefaultReactiveDomain(),
+                          parent_env = baseenv()){
       private$session = session
 
       # wrapper can access data repository, and contains all util functions
-      self$wrapper_env = new.env(parent = data_env)
+      # The advantage of using rlang::as_data_mask here is that we can pre
+      # import packages as parent environments of parent_env. And in the meanwhile
+      # data_env is the first environemnt being accessed.
+      self$wrapper_env = rlang::as_data_mask(data_env, parent = parent_env)
+        #new.env(parent = data_env)
 
       # static_env contains user self-defined functions. once initialized, they can
       # be read-only (in most of the cases).
@@ -261,6 +280,7 @@ ExecEnvir <- R6::R6Class(
       # runtime_env, all variables will be stored within this environment, is the
       # one that real execute take place
       self$runtime_env = new.env(parent = self$static_env)
+      self$static_env$.env = self$runtime_env
       private$cache_env = new.env()
       private$cache_env$.keys = c()
       self$ns = base::I
