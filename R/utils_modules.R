@@ -73,7 +73,10 @@ module_to_package <- function(
                  data = .inner,
                  dependencies = .this$..packages,
                  load = load,
-                 root_dir = root_dir)
+                 root_dir = root_dir) ->
+    re
+
+  return(re)
 }
 
 
@@ -170,7 +173,7 @@ create_package <- function(module_id, env = new.env(), data = new.env(),
       ))
     }
   }else{
-    e = TRUE
+    e = pkgName
   }
 
 
