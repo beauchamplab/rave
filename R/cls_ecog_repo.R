@@ -133,7 +133,7 @@ ECoGRepository <- R6::R6Class(
           self[[name]]$set(
             key = name,
             value = ECoGTensor$new(
-              data = vapply(rep(1, length(results)), function(i){
+              data = vapply(seq_len(length(results)), function(i){
                 data = env$results[[1]]$data
                 env$results[[1]] = NULL
                 dimnames(data) = NULL
@@ -273,7 +273,6 @@ ECoGRepository <- R6::R6Class(
         }
       }
 
-      ###FIXME
       bls_dim = dim(e_power)
       bls_dimnames = dimnames(e_power)
       bls = array(0, dim = bls_dim[c(1,2)])

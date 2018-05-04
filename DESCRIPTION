@@ -121,6 +121,7 @@ Collate:
     'utils_lapply.R'
     'utils_logger.R'
     'utils_mem.R'
+    'utils_modules.R'
     'utils_niml.R'
     'utils_normalize_path.R'
     'utils_parse.R'

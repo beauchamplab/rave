@@ -28,7 +28,7 @@ getDefaultDataRepository <- function(
     session_id = '.TEMP'
   }
   if(!exists(session_id, envir = data_repository)){
-    e = new.env(parent = baseenv())
+    e = new.env(parent = globalenv())
     e$.clean = function(){
       if(is.null(session)){
         return(invisible())
@@ -903,6 +903,9 @@ rave_inputs <- function(..., .tabsets = list(), .env = globalenv()){
 
     inputId = arglist[['inputId']]
     value = arglist[[val_name]]
+    try({
+      value = eval(value)
+    })
     if(!is.null(inputId) && inputId != ''){
       assign(inputId, value, envir = .env)
     }

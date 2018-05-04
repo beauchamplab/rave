@@ -540,7 +540,7 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2){
     observeEvent(input$save, {
       save_path = get_save_path()
       tbl = get_epochs()
-      write.csv(tbl, save_path, row.names = F)
+      safe_write_csv(tbl, save_path, row.names = F)
 
       showNotification(p('Epoch file exported.'), type = 'message')
     })

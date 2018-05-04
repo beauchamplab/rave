@@ -4,11 +4,17 @@ module_to_package <- function(
   load = F, root_dir = NULL
 ){
   src = readLines(script_path)
+  force(module_id);force(label_name);force(packages);force(load);force(root_dir)
 
-  .this = new.env(parent = globalenv())
+  global_env = globalenv()
+  rm(list = ls(global_env, all.names = T), envir = global_env)
+
+  .this = new.env(parent = global_env)
   .inner = new.env(parent = .this)
   .this$..packages = packages
   .this$..call_stack = list()
+
+  .func = new.env()
 
 
   # functions
@@ -37,8 +43,40 @@ module_to_package <- function(
     .this$..call_stack = c(.this$..call_stack, rev(rlang::parse_quos(paste(readLines(fpath), collapse = '\n'), env = .this)))
   }
 
-  # TODO modify
-  .this$rave_inputs = .this$rave_outputs = .this$rave_updates = .this$rave_execute = function(...){}
+  .this$rave_updates = function(...){
+    quos = rlang::quos(...)
+    exprs = lapply(quos, rlang::quo_get_expr)
+    call = rlang::new_call(quote(rave_updates), as.pairlist(exprs))
+    call[['.env']] = quote(.env)
+    .inner$..rave_updates = function(.env = ..get_runtime_env()){}
+    body(.inner$..rave_updates) = call
+  }
+
+  .this$rave_inputs = function(...){
+    quos = rlang::quos(...)
+    exprs = lapply(quos, rlang::quo_get_expr)
+    call = rlang::new_call(quote(rave_inputs), as.pairlist(exprs))
+    call[['.env']] = quote(.env)
+    .inner$..rave_inputs = function(.env = ..get_runtime_env()){}
+    body(.inner$..rave_inputs) = call
+  }
+
+  .this$rave_execute = function(...){
+    quos = rlang::quos(...)
+    exprs = lapply(quos, rlang::quo_get_expr)
+    call = rlang::new_call(quote(rave_execute), as.pairlist(exprs))
+    call[['.env']] = quote(.env)
+    .inner$..rave_execute = function(.env = ..get_runtime_env()){}
+    body(.inner$..rave_execute) = call
+  }
+
+  .this$rave_outputs = function(...){
+    quos = rlang::quos(...)
+    exprs = lapply(quos, rlang::quo_get_expr)
+    call = rlang::new_call(quote(rave_outputs), as.pairlist(exprs))
+    .inner$..rave_outputs = function(){}
+    body(.inner$..rave_outputs) = call
+  }
 
 
   # parse source
@@ -58,7 +96,7 @@ module_to_package <- function(
   # to create a package for this, the best way is to write down all functions to scripts and cache all variables
   # to a RData file and load them via a function
   nms = names(as.list(.inner, all.names = T))
-  .func = new.env()
+
   sapply(nms, function(key){
     val = .inner[[key]]
     if(is.function(val)){
@@ -107,17 +145,60 @@ create_package <- function(module_id, env = new.env(), data = new.env(),
 
 
   env$..dependencies = function(){}
-  env$..rave_init_vars = function(){}
-  body(env$..rave_init_vars) = rlang::quo_squash(rlang::quo({
-    ..rdata_file = system.file('vars.RData', package = !!pkgName)
-    ..env = new.env()
-    base::load(file = ..rdata_file, envir = ..env)
-    ..env
+  env$..rave_init = function(clear_env = T){}
+  body(env$..rave_init) = rlang::quo_squash(rlang::quo({
+    runtime_env = ..get_runtime_env()
+    static_env = parent.env(runtime_env)
+
+    if(clear_env){
+      .list = names(as.list(runtime_env, all.names = T))
+      if(length(.list)){
+        rm(list = .list, envir = runtime_env)
+      }
+    }
+
+    if(!environmentIsLocked(static_env)){
+
+      pkg = do.call('loadNamespace', list(package = !!pkgName))
+
+      ..rdata_file = system.file('vars.RData', package = !!pkgName)
+      base::load(file = ..rdata_file, envir = runtime_env)
+
+      lapply(names(as.list(pkg, all.names=T)), function(nm){
+        fun = pkg[[nm]]
+        if(is.function(fun)){
+          environment(fun) = runtime_env
+        }
+        static_env[[nm]] = fun
+        invisible()
+      })
+
+      # lock static_env
+      lockEnvironment(static_env)
+    }
+
+
+    list(
+      static = static_env,
+      runtime = runtime_env
+    )
   }))
+
+  env$..get_runtime_env = function(session){
+    if(missing(session) || is.null(session)){
+      session = shiny::getDefaultReactiveDomain()
+    }
+    sid = rave:::add_to_session(session)
+    sid %?<-% 'TEMP'
+    ..session_envs[[sid]] %?<-% new.env(parent = rave::getDefaultDataRepository())
+    ..session_envs[[sid]][['..runtime']] %?<-% new.env(parent = ..session_envs[[sid]])
+    ..session_envs[[sid]][['..runtime']]
+  }
   body(env$..dependencies) = {dependencies}
   package.skeleton(name=pkgName, path = root_dir, environment = env, force = T)
-
-  # cat(src, sep = '\n', file = src_file)
+  cat("\n..runtime_env = new.env();\n",
+      "..session_envs = new.env()",
+      sep = '\n', file = src_file, append = T)
   # remove man folder
   unlink(file.path(pack_dir, 'man'), recursive = T, force = T)
   dir.create(inst_dir, showWarnings = F, recursive = T)

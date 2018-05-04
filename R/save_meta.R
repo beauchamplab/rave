@@ -80,20 +80,27 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
       }
     }else if(meta_type == 'epoch'){
       epoch_file = file.path(meta_dir, sprintf('epoch_%s.csv', meta_name))
+      default_cols = c('Block', 'Time', 'Trial', 'Condition', 'Duration')
+
       epochs = read.csv(epoch_file, header = T, stringsAsFactors = F,
-                        colClasses = c('character', 'numeric', 'numeric'))
-      if(!'Label' %in% names(epochs)){
-        trial_path = file.path(meta_dir, 'trials.csv')
-        if(file.exists(trial_path)){
-          trials = read.csv(trial_path, stringsAsFactors = F)
-          epochs = merge(epochs, trials, by = 'Trial', all.x = T, sort = F, suffixes = c('', '_y'))
-          epochs = epochs[, c('Block', 'Time', 'Trial', 'Label')]
-          epochs$Label[is.na(epochs$Label)] = 'NotAvailable'
-        }else{
-          epochs$Label = 'NotAvailable'
-        }
+                        colClasses = 'character')
+      epochs$Time = as.numeric(epochs$Time)
+      epochs$Trial = as.numeric(epochs$Trial)
+      epochs$Duration %?<-% NA
+      epochs$Duration = as.numeric(epochs$Duration)
+
+      trial_path = file.path(meta_dir, 'trials.csv')
+      if(file.exists(trial_path)){
+        trials = read.csv(trial_path, stringsAsFactors = F)
+        epochs = merge(epochs, trials, by = 'Trial', all.x = T, sort = F, suffixes = c('', '_y'))
       }
-      epochs$Label = as.character(epochs$Label)
+      epochs$Condition %?<-% 'NoCondition'
+      epochs$Condition[is.na(epochs$Condition)] = 'NoCondition'
+      epochs$Condition = as.character(epochs$Condition)
+      # sort column orders
+      nms = names(epochs)
+      nms = c(default_cols, nms[!nms %in% default_cols])
+      epochs = epochs[, nms]
       return(epochs)
     }else if(meta_type == 'info'){
       info_file = file.path(meta_dir, 'info.yaml')

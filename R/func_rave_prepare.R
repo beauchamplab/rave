@@ -66,6 +66,7 @@ rave_prepare <- function(
     env$frequencies = meta$Frequency
     env$electrodes = meta$Electrode
     env$meta = repo$subject$meta
+    env$meta[['epoch_data']] = repo$epochs$get('epoch_data')
     env$epoch = list(
       name = epoch,
       time_range = time_range

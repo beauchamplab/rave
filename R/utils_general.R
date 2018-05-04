@@ -214,6 +214,11 @@ image_plot = function(z, x, y, crop = NULL, symmetric = F, precision = 1, main =
 
   parent_env = parent.frame()
 
+  pl.fun = function(){}
+
+  body(pl.fun) = substitute(panel.last, env = environment())
+  environment(pl.fun) = parent_env
+
 
   lapply(seq_len(length(z)), function(ii){
 
@@ -232,7 +237,7 @@ image_plot = function(z, x, y, crop = NULL, symmetric = F, precision = 1, main =
             cex.axis = cex.axis, cex.main = cex.main * 0.8, main = sub_titles[ii], ...)
     }
 
-    eval(panel.last, envir = parent_env)
+    pl.fun()
   })
   invisible()
 

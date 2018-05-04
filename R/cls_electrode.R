@@ -100,6 +100,7 @@ Electrode <- R6::R6Class(
       pre = round(pre * private$subject$sample_rate)
       post = round(post * private$subject$sample_rate)
       time_points = seq(-pre, post) / private$subject$sample_rate
+      trial_order = order(epochs$Trial)
       lapply(1:nrow(epochs), function(i){
         epochs[i,]
       }) ->
@@ -131,13 +132,13 @@ Electrode <- R6::R6Class(
         subinds = as.vector(sapply(indices[sel], '[[', 'ind'))
         a = tmp[[b]][,subinds]
         dim(a) = c(nrow(a), dim_3, sum(sel))
-        placehold[sel,,,1] = aperm(a, c(3, 1, 2))
+        placehold[trial_order[sel],,,1] = aperm(a, c(3, 1, 2))
       }
       # assign dim names
       data = ECoGTensor$new(
         data = placehold,
         dimnames = list(
-          Trial = epochs$Label,
+          Trial = epochs$Trial[trial_order],
           Frequency = freqs$Frequency,
           Time = time_points,
           Electrode = electrode
@@ -195,7 +196,7 @@ Electrode <- R6::R6Class(
 
       # assign dim names
       data = rave:::ECoGTensor$new(data = placehold, dimnames = list(
-        epochs$Label,
+        epochs$Trial,
         freqs$Frequency,
         time_points,
         electrode
