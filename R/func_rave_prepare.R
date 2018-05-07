@@ -84,6 +84,8 @@ rave_prepare <- function(
       if('rave_data' %in% search()){
         base::detach('rave_data', character.only = T, force = T)
       }
+      # special for dev use
+      env$module_tools = rave_module_tools()
       base::attach(env, name = 'rave_data')
 
 
