@@ -333,7 +333,6 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2){
       plot_volt(time, signal, plot_range = plot_range, use_abs = is_symmetric, hlines = local_data$threshold, vlines = st, vcols = vcol)
     })
 
-    assign('ld', local_data, envir = globalenv())
 
     observeEvent(input$console_plot_clicked, {
       e = input$console_plot_clicked

@@ -169,7 +169,7 @@ readh5dataset <- function(h5dataset, index = NULL){
     }, add = T)
 
     obj <- H5Dread(h5dataset = h5dataset, h5spaceFile = h5spaceFile,
-                   h5spaceMem = h5spaceMem, compoundAsDataFrame = F, drop = F)
+                   h5spaceMem = h5spaceMem, compoundAsDataFrame = F)
 
     # redim obj
     obj = do.call('[', args = c(
