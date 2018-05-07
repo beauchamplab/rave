@@ -1,12 +1,13 @@
-# 1 UI for all
+#' RAVE Preprocess Function
+#' @usage rave_pre_process(sidebar_width = 3L, launch.browser = T, host = '127.0.0.1', ...)
 #' @import shiny
 #' @import rhdf5
 #' @import stringr
 #' @importFrom magrittr %>%
 #' @importFrom assertthat assert_that
 #' @export
-rave_preprocess3 <- function(
-  sidebar_width = 3,
+rave_pre_process <- function(
+  sidebar_width = 3L,
   launch.browser = T,
   host = '127.0.0.1',
   quiet = T,
@@ -21,14 +22,54 @@ rave_preprocess3 <- function(
   model_instances = NULL
 
 
+  if(missing(modules) || length(modules) == 0){
+    modules = list(
+      list(
+        ID = 'OVERVIEW',
+        name = 'Overview',
+        checklevel = 0,
+        ..func = 'rave_pre_overview3'
+      ),
+      list(
+        ID = 'NOTCH',
+        name = 'Notch Filter',
+        checklevel = 1,
+        ..func = 'rave_pre_notch3'
+      ),
+      list(
+        ID = 'WAVELET',
+        name = 'Wavelet',
+        checklevel = 2,
+        ..func = 'rave_pre_wavelet3'
+      ),
+      list(
+        ID = 'REF',
+        name = 'Reference',
+        checklevel = 2,
+        ..func = 'rave_pre_ref3'
+      ),
+      list(
+        ID = 'POSTREF',
+        name = 'Post Inspection',
+        checklevel = 4,
+        ..func = 'rave_pre_postref3'
+      ),
+      list(
+        ID = 'EPOCH',
+        name = 'Trial Epoch',
+        checklevel = 1,
+        ..func = 'pre_epoch3'
+      )
+    )
+  }
 
 
   # Step 2: initialize models
 
-  #' checklevel:
-  #' 0 - No check
-  #' 1 - subject loaded, folder exists
-  #' 2 - notch filter applied
+  # checklevel:
+  # 0 - No check
+  # 1 - subject loaded, folder exists
+  # 2 - notch filter applied
   NOTCH_FILTERED = 2
   WAVELET_TRANSFORMED = 3
   REFERENCED = 4
@@ -94,8 +135,8 @@ rave_preprocess3 <- function(
       reset = NULL
     )
 
-    env <<- environment()
-    utils <<- rave_tools(env = env)
+    env <- environment()
+    utils <- rave_preprocess_tools(env = env)
 
     # Reset modules
     utils$reset = function(){

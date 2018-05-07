@@ -3,7 +3,7 @@ rave_inputs(
 
     # compound Input allows to grow the number of independent conditions
     compoundInput(
-        inputId = 'GROUPS',
+        inputId = 'GROUPS_CMPD',
         label = 'Group',
         components = {
             textInput('GROUP_NAME', 'Name', value = '', placeholder = 'Name')
@@ -45,23 +45,31 @@ rave_outputs(
 # how are the variables updated
 rave_updates(
     electrode = list(
-        choices = electrodes,
-        selected = electrodes[1]
+        choices = power$dimnames$Electrode,
+        selected = power$dimnames$Electrode[1]
     ),
-    GROUPS = list(
+    GROUPS_CMPD = local({
+      tools = module_tools
+      trials = tools$get_meta('trials')
+      cond = unique(trials$Condition)
+
+      list(
         initialize = list(
-            GROUP = list(
-                choices = unique(trials)
-            )
+          GROUP = list(
+            choices = cond
+          )
         ),
-        value = cache_input('GROUPS', list(
-            list(
-                GROUP = trials[1]
-            )
+        value = cache_input('GROUPS_CMPD', list(
+          list(
+            GROUP = cond[1]
+          )
         ))
-    ),
+      )
+    }),
 
     BASELINE = local({
+      time_points = power$dimnames$Time
+
         list(
             min = min(time_points),
             max = max(time_points),
@@ -69,6 +77,7 @@ rave_updates(
         )
     }),
     FREQUENCY = local({
+      frequencies = power$dimnames$Frequency
         list(
             min = min(round(frequencies)),
             max = max(round(frequencies)),
@@ -76,6 +85,7 @@ rave_updates(
         )
     }),
     TIME_RANGE = local({
+      time_points = power$dimnames$Time
         list(
             min = min(time_points),
             max = max(time_points),

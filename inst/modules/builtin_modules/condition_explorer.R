@@ -20,7 +20,7 @@ rave_ignore({
     #              module_lookup_file = '~/Dropbox/RAVE_DEV/module_dev.csv',
     #              crayon_enabled=TRUE)
 
-    GROUPS = list(
+  GROUPS_CMPD = list(
         list(
             GROUP_NAME = 'G1',
             GROUP = c('drive_a', 'known_v')
@@ -83,17 +83,39 @@ async_out = function(){
 rave_execute({
     assertthat::assert_that(length(electrode) == 1,msg = 'No electrode selected')
 
+  # TODO: change adhoc vars definition - Zhengjia
+  electrodes = power$dimnames$Electrode
+  trials = power$dimnames$Trial
+  frequencies = power$dimnames$Frequency
+  time_points = power$dimnames$Time
+
+
+
     electrode = as.integer(electrode)
 
     #baseline all available trials
 
-    has_trials <- vapply(GROUPS, function(g) length(g$GROUP) > 0, TRUE)
+    has_trials <- vapply(GROUPS_CMPD, function(g) length(g$GROUP) > 0, TRUE)
     any_trials = any(has_trials)
 
     bl_power <- cache(
         key = list(subject$subject_id, electrode, BASELINE, any_trials),
         val = baseline(BASELINE[1],  BASELINE[2], electrode)
     )
+
+    # TODO: change GROUPS definition - Zhengjia
+    trials_ = module_tools$get_meta('trials')
+    GROUPS = lapply(GROUPS_CMPD, function(g){
+      g[['GROUP_NAME']] %?<-% ''
+      cond = g[['GROUP']]
+      tls = trials_$Trial[trials_$Condition %in% cond]
+      if(length(tls)){
+        g[['GROUP']] = tls
+      }else{
+        g[['GROUP']] = NULL
+      }
+      g
+    })
 
     # we were repeating a lot of calculations and looping over GROUPS too many times
     # let's clean that up

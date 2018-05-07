@@ -488,7 +488,7 @@ eval_within <- function(FUN, env = parent.frame(), ..., .args = list(), .tidy = 
 
 #' Function to clear all elements within environment
 #' @usage clear_env(env, all.names = T)
-#' @example
+#' @examples
 #' env = new.env()
 #' env$a = 1
 #' print(as.list(env))
@@ -621,7 +621,7 @@ zero_length <- function(..., any = T, na.rm = F){
 
 
 #' Drop nulls within lists/vectors
-#' @example
+#' @examples
 #' x <- list(NULL,NULL,1,2)
 #' dropNulls(x)
 #' @export
@@ -746,7 +746,7 @@ cache <- function(key, val, global = FALSE, replace = FALSE, session = NULL, swa
   if(global){
     session = NULL
   }else{
-    session %?<-% shiny::getDefaultReactiveDomain()
+    session %?<-% getDefaultReactiveDomain()
   }
   cache_env = getDefaultCacheEnvironment(session = session)
 
@@ -780,7 +780,7 @@ cache <- function(key, val, global = FALSE, replace = FALSE, session = NULL, swa
 #' @param all Clear all cache? Don't turn it on in shiny app. This is for debug use.
 #' @export
 clear_cache <- function(all = FALSE, session = NULL){
-  session %?<-% shiny::getDefaultReactiveDomain()
+  session %?<-% getDefaultReactiveDomain()
   cache_env = getDefaultCacheEnvironment(session = session)
   clear_env(cache_env)
   if(all){
@@ -793,7 +793,7 @@ clear_cache <- function(all = FALSE, session = NULL){
 
 #' @export
 getDefaultCacheEnvironment <- function(
-  session = shiny::getDefaultReactiveDomain()
+  session = getDefaultReactiveDomain()
 ){
   data_env = getDefaultDataRepository(session = session, session_based = T)
   data_env$.cache_env %?<-% new.env(parent = baseenv())

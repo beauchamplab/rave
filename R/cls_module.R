@@ -5,12 +5,19 @@
 #' This will help create a clean environment for modules.
 NULL
 
+
+getDefaultReactiveDomain <- function(){
+  session = shiny::getDefaultReactiveDomain()
+  session %?<-% get0('session', envir = globalenv())
+  return(session)
+}
+
 data_repository = new.env(parent = baseenv())
 
 
 #' @export
 getDefaultDataRepository <- function(
-  session = shiny::getDefaultReactiveDomain(),
+  session = getDefaultReactiveDomain(),
   session_id,
   session_based = NULL
 ){
@@ -28,7 +35,7 @@ getDefaultDataRepository <- function(
     session_id = '.TEMP'
   }
   if(!exists(session_id, envir = data_repository)){
-    e = new.env(parent = globalenv())
+    e = new.env(parent = baseenv())
     e$.clean = function(){
       if(is.null(session)){
         return(invisible())
@@ -67,6 +74,7 @@ ModuleEnvir <- R6::R6Class(
     version = NULL,
     packages = NULL,
     rmd_path = NULL,
+    externalpackage = FALSE,
     print = function(){
       cat('Module Name:', self$label_name, '\n')
       cat('Version:', self$version, '\n')
@@ -84,7 +92,8 @@ ModuleEnvir <- R6::R6Class(
       version = '0',
       packages = NULL,
       .script_content = NULL,
-      rmd_path = NULL
+      rmd_path = NULL,
+      externalpackage = FALSE
     ){
       self$module_id = module_id
       self$label_name = label_name
@@ -93,6 +102,10 @@ ModuleEnvir <- R6::R6Class(
       self$packages = c('rave', packages)
       self$rmd_path = rmd_path
       private$cache_env = list()
+      self$externalpackage = externalpackage
+      if(externalpackage){
+        self$packages = to_package_name(module_id)
+      }
 
       # validate script_path
       if(missing(script_path)){
@@ -106,15 +119,20 @@ ModuleEnvir <- R6::R6Class(
       self$script_path = script_path
 
     },
-    get_or_new_exec_env = function(data_env = rave::getDefaultDataRepository(),
-                            session = shiny::getDefaultReactiveDomain()){
+    get_or_new_exec_env = function(session = getDefaultReactiveDomain(), ...){
       session_id = add_to_session(session)
       if(is.null(session_id)){
         session_id = '.TEMP'
       }
+      if(self$externalpackage){
+        parent_env = list(...)[['parent_env']]
+        parent_env %?<-% do.call(base::loadNamespace, args = list(self$packages))
+      }else{
+        parent_env = globalenv()
+      }
 
       if(is.null(private$exec_env[[session_id]])){
-        private$exec_env[[session_id]] = ExecEnvir$new(data_env = data_env, session = session)
+        private$exec_env[[session_id]] = ExecEnvir$new(session = session, parent_env = parent_env)
         private$exec_env[[session_id]]$register_module(self)
       }
       if(!session_id %in% names(private$cache)){
@@ -122,17 +140,17 @@ ModuleEnvir <- R6::R6Class(
       }
       return(private$exec_env[[session_id]])
     },
-    load_script = function(session = shiny::getDefaultReactiveDomain()){
+    load_script = function(session = getDefaultReactiveDomain()){
       # read in script, get package info
       src = readLines(self$script_path)
       # add package information into static_env
-      additional_pkgs = str_match(src, '(require|library)\\(([a-zA-Z0-9_]*)')[,3]
-      additional_pkgs = additional_pkgs[!is.na(additional_pkgs)]
-
-      loaded_pkgs = str_match(search(), '^package:(.+)')[,2]
-      loaded_pkgs = rev(loaded_pkgs[!is.na(loaded_pkgs)])
-
-      all_packages = c(loaded_pkgs, self$packages, additional_pkgs)
+      # additional_pkgs = str_match(src, '(require|library)\\(([a-zA-Z0-9_]*)')[,3]
+      # additional_pkgs = additional_pkgs[!is.na(additional_pkgs)]
+      #
+      # loaded_pkgs = str_match(search(), '^package:(.+)')[,2]
+      # loaded_pkgs = rev(loaded_pkgs[!is.na(loaded_pkgs)])
+      #
+      # all_packages = c(loaded_pkgs, self$packages, additional_pkgs)
 
 
 
@@ -148,19 +166,18 @@ ModuleEnvir <- R6::R6Class(
           # logger('[Parsed]: ', str_c(parsed[i]), level = 'DEBUG')
         }, error = function(e){
           logger('[Ignored]: ', str_c(parsed[i]), level = 'INFO')
-          # logger(e, level = 'WARNING')
+          logger(paste(e, sep = '\n'), level = 'WARNING')
         })
       }
 
       # re-direct function environment to runtime-env where rave_execute take place.
       for(nm in ls(static_env, all.names = T)){
-        obj = get(nm, envir = static_env)
-        if(is.function(obj)){
-          environment(obj) <- runtime_env
-          assign(nm, obj, envir = static_env)
+        if(is.function(static_env[[nm]])){
+          environment(static_env[[nm]]) <- runtime_env
         }
       }
 
+      # lockEnvironment(static_env)
 
     },
     cache = function(key, val, session, replace = FALSE){
@@ -185,7 +202,7 @@ ModuleEnvir <- R6::R6Class(
         }
       }
     },
-    render_ui = function(session = shiny::getDefaultReactiveDomain()){
+    render_ui = function(session = getDefaultReactiveDomain()){
       e = self$get_or_new_exec_env(session = session)
       shiny::fluidRow(
         e$generate_input_ui(),
@@ -193,7 +210,7 @@ ModuleEnvir <- R6::R6Class(
       )
 
     },
-    clean = function(session = shiny::getDefaultReactiveDomain(),
+    clean = function(session = getDefaultReactiveDomain(),
                      session_id){
 
       if(missing(session_id)){
@@ -240,6 +257,7 @@ ExecEnvir <- R6::R6Class(
     wrapper_env = NULL,
     static_env = NULL,
     runtime_env = NULL,
+    param_env = NULL,
     ns = NULL,
     input_update = NULL,
     register_output_events = NULL,
@@ -251,49 +269,93 @@ ExecEnvir <- R6::R6Class(
       cat(ls(self$wrapper_env))
       cat('\n- static environment -\n')
       cat(ls(self$static_env))
+      cat('\n- param environment -\n')
+      cat(ls(self$param_env))
       cat('\n- runtime environment -\n')
       cat(ls(self$runtime_env))
     },
     clean = function(){
       # WARNING: this is not clean, but should be able to clear most of the large objects
       clear_env(self$runtime_env)
-      clear_env(self$static_env)
+      # clear_env(self$static_env)
       clear_env(private$cache_env)
-      clear_env(self$wrapper_env)
+      # clear_env(self$wrapper_env)
     },
-    initialize = function(data_env = rave::getDefaultDataRepository(),
-                          session = shiny::getDefaultReactiveDomain(),
+    initialize = function(session = getDefaultReactiveDomain(),
                           parent_env = baseenv()){
       private$session = session
 
-      # wrapper can access data repository, and contains all util functions
-      # The advantage of using rlang::as_data_mask here is that we can pre
-      # import packages as parent environments of parent_env. And in the meanwhile
-      # data_env is the first environemnt being accessed.
-      self$wrapper_env = rlang::as_data_mask(data_env, parent = parent_env)
-        #new.env(parent = data_env)
+      # wrapper has active bindings to data repository which allow us
+      # the access to data loaded in data repo. It'll be sealed (locked)
+      self$wrapper_env = new.env(parent = parent_env)
+      rave::rave_module_tools(self$wrapper_env)
 
       # static_env contains user self-defined functions. once initialized, they can
       # be read-only (in most of the cases).
       self$static_env = new.env(parent = self$wrapper_env)
+      self$param_env = new.env(parent = self$static_env)
 
       # runtime_env, all variables will be stored within this environment, is the
       # one that real execute take place
-      self$runtime_env = new.env(parent = self$static_env)
+      self$runtime_env = new.env(parent = self$param_env)
       self$static_env$.env = self$runtime_env
       private$cache_env = new.env()
       private$cache_env$.keys = c()
       self$ns = base::I
 
-      self$wrapper_env$rave_inputs = self$rave_inputs
-      self$wrapper_env$rave_outputs = self$rave_outputs
-      self$wrapper_env$rave_updates = self$rave_updates
-      self$wrapper_env$rave_execute = self$rave_execute
-      self$wrapper_env$cache = self$cache
-      self$wrapper_env$cache_input = self$cache_input
-      self$wrapper_env$rave_ignore = function(...){}
-      self$wrapper_env$rave_prepare = function(...){} # do nothing
+      self$wrapper_env$rave_inputs = function(...){
+        if(is.null(getDefaultReactiveDomain())){
+          rave::rave_inputs(...)
+        }else{
+          self$rave_inputs(...)
+        }
+      }
+      self$wrapper_env$rave_outputs = function(...){
+        if(is.null(getDefaultReactiveDomain())){
+          rave::rave_outputs(...)
+        }else{
+          self$rave_outputs(...)
+        }
+      }
+      self$wrapper_env$rave_updates = function(...){
+        if(is.null(getDefaultReactiveDomain())){
+          rave::rave_updates(...)
+        }else{
+          self$rave_updates(...)
+        }
+      }
+      self$wrapper_env$rave_execute = function(...){
+        if(is.null(getDefaultReactiveDomain())){
+          rave::rave_execute(...)
+        }else{
+          self$rave_execute(...)
+        }
+      }
+      self$wrapper_env$cache = function(...){
+        if(is.null(getDefaultReactiveDomain())){
+          rave::cache(...)
+        }else{
+          self$cache(...)
+        }
+      }
+      self$wrapper_env$cache_input = function(...){
+        if(is.null(getDefaultReactiveDomain())){
+          rave::cache_input(...)
+        }else{
+          self$cache_input(...)
+        }
+      }
+      self$wrapper_env$rave_ignore = function(...){
+        if(is.null(getDefaultReactiveDomain())){
+          rave::rave_ignore(...)
+        }
+      }
+      self$wrapper_env$rave_prepare = self$wrapper_env$rave_ignore # do nothing
       self$wrapper_env$source = function(file, local = T, ...){
+        if(environmentIsLocked(self$static_env)){
+          return()
+        }
+
         # try to find file, if not, try to use the one under modules's dir
         if(!file.exists(file)){
           logger('File [', file, '] does not exists, try to look for it.', level = 'INFO')
@@ -322,6 +384,8 @@ ExecEnvir <- R6::R6Class(
       }
 
       self$wrapper_env$library = self$wrapper_env$require
+
+      lockEnvironment(self$wrapper_env)
 
     },
     reset = function(inputs){
@@ -421,16 +485,20 @@ ExecEnvir <- R6::R6Class(
       private$module_env = module_env
       self$ns = shiny::NS(module_env$module_id)
     },
-    rave_inputs = function(..., .tabsets = list()){
+    rave_inputs = function(..., .tabsets = list(), .env = NULL){
       private$tabsets = .tabsets
       dots = lazyeval::lazy_dots(...)
       re = lapply(dots, function(comp){
-        comp = parse_shiny_inputs(comp, env = self$static_env)
+        comp = parse_shiny_inputs(comp, env = self$param_env)
         comp$expr = comp$.change_param(inputId = self$ns(comp$.inputId), .lazy = F)
         comp
       })
       nm = lapply(re, function(x){
-        assign(x$.inputId, x$.args[[x$.value]], envir = self$static_env)
+        val = x$.args[[x$.value]]
+        try({
+          val = eval(val)
+        }, silent = T)
+        assign(x$.inputId, val, envir = self$param_env)
         x$.inputId
       })
       names(re) = nm
@@ -443,7 +511,7 @@ ExecEnvir <- R6::R6Class(
       dots = lapply(1:length(dots), function(ii){
         comp = dots[[ii]]
         title = titles[[ii]]
-        comp$env = self$static_env
+        comp$env = self$param_env
         expr = comp$expr
         ui_func = expr[[1]]
         func_name = str_replace(ui_func, '^[\\w]+::', '')
@@ -533,7 +601,7 @@ ExecEnvir <- R6::R6Class(
         }
       }
     },
-    rave_updates = function(...){
+    rave_updates = function(..., .env = NULL){
       dots = lapply(lazyeval::lazy_dots(...), function(x){
         parse_call(x, self$runtime_env)
       })
@@ -546,7 +614,7 @@ ExecEnvir <- R6::R6Class(
           return(invisible())
         }
         if(is.null(session)){
-          session = shiny::getDefaultReactiveDomain() #private$session
+          session = getDefaultReactiveDomain() #private$session
         }
         for(varname in names(private$update)){
           tryCatch({
@@ -617,7 +685,7 @@ ExecEnvir <- R6::R6Class(
       self$input_update = update
       return(invisible(dots))
     },
-    rave_execute = function(...){
+    rave_execute = function(..., .env = NULL){
       exprs = lapply(lazyeval::lazy_dots(...), function(x){x$env = self$runtime_env; x})
       force(exprs)
       private$execute = function(plan = NULL, async = TRUE){
@@ -681,7 +749,7 @@ ExecEnvir <- R6::R6Class(
       }
     },
     cache = function(key, val, global = FALSE, replace = FALSE,
-                     session = shiny::getDefaultReactiveDomain()){
+                     session = getDefaultReactiveDomain()){
       # .key = str_c(unlist(key, recursive = T, use.names = F), collapse = ', ')
       key = as.character(digest::digest(key))
       if(global){
@@ -769,7 +837,7 @@ ExecEnvir <- R6::R6Class(
         lapply(var_names, function(nm){
           expr = private$inputs[[nm]]$expr
         }) %>%
-          lazyeval::as.lazy_dots(env = self$static_env) %>%
+          lazyeval::as.lazy_dots(env = self$param_env) %>%
           lazyeval::lazy_eval() %>%
           tagList() %>%
           shinydashboard::box(
@@ -808,7 +876,7 @@ ExecEnvir <- R6::R6Class(
           width = comp$width,
           title = comp$title,
           collapsible = T,
-          lazyeval::lazy_eval(lazyeval::as.lazy(expr, env = self$static_env))
+          lazyeval::lazy_eval(lazyeval::as.lazy(expr, env = self$param_env))
         )
       }) %>%
         tagList() %>%

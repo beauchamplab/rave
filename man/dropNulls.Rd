@@ -9,3 +9,7 @@ dropNulls(x, .invalids = c("null"))
 \description{
 Drop nulls within lists/vectors
 }
+\examples{
+x <- list(NULL,NULL,1,2)
+dropNulls(x)
+}

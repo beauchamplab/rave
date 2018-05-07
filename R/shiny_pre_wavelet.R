@@ -33,7 +33,7 @@ rave_pre_wavelet <- function(module_id = 'WAVELET_M', sidebar_width = 2){
     )
   )
 
-  server = function(input, output, session = shiny::getDefaultReactiveDomain(), user_data){
+  server = function(input, output, session = getDefaultReactiveDomain(), user_data){
     local_data = reactiveValues(
       save = NULL,
       refresh = NULL,

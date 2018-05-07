@@ -41,24 +41,70 @@ LazyH5 <- R6::R6Class(
       rhdf5::H5Dclose(private$data)
     },
 
-    subset = function(i, j, ..., drop = TRUE){
+    subset = function(i, j, ..., drop = FALSE){
       env = parent.frame()
       self$open()
       on.exit({self$close()})
 
       index = as.list(sys.call())[-1]
+      index[['drop']] = NULL
 
-      index = lapply(index, function(x){
-        if(length(x) == 0 || x == ''){
-          NULL
-        }else{
-          eval(x, envir = env)
-        }
-      })
-      if(length(dropNulls(index)) == 0){
-        index = NULL
+      re = readh5dataset(private$data, index)
+      if(drop){
+        re = re[drop = T]
       }
-      rhdf5:::h5readDataset(h5dataset = private$data, index = index)
+      return(re)
+#
+#       # Get dimension
+#       dims = H5Sget_simple_extent_dims(H5Dget_space(private$data))
+#       dims = dims$size
+#
+#       index = lapply(seq_along(dims), function(ii){
+#         x = index[[ii]]
+#         if(length(x) == 0 || x == ''){
+#           return(NULL)
+#         }
+#         ind = eval(x, envir = env)
+#         ind = seq_len(dims[ii])[ind]
+#         return(ind)
+#       })
+#
+#       if(length(dropNulls(index)) == 0){
+#         return(rhdf5:::h5readDataset(h5dataset = private$data, index = NULL, drop = drop))
+#       }else{
+#         dim_ind = sapply(seq_along(dims), function(ii){
+#           x = index[[ii]]
+#           if(length(x) == 0){
+#             return(rep(T, dims[ii]))
+#           }else{
+#             return(!is.na(x))
+#           }
+#         })
+#
+#         dims = vapply(dim_ind, length, 0)
+#
+#         index = lapply(index, function(x){
+#           if(length(x)){
+#             x[!is.na(x)]
+#           }else{
+#             NULL
+#           }
+#         })
+#
+#         re = array(NA, dim = dims)
+#         re = do.call('[<-', c(
+#           list(re),
+#           dim_ind,
+#           list(value = rhdf5:::h5readDataset(h5dataset = private$data, index = index, drop = F))
+#         ))
+#
+#         if(drop){
+#           re[drop = T]
+#         }
+#         return(re)
+#
+#       }
+
 
     },
 
@@ -73,6 +119,83 @@ LazyH5 <- R6::R6Class(
     }
   )
 )
+
+#' Low API implementation of getting H5 data
+readh5dataset <- function(h5dataset, index = NULL){
+  # redundant, but faster
+  if(!length(index)){
+    return(H5Dread(h5dataset))
+  }else{
+    index = lapply(index, function(x){
+      eval(x, envir = parent.frame())
+    })
+  }
+
+  h5spaceFile <- H5Dget_space(h5dataset)
+
+  on.exit({
+    try({
+      H5Sclose(h5spaceFile)
+    }, silent = T)
+  }, add = T)
+
+  h5spaceMem = NULL
+  s <- H5Sget_simple_extent_dims(h5spaceFile)$size
+
+  if(length(index) == length(s)){
+    index = lapply(seq_along(s), function(ii){
+      ind = index[[ii]]
+      if(is.null(ind)){
+        return(seq_len(s[ii]))
+      }else{
+        seq_len(s[ii])[ind]
+      }
+    })
+
+    valid_ind = lapply(index, function(x){x[!is.na(x)]})
+    sub_sel = lapply(index, function(x){!is.na(x)})
+
+    re_dim = vapply(sub_sel, sum, FUN.VALUE = 0)
+
+    if(any(re_dim <= 0)){
+      return(numeric(0))
+    }
+
+    h5spaceMem = H5Screate_simple(H5Sselect_index(h5spaceFile, valid_ind))
+    on.exit({
+      try({
+        H5Sclose(h5spaceMem)
+      }, silent = T)
+    }, add = T)
+
+    obj <- H5Dread(h5dataset = h5dataset, h5spaceFile = h5spaceFile,
+                   h5spaceMem = h5spaceMem, compoundAsDataFrame = F, drop = F)
+
+    # redim obj
+    obj = do.call('[', args = c(
+      list(obj),
+      lapply(valid_ind, function(x){
+        tmp = sort(unique(x))
+        match(x, tmp)
+      })
+    ))
+
+
+    if(!any(!unlist(sub_sel))){
+      return(obj)
+    }else{
+      obj = do.call('[<-', args = c(
+        list(array(NA, dim = vapply(index, length, FUN.VALUE = 0))),
+        sub_sel,
+        list(value = obj)
+      ))
+      return(obj)
+    }
+
+  }else{
+    return(H5Dread(h5dataset))
+  }
+}
 
 #' @export
 `[.LazyH5` <- function(obj, ...){

@@ -50,6 +50,13 @@ rave_prepare <- function(
   }else{
     repo$epoch(epoch_name = epoch, pre = time_range[1], post = time_range[2], names = data_types, func = post_process)
     env$.repository = repo
+    env$.utils = rave_preprocess_tools()
+
+    sid = repo$subject$id
+    splits = stringr::str_split_fixed(sid, '_', 2)
+
+    env$.utils$load_subject(subject_code = splits[1], project_name = splits[2])
+
     env$subject = repo$subject
     env$power = repo$power$get('power')
     env$phase = repo$phase$get('phase')

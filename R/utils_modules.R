@@ -1,10 +1,39 @@
+to_package_name <- function(module_id){
+  pkgName = paste('RAVE', module_id)
+  pkgName = str_replace_all(pkgName, '[\\W_]', '')
+  return(pkgName)
+}
+
+#' @export
+install_rave_module <- function(module_id, ...){
+  modules = read.csv(rave_options('module_lookup_file'), stringsAsFactors = F)
+  assertthat::assert_that(module_id %in% modules$ModuleID, msg =
+                            'Module ID [' %&% module_id %&% '] not found in rave_options("module_lookup_file")')
+  row = which(modules$ModuleID == module_id)[1]
+  label_name = modules$Name[row]
+  script_path = modules$ScriptPath[row]
+  packages = modules$Packages[row]
+  packages = stringr::str_trim(stringr::str_split(packages, ';', simplify = T))
+  packages = packages[!is.blank(packages)]
+
+  pkg = rave:::module_to_package(
+    module_id = module_id, label_name = label_name,
+    script_path = script_path, load = F, packages = packages
+  )
+
+  return(pkg)
+}
+
+
 module_to_package <- function(
   module_id, label_name,
   script_path, packages = NULL,
-  load = F, root_dir = NULL
+  load = F, root_dir = NULL, ...
 ){
   src = readLines(script_path)
   force(module_id);force(label_name);force(packages);force(load);force(root_dir)
+
+  pkgName = to_package_name(module_id)
 
   global_env = globalenv()
   rm(list = ls(global_env, all.names = T), envir = global_env)
@@ -47,9 +76,11 @@ module_to_package <- function(
     quos = rlang::quos(...)
     exprs = lapply(quos, rlang::quo_get_expr)
     call = rlang::new_call(quote(rave_updates), as.pairlist(exprs))
-    call[['.env']] = quote(.env)
-    .inner$..rave_updates = function(.env = ..get_runtime_env()){}
-    body(.inner$..rave_updates) = call
+    call[['.env']] = quote(environment())
+    .inner$..rave_updates = function(.env = ..get_runtime_env(name = 'param_env')){}
+    body(.inner$..rave_updates) = rlang::quo_squash(rlang::quo({
+      with(.env, {!!call})
+    }))
   }
 
   .this$rave_inputs = function(...){
@@ -57,7 +88,7 @@ module_to_package <- function(
     exprs = lapply(quos, rlang::quo_get_expr)
     call = rlang::new_call(quote(rave_inputs), as.pairlist(exprs))
     call[['.env']] = quote(.env)
-    .inner$..rave_inputs = function(.env = ..get_runtime_env()){}
+    .inner$..rave_inputs = function(.env = ..get_runtime_env(name = 'param_env')){}
     body(.inner$..rave_inputs) = call
   }
 
@@ -105,13 +136,76 @@ module_to_package <- function(
     }
     NULL
   })
+
+  .func$..get_runtime_env = function(session, wrapper = F, name = 'runtime_env'){}
+  body(.func$..get_runtime_env) = rlang::quo_squash(rlang::quo({
+    if(missing(session) || is.null(session)){
+      session = rave:::getDefaultReactiveDomain()
+    }
+    ..session_envs[['module_instance']] %?<-% rave::ModuleEnvir$new(
+      module_id = !!module_id,
+      label_name = !!label_name,
+      script_path = system.file('rave_init.R', package = !!pkgName),
+      externalpackage = T
+    )
+
+    exec_env = ..session_envs[['module_instance']]$get_or_new_exec_env(session = session, parent_env = ..runtime_env)
+    if(wrapper){
+      return(exec_env)
+    }else{
+      return(exec_env[[name]])
+    }
+  }))
+
+  .func$..rave_init = function(clear_env = T){}
+  body(.func$..rave_init) = rlang::quo_squash(rlang::quo({
+    exec_env = ..get_runtime_env(wrapper = T)
+    runtime_env = exec_env$runtime_env
+    static_env = exec_env$static_env
+
+    if(clear_env){
+      .list = names(as.list(runtime_env, all.names = T))
+      if(length(.list)){
+        rm(list = .list, envir = runtime_env)
+      }
+    }
+
+    if(!environmentIsLocked(static_env)){
+      # Step 2: re-direct functions so that we can call any functions
+      # This is only for RAVE. However, may not be necessary
+      # Will see if I can remove this ugly step
+      pkg = do.call('loadNamespace', list(package = !!pkgName))
+
+      ..rdata_file = system.file('vars.RData', package = !!pkgName)
+      base::load(file = ..rdata_file, envir = static_env)
+
+      lapply(names(as.list(pkg, all.names=T)), function(nm){
+        fun = pkg[[nm]]
+        if(is.function(fun)){
+          environment(fun) = runtime_env
+        }
+        static_env[[nm]] = fun
+        invisible()
+      })
+
+      # lock static_env, this step is now take place in execenv -> load_script
+      # lockEnvironment(static_env)
+    }
+
+
+    list(
+      static = static_env,
+      runtime = runtime_env
+    )
+  }))
+
   # create package
   create_package(module_id = module_id,
                  env = .func,
                  data = .inner,
                  dependencies = .this$..packages,
                  load = load,
-                 root_dir = root_dir) ->
+                 root_dir = root_dir, ...) ->
     re
 
   return(re)
@@ -121,10 +215,9 @@ module_to_package <- function(
 
 #' @import stringr
 create_package <- function(module_id, env = new.env(), data = new.env(),
-                           dependencies = NULL, load = T, attach = FALSE, root_dir = NULL) {
+                           dependencies = NULL, load = T, attach = FALSE, root_dir = NULL, ...) {
 
-  pkgName = paste('RAVE', module_id)
-  pkgName = str_replace_all(pkgName, '[\\W_]', '')
+  pkgName = to_package_name(module_id)
 
   if(is.null(root_dir)){
     root_dir = file.path(rave_options('module_root_dir'), 'tempdir')
@@ -145,69 +238,42 @@ create_package <- function(module_id, env = new.env(), data = new.env(),
 
 
   env$..dependencies = function(){}
-  env$..rave_init = function(clear_env = T){}
-  body(env$..rave_init) = rlang::quo_squash(rlang::quo({
-    runtime_env = ..get_runtime_env()
-    static_env = parent.env(runtime_env)
 
-    if(clear_env){
-      .list = names(as.list(runtime_env, all.names = T))
-      if(length(.list)){
-        rm(list = .list, envir = runtime_env)
-      }
-    }
+  env$..pkgName = pkgName
 
-    if(!environmentIsLocked(static_env)){
-
-      pkg = do.call('loadNamespace', list(package = !!pkgName))
-
-      ..rdata_file = system.file('vars.RData', package = !!pkgName)
-      base::load(file = ..rdata_file, envir = runtime_env)
-
-      lapply(names(as.list(pkg, all.names=T)), function(nm){
-        fun = pkg[[nm]]
-        if(is.function(fun)){
-          environment(fun) = runtime_env
-        }
-        static_env[[nm]] = fun
-        invisible()
-      })
-
-      # lock static_env
-      lockEnvironment(static_env)
-    }
-
-
-    list(
-      static = static_env,
-      runtime = runtime_env
-    )
-  }))
-
-  env$..get_runtime_env = function(session){
-    if(missing(session) || is.null(session)){
-      session = shiny::getDefaultReactiveDomain()
-    }
-    sid = rave:::add_to_session(session)
-    sid %?<-% 'TEMP'
-    ..session_envs[[sid]] %?<-% new.env(parent = rave::getDefaultDataRepository())
-    ..session_envs[[sid]][['..runtime']] %?<-% new.env(parent = ..session_envs[[sid]])
-    ..session_envs[[sid]][['..runtime']]
-  }
   body(env$..dependencies) = {dependencies}
   package.skeleton(name=pkgName, path = root_dir, environment = env, force = T)
-  cat("\n..runtime_env = new.env();\n",
-      "..session_envs = new.env()",
+  cat("\n..runtime_env = new.env();",
+      "..session_envs = new.env();\n\n\n",
+      paste0("#' @import ", dependencies),
+      'NULL\n',
       sep = '\n', file = src_file, append = T)
   # remove man folder
   unlink(file.path(pack_dir, 'man'), recursive = T, force = T)
   dir.create(inst_dir, showWarnings = F, recursive = T)
 
   # cache data
+  if(!is.environment(data)){
+    if(is.list(data)){
+      data = list2env(data)
+    }else{
+      data = new.env()
+    }
+  }
+
   if(is.environment(data) && length(as.list(data, all.names = T))){
     nm = names(as.list(data, all.names = T))
     save(list = nm, envir = data, file = file.path(inst_dir, 'vars.RData'))
   }
+  cat(
+    '..rave_init(clear_env = T)',
+    '..rave_inputs()',
+    '..rave_updates()',
+    '..rave_outputs()',
+    '..rave_execute()',
+    # TODO: add ..rave_check()
+    sep = '\n', file = file.path(inst_dir, 'rave_init.R')
+  )
 
 
   disc = file.path(pack_dir, 'DESCRIPTION')
@@ -233,7 +299,7 @@ create_package <- function(module_id, env = new.env(), data = new.env(),
   writeLines(tmp, nsp)
 
 
-  # roxygen2::roxygenise(pack_dir, clean = T, roclets = c("collate", "namespace"))
+  roxygen2::roxygenise(pack_dir, clean = T, roclets = c("collate", "namespace"))
   # devtools::build(pack_dir)
   pkg = devtools::install(pack_dir, reload = T, quick = T, local = T, dependencies = T, upgrade_dependencies = T,
                           keep_source = T, quiet = T)

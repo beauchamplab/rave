@@ -1,6 +1,6 @@
 progress <- function(
   title, max = 1,
-  session = shiny::getDefaultReactiveDomain()
+  session = getDefaultReactiveDomain()
 ){
   env = environment()
   if(is.null(session)){

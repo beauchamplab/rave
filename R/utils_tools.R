@@ -1,5 +1,5 @@
 #' @export
-rave_tools <- function(env = new.env(), ...){
+rave_preprocess_tools <- function(env = new.env(), ...){
   env$subject = list()
 
   NO_SUBJECT = 0
@@ -11,7 +11,7 @@ rave_tools <- function(env = new.env(), ...){
   utils = list(
 
     showNotification = function(msg, type = 'message'){
-      session = shiny::getDefaultReactiveDomain()
+      session = getDefaultReactiveDomain()
       if(is.null(session)){
         level = switch (
           type,
@@ -406,7 +406,7 @@ rave_tools <- function(env = new.env(), ...){
       sel = (ref_table$Channel %in% g_channels) & (!ref_table$Group %in% c('', g_name))
       if(sum(sel)){
         cg = paste(unique(ref_table$Group[sel]), collapse = ', ')
-        session = shiny::getDefaultReactiveDomain()
+        session = getDefaultReactiveDomain()
         msg = c('Your group overlaps with the other groups (' %&% cg %&% ') ',
                 'Please revise your channels within these groups.')
         type = 'error'

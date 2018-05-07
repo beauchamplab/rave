@@ -1,4 +1,4 @@
-context('[Test - rave_tools]    ')
+context('[Test - rave_preprocess_tools]    ')
 
 require(rave)
 require(shiny)
@@ -7,7 +7,7 @@ require(stringr)
 require(assertthat)
 require(rhdf5)
 
-utils = rave_tools()
+utils = rave_preprocess_tools()
 subject_code = 'YAB'
 project_name = 'Congruency_3'
 

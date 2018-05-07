@@ -1,6 +1,6 @@
 #' @import magrittr
 #' @import shiny
-shinirize <- function(module, session = shiny::getDefaultReactiveDomain(), test.mode = TRUE){
+shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = TRUE){
   # assign variables
   MODULE_ID = module$module_id
   MODULE_LABEL = module$label_name
@@ -405,10 +405,10 @@ shinirize <- function(module, session = shiny::getDefaultReactiveDomain(), test.
           t = Sys.time()
 
           if(global_reactives$has_data){
-            assign(inputId, input[[inputId]], envir = execenv$runtime_env)
+            execenv$runtime_env[[inputId]] = input[[inputId]]
+            execenv$param_env[[inputId]] = input[[inputId]]
             local_data$last_input = t
             local_data$input_queue = c(local_data$input_queue, inputId)
-
           }
 
         })
