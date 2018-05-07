@@ -4,6 +4,8 @@ to_package_name <- function(module_id){
   return(pkgName)
 }
 
+#' @importFrom devtools install
+#' @importFrom roxygen2 roxygenise
 #' @export
 install_rave_module <- function(module_id, ...){
   modules = read.csv(rave_options('module_lookup_file'), stringsAsFactors = F)
