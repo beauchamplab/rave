@@ -1,4 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^temp$
-^adhoc$
+^demo
+^adhoc
+^packrat/
+^\.Rprofile$

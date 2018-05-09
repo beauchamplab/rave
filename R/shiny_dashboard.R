@@ -129,8 +129,9 @@ dashboardHeader = function (..., title = NULL, titleWidth = NULL, disable = FALS
 #' @export
 dashboardPage = function (
   header, sidebar, control, body, title = NULL,
-  skin = c("blue", "black", "purple", "green", "red", "yellow"))
-{
+  skin = c("blue", "black", "purple", "green", "red", "yellow"), controlbar_opened = FALSE,
+  initial_mask = NULL
+  ){
   skin <- match.arg(skin)
   extractTitle <- function(header) {
     x <- header$children[[2]]
@@ -187,14 +188,27 @@ dashboardPage = function (
   }
 
 
-
+  if(controlbar_opened){
+	cls = ' control-sidebar-open'
+  }else{
+	cls = ''
+  }
 
 
   addDeps(
     tags$body(
-      class = paste0("skin-", skin, ""), # if you want control-sidebar to be opened, add " control-sidebar-open"
+      class = paste0("skin-", skin, cls), # if you want control-sidebar to be opened, add " control-sidebar-open"
       style = "min-height: 611px;",
-      shiny::bootstrapPage(shinyjs::useShinyjs(), content, title = title)
+      shiny::bootstrapPage(shinyjs::useShinyjs(),
+                           div(
+                             id='__rave__mask__',
+                             class = ifelse(is.null(initial_mask), 'hidden', ''),
+                             div(
+                               class = 'loading_info',
+                               initial_mask
+                             )
+                           ),
+                           content, title = title)
     )
   )
 }

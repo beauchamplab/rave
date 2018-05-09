@@ -1,4 +1,2 @@
-category,module_id,label,source_path,active,packages,author,version,is_univariate,suma_enabled,order
-Overview,condition_explorer,Condition Explorer,"system.file('modules/condition_explorer.R', package = 'rave')",TRUE,"plotly, tidyverse, magrittr",John Magnotti,1.0.1,TRUE,TRUE,100
-Trial Clusters,cluster_over_trials,Spearman Correlation,"system.file('modules/cluster_within_electrode.R', package = 'rave')",FALSE,"magrittr, plotly",Zhengjia,0.1.0,TRUE,TRUE,200
-Mask,mask_generator,Mask Generator,"system.file('modules/mask_generator.R', package = 'rave')",TRUE,stringr,Zhengjia,0.0.1,TRUE,FALSE,300
+ModuleID,Name,ScriptPath,Active,Author,Version
+condition_explorer_another,Condition Explorer,~/rave_modules/modules/condition_explorer/main.R,TRUE,"[John Magnotti]<john.Magnotti@bcm.edu>, [Zhengjia Wang]<dipterix.wang@gmail.com>",0.1.6
