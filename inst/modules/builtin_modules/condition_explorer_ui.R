@@ -38,7 +38,17 @@ rave_outputs(
     'Windowed Comparison (Collapse over time and freq)' = plotOutput('windowed_comparison_plot', width = 4),
     'Activity over time per trial (Collapse over frequency)' = plotOutput('by_trial_heat_map', width = 12),
     'Side Message' = textOutput('msg_out', width = 4),
-    'Async Message' = textOutput('async_out', width = 4)
+    'Async Message' = textOutput('async_out', width = 4),
+    .tabsets = list(
+      'Tab1' = list(
+        'Heatmap' = c('heat_map_plot'),
+        'tabpanel2' = c('windowed_comparison_plot', 'over_time_plot')
+      ),
+      'Tab2' = list(
+        'Msg' = 'msg_out'
+      ),
+      width = c(12)
+    )
 )
 
 

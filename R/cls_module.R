@@ -261,6 +261,7 @@ ExecEnvir <- R6::R6Class(
     ns = NULL,
     input_update = NULL,
     register_output_events = NULL,
+    register_input_events = NULL,
     finalize = function(){
       logger(sprintf('[%s] Runtime Environment Removed.', private$module_env$module_id))
     },
@@ -486,128 +487,154 @@ ExecEnvir <- R6::R6Class(
       self$ns = shiny::NS(module_env$module_id)
     },
     rave_inputs = function(..., .tabsets = list(), .env = NULL){
-      private$tabsets = .tabsets
-      dots = lazyeval::lazy_dots(...)
-      re = lapply(dots, function(comp){
-        comp = parse_shiny_inputs(comp, env = self$param_env)
-        comp$expr = comp$.change_param(inputId = self$ns(comp$.inputId), .lazy = F)
-        comp
-      })
-      nm = lapply(re, function(x){
-        val = x$.args[[x$.value]]
-        try({
-          val = eval(val)
-        }, silent = T)
-        assign(x$.inputId, val, envir = self$param_env)
-        x$.inputId
-      })
-      names(re) = nm
-      private$inputs = re
-      return(invisible(re))
-    },
-    rave_outputs = function(...){
-      dots = lazyeval::lazy_dots(...)
-      titles = names(dots)
-      dots = lapply(1:length(dots), function(ii){
-        comp = dots[[ii]]
-        title = titles[[ii]]
-        comp$env = self$param_env
-        expr = comp$expr
-        ui_func = expr[[1]]
-        func_name = str_replace(ui_func, '^[\\w]+::', '')
-        func_env = environment(eval(ui_func))
-        env_name = environmentName(func_env)
-        func = get(func_name, envir = func_env)
+      quos = rlang::quos(...)
+      parsers = comp_parser()
 
-        arglist = as.list(expr)[-1]
-        func_args = formals(func)
-        func_args[names(func_args) %in% names(arglist)] <- NULL
-        func_args_names = names(func_args)
-        nm = names(arglist)
-        unnamed = length(nm[nm == ''])
-        if(unnamed > 0){
-          names(arglist)[nm == ''] = func_args_names[1:min(length(func_args_names), unnamed)]
-        }
+      x = lapply(quos, parsers$parse_quo)
+      names(x) = ids = sapply(x, function(comp){comp$inputId})
 
-        tryCatch({
-          min(as.numeric(arglist$width), 12L)
-        }, error = function(e){
-          return(12L)
-        }) ->
-          width
-        arglist[['width']] <- NULL
-        outputId = arglist$outputId
+      rest_inputs = ids[!ids %in% unlist(.tabsets)]
+      .tabsets[['Local Variables']] = c(rest_inputs)
 
-        comp_info = list(
-          outputId = outputId,
-          title = title,
-          width = width,
-          arglist = arglist
-        )
-        init_args = arglist
-        init_args$outputId = self$ns(arglist$outputId)
 
-        for(event_name in c('click', 'hover', 'brush', 'dblclick')){
-          if(event_name %in% names(arglist)){
-            init_args[[event_name]] = self$ns(arglist[[event_name]])
-          }
-        }
+      lapply(seq_along(.tabsets), function(ii){
+        tabName = names(.tabsets)[ii]
 
-        comp_info$init_expr = lazyeval::call_new(ui_func, .args = init_args)
-        comp_info$observers = function(input, output, session, local_data){
-          render_func = ui_register_function(str_c(env_name, '::', func_name))
-          if(!is.null(render_func)){
-            output[[outputId]] <- do.call(render_func$update_func, args = c(alist({
-              local_data$show_results
-              # get function with same output id name in runtime_env
-              func = get(outputId, envir = self$runtime_env)
-              eval_fun(func, env = NULL)
-            }),
-              render_func$default_args
-            ))
-          }
-
-          events = c(
-            'click', 'hover', 'brush', 'dblclick'
-          )
-          events = events[events %in% names(arglist)]
-          if(length(events)){
-            lapply(events, function(event_name){
-              event_id = arglist[[event_name]]
-              observe({
-                e = input[[event_id]]
-                func = get(event_id, envir = self$runtime_env)
-                eval_fun(func, args = list(
-                  event = e,
-                  env = self$runtime_env
-                ), env = self$runtime_env)
-                local_data$force_render = Sys.time()
-              })
+        rlang::quo({
+          do.call(shinydashboard::box, args = c(
+            list(width = 12, title = !!tabName, collapsible = T),
+            !!lapply(.tabsets[[ii]], function(inputId){
+              comp = x[[inputId]]
+              comp$expr
             })
-          }
+          ))
 
-        }
-        comp_info
+        })
+
+      }) ->
+        ui_inputs
+
+      rlang::quo({
+        do.call(shiny::fluidRow, args = !!ui_inputs)
+      }) -> ui_inputs
+
+      private$inputs = list(
+        quos = ui_inputs,
+        comp = x
+      )
+
+      self$register_input_events = function(input, output, session, local_data){
+        lapply(x, function(comp){
+          comp$observers(input, output, session, local_data, self)
+        })
+      }
+
+      invisible()
+    },
+    rave_outputs = function(..., .tabsets = list(), .env = NULL){
+      quos = rlang::quos(...)
+      assign('quos', quos, envir = globalenv())
+      assertthat::assert_that(length(quos) > 0, msg = 'No output defined!')
+      parsers = rave:::comp_parser()
+      x = lapply(names(quos), function(nm){
+        re = parsers$parse_quo(quos[[nm]])
+        re$label = nm
+        re
       })
 
-      names = unlist(lapply(dots, function(x){x$outputId}))
-      names(dots) = names
-      private$outputs = dots
-      self$register_output_events = function(input, output, session, local_data){
-        if(length(private$outputs)){
-          lapply(private$outputs, function(comp){
-            comp$observers(input, output, session, local_data)
-          })
+      ids = sapply(x, function(comp){comp$outputId})
+      names(x) = ids
+
+      #### Generate UIs for output
+
+      # 1. tabsets in .tabsets
+      widths = .tabsets[['width']]
+      .tabsets[['width']] = NULL
+
+      if(length(.tabsets)){
+        names = names(.tabsets)
+        ntabs = length(names)
+        if(length(widths) < ntabs){
+          widths = rep(widths, ntabs)
         }
+
+        lapply(seq_len(ntabs), function(ii){
+          nm = names[[ii]]
+          ids = .tabsets[[nm]]
+
+          quo_panels = lapply(seq_along(ids), function(ii){
+            comp = ids[ii]
+            title = names(comp)
+            rlang::quo({
+              shiny::tabPanel(
+                title = !!title,
+                do.call(shiny::fluidRow, args = !!{lapply(comp[[1]], function(output_id){
+                  comp = x[[output_id]]
+                  width = comp[['width']]; width %?<-% 12L
+                  expr = quote(shiny::column())
+                  expr = c(as.list(expr), list(
+                    shiny::h4(comp$label),
+                    comp$expr,
+                    width = width
+                  ))
+                  as.call(expr)
+                })}
+                )
+              )
+            })
+          })
+
+          quo_box = rlang::quo({
+            do.call(shinydashboard::tabBox,
+                    args = c(
+                      list(title = !!nm, width = !!widths[[ii]]),
+                      !!quo_panels
+                    )
+            )
+          })
+
+          quo_box
+        }) ->
+          tab_boxes
+      }else{
+        tab_boxes = NULL
+      }
+
+      left_ids = ids[!ids %in% unlist(.tabsets)]
+
+      lapply(left_ids, function(nm){
+        comp = x[[nm]]
+        width = comp$width; width %?<-% 12L
+        rlang::quo({
+          shinydashboard::box(
+            width = width,
+            title = comp$label,
+            collapsible = T,
+            !!comp$expr
+          )
+        })
+      }) ->
+        single_boxes
+
+      ui_comps = rlang::quo(do.call(shiny::fluidRow, args = c(!!tab_boxes, !!single_boxes)))
+
+      #### Reactive functions
+      private$outputs = list(
+        quos = ui_comps,
+        comp = x
+      )
+      self$register_output_events = function(input, output, session, local_data){
+        lapply(x, function(comp){
+          comp$observers(input, output, session, local_data, self)
+        })
       }
     },
     rave_updates = function(..., .env = NULL){
-      dots = lapply(lazyeval::lazy_dots(...), function(x){
-        parse_call(x, self$runtime_env)
-      })
-      private$update = dots
+      quos = rlang::quos(..., .named = T)
+      private$update = quos
 
       update = function(input, session = NULL, init = FALSE){
+        assign('input', input, envir = globalenv())
         input = dropNulls(input)
         if(!init){
           # Not yet implemented
@@ -618,62 +645,10 @@ ExecEnvir <- R6::R6Class(
         }
         for(varname in names(private$update)){
           tryCatch({
-            info = private$inputs[[varname]]
-            lazy_comp = private$update[[varname]]
-            valname = info$.value
-            val = lazyeval::lazy_eval(lazy_comp)
+            comp = private$inputs$comp[[varname]]
+            new_args = rlang::eval_tidy(private$update[[varname]], data = input, env = self$param_env)
 
-            if(!is.list(val)){
-              val = list(val)
-              names(val) = valname
-            }
-
-            if(!is.null(input[[varname]])){
-              val[[valname]] = input[[varname]]
-            }
-
-            once = TRUE # By default, all inputs only run once
-            if(!is.null(val$once)){
-              once = val$once
-              val[['once']] <- NULL
-            }
-            val[['inputId']] = varname # info$inputId
-            val[['session']] = session
-
-            onced = self$cache_input('..onced', FALSE, read_only = T, sig = 'special')
-            if(init){
-              local({
-                logger('Initializing Input - ', varname)
-                tryCatch({
-                  do.call(info$.update_func, args = val)
-                }, error = function(e){
-                  logger('Error in updating - ', varname, level = 'WARNING')
-                })
-              })
-              next;
-            }else{
-
-              # if(!once){
-              #   val[[valname]] <- self$cache(
-              #     key = list(
-              #       type = '.rave-inputs-Dipterix',
-              #       inputId = varname
-              #     ), NULL,
-              #     global = self$is_global(varname),
-              #     replace = FALSE)
-              #   if(length(val)){
-              #     val[['inputId']] = varname # info$inputId
-              #     val[['session']] = session
-              #     local({
-              #       tryCatch({
-              #         logger('Updating Input - [', varname, '] - ', val[[valname]])
-              #         print(val)
-              #         do.call(info$.update_func, args = val)
-              #       }, error = function(e){})
-              #     })
-              #   }
-              # }
-            }
+            comp$updates(session = session, .args = new_args)
           },error = function(e){
             logger('Error in updating input ', varname, level = 'ERROR')
             s = capture.output(traceback(e))
@@ -683,7 +658,7 @@ ExecEnvir <- R6::R6Class(
         }
       }
       self$input_update = update
-      return(invisible(dots))
+      invisible()
     },
     rave_execute = function(..., .env = NULL){
       exprs = lapply(lazyeval::lazy_dots(...), function(x){x$env = self$runtime_env; x})
@@ -813,75 +788,22 @@ ExecEnvir <- R6::R6Class(
       }
       return(v)
     },
-    generate_input_ui = function(sidebar_width = 3){
-      # generate inputs
-      input_names = names(private$inputs)
-      tabsets = private$tabsets
-
-      tabnames = names(tabsets)
-      varnames = unlist(tabsets)
-      localnames = input_names[!input_names %in% varnames]
-      if(length(localnames)){
-        tabsets$`Local Variables` = localnames
-        tabnames = c(tabnames, 'Local Variables')
-      }
-      column = function(..., width, offset = 0L){
-        shiny::column(width = width, ..., offset = offset)
-      }
-
-
-      lapply(tabnames, function(tnm){
-        var_names = str_c(tabsets[[tnm]])
-        var_names = var_names[var_names %in% input_names]
-
-        lapply(var_names, function(nm){
-          expr = private$inputs[[nm]]$expr
-        }) %>%
-          lazyeval::as.lazy_dots(env = self$param_env) %>%
-          lazyeval::lazy_eval() %>%
-          tagList() %>%
-          shinydashboard::box(
-            title = tnm,
-            collapsible = T,
-            width = 12
-          ) %>%
-          fluidRow()
-        }) %>%
-        tagList() %>%
-        column(
-          fluidRow(
-            shinydashboard::box(
-              title = 'Others',
-              width = 12,
-              h4('Export'),
-              hr(),
-              actionButton(self$ns('.gen_report'), 'Export Report'),
-              actionButton(self$ns('.gen_niml'), 'Export NIML for SUMA'),
-              actionButton(self$ns('.force_run'), 'Force Run')
-            )
-          ),
-          width = sidebar_width
-        )
+    generate_input_ui = function(sidebar_width = 3L){
+      ns = self$ns
+      env = environment()
+      shiny::column(
+        sidebar_width,
+        rlang::eval_tidy(private$inputs$quos, env = env)
+      )
     },
-    generate_output_ui = function(sidebar_width = 3){
-      column = function(..., width, offset = 0L){
-        shiny::column(width = width, ..., offset = offset)
-      }
+    generate_output_ui = function(sidebar_width = 3L){
+      ns = self$ns
+      env = environment()
+      shiny::column(
+        12L - sidebar_width,
+        rlang::eval_tidy(private$outputs$quos, env = env)
+      )
 
-      nms = names(private$outputs)
-      lapply(nms, function(nm){
-        comp = private$outputs[[nm]]
-        expr = comp$init_expr
-        shinydashboard::box(
-          width = comp$width,
-          title = comp$title,
-          collapsible = T,
-          lazyeval::lazy_eval(lazyeval::as.lazy(expr, env = self$param_env))
-        )
-      }) %>%
-        tagList() %>%
-        fluidRow() %>%
-        column(width = 12 - sidebar_width)
     },
     generate_results = function(env, async = TRUE){
       env$.rave_future <- private$execute(plan = NULL, async = async)
@@ -901,20 +823,20 @@ ExecEnvir <- R6::R6Class(
   ),
   active = list(
     input_ids = function(){
-      names(private$inputs)
+      names(private$inputs$comp)
     },
     input_labels = function(){
-      re = lapply(private$inputs, function(x){x$.args$label})
-      names(re) = names(private$inputs)
+      re = lapply(private$inputs$comp, function(x){x$args$label})
+      names(re) = names(private$inputs$comp)
       return(re)
     },
     output_labels = function(){
-      re = lapply(private$outputs, function(x){x$title})
-      names(re) = names(private$outputs)
+      re = lapply(private$outputs$comp, function(x){x$label})
+      names(re) = names(private$outputs$comp)
       return(re)
     },
     output_ids = function(){
-      names(private$outputs)
+      names(private$outputs$comp)
     }
   )
 )
@@ -1031,3 +953,14 @@ rave_execute <- function(..., .env = globalenv()){
 cache_input <- function(key, val, read_only = T){
   return(val)
 }
+
+
+
+
+
+
+
+
+
+
+

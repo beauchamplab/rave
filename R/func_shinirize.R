@@ -30,6 +30,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         last_input = Sys.time(),
         last_executed = FALSE,
         initialized = FALSE,
+        has_data = FALSE,
         has_results = Sys.time(),
         suspended = TRUE,
         input_queue = NULL,
@@ -46,7 +47,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       })
 
       run_script <- function(async = FALSE){
-        if(isolate(!global_reactives$has_data)){
+        if(isolate(!local_data$has_data)){
           return(NULL)
         }
         logger('Executing Script')
@@ -132,6 +133,12 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
         if(!global_reactives$has_data){
           return(NULL)
+        }else{
+          # Module need to check if data loaded need the requirement (TODO)
+          # if not, disable local_data$has_data and return NULL
+
+          # Pass the check, local_data$has_data = T
+          local_data$has_data = T
         }
         if(test.mode){
           logger('Flushing Toilet')
@@ -145,7 +152,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
           execenv$input_update(input = params, session = session, init = FALSE)
           local_data$run_script = Sys.time()
         }else if(
-          global_reactives$has_data && global_reactives$execute_module == str_to_upper(MODULE_ID)
+          local_data$has_data && global_reactives$execute_module == str_to_upper(MODULE_ID)
         ){
 
           execenv$input_update(input = params, session = session, init = TRUE)
@@ -164,7 +171,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
       observeEvent(global_reactives$execute_module, {
 
-        if(global_reactives$has_data && global_reactives$execute_module == str_to_upper(MODULE_ID)){
+        if(local_data$has_data && global_reactives$execute_module == str_to_upper(MODULE_ID)){
           logger('Sidebar switched to ', global_reactives$execute_module)
           local_data$input_updated = Sys.time()
         }
@@ -194,7 +201,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       # })
 
       observeEvent(global_reactives$check_results, {
-        if(!global_reactives$has_data){
+        if(!local_data$has_data){
           return(NULL)
         }
         if(!local_data$suspended){
@@ -398,22 +405,6 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       )
 
 
-      # register inputs
-      lapply(execenv$input_ids, function(inputId){
-        observeEvent(input[[inputId]], {
-          val = input[[inputId]]
-          t = Sys.time()
-
-          if(global_reactives$has_data){
-            execenv$runtime_env[[inputId]] = input[[inputId]]
-            execenv$param_env[[inputId]] = input[[inputId]]
-            local_data$last_input = t
-            local_data$input_queue = c(local_data$input_queue, inputId)
-          }
-
-        })
-      })
-
       cache_all_inputs <- function(save = T){
         params = isolate(reactiveValuesToList(input))
         lapply(execenv$input_ids, function(inputId){
@@ -421,6 +412,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
           execenv$cache_input(inputId, val, read_only = !save)
         }) ->
           altered_params
+        names(altered_params) = execenv$input_ids
         altered_params = dropNulls(altered_params)
         return(altered_params)
       }
@@ -430,6 +422,13 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         input, output, session,
         local_data = local_data
       )
+
+      execenv$register_input_events(
+        input, output, session,
+        local_data = local_data
+      )
+
+
     }
   )
 }
