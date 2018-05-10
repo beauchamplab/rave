@@ -26,14 +26,18 @@ compoundInput <- function(
           div(
             class = paste('rave-ui-compound-inner', ifelse(inital_ncomp < ind, 'hidden', '')),
             'data-value' = ind,
-            tagList(
-              lapply(dots, function(comp){
-                comp = comp$.change_param(
-                  inputId = paste0(inputId, '_', comp$.args$inputId, '_', ind),
-                  label = paste0(label, '-', comp$.args$label, ' ', ind)
-                )
-                lazyeval::lazy_eval(comp)
-              })
+            tags$fieldset(
+              style = 'border: 1px solid #efefef; padding:.35em .625em .75em; margin-bottom: 15px;',
+              tags$legend('Group ' %&% ind, style = 'border:none; margin: 0; padding: 0 10px; font-size: 14px;'),
+              tagList(
+                lapply(dots, function(comp){
+                  comp = comp$.change_param(
+                    inputId = paste0(inputId, '_', comp$.args$inputId, '_', ind),
+                    label = comp$.args$label
+                  )
+                  lazyeval::lazy_eval(comp)
+                })
+              )
             )
           )
         })
