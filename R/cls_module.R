@@ -838,6 +838,7 @@ ExecEnvir <- R6::R6Class(
           shinydashboard::box(
             title = 'More...',
             tags$ul(
+              class = 'rave-grid-inputs',
               tagList(more_btns)
             ),
             width = 12,

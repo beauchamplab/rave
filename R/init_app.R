@@ -43,6 +43,10 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
     modules = load_modules()
   }
 
+  if(!is.list(modules)){
+    modules = list("______" = list(modules))
+  }
+
   data_selector = rave:::shiny_data_selector('DATA_SELECTOR')
   ui = rave::dashboardPage(
     title = 'R Analysis and Visualization of ECoG Data',

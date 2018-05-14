@@ -208,3 +208,17 @@ li.control-sidebar-items>a {
 }
 
 
+.rave-grid-inputs>li{
+  display: inline-block;
+  flex-basis: 100%;
+  padding: 15px;
+  margin: -7px 5px 7px 5px;
+  -webkit-transition: background-color 0.5s ease-out;
+  -moz-transition: background-color 0.5s ease-out;
+  -o-transition: background-color 0.5s ease-out;
+  transition: background-color 0.5s ease-out;
+}
+
+.rave-grid-inputs>li:hover{
+  background-color: #f39c1247;
+}
