@@ -182,3 +182,29 @@ li.control-sidebar-items>a {
     padding: 20px;
 }
 */
+
+.rave-ui-compound-ctrl{
+  margin-bottom: 15px;
+}
+
+
+.rave-grid-inputs{
+  display: -webkit-box;      /* OLD - iOS 6-, Safari 3.1-6 */
+  display: -moz-box;         /* OLD - Firefox 19- (buggy but mostly works) */
+  display: -ms-flexbox;      /* TWEENER - IE 10 */
+  display: -webkit-flex;     /* NEW - Chrome */
+  display: flex;
+  padding: 15px 5px 0 5px;
+  border: 1px solid #efefef;
+  flex-wrap: wrap;
+  align-items: baseline;
+  margin-bottom: 5px;
+}
+
+
+.rave-grid-inputs>div{
+  flex-basis: 33%;
+  padding-right: 5px;
+}
+
+

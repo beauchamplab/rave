@@ -128,8 +128,6 @@ Electrode <- R6::R6Class(
       placehold = array(NA, dim = c(length(ep), dim_2, dim_3, 1))
       bvec = sapply(indices,'[[', 'block')
       for(b in unique(bvec)){
-        assign('sss', environment(), envir = globalenv())
-
         sel = bvec == b
         subinds = as.vector(sapply(indices[sel], '[[', 'ind'))
         a = tmp[[b]][,subinds]

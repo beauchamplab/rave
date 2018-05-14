@@ -76,12 +76,11 @@ msg_out = function() {
 }
 
 async_out = function(){
-    validate(need(exists('async_msg', envir = environment()), 'Press "Force run" Button.'))
     async_msg
 }
 
 rave_execute({
-    assertthat::assert_that(length(electrode) == 1,msg = 'No electrode selected')
+    assertthat::assert_that(length(electrode) == 1, msg = 'No electrode selected')
 
   # TODO: change adhoc vars definition - Zhengjia
   electrodes = power$dimnames$Electrode
@@ -199,15 +198,11 @@ rave_execute({
     attr(scatter_bar_data, 'stats') <- result_for_suma
 
 },{
-    if(.is_async){
-        async_msg = 'Running in the background'
-    }
+  async_msg = async_var(async_msg, 'Press "Async run" Button.')
 }, async = {
-    logger('Async test')
-    # rm(list = ls(all.names = T))
-    Sys.sleep(0.15)
+    Sys.sleep(5)
     nms = ls(all.names = T)
-    async_msg = paste(search(), collapse = ', ')
+    async_msg = paste(search(), collapse = ', ') %&% '   ' %&% Sys.getpid()
 }
 )
 

@@ -103,9 +103,6 @@ ModuleEnvir <- R6::R6Class(
       self$rmd_path = rmd_path
       private$cache_env = list()
       self$externalpackage = externalpackage
-      if(externalpackage){
-        self$packages = to_package_name(module_id)
-      }
 
       # validate script_path
       if(missing(script_path)){
@@ -250,7 +247,6 @@ ExecEnvir <- R6::R6Class(
     inputs = NULL,
     outputs = NULL,
     update = NULL,
-    execute = NULL,
     tabsets = NULL
   ),
   public = list(
@@ -262,6 +258,8 @@ ExecEnvir <- R6::R6Class(
     input_update = NULL,
     register_output_events = NULL,
     register_input_events = NULL,
+    execute = NULL,
+    async_module = FALSE,
     finalize = function(){
       logger(sprintf('[%s] Runtime Environment Removed.', private$module_env$module_id))
     },
@@ -295,6 +293,8 @@ ExecEnvir <- R6::R6Class(
       # be read-only (in most of the cases).
       self$static_env = new.env(parent = self$wrapper_env)
       self$param_env = new.env(parent = self$static_env)
+      self$param_env$..rave_future_env = new.env()
+
 
       # runtime_env, all variables will be stored within this environment, is the
       # one that real execute take place
@@ -303,6 +303,19 @@ ExecEnvir <- R6::R6Class(
       private$cache_env = new.env()
       private$cache_env$.keys = c()
       self$ns = base::I
+
+      self$wrapper_env$async_var = function(x, default = NULL){
+        x_name = deparse(substitute(x))
+        val = NULL
+        if(is.environment(self$param_env[['..rave_future_env']])){
+          val = self$param_env[['..rave_future_env']][[x_name]]
+        }
+        if(is.null(val)){
+          return(default)
+        }else{
+          return(val)
+        }
+      }
 
       self$wrapper_env$rave_inputs = function(...){
         if(is.null(getDefaultReactiveDomain())){
@@ -424,7 +437,7 @@ ExecEnvir <- R6::R6Class(
       lapply(names(param), function(nm){
         assign(nm, param[[nm]], envir = self$runtime_env)
       })
-      res = private$execute(plan = plan, async = async)
+      res = self$execute(plan = plan, async = async)
       if(async){
         logger('Execute_with async not implemented.')
       }
@@ -493,8 +506,12 @@ ExecEnvir <- R6::R6Class(
       x = lapply(quos, parsers$parse_quo)
       names(x) = ids = sapply(x, function(comp){comp$inputId})
 
-      rest_inputs = ids[!ids %in% unlist(.tabsets)]
-      .tabsets[['Local Variables']] = c(rest_inputs)
+      if(!'Local Variables' %in% names(.tabsets)){
+        rest_inputs = ids[!ids %in% unlist(.tabsets)]
+        if(length(rest_inputs)){
+          .tabsets[['Local Variables']] = c(rest_inputs)
+        }
+      }
 
 
       lapply(seq_along(.tabsets), function(ii){
@@ -503,9 +520,40 @@ ExecEnvir <- R6::R6Class(
         rlang::quo({
           do.call(shinydashboard::box, args = c(
             list(width = 12, title = !!tabName, collapsible = T),
-            !!lapply(.tabsets[[ii]], function(inputId){
-              comp = x[[inputId]]
-              comp$expr
+            !!lapply(.tabsets[[ii]], function(inputIds){
+              if(length(inputIds) == 1){
+                comp = x[[inputIds]]
+                return(comp$expr)
+              }else{
+                n = length(inputIds)
+                mod2 = n %% 2
+                mod3 = n %% 3
+                if(mod3 == 0){
+                  flex_basis = rep('flex-basis: 33%;', n)
+                }else if(mod2 == 0){
+                  flex_basis = rep('flex-basis: 50%;', n)
+                }else if(mod3 == 1){
+                  flex_basis = rep('flex-basis: 50%;', n)
+                  flex_basis[length(flex_basis)] = 'flex-basis: 100%;'
+                }else{
+                  flex_basis = rep('flex-basis: 33%;', n)
+                  flex_basis[length(flex_basis) - c(0:1)] = 'flex-basis: 50%;'
+                }
+
+                return(rlang::quo_squash(rlang::quo(
+                  do.call(div, args = c(
+                    list(class = 'rave-grid-inputs'),
+                    !!lapply(seq_len(n), function(jj){
+                      inputId = inputIds[[jj]]
+                      rlang::quo_squash(rlang::quo(
+                        do.call(div, args = c(
+                          list(style = !!flex_basis[[jj]], !!x[[inputId]]$expr)
+                        ))
+                      ))
+                    })
+                  ))
+                )))
+              }
             })
           ))
 
@@ -533,7 +581,6 @@ ExecEnvir <- R6::R6Class(
     },
     rave_outputs = function(..., .tabsets = list(), .env = NULL){
       quos = rlang::quos(...)
-      assign('quos', quos, envir = globalenv())
       assertthat::assert_that(length(quos) > 0, msg = 'No output defined!')
       parsers = rave:::comp_parser()
       x = lapply(names(quos), function(nm){
@@ -634,7 +681,6 @@ ExecEnvir <- R6::R6Class(
       private$update = quos
 
       update = function(input, session = NULL, init = FALSE){
-        assign('input', input, envir = globalenv())
         input = dropNulls(input)
         if(!init){
           # Not yet implemented
@@ -661,66 +707,35 @@ ExecEnvir <- R6::R6Class(
       invisible()
     },
     rave_execute = function(..., .env = NULL){
-      exprs = lapply(lazyeval::lazy_dots(...), function(x){x$env = self$runtime_env; x})
-      force(exprs)
-      private$execute = function(plan = NULL, async = TRUE){
-        local_env = self$runtime_env
-        local_env$.is_async = async
+      quos = rlang::quos_auto_name(rlang::quos(...))
+
+      normal_quos = quos[!names(quos) %in% 'async']
+      async_quo = quos[['async']]
+      self$async_module = !is.null(async_quo)
+
+      self$execute = function(async = FALSE){
+        self$runtime_env$.is_async = async
         async_future = NULL
 
-        if(length(exprs)){
-          for(i in 1:length(exprs)){
-            if('async' != names(exprs)[i]){
-              lazyeval::lazy_eval(exprs[[i]])
-              # tryCatch({
-              #   lazyeval::lazy_eval(exprs[[i]])
-              # }, error = function(e){
-              #   logger('Error in executing ', private$module_env$module_id, level = 'ERROR')
-              #   s = capture.output(traceback(e))
-              #   lapply(s, logger, level = 'ERROR')
-              # })
-
-            }
+        if(async){
+          if(self$async_module){
+            async_env = new.env(parent = self$runtime_env)
+            packages = str_match(search(), '^package:(.+)$')[,2]; packages = packages[!is.na(packages)]
+            packages = unique(packages, private$module_env$packages)
+            self$param_env$..rave_future_obj =
+              future::future({
+                rave::eval_dirty(async_quo, env = async_env)
+                async_env
+              }, packages = packages, evaluator = future::multiprocess,
+              gc = T, workers = rave_options('max_worker'))
+          }
+        }else{
+          if(length(normal_quos)){
+            lapply(normal_quos, rave::eval_dirty, env = self$runtime_env)
           }
         }
 
-        if(async && 'async' %in% names(exprs)){
-          e = exprs[['async']]
-          .env = e$env
-          .env$..async.. = e
-          async({
-            if(is.character(..packages)){
-              lapply(..packages, function(p){
-                do.call('require', args = list(
-                  package = p,
-                  character.only = T
-                ))
-              })
-            }
-            lazyeval::lazy_eval(..async..)
-            # large object won't be returned
-            env = ..async..$env
-            nms = ls(envir = env)
-            sapply(nms, function(nm){
-              tryCatch({
-                pryr::object_size(get(nm, envir = env))
-              }, error = function(e){
-                return(0)
-              })
-            }) -> s
-            nms = nms[s > rave_options('big_object_size')]
-            if(length(nms)){
-              rm(list = nms, envir = env)
-            }
-            return(env)
-          }, plan = plan, envir = .env) ->
-            async_future
-        }
-
-        return(list(
-          async_future = async_future,
-          local_env = local_env
-        ))
+        return(self$param_env[['..rave_future_obj']])
       }
     },
     cache = function(key, val, global = FALSE, replace = FALSE,
@@ -791,9 +806,44 @@ ExecEnvir <- R6::R6Class(
     generate_input_ui = function(sidebar_width = 3L){
       ns = self$ns
       env = environment()
+
+      more_btns = list(
+        vignette = tags$li(actionLink(self$ns('..vignette'), 'Show Module Description')),
+        niml = tags$li(actionLink(self$ns('.gen_niml'), 'Generate NIML File for SUMA')),
+        async = tags$li(actionLink(self$ns('..async_run'), 'Run Algorithm (Async)'))
+      )
+
+      # TODO Vignette
+
+      # NIML
+      niml_func = names(as.list(self$static_env))
+      is_niml_func = vapply(niml_func, function(x){
+        is.function(self$static_env[[x]]) && str_detect(x, 'niml_')
+      }, FUN.VALUE = logical(1))
+      if(length(is_niml_func) == 0 || sum(is_niml_func) == 0){
+        more_btns[['niml']] = NULL
+      }
+
+      # Async
+      if(!self$async_module){
+        more_btns[['async']] = NULL
+      }
+
+
+      names(more_btns) = NULL
       shiny::column(
         sidebar_width,
-        rlang::eval_tidy(private$inputs$quos, env = env)
+        rlang::eval_tidy(private$inputs$quos, env = env),
+        fluidRow(
+          shinydashboard::box(
+            title = 'More...',
+            tags$ul(
+              tagList(more_btns)
+            ),
+            width = 12,
+            collapsible = T
+          )
+        )
       )
     },
     generate_output_ui = function(sidebar_width = 3L){
@@ -804,9 +854,6 @@ ExecEnvir <- R6::R6Class(
         rlang::eval_tidy(private$outputs$quos, env = env)
       )
 
-    },
-    generate_results = function(env, async = TRUE){
-      env$.rave_future <- private$execute(plan = NULL, async = async)
     },
     is_global = function(inputId){
       tabsets = private$tabsets
@@ -955,8 +1002,14 @@ cache_input <- function(key, val, read_only = T){
 }
 
 
-
-
+#' @export
+async_var <- function(x, default = NULL){
+  if(is.null(x)){
+    return(default)
+  }else{
+    return(x)
+  }
+}
 
 
 

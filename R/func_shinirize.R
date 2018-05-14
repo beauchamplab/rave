@@ -51,24 +51,20 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
           return(NULL)
         }
         logger('Executing Script')
-        # record time
-        start_time = Sys.time()
-        # local_data$last_executed = F
-        q = quote({
-          execenv$generate_results(env = local_data, async = async)
+        tryCatch({
+          # record time
+          start_time = Sys.time()
+          execenv$execute(async = async)
           if(async){
             local_data$suspended = FALSE
+          }else{
+            local_data$has_results = Sys.time()
+            end_time = Sys.time()
+            if(test.mode){
+              logger(MODULE_LABEL, ' - Exec time: ', sprintf('%.3f (sec)', end_time - start_time), level = 'INFO')
+            }
           }
-          local_data$has_results = Sys.time()
-          end_time = Sys.time()
-          if(test.mode){
-            logger(MODULE_LABEL, ' - Exec time: ', sprintf('%.3f (sec)', end_time - start_time), level = 'INFO')
-          }
-        })
 
-
-        tryCatch({
-          eval(q)
           local_data$last_executed = T
           cache_all_inputs()
           if(!isolate(local_data$onced)){
@@ -188,10 +184,11 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         local_data$input_updated = Sys.time()
       }, priority = 999L)
 
-      observeEvent(input$.force_run, {
+      observeEvent(input$..async_run, {
         if(global_reactives$has_data){
           logger('Running the script with async')
           run_script(async = TRUE)
+          showNotification(p('Running in the background. Results will be shown once finished. Please do not hit button again.'), type = 'message')
         }
       })
 
@@ -201,47 +198,22 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       # })
 
       observeEvent(global_reactives$check_results, {
-        if(!local_data$has_data){
-          return(NULL)
-        }
-        if(!local_data$suspended){
+        if(!isolate(local_data$suspended)){
           logger('Checking futures')
-          f = local_data$.rave_future
-          if(!is.null(f) && 'Future' %in% class(f$async_future)){
-            if(future::resolved(f$async_future)){
-              value(f$async_future)
-              res = tryCatch({
-                value(f$async_future)
+          f = execenv$param_env[['..rave_future_obj']]
+          if(!is.null(f) && is(f, 'Future')){
+            if(future::resolved(f)){
+              execenv$param_env[['..rave_future_env']] = tryCatch({
+                future::value(f)
               }, error = function(e){
-                capture.output(traceback(e))
+                logger('[ASYNC]: ', MODULE_LABEL, ' got an error during async evaluation:', level = 'ERROR')
+                logger(paste(capture.output(traceback(e)), collapse = '\n'), level = 'ERROR')
+                return(NULL)
               })
-              tmp_env = new.env()
-              if(is.environment(res)){
-                for (nm in ls(res)) {
-                  obj = get(nm, envir = res)
-
-                  capture.output({
-                    tryCatch({
-                      tmp_env$obj_size = pryr::object_size(obj)
-                    }, error = function(e){
-                      tmp_env$obj_size = 0
-                    })
-                  }) -> junk
-                  if(tmp_env$obj_size < rave_options('big_object_size')){
-                    if(is.function(obj)){
-                      environment(obj) <- execenv$runtime_env
-                    }
-                    assign(nm, obj, envir = execenv$runtime_env)
-                  }
-                }
-                # remove
-                em(tmp_env)
-              }else{
-                # async module has error
-                lapply(res, logger, level = 'ERROR')
-              }
               local_data$suspended = TRUE
-              local_data$has_results = Sys.time()
+              # Need to run script again to update async_vars
+              run_script(async = F)
+              showNotification(p('Async evaluation is finished - ', MODULE_LABEL), duration = 8, type = 'message')
             }
           }else{
             local_data$suspended = TRUE

@@ -2,7 +2,7 @@ comp_parser = function(){
   parsers = new.env()
   parsers[['.default_parser']] = function(expr, env = environment()){
     fun = eval(expr[[1]], envir = env)
-    width = expr[['width']]
+    width = eval(expr[['width']])
     if(length(width) != 1 || !is.numeric(width)){
       width = 12L
     }else{
@@ -254,7 +254,6 @@ comp_parser = function(){
 
       updates = function(session, ..., .args = list()){
         args = c(list(...), .args)
-        assign('a', args, envir=globalenv())
         base_args = args$initialize
 
         lapply(seq_len(max_ncomp), function(ii){

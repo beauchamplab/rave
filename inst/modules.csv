@@ -1,4 +1,4 @@
-ModuleID,Name,ScriptPath,Active,Author,Version,Packages
-condition_explorer,Condition Explorer,~/rave_modules/modules/builtin_modules/condition_explorer.R,TRUE,"[John Magnotti]<john.Magnotti@bcm.edu>, [Zhengjia Wang]<dipterix.wang@gmail.com>",0.1.6,rave;magrittr;stringr;shiny;MASS
-onset_detection,Onset Detection,~/rave_modules/modules/builtin_modules/onset_detection.R,TRUE,"[John Magnotti]<john.Magnotti@bcm.edu>, [Zhengjia Wang]<dipterix.wang@gmail.com>",0.1.0,rave;magrittr;stringr;shiny;MASS
-across_elec_correlation,Electrode Connectivity,~/rave_modules/modules/builtin_modules/across_electrode_correlations.R,TRUE,"[John Magnotti]<john.Magnotti@bcm.edu>, [Zhengjia Wang]<dipterix.wang@gmail.com>",0.1.0,rave;magrittr;stringr;shiny;MASS
+PackageID,GroupName,ModuleID,Name,ScriptPath,Active,Author,Version,Packages
+beauchamplab,Builtin Modules,condition_explorer,Condition Explorer,~/rave_modules/modules/builtin_modules/condition_explorer.R,TRUE,"[John Magnotti]<john.Magnotti@bcm.edu>, [Zhengjia Wang]<dipterix.wang@gmail.com>",0.1.6,rave;magrittr;stringr;shiny;MASS
+beauchamplab,Builtin Modules,onset_detection,Onset Detection,~/rave_modules/modules/builtin_modules/onset_detection.R,TRUE,"[John Magnotti]<john.Magnotti@bcm.edu>, [Zhengjia Wang]<dipterix.wang@gmail.com>",0.1.0,rave;magrittr;stringr;shiny;MASS
+beauchamplab,,across_elec_correlation,Electrode Connectivity,~/rave_modules/modules/builtin_modules/across_electrode_correlations.R,TRUE,"[John Magnotti]<john.Magnotti@bcm.edu>, [Zhengjia Wang]<dipterix.wang@gmail.com>",0.1.0,rave;magrittr;stringr;shiny;MASS

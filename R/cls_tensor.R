@@ -55,7 +55,6 @@ Tensor <- R6::R6Class(
     },
     subset = function(..., drop = FALSE, data_only = F, .env = parent.frame()){
       ..wrapper = list2env(self$dimnames, parent = .env)
-      assign('sss', ..wrapper, envir = globalenv())
       # expr = lapply(lazyeval::lazy_dots(...), function(x){x$env = .env; x})
       # class(expr) <- 'lazy_dots'
       # re = lazyeval::lazy_eval(expr, data = self$dimnames)

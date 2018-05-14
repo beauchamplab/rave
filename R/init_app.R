@@ -87,24 +87,67 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
     sidebar = shinydashboard::dashboardSidebar(
       shinydashboard::sidebarMenu(
         id = 'sidebar',
-        .list = lapply(modules, function(m){
-          shinydashboard::menuItem(
-            text = m$label_name,
-            tabName = str_to_upper(m$module_id)
-          )
-        })
+        .list =
+          # local({
+          #   sel = names(modules) %in% "______"
+          #   grouped = modules[sel]
+          #   singles = modules[!sel]
+          #
+          #
+          #   if(length(grouped)){
+          #     lapply(names(grouped), function(group_name)){
+          #       quo({
+          #         shinydashboard::menuItem(
+          #           text = !!group_name,
+          #           expandedName = !!group_name,
+          #           startExpanded = F,
+          #
+          #         )
+          #       })
+          #     }
+          #   }
+          # })
+        tagList(
+          lapply(names(modules)[!names(modules) %in% "______"], function(nm){
+            m = modules[[nm]]
+            if(nm != "______"){
+              do.call(shinydashboard::menuItem, args = list(
+                text = nm,
+                expandedName = nm,
+                startExpanded = F,
+                lapply(m, function(smd){
+                  shinydashboard::menuSubItem(
+                    text = smd$label_name,
+                    tabName = str_to_upper(smd$module_id)
+                  )
+                })
+              ))
+            }
+          }),
+          lapply(unlist(modules[["______"]]), function(smd){
+            shinydashboard::menuItem(
+              text = smd$label_name,
+              tabName = str_to_upper(smd$module_id)
+            )
+          })
+        )
       )
     ),
     control = dashboardControl(
       data_selector$control()
     ),
     body = shinydashboard::dashboardBody(
-      do.call(shinydashboard::tabItems, args = lapply(modules, function(m){
-        shinydashboard::tabItem(
-          tabName = str_to_upper(m$module_id),
-          uiOutput(str_c(m$module_id, '_UI'))
-        )
-      }))
+      do.call(
+        shinydashboard::tabItems,
+        args = local({
+          re = lapply(unlist(modules), function(m) {
+            shinydashboard::tabItem(tabName = str_to_upper(m$module_id),
+                                    uiOutput(str_c(m$module_id, '_UI')))
+          })
+          names(re) = NULL
+          re
+        })
+      )
     ),
     initial_mask = tagList(
       h2('R Analysis and Visualizations for Electrocorticography Data'),
@@ -130,7 +173,7 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
     #################################################################
 
     # Global variable, timer etc.
-    async_timer = reactiveTimer(500)
+    async_timer = reactiveTimer(1000)
     # input_timer = reactiveTimer(rave_options('delay_input') / 2)
     global_reactives = reactiveValues(
       check_results = NULL,
@@ -151,7 +194,7 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
 
     ##################################################################
     # load modules
-    shinirized_modules = lapply(modules, rave:::shinirize, test.mode = test.mode)
+    shinirized_modules = lapply(unlist(modules), rave:::shinirize, test.mode = test.mode)
 
     observe({
       if(global_reactives$has_data){
@@ -246,7 +289,7 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
         data_repo = getDefaultDataRepository()
         suma_out_dir = data_repo$subject$dirs$suma_out_dir
 
-        module = modules[vapply(modules, function(x){
+        module = modules[vapply(unlist(modules), function(x){
           global_reactives$execute_module == str_to_upper(x$module_id)
         }, FALSE)]
         pattern = module[[1]]$label_name
@@ -298,7 +341,7 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
     if(!test.mode){
       session$onSessionEnded(function() {
         logger('Clean up environment.')
-        lapply(modules, function(x){
+        lapply(unlist(modules), function(x){
           x$clean(session_id = session_id)
         })
         logger('Clean up data repository.')

@@ -24,8 +24,13 @@ rave_inputs(
     checkboxInput('collapse_using_median', 'Collapse using median'),
 
     .tabsets = list(
-        'Global Variables' = c(
+        'Global Variables' = list(
             'GROUPS', 'FREQUENCY', 'BASELINE', 'TIME_RANGE'
+        ),
+        'Local Variables' = list(
+          'GROUPS_CMPD',
+          c('electrode', 'max_zlim'),
+          c('log_scale', 'sort_trials_by_type', 'collapse_using_median')
         )
     )
 )
