@@ -21,7 +21,7 @@ write.niml <- function(values_matrix, electrode_numbers=NULL, value_labels=NULL,
   AFNI_PATH = try_normalizePath(rave_options('suma_path'))
   faces_per_electrode = rave_options('suma_nodes_per_electrodes')
 
-  fname = prefix %&% '_' %&% str_replace_all(Sys.time(), '\\ |:', '_')
+  fname = prefix %&% '_' %&% str_replace_all(Sys.time(), '\\ |:|/', '_')
   niml_fname <- fname %&% '.niml.dset'
   csv_fname = fname %&% '.csv'
 

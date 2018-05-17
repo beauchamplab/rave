@@ -53,8 +53,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
 
     # eval once
     # To be changed
-    potential_projects = str_split_fixed(list.dirs(rave_options('data_dir'), full.names = F, recursive = F), '_', 2)[,2]
-    local_data$all_projects = potential_projects
+    local_data$all_projects = potential_projects = list.dirs(rave_options('data_dir'), full.names = F, recursive = F)
 
     last_inputs = utils$last_inputs()
     local_data$project_name = last_inputs$last_project_name

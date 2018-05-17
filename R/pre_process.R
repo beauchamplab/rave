@@ -160,7 +160,7 @@ rave_pre_process <- function(
       dirs = get_dir(subject_code = subject_code, project_name = project_name)
       assert_that(dir.exists(dirs$preprocess_dir), msg = 'Subject ' %&% subject_code %&% ' has no project folder ' %&% project_name)
       s = SubjectInfo2$new(project_name = project_name, subject_code = subject_code)
-      id = s$subject_code %&% '_' %&% s$project_name
+      id = sprintf('%s/%s', s$project_name, s$subject_code)
 
       rave_hist$save(
         .rave_pre_project_name = project_name,

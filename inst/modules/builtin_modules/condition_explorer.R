@@ -83,11 +83,11 @@ rave_execute({
     assertthat::assert_that(length(electrode) == 1, msg = 'No electrode selected')
 
   # TODO: change adhoc vars definition - Zhengjia
+  power = module_tools$get_power(force = T)
   electrodes = power$dimnames$Electrode
   trials = power$dimnames$Trial
   frequencies = power$dimnames$Frequency
   time_points = power$dimnames$Time
-
 
 
     electrode = as.integer(electrode)
@@ -99,7 +99,7 @@ rave_execute({
 
     bl_power <- cache(
         key = list(subject$subject_id, electrode, BASELINE, any_trials),
-        val = baseline(BASELINE[1],  BASELINE[2], electrode)
+        val = module_tools$baseline(BASELINE[1],  BASELINE[2], electrode)
     )
 
     # TODO: change GROUPS definition - Zhengjia

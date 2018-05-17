@@ -12,7 +12,7 @@ safe_write_csv <- function(data, file, ...){
 #' @export
 save_meta <- function(data, meta_type, project_name, subject_code){
   data_dir = rave_options('data_dir')
-  meta_dir = file.path(data_dir, sprintf('%s_%s', subject_code, project_name), 'rave', 'meta')
+  meta_dir = file.path(data_dir, sprintf('%s/%s', project_name, subject_code), 'rave', 'meta')
 
   if(!dir.exists(meta_dir)){
     dir.create(meta_dir, recursive = T)
@@ -52,7 +52,7 @@ save_meta <- function(data, meta_type, project_name, subject_code){
 load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_name){
   data_dir = rave_options('data_dir')
   if(missing(subject_id)){
-    meta_dir = file.path(data_dir, sprintf('%s_%s', subject_code, project_name), 'rave', 'meta')
+    meta_dir = file.path(data_dir, sprintf('%s/%s', project_name, subject_code), 'rave', 'meta')
   }else{
     meta_dir = file.path(data_dir, subject_id, 'rave', 'meta')
   }

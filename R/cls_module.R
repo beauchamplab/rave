@@ -1005,11 +1005,18 @@ cache_input <- function(key, val, read_only = T){
 
 #' @export
 async_var <- function(x, default = NULL){
-  if(is.null(x)){
-    return(default)
-  }else{
-    return(x)
-  }
+  tryCatch({
+    if(is.null(x)){
+      re = default
+    }else{
+      re = x
+    }
+    re
+  }, error = function(e){
+    default
+  }) ->
+    re
+  re
 }
 
 

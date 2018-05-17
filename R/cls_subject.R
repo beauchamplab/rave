@@ -75,6 +75,12 @@ Subject <- R6::R6Class(
     },
     id = function(){
       self$subject_id
+    },
+    project_name = function(){
+      unlist(str_split(self$subject_id, '/'))[1]
+    },
+    subject_code = function(){
+      unlist(str_split(self$subject_id, '/'))[2]
     }
   )
 )

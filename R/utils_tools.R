@@ -27,13 +27,70 @@ rave_preprocess_tools <- function(env = new.env(), ...){
       }
     },
 
+    check_load_subject = function(subject_code, project_name, details = T){
+      checklist = list()
+      ind = 1
+      # Step 1: check if subject folders exists
+      dirs = get_dir(subject_code = subject_code, project_name = project_name)
+      check_names = list(
+        'subject_dir' = 'Subject Folder',
+        'rave_dir' = 'RAVE Folder',
+        'preprocess_dir' = 'Preprocessing Folder',
+        'meta_dir' = 'Meta Folder',
+        'channel_dir' = 'Channel Folder',
+        'suma_dir' = 'SUMA Folder',
+        'suma_out_dir' = 'SUMA-RAVE Folder',
+        'pre_subject_dir' = 'Raw Directory'
+      )
+      sapply(names(check_names), function(nm){
+        l = list(
+          dir.exists(dirs[[nm]])
+        )
+        names(l) = check_names[[nm]]
+        l
+      }, simplify = T, USE.NAMES = F) ->
+        l
+      checklist[['Folders']] = l
+
+      # step 2: Check if subject has preprocessed yet
+      l = list(
+        'Started Proprocess' = F,
+        'Notch Filter' = F,
+        'Wavelet' = F,
+        'Referenced' = F
+      )
+      try({
+        utils$load_subject(subject_code = subject_code, project_name = project_name)
+        l[seq_len(utils$get_check_level())] = T
+      })
+
+      checklist[['Preprocess']] = l
+
+
+      # step 3: Check if subject meta data is ready
+      meta_dir = dirs$meta_dir
+      meta_files = list.files(meta_dir)
+
+      l = list(
+        'Trial File' = 'trials.csv' %in% meta_files,
+        'Electrode File' = 'electrodes.csv' %in% meta_files,
+        'Time point File' = 'time_points.csv' %in% meta_files,
+        'Frequency File' = 'frequencies.csv' %in% meta_files,
+        'Epoch File' = any(str_detect(meta_files, '^epoch_[a-zA-Z0-9]+\\.[cC][sS][vV]$'))
+      )
+
+      checklist[['Meta']] = l
+
+      checklist
+    },
+
     # Load subject
     load_subject = function(subject_code, project_name){
       logger('Loading Subject')
       dirs = get_dir(subject_code = subject_code, project_name = project_name)
       assert_that(dir.exists(dirs$preprocess_dir), msg = 'Subject ' %&% subject_code %&% ' has no project folder ' %&% project_name)
       s = SubjectInfo2$new(project_name = project_name, subject_code = subject_code)
-      id = s$subject_code %&% '_' %&% s$project_name
+      id = s$project_name %&% '/' %&% s$subject_code
 
       env[['subject']] = s
 
@@ -82,7 +139,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
     get_subject_id = function(){
       subject_code = get_val(env$subject, 'subject_code', default = '')
       project_name = get_val(env$subject, 'project_name', default = '')
-      return(subject_code %&% '_' %&% project_name)
+      return(project_name %&% '/' %&% subject_code)
     },
 
     load_signal = function(block, channel, group){

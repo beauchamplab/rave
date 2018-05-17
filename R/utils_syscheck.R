@@ -140,7 +140,7 @@ setLoadActions(function(ns){
 
   rave::rave_setup()
 
-  rave::logger("RAVE - (Code: Dipterix) is loaded!", level = 'INFO')
+  rave::logger("RAVE - (Code: Ent) is loaded!", level = 'INFO')
 
   if(is_changed_module || is_changed_data){
     message('--------------------')

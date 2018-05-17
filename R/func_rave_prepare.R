@@ -15,7 +15,6 @@ rave_prepare <- function(
     }
     return(invisible())
   }
-  data_types = data_types[data_types %in% c('power', 'phase')]
   logger('Preparing subject [', subject,']')
   logger('# of electrodes to be loaded: ', length(electrodes))
   logger('Data type(s): ', paste(data_types, collapse = ', '))
@@ -48,44 +47,75 @@ rave_prepare <- function(
     rave_setup()
     logger('You have either specified func or baseline. I assume that you want adhoc analysis.', level = 'INFO')
   }else{
-    repo$epoch(epoch_name = epoch, pre = time_range[1], post = time_range[2], names = data_types, func = post_process)
-    env$.repository = repo
-    env$.utils = rave_preprocess_tools()
+    # actually load data to environment
 
-    sid = repo$subject$id
-    splits = stringr::str_split_fixed(sid, '_', 2)
-
-    env$.utils$load_subject(subject_code = splits[1], project_name = splits[2])
-
-    env$subject = repo$subject
-    env$power = repo$power$get('power')
-    env$phase = repo$phase$get('phase')
-    env$valid_electrodes = repo$subject$filter_valid_electrodes
-
-    ds = 'power'
-    if(is.null(env$power)){
-      ds = 'phase'
+    # load power phase
+    tmp = c('power', 'phase'); tmp = tmp[tmp %in% data_types]
+    if(length(tmp)){
+      repo$epoch(epoch_name = epoch, pre = time_range[1], post = time_range[2], names = tmp)
     }
 
-    meta = repo[[ds]]$get(ds)$dimnames
-    env$time_points = meta$Time
-    env$trials = meta$Trial
-    env$frequencies = meta$Frequency
-    env$electrodes = meta$Electrode
-    env$meta = repo$subject$meta
-    env$meta[['epoch_data']] = repo$epochs$get('epoch_data')
-    env$epoch = list(
+
+
+    subject = repo$subject
+
+
+
+
+    meta = subject$meta
+    meta[['epoch_data']] = load_meta('epoch', subject_id = subject$subject_id, meta_name = epoch)
+    meta[['epoch_info']] = list(
       name = epoch,
       time_range = time_range
     )
-    env$baseline = repo$baseline
+
+    # bindings
+    env$.private = new.env(parent = baseenv())
+    env$.private$repo = repo
+    env$.private$meta = meta
+
+    env$.private$preproc_tools = rave_preprocess_tools()
+    env$data_check = env$.private$preproc_tools$check_load_subject(subject_code = subject$subject_code, project_name = subject$project_name)
+    env$subject = subject
+    env$module_tools = rave_module_tools()
+    env$preload_info = list(
+      epoch_name = env$.private$meta$epoch_info$name,
+      time_points = seq(-time_range[1], time_range[2], by = 1/subject$sample_rate),
+      electrodes = electrodes,
+      frequencies = subject$frequencies$Frequency,
+      condition = unique(env$.private$meta$epoch_data$Condition)
+    )
+
+    env$.module_data = new.env(parent = baseenv())
+
+    # Load voltage and customized data
+    if('voltage' %in% data_types){
+      env$.private[['voltage']] = env$module_tools$get_voltage(force = T)
+    }
+
+    # Load other data
+    other_data_types = data_types[!data_types %in% c('power', 'phase', 'voltage')]
+    if(length(other_data_types)){
+      module_data_dir = subject$dirs$module_data_dir
+      lapply(other_data_types, function(path){
+        env$.module_data[[path]] %?<-% new.env(parent = emptyenv())
+        lapply(list.files(file.path(module_data_dir, path)), function(name){
+          re = env$module_tools$get_subject_data(path = path, name = name)
+          env$.module_data[[path]][[name]] = re
+          NULL
+        })
+        NULL
+      })
+    }
+
+
+
 
     if(attach != FALSE){
       if('rave_data' %in% search()){
         base::detach('rave_data', character.only = T, force = T)
       }
-      # special for dev use
-      env$module_tools = rave_module_tools()
+
       base::attach(env, name = 'rave_data')
 
 

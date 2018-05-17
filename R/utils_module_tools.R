@@ -1,103 +1,135 @@
 #' Tools for module writers
 #' @export
 rave_module_tools <- function(env = NULL) {
+  data_env = getDefaultDataRepository()
+
   tools =
     list(
 
       ####### part 1: Data ######
 
       get_power = function(force = F) {
-        data_env = rave::getDefaultDataRepository()
-        if (force && is.null(data_env[['power']])) {
-          data_env$.repository$epochs$set('signature', 'RESET')
-          data_env$.repository$epoch(
-            epoch_name = data_env$epoch$name,
-            pre = data_env$epoch$time_range[1],
-            post = data_env$epoch$time_range[2],
+        repo = data_env$.private$repo
+        epoch = data_env$.private$meta$epoch_info
+
+        power = repo$power$get('power')
+
+        if (force && is.null(power)) {
+          repo$epochs$set('signature', 'RESET')
+          repo$epoch(
+            epoch_name = epoch$name,
+            pre = epoch$time_range[1],
+            post = epoch$time_range[2],
             names = 'power',
             func = NULL
           )
-          data_env[['power']] = data_env$.repository$power$get('power')
+          power = repo$power$get('power')
         }
-        return(data_env[['power']])
+        return(power)
       },
 
       get_phase = function(force = F) {
-        data_env = rave::getDefaultDataRepository()
-        if (force && is.null(data_env[['phase']])) {
-          data_env$.repository$epochs$set('signature', 'RESET')
-          data_env$.repository$epoch(
-            epoch_name = data_env$epoch$name,
-            pre = data_env$epoch$time_range[1],
-            post = data_env$epoch$time_range[2],
+        repo = data_env$.private$repo
+        epoch = data_env$.private$meta$epoch_info
+
+        phase = repo$phase$get('phase')
+
+        if (force && is.null(phase)) {
+          repo$epochs$set('signature', 'RESET')
+          repo$epoch(
+            epoch_name = epoch$name,
+            pre = epoch$time_range[1],
+            post = epoch$time_range[2],
             names = 'phase',
             func = NULL
           )
-          data_env[['phase']] = data_env$.repository$phase$get('phase')
+          phase = repo$phase$get('phase')
         }
-        return(data_env[['phase']])
+        return(phase)
+      },
+
+      get_voltage = function(force = F){
+        voltage = data_env$.private[['voltage']]
+        if(force && is.null(voltage)){
+          electrodes = tools$get_loaded_electrodes()
+          voltage = tools$.get_voltages(electrodes)
+          data_env$.private[['voltage']] = voltage
+        }
+        return(data_env$.private[['voltage']])
       },
 
       get_meta = function(name) {
-        data_env = rave::getDefaultDataRepository()
+        meta = data_env$.private$meta
         switch (
           name,
           'electrodes' = {
-            data_env$meta$electrode
+            meta$electrode
           },
           'frequencies' = {
-            data_env$meta$frequency
+            meta$frequency
           },
           'time_points' = {
-            data_env$meta$time
+            meta$time
           },
           'trials' = {
-            data_env$meta$epoch_data
+            meta$epoch_data
           }
         )
       },
 
       get_subject_dirs = function() {
-        data_env = rave::getDefaultDataRepository()
         data_env$subject$dirs
       },
 
-      get_subject_data = function(name,
-                                  path = 'common',
-                                  ...,
-                                  try_open = T) {
-        data_env = rave::getDefaultDataRepository()
-        root_dir = data_env$subject$dirs[['rave_dir']]
-        path = file.path(root_dir, 'module_data', path)
+      get_subject_data = function(
+        name,
+        path = 'common',
+        ...,
+        default = NULL,
+        try_open = T,
+        check_cache = T
+      ) {
+
+        if(check_cache){
+          val = data_env$.module_data[[path]][[name]]
+          if(!is.null(val)){
+            return(val)
+          }
+        }
+
+        root_dir = data_env$subject$dirs$module_data_dir
+        path = file.path(root_dir, path)
         if (!dir.exists(path)) {
           dir.create(path, recursive = T, showWarnings = F)
         }
         file = list.files(path,
                           pattern = sprintf('^%s\\.', name),
                           full.names = T)
-        if (length(file) && try_open) {
-          env = try_load_file(file[[1]], name, ...)
-          return(env)
+        if(try_open){
+          if (length(file)) {
+            data = default
+            try({
+              data = try_load_file(file[[1]], name, ..., simplify = T)
+            })
+          }
+          return(data)
+        }else{
+          return(file)
         }
-        return(NULL)
       },
 
       get_loaded_electrodes = function() {
-        data_env = rave::getDefaultDataRepository()
-        p = data_env$.repository$power$get('power')
-        p %?<-% data_env$.repository$power$get('phase')
-        if(is.null(p)){
-          return(NULL)
-        }else{
-          return(p$dimnames$Electrode)
-        }
+        repo = data_env$.private$repo
+        e = repo$raw$keys()
+        e = as.numeric(e)
+        e = e[!is.na(e)]
+        sort(e)
       },
       save_subject_data = function(data,
                                    name,
                                    ...,
                                    path = 'common',
                                    format = 'rds') {
-        data_env = rave::getDefaultDataRepository()
         format = str_to_lower(format)
         assertthat::assert_that(format %in% c('rds', 'h5', 'rdata', 'csv', 'mat'),
                                 msg = 'Unsupported format: MUST be rds, h5, rdata, csv, or mat')
@@ -128,15 +160,15 @@ rave_module_tools <- function(env = NULL) {
       },
 
       get_sample_rate = function(raw = F){
-        data_env = rave::getDefaultDataRepository()
         if(raw){
-          return(data_env$.utils$get_srate())
+          return(data_env$.private$preproc_tools$get_srate())
         }else{
           return(data_env$subject$sample_rate)
         }
       },
 
-      get_voltages = function(channels, data_only = F){
+      .get_voltages = function(electrodes, data_only = F){
+        channels = electrodes
         epoch = T
         referenced = T
         if(length(channels) > 1){
@@ -184,8 +216,7 @@ rave_module_tools <- function(env = NULL) {
       },
 
       .get_voltage = function(chl, referenced = T, epoch = T, data_only = F){
-        data_env = rave::getDefaultDataRepository()
-        utils = data_env$.utils
+        utils = data_env$.private$preproc_tools
         dirs = data_env[['subject']]$dirs
         vfile = file.path(dirs$preprocess_dir, sprintf('chl_%d.h5', chl))
 
@@ -204,7 +235,8 @@ rave_module_tools <- function(env = NULL) {
           return(re)
         }
         epochs = tools$get_meta(name = 'trials')
-        tp = seq(-data_env$epoch$time_range[1] * srate, data_env$epoch$time_range[2] * srate)
+        epoch_info = data_env$.private$meta$epoch_info
+        tp = seq(-epoch_info$time_range[1] * srate, epoch_info$time_range[2] * srate)
         vapply(order(epochs$Trial), function(ii){
           b = epochs$Block[ii]
           t = round(epochs$Time[ii] * srate)
@@ -240,13 +272,11 @@ rave_module_tools <- function(env = NULL) {
 
       ###### Part 2: utilities #######
       get_valid_electrodes = function(electrodes = seq_len(10000)){
-        data_env = rave::getDefaultDataRepository()
         data_env[['subject']]$filter_valid_electrodes(electrodes = electrodes)
       },
 
       baseline = function(from, to, ...){
-        data_env = rave::getDefaultDataRepository()
-        data_env$.repository$baseline(from = from, to = to, ...)
+        data_env$.private$repo$baseline(from = from, to = to, ...)
       }
 
     )
@@ -256,39 +286,21 @@ rave_module_tools <- function(env = NULL) {
 
   # If env is provided, create active binds
   if(is.environment(env) && !environmentIsLocked(env)){
-    makeActiveBinding('power', function(){
-      tools$get_power()
-    }, env)
-
-    makeActiveBinding('phase', function(){
-      tools$get_phase()
-    }, env)
-
-    makeActiveBinding('epoch', function(){
-      data_env = rave::getDefaultDataRepository()
-      data_env[['epoch']]
-    }, env)
-
-    makeActiveBinding('baseline', function(){
-      tools$baseline
-    }, env)
-
-    makeActiveBinding('subject', function(){
-      data_env = rave::getDefaultDataRepository()
-      data_env[['subject']]$clone()
-    }, env)
-
-    makeActiveBinding('valid_electrodes', function(){
-      tools$get_valid_electrodes
-    }, env)
 
     makeActiveBinding('module_tools', function(){
       tools
     }, env)
 
-    makeActiveBinding('preprocess_tools', function(){
-      data_env = rave::getDefaultDataRepository()
-      data_env[['.utils']]
+    makeActiveBinding('subject', function(){
+      data_env$subject
+    }, env)
+
+    makeActiveBinding('data_check', function(){
+      data_env$data_check
+    }, env)
+
+    makeActiveBinding('preload_info', function(){
+      data_env$preload_info
     }, env)
   }
 
@@ -315,7 +327,7 @@ try_save_file <- function(data, ..., fpath, name, append = F) {
       rave::save_h5(
         data,
         fpath,
-        name,
+        'data',
         ...,
         new_file = !append,
         replace = !append,
@@ -359,7 +371,7 @@ try_save_file <- function(data, ..., fpath, name, append = F) {
 
 #' @import stringr
 #' @export
-try_load_file <- function(fpath, name, ..., env = new.env()) {
+try_load_file <- function(fpath, name, ..., env = new.env(parent = emptyenv()), simplify = T) {
   if (!file.exists(fpath)) {
     return(NULL)
   }
@@ -373,25 +385,39 @@ try_load_file <- function(fpath, name, ..., env = new.env()) {
   ))), 1)
 
 
+  if(simplify){
+    env = new.env(parent = emptyenv())
+  }
 
   switch (
     postfix,
     'csv' = {
-      env$data = utils::read.csv(fpath, ...)
+      env$data = utils::read.csv(file = fpath, ...)
     },
     'h5' = {
-      env$data = rave::load_h5(fpath, name, ...)
+      env$data = rave::load_h5(file = fpath, name = 'data', ...)
     },
     'rdata' = {
-      base::load(fpath, envir = env, ...)
+      base::load(file = fpath, envir = env, ...)
     },
     'rds' = {
-      env$data = base::readRDS(fpath, ...)
+      env$data = base::readRDS(file = fpath, ...)
     },
     'mat' = {
-      env$data = R.matlab::readMat(fpath, ...)
+      env$data = R.matlab::readMat(con = fpath, ...)
     }
   )
 
-  as.list(env)
+  data = as.list(env, all.names = T)
+
+  if(simplify){
+    if(length(data) == 1){
+      return(data[[1]])
+    }
+    if(length(data) == 0){
+      return(NULL)
+    }
+  }
+
+  return(data)
 }

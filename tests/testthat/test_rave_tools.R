@@ -28,7 +28,7 @@ test_that('[tools] Load subject', {
 })
 
 test_that('[tools] Subject attributes', {
-  expect(utils$get_subject_id() == subject_code %&% '_' %&% project_name, 'Check get_subject_id')
+  expect(utils$get_subject_id() == project_name %&% '/' %&%subject_code, 'Check get_subject_id')
   expect(utils$get_check_level() %in% 0:4, 'Check level invalid range')
 
   if(utils$get_check_level() == 1){

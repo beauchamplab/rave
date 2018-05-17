@@ -307,13 +307,13 @@ add_to_session <- function(
 #' print(a)  # Will be 1
 #' eval_dirty(expr, env)
 #' print(a)  # a is changed
-#' @importFrom rlang quo_get_expr
+#' @importFrom rlang quo_squash
 #' @importFrom rlang is_quosure
 #' @export
 eval_dirty <- function(expr, env = parent.frame(), data = NULL){
 
   if(is_quosure(expr)){
-    expr = quo_get_expr(expr)
+    expr = quo_squash(expr)
   }
 
   if(!is.null(data)){
@@ -830,6 +830,7 @@ getDefaultCacheEnvironment <- function(
 #' @export
 lapply_async <- function(x, fun, ..., .ncores = 0, .future_plan = future::multiprocess,
                          .call_back = NULL, .packages = NULL, .envir = environment(), .globals = TRUE, .gc = TRUE){
+  .ncores = as.integer(.ncores)
   if(.ncores <= 0){
     .ncores = rave_options('max_worker')
   }
@@ -839,7 +840,6 @@ lapply_async <- function(x, fun, ..., .ncores = 0, .future_plan = future::multip
     .packages = rev(.packages[!is.na(.packages)])
   }
   .niter = length(x)
-  .ncores = as.integer(.ncores)
   .ncores = min(.ncores, .niter)
 
   .future_list = list()
@@ -855,17 +855,18 @@ lapply_async <- function(x, fun, ..., .ncores = 0, .future_plan = future::multip
     }, envir = .envir, substitute = T, lazy = F, globals = .globals, .packages = .packages, gc = .gc,
     evaluator = .future_plan, workers = .ncores)
 
+    if(is.function(.call_back)){
+      try({
+        .call_back(.i)
+      })
+    }
+
     if(length(.future_list) >= .ncores){
       # wait for one of futures resolved
       .future_values[[1 + length(.future_values)]] = future::value(.future_list[[1]])
       .future_list[[1]] = NULL
     }
 
-    if(is.function(.call_back)){
-      try({
-        .call_back(.i)
-      })
-    }
   }
 
   return(c(.future_values, future::values(.future_list)))
