@@ -203,7 +203,7 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
     observe({
       if(global_reactives$has_data){
         global_reactives$execute_module = input$sidebar
-        shinyjs::hide(id = '__rave__mask__', anim = T, animType = 'fade')
+        shinyjs::hide(id = '__rave__mask__', anim = T, animType = 'slide')
       }else{
         shinyjs::show(id = '__rave__mask__', anim = T, animType = 'slide')
       }

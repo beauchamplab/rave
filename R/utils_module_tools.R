@@ -3,6 +3,7 @@
 rave_module_tools <- function(env = NULL) {
   data_env = getDefaultDataRepository()
 
+
   tools =
     list(
 
@@ -16,6 +17,7 @@ rave_module_tools <- function(env = NULL) {
 
         if (force && is.null(power)) {
           repo$epochs$set('signature', 'RESET')
+
           repo$epoch(
             epoch_name = epoch$name,
             pre = epoch$time_range[1],

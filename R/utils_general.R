@@ -871,3 +871,32 @@ lapply_async <- function(x, fun, ..., .ncores = 0, .future_plan = future::multip
 
   return(c(.future_values, future::values(.future_list)))
 }
+
+
+
+#' @export
+restart_rave <- function(reload = T, quiet = FALSE){
+  unloadns = function(ns_){
+    ns = ns_
+    if(isNamespaceLoaded(ns)){
+      ns = asNamespace(ns)
+      sub_ns = getNamespaceUsers(ns)
+      for(sbns in sub_ns){
+        unloadns(sbns)
+      }
+      if(!quiet){
+        base::message("Unload namespace - ", ns_)
+      }
+      unloadNamespace(ns_)
+    }
+  }
+
+  unloadns('rave')
+
+  cmd = ''
+  if(reload){
+    cmd = 'base::library(rave)'
+  }
+
+  rstudioapi::restartSession(cmd)
+}

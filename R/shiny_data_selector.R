@@ -323,7 +323,7 @@ shiny_data_selector <- function(moduleId){
     data_loaded = rlang::env_has(
       data_env,
       nms = c(
-        "private",
+        ".private",
         "data_check",
         "module_tools",
         "preload_info",
