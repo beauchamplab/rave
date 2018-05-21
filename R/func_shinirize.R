@@ -184,12 +184,31 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         local_data$input_updated = Sys.time()
       }, priority = 999L)
 
+
       observeEvent(input$..async_run, {
         if(global_reactives$has_data){
+          if(!is.null(local_data$run_async)){
+            showNotification(p('There is another process running in the background. ', actionLink(execenv$ns('..kill'), 'Proceed?')), type = 'warning', duration = NULL, id = 'async_msg')
+          }else{
+            local_data$run_async = Sys.time()
+          }
+
+        }
+
+
+      })
+
+      observeEvent(local_data$run_async, {
+        is_run = !is.null(local_data$run_async)
+        if(is_run){
           logger('Running the script with async')
           run_script(async = TRUE)
-          showNotification(p('Running in the background. Results will be shown once finished. Please do not hit button again.'), type = 'message')
+          showNotification(p('Running in the background. Results will be shown once finished.'), type = 'message', id = 'async_msg')
         }
+      })
+
+      observeEvent(input$..kill, {
+        local_data$run_async = Sys.time()
       })
 
       # observeEvent(local_data$show_results, {
@@ -213,6 +232,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
               local_data$suspended = TRUE
               # Need to run script again to update async_vars
               run_script(async = F)
+              local_data$run_async = NULL
               showNotification(p('Async evaluation is finished - ', MODULE_LABEL), duration = 8, type = 'message')
             }
           }else{

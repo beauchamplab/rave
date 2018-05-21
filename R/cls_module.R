@@ -511,7 +511,7 @@ ExecEnvir <- R6::R6Class(
         s = str_trim(unlist(str_split(nm, '\\[|\\]')))
         s = s[s!='']
         re = list(
-          collapsed = '+' %in% s,
+          collapsed = '-' %in% s,
           headerColor = tryCatch({
             col = NULL
             tmp = s[str_detect(s, '^#')]
