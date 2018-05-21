@@ -39,7 +39,7 @@ load_modules <- function(recompile = F){
 
   gt_md = function(x){
     m = as.list(x)
-    if(is_invalid(m$PackageID)){
+    if(is_invalid(m$PackageID, .invalids = c('null', 'na', 'blank'))){
       module = rave::ModuleEnvir$new(
         module_id = m$ModuleID,
         label_name = m$Name,

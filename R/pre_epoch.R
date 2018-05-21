@@ -43,7 +43,7 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2){
               actionButton(ns('stage'), 'Save Changes', width = '100%'),
               hr(),
               p('Danger:'),
-              actionButton(ns('discard'), 'Disgard Epoch', width = '100%')
+              actionButton(ns('discard'), 'Discard Epoch', width = '100%')
             )
           ),
           column(5,

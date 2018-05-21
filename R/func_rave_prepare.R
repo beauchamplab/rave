@@ -77,7 +77,7 @@ rave_prepare <- function(
     env$.private$preproc_tools = rave_preprocess_tools()
     env$data_check = env$.private$preproc_tools$check_load_subject(subject_code = subject$subject_code, project_name = subject$project_name)
     env$subject = subject
-    env$module_tools = rave_module_tools()
+    env$module_tools = rave_module_tools(data_env = env)
     env$preload_info = list(
       epoch_name = env$.private$meta$epoch_info$name,
       time_points = seq(-time_range[1], time_range[2], by = 1/subject$sample_rate),

@@ -1,7 +1,9 @@
 #' Tools for module writers
 #' @export
-rave_module_tools <- function(env = NULL) {
-  data_env = getDefaultDataRepository()
+rave_module_tools <- function(env = NULL, data_env = NULL) {
+  if(!is.environment(data_env)){
+    data_env = getDefaultDataRepository()
+  }
 
 
   tools =
@@ -167,6 +169,65 @@ rave_module_tools <- function(env = NULL) {
         }else{
           return(data_env$subject$sample_rate)
         }
+      },
+
+      incubate = function(expr, each = T, electrodes = NULL, data_types = NULL,
+                          parallel = FALSE, ncores = rave_options('max_worker')){
+        root_env = new.env(parent = parent.frame())
+        expr = substitute(expr)
+
+        if(is.null(electrodes)){
+          electrodes = data_env$preload_info$electrodes
+        }
+        epoch_info = data_env$.private$meta$epoch_info
+
+
+
+        if(each){
+          if(parallel){
+            lapply = function(x, fun){
+              progress = rave:::progress('Running', max = length(electrodes))
+              on.exit({progress$close()})
+              lapply_async(x, fun, .ncores = ncores, .call_back = function(i){
+                progress$inc('Electrode - ', electrodes[[i]])
+              })
+            }
+          }
+          lapply(
+            electrodes, function(e){
+              env = new.env()
+              re = NULL
+              tryCatch({
+                rave::rave_prepare(
+                  subject = data_env$subject$id,
+                  electrodes = e,
+                  epoch = epoch_info$name,
+                  time_range = epoch_info$time_range,data_types = data_types, attach = F, env = env
+                )
+                eval_dirty(expr, env = root_env, data = as.list(env))
+              }, error = function(e){
+                return(e)
+              }) -> re
+              return(re)
+            }
+          ) ->
+            re
+        }else{
+          env = new.env()
+          re = NULL
+          tryCatch({
+            rave::rave_prepare(
+              subject = data_env$subject$id,
+              electrodes = electrodes,
+              epoch = epoch_info$name,
+              time_range = epoch_info$time_range,data_types = data_type, attach = F, env = env
+            )
+            re = eval_dirty(expr, env = root_env, data = as.list(env))
+          }, error = function(e){
+            return(e)
+          }) -> re
+        }
+        return(re)
       },
 
       .get_voltages = function(electrodes, data_only = F){

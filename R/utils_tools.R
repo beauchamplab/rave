@@ -857,6 +857,24 @@ rave_preprocess_tools <- function(env = new.env(), ...){
         }
       }
 
+      addition_rows = NULL
+      for(gname in names(ref_list)){
+        addition_rows = rbind(addition_rows,
+                              data.frame(
+                                Channel = ref_list[[gname]]$num,
+                                ChlType = 1,
+                                Group = gname,
+                                Reference = 'This is a reference signal',
+                                RefType = ''
+                              ))
+      }
+
+      utils$save_channel_meta(
+        addition_rows = addition_rows
+      )
+
+      utils$save_excltime_meta()
+
 
       lapply_async(1:nrow(tbl), function(ii){
         chl = tbl[ii, 'Channel']
@@ -945,23 +963,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
         progress$inc(sprintf('Saving channel %d' , tbl$Channel[i]))
       })
 
-      addition_rows = NULL
-      for(gname in names(ref_list)){
-        addition_rows = rbind(addition_rows,
-                              data.frame(
-                                Channel = ref_list[[gname]]$num,
-                                ChlType = 1,
-                                Group = gname,
-                                Reference = 'This is a reference signal',
-                                RefType = ''
-                              ))
-      }
 
-      utils$save_channel_meta(
-        addition_rows = addition_rows
-      )
-
-      utils$save_excltime_meta()
 
       env$subject$logger$save(checklevel = REFERENCED)
 
