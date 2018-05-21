@@ -42,7 +42,7 @@ ECoGRepository <- R6::R6Class(
       names(re) = name
       return(re)
     },
-    load_electrodes = function(electrodes){
+    load_electrodes = function(electrodes, quiet = FALSE){
       if(missing(electrodes)){
         electrodes = self$subject$valid_electrodes
       }else{
@@ -54,7 +54,7 @@ ECoGRepository <- R6::R6Class(
 
       if(length(electrodes) > 0){
         logger('Loading electrodes')
-        progress = progress(title = 'Checking data...', max = length(electrodes))
+        progress = progress(title = 'Checking data...', max = length(electrodes), quiet = quiet)
         for(e in electrodes){
           e_str = paste(e)
           progress$inc(sprintf('Electrode - %s', e_str))
@@ -64,7 +64,7 @@ ECoGRepository <- R6::R6Class(
         progress$close()
       }
     },
-    epoch = function(epoch_name, pre, post, electrodes = NULL, func = NULL, names = c('power')){
+    epoch = function(epoch_name, pre, post, electrodes = NULL, func = NULL, names = c('power'), quiet = FALSE){
       if(is.null(electrodes)){
         electrodes = self$subject$valid_electrodes
       }else{
@@ -91,7 +91,7 @@ ECoGRepository <- R6::R6Class(
       self$epochs$set('signature', digest)
       freqs = load_meta(subject_id = self$subject$subject_id, meta_type = 'frequencies')
 
-      progress = progress(title = 'Loading data...', max = (length(electrodes) + 1) * length(names))
+      progress = progress(title = 'Loading data...', max = (length(electrodes) + 1) * length(names), quiet = quiet)
       on.exit({progress$close()})
 
       epoch_data = self$epochs$get('epoch_data')

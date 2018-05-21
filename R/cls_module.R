@@ -339,10 +339,9 @@ ExecEnvir <- R6::R6Class(
         }
       }
       self$wrapper_env$rave_execute = function(...){
+        self$rave_execute(...)
         if(is.null(getDefaultReactiveDomain())){
           rave::rave_execute(...)
-        }else{
-          self$rave_execute(...)
         }
       }
       self$wrapper_env$cache = function(...){
@@ -499,7 +498,33 @@ ExecEnvir <- R6::R6Class(
       private$module_env = module_env
       self$ns = shiny::NS(module_env$module_id)
     },
-    rave_inputs = function(..., .tabsets = list(), .env = NULL){
+    rave_inputs = function(..., .input_panels = list(), .tabsets = list(), .env = NULL){
+      .tabsets = .input_panels
+      names(.tabsets) = sapply(names(.input_panels), function(nm){
+        s = str_trim(unlist(str_split(nm, '\\[|\\]')))
+        s = s[s!='']
+        s[length(s)]
+      })
+
+
+      .tabsetParams = lapply(names(.input_panels), function(nm){
+        s = str_trim(unlist(str_split(nm, '\\[|\\]')))
+        s = s[s!='']
+        re = list(
+          collapsed = '+' %in% s,
+          headerColor = tryCatch({
+            col = NULL
+            tmp = s[str_detect(s, '^#')]
+            if(length(tmp) == 1){
+              col2rgb(tmp)
+              col = tmp
+            }
+            col
+          }, error = function(e){NULL})
+        )
+        re
+      })
+      names(.tabsetParams) = names(.tabsets)
       quos = rlang::quos(...)
       parsers = comp_parser()
 
@@ -518,9 +543,12 @@ ExecEnvir <- R6::R6Class(
         tabName = names(.tabsets)[ii]
 
         rlang::quo({
-          do.call(shinydashboard::box, args = c(
-            list(width = 12, title = !!tabName, collapsible = T),
-            !!lapply(.tabsets[[ii]], function(inputIds){
+          do.call(box, args = c(
+            list(width = 12,
+                 title = !!tabName,
+                 collapsible = T),
+            !!.tabsetParams[[tabName]],
+            !!lapply(.tabsets[[tabName]], function(inputIds){
               if(length(inputIds) == 1){
                 comp = x[[inputIds]]
                 return(comp$expr)
@@ -579,7 +607,8 @@ ExecEnvir <- R6::R6Class(
 
       invisible()
     },
-    rave_outputs = function(..., .tabsets = list(), .env = NULL){
+    rave_outputs = function(..., .output_tabsets = list(), .tabsets = list(), .env = NULL){
+      .tabsets = .output_tabsets
       quos = rlang::quos(...)
       assertthat::assert_that(length(quos) > 0, msg = 'No output defined!')
       parsers = rave:::comp_parser()
@@ -809,8 +838,8 @@ ExecEnvir <- R6::R6Class(
 
       more_btns = list(
         vignette = tags$li(actionLink(self$ns('..vignette'), 'Show Module Description')),
-        niml = tags$li(actionLink(self$ns('.gen_niml'), 'Generate NIML File for SUMA')),
-        async = tags$li(actionLink(self$ns('..async_run'), 'Run Algorithm (Async)'))
+        async = tags$li(actionLink(self$ns('..async_run'), 'Run Algorithm (Async)')),
+        niml = tags$li(actionLink(self$ns('..incubator'), 'Exports'))
       )
 
       # TODO Vignette
@@ -917,7 +946,7 @@ rave_ignore <- function(...){
 }
 
 #' @export
-rave_inputs <- function(..., .tabsets = list(), .env = globalenv()){
+rave_inputs <- function(..., .input_panels = list(), .env = globalenv()){
   dots = lazyeval::lazy_dots(...)
   lapply(dots, function(comp){
     expr = comp$expr

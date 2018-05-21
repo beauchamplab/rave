@@ -1,9 +1,10 @@
 progress <- function(
   title, max = 1,
-  session = getDefaultReactiveDomain()
+  session = getDefaultReactiveDomain(),
+  quiet = FALSE
 ){
   env = environment()
-  if(is.null(session)){
+  if(is.null(session) || quiet){
     # progress = txtProgressBar(title = title, initial = 0, max = max)
     #
     # val = 0

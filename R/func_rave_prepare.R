@@ -24,7 +24,7 @@ rave_prepare <- function(
 
 
 
-  repo$load_electrodes(electrodes = electrodes)
+  repo$load_electrodes(electrodes = electrodes, quiet = quiet)
   if(!is.null(baseline)){
     data_types = 'power'
     post_process = function(e_power){
@@ -41,7 +41,7 @@ rave_prepare <- function(
   }
 
   if(is.function(post_process)){
-    repo$epoch(epoch_name = epoch, pre = time_range[1], post = time_range[2], names = data_types, func = post_process) ->
+    repo$epoch(epoch_name = epoch, pre = time_range[1], post = time_range[2], names = data_types, func = post_process, quiet = quiet) ->
       re
     force(re)
     rave_setup()
@@ -52,7 +52,7 @@ rave_prepare <- function(
     # load power phase
     tmp = c('power', 'phase'); tmp = tmp[tmp %in% data_types]
     if(length(tmp)){
-      repo$epoch(epoch_name = epoch, pre = time_range[1], post = time_range[2], names = tmp)
+      repo$epoch(epoch_name = epoch, pre = time_range[1], post = time_range[2], names = tmp, quiet = quiet)
     }
 
 
@@ -77,7 +77,7 @@ rave_prepare <- function(
     env$.private$preproc_tools = rave_preprocess_tools()
     env$data_check = env$.private$preproc_tools$check_load_subject(subject_code = subject$subject_code, project_name = subject$project_name)
     env$subject = subject
-    env$module_tools = rave_module_tools(data_env = env)
+    env$module_tools = rave_module_tools(data_env = env, quiet = quiet)
     env$preload_info = list(
       epoch_name = env$.private$meta$epoch_info$name,
       time_points = seq(-time_range[1], time_range[2], by = 1/subject$sample_rate),

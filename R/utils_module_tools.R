@@ -1,6 +1,6 @@
 #' Tools for module writers
 #' @export
-rave_module_tools <- function(env = NULL, data_env = NULL) {
+rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
   if(!is.environment(data_env)){
     data_env = getDefaultDataRepository()
   }
@@ -25,7 +25,8 @@ rave_module_tools <- function(env = NULL, data_env = NULL) {
             pre = epoch$time_range[1],
             post = epoch$time_range[2],
             names = 'power',
-            func = NULL
+            func = NULL,
+            quiet = quiet
           )
           power = repo$power$get('power')
         }
@@ -45,7 +46,8 @@ rave_module_tools <- function(env = NULL, data_env = NULL) {
             pre = epoch$time_range[1],
             post = epoch$time_range[2],
             names = 'phase',
-            func = NULL
+            func = NULL,
+            quiet = quiet
           )
           phase = repo$phase$get('phase')
         }
@@ -171,10 +173,13 @@ rave_module_tools <- function(env = NULL, data_env = NULL) {
         }
       },
 
-      incubate = function(expr, each = T, electrodes = NULL, data_types = NULL,
+      incubate = function(expr, fun = NULL, each = T, electrodes = NULL, data_types = NULL,
                           parallel = FALSE, ncores = rave_options('max_worker')){
         root_env = new.env(parent = parent.frame())
         expr = substitute(expr)
+        if(is.function(fun)){
+          expr = body(fun)
+        }
 
         if(is.null(electrodes)){
           electrodes = data_env$preload_info$electrodes
@@ -202,7 +207,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL) {
                   subject = data_env$subject$id,
                   electrodes = e,
                   epoch = epoch_info$name,
-                  time_range = epoch_info$time_range,data_types = data_types, attach = F, env = env
+                  time_range = epoch_info$time_range,data_types = data_types, attach = F, env = env, quiet = T
                 )
                 eval_dirty(expr, env = root_env, data = as.list(env))
               }, error = function(e){
@@ -235,7 +240,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL) {
         epoch = T
         referenced = T
         if(length(channels) > 1){
-          pg = rave:::progress(title = 'Loading Voltage Data...', max = length(channels))
+          pg = rave:::progress(title = 'Loading Voltage Data...', max = length(channels), quiet = quiet)
           on.exit({pg$close()})
 
           gvt = tools$.get_voltage

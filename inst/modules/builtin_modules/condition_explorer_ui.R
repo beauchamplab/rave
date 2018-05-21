@@ -61,8 +61,8 @@ rave_inputs(
 
   checkboxInput('collapse_using_median', 'Collapse using median'),
 
-  .tabsets = list(
-    'Global Variables' = list('GROUPS', 'FREQUENCY', 'BASELINE', 'TIME_RANGE'),
+  .input_panels = list(
+    '[-][#ccff99] Global Variables' = list('GROUPS', 'FREQUENCY', 'BASELINE', 'TIME_RANGE'),
     'Local Variables' = list(
       'GROUPS_CMPD',
       c('electrode', 'max_zlim'),
@@ -80,7 +80,7 @@ rave_outputs(
   'Activity over time per trial (Collapse over frequency)' = plotOutput('by_trial_heat_map', width = 12),
   'Side Message' = textOutput('msg_out', width = 4),
   'Async Message' = textOutput('async_out', width = 4),
-  .tabsets = list(
+  .output_tabsets = list(
     'Tab1' = list(
       'Heatmap' = c('heat_map_plot'),
       'tabpanel2' = c('windowed_comparison_plot', 'over_time_plot')

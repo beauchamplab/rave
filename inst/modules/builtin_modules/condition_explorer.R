@@ -79,9 +79,9 @@ async_out = function(){
     async_msg
 }
 
-rave_execute({
-    assertthat::assert_that(length(electrode) == 1, msg = 'No electrode selected')
 
+
+condition_explorer_main = function(){
   # TODO: change adhoc vars definition - Zhengjia
   power = module_tools$get_power(force = T)
   electrodes = power$dimnames$Electrode
@@ -90,112 +90,120 @@ rave_execute({
   time_points = power$dimnames$Time
 
 
-    electrode = as.integer(electrode)
+  electrode = as.integer(electrode)
 
-    #baseline all available trials
+  #baseline all available trials
 
-    has_trials <- vapply(GROUPS_CMPD, function(g) length(g$GROUP) > 0, TRUE)
-    any_trials = any(has_trials)
+  has_trials <- vapply(GROUPS_CMPD, function(g) length(g$GROUP) > 0, TRUE)
+  any_trials = any(has_trials)
 
-    bl_power <- cache(
-        key = list(subject$subject_id, electrode, BASELINE, any_trials),
-        val = module_tools$baseline(BASELINE[1],  BASELINE[2], electrode)
-    )
+  bl_power <- cache(
+    key = list(subject$subject_id, electrode, BASELINE, any_trials),
+    val = module_tools$baseline(BASELINE[1],  BASELINE[2], electrode)
+  )
 
-    # TODO: change GROUPS definition - Zhengjia
-    trials_ = module_tools$get_meta('trials')
-    GROUPS = lapply(GROUPS_CMPD, function(g){
-      g[['GROUP_NAME']] %?<-% ''
-      cond = g[['GROUP']]
-      tls = trials_$Trial[trials_$Condition %in% cond]
-      if(length(tls)){
-        g[['GROUP']] = tls
-      }else{
-        g[['GROUP']] = NULL
-      }
-      g
-    })
+  # TODO: change GROUPS definition - Zhengjia
+  trials_ = module_tools$get_meta('trials')
+  GROUPS = lapply(GROUPS_CMPD, function(g){
+    g[['GROUP_NAME']] %?<-% ''
+    cond = g[['GROUP']]
+    tls = trials_$Trial[trials_$Condition %in% cond]
+    if(length(tls)){
+      g[['GROUP']] = tls
+    }else{
+      g[['GROUP']] = NULL
+    }
+    g
+  })
 
-    # we were repeating a lot of calculations and looping over GROUPS too many times
-    # let's clean that up
-    has_trials <- unlist(lapply(GROUPS, function(g) length(g$GROUP) > 0))
+  # we were repeating a lot of calculations and looping over GROUPS too many times
+  # let's clean that up
+  has_trials <- unlist(lapply(GROUPS, function(g) length(g$GROUP) > 0))
 
-    #helper file to build lists with common elements pre-populated
-    build_list <- function() {
-        ##NB: this is faster than using replicate(length(has_trials))
-        lapply(seq_len(length(has_trials)), function(ii)
-            list('has_trials' = has_trials[ii],
-                 'name' = GROUPS[[ii]]$GROUP_NAME))
+  #helper file to build lists with common elements pre-populated
+  build_list <- function() {
+    ##NB: this is faster than using replicate(length(has_trials))
+    lapply(seq_len(length(has_trials)), function(ii)
+      list('has_trials' = has_trials[ii],
+           'name' = GROUPS[[ii]]$GROUP_NAME))
+  }
+
+  # declare all our variables with pre-populated 'has_trials' and 'name' variables
+  build_list() ->
+    scatter_bar_data -> line_plot_data -> by_trial_heat_map_data -> heat_map_data
+
+  flat_data <- data.frame()
+
+  # load up our collapsers into a list, this allows us to swap them out as needed
+  collapse <- rave_collapsers.mean()
+
+  # swap out the collapsers for medians
+  if (exists('collapse_using_median')) {
+    if(isTRUE(collapse_using_median)) {
+      collapse <- rave_collapsers.median()
+    }
+  }
+
+  # now we loop through only those groups with data
+  for(ii in which(has_trials)) {
+    power = bl_power$subset(Trial = Trial %in% GROUPS[[ii]]$GROUP)
+
+    #helper function to clean up the syntax below, value here should be a function
+    # we're relying on power being defined above, so don't move this function out of this scope
+    `add_data<-` <- function(x, value) {
+      x[c('data', 'range', 'N', 'trials')] <- list(value, .fast_range(value), dim(power)[1L], power$dimnames$Trial)
+      x
     }
 
-    # declare all our variables with pre-populated 'has_trials' and 'name' variables
-    build_list() ->
-        scatter_bar_data -> line_plot_data -> by_trial_heat_map_data -> heat_map_data
+    add_data(heat_map_data[[ii]]) <- collapse$over_trial(power)
+    add_data(by_trial_heat_map_data[[ii]]) <- collapse$over_frequency(power)
 
-    flat_data <- data.frame()
+    add_data(line_plot_data[[ii]]) <- collapse$over_frequency_and_trial(power)
+    # we want to make a special range for the line plot data that takes into account mean +/- SE
+    line_plot_data[[ii]]$range <- .fast_range(plus_minus(line_plot_data[[ii]]$data[,1],
+                                                         line_plot_data[[ii]]$data[,2]))
 
-    # load up our collapsers into a list, this allows us to swap them out as needed
-    collapse <- rave_collapsers.mean()
+    add_data(scatter_bar_data[[ii]]) <- collapse$over_frequency_and_time(power)
 
-    # swap out the collapsers for medians
-    if (exists('collapse_using_median')) {
-        if(isTRUE(collapse_using_median)) {
-            collapse <- rave_collapsers.median()
-        }
-    }
+    # for the scatter_bar_data we also need to get m_se within condition
+    scatter_bar_data[[ii]]$mse <- .fast_mse(scatter_bar_data[[ii]]$data)
 
-    # now we loop through only those groups with data
-    for(ii in which(has_trials)) {
-        power = bl_power$subset(Trial = Trial %in% GROUPS[[ii]]$GROUP)
-
-        #helper function to clean up the syntax below, value here should be a function
-        # we're relying on power being defined above, so don't move this function out of this scope
-        `add_data<-` <- function(x, value) {
-            x[c('data', 'range', 'N', 'trials')] <- list(value, .fast_range(value), dim(power)[1L], power$dimnames$Trial)
-            x
-        }
-
-        add_data(heat_map_data[[ii]]) <- collapse$over_trial(power)
-        add_data(by_trial_heat_map_data[[ii]]) <- collapse$over_frequency(power)
-
-        add_data(line_plot_data[[ii]]) <- collapse$over_frequency_and_trial(power)
-        # we want to make a special range for the line plot data that takes into account mean +/- SE
-        line_plot_data[[ii]]$range <- .fast_range(plus_minus(line_plot_data[[ii]]$data[,1],
-                                                     line_plot_data[[ii]]$data[,2]))
-
-        add_data(scatter_bar_data[[ii]]) <- collapse$over_frequency_and_time(power)
-
-        # for the scatter_bar_data we also need to get m_se within condition
-        scatter_bar_data[[ii]]$mse <- .fast_mse(scatter_bar_data[[ii]]$data)
-
-        flat_data %<>% rbind(data.frame('group'=ii, 'y' = scatter_bar_data[[ii]]$data))
-    }
-    flat_data$group %<>% factor
+    flat_data %<>% rbind(data.frame('group'=ii, 'y' = scatter_bar_data[[ii]]$data))
+  }
+  flat_data$group %<>% factor
 
 
-    # this can be used elsewhere
-    has_data = sum(has_trials)
+  # this can be used elsewhere
+  has_data = sum(has_trials)
 
-    # calculate some statistics
+  # calculate some statistics
 
-    # calculate the statistics here so that we can add them to the niml_out
-    # if there are > 1 groups in the data, then do linear model, otherwise one-sample t-test
-    if(length(unique(flat_data$group)) > 1) {
-        # we need to check if they have supplied all identical data sets
-        # easy way is to check that the trials are the same?
-        g1 <- GROUPS[[which(has_trials)[1]]]$GROUP
-        if(all(sapply(which(has_trials)[-1],
-                      function(ii) identical(GROUPS[ii]$GROUP, g1)))) {
-            result_for_suma <-
-                get_t(flat_data$y[flat_data$group==flat_data$group[1]])
-        } else {
-            result_for_suma <- get_f(y ~ group, flat_data)
-        }
+  # calculate the statistics here so that we can add them to the niml_out
+  # if there are > 1 groups in the data, then do linear model, otherwise one-sample t-test
+  if(length(unique(flat_data$group)) > 1) {
+    # we need to check if they have supplied all identical data sets
+    # easy way is to check that the trials are the same?
+    g1 <- GROUPS[[which(has_trials)[1]]]$GROUP
+    if(all(sapply(which(has_trials)[-1],
+                  function(ii) identical(GROUPS[ii]$GROUP, g1)))) {
+      result_for_suma <-
+        get_t(flat_data$y[flat_data$group==flat_data$group[1]])
     } else {
-        result_for_suma <- flat_data$y %>% get_t
+      result_for_suma <- get_f(y ~ group, flat_data)
     }
+  } else {
+    result_for_suma <- flat_data$y %>% get_t
+  }
 
-    attr(scatter_bar_data, 'stats') <- result_for_suma
+  attr(scatter_bar_data, 'stats') <- result_for_suma
+}
+
+
+rave_execute({
+  assertthat::assert_that(length(electrode) == 1, msg = 'No electrode selected')
+
+  eval_dirty(body(condition_explorer_main), env = environment())
+
 
 },{
   async_msg = async_var(async_msg, 'Press "Async run" Button.')
@@ -206,8 +214,11 @@ rave_execute({
 }
 )
 
-niml_default = function(){
+export_NIML = function(){
+  module_tools$incubate({
+    eval_dirty(body(condition_explorer_main), env = environment())
     return(result_for_suma)
+  }, electrodes = 1:10, each = T, parallel = T)
 }
 
 if(FALSE) {

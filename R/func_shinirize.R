@@ -221,72 +221,62 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         }
       })
 
-      observeEvent(input$.gen_niml, {
+      observeEvent(input$..incubator, {
         input_labels = str_c(unlist(execenv$input_labels))
-        sel = str_detect(input_labels, 'lectrode')
-        if(sum(sel)){
-          sel = input_labels[sel][1]
-        }else{
-          sel = input_labels[1]
-        }
-        niml_func = names(as.list(execenv$static_env))
-        is_niml_func = vapply(niml_func, function(x){
-          is.function(execenv$static_env[[x]]) && str_detect(x, 'niml_')
+        export_func = ls(execenv$static_env)
+        is_export_func = vapply(export_func, function(x){
+          is.function(execenv$static_env[[x]]) && str_detect(x, 'export_')
         }, FUN.VALUE = logical(1))
-        niml_func = niml_func[is_niml_func]
+        export_func = export_func[is_export_func]
 
-        if(length(niml_func)){
+        if(length(export_func)){
           showModal(
             modalDialog(
               title = '',
               easyClose = T,
               footer = tagList(
                 modalButton('Cancel'),
-                actionButton(execenv$ns('.gen_niml_ready'), 'OK')
+                actionButton(execenv$ns('.export_ready'), 'OK')
               ),
               fluidRow(
                 column(
                   width = 12,
                   selectInput(
-                    execenv$ns('.gen_niml_var'), label = 'Which variable is for electrodes?',
-                    choices = input_labels,
-                    selected = sel, multiple = F
-                  ),
-                  selectInput(
-                    execenv$ns('.gen_niml_func'), label = 'Which function to apply?',
-                    choices = niml_func
+                    execenv$ns('.export_func'), label = 'Which function to apply?',
+                    choices = export_func
                   )
                 )
               )
             )
           )
         }else{
-          showNotification(p('No NIML export function detected.'), type = 'warning')
+          showNotification(p('No report generating function detected.'), type = 'warning')
         }
 
       })
 
-      observeEvent(input$.gen_niml_ready, {
-        var = input$.gen_niml_var
-        input_labels = execenv$input_labels
-        in_id = names(input_labels)[str_c(unlist(input_labels)) == var]
-        fun_name = input$.gen_niml_func
+      observeEvent(input$.export_ready, {
+        fun_name = input$.export_func
 
         tryCatch({
-          res = execenv$calculate_niml(inputId = in_id, func_name = fun_name)
-          write.niml(
-            res,
-            electrode_numbers = data_env$electrodes,
-            value_labels = NULL,
-            prefix = sprintf('%s', str_replace_all(MODULE_LABEL, '[^A-Za-z0-9_]', '_')),
-            add_electrodes_as_column = TRUE,
-            value_file = '__vals.dat',
-            index_file = '__ind.dat',
-            work_dir = data_env$subject$dirs$suma_out_dir) ->
-            cmd
-          showNotification(p('NIML file generated. Please open it in SUMA'), type = 'message')
+          # write.niml(
+          #   res,
+          #   electrode_numbers = data_env$electrodes,
+          #   value_labels = NULL,
+          #   prefix = sprintf('%s', str_replace_all(MODULE_LABEL, '[^A-Za-z0-9_]', '_')),
+          #   add_electrodes_as_column = TRUE,
+          #   value_file = '__vals.dat',
+          #   index_file = '__ind.dat',
+          #   work_dir = data_env$subject$dirs$suma_out_dir) ->
+          #   cmd
+          res = execenv$static_env[[fun_name]]()
+          assign('..rave_exported', res, envir = globalenv())
+          if(!(length(res) == 1 && is.character(res))){
+            res = 'Exported!'
+          }
+          showNotification(p(res), type = 'message')
         }, error = function(e){
-          showNotification(p('NIML file failed: (message)', br(), e$message, br(), 'Please check console for error messages.'), type = 'error')
+          showNotification(p('Export failed: (message)', br(), e$message, br(), 'Please check console for error messages.'), type = 'error')
         })
 
         removeModal()

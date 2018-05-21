@@ -4,7 +4,7 @@
 \alias{rave_module_tools}
 \title{Tools for module writers}
 \usage{
-rave_module_tools(env = NULL, data_env = NULL)
+rave_module_tools(env = NULL, data_env = NULL, quiet = FALSE)
 }
 \description{
 Tools for module writers
