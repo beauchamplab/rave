@@ -29,8 +29,8 @@ get_dir <- function(subject_code, project_name, block_num, mkdirs = NULL, subjec
     re$meta_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'meta'))
     re$cache_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'data'))
     re$channel_dir = re$cache_dir
-    re$suma_dir = (file.path(re$data_dir, re$subject_name, 'suma'))
-    re$suma_out_dir = (file.path(re$data_dir, re$subject_name, 'suma', 'rave'))
+    re$suma_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'suma'))
+    re$suma_out_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'suma'))
 
     re$copied_raw_dir = copied_raw_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'raw'))
 

@@ -27,12 +27,12 @@ write.niml <- function(values_matrix, electrode_numbers=NULL, value_labels=NULL,
 
   # get useful defaults
   # if value_labels weren't passed in, maybe there are column names?
-  set_if_null(value_labels) <- colnames(values_matrix)
+  value_labels %?<-% colnames(values_matrix)
   # if these are still null, then just set an increasing number
-  set_if_null(value_labels) <- 'Val_' %&% (1:ncol(values_matrix))
+  value_labels %?<-% ('Val_' %&% (1:ncol(values_matrix)))
 
   # if electrode_numbers weren't passed in, maybe there are row.names?
-  if(length(electrode_numbers) == 0){
+  if(length(electrode_numbers) != nrow(values_matrix)){
     electrode_numbers = 1:nrow(values_matrix)
   }else{
     electrode_numbers = as.numeric(electrode_numbers)
@@ -47,7 +47,7 @@ write.niml <- function(values_matrix, electrode_numbers=NULL, value_labels=NULL,
   # duplicate indices and values to match #faces in SUMA spheres
   indices <- rep(electrode_numbers, each=faces_per_electrode)
 
-  values_matrix = as.numeric(values_matrix)
+  values_matrix = apply(values_matrix, 2, as.numeric)
   values_matrix[is.na(values_matrix)] = 0
 
   values <- values_matrix[rep(1:nrow(values_matrix), each=faces_per_electrode),]

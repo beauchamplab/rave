@@ -102,6 +102,10 @@ shiny_data_selector <- function(moduleId){
   server = function(input, output, session, global_reactives){
     last_entry = function(key, default = NULL, check = FALSE){
       re = rave_hist$get_or_save(key = 'main_app', val = list())
+      if(!is.list(re)){
+        rave_hist$save(main_app = list())
+        re = list()
+      }
       if(missing(key)){
         return(re)
       }else{
@@ -310,7 +314,8 @@ shiny_data_selector <- function(moduleId){
           current_subject_id = subject_id,
           current_electrodes = electrodes,
           current_epoch = epoch,
-          current_epoch_range = epoch_range
+          current_epoch_range = epoch_range,
+          last_data_types = data_types
         )
       )
       global_reactives$has_data = TRUE

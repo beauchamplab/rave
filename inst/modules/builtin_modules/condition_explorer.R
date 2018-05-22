@@ -5,45 +5,15 @@ require(stringr)
 require(shiny)
 
 # give us some defaults to play with while we're working on the module code
-rave_prepare(subject = 'KC_congruency1_sliding',
-             electrodes = 73,
-             epoch = 'KCa',
+rave_prepare(subject = 'congruency1_sliding/YAB',
+             electrodes = 38,
+             epoch = 'YABa',
              time_range = c(1, 2))
 
 source('rave_calculators.R')
 source('condition_explorer_ui.R')
 source('condition_explorer_plots.R')
 
-rave_ignore({
-
-    # rave_options(data_dir = '/Volumes/data/rave_data/data/',
-    #              module_lookup_file = '~/Dropbox/RAVE_DEV/module_dev.csv',
-    #              crayon_enabled=TRUE)
-
-  GROUPS_CMPD = list(
-        list(
-            GROUP_NAME = 'G1',
-            GROUP = c('drive_a', 'known_v')
-        ),
-        list(
-            GROUP_NAME = 'G2',
-            GROUP = c('drive_a')
-        ),
-        list(
-            GROUP_NAME = 'G3',
-            GROUP = c('known_v')
-        ),
-        list(
-            GROUP_NAME = '',
-            GROUP=c()
-        )
-    )
-
-    max_zlim=500
-    log_scale=FALSE
-    sort_trials_by_type=TRUE
-    collapse_using_median=FALSE
-})
 
 # time series plot
 over_time_plot <- function() {
@@ -208,17 +178,30 @@ rave_execute({
 },{
   async_msg = async_var(async_msg, 'Press "Async run" Button.')
 }, async = {
-    Sys.sleep(5)
     nms = ls(all.names = T)
     async_msg = paste(search(), collapse = ', ') %&% '   ' %&% Sys.getpid()
 }
 )
 
 export_NIML = function(){
-  module_tools$incubate({
-    eval_dirty(body(condition_explorer_main), env = environment())
+  export_report({
     return(result_for_suma)
-  }, electrodes = 1:10, each = T, parallel = T)
+  }, inputId = 'electrode', electrodes = subject$valid_electrodes) ->
+    dat
+
+  tbl = t(sapply(rave:::dropNulls(dat), I))
+  colnames(tbl) = c('mean', 't', 'p')
+  rave:::write.niml(
+    tbl,
+    electrode_numbers = 1:10,
+    value_labels = subject$valid_electrodes,
+    prefix = 'CE',
+    add_electrodes_as_column = TRUE,
+    value_file = '__vals.dat',
+    index_file = '__ind.dat',
+    work_dir = module_tools$get_subject_dirs()$suma_out_dir) ->
+    cmd
+  return('NIML File Generated! Pease launch SUMA.')
 }
 
 if(FALSE) {

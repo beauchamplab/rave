@@ -35,7 +35,7 @@ getDefaultDataRepository <- function(
     session_id = '.TEMP'
   }
   if(!exists(session_id, envir = data_repository)){
-    e = new.env(parent = baseenv())
+    e = new.env(parent = do.call('loadNamespace', list('rave')))
     e$.clean = function(){
       if(is.null(session)){
         return(invisible())
@@ -116,7 +116,7 @@ ModuleEnvir <- R6::R6Class(
       self$script_path = script_path
 
     },
-    get_or_new_exec_env = function(session = getDefaultReactiveDomain(), ...){
+    get_or_new_exec_env = function(session = getDefaultReactiveDomain(), ..., new = FALSE){
       session_id = add_to_session(session)
       if(is.null(session_id)){
         session_id = '.TEMP'
@@ -128,7 +128,7 @@ ModuleEnvir <- R6::R6Class(
         parent_env = globalenv()
       }
 
-      if(is.null(private$exec_env[[session_id]])){
+      if(new || is.null(private$exec_env[[session_id]])){
         private$exec_env[[session_id]] = ExecEnvir$new(session = session, parent_env = parent_env)
         private$exec_env[[session_id]]$register_module(self)
       }
@@ -140,14 +140,7 @@ ModuleEnvir <- R6::R6Class(
     load_script = function(session = getDefaultReactiveDomain()){
       # read in script, get package info
       src = readLines(self$script_path)
-      # add package information into static_env
-      # additional_pkgs = str_match(src, '(require|library)\\(([a-zA-Z0-9_]*)')[,3]
-      # additional_pkgs = additional_pkgs[!is.na(additional_pkgs)]
-      #
-      # loaded_pkgs = str_match(search(), '^package:(.+)')[,2]
-      # loaded_pkgs = rev(loaded_pkgs[!is.na(loaded_pkgs)])
-      #
-      # all_packages = c(loaded_pkgs, self$packages, additional_pkgs)
+
 
 
 
@@ -299,7 +292,10 @@ ExecEnvir <- R6::R6Class(
       # runtime_env, all variables will be stored within this environment, is the
       # one that real execute take place
       self$runtime_env = new.env(parent = self$param_env)
+      self$static_env$..runtime_env = self$runtime_env
       self$static_env$.env = self$runtime_env
+      self$static_env$..param_env = self$param_env
+
       private$cache_env = new.env()
       private$cache_env$.keys = c()
       self$ns = base::I
@@ -318,21 +314,21 @@ ExecEnvir <- R6::R6Class(
       }
 
       self$wrapper_env$rave_inputs = function(...){
-        if(is.null(getDefaultReactiveDomain())){
+        if(is.null(private$session)){
           rave::rave_inputs(...)
         }else{
           self$rave_inputs(...)
         }
       }
       self$wrapper_env$rave_outputs = function(...){
-        if(is.null(getDefaultReactiveDomain())){
+        if(is.null(private$session)){
           rave::rave_outputs(...)
         }else{
           self$rave_outputs(...)
         }
       }
       self$wrapper_env$rave_updates = function(...){
-        if(is.null(getDefaultReactiveDomain())){
+        if(is.null(private$session)){
           rave::rave_updates(...)
         }else{
           self$rave_updates(...)
@@ -340,29 +336,30 @@ ExecEnvir <- R6::R6Class(
       }
       self$wrapper_env$rave_execute = function(...){
         self$rave_execute(...)
-        if(is.null(getDefaultReactiveDomain())){
+        if(is.null(private$session)){
           rave::rave_execute(...)
         }
       }
       self$wrapper_env$cache = function(...){
-        if(is.null(getDefaultReactiveDomain())){
+        if(is.null(private$session)){
           rave::cache(...)
         }else{
           self$cache(...)
         }
       }
       self$wrapper_env$cache_input = function(...){
-        if(is.null(getDefaultReactiveDomain())){
+        if(is.null(private$session)){
           rave::cache_input(...)
         }else{
           self$cache_input(...)
         }
       }
       self$wrapper_env$rave_ignore = function(...){
-        if(is.null(getDefaultReactiveDomain())){
+        if(is.null(private$session)){
           rave::rave_ignore(...)
         }
       }
+      self$wrapper_env$export_report = self$export_report
       self$wrapper_env$rave_prepare = self$wrapper_env$rave_ignore # do nothing
       self$wrapper_env$source = function(file, local = T, ...){
         if(environmentIsLocked(self$static_env)){
@@ -411,74 +408,99 @@ ExecEnvir <- R6::R6Class(
       }
     },
     copy = function(
-      session_id = '__fake_runtime_env__'
+      session_id = '__fake_runtime_env__', data_env = getDefaultDataRepository()
     ){
       # deep clone, but sharing the data, module environment
-      fakesession = fake_session(rave_id = session_id)
-      data_env = private$data_env
+      fakesession = rave:::fake_session(rave_id = session_id)
 
-      new = private$module_env$get_or_new_exec_env(
-        data_env = data_env, session = fakesession
+      m = private$module_env
+      new_exec = m$get_or_new_exec_env(
+        parent_env = data_env, session = fakesession, new = T
       )
 
-      capture.output(
-        private$module_env$load_script(session = fakesession)
-      )
+      if(m$externalpackage){
+        env = do.call("loadNamespace", list(package = "RAVEbeauchamplab"))
+        if (!environmentIsLocked(new_exec$static_env)) {
+          ..rdata_file = system.file("vars.RData", package = "RAVEbeauchamplab")
+          base::load(file = ..rdata_file, envir = new_exec$static_env)
+          lapply(names(as.list(env, all.names = T)), function(nm) {
+            fun = env[[nm]]
+            if (is.function(fun)) {
+              environment(fun) = new_exec$runtime_env
+            }
+            new_exec$static_env[[nm]] = fun
+          })
+        }
+      }
 
-      # migrate runtime_env, params only
-      lapply(self$input_ids, function(nm){
-        new$runtime_env[[nm]] = self$runtime_env[[nm]]
-      })
 
-      return(new)
+
+      # migrate param_env
+      list2env(as.list(self$param_env, all.names = T), new_exec$param_env)
+      new_exec$private$module_env$load_script(session = fakesession)
+
+      return(new_exec)
     },
     execute_with = function(param, async = FALSE, plan = NULL){
       lapply(names(param), function(nm){
-        assign(nm, param[[nm]], envir = self$runtime_env)
+        self$runtime_env[[nm]] = param[[nm]]
+        self$param_env[[nm]] = param[[nm]]
       })
-      res = self$execute(plan = plan, async = async)
+      res = self$execute(async = async)
       if(async){
         logger('Execute_with async not implemented.')
       }
       return(invisible(self$runtime_env))
     },
-    calculate_niml = function(inputId = 'electrode', func_name = 'niml_default'){
-      param = sapply(self$input_ids, get, envir = self$runtime_env, simplify = F, USE.NAMES = T)
+    export_report = function(expr, inputId = 'electrode', electrodes = NULL, async = F){
+      assign('aaa', environment(), envir = globalenv())
+      expr = substitute(expr)
+      params = as.list(self$param_env)
+
+      preload_info = get('preload_info', self$param_env)
+      preload_electrodes = preload_info$electrodes
+      reload = T
+      if(!length(electrodes)){
+        electrodes = preload_electrodes
+        reload = F
+      }else if(setequal(electrodes, preload_electrodes)){
+        reload = F
+      }
+
       new = self$copy()
-      elecs = private$data_env$electrodes
-      progress = rave:::progress('Export to NIML for SUMA.', max = length(elecs))
-      on.exit({progress$close()})
+
+      progress = rave:::progress('Exporting Report', max = length(electrodes))
+      on.exit({progress$close()}, add = T)
+      rave_data = getDefaultDataRepository()
 
       tryCatch({
-        lapply_async(elecs, function(e){
-          pm = param
+        sid = rave_data$subject$id
+        epoch_info = rave_data$.private$meta$epoch_info
+        lapply_async(electrodes, function(e){
+          if(reload){
+            rave_prepare(
+              subject = sid,
+              electrodes = e,
+              epoch = epoch_info$name,
+              time_range = epoch_info$time_range,
+              data_types = NULL,
+              quiet = T,
+              attach = F
+            )
+          }
+          pm = params
           pm[[inputId]] = e
-          new$execute_with(pm, async = F, plan = NULL)
-          func = get(func_name, envir = new$runtime_env, inherits = T)
-          return(func())
+          new$execute_with(pm, async = async)
+          eval(expr, envir = new$runtime_env)
         }, .ncores = rave_options('max_worker'), .call_back = function(i){
-          progress$inc(sprintf('Calculating %d (%d of %d)', elecs[i], i, length(elecs)))
+          progress$inc(sprintf('Calculating %d (%d of %d)', electrodes[i], i, length(electrodes)))
         }) ->
           fs
-
-        nelem = length(as.vector(fs[[1]]))
-        nm = names(fs[[1]])
-        dat = t(vapply(fs, function(x){as.numeric(x)}, numeric(nelem)))
-        if(length(nm)){
-          nm = stringr::str_trim(nm)
-          nm[nm == ''] = paste0('Unamed_', which(nm == ''))
-          nm = stringr::str_replace_all(nm, '[^a-zA-Z0-9]', '_')
-          colnames(dat) = nm
-        }
-        return(dat)
+        return(fs)
       }, error = function(e){
         logger(str_c(capture.output({traceback()}), collapse = '\n'), level = 'ERROR')
         return(NULL)
       })
-
-
-
-
     },
     names = function(x){
       if(is.list(x)){
@@ -1049,7 +1071,10 @@ async_var <- function(x, default = NULL){
 }
 
 
+#' @export
+export_report <- function(expr, inputId){
 
+}
 
 
 
