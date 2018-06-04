@@ -12,7 +12,7 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2){
   body = fluidRow(
     shinydashboard::box(
       width = sidebar_width,
-      title = 'Epoching',
+      title = 'Trial Epoch',
       uiOutput(ns('inner_ui')), # need notch to be applied
       uiOutput(ns('inner_ui2')),
       uiOutput(ns('inner_ui3')),
@@ -25,14 +25,22 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2){
         title = 'Select',
         fluidRow(
           column(8,
-                 plotOutput(ns('console_plot'), dblclick = ns('console_plot_clicked'),
-                            brush = brushOpts(ns('console_plot_brush'), clip = T, direction = 'x')
-                            )),
+                 div(class = 'rave-border-box', plotOutput(
+                   ns('console_plot'),
+                   dblclick = ns('console_plot_clicked'),
+                   brush = brushOpts(
+                     ns('console_plot_brush'),
+                     clip = T,
+                     direction = 'x'
+                   )
+                 )))
+          ,
           column(4,
-                 plotOutput(ns('console_plot_sub'))),
+                 div(class = 'rave-border-box',
+                     plotOutput(ns('console_plot_sub')))),
           column(5,
-                 DT::dataTableOutput(ns('epoch_tmp'))
-          ),
+                 div(class = 'rave-border-box', style = 'min-height:500px',
+                     DT::dataTableOutput(ns('epoch_tmp')))),
           column(
             2,
             div(
@@ -47,8 +55,8 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2){
             )
           ),
           column(5,
-                 DT::dataTableOutput(ns('epoch_staged'))
-          )
+                 div(class = 'rave-border-box', style = 'min-height:500px',
+                     DT::dataTableOutput(ns('epoch_staged'))))
         )
       ),
       shiny::tabPanel(
@@ -128,7 +136,7 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2){
 
 
         raw_files = list.files(file.path(dirs$pre_subject_dir, block))
-        excl_files = sprintf('%sDatafile%s_ch%s.mat', subject_code, block, utils$get_channels())
+        excl_files = sprintf('%sDatafile%s_ch%s.mat', subject_code, block, utils$get_electrodes())
         selected_files = raw_files[!raw_files %in% excl_files]
       }
     })
@@ -153,7 +161,7 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2){
 
 
       raw_files = list.files(file.path(dirs$pre_subject_dir, block))
-      excl_files = sprintf('%sDatafile%s_ch%s.mat', subject_code, block, utils$get_channels())
+      excl_files = sprintf('%sDatafile%s_ch%s.mat', subject_code, block, utils$get_electrodes())
       # guess selected file
       selected_files = isolate(local_data$efile)
       if(length(selected_files)){

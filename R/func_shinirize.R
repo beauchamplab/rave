@@ -126,6 +126,9 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         }
       }, priority = -1000L)
       observeEvent(input_updated(), {
+        logger = function(...){
+          rave::logger('[', MODULE_ID, '] ', ...)
+        }
 
         if(!global_reactives$has_data){
           return(NULL)
@@ -142,16 +145,20 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
         # get global/local cache
         # params = isolate(reactiveValuesToList(input))
+
         params = cache_all_inputs(save = F)
-        if(local_data$initialized){
+        logger('Stand up')
+        if(isolate(local_data$initialized)){
           # get current input
           execenv$input_update(input = params, session = session, init = FALSE)
           local_data$run_script = Sys.time()
+          logger('Flush')
         }else if(
           local_data$has_data && global_reactives$execute_module == str_to_upper(MODULE_ID)
         ){
-
+          logger('Close lid')
           execenv$input_update(input = params, session = session, init = TRUE)
+          logger('Flush')
           local_data$initialized = TRUE
           logger('Module Initialized, Gonna Flush the Toilet again.')
           # For initialization, no need to add flag to last_input
@@ -163,6 +170,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
           # the result will flush before input changed.
           local_data$last_input = Sys.time()
         }
+        logger('Reload Water')
       }, priority = 500L)
 
       observeEvent(global_reactives$execute_module, {

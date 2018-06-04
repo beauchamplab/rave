@@ -4,11 +4,14 @@
 Subject <- R6::R6Class(
   classname = 'Subject',
   private = list(
-    loaded = NULL
+    loaded = NULL,
+    subjectinfo = NULL
   ),
   public = list(
     meta = NULL,
     subject_id = NULL,
+    subject_code = NULL,
+    project_name = NULL,
     dirs = NULL,
     print = function(){
       cat('<Subject> [', self$subject_id, ']\n - Total electrodes: ', length(self$valid_electrodes), '\n', sep = '')
@@ -17,42 +20,60 @@ Subject <- R6::R6Class(
     finalize = function(){
       rm(list = ls(private$loaded), envir = private$loaded)
     },
-    initialize = function(subject_id){
+    initialize = function(project_name, subject_code){
+      subject_id = sprintf('%s/%s', project_name, subject_code)
+      self$project_name = project_name
+      self$subject_code = subject_code
       self$subject_id = subject_id
+
       self$meta = list()
       private$loaded = new.env()
 
       # load meta data
       self$dirs = get_dir(subject_id = subject_id)
 
-      meta_dir = self$dirs$meta_dir
+      # meta_dir = self$dirs$meta_dir
+      #
+      # self$meta[['electrode']] = read.csv(file.path(meta_dir, 'electrodes.csv'), stringsAsFactors = F)
+      # self$meta[['frequency']] = read.csv(file.path(meta_dir, 'frequencies.csv'), stringsAsFactors = F)
 
-      self$meta[['electrode']] = read.csv(file.path(meta_dir, 'electrodes.csv'), stringsAsFactors = F)
-      self$meta[['frequency']] = read.csv(file.path(meta_dir, 'frequencies.csv'), stringsAsFactors = F)
+      self$meta[['electrode']] = load_meta('electrodes', project_name = project_name, subject_code = subject_code)
+      self$meta[['frequency']] = load_meta('frequencies', project_name = project_name, subject_code = subject_code)
 
-      time_points = read.csv(file.path(meta_dir, 'time_points.csv'), stringsAsFactors = F, colClasses = c('character', 'numeric'))
-      time_points$Valid = T
+      self$meta[['time_points']] = load_meta('time_points', project_name = project_name, subject_code = subject_code)
 
-      tm = time_points$Time[1:2]
+      tm = self$meta[['time_points']]$Time[1:2]
       self$meta[['sample_rate']] = sample_rate = 1 / (tm[2] - tm[1])
 
-      time_excluded_path = file.path(meta_dir, 'time_excluded.csv')
-      if(file.exists(time_excluded_path)){
-        time_excluded = read.csv(file.path(meta_dir, 'time_excluded.csv'), stringsAsFactors = F, colClasses = c('character', 'numeric', 'numeric'))
-        for(i in 1:nrow(time_excluded)){
-          b = time_excluded$Block[i]
-          s = time_excluded$Start[i]
-          e = time_excluded$End[i]
-          sel = time_points$Block == b & time_points$Time %within% c(s, e)
-          if(sum(sel)){
-            time_points$Valid[sel] = FALSE
-          }
-        }
+
+      self$meta[['time_excluded']] = load_meta('time_excluded', project_name = project_name, subject_code = subject_code)
+
+      # load preprocess subject info
+      private$subjectinfo = SubjectInfo2$new(project_name = project_name, subject_code = subject_code)
+
+    },
+    preprocess_info = function(key, default = NULL, customized = F){
+      if(customized){
+        res = private$subjectinfo$logger$get_or_save(key = key)
+      }else{
+        res = private$subjectinfo[[key]]
       }
-      self$meta[['time']] = time_points
+      res %?<-% default
+      return(res)
     },
     filter_valid_electrodes = function(electrodes){
       electrodes[electrodes %in% self$valid_electrodes]
+    },
+    has_bad_time_point = function(block, electrode, start, end){
+      (self$meta[['time_excluded']]) %>%
+        subset(
+          Block %in% block &
+          Electrode %in% electrode &
+          (start < End | end < Start)
+        ) %>%
+        nrow() ->
+        res
+      return(res > 0)
     }
   ),
   active = list(
@@ -63,24 +84,19 @@ Subject <- R6::R6Class(
       self$meta[['frequency']]
     },
     time_points = function(){
-      self$meta[['time']]
+      self$meta[['time_points']]
+    },
+    time_excluded = function(){
+      self$meta[['time_excluded']]
     },
     sample_rate = function(){
       self$meta[['sample_rate']]
     },
     valid_electrodes = function(){
-      e = self$meta[['electrode']]
-      sel = e$BadChan | e$EpilepsyChan
-      e$Channel[!sel]
+      private$subjectinfo$channels
     },
     id = function(){
       self$subject_id
-    },
-    project_name = function(){
-      unlist(str_split(self$subject_id, '/'))[1]
-    },
-    subject_code = function(){
-      unlist(str_split(self$subject_id, '/'))[2]
     }
   )
 )

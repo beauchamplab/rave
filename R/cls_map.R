@@ -80,8 +80,8 @@ Map <- R6::R6Class(
     contains = function(key) {
       exists(key, envir=private$env, inherits=FALSE)
     },
-    keys = function() {
-      ls(private$env, all.names = T)
+    keys = function(all.names = T) {
+      ls(private$env, all.names = all.names)
     },
     values = function() {
       as.list(private$env, all.names=TRUE)

@@ -6,6 +6,17 @@ NULL
 # New dir hierachy
 # data_dir > projectdir > subjectdir > rave > {raw, preprocessing, rave, meta, suma}
 
+#' @export
+get_projects <- function(){
+  data_dir = rave_options('data_dir')
+  list.dirs(data_dir, full.names = F, recursive = F)
+}
+
+#' @export
+get_subjects <- function(project_name){
+  data_dir = rave_options('data_dir')
+  list.dirs(file.path(data_dir, project_name), full.names = F, recursive = F)
+}
 
 
 #' @export
@@ -29,6 +40,7 @@ get_dir <- function(subject_code, project_name, block_num, mkdirs = NULL, subjec
     re$meta_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'meta'))
     re$cache_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'data'))
     re$channel_dir = re$cache_dir
+    re$reference_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'data', 'reference'))
     re$suma_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'suma'))
     re$suma_out_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'suma'))
 

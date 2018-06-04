@@ -19,7 +19,7 @@ save_meta <- function(data, meta_type, project_name, subject_code){
   }
 
   if(meta_type == 'electrodes'){
-    names(data)[1:4] = c('Channel', 'EpilepsyChan', 'BadChan', 'ExcludedChan')
+    names(data)[1] = c('Electrode')
     if(!'Coord_x' %in% names(data)){
       # try not to overwrite original data
       data$Coord_x = 0
@@ -66,19 +66,43 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
         }
         return(tbl)
       }
-    }else if(meta_type == 'time_points'){
+    }
+    else if(meta_type == 'time_points'){
       file = file.path(meta_dir, 'time_points.csv')
       if(file.exists(file)){
-        return(read.csv(file, stringsAsFactors = F, colClasses = c(
-          Block = 'character'
-        )))
+        return(read.csv(
+          file,
+          stringsAsFactors = F,
+          colClasses = c(Block = 'character')
+        ))
+
       }
-    }else if(meta_type == 'frequencies'){
+    }
+    else if(meta_type == 'time_excluded'){
+      # Read time_excluded.csv if exists
+      time_excluded_path = file.path(meta_dir, 'time_excluded.csv')
+      if(file.exists(time_excluded_path)){
+        return(read.csv(
+          time_excluded_path,
+          stringsAsFactors = F,
+          colClasses = c(Block = 'character')
+        ))
+      }else{
+        return(data.frame(
+          Block = NULL,
+          Electrode = NULL,
+          Start = NULL,
+          End = NULL
+        ))
+      }
+    }
+    else if(meta_type == 'frequencies'){
       file = file.path(meta_dir, 'frequencies.csv')
       if(file.exists(file)){
         return(read.csv(file, stringsAsFactors = F))
       }
-    }else if(meta_type == 'epoch'){
+    }
+    else if(meta_type == 'epoch'){
       epoch_file = file.path(meta_dir, sprintf('epoch_%s.csv', meta_name))
       default_cols = c('Block', 'Time', 'Trial', 'Condition', 'Duration')
 
@@ -102,11 +126,13 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
       nms = c(default_cols, nms[!nms %in% default_cols])
       epochs = epochs[, nms]
       return(epochs)
-    }else if(meta_type == 'info'){
+    }
+    else if(meta_type == 'info'){
       info_file = file.path(meta_dir, 'info.yaml')
       info = yaml::yaml.load_file(info_file)
       return(info)
-    }else if(meta_type == 'time_excluded'){
+    }
+    else if(meta_type == 'time_excluded'){
       file = file.path(meta_dir, 'time_excluded.csv')
       if(!file.exists(file)){
         return(NULL)
@@ -114,6 +140,17 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
       time_excluded = read.csv(file, header = T, stringsAsFactors = F,
                         colClasses = c('character', 'numeric', 'numeric'))
       return(time_excluded)
+    }
+    else if(meta_type == 'references'){
+      file = file.path(meta_dir, sprintf('reference_%s.csv', meta_name))
+      if(!file.exists(file)){
+        return(NULL)
+      }
+      ref_tbl = read.csv(file, header = T, stringsAsFactors = F)
+      if(names(ref_tbl)[1] != 'Electrode'){
+        ref_tbl = ref_tbl[,-1]
+      }
+      return(ref_tbl)
     }
   }
 

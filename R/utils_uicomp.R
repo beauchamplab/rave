@@ -23,12 +23,11 @@ comp_parser = function(){
           val = input[[inputId]]
           t = Sys.time()
           if(local_data$has_data){
-            logger('Assign input - ', inputId)
             exec_env$param_env[[inputId]] = val
             exec_env$runtime_env[[inputId]] = val
             local_data$last_input = t
           }
-
+          logger('Assigned input - ', inputId, sprintf(' (%.3f sec)', as.numeric(Sys.time() - t)))
         })
       }
       updates = function(session, ..., .args = list()){
@@ -188,10 +187,6 @@ comp_parser = function(){
           }
         }
 
-
-        logger('Updating - ', args[['inputId']])
-        print(args)
-        print('---')
 
         do.call(shiny::updateSelectInput, args = args)
       }

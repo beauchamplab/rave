@@ -1,3 +1,4 @@
+#' @export
 progress <- function(
   title, max = 1,
   session = getDefaultReactiveDomain(),
@@ -17,8 +18,9 @@ progress <- function(
     #   options(rave.logger.disabled = FALSE)
     # }
     progress = NULL
-    inc = logger
+    inc = function(message){logger(message)}
     close = function(){}
+    reset = function(message = NULL, detail = NULL){}
   }else{
     progress = Progress$new(
       session = session,
@@ -30,11 +32,15 @@ progress <- function(
     close = function(){
       progress$close()
     }
+    reset = function(message = NULL, detail = NULL){
+      progress$set(value = 0, message = message, detail = detail)
+    }
   }
 
   return(list(
     .progress = progress,
     inc = inc,
-    close = close
+    close = close,
+    reset = reset
   ))
 }

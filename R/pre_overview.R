@@ -12,9 +12,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
           column(
             width = 12,
             uiOutput(ns('overview_inputs1')),
-            uiOutput(ns('overview_inputs2')),
-
-            actionButton(ns('save'), 'Update Changes')
+            uiOutput(ns('overview_inputs2'))
           )
         )
       )
@@ -30,7 +28,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
         ),
         column(
           width = 6,
-          h2('Channel Settings'),
+          h2('Electrode Settings'),
           tableOutput(ns('channel_table'))
         ),
         column(
@@ -53,7 +51,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
 
     # eval once
     # To be changed
-    local_data$all_projects = potential_projects = list.dirs(rave_options('data_dir'), full.names = F, recursive = F)
+    local_data$all_projects = potential_projects = get_projects()
 
     last_inputs = utils$last_inputs()
     local_data$project_name = last_inputs$last_project_name
@@ -73,8 +71,15 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
           local_data$project_name = project_name
           local_data$subject_code = subject_code
           showNotification(p('Subject ', subject_code, '(', project_name, ')', ' loaded!'), type = 'message')
+          return()
         }
       }
+      utils$clear_subject()
+      # Update
+      updateSelectInput(session, 'blocks', label = 'Block', selected = NULL, choices = '')
+      updateTextInput(session, 'channels', label = 'Electrodes', value = '')
+      updateNumericInput(session, 'srate', label = 'Sample Rate', value = 0)
+      updateActionButton(session, 'save', label = 'Create Subject')
     })
 
     observeEvent(input$save, {
@@ -96,7 +101,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
               n_changes = n_changes - 1
             }
 
-            if(!utils$set_channels(input$channels, name = 'channels')){
+            if(!utils$set_electrodes(input$channels, name = 'channels')){
               channels = rave:::deparse_selections(utils$get_from_subject('channels', NULL))
               updateTextInput(session, inputId = 'channels', value = channels)
               n_changes = n_changes - 1
@@ -107,6 +112,13 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
               updateNumericInput(session, 'srate', value = srate)
               n_changes = n_changes - 1
             }
+
+            # Check if subject has been imported or not
+            if(!utils$has_raw_cache() && length(utils$get_blocks()) && length(utils$get_electrodes())){
+              # Subject is created but not imported
+              utils$collect_raw_voltage()
+            }
+
             if(n_changes){
               utils$reset()
               showNotification(p('Subject ', subject_code, '(', project_name, ')', ' saved! ', br(),
@@ -145,36 +157,54 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
       block_choices = utils$get_from_subject('available_blocks', '')
       block_selected = utils$get_from_subject('blocks', NULL)
       channels = rave:::deparse_selections(utils$get_from_subject('channels', NULL))
-      exclchan = rave:::deparse_selections(utils$get_from_subject('exclchan', NULL))
-      badchan = rave:::deparse_selections(utils$get_from_subject('badchan', NULL))
-      epichan = rave:::deparse_selections(utils$get_from_subject('epichan', NULL))
-      logger('gen UI')
+      # exclchan = rave:::deparse_selections(utils$get_from_subject('exclchan', NULL))
+      # badchan = rave:::deparse_selections(utils$get_from_subject('badchan', NULL))
+      # epichan = rave:::deparse_selections(utils$get_from_subject('epichan', NULL))
+      # logger('gen UI')
+
 
 
       if(is.null(input$project_name_sel) || input$project_name_sel == 'New Project...'){
-        tagList(
-          textInput(ns('project_name'), 'Project Name', value = ''),
-          selectInput(ns('blocks'), 'Blocks', selected = block_selected, choices = block_choices, multiple = T),
-          textInput(ns('channels'), 'Channels', placeholder = 'E.g. 1-84', value = channels),
-          numericInput(ns('srate'), 'Sample Rate', value = srate, step = 1L, min = 1L),
-          textInput(ns('exclchan'), 'Excluded Channels', placeholder = 'E.g. 51,44-45', value = exclchan),
-          textInput(ns('badchan'), 'Bad Channels', placeholder = 'E.g. 3,4,5,11-20', value = badchan),
-          textInput(ns('epichan'), 'Epilepsy Channels', placeholder = 'E.g. 1-10', value = epichan)
+        re = tagList(
+          textInput(ns('project_name'), 'Project Name', value = '')
         )
       }else{
-        tagList(
+        re = tagList(
           div(
             class = 'hidden',
             textInput(ns('project_name'), 'Project Name', value = input$project_name_sel)
-          ),
-          selectInput(ns('blocks'), 'Blocks', selected = block_selected, choices = block_choices, multiple = T),
-          textInput(ns('channels'), 'Channels', placeholder = 'E.g. 1-84', value = channels),
-          numericInput(ns('srate'), 'Sample Rate', value = srate, step = 1L, min = 1L),
-          textInput(ns('exclchan'), 'Excluded Channels', placeholder = 'E.g. 51,44-45', value = exclchan),
-          textInput(ns('badchan'), 'Bad Channels', placeholder = 'E.g. 3,4,5,11-20', value = badchan),
-          textInput(ns('epichan'), 'Epilepsy Channels', placeholder = 'E.g. 1-10', value = epichan)
+          )
         )
       }
+
+      block_label = 'Blocks'
+      elec_label = 'Electrodes'
+      srate_label = 'Sample Rate'
+      save_label = 'Update Changes'
+
+      if(!utils$has_subject()){
+        save_label = 'Create Subject'
+      }else{
+        if(utils$has_raw_cache()){
+          block_label = 'Blocks (read-only)'
+          elec_label = 'Electrodes (read-only)'
+        }else{
+          save_label = 'Import Subject'
+        }
+        if(utils$notch_filtered()){
+          srate_label = 'Sample Rate (read-only)'
+        }
+      }
+
+
+
+      re = tagList(
+        re,
+        selectInput(ns('blocks'), block_label, selected = block_selected, choices = block_choices, multiple = T),
+        textInput(ns('channels'), elec_label, placeholder = 'E.g. 1-84', value = channels),
+        numericInput(ns('srate'), srate_label, value = srate, step = 1L, min = 1L),
+        actionButton(ns('save'), save_label)
+      )
 
 
     })

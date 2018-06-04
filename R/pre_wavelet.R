@@ -16,95 +16,55 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
   )
 
   server = function(input, output, session, user_data, utils){
-    local_data = reactiveValues(
-      is_wavelet = FALSE
-    )
-
     output$wavelet_inputs1 <- renderUI({
       user_data$reset
       validate(
-        need(utils$has_subject(), 'Load subject first.'),
-        need(utils$notch_filtered(), 'Apply notch filter first.')
+        need(utils$notch_filtered(), 'Please finish previous steps first (Import subject, Notch filter).')
       )
-      channels = utils$get_channels()
-      vc_txt = rave:::deparse_selections(channels)
-      max_core = max(1, rave_options('max_worker'), future::availableCores())
+      electrodes = utils$get_electrodes()
+      vc_txt = rave:::deparse_selections(electrodes)
+      max_core = max(1, rave_options('max_worker'))
       srate = utils$get_srate()
+      target_srate = 100
+
+      freq_range = c(2,200)
+      freq_step = 2
+      wave_num = c(3,20)
+
+      if(utils$waveleted()){
+        log = utils$get_from_subject('wavelet_log', customized = T)
+        log = log[[length(log)]]
+        freqs = log$frequencies
+        freq_range = range(freqs)
+        if(length(freqs) >= 2){
+          freq_step = freqs[2] - freqs[1]
+        }
+        wave_num = log$wave_num
+        target_srate = log$target_srate
+      }
 
       tagList(
-        textInput(ns('wave_electrodes'), 'Channels:', value = vc_txt, placeholder = 'Select at least one electrode.'),
-        sliderInput(ns('freq_range'), 'Frequency Range (Hz):', value = c(2,200), step = 1L, round = TRUE, min = 1L, max = 300L),
-        numericInput(ns('freq_step'), 'Frequency Step Size (Hz): ', value = 2, step = 1L, min = 1L),
-        sliderInput(ns('wave_num'), 'Number of Wavelet Cycles: ', value = c(3,20), step = 1L, min = 1L, max = 30L, round = T),
-        numericInput(ns('target_srate'), 'Target Sample Rate', value = 100, min = 10L, max = srate, step = 1L),
+        textInput(ns('wave_electrodes'), 'Electrodes:', value = vc_txt, placeholder = 'Select at least one electrode.'),
+        sliderInput(ns('freq_range'), 'Frequency Range (Hz):', value = freq_range, step = 1L, round = TRUE, min = 1L, max = srate / 2),
+        numericInput(ns('freq_step'), 'Frequency Step Size (Hz): ', value = freq_step, step = 1L, min = 1L),
+        sliderInput(ns('wave_num'), 'Number of Wavelet Cycles: ', value = wave_num, step = 1L, min = 1L, max = 40L, round = T),
+        numericInput(ns('target_srate'), 'Target Sample Rate', value = target_srate, min = 10L, max = srate, step = 1L),
         numericInput(ns('ncores'), 'Parallel, Number of Cores:', value = future::availableCores(), min = 1L, max = max_core, step = 1L),
         actionButton(ns('do_wavelet'), 'Run Wavelet')
       )
     })
 
-    output$wave_windows_plot <- renderPlot({
-      wave_num = input$wave_num
-      freq_range = input$freq_range
-      fstep = input$freq_step
-      srate = utils$get_srate()
-
-      validate(
-        need(length(wave_num) > 0, 'Specify number of wavelet cycles'),
-        need(length(freq_range) > 0 && freq_range[1] < freq_range[2], 'Specify valid frequency range'),
-        need(length(fstep) > 0 && fstep > 0, 'Specify valid frequency steps'),
-        need(length(srate) > 0 && srate > 0, 'Wait, have you loaded subject yet?')
-      )
-      freqs = seq(freq_range[1], freq_range[2], by = fstep)
-      wavelet_kernels(freqs, srate, wave_num)
-    })
-
-    observeEvent(input$cancel, {
-      if(local_data$is_wavelet){
-        showNotification(p('Wavelet is running. This may take a while. Please wait till finished. Grab a cup of coffee, or take a nap, or go outside to enjoy your life. Life is more than a wavelet, don\'t dit here and wait for it.'), duration = 20, type = 'message')
-      }else{
-        removeModal()
-      }
-
-    })
-
-    observeEvent(input$ok, {
-      w_channels = rave:::parse_selections(input$wave_electrodes)
-      channels = utils$get_channels()
-      w_channels = w_channels[w_channels %in% channels]
-      frange = round(input$freq_range)
-      fstep = max(1, round(input$freq_step))
-      w_freqs = seq(frange[1], frange[2], by = fstep)
-
-      showNotification(p('Wavelet start!'), type = 'message')
-      local_data$is_wavelet = TRUE
-
-      utils$apply_wavelet(
-        channels = w_channels,
-        target_srate = round(input$target_srate),
-        frequencies = w_freqs,
-        wave_num = round(input$wave_num),
-        ncores = round(input$ncores)
-      )
-
-      utils$reset()
-
-      local_data$is_wavelet = FALSE
-      showNotification(p('Wavelet finished!'), type = 'message')
-      removeModal()
-
-
-    })
-
+    # Modal
     observeEvent(input$do_wavelet, {
       # check
-      w_channels = rave:::parse_selections(input$wave_electrodes)
-      channels = utils$get_channels()
-      w_channels = w_channels[w_channels %in% channels]
+      w_e = rave:::parse_selections(input$wave_electrodes)
+      es = utils$get_electrodes()
+      w_e = w_e[w_e %in% es]
       frange = round(input$freq_range)
       fstep = max(1, round(input$freq_step))
       w_freqs = seq(frange[1], frange[2], by = fstep)
 
-      if(length(w_channels) && length(w_freqs) > 1){
+      if(length(w_e) && length(w_freqs) > 1){
         showModal(
           modalDialog(
             title = 'Confirmation',
@@ -116,8 +76,8 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
             fluidRow(
               column(
                 width = 12,
-                p('Apply wavelet to the following channels:'),
-                tags$blockquote(rave:::deparse_selections(w_channels)),
+                p('Apply wavelet to the following electrodes:'),
+                tags$blockquote(rave:::deparse_selections(w_e)),
                 p('This might take a while.'),
                 hr(),
                 p("* It's highly recommend that you perform wavelet to all channels first with **SAME** settings, otherwise reference module will work improperly.")
@@ -135,7 +95,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
                 width = 12,
                 p('Check your inputs, there might be some problem(s).'),
                 tags$ul(
-                  tags$li('Valid channels: ' %&% rave:::deparse_selections(w_channels)),
+                  tags$li('Valid channels: ' %&% rave:::deparse_selections(w_e)),
                   tags$li('Frequency bands: ' %&% paste(frange, collapse = '-') %&% ' Hz with step of ' %&% fstep %&% ' Hz.')
                 )
               )
@@ -145,6 +105,54 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
       }
     })
 
+    observeEvent(input$cancel, {
+      # little trick: if server is running other tasks, modal will not be removed
+      removeModal()
+    })
+
+    observeEvent(input$ok, {
+      w_e = rave:::parse_selections(input$wave_electrodes)
+      es = utils$get_electrodes()
+      w_e = w_e[w_e %in% es]
+      frange = round(input$freq_range)
+      fstep = max(1, round(input$freq_step))
+      w_freqs = seq(frange[1], frange[2], by = fstep)
+
+      showNotification(p('Wavelet start!'), type = 'message')
+
+
+      utils$apply_wavelet(
+        electrodes = w_e,
+        target_srate = round(input$target_srate),
+        frequencies = w_freqs,
+        wave_num = round(input$wave_num),
+        ncores = round(input$ncores)
+      )
+
+      utils$reset()
+
+      showNotification(p('Wavelet finished!'), type = 'message')
+      removeModal()
+    })
+
+    # Output plot
+    output$wave_windows_plot <- renderPlot({
+      wave_num = input$wave_num
+      freq_range = input$freq_range
+      fstep = input$freq_step
+      srate = utils$get_srate()
+
+      validate(
+        need(length(wave_num) > 0, 'Specify number of wavelet cycles'),
+        need(length(freq_range) > 0 && freq_range[1] < freq_range[2], 'Specify valid frequency range'),
+        need(length(fstep) > 0 && fstep > 0, 'Specify valid frequency steps'),
+        need(length(srate) > 0 && srate > 0, 'Wait, have you loaded subject yet?')
+      )
+      freqs = seq(freq_range[1], freq_range[2], by = fstep)
+      wavelet_kernels(freqs, srate, wave_num)
+    })
+
+
   }
 
   return(list(
@@ -152,7 +160,6 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
     server = server
   ))
 }
-
 
 
 

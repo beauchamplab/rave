@@ -300,7 +300,6 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
         }, FALSE)]
         pattern = module[[1]]$label_name
         pattern = sprintf('%s_([0-9_\\-]+).csv', str_replace_all(pattern, '[^a-zA-Z0-9_]', '_'))
-        print(pattern)
         dat = list.files(suma_out_dir, pattern = pattern)
         fname = dat[which.max(as.numeric(strptime(str_match(dat, pattern)[,2], '%Y-%m-%d_%H_%M_%S')))]
         dat = read.csv(file.path(suma_out_dir, fname))

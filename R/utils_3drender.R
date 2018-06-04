@@ -28,40 +28,40 @@ render_3d_electrodes <- function(
     hoverinfo = 'none'
   ) ->
     p
+#
+#   if(sum(tbl$EpilepsyChan)){
+#     p %>%
+#       plotly::add_markers(
+#         data = tbl[tbl$EpilepsyChan, ],
+#         name = "Epilepsey",
+#         mode = 'markers',
+#         hoverinfo = 'text',
+#         marker = list(
+#           symbol = 'cross',
+#           opacity = 0.5,
+#           color = "#8DA0CB"
+#         )
+#       ) ->
+#       p
+#   }
+#
+#
+#   if(sum((tbl$BadChan & !tbl$EpilepsyChan))){
+#     p %>%
+#       plotly::add_markers(
+#         data = tbl[(tbl$BadChan & !tbl$EpilepsyChan), ],
+#         name = "Bad Channels",
+#         mode = 'markers',
+#         marker = list(
+#           symbol = 'cross',
+#           opacity = 0.5,
+#           color = "#B3B3B3"
+#         )
+#       ) ->
+#       p
+#   }
 
-  if(sum(tbl$EpilepsyChan)){
-    p %>%
-      plotly::add_markers(
-        data = tbl[tbl$EpilepsyChan, ],
-        name = "Epilepsey",
-        mode = 'markers',
-        hoverinfo = 'text',
-        marker = list(
-          symbol = 'cross',
-          opacity = 0.5,
-          color = "#8DA0CB"
-        )
-      ) ->
-      p
-  }
-
-
-  if(sum((tbl$BadChan & !tbl$EpilepsyChan))){
-    p %>%
-      plotly::add_markers(
-        data = tbl[(tbl$BadChan & !tbl$EpilepsyChan), ],
-        name = "Bad Channels",
-        mode = 'markers',
-        marker = list(
-          symbol = 'cross',
-          opacity = 0.5,
-          color = "#B3B3B3"
-        )
-      ) ->
-      p
-  }
-
-  if(length(!(tbl$EpilepsyChan | tbl$BadChan | tbl$Channel %in% loaded_electrodes))){
+  # if(length(!(tbl$EpilepsyChan | tbl$BadChan | tbl$Channel %in% loaded_electrodes))){
     p %>% plotly::add_markers(
       data = tbl[!(tbl$EpilepsyChan | tbl$BadChan | tbl$Channel %in% loaded_electrodes), ],
       name = "Good Channels",
@@ -74,7 +74,7 @@ render_3d_electrodes <- function(
     ) ->
       p
 
-  }
+  # }
 
   if(length(loaded_electrodes)){
     if(length(loaded_electrodes) == length(values)){

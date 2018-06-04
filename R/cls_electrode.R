@@ -11,15 +11,18 @@ Electrode <- R6::R6Class(
   cloneable = FALSE,
   private = list(
     dir = NULL,
-    power = list(),
-    phase = list(),
-    cumsum = list(),
+    # power = list(),
+    # phase = list(),
+    # cumsum = list(),
+    coef = list(),
+    volt = list(),
     cache = list(),
     subject = NULL
   ),
   public = list(
     electrode = NULL,
     subject_id = NULL,
+    is_reference = F,
 
     print = function(...){
       cat('Subject: ', self$subject_id, '\nElectrode: ', self$electrode, '\n', sep = '')
@@ -30,183 +33,190 @@ Electrode <- R6::R6Class(
       invisible(self)
     },
 
-    initialize = function(subject, electrode){
+    initialize = function(subject, electrode, is_reference = F){
       if(!(R6::is.R6(subject) && 'Subject' %in% class(subject))){
         assertthat::assert_that('character' %in% class(subject),
                                 msg = 'Param <subject> needs to be either subject ID or a Subject instance')
-        subject = Subject$new(subject_id = subject)
+        subject = str_split_fixed(subject, '\\\\|/', 2)
+        subject = Subject$new(project_name = subject[1], subject_code = subject[2])
       }
       private$subject = subject
       subject_id = subject$subject_id
 
-      private$dir = get_dir(subject_id = subject_id)
-      self$electrode = electrode
+      private$dir = get_dir(subject_code = subject$subject_code, project_name = subject$project_name)
       self$subject_id = subject_id
 
-      # import file
+      self$is_reference = is_reference
       cache_dir = private$dir$cache_dir
-      file = file.path(cache_dir, sprintf("%d.h5", electrode))
-      file_ls = h5ls(file)
+      pre_dir = private$dir$preprocess_dir
 
-      # load power data
-      rows = (file_ls$group == '/wavelet/power')
-      if(sum(rows) > 0){
-        blocks = file_ls$name[rows]
-        cached_dir = private$dir$cache_dir
+      if(is_reference){
+        self$electrode = 0
+        wave_file = file.path(cache_dir, 'reference', sprintf("%s.h5", electrode))
+        volt_file = wave_file
+        volt_group = '/voltage/'
+      }else{
+        self$electrode = electrode
+        # import file
+        wave_file = file.path(cache_dir, 'spectrum', sprintf("%d.h5", electrode))
+        volt_file = file.path(pre_dir, sprintf("electrode_%d.h5", electrode))
+        volt_group = '/notch/'
+      }
 
-        for(name in c('power', 'phase', 'cumsum')){
-          li = get(name, envir = private)
-          for(b in blocks){
-            dname = sprintf('/wavelet/%s/%s', name, b)
-            li[[b]] = LazyH5$new(
-              file_path = file,
-              data_name = dname
-            )
-            # cached_name = sprintf('%d_%s.%s', self$electrode, b, name)
-            # cached_file = file.path(cached_dir, sprintf('%s.ff', cached_name))
-            # if(file.exists(cached_file)){
-            #   li[[b]] = rave:::load_ff(name = cached_name, directory = cached_dir)
-            # }else{
-            #   li[[b]] =
-            #     rave:::as_ff(
-            #       h5read(file, sprintf('/wavelet/%s/%s', name, b)),
-            #       directory = cached_dir,
-            #       name = cached_name
-            #     )
-            # }
-          }
-          private[[name]] = li
-        }
-
-
-        # phase
-        # for(b in blocks){
-        #   cached_name = sprintf('%d.phase', self$electrode)
-        #   cached_file = file.path(cached_dir, sprintf('%s.ff', cached_name))
-        #   if(file.exists(cached_file)){
-        #     private$phase[[b]] = rave:::load_ff(name = cached_name, directory = cached_dir)
-        #   }else{
-        #     private$phase[[b]] =
-        #       rave:::as_ff(
-        #         h5read(file, sprintf('/wavelet/phase/%s', b)),
-        #         directory = cached_dir,
-        #         name = cached_name
-        #       )
-        #   }
-        # }
+      # Get blocks
+      blocks = subject$preprocess_info('blocks', customized = F)
+      for(b in blocks){
+        private$coef[[b]] = load_h5(wave_file, name = '/wavelet/coef/' %&% b)
+        private$volt[[b]] = load_h5(volt_file, name = volt_group %&% b)
       }
     },
-    fast_epoch = function(epochs, freqs, pre, post, name = 'power'){
-      pre = round(pre * private$subject$sample_rate)
-      post = round(post * private$subject$sample_rate)
-      time_points = seq(-pre, post) / private$subject$sample_rate
+    # fast_epoch = function(epochs, freqs = NULL, pre = 1, post = 2){
+    #   freqs %?<-% private$subject$frequencies
+    #   pre = round(pre * private$subject$sample_rate)
+    #   post = round(post * private$subject$sample_rate)
+    #   time_points = seq(-pre, post) / private$subject$sample_rate
+    #   trial_order = order(epochs$Trial)
+    #   lapply(1:nrow(epochs), function(i){
+    #     epochs[i,]
+    #   }) ->
+    #     ep
+    #
+    #   # Epoch
+    #   dim_2 = nrow(freqs)   # Freq
+    #   dim_3 = post + pre + 1     # Time
+    #   sample = matrix(rep(0, dim_2 * dim_3), c(dim_2, dim_3))
+    #
+    #   logger('Epoching electrode: ', self$electrode, ' (', self$subject_id, ')')
+    #
+    #
+    #   lapply(ep, function(row){
+    #     block = row[['Block']]
+    #     i = round(row[['Time']] * private$subject$sample_rate)
+    #     # logger('Epoching: Block - ', block, ' On-set Point - ', i)
+    #     return(list(
+    #       ind = i + seq(-pre, post),
+    #       block = row$Block
+    #     ))
+    #   }) ->
+    #     indices
+    #   placehold = array(NA, dim = c(length(ep), dim_2, dim_3, 1))
+    #   env = environment()
+    #   bvec = sapply(indices,'[[', 'block')
+    #   lapply(unique(bvec), function(b){
+    #     sel = bvec == b
+    #     subinds = as.vector(sapply(indices[sel], '[[', 'ind'))
+    #     coef = private$coef[[b]][,subinds,]
+    #     a = coef[,,1] * exp(1i * coef[,,2])
+    #     dim(a) = c(nrow(a), dim_3, sum(sel))
+    #     env$placehold[trial_order[sel],,, 1] = aperm(a, c(3, 1, 2))
+    #     NULL
+    #   })
+    #   # assign dim names
+    #   data = ECoGTensor$new(
+    #     data = placehold,
+    #     dimnames = list(
+    #       Trial = epochs$Trial[trial_order],
+    #       Frequency = freqs$Frequency,
+    #       Time = time_points,
+    #       Electrode = electrode
+    #     ),
+    #     varnames = c('Trial', 'Frequency', 'Time', 'Electrode'))
+    # },
+    epoch = function(epoch_name, pre, post, type = c('voltage', 'spectrum')){
+      # prepare data
+      epochs = load_meta(meta_type = 'epoch', meta_name = epoch_name, project_name = private$subject$project_name, subject_code = private$subject$subject_code)
+      freqs = private$subject$frequencies
       trial_order = order(epochs$Trial)
       lapply(1:nrow(epochs), function(i){
         epochs[i,]
       }) ->
         ep
 
-      # Epoch
-      tmp = get(name, envir = private)
-      dim_2 = nrow(freqs)   # Freq
-      dim_3 = post + pre + 1     # Time
-      sample = matrix(rep(0, dim_2 * dim_3), c(dim_2, dim_3))
+      re = list()
+      params = list(
+        pre = pre,
+        post = post
+      )
 
-      logger('Epoching electrode: ', self$electrode, ' (', self$subject_id, ') - ', name)
+      electrode = self$electrode
 
+      epo = function(srate, data_type){
+        pre = round(params$pre * srate)
+        post = round(params$post * srate)
+        time_points = seq(-pre, post) / srate
+        # Epoch
+        dim_2 = nrow(freqs)   # Freq
+        dim_3 = post + pre + 1     # Time
+        sample = matrix(rep(0, dim_2 * dim_3), c(dim_2, dim_3))
+        lapply(ep, function(row){
+          block = row[['Block']]
+          i = round(row[['Time']] * srate)
+          return(list(
+            ind = i + seq(-pre, post),
+            block = row$Block
+          ))
+        }) ->
+          indices
+        env = environment()
+        bvec = sapply(indices,'[[', 'block')
 
-      lapply(ep, function(row){
-        block = row[['Block']]
-        i = round(row[['Time']] * private$subject$sample_rate)
-        # logger('Epoching: Block - ', block, ' On-set Point - ', i)
-        return(list(
-          ind = i + seq(-pre, post),
-          block = row$Block
-        ))
-      }) ->
-        indices
-      placehold = array(NA, dim = c(length(ep), dim_2, dim_3, 1))
-      bvec = sapply(indices,'[[', 'block')
-      for(b in unique(bvec)){
-        sel = bvec == b
-        subinds = as.vector(sapply(indices[sel], '[[', 'ind'))
-        a = tmp[[b]][,subinds]
-        dim(a) = c(nrow(a), dim_3, sum(sel))
-        placehold[trial_order[sel],,,1] = aperm(a, c(3, 1, 2))
-      }
-      # assign dim names
-      data = ECoGTensor$new(
-        data = placehold,
-        dimnames = list(
-          Trial = epochs$Trial[trial_order],
-          Frequency = freqs$Frequency,
-          Time = time_points,
-          Electrode = electrode
-        ),
-        varnames = c('Trial', 'Frequency', 'Time', 'Electrode'))
-    },
-    epoch = function(epoch_name, pre, post, name = 'power'){
-      pre = round(pre * private$subject$sample_rate)
-      post = round(post * private$subject$sample_rate)
-      time_points = seq(-pre, post) / private$subject$sample_rate
+        if(data_type == 'spectrum'){
+          placehold = array(NA, dim = c(length(ep), dim_2, dim_3, 1))
+          lapply(unique(bvec), function(b){
+            sel = bvec == b
+            subinds = as.vector(sapply(indices[sel], '[[', 'ind'))
+            coef = private$coef[[b]][,subinds,]
+            a = coef[,,1] * exp(1i * coef[,,2])
+            dim(a) = c(nrow(a), dim_3, sum(sel))
+            env$placehold[trial_order[sel],,, 1] = aperm(a, c(3, 1, 2))
+            NULL
+          })
+          # assign dim names
+          data = rave:::ECoGTensor$new(data = placehold, dimnames = list(
+            epochs$Trial[trial_order],
+            freqs$Frequency,
+            time_points,
+            electrode
+          ), varnames = c('Trial', 'Frequency', 'Time', 'Electrode'))
+        }else{
+          placehold = array(NA, dim = c(length(ep), dim_3, 1))
+          lapply(unique(bvec), function(b){
+            sel = bvec == b
+            subinds = as.vector(sapply(indices[sel], '[[', 'ind'))
+            a = private$volt[[b]][subinds]
+            dim(a) = c(dim_3, sum(sel))
+            env$placehold[trial_order[sel],, 1] = aperm(a, c(2, 1))
+            NULL
+          })
 
-      epochs = load_meta(subject_id = self$subject_id, meta_type = 'epoch', meta_name = epoch_name)
-      freqs = load_meta(subject_id = self$subject_id, meta_type = 'frequencies')
+          # assign dim names
+          data = rave:::Tensor$new(data = placehold, dimnames = list(
+            epochs$Trial[trial_order],
+            time_points,
+            electrode
+          ), varnames = c('Trial', 'Time', 'Electrode'))
+        }
+        return(data)
 
-      lapply(1:nrow(epochs), function(i){
-        epochs[i,]
-      }) ->
-        ep
-
-      # Epoch
-      tmp = get(name, envir = private)
-      dim_2 = dim(tmp[[1]])[1]   # Freq
-      dim_3 = post + pre + 1     # Time
-      sample = matrix(rep(0, dim_2 * dim_3), c(dim_2, dim_3))
-
-      logger('Epoching electrode: ', self$electrode, ' (', self$subject_id, ') - ', name)
-      # vapply(ep, function(row){
-      #   block = row[['Block']]
-      #   i = round(row[['Time']] * private$subject$sample_rate)
-      #   # logger('Epoching: Block - ', block, ' On-set Point - ', i)
-      #   tmp[[block]][, i + seq(-pre, post)]
-      # }, sample) ->
-      #   data
-      #
-      # data = aperm(data, c(3,1,2))
-
-      lapply(ep, function(row){
-        block = row[['Block']]
-        i = round(row[['Time']] * private$subject$sample_rate)
-        return(list(
-          ind = i + seq(-pre, post),
-          block = row$Block
-        ))
-      }) ->
-        indices
-      placehold = array(NA, dim = c(length(ep), dim_2, dim_3, 1))
-      bvec = sapply(indices,'[[', 'block')
-      for(b in unique(bvec)){
-        sel = bvec == b
-        subinds = as.vector(sapply(indices[sel], '[[', 'ind'))
-        a = tmp[[b]][,subinds]
-        dim(a) = c(nrow(a), dim_3, sum(sel))
-        placehold[sel,,, 1] = aperm(a, c(3, 1, 2))
       }
 
-      # assign dim names
-      data = rave:::ECoGTensor$new(data = placehold, dimnames = list(
-        epochs$Trial,
-        freqs$Frequency,
-        time_points,
-        electrode
-      ), varnames = c('Trial', 'Frequency', 'Time', 'Electrode'))
+      if('voltage' %in% type){
+        srate = private$subject$preprocess_info('srate')
+        logger('Epoching electrode: ', self$electrode, ' (', self$subject_id, ') - voltage')
+        re[['voltage']] = epo(srate, data_type = 'voltage')
+      }
+
+      if('spectrum' %in% type){
+        srate = private$subject$sample_rate
+        logger('Epoching electrode: ', self$electrode, ' (', self$subject_id, ') - spectrum')
+        re[['spectrum']] = epo(srate, data_type = 'spectrum')
+      }
 
       # private$cache[[cache_name]] = data
       # if(length(private$cache) > 3){
       #   private$cache[[names(private$cache)[1]]] <- NULL
       # }
-      data
+      re
     },
     get_data = function(block_num, time = NULL,
                         frequencies = NULL, name = 'power',
@@ -215,27 +225,20 @@ Electrode <- R6::R6Class(
       if(is.null(time_point) && !is.null(time)){
         time_point = round(time_point * private$subject$sample_rate)
       }
-      if(name %in% c('power', 'cumsum', 'phase')){
-        return(private[[name]][[block_num]][frequencies, time_point])
-        # if(!use_ff){
-        #   cache_dir = private$dir$cache_dir
-        #   file = file.path(cache_dir, sprintf("%d.h5", self$electrode))
-        #   file_ls = h5ls(file)
-        #   re = h5read(file, name = sprintf('/wavelet/%s/%s', name, block_num),
-        #               index = list(frequencies, time_point))
-        #   H5close()
-        #   return(re)
-        # }else{
-        #   return(private[[name]][[block_num]][frequencies, time_point])
-          # if(!is.null(frequencies) && !is.null()){
-          #   private[[name]][[block_num]][]
-          # }
-          # if(length(time_point) == 0){
-          #   return(li[[block_num]][frequencies, ])
-          # }else{
-          #   return(li[[block_num]][frequencies, time_point])
-          # }
-        # }
+      if(name %in% c('power', 'phase', 'coef')){
+        dat = private$coef[[block_num]][frequencies, time_point]
+        switch(
+          name,
+          coef = {
+            return(dat)
+          },
+          'power' = {
+            return((base::Mod(dat))^2)
+          },
+          'phase' = {
+            return(base::Arg(dat))
+          }
+        )
       }
 
       return(NULL)

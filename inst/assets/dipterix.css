@@ -222,3 +222,11 @@ li.control-sidebar-items>a {
 .rave-grid-inputs>li:hover{
   background-color: #f39c1247;
 }
+
+
+.rave-border-box {
+  border: 1px dashed #efefef;
+  height: 100%;
+  margin-bottom: 20px;
+  padding: 5px;
+}
