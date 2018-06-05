@@ -62,7 +62,7 @@ check_subjects <- function(
 #' @export
 last_entry <- function(key, default, save = F, group = 'customized'){
   assertthat::assert_that(is.character(key), msg = 'Key must be a string')
-  dict = rave_hist$get_or_save(key = group, val = list())
+  dict = rave_hist$get_or_save(key = group, val = list(), save = F)
   val = dict[[key]]
   val %?<-% default
   if(save){

@@ -1,3 +1,12 @@
+#' @export
+time_diff <- function(start, end){
+  delta = unclass(end-start)
+  list(
+    delta = as.numeric(delta),
+    units = attr(delta, 'units')
+  )
+}
+
 #' For each element e1 ind1, find next element e2 in ind2 with e1<e2
 #' @export
 align_index = function(ind1, ind2, max_lag = 0){

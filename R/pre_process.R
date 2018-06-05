@@ -6,8 +6,8 @@
 #' @importFrom magrittr %>%
 #' @importFrom assertthat assert_that
 #' @export
-rave_pre_process <- function(
-  sidebar_width = 3L,
+rave_preprocess <- function(
+  sidebar_width = 3,
   launch.browser = T,
   host = '127.0.0.1',
   quiet = T,
@@ -21,58 +21,37 @@ rave_pre_process <- function(
   default_subject_code = ''
   model_instances = NULL
 
+  future::plan(future::multiprocess, workers = rave::rave_options('max_worker'))
 
-  if(missing(modules) || length(modules) == 0){
-    modules = list(
-      list(
-        ID = 'OVERVIEW',
-        name = 'Overview',
-        checklevel = 0,
-        ..func = 'rave_pre_overview3'
-      ),
-      list(
-        ID = 'NOTCH',
-        name = 'Notch Filter',
-        checklevel = 1,
-        ..func = 'rave_pre_notch3'
-      ),
-      list(
-        ID = 'WAVELET',
-        name = 'Wavelet',
-        checklevel = 2,
-        ..func = 'rave_pre_wavelet3'
-      ),
-      list(
-        ID = 'REF',
-        name = 'Reference',
-        checklevel = 2,
-        ..func = 'rave_pre_ref3'
-      ),
-      list(
-        ID = 'POSTREF',
-        name = 'Post Inspection',
-        checklevel = 4,
-        ..func = 'rave_pre_postref3'
-      ),
-      list(
-        ID = 'EPOCH',
-        name = 'Trial Epoch',
-        checklevel = 1,
-        ..func = 'pre_epoch3'
-      )
+
+  modules = list(
+    list(
+      ID = 'OVERVIEW',
+      name = 'Overview',
+      checklevel = 0,
+      ..func = 'rave_pre_overview3'
+    ),
+    list(
+      ID = 'NOTCH',
+      name = 'Notch Filter',
+      checklevel = 1,
+      ..func = 'rave_pre_notch3'
+    ),
+    list(
+      ID = 'WAVELET',
+      name = 'Wavelet',
+      checklevel = 2,
+      ..func = 'rave_pre_wavelet3'
+    ),
+    list(
+      ID = 'EPOCH',
+      name = 'Trial Epoch',
+      checklevel = 1,
+      ..func = 'pre_epoch3'
     )
-  }
-
+  )
 
   # Step 2: initialize models
-
-  # checklevel:
-  # 0 - No check
-  # 1 - subject loaded, folder exists
-  # 2 - notch filter applied
-  NOTCH_FILTERED = 2
-  WAVELET_TRANSFORMED = 3
-  REFERENCED = 4
 
   model_instances <- lapply(modules, function(x){
     with(x, {
@@ -94,7 +73,8 @@ rave_pre_process <- function(
   })
 
 
-  ui = shinydashboard::dashboardPage(
+  ui = rave:::dashboardPage(
+    control = div(),
     header = shinydashboard::dashboardHeader(
       title = 'RAVE Preprocess'
     ),
@@ -160,7 +140,7 @@ rave_pre_process <- function(
       dirs = get_dir(subject_code = subject_code, project_name = project_name)
       assert_that(dir.exists(dirs$preprocess_dir), msg = 'Subject ' %&% subject_code %&% ' has no project folder ' %&% project_name)
       s = SubjectInfo2$new(project_name = project_name, subject_code = subject_code)
-      id = sprintf('%s/%s', s$project_name, s$subject_code)
+      id = s$project_name %&% '/' %&% s$subject_code
 
       rave_hist$save(
         .rave_pre_project_name = project_name,
@@ -228,6 +208,10 @@ rave_pre_process <- function(
 
 
   shinyApp(ui = ui, server = server, options = list(
-    host = host
+    host = host, launch.browser = launch.browser
   ))
 }
+
+#' @export
+rave_pre_process = rave_preprocess
+

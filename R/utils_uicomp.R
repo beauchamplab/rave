@@ -22,12 +22,12 @@ comp_parser = function(){
         observe({
           val = input[[inputId]]
           t = Sys.time()
-          if(local_data$has_data){
+          if(isolate(local_data$has_data)){
             exec_env$param_env[[inputId]] = val
             exec_env$runtime_env[[inputId]] = val
             local_data$last_input = t
           }
-          logger('Assigned input - ', inputId, sprintf(' (%.3f sec)', as.numeric(Sys.time() - t)))
+          # logger('Assigned input - ', inputId, sprintf(' (%.3f sec)', as.numeric(Sys.time() - t)))
         })
       }
       updates = function(session, ..., .args = list()){
@@ -66,7 +66,7 @@ comp_parser = function(){
 
           output[[outputId]] = do.call(fun_name, args = list(quote({
             local_data$show_results
-            if(local_data$has_data){
+            if(isolate(local_data$has_data)){
               func = get(outputId, envir = exec_env$param_env, inherits = T)
               if(is.function(func)){
                 func()
@@ -254,7 +254,7 @@ comp_parser = function(){
           #   val
 
           val = input[[inputId]]
-          if(local_data$has_data){
+          if(isolate(local_data$has_data)){
 
             t = Sys.time()
             exec_env$param_env[[inputId]] = val

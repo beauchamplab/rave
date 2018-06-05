@@ -732,6 +732,7 @@ ExecEnvir <- R6::R6Class(
       private$update = quos
 
       update = function(input, session = NULL, init = FALSE){
+        start = Sys.time()
         input = dropNulls(input)
         if(!init){
           # Not yet implemented
@@ -753,6 +754,11 @@ ExecEnvir <- R6::R6Class(
           })
 
         }
+
+        end = Sys.time()
+        delta = time_diff(start, end)
+        logger(sprintf('Updating inputs takes %.2f %s', delta$delta, delta$units))
+
       }
       self$input_update = update
       invisible()

@@ -1,6 +1,10 @@
 #' @import magrittr
 #' @import shiny
 shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = TRUE){
+  logger = function(...){
+    rave::logger('[', MODULE_ID, '] ', ..., strftime(Sys.time(), ' - %M:%S', usetz = F))
+  }
+
   # assign variables
   MODULE_ID = module$module_id
   MODULE_LABEL = module$label_name
@@ -79,24 +83,28 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
       # debounce inputs - rate policy
       reactive({
+        logger('Input changed')
         local_data$last_input
       }) %>%
-        debounce(rave_options('delay_input')) ->
+        debounce(50) ->
         check_inputs
 
       reactive({
+        logger('Result generated')
         local_data$has_results
       }) %>%
         debounce(20) ->
         show_results
 
       reactive({
+        logger('Ready to run script')
         local_data$run_script
       }) %>%
         debounce(20) ->
         get_results
 
       reactive({
+        logger('Input updated')
         local_data$input_updated
       }) %>%
         debounce(50) ->
@@ -125,10 +133,10 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
           run_script()
         }
       }, priority = -1000L)
-      observeEvent(input_updated(), {
-        logger = function(...){
-          rave::logger('[', MODULE_ID, '] ', ...)
-        }
+
+
+      observe({
+        input_updated()
 
         if(!global_reactives$has_data){
           return(NULL)
@@ -139,38 +147,37 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
           # Pass the check, local_data$has_data = T
           local_data$has_data = T
         }
-        if(test.mode){
-          logger('Flushing Toilet')
-        }
+
 
         # get global/local cache
         # params = isolate(reactiveValuesToList(input))
 
-        params = cache_all_inputs(save = F)
-        logger('Stand up')
-        if(isolate(local_data$initialized)){
-          # get current input
-          execenv$input_update(input = params, session = session, init = FALSE)
-          local_data$run_script = Sys.time()
-          logger('Flush')
-        }else if(
-          local_data$has_data && global_reactives$execute_module == str_to_upper(MODULE_ID)
-        ){
+
+        if(global_reactives$execute_module == str_to_upper(MODULE_ID)){
+          params = cache_all_inputs(save = F)
+          if(test.mode){
+            logger('Flushing Toilet')
+          }
+
           logger('Close lid')
-          execenv$input_update(input = params, session = session, init = TRUE)
-          logger('Flush')
-          local_data$initialized = TRUE
-          logger('Module Initialized, Gonna Flush the Toilet again.')
-          # For initialization, no need to add flag to last_input
-          # However, if use switched data and the new param settings are the same
-          # as the old ones. In this case, result won't be updated and we have to
-          # tell it hey! you need to refresh urself.
-          #
-          # BUT, this will cause a problem. Because if the input need to be changed
-          # the result will flush before input changed.
-          local_data$last_input = Sys.time()
+          if(!isolate(local_data$initialized && local_data$has_data)){
+            execenv$input_update(input = params, session = session, init = TRUE)
+            logger('Flush')
+            local_data$initialized = TRUE
+            logger('Module Initialized, Gonna Flush the Toilet again.')
+          }
+
+          if(isolate(local_data$initialized)){
+            # get current input
+            execenv$input_update(input = params, session = session, init = FALSE)
+            local_data$run_script = Sys.time()
+            logger('Flush')
+          }
+
+
         }
-        logger('Reload Water')
+
+
       }, priority = 500L)
 
       observeEvent(global_reactives$execute_module, {
@@ -189,7 +196,10 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         execenv$reset(params)
 
         local_data$initialized = FALSE
-        local_data$input_updated = Sys.time()
+        # local_data$input_updated = Sys.time()
+        if(local_data$has_data && global_reactives$execute_module == str_to_upper(MODULE_ID)){
+          local_data$input_updated = Sys.time()
+        }
       }, priority = 999L)
 
 
