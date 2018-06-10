@@ -65,7 +65,8 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
             local_data$has_results = Sys.time()
             end_time = Sys.time()
             if(test.mode){
-              logger(MODULE_LABEL, ' - Exec time: ', sprintf('%.3f (sec)', end_time - start_time), level = 'INFO')
+              dta = time_diff(start_time, end_time)
+              logger(MODULE_LABEL, ' - Exec time: ', sprintf('%.3f (%s)', dta$delta, dta$units), level = 'INFO')
             }
           }
 

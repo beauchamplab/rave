@@ -859,16 +859,17 @@ lapply_async <- function(x, fun, ..., .ncores = 0, .future_plan = future::multip
     .i = .i+1
     .x = x[[.i]]
 
-    .future_list[[length(.future_list) + 1]] = future::future({
-      fun(.x)
-    }, envir = .envir, substitute = T, lazy = F, globals = .globals, .packages = .packages, gc = .gc,
-    evaluator = .future_plan, workers = .ncores)
-
     if(is.function(.call_back)){
       try({
         .call_back(.i)
       })
     }
+
+    .future_list[[length(.future_list) + 1]] = future::future({
+      fun(.x)
+    }, envir = .envir, substitute = T, lazy = F, globals = .globals, .packages = .packages, gc = .gc,
+    evaluator = .future_plan, workers = .ncores)
+
 
     if(length(.future_list) >= .ncores){
       # wait for one of futures resolved

@@ -67,6 +67,16 @@ get_dir <- function(subject_code, project_name, block_num, mkdirs = NULL, subjec
       if(!dir.exists(dir)){
         dir.create(dir, recursive = T)
       }
+      if(dname %in% 'preprocess_dir'){
+        dir.create(file.path(dir, 'spectrum'), recursive = T, showWarnings = F)
+        dir.create(file.path(dir, 'voltage'), recursive = T, showWarnings = F)
+      }
+      if(dname %in% c('channel_dir', 'cache_dir')){
+        dir.create(file.path(dir, 'power'), recursive = T, showWarnings = F)
+        dir.create(file.path(dir, 'phase'), recursive = T, showWarnings = F)
+        dir.create(file.path(dir, 'voltage'), recursive = T, showWarnings = F)
+        dir.create(file.path(dir, 'reference'), recursive = T, showWarnings = F)
+      }
     }
   }
 

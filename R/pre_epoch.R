@@ -523,6 +523,8 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2){
       }
       if(nrow(tbl)){
         tbl$Trial = seq_len(nrow(tbl))
+        tbl$Condition = 'NoCondition'
+        tbl$Duration = NA
       }
       tbl
     }

@@ -200,7 +200,7 @@ comp_parser = function(){
       re$observers = function(input, output, session, local_data, exec_env){
         output[[outputId]] = do.call(shiny::renderText, args = list(quote({
           local_data$show_results
-          if (local_data$has_data) {
+          if (isolate(local_data$has_data)) {
             func = get(outputId, envir = exec_env$param_env,
                        inherits = T)
             if (is.function(func)) {

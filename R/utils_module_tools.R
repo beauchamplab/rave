@@ -11,53 +11,72 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
     is_loaded = function(data_type){
       repo = data_env$.private$repo
       on.exit(rm(repo))
-      switch (data_type,
-        'spectrum' = {!is.null(repo$coef)},
-        'voltage' = {!is.null(repo$volt)},
-        {
-          data_type %in% names(data_env$.module_data)
-        }
-      )
+      !is.null(repo[[data_type]])
     }
 
 
-    get_power = function(force = T) {
+    get_power = function(force = T, referenced = T) {
       repo = data_env$.private$repo
       on.exit(rm(repo))
-      if(force && is.null(data_env$.private$power)){
-        repo$calc_reference(original = F, data_type = 'spectrum')
-        data_env$.private$power = ECoGTensor$new(
-          data = Mod(repo$coef$data) ^ 2,
-          dim = dim(repo$coef),
-          dimnames = dimnames(repo$coef),
-          varnames = repo$coef$varnames
+      nm = ifelse(referenced, 'power', 'raw_power')
+      if(force && is.null(repo[[nm]])){
+        epoch_name = data_env$.private$meta$epoch_info$name
+        time_range = data_env$.private$meta$epoch_info$time_range
+        repo$epoch(
+          epoch_name = epoch_name,
+          pre = time_range[1],
+          post = time_range[2],
+          electrodes = data_env$preload_info$electrodes,
+          data_type = 'power',
+          referenced = referenced
         )
       }
-      return(data_env$.private$power)
+      return(repo[[nm]])
     }
 
-    get_phase = function(force = T){
+    get_phase = function(force = T, referenced = T){
       repo = data_env$.private$repo
       on.exit(rm(repo))
-      if(force && is.null(data_env$.private$phase)){
-        repo$calc_reference(original = F, data_type = 'spectrum')
-        data_env$.private$phase = ECoGTensor$new(
-          data = Arg(repo$coef$data),
-          dim = dim(repo$coef),
-          dimnames = dimnames(repo$coef),
-          varnames = repo$coef$varnames
+      nm = ifelse(referenced, 'phase', 'raw_phase')
+      if(force && is.null(repo[[nm]])){
+        epoch_name = data_env$.private$meta$epoch_info$name
+        time_range = data_env$.private$meta$epoch_info$time_range
+        repo$epoch(
+          epoch_name = epoch_name,
+          pre = time_range[1],
+          post = time_range[2],
+          electrodes = data_env$preload_info$electrodes,
+          data_type = 'phase',
+          referenced = referenced
         )
       }
-      return(data_env$.private$phase)
+      return(repo[[nm]])
     }
 
-    get_voltage = function(force = T){
+    get_voltage = function(force = T, referenced = T){
       repo = data_env$.private$repo
       on.exit(rm(repo))
-      if(force && is.null(repo$volt)){
-        repo$calc_reference(original = F, data_type = 'voltage')
+      nm = ifelse(referenced, 'volt', 'raw_volt')
+      if(force && is.null(repo[[nm]])){
+        epoch_name = data_env$.private$meta$epoch_info$name
+        time_range = data_env$.private$meta$epoch_info$time_range
+        repo$epoch(
+          epoch_name = epoch_name,
+          pre = time_range[1],
+          post = time_range[2],
+          electrodes = data_env$preload_info$electrodes,
+          data_type = 'volt',
+          referenced = referenced
+        )
       }
-      return(repo$volt)
+      return(repo[[nm]])
+    }
+
+    clean = function(items = c('raw_volt', 'raw_phase', 'raw_power')){
+      for(i in items){
+        data_env$.private$repo[[i]] = NULL
+      }
+      gc()
     }
 
     get_meta = function(name) {

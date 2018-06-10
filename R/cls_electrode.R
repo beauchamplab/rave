@@ -3,6 +3,24 @@
 #' Provide util functions to epoch data
 NULL
 
+#' @export
+as_printable = function(env){
+  assertthat::assert_that(is.environment(env), msg = 'env MUST be an environment.')
+  cls = c(class(env), 'rave_printable')
+  cls = unique(cls[!cls %in% ''])
+  class(env) = cls
+  return(env)
+}
+
+#' @export
+print.rave_printable = function(env){
+  assertthat::assert_that(is.environment(env), msg = 'env MUST be an environment.')
+  base::print(
+    paste0('<environment key=[', paste(ls(env), collapse = ', '), ']>')
+  )
+  return(env)
+}
+
 #' @import rhdf5
 #' @export
 Electrode <- R6::R6Class(
@@ -10,30 +28,94 @@ Electrode <- R6::R6Class(
   portable = FALSE,
   cloneable = FALSE,
   private = list(
-    dir = NULL,
-    # power = list(),
-    # phase = list(),
-    # cumsum = list(),
-    coef = list(),
-    volt = list(),
-    cache = list(),
-    subject = NULL
+    subject = NULL,
+    is_reference = F
   ),
   public = list(
     electrode = NULL,
-    subject_id = NULL,
-    is_reference = F,
+    raw_power = NULL, # before reference
+    raw_phase = NULL, # before reference
+    raw_volt = NULL, # Voltage before ref
+    phase = NULL,  # referenced phase
+    power = NULL,  # referenced power
+    volt = NULL,   #
+    preload = NULL,
+    reference = NULL,
+
 
     print = function(...){
-      cat('Subject: ', self$subject_id, '\nElectrode: ', self$electrode, '\n', sep = '')
-      if(length(private$power) > 0){
-        cat('Number of blocks: ', length(private$power), '\n')
-        cat('Number of frequencies: ', dim(private$power[[1]])[1], '\n')
+
+      cat('Subject: ', self$subject_id, '\nElectrode: ', self$electrode, ifelse(self$reference_electrode, ' (Reference)',''), '\n', sep = '')
+      if(length(self$power) > 0){
+        cat('Blocks: [', paste(self$blocks, collapse = ', '), ']\n')
       }
       invisible(self)
     },
 
-    initialize = function(subject, electrode, is_reference = F){
+    switch_reference = function(new_reference){
+      assertthat::assert_that(is(new_reference, 'Electrode'), msg = 'new_reference MUST be a reference electrode instance.')
+      self$reference = new_reference
+      self$preload = NULL
+      rm(list = ls(self$power, all.names = T), envir = self$power)
+      rm(list = ls(self$phase, all.names = T), envir = self$phase)
+      rm(list = ls(self$volt, all.names = T), envir = self$volt)
+    },
+
+    referenced = function(type = 'power', ram = T){
+
+      if(is.character(self$reference) || setequal(names(self[[type]]), self$blocks)){
+        env = self[[type]]
+        if(ram){
+          sapply(self$blocks, function(b){
+            env[[b]][]
+          }, simplify = F, USE.NAMES = T) ->
+            env
+        }
+        return(env)
+      }
+
+      # otherwise we need to reference itself
+
+      raw_type = 'raw_' %&% type
+      switch (type,
+        'volt' = {
+          lapply(self$blocks, function(b){
+            self$volt[[b]] = self$raw_volt[[b]][] - self$reference$raw_volt[[b]][]
+          })
+          return(self$volt)
+        },
+        # default need to have power and phase
+        {
+          lapply(self$blocks, function(b){
+            coef = (sqrt(self$raw_power[[b]][]) * exp(1i * self$raw_phase[[b]][])) -
+              sqrt(self$reference$raw_power[[b]]) * exp(1i * self$reference$raw_phase[[b]])
+            self$power[[b]] = Mod(coef)^2
+            self$phase[[b]] = Arg(coef)
+            rm(coef)
+            invisible()
+          })
+          return(self[[type]])
+        }
+      )
+
+    },
+
+    clean = function(types = c('power', 'phase', 'volt'), force = F){
+      if(is(self$reference, 'Electrode')){
+        if(!force){
+          types = types[!types %in% self$preload]
+        }else{
+          self$preload = NULL
+        }
+
+        for(type in types){
+          env = self[[types]]
+          rm(list = ls(env, all.names = T), envir = env)
+        }
+      }
+    },
+
+    initialize = function(subject, electrode, reference_by = 'noref', preload = NULL, is_reference = FALSE){
       if(!(R6::is.R6(subject) && 'Subject' %in% class(subject))){
         assertthat::assert_that('character' %in% class(subject),
                                 msg = 'Param <subject> needs to be either subject ID or a Subject instance')
@@ -43,86 +125,103 @@ Electrode <- R6::R6Class(
       private$subject = subject
       subject_id = subject$subject_id
 
-      private$dir = get_dir(subject_code = subject$subject_code, project_name = subject$project_name)
-      self$subject_id = subject_id
+      # Initialize data
+      self$electrode = electrode
+      self$raw_power = as_printable(new.env())
+      self$raw_phase = as_printable(new.env())
+      self$raw_volt = as_printable(new.env())
+      self$phase = as_printable(new.env())
+      self$power = as_printable(new.env())
+      self$volt = as_printable(new.env())
+      self$preload = preload
 
-      self$is_reference = is_reference
-      cache_dir = private$dir$cache_dir
-      pre_dir = private$dir$preprocess_dir
 
-      if(is_reference){
-        self$electrode = 0
-        wave_file = file.path(cache_dir, 'reference', sprintf("%s.h5", electrode))
-        volt_file = wave_file
-        volt_group = '/voltage/'
-      }else{
-        self$electrode = electrode
-        # import file
-        wave_file = file.path(cache_dir, 'spectrum', sprintf("%d.h5", electrode))
-        volt_file = file.path(pre_dir, sprintf("electrode_%d.h5", electrode))
-        volt_group = '/notch/'
-      }
+      private$is_reference = is_reference
+      cache_dir = subject$dirs$cache_dir
 
-      # Get blocks
       blocks = subject$preprocess_info('blocks', customized = F)
-      for(b in blocks){
-        private$coef[[b]] = load_h5(wave_file, name = '/wavelet/coef/' %&% b)
-        private$volt[[b]] = load_h5(volt_file, name = volt_group %&% b)
+
+      # Get reference info
+      if(!is_reference){
+        file = file.path(cache_dir, 'power', sprintf("%d.h5", electrode))
+        ref = load_h5(file, '/reference', ram = T)
+        need_ref = F
+        if(is.character(reference_by) && reference_by != ref){
+          reference_by = Electrode$new(subject, electrode = reference_by, reference_by = NULL, is_reference = T)
+        }
+        if(methods::is(reference_by, 'Electrode')){
+          assertthat::assert_that(reference_by$reference_electrode, msg = 'This is not a reference signal.')
+          need_ref = (reference_by$electrode != ref)
+        }
+        if(need_ref){
+          self$reference = reference_by
+        }else{
+          rm(reference_by)
+          reference_by = ref
+          self$reference = ref
+        }
       }
+
+
+
+      # For each block, link data
+      for(b in blocks){
+        if(!is_reference){
+          # power
+          file = file.path(cache_dir, 'power', sprintf("%d.h5", electrode))
+          self$raw_power[[b]] = load_h5(file, sprintf('/raw/power/%s', b), ram = ('raw_power' %in% preload))
+          if(!need_ref){
+            self$power[[b]] = load_h5(file, sprintf('/ref/power/%s', b), ram = ('power' %in% preload))
+          }
+
+          # phase
+          file = file.path(cache_dir, 'phase', sprintf("%d.h5", electrode))
+          self$raw_phase[[b]] = load_h5(file, sprintf('/raw/phase/%s', b), ram = ('raw_phase' %in% preload))
+          if(!need_ref){
+            self$phase[[b]] = load_h5(file, sprintf('/ref/phase/%s', b), ram = ('phase' %in% preload))
+          }
+
+          # voltage
+          file = file.path(cache_dir, 'voltage', sprintf("%d.h5", electrode))
+          self$raw_volt[[b]] = load_h5(file, sprintf('/raw/voltage/%s', b), ram = ('raw_volt' %in% preload))
+          if(!need_ref){
+            self$volt[[b]] = load_h5(file, sprintf('/ref/voltage/%s', b), ram = ('volt' %in% preload))
+          }
+
+          # If reference_by is an instance of electrode, reference it
+          if(need_ref){
+            if('volt' %in% preload){
+              self$volt[[b]] = self$raw_volt[[b]][] - reference_by$raw_volt[[b]][]
+            }
+            if(any(c('power', 'phase') %in% preload)){
+              coef = sqrt(self$raw_power[[b]][]) * exp(1i * self$raw_phase[[b]][])
+              ref_coef = sqrt(reference_by$raw_power[[b]][]) * exp(1i * reference_by$raw_phase[[b]][])
+              coef = coef - ref_coef
+              if('phase' %in% preload)  self$phase[[b]] = force(Arg(coef))
+              if('power' %in% preload)  self$power[[b]] = force((Mod(coef))^2)
+              rm(list = c('coef', 'ref_coef'))
+            }
+          }
+        }else{
+          # this is reference signal, only load raw_*
+          if(electrode == 'noref'){
+            # this is a special reference where power, volt, phase = 0
+            self$raw_power[[b]] = 0
+            self$raw_phase[[b]] = 0
+            self$raw_volt[[b]] = 0
+          }else{
+            file = file.path(cache_dir, 'reference', sprintf("%s.h5", electrode))
+            coef = load_h5(file, name = '/wavelet/coef/' %&% b, ram = T)
+            self$raw_power[[b]] = (coef[,,1])^2
+            self$raw_phase[[b]] = (coef[,,2])
+            self$raw_volt[[b]] = load_h5(file, name = '/voltage/' %&% b, ram = T)
+          }
+        }
+      }
+
     },
-    # fast_epoch = function(epochs, freqs = NULL, pre = 1, post = 2){
-    #   freqs %?<-% private$subject$frequencies
-    #   pre = round(pre * private$subject$sample_rate)
-    #   post = round(post * private$subject$sample_rate)
-    #   time_points = seq(-pre, post) / private$subject$sample_rate
-    #   trial_order = order(epochs$Trial)
-    #   lapply(1:nrow(epochs), function(i){
-    #     epochs[i,]
-    #   }) ->
-    #     ep
-    #
-    #   # Epoch
-    #   dim_2 = nrow(freqs)   # Freq
-    #   dim_3 = post + pre + 1     # Time
-    #   sample = matrix(rep(0, dim_2 * dim_3), c(dim_2, dim_3))
-    #
-    #   logger('Epoching electrode: ', self$electrode, ' (', self$subject_id, ')')
-    #
-    #
-    #   lapply(ep, function(row){
-    #     block = row[['Block']]
-    #     i = round(row[['Time']] * private$subject$sample_rate)
-    #     # logger('Epoching: Block - ', block, ' On-set Point - ', i)
-    #     return(list(
-    #       ind = i + seq(-pre, post),
-    #       block = row$Block
-    #     ))
-    #   }) ->
-    #     indices
-    #   placehold = array(NA, dim = c(length(ep), dim_2, dim_3, 1))
-    #   env = environment()
-    #   bvec = sapply(indices,'[[', 'block')
-    #   lapply(unique(bvec), function(b){
-    #     sel = bvec == b
-    #     subinds = as.vector(sapply(indices[sel], '[[', 'ind'))
-    #     coef = private$coef[[b]][,subinds,]
-    #     a = coef[,,1] * exp(1i * coef[,,2])
-    #     dim(a) = c(nrow(a), dim_3, sum(sel))
-    #     env$placehold[trial_order[sel],,, 1] = aperm(a, c(3, 1, 2))
-    #     NULL
-    #   })
-    #   # assign dim names
-    #   data = ECoGTensor$new(
-    #     data = placehold,
-    #     dimnames = list(
-    #       Trial = epochs$Trial[trial_order],
-    #       Frequency = freqs$Frequency,
-    #       Time = time_points,
-    #       Electrode = electrode
-    #     ),
-    #     varnames = c('Trial', 'Frequency', 'Time', 'Electrode'))
-    # },
-    epoch = function(epoch_name, pre, post, type = c('voltage', 'spectrum')){
+
+    epoch = function(epoch_name, pre, post, types = c('volt', 'power', 'phase'), raw = F){
       # prepare data
       epochs = load_meta(meta_type = 'epoch', meta_name = epoch_name, project_name = private$subject$project_name, subject_code = private$subject$subject_code)
       freqs = private$subject$frequencies
@@ -140,11 +239,26 @@ Electrode <- R6::R6Class(
 
       electrode = self$electrode
 
-      epo = function(srate, data_type){
+      if(!raw){
+        # reference first
+        lapply(types, function(type){
+          self$referenced(type = type, ram = F)
+          NULL
+        })
+        on.exit({self$clean(types = types)})
+      }
+
+      re = list(raw = raw)
+
+      # Voltage
+      if('volt' %in% types){
+        name = ifelse(raw, 'raw_volt', 'volt')
+        srate = private$subject$preprocess_info(key = 'srate')
         pre = round(params$pre * srate)
         post = round(params$post * srate)
         time_points = seq(-pre, post) / srate
         # Epoch
+        dim_1 = length(ep)
         dim_2 = nrow(freqs)   # Freq
         dim_3 = post + pre + 1     # Time
         sample = matrix(rep(0, dim_2 * dim_3), c(dim_2, dim_3))
@@ -157,65 +271,76 @@ Electrode <- R6::R6Class(
           ))
         }) ->
           indices
+
         env = environment()
         bvec = sapply(indices,'[[', 'block')
 
-        if(data_type == 'spectrum'){
-          placehold = array(NA, dim = c(length(ep), dim_2, dim_3, 1))
+        placehold = array(NA, dim = c(dim_1, dim_3, 1))
+        lapply(unique(bvec), function(b){
+          sel = bvec == b
+          subinds = as.vector(sapply(indices[sel], '[[', 'ind'))
+          a = self[[name]][[b]][subinds]
+          dim(a) = c(dim_3, sum(sel))
+          env$placehold[trial_order[sel],, 1] = aperm(a, c(2, 1))
+          NULL
+        })
+
+        # assign dim names
+        re[['volt']] = rave:::Tensor$new(data = placehold, dimnames = list(
+          epochs$Trial[trial_order],
+          time_points,
+          electrode
+        ), varnames = c('Trial', 'Time', 'Electrode'))
+        rm(placehold)
+      }
+      types = types[types != 'volt']
+      if(any(c('power', 'phase') %in% types)){
+        for(name in types){
+          dname = ifelse(raw, 'raw_' %&% name, name)
+          srate = private$subject$sample_rate
+          pre = round(params$pre * srate)
+          post = round(params$post * srate)
+          time_points = seq(-pre, post) / srate
+          # Epoch
+          dim_1 = length(ep)
+          dim_2 = nrow(freqs)   # Freq
+          dim_3 = post + pre + 1     # Time
+          sample = matrix(rep(0, dim_2 * dim_3), c(dim_2, dim_3))
+          lapply(ep, function(row){
+            block = row[['Block']]
+            i = round(row[['Time']] * srate)
+            return(list(
+              ind = i + seq(-pre, post),
+              block = row$Block
+            ))
+          }) ->
+            indices
+
+          env = environment()
+          bvec = sapply(indices,'[[', 'block')
+          placehold = array(NA, dim = c(dim_1, dim_2, dim_3, 1))
+
           lapply(unique(bvec), function(b){
             sel = bvec == b
             subinds = as.vector(sapply(indices[sel], '[[', 'ind'))
-            coef = private$coef[[b]][,subinds,]
-            a = coef[,,1] * exp(1i * coef[,,2])
+            a = self[[dname]][[b]][,subinds]
             dim(a) = c(nrow(a), dim_3, sum(sel))
             env$placehold[trial_order[sel],,, 1] = aperm(a, c(3, 1, 2))
             NULL
           })
           # assign dim names
-          data = rave:::ECoGTensor$new(data = placehold, dimnames = list(
+          re[[name]] = rave:::ECoGTensor$new(data = placehold, dimnames = list(
             epochs$Trial[trial_order],
             freqs$Frequency,
             time_points,
             electrode
           ), varnames = c('Trial', 'Frequency', 'Time', 'Electrode'))
-        }else{
-          placehold = array(NA, dim = c(length(ep), dim_3, 1))
-          lapply(unique(bvec), function(b){
-            sel = bvec == b
-            subinds = as.vector(sapply(indices[sel], '[[', 'ind'))
-            a = private$volt[[b]][subinds]
-            dim(a) = c(dim_3, sum(sel))
-            env$placehold[trial_order[sel],, 1] = aperm(a, c(2, 1))
-            NULL
-          })
 
-          # assign dim names
-          data = rave:::Tensor$new(data = placehold, dimnames = list(
-            epochs$Trial[trial_order],
-            time_points,
-            electrode
-          ), varnames = c('Trial', 'Time', 'Electrode'))
         }
-        return(data)
-
       }
+      rm(placehold)
 
-      if('voltage' %in% type){
-        srate = private$subject$preprocess_info('srate')
-        logger('Epoching electrode: ', self$electrode, ' (', self$subject_id, ') - voltage')
-        re[['voltage']] = epo(srate, data_type = 'voltage')
-      }
 
-      if('spectrum' %in% type){
-        srate = private$subject$sample_rate
-        logger('Epoching electrode: ', self$electrode, ' (', self$subject_id, ') - spectrum')
-        re[['spectrum']] = epo(srate, data_type = 'spectrum')
-      }
-
-      # private$cache[[cache_name]] = data
-      # if(length(private$cache) > 3){
-      #   private$cache[[names(private$cache)[1]]] <- NULL
-      # }
       re
     },
     get_data = function(block_num, time = NULL,
@@ -246,7 +371,13 @@ Electrode <- R6::R6Class(
   ),
   active = list(
     blocks = function(){
-      return(names(private$power))
+      private$subject$preprocess_info('blocks', customized = F)
+    },
+    subject_id = function(){
+      private$subject$subject_id
+    },
+    reference_electrode = function(){
+      private$is_reference
     }
   )
 )

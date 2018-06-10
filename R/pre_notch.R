@@ -896,7 +896,7 @@ cache_raw_voltage <- function(project_name, subject_code, blocks, electrodes, ..
   on.exit({progress$close()})
 
   lapply_async(electrodes, function(e){
-    cfile = file.path(dirs$preprocess_dir, sprintf('electrode_%d.h5', e))
+    cfile = file.path(dirs$preprocess_dir, 'voltage', sprintf('electrode_%d.h5', e))
     if(file.exists(cfile)){
       unlink(cfile)
     }

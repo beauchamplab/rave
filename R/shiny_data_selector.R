@@ -3,7 +3,7 @@ check_subjects <- function(
   project_name, subject_code, check = T,
   folders = c('Subject Folder', 'RAVE Folder', 'Preprocessing Folder', 'Meta Folder', 'Channel Folder'),
   preprocess = c('Started Proprocess', 'Notch Filter', 'Wavelet'),
-  Meta = c("Trial File", "Electrode File", "Time point File", "Frequency File", "Epoch File")
+  Meta = c("Electrode File", "Time point File", "Frequency File", "Epoch File")
 ){
   utils = rave_preprocess_tools()
   miss_subject_code = missing(subject_code)

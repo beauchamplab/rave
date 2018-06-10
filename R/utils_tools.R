@@ -82,11 +82,11 @@ rave_preprocess_tools <- function(env = new.env(), ...){
       meta_files = list.files(meta_dir)
 
       l = list(
-        'Trial File' = 'trials.csv' %in% meta_files,
         'Electrode File' = 'electrodes.csv' %in% meta_files,
         'Time point File' = 'time_points.csv' %in% meta_files,
         'Frequency File' = 'frequencies.csv' %in% meta_files,
-        'Epoch File' = any(str_detect(meta_files, '^epoch_[a-zA-Z0-9]+\\.[cC][sS][vV]$'))
+        'Epoch File' = any(str_detect(meta_files, '^epoch_[a-zA-Z0-9]+\\.[cC][sS][vV]$')),
+        'Reference file' = any(str_detect(meta_files, '^reference_[a-zA-Z0-9]+\\.[cC][sS][vV]$'))
       )
 
       checklist[['Meta']] = l
@@ -363,7 +363,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
       ind = sapply(electrodes, function(e){which(e == utils$get_electrodes())})
       dirs = utils$get_from_subject('dirs', list(), customized = F)
 
-      cfile = file.path(dirs$preprocess_dir, sprintf('electrode_%d.h5', electrodes))
+      cfile = file.path(dirs$preprocess_dir, 'voltage', sprintf('electrode_%d.h5', electrodes))
       if(raw){
         group = '/raw/'
       }else{
@@ -423,7 +423,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
 
       lapply_async(seq_along(electrodes), function(ii){
         e = electrodes[[ii]]
-        cfile = file.path(dirs$preprocess_dir, sprintf('electrode_%d.h5', e))
+        cfile = file.path(dirs$preprocess_dir, 'voltage', sprintf('electrode_%d.h5', e))
         # load from file
         for(block in blocks){
           bandwidths[[block]] %?<-% bandwidths[['default']]
@@ -456,68 +456,157 @@ rave_preprocess_tools <- function(env = new.env(), ...){
 
       compress_rate = srate / target_srate
 
-      progress2 = progress('Block Progress', max = length(electrodes) + 1)
+      progress2 = progress('Block Progress', max = length(electrodes))
       progress1 = progress('Overall Progress', max = length(blocks))
       on.exit({
         progress2$close()
         progress1$close()
       })
 
-      root_dir = file.path(dirs$channel_dir, 'spectrum')
-      ref_dir = file.path(dirs$channel_dir, 'reference')
-      dir.create(root_dir, showWarnings = F, recursive = T)
-      dir.create(ref_dir, showWarnings = F, recursive = T)
+      ### Prepare for the wavelet file. Since users may specify different sample rate, we need to remove files if they exists
+      # 1. reference file
+      ref_file = file.path(dirs$channel_dir, 'reference', sprintf('ref_%s.h5', rave:::deparse_selections(electrodes)))
+      unlink(ref_file)
+
+      # 2. raw channel files and power/phase files
       lapply(electrodes, function(e){
-        file = file.path(root_dir, sprintf('%d.h5', e))
-        if(file.exists(file)){
-          unlink(file)
-          return(T)
-        }
-        return(F)
+        unlink(file.path(dirs$preprocess_dir, 'spectrum', sprintf('%d.h5', e)))
+        unlink(file.path(dirs$channel_dir, 'power', sprintf('%d.h5', e)))
+        unlink(file.path(dirs$channel_dir, 'phase', sprintf('%d.h5', e)))
+        unlink(file.path(dirs$channel_dir, 'voltage', sprintf('%d.h5', e)))
       })
-
-      ref_file = file.path(ref_dir, sprintf('ref_%s.h5', rave:::deparse_selections(electrodes)))
-      if(file.exists(ref_file)){
-        unlink(ref_file)
-      }
-
 
       # load signals
       for(block in blocks){
         progress2$reset(detail = 'Initializing...')
         progress1$inc('Block - ' %&% block)
-        v = utils$load_voltage(electrodes = electrodes, blocks = block, raw = F)[[1]]
+        # v = utils$load_voltage(electrodes = electrodes, blocks = block, raw = F)[[1]]
 
-        lapply_async(c(seq_along(electrodes), 0), function(ii){
-          if(ii != 0){
-            file = file.path(root_dir, sprintf('%d.h5', electrodes[[ii]]))
-            re = wavelet(v[ii, ], freqs = frequencies, srate = srate, wave_num = wave_num)
-          }else{
-            file = ref_file
-            ref = as.vector(colMeans(v))
-            save_h5(ref, file = file, name = sprintf('/voltage/%s', block), chunk = c(1024))
-            re = wavelet(ref, freqs = frequencies, srate = srate, wave_num = wave_num)
-          }
+        lapply_async(seq_along(electrodes), function(ii){
+          # This is electrode
+          e = electrodes[[ii]]
+          s = load_h5(file = file.path(dirs$preprocess_dir, 'voltage', sprintf('electrode_%d.h5', e)), name = sprintf('/notch/%s', block))[1,]
 
+          re = wavelet(s, freqs = frequencies, srate = srate, wave_num = wave_num)
+
+          # Subset coefficients to save space
           ind = floor(seq(1, ncol(re$phase), by = compress_rate))
-          coef = re$coef[, ind, drop = F]
-          phase = re$phase[, ind, drop = F]
-          coef = c(coef, phase)
-          dim(coef) = c(dim(phase), 2)
-          save_h5(coef, file = file, name = sprintf('/wavelet/coef/%s', block), chunk = c(length(frequencies), 128, 2))
 
-          # rm
-          rm(list = ls(all.names = T))
+          #
+          coef = re$coef[, ind, drop = F]
+          re$coef = NULL
+          phase = re$phase[, ind, drop = F]
+          re$phase = NULL
+          power = re$power[, ind, drop = F]
+          re$power = NULL
+          rm(re)
           gc()
 
-        }, .ncores = ncores, .call_back = function(i){
-          if(i <= length(electrodes)){
-            progress2$inc(message = 'Electrode - ' %&% electrodes[i])
-          }else{
-            progress2$inc(message = 'Calculating reference')
-          }
-        })
+          # Save power and phase voltage
+          # power
+          save_h5(
+            x = power,
+            file = file.path(dirs$channel_dir, 'power', sprintf('%d.h5', e)),
+            name = sprintf('/ref/power/%s', block),
+            chunk = c(length(frequencies), 128),
+            replace = T
+          )
+          save_h5(
+            x = power,
+            file = file.path(dirs$channel_dir, 'power', sprintf('%d.h5', e)),
+            name = sprintf('/raw/power/%s', block),
+            chunk = c(length(frequencies), 128),
+            replace = T
+          )
+          save_h5(
+            x = 'noref',
+            file = file.path(dirs$channel_dir, 'power', sprintf('%d.h5', e)),
+            name = '/reference',
+            chunk = 1,
+            replace = T, size = 1000
+          )
 
+          # phase
+          save_h5(
+            x = phase,
+            file = file.path(dirs$channel_dir, 'phase', sprintf('%d.h5', e)),
+            name = sprintf('/ref/phase/%s', block),
+            chunk = c(length(frequencies), 128),
+            replace = T
+          )
+          save_h5(
+            x = phase,
+            file = file.path(dirs$channel_dir, 'phase', sprintf('%d.h5', e)),
+            name = sprintf('/raw/phase/%s', block),
+            chunk = c(length(frequencies), 128),
+            replace = T
+          )
+          save_h5(
+            x = 'noref',
+            file = file.path(dirs$channel_dir, 'phase', sprintf('%d.h5', e)),
+            name = '/reference',
+            chunk = 1,
+            replace = T, size = 1000
+          )
+
+          # voltage
+          save_h5(
+            x = s,
+            file = file.path(dirs$channel_dir, 'voltage', sprintf('%d.h5', e)),
+            name = sprintf('/ref/voltage/%s', block),
+            chunk = 1024,
+            replace = T
+          )
+          save_h5(
+            x = s,
+            file = file.path(dirs$channel_dir, 'voltage', sprintf('%d.h5', e)),
+            name = sprintf('/raw/voltage/%s', block),
+            chunk = 1024,
+            replace = T
+          )
+          save_h5(
+            x = 'noref',
+            file = file.path(dirs$channel_dir, 'voltage', sprintf('%d.h5', e)),
+            name = '/reference',
+            chunk = 1,
+            replace = T, size = 1000
+          )
+
+          # # Raw complex coefficient
+          # coef = c(coef, phase)
+          # dim(coef) = c(dim(phase), 2)
+          # file = file.path(dirs$preprocess_dir, 'spectrum', sprintf('%d.h5', e))
+          # save_h5(coef, file = file, name = sprintf('/wavelet/coef/%s', block), chunk = c(length(frequencies), 128, 2))
+
+          # Clean up
+          vars = ls(all.names = T)
+          vars = c(vars[vars != 's'], 'vars')
+          rm(list = vars)
+          gc()
+          return(NULL)
+
+        }, .ncores = ncores, .call_back = function(i){
+          progress2$inc(message = 'Electrode - ' %&% electrodes[i])
+        }) ->
+          volts
+
+        # # Create reference
+        # progress2$inc(message = 'Calculating reference')
+        # file = ref_file
+        # ref = rowMeans(sapply(volts, I))
+        # save_h5(ref, file = file, name = sprintf('/voltage/%s', block), chunk = c(1024))
+        # re = wavelet(ref, freqs = frequencies, srate = srate, wave_num = wave_num)
+        #
+        # ind = floor(seq(1, ncol(re$phase), by = compress_rate))
+        # coef = re$coef[, ind, drop = F]
+        # phase = re$phase[, ind, drop = F]
+        # rm(re)
+        # coef = c(coef, phase)
+        # dim(coef) = c(dim(phase), 2)
+        # save_h5(coef, file = file, name = sprintf('/wavelet/coef/%s', block), chunk = c(length(frequencies), 128, 2))
+        # rm(list = c('file', 'coef', 'phase'))
+
+        invisible()
       }
 
       wavelet_log = env$subject$logger$get_or_save('wavelet_log', list(), save = F)
@@ -568,9 +657,9 @@ rave_preprocess_tools <- function(env = new.env(), ...){
         # Time points
         srate = wavelet_log$target_srate
         e = wavelet_log$electrodes[1]
-        file = file.path(dirs$channel_dir, 'spectrum', sprintf('%d.h5', e))
+        file = file.path(dirs$channel_dir, 'power', sprintf('%d.h5', e))
         lapply(utils$get_blocks(), function(b){
-          npts = dim(load_h5(file, sprintf('/wavelet/coef/%s', b)))[2]
+          npts = dim(load_h5(file, sprintf('/raw/power/%s', b)))[2]
           data.frame(
             Block = b,
             Time = seq(0, by = 1 / srate, length.out = npts),
@@ -591,18 +680,11 @@ rave_preprocess_tools <- function(env = new.env(), ...){
         ref = data.frame(
           Electrode = es,
           Group = 'Default',
-          Reference = 'ref_' %&% rave:::deparse_selections(es),
+          Reference = 'noref',
           stringsAsFactors = F
         )
         safe_write_csv(ref, file.path(dirs$meta_dir, 'reference_default.csv'))
 
-        ref = data.frame(
-          Electrode = es,
-          Group = 'Default',
-          Reference = 'noref',
-          stringsAsFactors = F
-        )
-        safe_write_csv(ref, file.path(dirs$meta_dir, 'reference_noref.csv'))
       }
 
 

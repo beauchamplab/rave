@@ -257,8 +257,12 @@ as.array.LazyH5 <- function(obj, ...){
 #' dat[,1:3]
 #' }
 #' @export
-load_h5 <- function(file, name, read_only = T){
-  LazyH5$new(file_path = file, data_name = name, read_only = read_only)
+load_h5 <- function(file, name, read_only = T, ram = F){
+  re = LazyH5$new(file_path = file, data_name = name, read_only = read_only)
+  if(ram){
+    re = re[]
+  }
+  re
 }
 
 
@@ -286,7 +290,7 @@ load_h5 <- function(file, name, read_only = T){
 #' @import rhdf5
 #' @import stringr
 #' @export
-save_h5 <- function(x, file, name, chunk, level = 7,replace = FALSE, new_file = FALSE, ctype = NULL){
+save_h5 <- function(x, file, name, chunk, level = 7,replace = FALSE, new_file = FALSE, ctype = NULL, ...){
 
   # Create file if needed
   if(new_file){
@@ -362,7 +366,7 @@ save_h5 <- function(x, file, name, chunk, level = 7,replace = FALSE, new_file = 
     }
     H5close()
     h5createDataset(file, dataset = name, dims = dim,
-                    storage.mode = ctype, chunk = chunk, level = level)
+                    storage.mode = ctype, chunk = chunk, level = level, ...)
     logger('[HDF5] ', file, ' -> ', name, ' (Dataset) created.')
   }
 

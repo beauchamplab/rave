@@ -4,8 +4,8 @@
 rave_prepare <- function(
   subject, electrodes,
   epoch , time_range,
-  data_types = c('spectrum', 'voltage'),
-  reference = 'noref', attach = 'r',
+  data_types = c('power'),
+  reference = 'default', attach = 'r',
   data_env = rave::getDefaultDataRepository()
 ){
   if(missing(subject)){
@@ -21,17 +21,20 @@ rave_prepare <- function(
   logger('Epoch name: ', epoch)
   logger('From: ', -(time_range[1]), ' sec - to: ', time_range[2], ' sec.')
 
-  repo = ECoGRepository$new(subject = subject, autoload = F)
+  repo = ECoGRepository$new(subject = subject, autoload = F, reference = reference)
   repo$load_electrodes(electrodes = electrodes)
 
   # Set epoch information
-  repo$epochs$set('epoch_name', epoch)
-  repo$epochs$set('epoch_params', time_range)
-
-  tmp = c('spectrum', 'voltage'); tmp = tmp[tmp %in% data_types]
-  assertthat::assert_that(is.character(reference), msg = 'Must provide reference. Default is "noref"')
-  repo$load_reference(ref_name = reference)
-  repo$calc_reference(original = F, data_type = tmp)
+  tmp = c('power', 'phase', 'volt'); tmp = tmp[tmp %in% data_types]
+  repo$epoch(
+    epoch_name = epoch,
+    pre = time_range[1],
+    post = time_range[2],
+    electrodes = electrodes,
+    data_type = tmp,
+    referenced = T,
+    func = NULL
+  )
 
 
   # Register to data_env
@@ -57,7 +60,7 @@ rave_prepare <- function(
   )
   data_env$.module_data = new.env(parent = baseenv())
   # Load other data
-  other_data_types = data_types[!data_types %in% c('spectrum', 'voltage')]
+  other_data_types = data_types[!data_types %in% c('power', 'volt')]
   if(length(other_data_types)){
     module_data_dir = subject$dirs$module_data_dir
     lapply(other_data_types, function(path){

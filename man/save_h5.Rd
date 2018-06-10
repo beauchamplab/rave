@@ -5,7 +5,7 @@
 \title{Save objects to H5 file without trivial checkings}
 \usage{
 save_h5(x, file, name, chunk, level = 7, replace = FALSE,
-  new_file = FALSE, ctype = NULL)
+  new_file = FALSE, ctype = NULL, ...)
 }
 \description{
 Save objects to H5 file without trivial checkings

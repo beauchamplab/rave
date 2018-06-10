@@ -113,11 +113,6 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
       epochs$Duration %?<-% NA
       epochs$Duration = as.numeric(epochs$Duration)
 
-      trial_path = file.path(meta_dir, 'trials.csv')
-      if(file.exists(trial_path)){
-        trials = read.csv(trial_path, stringsAsFactors = F)
-        epochs = merge(epochs, trials, by = 'Trial', all.x = T, sort = F, suffixes = c('', '_y'))
-      }
       epochs$Condition %?<-% 'NoCondition'
       epochs$Condition[is.na(epochs$Condition)] = 'NoCondition'
       epochs$Condition = as.character(epochs$Condition)
