@@ -261,10 +261,13 @@ save_ref_table = function(tbl, is_new = FALSE){
     table = tbl,
     new = is_new
   )
-  cache(key = list(
+  old = cache(key = list(
     ref_name_alt = ref_name_alt,
     subject = subject$id
   ), val, replace = T)
+  if(nrow(old$table) != nrow(tbl)){
+    stop("Refernce table doesn't match")
+  }
   local_data$ref_tbl = tbl
   invisible()
 }
@@ -284,7 +287,7 @@ import_external = function(){
     is_new = T
   }else{
     tbl = data.frame(
-      Electrode = subject$valid_electrodes,
+      Electrode = subject$preprocess_info('channels'),
       Group = '',
       Reference = 'noref',
       Type = 'No Reference',
@@ -583,7 +586,7 @@ if(FALSE){
   ns = shiny::NS('mid')
 
   # Post
-  execenv = m$private$exec_env$nBjmfUpDRJdQrKzEX87y
+  execenv = m$private$exec_env$v4UJzmxkI0eja7TVuCSs
   execenv$private$inputs
   ref_group = execenv$param_env$ref_group
 

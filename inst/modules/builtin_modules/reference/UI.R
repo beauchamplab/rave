@@ -14,7 +14,7 @@ rave_inputs(
   # Group inspection
   selectInput('cur_group', 'Group Number', choices = 1:20, selected = NULL),
   customizedUI('cur_group_ui'),
-  actionButton('cur_group_save', 'Save',width = '100%'),
+  actionButton('cur_group_save', 'Preview & Export',width = '100%'),
 
 
   # generator
