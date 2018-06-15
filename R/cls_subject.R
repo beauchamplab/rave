@@ -20,7 +20,7 @@ Subject <- R6::R6Class(
     finalize = function(){
       rm(list = ls(private$loaded), envir = private$loaded)
     },
-    initialize = function(project_name, subject_code){
+    initialize = function(project_name, subject_code, reference = NULL){
       subject_id = sprintf('%s/%s', project_name, subject_code)
       self$project_name = project_name
       self$subject_code = subject_code
@@ -36,8 +36,14 @@ Subject <- R6::R6Class(
       #
       # self$meta[['electrode']] = read.csv(file.path(meta_dir, 'electrodes.csv'), stringsAsFactors = F)
       # self$meta[['frequency']] = read.csv(file.path(meta_dir, 'frequencies.csv'), stringsAsFactors = F)
-
-      self$meta[['electrode']] = load_meta('electrodes', project_name = project_name, subject_code = subject_code)
+      es = load_meta('electrodes', project_name = project_name, subject_code = subject_code)
+      if(is.character(reference)){
+        ref = load_meta('references', project_name = project_name, subject_code = subject_code, meta_name = reference)
+        if(is.data.frame(ref)){
+          es = merge(es, ref, by = 'Electrode')
+        }
+      }
+      self$meta[['electrode']] = es
       self$meta[['frequency']] = load_meta('frequencies', project_name = project_name, subject_code = subject_code)
 
       self$meta[['time_points']] = load_meta('time_points', project_name = project_name, subject_code = subject_code)
@@ -60,6 +66,10 @@ Subject <- R6::R6Class(
       }
       res %?<-% default
       return(res)
+    },
+    filter_all_electrodes = function(electrodes){
+      electrodes = electrodes[electrodes %in% private$subjectinfo$channels]
+      electrodes
     },
     filter_valid_electrodes = function(electrodes){
       electrodes[electrodes %in% self$valid_electrodes]
@@ -93,7 +103,13 @@ Subject <- R6::R6Class(
       self$meta[['sample_rate']]
     },
     valid_electrodes = function(){
-      private$subjectinfo$channels
+      tbl = self$meta[['electrode']]
+      if(is.data.frame(tbl) && 'Reference' %in% names(tbl)){
+        re = tbl$Electrode[tbl$Reference != '']
+      }else{
+        re = private$subjectinfo$channels
+      }
+      re
     },
     id = function(){
       self$subject_id

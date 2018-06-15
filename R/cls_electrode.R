@@ -204,17 +204,31 @@ Electrode <- R6::R6Class(
           }
         }else{
           # this is reference signal, only load raw_*
-          if(electrode == 'noref'){
-            # this is a special reference where power, volt, phase = 0
-            self$raw_power[[b]] = 0
-            self$raw_phase[[b]] = 0
-            self$raw_volt[[b]] = 0
-          }else{
-            file = file.path(cache_dir, 'reference', sprintf("%s.h5", electrode))
+          file = file.path(cache_dir, 'reference', sprintf("%s.h5", electrode))
+          if(file.exists(file)){
             coef = load_h5(file, name = '/wavelet/coef/' %&% b, ram = T)
             self$raw_power[[b]] = (coef[,,1])^2
             self$raw_phase[[b]] = (coef[,,2])
             self$raw_volt[[b]] = load_h5(file, name = '/voltage/' %&% b, ram = T)
+          }else{
+            # File not exist, usually this happens to norefs or bipolar refs, therefore, extract first one
+            es = str_extract_all(electrode, '[0-9,\\-]+')
+            es = unlist(es)
+            es = rave:::parse_selections(es)
+            es = subject$filter_all_electrodes(es)
+            if(length(es)){
+              # Bipolar ref
+              fname = sprintf("%d.h5", es[1])
+              self$raw_power[[b]] = load_h5(file.path(cache_dir, 'power', fname), '/raw/power/' %&% b)[]
+              self$raw_phase[[b]] = load_h5(file.path(cache_dir, 'phase', fname), '/raw/phase/' %&% b)[]
+              self$raw_volt[[b]] = load_h5(file.path(cache_dir, 'voltage', fname), '/raw/voltage/' %&% b)[]
+            }else{
+              # Noref or bad electrodes
+              # this is a special reference where power, volt, phase = 0
+              self$raw_power[[b]] = 0
+              self$raw_phase[[b]] = 0
+              self$raw_volt[[b]] = 0
+            }
           }
         }
       }

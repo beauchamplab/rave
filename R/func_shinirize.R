@@ -42,7 +42,6 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         .rave_future = NULL
       )
 
-
       observeEvent(local_data$force_render, {
         if(global_reactives$has_data){
           logger('Force Render Results')

@@ -113,53 +113,17 @@ get_fake_updated_message <- function(..., .args = list(), .func = NULL){
 
 
 #' @export
-updateCompoundInput <- function(session, inputId, initialize, value = NULL, which = 1:100, ...){
-  values = initialize
-  excl = NULL
-  if(length(value)){
-    for(ii in 1:length(value)){
-      excl = c(excl, ii)
-      val = value[[ii]]
-      values_cp = values
-      for(nm in names(val)){
-        tmp = values_cp[[nm]]
-        if(is.null(tmp)){
-          values_cp[[nm]] = list(value = val[[nm]])
-        }else{
-          tmp_l = val[nm]
-          if(sum(c('choices', 'selected') %in% names(tmp)) > 0){
-            names(tmp_l) = 'selected'
-          }else{
-            names(tmp_l) = 'value'
-          }
-          values_cp[[nm]] = c(
-            values_cp[[nm]],
-            tmp_l
-          )
-        }
-      }
-
-      lapply(values_cp, function(v){
-        v = get_fake_updated_message(.args = v)
-        return(v)
-      }) -> values_cp
-
-      message = force(dropNulls(list(value = values_cp, which = ii)))
-      session$sendInputMessage(inputId, message)
-    }
+updateCompoundInput <- function(session, inputId, to, ...){
+  val = isolate(session$input[[inputId]])
+  if(is.null(val)){
+    return()
   }
 
-  which = which[!which %in% excl]
-  if(length(which)){
-    lapply(values, function(v){
-      v = get_fake_updated_message(.args = v)
-      return(v)
-    }) -> values_cp
-    message = force(dropNulls(list(value = values_cp, which = which)))
-    session$sendInputMessage(inputId, message)
-  }
+  which = max(min(attr(val, 'maxcomp'), to), 1)
+
+  message = list(which = which)
+  session$sendInputMessage(inputId, message)
   return(invisible())
-
 }
 
 .ui_update_repo <- new.env()

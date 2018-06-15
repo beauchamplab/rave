@@ -1,4 +1,11 @@
-comp_parser = function(){
+#' @export
+customizedUI <- function(inputId, width = 12L, ...){
+  shiny::uiOutput(inputId, ...)
+}
+
+
+
+comp_parser <- function(){
   parsers = new.env()
   parsers[['.default_parser']] = function(expr, env = environment()){
     fun = eval(expr[[1]], envir = env)
@@ -84,6 +91,7 @@ comp_parser = function(){
       inputId = inputId,
       outputId = outputId,
       args = args,
+      initial_value = args[['value']],
       width = width,
       observers = observers,
       updates = updates
@@ -167,6 +175,8 @@ comp_parser = function(){
       re = parsers[['.default_parser']](expr, env)
       inputId = re$inputId
 
+      re$initial_value = re$args[['selected']]
+
       re$updates = function(session, ..., .args = list()){
         args = c(list(...), .args)
         if(length(args) == 0){
@@ -210,10 +220,72 @@ comp_parser = function(){
         })))
       }
       return(re)
+    },
+    'verbatimTextOutput' = function(expr, env = environment()){
+      re = parsers[['.default_parser']](expr, env)
+      outputId = re$outputId
+
+      re$observers = function(input, output, session, local_data, exec_env){
+        output[[outputId]] = do.call(shiny::renderPrint, args = list(quote({
+          local_data$show_results
+          if (isolate(local_data$has_data)) {
+            func = get(outputId, envir = exec_env$param_env,
+                       inherits = T)
+            if (is.function(func)) {
+              func()
+            }
+          }
+        })))
+      }
+      return(re)
     }
+
   )
 
   parsers[['rave']] = list(
+    'customizedUI' = function(expr, env = environment()){
+      # expr : customizedUI('id')
+      expr = match.call(customizedUI, expr)
+      inputId = expr[['inputId']]
+      width = eval(expr[['width']])
+      if(!is.null(width)){
+        expr[['width']] = NULL
+      }else{
+        width = 12L
+      }
+      args = as.list(expr)[-1];
+
+      expr[['inputId']] = as.call(list(quote(ns), inputId))
+
+      expr[[1]] = quote(shiny::uiOutput)
+      observers = function(input, output, session, local_data, exec_env){
+        output[[inputId]] <- shiny::renderUI({
+          if(local_data$has_data){
+            func = exec_env$static_env[[inputId]]
+            tryCatch({
+              if(is.function(func)){
+                func()
+              }
+            }, error = function(e){
+              lapply(capture.output(traceback(e)), function(x){
+                logger(x, level = 'ERROR')
+              })
+            })
+          }
+        })
+      }
+
+      list(
+        expr = expr,
+        inputId = inputId,
+        outputId = inputId,
+        args = args,
+        initial_value = NULL,
+        width = width,
+        observers = observers,
+        updates = do_nothing
+      )
+    },
     'compoundInput' = function(expr, env = environment()){
       expr = match.call(rave::compoundInput, expr)
       inputId = expr[['inputId']]
@@ -243,16 +315,6 @@ comp_parser = function(){
       observers = function(input, output, session, local_data, exec_env){
 
         observe({
-          # lapply(seq_len(max_ncomp), function(ii){
-          #   sub_ids = paste0(inputId, '_', sub_names, '_', ii)
-          #   lapply(sub_ids, function(i){
-          #     input[[i]]
-          #   }) ->
-          #     re
-          #   names(re) = sub_names
-          # }) ->
-          #   val
-
           val = input[[inputId]]
           if(isolate(local_data$has_data)){
 
@@ -291,7 +353,10 @@ comp_parser = function(){
         inputId = inputId,
         args = args,
         observers = observers,
-        updates = updates
+        updates = updates,
+        initial_value = list(sapply(sub_comps, function(co) {
+          co$initial_value
+        }, simplify = F, USE.NAMES = T))
       )
     }
   )

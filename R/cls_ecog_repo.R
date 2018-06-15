@@ -59,15 +59,12 @@ ECoGRepository <- R6::R6Class(
         assertthat::assert_that('character' %in% class(subject),
                                 msg = 'Param <subject> needs to be either subject ID or a Subject instance')
         subject = str_split_fixed(subject, '\\\\|/', 2)
-        self$subject = Subject$new(project_name = subject[1], subject_code = subject[2])
+        self$subject = Subject$new(project_name = subject[1], subject_code = subject[2], reference = reference)
       }
-
-      # Set up reference
-      self$load_reference(reference)
 
       # load electrodes
       if(autoload){
-        self$load_electrodes()
+        self$load_electrodes(reference = reference)
       }
       invisible()
     },
@@ -79,12 +76,17 @@ ECoGRepository <- R6::R6Class(
       names(re) = name
       return(re)
     },
-    load_electrodes = function(electrodes){
+    load_electrodes = function(electrodes, reference = 'default'){
       if(missing(electrodes)){
         electrodes = self$subject$valid_electrodes
       }else{
-        electrodes = electrodes[electrodes %in% self$subject$valid_electrodes]
+        electrodes = self$subject$filter_valid_electrodes(electrodes)
       }
+
+
+      # Set up reference
+      self$load_reference(reference, electrodes = electrodes)
+
       electrodes = electrodes[!paste(electrodes) %in% self$raw$keys()]
 
       ref_table = self$reference$get('ref_table')
@@ -107,7 +109,7 @@ ECoGRepository <- R6::R6Class(
       if(is.null(electrodes)){
         electrodes = self$subject$valid_electrodes
       }else{
-        electrodes = electrodes[electrodes %in% self$subject$valid_electrodes]
+        electrodes = self$subject$filter_valid_electrodes(electrodes)
       }
       electrodes = electrodes[paste(electrodes) %in% self$raw$keys()]
       assertthat::assert_that(length(electrodes) > 0, msg = 'No electrode loaded.')
@@ -144,7 +146,7 @@ ECoGRepository <- R6::R6Class(
         }
         return(elc)
       }, .call_back = function(i){
-        progress$inc(sprintf('Electrode - %d', electrodes[i]))
+        progress$inc(sprintf('Preparing electrode - %d', electrodes[i]))
       }) ->
         results
 
@@ -218,7 +220,13 @@ ECoGRepository <- R6::R6Class(
       }
 
     },
-    load_reference = function(ref_name){
+    load_reference = function(ref_name, electrodes = NULL){
+
+      if(!length(electrodes)){
+        electrodes = self$subject$valid_electrodes
+      }else{
+        electrodes = self$subject$filter_valid_electrodes(electrodes)
+      }
 
       # Set reference table
       ref_table = load_meta(
@@ -228,6 +236,9 @@ ECoGRepository <- R6::R6Class(
         meta_name = ref_name
       )
       self$reference$set('ref_table', ref_table)
+
+      # load partial references, also avoid invalid electrodes
+      ref_table = ref_table[ref_table$Electrode %in% electrodes, ]
 
       # Trick: use lazy assign to allocate reference, this is hack to R6 but avoiding evaluations
       ref_env = self$reference$private$env

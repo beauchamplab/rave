@@ -395,6 +395,11 @@ ExecEnvir <- R6::R6Class(
 
       self$wrapper_env$library = self$wrapper_env$require
 
+      self$wrapper_env$ns = function(id){
+        self$ns(id)
+      }
+
+
       lockEnvironment(self$wrapper_env)
 
     },
@@ -519,6 +524,7 @@ ExecEnvir <- R6::R6Class(
       }
       private$module_env = module_env
       self$ns = shiny::NS(module_env$module_id)
+
     },
     rave_inputs = function(..., .input_panels = list(), .tabsets = list(), .env = NULL){
       .tabsets = .input_panels
@@ -975,42 +981,22 @@ rave_ignore <- function(...){
 
 #' @export
 rave_inputs <- function(..., .input_panels = list(), .env = globalenv()){
-  dots = lazyeval::lazy_dots(...)
-  lapply(dots, function(comp){
-    expr = comp$expr
-    ui_func = expr[[1]]
-    func_name = str_replace(ui_func, '^[\\w]+::', '')
-    func_env = environment(eval(ui_func))
-    env_name = environmentName(func_env)
-    func = get(func_name, envir = func_env)
-    info = ui_register_function(sprintf('%s::%s', env_name, func_name))
-    arglist = as.list(expr)[-1]
-    func_args = formals(func)
-    func_args[names(func_args) %in% names(arglist)] <- NULL
-    func_args_names = names(func_args)
-    nm = names(arglist)
-    unnamed = length(nm[nm == ''])
-    if(unnamed > 0){
-      names(arglist)[nm == ''] = func_args_names[1:min(length(func_args_names), unnamed)]
-    }
+  quos = rlang::quos(...)
+  parser = rave:::comp_parser()
+  lapply(quos, function(quo){
+    comp = parser$parse_quo(quo)
+    value = comp$initial_value
+    inputId = comp$inputId
+    .env[[inputId]] = value
 
-    val_name = info$value
-
-    inputId = arglist[['inputId']]
-    value = arglist[[val_name]]
-    try({
-      value = eval(value)
-    })
-    if(!is.null(inputId) && inputId != ''){
-      assign(inputId, value, envir = .env)
-    }
-    return(list(inputId = inputId, value = value, val_name = val_name))
+    return(list(inputId = inputId, value = value))
   }) ->
-    init_val
-
-  nms = unlist(lapply(init_val, function(x){x$inputId}))
-  names(init_val) = nms
-  assign('.tmp_init', init_val, envir = .env)
+    re
+  nms = lapply(re, function(x){x$inputId})
+  vals = lapply(re, function(x){x$value})
+  names(vals) = nms
+  .env[['.tmp_init']] = vals
+  invisible(vals)
 }
 
 #' @export
@@ -1081,6 +1067,7 @@ async_var <- function(x, default = NULL){
 export_report <- function(expr, inputId){
 
 }
+
 
 
 
