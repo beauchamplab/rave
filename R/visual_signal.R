@@ -60,6 +60,9 @@ diagnose_signal <- function(
     grid::grid.newpage()
     lay <- rbind(c(1,1,1), c(2,3,4))
     graphics::layout(mat = lay)
+    # mai = par('mai');
+    # on.exit({par(mai = mai)}, add = T)
+    # par(mai = c(1.1, 0.8 ,0.4, 0.25))
   }
 
   # First plot: plot sc directly with col[1]
@@ -67,11 +70,11 @@ diagnose_signal <- function(
     plot(start_time + (seq_along(sc) / sratec), sc, xlab = 'Time (seconds)', ylab = 'Voltage',
          main = main, lwd = lwd,
          type = 'l', ylim = c(-ylim-1, ylim+1), yaxt="n", col = col[1],
-         cex.axis = cex, cex.lab = cex, cex.main = cex, cex.sub = cex, ...)
+         cex.axis = cex * 0.7, cex.lab = cex *0.8, cex.main = cex, cex.sub = cex, ...)
     abline(h = c(-1,1) * boundary, col = 'red')
     ticks<-c(-ylim, -boundary,0,boundary, ylim)
     axis(2,at=ticks,labels=round(ticks), las = 1,
-         cex.axis = cex, cex.lab = cex, cex.main = cex, cex.sub = cex)
+         cex.axis = cex*0.7, cex.lab = cex *0.8, cex.main = cex, cex.sub = cex)
   }
 
   # plot 2, 3 too slow, need to be faster - pwelch periodogram
@@ -82,7 +85,7 @@ diagnose_signal <- function(
              log = 'y', xlim = xlim, spec_func = rave:::spectrum.pgram, max_freq = max_freq)
       pwelch(s1, fs = srate, window = window, noverlap = noverlap, cex = cex, ylim = flim,
              plot = 2, col = col[1], log = 'y', xlim = xlim, spec_func = spectrum.pgram, max_freq = max_freq)
-      legend('topright', sprintf('%s %s', c('Before', 'After'), name), col = rev(col), lty = 1, cex = cex * 0.8)
+      legend('topright', sprintf('%s %s', c('Before', 'After'), name), col = rev(col), lty = 1, cex = cex * 0.7)
     }else{
       pwelch(s1, fs = srate, window = window,
              noverlap = noverlap, plot = 1, col = col[1], cex = cex, ylim = flim,
@@ -112,7 +115,7 @@ diagnose_signal <- function(
     # Plot 4:
     hist(s1, nclass = nclass,
          xlab = 'Signal Voltage Histogram', main = 'Histogram ' %&% name,
-         cex.axis = cex, cex.lab = cex, cex.main = cex, cex.sub = cex)
+         cex.axis = cex * 0.7, cex.lab = cex*0.8, cex.main = cex, cex.sub = cex)
   }
 
   return(list(
@@ -241,7 +244,7 @@ pwelch <- function (
     }else{
       plot(freq, spec, type = 'l', col = col, xlab = xlab, ylab = ylab,
            xlim = xlim, ylim = ylim, main = main, las = 1,
-           cex.axis = cex, cex.lab = cex, cex.main = cex, cex.sub = cex)
+           cex.axis = cex * 0.7, cex.lab = cex * 0.8, cex.main = cex, cex.sub = cex)
     }
   }
   return(invisible(res))
@@ -332,9 +335,10 @@ plot_signals <- function(
 
   if(new_plot){
     matplot(time_shift + Time, t(r), type='l', col = col, lty=1, lwd = lwd,
-            frame.plot = FALSE, yaxt = 'n', xlab = 'Time(s)', ylab = ylab,
+            frame.plot = FALSE, yaxt = 'n', xlab = 'Time(s)', ylab = '',
             cex.main = cex, cex.axis = cex * 0.7, cex.lab = cex * 0.8, ...)
     axis(2, at = y0, labels = channel_names, pos = start_time + time_shift, las=1, cex.axis = cex * 0.7)
+    title(ylab = ylab, line=1, cex.lab=cex * 0.8)
   }else{
     matpoints(time_shift + Time, t(r), type='l', col = col, lty=1, lwd = lwd)
   }

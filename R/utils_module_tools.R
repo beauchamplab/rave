@@ -72,6 +72,45 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
       return(repo[[nm]])
     }
 
+    get_voltage2 = function(){
+
+      if(is.null(data_env$.private[['volt_unblocked']])){
+        blocks = data_env$subject$preprocess_info('blocks')
+        dirs = data_env$subject$dirs
+        electrodes = data_env$subject$electrodes$Electrode
+
+        print(sys.on.exit())
+
+        progress = progress('Prepare preprocess voltage', max = length(electrodes) + 1)
+
+        lapply_async(electrodes, function(e){
+          sapply(blocks, function(b){
+            f = file.path(dirs$channel_dir, 'voltage', sprintf('%d.h5', e))
+            load_h5(f, '/raw/voltage/' %&% b)[]
+          }, simplify = F, USE.NAMES = T)
+        }, .call_back = function(i){
+          progress$inc(sprintf('Loading voltage data - %d', electrodes[i]))
+        }) ->re
+
+        progress$inc('Finalizing...')
+
+        data_env$.private[['volt_unblocked']] = new.env()
+        r = sapply(blocks, function(b) {
+            l = list()
+            l[electrodes] = lapply(re, function(comp) {
+              comp[[b]]
+            })
+          }, simplify = F, USE.NAMES = T)
+
+        list2env(r, envir = data_env$.private[['volt_unblocked']])
+        progress$close()
+        rm(list = ls(), envir = environment())
+      }
+
+
+      data_env$.private[['volt_unblocked']]
+    }
+
     clean = function(items = c('raw_volt', 'raw_phase', 'raw_power')){
       for(i in items){
         data_env$.private$repo[[i]] = NULL

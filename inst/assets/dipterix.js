@@ -23,6 +23,32 @@ $(document).ready(function(){
 	  // 1) Trigger the resize event (so images are responsive and resize)
 	  $(window).trigger("resize");
 	});
+
+
+	$(document).on("click", ".rave-elastic-btn", function() {
+	  // find its parent div and add class "rave-elastic"
+	  var el = $(this),
+	  // get data-target
+	      target_selector = el.attr('data-target'),
+	      cls_name = "rave-elastic-active",
+	      pa;
+
+	  if(target_selector !== undefined){
+	    pa = el.closest(target_selector);
+	  }else{
+      pa = el.parent();
+	  }
+
+	  pa.addClass('rave-elastic');
+
+	  if(pa.hasClass(cls_name)){
+	    pa.removeClass(cls_name);
+	    el.html('<i class="fa fa-expand" aria-hidden="true"></i>');
+	  }else{
+	    pa.addClass(cls_name);
+	    el.html('<i class="fa fa-compress" aria-hidden="true"></i>');
+	  }
+	});
 });
 
 

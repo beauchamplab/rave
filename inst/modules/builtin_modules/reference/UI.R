@@ -18,8 +18,7 @@ rave_inputs(
 
 
   # generator
-  textInput('ref_electrodes', label = 'Electrodes', value = '', placeholder = 'e.g. 1-3,5'),
-  actionButton('ref_calc', 'Generate Reference', width = '100%'),
+  customizedUI('ref_generator_ui'),
 
   # Groups
 
@@ -36,8 +35,7 @@ rave_inputs(
       'cur_group_save'
     ),
     '[-] Reference Generator' = list(
-      'ref_electrodes',
-      'ref_calc'
+      'ref_generator_ui'
     )
   )
 )
@@ -56,23 +54,31 @@ rave_updates(
     env$ref_dir = file.path(env$dirs$channel_dir, 'reference')
     env$last_import = 'new..'
     choices = unique(c('new..', env$existing_refs))
+
     list(
       choices = choices,
       selected = 'new..'
-    )
-  }),
-  ref_electrodes = list(
-    value = ''
-  ),
-  ref_calc = local({
-    env$ref_calc = 0
-    list(
-      label = 'Generate Reference'
     )
   })
 )
 
 
 rave_outputs(
-  'Console' = verbatimTextOutput('console')
+  'Voltage Plot' = customizedUI('parallel_plot_ui'),
+  'Electrode Statistics' = customizedUI('electrode_plot_ui'),
+  .output_tabsets = list(
+    width = 12L,
+    # Tabset name
+    'Visualization' = list(
+      # Tab name 1
+      'Group Inspection' = list(
+        'parallel_plot_ui'
+      ),
+
+      # Tab name 2
+      'Electrode Inspection' = list(
+        'electrode_plot_ui'
+      )
+    )
+  )
 )

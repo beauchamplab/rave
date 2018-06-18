@@ -14,9 +14,13 @@ library(magrittr)
 
 # Shiny session used to update inputs in advanced ways
 session = getDefaultReactiveDomain()
+input = getDefaultReactiveInput()
+output = getDefaultReactiveOutput()
+
 local_data = shiny::reactiveValues(
   group_number = NULL,
-  refresh = NULL
+  refresh = NULL,
+  do_parallel_plot = NULL
 )
 
 ref_group %?<-% list()
@@ -27,9 +31,10 @@ env$last_import = 'new..'
 
 # Load UIs
 source('UI.R')
+source('plot.R')
 # source('./inst/modules/builtin_modules/reference/UI.R')
 
-observeEvent(session$input[[ns('bipolar_modal')]], {
+observeEvent(input[['bipolar_modal']], {
   # get group info
   group_info = current_group()
   if(!length(group_info)){
@@ -58,9 +63,9 @@ observeEvent(session$input[[ns('bipolar_modal')]], {
       DT::DTOutput(ns('bipolar_table'))
     )
   )
-}, event.env = ..runtime_env, handler.env = ..runtime_env)
+})
 
-observeEvent(session$input[[ns('bp_confirm')]], {
+observeEvent(input[[('bp_confirm')]], {
   tbl = env$bipolar_tbl
   ref_tbl = get_ref_table()
   if(nrow(tbl)){
@@ -73,16 +78,16 @@ observeEvent(session$input[[ns('bp_confirm')]], {
     save_ref_table(ref_tbl)
   }
   removeModal(session = session)
-}, event.env = ..runtime_env, handler.env = ..runtime_env)
+})
 
-bipolar_proxy = DT::dataTableProxy(ns('bipolar_table'), session = session)
+bipolar_proxy = DT::dataTableProxy('bipolar_table', session = session)
 
-session$output[[ns('bipolar_table')]] = DT::renderDT({
+output[[('bipolar_table')]] = DT::renderDT({
   env$bipolar_tbl
 }, env = ..runtime_env, editable = TRUE)
 
-observeEvent(session$input[[ns('bipolar_table_cell_edit')]], {
-  info = session$input[[ns('bipolar_table_cell_edit')]]
+observeEvent(input[[('bipolar_table_cell_edit')]], {
+  info = input[[('bipolar_table_cell_edit')]]
   i = info$row
   j = info$col
   v = info$value
@@ -107,10 +112,11 @@ observeEvent(session$input[[ns('bipolar_table_cell_edit')]], {
     env$bipolar_tbl[i, j] = v
     DT::replaceData(bipolar_proxy, env$bipolar_tbl, resetPaging = FALSE)  # important
   }
-}, event.env = ..runtime_env, handler.env = ..runtime_env)
+})
 
-session$output[[ns('elec_loc')]] = renderPlot({
+output[[('elec_loc')]] = renderPlot({
   local_data$refresh
+  logger('elec_loc')
   group_info = current_group()
   group_info %?<-% list(electrodes = NULL)
   x = subject$electrodes$Coord_x
@@ -119,14 +125,14 @@ session$output[[ns('elec_loc')]] = renderPlot({
   plot(x,y, col = sel + 1, pch = 16)
 }, env = ..runtime_env)
 
-observeEvent(session$input[[ns('cur_save')]], {
-  ref_to = session$input[[ns('ref_to')]]
+observeEvent(input[[('cur_save')]], {
+  ref_to = input[[('ref_to')]]
   group_info = current_group()
   if(is.null(group_info)){
     return()
   }
   electrodes = group_info$electrodes
-  bad_electrodes = rave:::parse_selections(session$input[[ns('ref_bad')]])
+  bad_electrodes = rave:::parse_selections(input[[('ref_bad')]])
 
   ref_table = get_ref_table()
   sel = ref_table$Electrode %in% electrodes
@@ -142,11 +148,13 @@ observeEvent(session$input[[ns('cur_save')]], {
       group_info$rg_name, ' (', group_info$rg_electrodes, ') is now set to be referenced to [', ref_to, ']'
     ), type = 'message')
   }
-}, priority = -1L, handler.env = ..runtime_env, event.env = ..runtime_env, domain = session)
+}, priority = -1L)
 
 # Customized UI
 cur_group_ui = function(){
   refresh = local_data$refresh
+  logger('cur_group_ui')
+  new_ref = local_data$has_new_ref
 
   if(length(cur_group) && cur_group <= length(ref_group)){
     group_number = as.integer(cur_group)
@@ -220,8 +228,8 @@ cur_group_ui = function(){
   )
 }
 
-session$output[[ns('bad_electrodes_out')]] = renderText({
-  bad_electrodes = rave:::parse_selections(session$input[[ns('ref_bad')]])
+output[[('bad_electrodes_out')]] = renderText({
+  bad_electrodes = rave:::parse_selections(input[[('ref_bad')]])
   bad_electrodes = subject$filter_all_electrodes(bad_electrodes)
   if(length(bad_electrodes)){
     bad_electrodes = rave:::deparse_selections(bad_electrodes)
@@ -244,6 +252,10 @@ current_group = function(){
     return()
   }
   group_info$electrodes = electrodes
+
+
+
+
   return(group_info)
 }
 get_ref_table = function(){
@@ -295,6 +307,7 @@ import_external = function(){
     )
     is_new = F
   }
+  local_data$ref_tbl = tbl
   list(
     table = tbl,
     new = is_new
@@ -333,18 +346,18 @@ load_reference = function(){
         # Group i
         row = unique_refs[i, ]
         # name
-        updateTextInput(session, ns(sprintf('%s_%s_%d', 'ref_group', 'rg_name', i)), value = row$Group)
+        updateTextInput(session, (sprintf('%s_%s_%d', 'ref_group', 'rg_name', i)), value = row$Group)
         # ref Method
-        updateSelectInput(session, ns(sprintf('%s_%s_%d', 'ref_group', 'rg_type', i)), selected = row$Type)
+        updateSelectInput(session, (sprintf('%s_%s_%d', 'ref_group', 'rg_type', i)), selected = row$Type)
         # Electrodes
         merged = merge(ref_tbl, row, by = c('Group', 'Type'), suffixes = c('', 'y'))
         updateTextInput(
           session,
-          ns(sprintf('%s_%s_%d', 'ref_group', 'rg_electrodes', i)),
+          (sprintf('%s_%s_%d', 'ref_group', 'rg_electrodes', i)),
           value = rave:::deparse_selections(merged$Electrode)
         )
 
-        updateCompoundInput(session, ns('ref_group'), to = nn)
+        updateCompoundInput(session, ('ref_group'), to = nn)
       })
 
     }
@@ -395,8 +408,8 @@ gen_reference = function(electrodes){
   mat[seq_along(electrodes)] = electrodes
 
   # Summing up
-  env$volt = list()
-  env$coef = list()
+  env$gen_volt = list()
+  env$gen_coef = list()
 
 
   progress = rave::progress(sprintf('Generating reference [%s]', fname), max = length(electrodes)+1)
@@ -432,12 +445,12 @@ gen_reference = function(electrodes){
     gc()
     lapply(re, function(dat){
       for(b in blocks){
-        if(length(env$volt[[b]])){
-          env$volt[[b]] = env$volt[[b]] + dat[[b]][['volt']]
-          env$coef[[b]] = env$coef[[b]] + dat[[b]][['coef']]
+        if(length(env$gen_volt[[b]])){
+          env$gen_volt[[b]] = env$gen_volt[[b]] + dat[[b]][['volt']]
+          env$gen_coef[[b]] = env$gen_coef[[b]] + dat[[b]][['coef']]
         }else{
-          env$volt[[b]] = dat[[b]][['volt']]
-          env$coef[[b]] = dat[[b]][['coef']]
+          env$gen_volt[[b]] = dat[[b]][['volt']]
+          env$gen_coef[[b]] = dat[[b]][['coef']]
         }
       }
       NULL
@@ -448,45 +461,17 @@ gen_reference = function(electrodes){
 
   # Average
   for(b in blocks){
-    volt = env$volt[[b]] / nes
-    coef = env$coef[[b]] / nes
+    volt = env$gen_volt[[b]] / nes
+    coef = env$gen_coef[[b]] / nes
     coef = array(c(Mod(coef), Arg(coef)), dim = c(dim(coef), 2)) # Freq x Time x 2
     save_h5(volt, file = f, name = sprintf('/voltage/%s', b), chunk = 1024, replace = T)
     save_h5(coef, file = f, name = sprintf('/wavelet/coef/%s', b), chunk = c(dim(coef)[1], 128, 2), replace = T)
   }
 
   showNotification(p('Reference [', fname, '] exported.'), type = 'message')
+  local_data$has_new_ref = Sys.time()
 }
-check_reference = function(){
-  ref_es = rave:::parse_selections(ref_electrodes)
-  ref_es = module_tools$get_valid_electrodes(ref_es)
 
-  if(length(ref_es)){
-    ref_calc_label = 'Generate [ref_' %&% rave:::deparse_selections(ref_es) %&% "]"
-  }else{
-    ref_calc_label = 'Generate Reference'
-  }
-
-  ref_calc %?<-% 0
-  if(env$ref_calc < ref_calc){
-    env$ref_calc = ref_calc
-    if(length(ref_es) == 0){
-      showNotification(p('No electrode(s) selected'), type = 'error')
-    }else{
-      # check conditions if we need to create reference
-      old_files = list.files(env$ref_dir, pattern = 'ref_.*\\.h5')
-      old_files = str_split_fixed(old_files, '(ref_)|(\\.h5)', 3)[,2]
-      new_file = rave:::deparse_selections(ref_es)
-      if(new_file %in% old_files){
-        showNotification(p('Reference [ref_', new_file, '.h5] already exists.'), type = 'message')
-      }else{
-        gen_reference(ref_es)
-      }
-    }
-  }
-
-  updateActionButton(session, inputId = ns('ref_calc'), label = ref_calc_label)
-}
 get_refs = function(){
   dirs = module_tools$get_subject_dirs()
   refs = list.files(file.path(dirs$channel_dir, 'reference'), pattern = '^ref_.*\\.h5$')
@@ -500,26 +485,26 @@ get_refs = function(){
 }
 
 
-session$output[[ns('export_table')]] <- DT::renderDataTable({
+output[[('export_table')]] <- DT::renderDT({
   if(is.data.frame(local_data$ref_tbl)){
     local_data$ref_tbl
   }
-})
+}, env = ..runtime_env)
 
 observe({
-  val = session$input[[ns('ref_export_name')]]
+  val = input[[('ref_export_name')]]
   val %?<-% 'default'
   val = str_replace_all(val, '\\W', '')
   val = str_to_lower(val)
   val = 'Reference Table Name: (reference_' %&% val %&% '.csv)'
-  updateTextInput(session, ns('ref_export_name'), label = val)
-}, env = ..runtime_env, label = 'OBSERVER (ref_export_name)')
+  updateTextInput(session, 'ref_export_name', label = val)
+})
 
-observeEvent(session$input[[ns('do_export')]], {
+observeEvent(input[[('do_export')]], {
   # get ref_table
   ref_tbl = get_ref_table()
   dirs = subject$dirs
-  fname = session$input[[ns('ref_export_name')]]
+  fname = input[[('ref_export_name')]]
   fname %?<-% 'default'
   fname = str_replace_all(fname, '\\W', '')
   fname = str_to_lower(fname)
@@ -527,16 +512,24 @@ observeEvent(session$input[[ns('do_export')]], {
   fpath = file.path(dirs$meta_dir, fname)
   rave:::safe_write_csv(data = ref_tbl, file = fpath, row.names = F)
   showNotification(p('Reference table [', fname, '] exported.'), type = 'message')
-}, event.env = ..runtime_env, handler.env = ..runtime_env)
+})
+
+check_load_volt = function(){
+  env$volt = module_tools$get_voltage2()
+}
 
 # Rave Execute
 rave_execute({
+  # Part 0: load voltage data on the fly
+  check_load_volt()
+
   # Part 1: Load or new reference scheme
   load_reference()
 
 
   # Part 2: show a specific group
   local_data$refresh = Sys.time()
+
 
   # Check if table needs to be saved
   cur_group_save %?<-% 0
@@ -560,7 +553,7 @@ rave_execute({
             actionButton(ns('do_export'), 'Export')
           )
         ),
-        DT::dataTableOutput(ns('export_table'))
+        DT::DTOutput(ns('export_table'))
       )
     )
   }
@@ -568,16 +561,53 @@ rave_execute({
 
 
 
-  # Part 3: prepare electrodes to be calcumated (mean)
-  check_reference()
 })
 
 
 # Output - visualizations
 console = function(){
-  print(reactiveValuesToList(session$input))
+  print(reactiveValuesToList(input))
 }
 
+ref_generator_ui = function(){
+  tagList(
+    textInput(ns('ref_electrodes'), label = 'Electrodes', value = '', placeholder = 'e.g. 1-3,5'),
+    actionButton(ns('ref_calc'), 'Generate Reference', width = '100%')
+  )
+}
+
+observe({
+  ref_calc_label = 'Generate Reference'
+  ref_es = rave:::parse_selections(input$ref_electrodes)
+  if(length(ref_es)){
+    ref_es = module_tools$get_valid_electrodes(ref_es)
+
+    if(length(ref_es)){
+      ref_calc_label = 'Generate [ref_' %&% rave:::deparse_selections(ref_es) %&% "]"
+    }
+  }
+
+  updateActionButton(session, inputId = 'ref_calc', label = ref_calc_label)
+})
+
+observeEvent(input$ref_calc, {
+  ref_es = rave:::parse_selections(isolate(input$ref_electrodes))
+  ref_es = module_tools$get_valid_electrodes(ref_es)
+
+  if(length(ref_es) == 0){
+    showNotification(p('No electrode(s) selected'), type = 'error')
+  }else{
+    # check conditions if we need to create reference
+    old_files = list.files(env$ref_dir, pattern = 'ref_.*\\.h5')
+    old_files = str_split_fixed(old_files, '(ref_)|(\\.h5)', 3)[,2]
+    new_file = rave:::deparse_selections(ref_es)
+    if(new_file %in% old_files){
+      showNotification(p('Reference [ref_', new_file, '.h5] already exists.'), type = 'message')
+    }else{
+      gen_reference(ref_es)
+    }
+  }
+})
 
 
 # Debug
@@ -586,7 +616,7 @@ if(FALSE){
   ns = shiny::NS('mid')
 
   # Post
-  execenv = m$private$exec_env$v4UJzmxkI0eja7TVuCSs
+  self = execenv = m$private$exec_env$`7QWM8VBKNtmi2Zdac03A`
   execenv$private$inputs
   ref_group = execenv$param_env$ref_group
 

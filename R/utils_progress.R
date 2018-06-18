@@ -26,6 +26,7 @@ progress <- function(
       session = session,
       max = max
     )
+    # progress$set(value = 0, message = title)
     inc = function(message){
       progress$inc(amount = 1, detail = message, message = title)
     }

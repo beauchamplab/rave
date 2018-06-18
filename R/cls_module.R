@@ -399,6 +399,87 @@ ExecEnvir <- R6::R6Class(
         self$ns(id)
       }
 
+      # advanced usage
+      self$wrapper_env$getDefaultReactiveDomain = function(){
+        id = private$module_env$module_id
+        if(is.null(id) || !is(private$session, 'ShinySession')){
+          stop('No module detected, please run "self$register_module(...)" to register module.')
+        }
+        private$session$makeScope(id)
+      }
+
+      self$wrapper_env$getDefaultReactiveInput = function(){
+        session = self$wrapper_env$getDefaultReactiveDomain()
+        input = NULL
+        if(!is.null(session) && is(session, 'session_proxy')){
+          input = session$input
+        }else{
+          stop('No module detected, please run "self$register_module(...)" to register module.')
+        }
+        return(input)
+      }
+
+      self$wrapper_env$getDefaultReactiveOutput = function(){
+        session = self$wrapper_env$getDefaultReactiveDomain()
+        output = NULL
+        if(!is.null(session) && is(session, 'session_proxy')){
+          output = session$output
+        }else{
+          stop('No module detected, please run "self$register_module(...)" to register module.')
+        }
+        return(output)
+      }
+
+      # Override observe, observeEvent
+      self$wrapper_env$observe = function(x, env = NULL, quoted = FALSE, priority = 0, domain = NULL, ...){
+        if(!quoted){
+          x = substitute(x)
+        }
+        if(!is.environment(env)){
+          env = self$runtime_env
+        }
+        if(is.null(domain)){
+          domain = self$wrapper_env$getDefaultReactiveDomain()
+        }
+        shiny::observe(
+          x = x,
+          env = env,
+          quoted = T,
+          priority = priority - 1L,
+          domain = domain,
+          ...
+        )
+      }
+
+      self$wrapper_env$observeEvent = function(
+        eventExpr, handlerExpr, event.env = NULL,
+        event.quoted = FALSE, handler.env = NULL, handler.quoted = FALSE,
+        priority = 0, domain = NULL, ...
+      ){
+        if(!event.quoted){
+          eventExpr = substitute(eventExpr)
+        }
+        if(!is.environment(event.env)){
+          event.env = self$runtime_env
+        }
+
+        if(!handler.quoted){
+          handlerExpr = substitute(handlerExpr)
+        }
+        if(!is.environment(handler.env)){
+          handler.env = self$runtime_env
+        }
+        if(is.null(domain)){
+          domain = self$wrapper_env$getDefaultReactiveDomain()
+        }
+
+        shiny::observeEvent(
+          eventExpr = eventExpr, handlerExpr = handlerExpr, event.env = event.env,
+          event.quoted = T, handler.env = handler.env, handler.quoted = T,
+          priority = priority - 1L, domain = domain, ...
+        )
+      }
+
 
       lockEnvironment(self$wrapper_env)
 
@@ -672,6 +753,14 @@ ExecEnvir <- R6::R6Class(
             rlang::quo({
               shiny::tabPanel(
                 title = !!title,
+                div(
+                  class = 'rave-abs-right',
+                  div(
+                    class = 'btn btn-box-tool force-recalculate',
+                    shiny::icon('refresh')
+                  ),
+                  div_elastic(css_selector = '.tab-pane')
+                ),
                 do.call(shiny::fluidRow, args = !!{lapply(comp[[1]], function(output_id){
                   comp = x[[output_id]]
                   width = comp[['width']]; width %?<-% 12L
@@ -710,7 +799,7 @@ ExecEnvir <- R6::R6Class(
         comp = x[[nm]]
         width = comp$width; width %?<-% 12L
         rlang::quo({
-          shinydashboard::box(
+          expand_box(
             width = width,
             title = comp$label,
             collapsible = T,
@@ -1000,7 +1089,7 @@ rave_inputs <- function(..., .input_panels = list(), .env = globalenv()){
 }
 
 #' @export
-rave_outputs <- function(...){
+rave_outputs <- function(..., .output_tabsets = list()){
   # do nothing
   return(invisible())
 }
