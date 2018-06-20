@@ -220,7 +220,7 @@ shiny_data_selector <- function(moduleId){
         local_data$epochs = subject_info$adapter$epochs()
 
         dirs = subject_info$adapter$get_from_subject('dirs')
-        local_data$data_types = c('spectrum', 'voltage', list.dirs(dirs$module_data_dir, full.names = F, recursive = F))
+        local_data$data_types = c('power', 'phase', 'voltage', list.dirs(dirs$module_data_dir, full.names = F, recursive = F))
         local_data$references = subject_info$adapter$references()
       }
     })
@@ -308,6 +308,14 @@ shiny_data_selector <- function(moduleId){
       epoch_range = c(input$pre, input$post)
       reference = input$reference
       subject_id = project_name %&% '/' %&% subject_code
+
+      tmp_subject = Subject$new(project_name = project_name, subject_code = subject_code, reference = reference)
+      electrodes = tmp_subject$filter_valid_electrodes(electrodes)
+      if(length(electrodes) == 0){
+        showNotification('You must select at least one electrode', type = 'error')
+        return(NULL)
+      }
+
       rave_prepare(
         subject = subject_id,
         electrodes = electrodes,
@@ -326,8 +334,8 @@ shiny_data_selector <- function(moduleId){
       last_entry('epoch_range', epoch_range, save = T, group = group)
       last_entry('data_types', data_types, save = T, group = group)
 
-      global_reactives$has_data = TRUE
       global_reactives$force_refresh_all = Sys.time()
+      global_reactives$has_data = Sys.time()
       removeModal()
     })
 
@@ -345,8 +353,8 @@ shiny_data_selector <- function(moduleId){
       inherit = F
     )
     if(!(FALSE %in% data_loaded)){
-      global_reactives$has_data = TRUE
       global_reactives$force_refresh_all = Sys.time()
+      global_reactives$has_data = Sys.time()
     }
 
 

@@ -823,10 +823,10 @@ ExecEnvir <- R6::R6Class(
       }
     },
     rave_updates = function(..., .env = NULL){
-      quos = rlang::quos(..., .named = T)
+      quos = rlang::quos(...)
       private$update = quos
 
-      update = function(input, session = NULL, init = FALSE){
+      self$input_update = function(input, session = NULL, init = FALSE){
         start = Sys.time()
         input = dropNulls(input)
         if(!init){
@@ -836,26 +836,47 @@ ExecEnvir <- R6::R6Class(
         if(is.null(session)){
           session = getDefaultReactiveDomain() #private$session
         }
-        for(varname in names(private$update)){
-          tryCatch({
-            comp = private$inputs$comp[[varname]]
-            new_args = rlang::eval_tidy(private$update[[varname]], data = input, env = self$param_env)
-
-            comp$updates(session = session, .args = new_args)
-          },error = function(e){
-            logger('Error in updating input ', varname, level = 'ERROR')
-            s = capture.output(traceback(e))
-            lapply(s, logger, level = 'ERROR')
+        var_names = names(private$update)
+        if('' %in% var_names){
+          lapply(private$update[var_names == ''], function(quo){
+            tryCatch({
+              eval_dirty(
+                quo, env = self$param_env
+              )
+            },error = function(e){
+              logger('Error in updating input (initialization)', level = 'ERROR')
+              s = capture.output(traceback(e))
+              lapply(s, logger, level = 'ERROR')
+            })
+            NULL
           })
-
         }
+
+        if(length(var_names[var_names != ''])){
+          lapply(var_names[var_names != ''], function(varname){
+            tryCatch({
+              comp = private$inputs$comp[[varname]]
+              new_args = eval_dirty(
+                private$update[[varname]], data = input, env = self$param_env
+              )
+
+              comp$updates(session = session, .args = new_args)
+            },error = function(e){
+              logger('Error in updating input ', varname, level = 'ERROR')
+              s = capture.output(traceback(e))
+              lapply(s, logger, level = 'ERROR')
+            })
+
+          })
+        }
+
+
 
         end = Sys.time()
         delta = time_diff(start, end)
         logger(sprintf('Updating inputs takes %.2f %s', delta$delta, delta$units))
 
       }
-      self$input_update = update
       invisible()
     },
     rave_execute = function(..., .env = NULL){

@@ -62,9 +62,16 @@ rave_inputs(
   checkboxInput('collapse_using_median', 'Collapse using median'),
 
   .input_panels = list(
-    '[-][#ccff99] Global Variables' = list('GROUPS', 'FREQUENCY', 'BASELINE', 'TIME_RANGE'),
+    '[-][#ccff99] Trial Sets' = list(
+      'GROUPS_CMPD'
+    ),
+    'Global Variables' = list(
+      # 'GROUPS',
+      'FREQUENCY',
+      'BASELINE',
+      'TIME_RANGE'
+    ),
     'Local Variables' = list(
-      'GROUPS_CMPD',
       c('electrode', 'max_zlim'),
       c('log_scale', 'sort_trials_by_type', 'collapse_using_median')
     )
@@ -79,15 +86,15 @@ rave_outputs(
   'Windowed Comparison (Collapse over time and freq)' = plotOutput('windowed_comparison_plot', width = 4),
   'Activity over time per trial (Collapse over frequency)' = plotOutput('by_trial_heat_map', width = 12),
   'Side Message' = textOutput('msg_out', width = 4),
-  'Async Message' = textOutput('async_out', width = 4),
-  .output_tabsets = list(
-    'Tab1' = list(
-      'Heatmap' = c('heat_map_plot'),
-      'tabpanel2' = c('windowed_comparison_plot', 'over_time_plot')
-    ),
-    'Tab2' = list('Msg' = 'msg_out'),
-    width = c(12)
-  )
+  'Async Message' = textOutput('async_out', width = 4)
+  # .output_tabsets = list(
+  #   'Tab1' = list(
+  #     'Heatmap' = c('heat_map_plot'),
+  #     'tabpanel2' = c('windowed_comparison_plot', 'over_time_plot')
+  #   ),
+  #   'Tab2' = list('Msg' = 'msg_out'),
+  #   width = c(12)
+  # )
 )
 
 
@@ -100,8 +107,12 @@ rave_updates(
   },
   GROUPS_CMPD = {
     trials = unique(preload_info$condition)
+    value = cache_input('GROUPS_CMPD', list(
+      list(GROUP = list(trials)),
+      list(GROUP = list(trials[1]))
+    ))
     list(initialize = list(GROUP = list(choices = trials)),
-         value = cache_input('GROUPS_CMPD', list(list(GROUP = trials[1]))))
+         value = value, to = length(value))
   },
 
   BASELINE = {

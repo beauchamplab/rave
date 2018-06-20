@@ -418,6 +418,15 @@ comp_parser <- function(){
         args = c(list(...), .args)
         base_args = args$initialize
 
+        to = args[['to']]
+
+        if(!is.null(to)){
+          args[['to']] = NULL
+          if(to > 0){
+            updateCompoundInput(session, inputId, to = to)
+          }
+        }
+
         lapply(seq_len(max_ncomp), function(ii){
           base_args
           if(ii <= length(args$value)){

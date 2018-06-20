@@ -49,7 +49,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
         numericInput(ns('freq_step'), 'Frequency Step Size (Hz): ', value = freq_step, step = 1L, min = 1L),
         sliderInput(ns('wave_num'), 'Number of Wavelet Cycles: ', value = wave_num, step = 1L, min = 1L, max = 40L, round = T),
         numericInput(ns('target_srate'), 'Target Sample Rate', value = target_srate, min = 10L, max = srate, step = 1L),
-        numericInput(ns('ncores'), 'Parallel, Number of Cores:', value = future::availableCores(), min = 1L, max = max_core, step = 1L),
+        numericInput(ns('ncores'), 'Parallel, Number of Cores:', value = min(4L, max_core), min = 1L, max = max_core, step = 1L),
         actionButton(ns('do_wavelet'), 'Run Wavelet')
       )
     })

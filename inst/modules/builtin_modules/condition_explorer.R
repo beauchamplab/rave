@@ -53,11 +53,11 @@ async_out = function(){
 
 condition_explorer_main = function(){
   # TODO: change adhoc vars definition - Zhengjia
-  power = module_tools$get_power(force = T)
-  electrodes = power$dimnames$Electrode
-  trials = power$dimnames$Trial
-  frequencies = power$dimnames$Frequency
-  time_points = power$dimnames$Time
+  .power = module_tools$get_power(force = T)
+  electrodes = .power$dimnames$Electrode
+  trials = .power$dimnames$Trial
+  frequencies = .power$dimnames$Frequency
+  time_points = .power$dimnames$Time
 
 
   electrode = as.integer(electrode)
@@ -67,8 +67,9 @@ condition_explorer_main = function(){
   has_trials <- vapply(GROUPS_CMPD, function(g) length(g$GROUP) > 0, TRUE)
   any_trials = any(has_trials)
 
+  # bl_power = module_tools$baseline(BASELINE[1],  BASELINE[2], electrode)
   bl_power <- cache(
-    key = list(subject$subject_id, electrode, BASELINE, any_trials),
+    key = list(subject$subject_id, electrode, BASELINE, any_trials, preload_info$reference_name),
     val = module_tools$baseline(BASELINE[1],  BASELINE[2], electrode)
   )
 

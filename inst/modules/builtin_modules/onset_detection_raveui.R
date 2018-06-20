@@ -49,10 +49,40 @@ rave_outputs(
 
 # how are the variables updated
 rave_updates(
+    {
+        # Edited by Dipterix: trick to assign variables to runtime_env
+        power = module_tools$get_power(force = T)
+        electrodes = preload_info$electrodes
+        time_points = preload_info$time_points
+        frequencies = preload_info$frequencies
+        trials = preload_info$condition
+        baseline = module_tools$baseline
+    },
     electrode = list(
         choices = electrodes,
         selected = electrodes[1]
-    ),
+      ),
+    BASELINE = local({
+      list(
+        min = min(time_points),
+        max = max(time_points),
+        value = cache_input('BASELINE', c(min(time_points), 0))
+      )
+    }),
+    FREQUENCY = local({
+      list(
+        min = min(round(frequencies)),
+        max = max(round(frequencies)),
+        value = cache_input('FREQUENCY', range(round(frequencies)))
+      )
+    }),
+    TIME_RANGE = local({
+      list(
+        min = min(time_points),
+        max = max(time_points),
+        value = cache_input('TIME_RANGE', c(0, max(time_points)))
+      )
+    }),
     GROUPS = list(
         initialize = list(
             GROUP = list(
@@ -64,27 +94,7 @@ rave_updates(
                 GROUP = trials[1]
             )
         ))
-    ),
+    )
 
-    BASELINE = local({
-        list(
-            min = min(time_points),
-            max = max(time_points),
-            value = cache_input('BASELINE', c(min(time_points), 0))
-        )
-    }),
-    FREQUENCY = local({
-        list(
-            min = min(round(frequencies)),
-            max = max(round(frequencies)),
-            value = cache_input('FREQUENCY', range(round(frequencies)))
-        )
-    }),
-    TIME_RANGE = local({
-        list(
-            min = min(time_points),
-            max = max(time_points),
-            value = cache_input('TIME_RANGE', c(0, max(time_points)))
-        )
-    })
+
 )

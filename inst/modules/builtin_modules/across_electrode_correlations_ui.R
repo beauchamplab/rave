@@ -53,12 +53,12 @@ rave_inputs(
 # define the output options
 rave_outputs(
     'Side Message' = textOutput('msg_out', width = 4),
-    
+
     'Collapsed Time series' = plotOutput('aec_plot_timeseries', width = 12),
     'Connection between areas' = plotOutput('aec_plot_connections', width = 12),
     'Single Trial Estimates' = plotOutput('aec_plot_trial_means', width = 12),
 
-    
+
     # 'Activity over time (Collapse over freq and trial)' = plotOutput('over_time_plot', width = 8),
     # 'Windowed Comparison (Collapse over time and freq)' = plotOutput('windowed_comparison_plot', width = 4),
     # 'Activity over time per trial (Collapse over frequency)' = plotOutput('by_trial_heat_map', width = 12),
@@ -68,6 +68,15 @@ rave_outputs(
 
 # how are the variables updated
 rave_updates(
+  {
+    # Edited by Dipterix: trick to assign variables to runtime_env
+    power = module_tools$get_power(force = T)
+    electrodes = preload_info$electrodes
+    time_points = preload_info$time_points
+    frequencies = preload_info$frequencies
+    trials = preload_info$condition
+    baseline = module_tools$baseline
+  },
     GROUPS = list(
         initialize = list(
             GROUP = list(

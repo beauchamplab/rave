@@ -10,14 +10,16 @@ rave_prepare(subject = 'KC_congruency1_sliding',
              epoch = 'KCa',
              time_range = c(1, 2))
 
-# rave_prepare(subject = 'Subject_RAVE_Demo',
-#              electrodes = 6,
-#              epoch = 'Default',
-#              time_range = c(1, 2))
 
 source('rave_calculators.R')
 source('onset_detection_raveui.R')
 source('condition_explorer_plots.R')
+
+if(F){
+  m = ModuleEnvir$new(module_id = 'id', 'Test', script_path = './inst/modules/builtin_modules/onset_detection.R'); init_app(m)
+}
+
+
 
 rave_ignore({
     rave_options(data_dir = '/Volumes/data/rave_data/data/',
@@ -210,7 +212,7 @@ rave_execute({
 
     # I think the cache persists across modules, so may as well take advantage
     bl_power <- cache(
-        key = list(subject$subject_id, electrode, BASELINE, any_trials),
+        key = list(subject$subject_id, electrode, BASELINE, any_trials, preload_info$reference_name),
         val = baseline(BASELINE[1],  BASELINE[2], electrode)
     )
 

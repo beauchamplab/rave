@@ -23,6 +23,10 @@ source('condition_explorer_plots.R')
 source('across_electrode_correlations_ui.R')
 source('draw_shapes.R')
 
+if(F){
+  m = ModuleEnvir$new(module_id = 'mid', 'ref', script_path = './inst/modules/builtin_modules/across_electrode_correlations.R'); init_app(m)
+}
+
 # setup the groups and some data for us
 rave_ignore({
 
@@ -73,7 +77,7 @@ rave_ignore({
 
 aec_plot_connections <- function() {
     validate(need(exists('res') && dim(res[[1]]$time_series)[2L] > 1, "Not enough for calculation"))
-    
+
     fnames <- names(res[[1]][[1]])
     to_name <- names(res[[1]])[1]
     ntrials <- length(res)
@@ -82,13 +86,13 @@ aec_plot_connections <- function() {
     # or maybe we shouldn't allow that... too much to plot
 
     par(mfrow=c(1,ntrials), mar=rep(1,4))
-    
+
     # helper function to extract a specified connection value and it's p-value
     get_r <- function(val) {
-        res[[ii]][1] %>% 
+        res[[ii]][1] %>%
             sapply(function(ri) 'r=' %&% paste0(ri[[val]], collapse='\np='))
     }
-    
+
     for(ii in seq_len(ntrials)) {
         # we need to figure out which ones are significant and change lty/lwd
         ul <- get_r('conditional')
@@ -100,7 +104,7 @@ aec_plot_connections <- function() {
 
 aec_plot_timeseries <- function() {
     validate(need((exists('over_time_data') && any_trials), "Not enough for calculation"))
-    
+
     par(mfrow=c(1,length(over_time_data)))
     mapply(function(otd, nm) {
         # to use the builtin time series plot, we need to supply a list of lists
@@ -130,25 +134,25 @@ aec_plot_timeseries <- function() {
 
 aec_plot_trial_means <- function () {
     validate(need(exists('res') && dim(res[[1]]$time_series)[2L] > 1, "Not enough for calculation"))
-    
+
     # par(mfrow=c(length(res), 1), mar=rep(2.5,4))
     par(mfrow=c(length(res),1))
-    
+
     lapply(seq_along(res), function(ri) {
         ts <- res[[ri]]$time_series
-        
+
         #we need to make room for the legend in the top left
         yrange <- pretty(c(ts, 1.1*max(c(ts))))
-        
+
         plot.clean(1:nrow(ts), yrange)
         rave_main(names(res)[ri])
-        
+
         for(ii in seq_len(dim(ts)[2L])) {
             lines(ts[,ii], type='o', col=get_color(ii), pch=16)
         }
         rave_axis(1, at=pretty(1:nrow(ts)))
         rave_axis(2, at=pretty(c(ts)))
-        
+
         legend('topleft', legend=colnames(ts), inset=c(0,0), horiz=TRUE,
                bty='n', text.col=get_color(seq_len(ncol(ts))), cex=rave_cex.lab)
     })
@@ -161,12 +165,12 @@ collapse_electrodes <- function(els) {
     if(is.list(els) && length(els)>1) {
         # check the apprpriate state variable for the desired collapse technique
         collapse <- rowMeans
-    
+
         els <- collapse(do.call(cbind, els))
     } else {
         els <- unlist(els)
     }
-    
+
     return(scale(els))
 }
 
@@ -186,7 +190,7 @@ fix_names <- function(nms, prfx) {
 # with numeric values for 'connection' and 'p.value'
 #
 correlation_conn <- function(x,y,Z,method) {
-    
+
     uncond <- cor.test(y, x, method=method) %>% format_r
     if(length(Z)<1) {
         cond <- format_r(list("estimate"=NA, 'p.value'=NaN))
@@ -213,17 +217,17 @@ format_r <- function(cor_res, prfx='') {
 }
 
 rave_execute({
-    
+
     assertthat::assert_that(length(electrodes) > 2,msg = 'Need > 1 electrode loaded')
-    
+
     assertthat::assert_that(length(FROM_ELEC_GROUPS) > 0 & length(FROM_ELEC_GROUPS) > 0,
                             msg = 'Need to specify FROM and TO electrode(s)')
-    
+
     logger('Electrodes: ', paste0(electrodes, collapse=', '))
-    
+
     has_trials <- vapply(GROUPS, function(g) length(g$GROUP) > 0, TRUE)
     any_trials = has_data = any(has_trials)
-    
+
     #we only need to get the electrodes that are in one of the groups
     from <- FROM_ELEC_GROUPS %>% lapply('[[', 'GROUP')
     to <- TO_ELEC_GROUPS %>% lapply('[[', 'GROUP')
@@ -257,7 +261,7 @@ rave_execute({
             NULL
         }
     }) %>% set_names(gnames)
-    
+
     by_f_and_t <- lapply(GROUPS, function(group) {
         if(length(group$GROUP) > 0) {
             # get collapsed data for all the electrodes
@@ -271,19 +275,19 @@ rave_execute({
             list('data'=NULL, 'range'=NULL, 'has_trials'=FALSE, 'name'=group$GROUP_NAME)
         }
     }) %>% set_names(gnames)
-    
+
     elf_names <- FROM_ELEC_GROUPS %>% sapply('[[', 'GROUP_NAME') %>% fix_names(prfx='F_')
     elt_names <- TO_ELEC_GROUPS %>% sapply('[[', 'GROUP_NAME') %>% fix_names(prfx='T_')
 
     # now we need to combine the FROM / TO electrode groups
     mse_over_elec <- function(els) {
         if(length(els) == 1) return(els[[1]]$data)
-        
+
         emat <- do.call(rbind, lapply(els, function(e) e$data[,1]))
-        
+
         cbind(.colMeans(emat, nrow(emat), ncol(emat)), .fast_column_se(emat))
     }
-    
+
     otd <- by_f_and_t[[1]]
     over_time_data <- by_f_and_t %>% lapply(function(otd) {
         if(is.null(otd)) return (otd)
@@ -291,14 +295,14 @@ rave_execute({
         from <- FROM_ELEC_GROUPS %>% lapply(function(feg) {
             otd['e' %&% feg$GROUP] %>% mse_over_elec
         }) %>% set_names(elf_names)
-    
+
         to <- TO_ELEC_GROUPS %>% lapply(function(teg) {
             otd['e' %&% teg$GROUP] %>% mse_over_elec
         }) %>% set_names(elt_names)
-        
+
         append(to, from)
     })
-    
+
     # we need to collapse the groups if necessary,
     # here we know that we don't need that
     res <- lapply(power_by_ttype, function(pbtt) {
@@ -322,7 +326,7 @@ rave_execute({
         # we need to add the time-series data into the res list
         all_els <- append(el_to, el_f)
         all_els_mat <- do.call(cbind, all_els) %>% set_colnames(c(elt_names, elf_names))
-        
+
         if(identical(CONN, spearman_conn)) {
             # save the ranked times series
             all_els_mat %<>% apply(2, rank)

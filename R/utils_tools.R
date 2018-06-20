@@ -465,8 +465,8 @@ rave_preprocess_tools <- function(env = new.env(), ...){
 
       ### Prepare for the wavelet file. Since users may specify different sample rate, we need to remove files if they exists
       # 1. reference file
-      ref_file = file.path(dirs$channel_dir, 'reference', sprintf('ref_%s.h5', rave:::deparse_selections(electrodes)))
-      unlink(ref_file)
+      # ref_file = file.path(dirs$channel_dir, 'reference', sprintf('ref_%s.h5', rave:::deparse_selections(electrodes)))
+      # unlink(ref_file)
 
       # 2. raw channel files and power/phase files
       lapply(electrodes, function(e){
@@ -477,7 +477,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
       })
 
       # load signals
-      for(block in blocks){
+      lapply(blocks, function(block){
         progress2$reset(detail = 'Initializing...')
         progress1$inc('Block - ' %&% block)
         # v = utils$load_voltage(electrodes = electrodes, blocks = block, raw = F)[[1]]
@@ -580,34 +580,17 @@ rave_preprocess_tools <- function(env = new.env(), ...){
 
           # Clean up
           vars = ls(all.names = T)
-          vars = c(vars[vars != 's'], 'vars')
+          vars = c(vars, 'vars')
           rm(list = vars)
           gc()
           return(NULL)
 
         }, .ncores = ncores, .call_back = function(i){
           progress2$inc(message = 'Electrode - ' %&% electrodes[i])
-        }) ->
-          volts
-
-        # # Create reference
-        # progress2$inc(message = 'Calculating reference')
-        # file = ref_file
-        # ref = rowMeans(sapply(volts, I))
-        # save_h5(ref, file = file, name = sprintf('/voltage/%s', block), chunk = c(1024))
-        # re = wavelet(ref, freqs = frequencies, srate = srate, wave_num = wave_num)
-        #
-        # ind = floor(seq(1, ncol(re$phase), by = compress_rate))
-        # coef = re$coef[, ind, drop = F]
-        # phase = re$phase[, ind, drop = F]
-        # rm(re)
-        # coef = c(coef, phase)
-        # dim(coef) = c(dim(phase), 2)
-        # save_h5(coef, file = file, name = sprintf('/wavelet/coef/%s', block), chunk = c(length(frequencies), 128, 2))
-        # rm(list = c('file', 'coef', 'phase'))
+        })
 
         invisible()
-      }
+      })
 
       wavelet_log = env$subject$logger$get_or_save('wavelet_log', list(), save = F)
       wavelet_log[[length(wavelet_log) + 1]] = list(

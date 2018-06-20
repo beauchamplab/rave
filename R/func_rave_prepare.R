@@ -54,8 +54,9 @@ rave_prepare <- function(
   data_env$subject = subject
   data_env$preload_info = list(
     epoch_name = data_env$.private$meta$epoch_info$name,
+    reference_name = reference,
     time_points = seq(-time_range[1], time_range[2], by = 1/subject$sample_rate),
-    electrodes = electrodes,
+    electrodes = subject$filter_valid_electrodes(electrodes),
     frequencies = subject$frequencies$Frequency,
     condition = unique(data_env$.private$meta$epoch_data$Condition)
   )

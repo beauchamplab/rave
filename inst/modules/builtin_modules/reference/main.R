@@ -2,9 +2,23 @@
 
 
 # Init virtualenv for module dev
-rave_prepare(subject = 'Complete/YAB', electrodes = 13:20, epoch = 'YABa', time_range = c(1,2), data_types = NULL, reference = 'default')
+if(F){
 
+  m = ModuleEnvir$new(module_id = 'mid', 'ref', script_path = './inst/modules/builtin_modules/reference/main.R'); init_app(m)
 
+  profvis::profvis({
+    rave_prepare(subject = 'Large/YAB', electrodes = c(1:10, 13:20), epoch = 'YABa', time_range = c(1,2), data_types = 'power', attach = F, reference = 'test')
+  })
+  profvis::profvis({
+    rave_prepare(subject = 'Large/YAB', electrodes = c(1:10, 13:20), epoch = 'YABa', time_range = c(1,2), data_types = 'power', attach = F, reference = 'default')
+  })
+
+  rave_data = getDefaultDataRepository()
+  pryr::object_size(rave_data)
+
+}
+
+rave_prepare(subject = 'Complete/YAB', electrodes = 64:65, epoch = 'YABa', time_range = c(1,2), data_types = NULL)
 
 # load libraries
 library(shiny)
@@ -500,7 +514,7 @@ observe({
   updateTextInput(session, 'ref_export_name', label = val)
 })
 
-observeEvent(input[[('do_export')]], {
+export_ref_table = function(){
   # get ref_table
   ref_tbl = get_ref_table()
   dirs = subject$dirs
@@ -511,7 +525,139 @@ observeEvent(input[[('do_export')]], {
   fname = 'reference_' %&% fname %&% '.csv'
   fpath = file.path(dirs$meta_dir, fname)
   rave:::safe_write_csv(data = ref_tbl, file = fpath, row.names = F)
-  showNotification(p('Reference table [', fname, '] exported.'), type = 'message')
+  return(fname)
+}
+
+
+load_refchan = function(r, subject_channel_dir, blocks, ram = T){
+  es = str_extract(r, '[0-9,\\-]+')
+  es = rave:::parse_selections(es)
+
+  ref_file = file.path(subject_channel_dir, 'reference', sprintf('%s.h5', r))
+  if(!file.exists(ref_file)){
+    if(length(es) == 1){
+      volt = sapply(blocks, function(b){
+        load_h5(file.path(subject_channel_dir, 'voltage', sprintf('%d.h5', es)), '/raw/voltage/' %&% b, ram = ram)
+      }, simplify = F, USE.NAMES = T)
+
+      coef = sapply(blocks, function(b){
+        power = load_h5(file.path(subject_channel_dir, 'power', sprintf('%d.h5', es)), name = '/raw/power/' %&% b, ram = ram)
+        phase = load_h5(file.path(subject_channel_dir, 'phase', sprintf('%d.h5', es)), name = '/raw/phase/' %&% b, ram = ram)
+        list(
+          power = power,
+          phase = phase
+        )
+      }, simplify = F, USE.NAMES = T)
+
+    }else{
+      stop('Reference ', r, ' does not exist.')
+    }
+  }else{
+    volt = sapply(blocks, function(b){
+      load_h5(ref_file, '/voltage/' %&% b, ram = ram)
+    }, simplify = F, USE.NAMES = T)
+    coef = sapply(blocks, function(b){
+      load_h5(ref_file, '/wavelet/coef/' %&% b, ram = ram)
+    }, simplify = F, USE.NAMES = T)
+  }
+  return(list(volt = volt, coef = coef))
+}
+
+observeEvent(input$do_export_cache, {
+  fname = export_ref_table()
+  showNotification(p('Reference table [', fname, '] exported. Creating cache referenced data.'), type = 'message', id = ns('ref_export_cache_notification'))
+  # Start cache
+  ref_tbl = get_ref_table()
+  electrodes = ref_tbl$Electrode
+  blocks = subject$preprocess_info('blocks')
+  subject_channel_dir = subject$dirs$channel_dir
+
+  # Step 1 get all the references
+  ref = table(ref_tbl$Reference)
+  ref = ref[!names(ref) %in% c('', 'noref')]
+
+  progress = progress(title = 'Create cache for electrodes', max = length(electrodes) + length(ref))
+
+  if(length(ref)){
+    ram = as.list(ref > 1)
+    lapply_async(names(ram), function(r){
+      load_refchan(r = r, subject_channel_dir = subject_channel_dir, blocks = blocks, ram = ram[[r]])
+    }, .call_back = function(ii){
+      progress$inc(sprintf('Loading reference - [%s]', names(ram)[ii]))
+    }) ->
+      refs
+    names(refs) = names(ram)
+  }else{
+    refs = list()
+  }
+
+  ref_names = names(ref)
+
+
+  lapply_async(electrodes, function(e){
+    fname = sprintf('%d.h5', e)
+    r = ref_tbl$Reference[ref_tbl$Electrode == e]
+    if(is.blank(r)) { r = 'noref' }
+
+    volt_fname = file.path(subject_channel_dir, 'voltage', fname)
+    power_fname = file.path(subject_channel_dir, 'power', fname)
+    phase_fname = file.path(subject_channel_dir, 'phase', fname)
+    lapply(blocks, function(b){
+      # load electrode - raw
+      volt = load_h5(volt_fname, '/raw/voltage/' %&% b, ram = T)
+      # reference voltage
+      volt_ref = refs[[r]][['volt']][[b]][]
+      volt_ref %?<-% 0
+      volt = volt - volt_ref
+      save_h5(volt, volt_fname, name = '/ref/voltage/' %&% b, replace = T, chunk = 1024)
+
+      # load electrode - coef
+      power = load_h5(power_fname, '/raw/power/' %&% b, ram = T)
+      phase = load_h5(phase_fname, '/raw/phase/' %&% b, ram = T)
+      coef = sqrt(power) * exp(1i * phase)
+
+      # reference coef
+      coef_ref = refs[[r]][['coef']][[b]]
+      if(!is.null(coef_ref)){
+        if('power' %in% names(coef_ref)){
+          coef_ref = sqrt(coef_ref$power[]) * exp(1i * coef_ref$phase[])
+        }else{
+          coef_ref = coef_ref[]
+          coef_ref = coef_ref[,,1] * exp(1i * coef_ref[,,2])
+        }
+      }else{
+        coef_ref = 0
+      }
+      coef = coef - coef_ref
+
+      # save power and phase
+      power = Mod(coef)^2
+      phase = Arg(phase)
+      dim = dim(power); dim[2] = 128
+      save_h5(power, power_fname, name = '/ref/power/' %&% b, replace = T, chunk = dim)
+      save_h5(phase, phase_fname, name = '/ref/phase/' %&% b, replace = T, chunk = dim)
+      rm(list = ls(envir = environment())); gc()
+      invisible()
+    })
+
+    # save reference
+    save_h5(r, file = volt_fname, name = '/reference', replace = T, chunk = 1, size = 1000)
+    save_h5(r, file = power_fname, name = '/reference', replace = T, chunk = 1, size = 1000)
+    save_h5(r, file = phase_fname, name = '/reference', replace = T, chunk = 1, size = 1000)
+  }, .call_back = function(ii){
+    progress$inc(sprintf('Referencing electrode - %d', electrodes[[ii]]))
+  })
+
+  progress$close()
+  showNotification(p('Now data are cached according to [', fname, ']'), type = 'message', id = ns('ref_export_cache_notification'))
+
+  removeModal()
+})
+
+observeEvent(input[[('do_export')]], {
+  fname = export_ref_table()
+  showNotification(p('Reference table [', fname, '] exported.'), type = 'message', id = ns('ref_export_cache_notification'))
+  removeModal()
 })
 
 check_load_volt = function(){
@@ -550,7 +696,8 @@ rave_execute({
           column(
             width = 12L,
             modalButton('Cancel'),
-            actionButton(ns('do_export'), 'Export')
+            actionButton(ns('do_export'), 'Export'),
+            actionButton(ns('do_export_cache'), 'Export & Cache')
           )
         ),
         DT::DTOutput(ns('export_table'))
@@ -615,8 +762,9 @@ if(FALSE){
   m = ModuleEnvir$new(module_id = 'mid', 'ref', script_path = './inst/modules/builtin_modules/reference/main.R'); init_app(m)
   ns = shiny::NS('mid')
 
+  self = execenv = RAVEbeauchamplab:::..module_env$condition_explorer$private$exec_env$voa3gkLDZwEMBPmbClqi
   # Post
-  self = execenv = m$private$exec_env$`7QWM8VBKNtmi2Zdac03A`
+  self = execenv = m$private$exec_env$
   execenv$private$inputs
   ref_group = execenv$param_env$ref_group
 
