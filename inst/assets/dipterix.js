@@ -23,6 +23,32 @@ $(document).ready(function(){
 	  // 1) Trigger the resize event (so images are responsive and resize)
 	  $(window).trigger("resize");
 	});
+
+
+	$(document).on("click", ".rave-elastic-btn", function() {
+	  // find its parent div and add class "rave-elastic"
+	  var el = $(this),
+	  // get data-target
+	      target_selector = el.attr('data-target'),
+	      cls_name = "rave-elastic-active",
+	      pa;
+
+	  if(target_selector !== undefined){
+	    pa = el.closest(target_selector);
+	  }else{
+      pa = el.parent();
+	  }
+
+	  pa.addClass('rave-elastic');
+
+	  if(pa.hasClass(cls_name)){
+	    pa.removeClass(cls_name);
+	    el.html('<i class="fa fa-expand" aria-hidden="true"></i>');
+	  }else{
+	    pa.addClass(cls_name);
+	    el.html('<i class="fa fa-compress" aria-hidden="true"></i>');
+	  }
+	});
 });
 
 
@@ -36,11 +62,14 @@ Shiny.addCustomMessageHandler("alertmessage",
 /*
 * Author: Zhengjia Wang
 * Date: 2/19/2018
+* Last Updates: 6/14/2018
 * This js file defines a customized shiny input component - compoundInput
 * compoundInput takes in any shiny (native) inputs and can duplicate components
 * This gives great flexibility to controling the number of unit components displayed.
 *
 * Originally designed for RAVE (R for Analysis and Visualizations of ECoG Data)
+*
+* Updates: updateCompountInput now only updates the number of components shown
 */
 
 
@@ -246,58 +275,27 @@ var is_undefined = function(e){
 binding.receiveMessage = function(el, value) {
 
   var ui = $(el),
+      ii = 0,
       re = [],
       ncomp = parseInt(ui.attr('data-value')),
       maxcomp = parseInt(ui.attr('data-max')),
       inputId = ui.attr('id'),
       meta = JSON.parse(ui.find(".rave-ui-compound-meta ").text()),
-      which = $.makeArray(value.which),
-      updates = value.value;
+      which = parseInt(value.which);
 
-  if(is_undefined(updates) || is_undefined(which)){
+  if(isNaN(which)){
     return(null);
   }
 
-  for(var subId in updates){
-    var shiny_func = meta[subId],
-        subvalue = updates[subId];
-
-    if(!is_undefined(shiny_func)){
-      bd = bindings[shiny_func];
-      if(!is_undefined(bd)){
-        var bn = bd.binding_name,
-            shinybinds = Shiny.inputBindings.bindingNames[bn];
-        if(!is_undefined(shinybinds)){
-          for(var ind = 1; ind <= maxcomp; ind++){
-            var innerId = getInnerId(inputId, subId, ind),
-                subel = ui.find('#' +innerId);
-            if(which.indexOf(ind) >= 0){
-              if(subel.length == 1){
-                try{
-                  shinybinds.binding.receiveMessage(subel[0], subvalue);
-                }catch(error) {
-                  console.log(error);
-                }
-              }
-            }else{
-              /*
-              tmpvalue = $.extend(false, subvalue, {'value': null});
-              if(tmpvalue.hasOwnProperty('options')){
-                tmpvalue.options = tmpvalue.options.split(' selected>').join('>');
-              }
-              delete(tmpvalue.value);
-              */
-            }
-
-          }
-        }
-
-      }
+  for(ii = 0; ii < maxcomp; ii++){
+    if(ii < which){
+      ui.find('.rave-ui-compound-inner[data-value='+ (ii+1) +']').removeClass('hidden');
+    }else{
+      ui.find('.rave-ui-compound-inner[data-value='+ (ii+1) +']').addClass('hidden');
     }
-
-
-
   }
+  ui.attr({'data-value': which});
+  return(null);
 };
 
 binding.getState = function(el) {

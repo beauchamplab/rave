@@ -1,0 +1,100 @@
+
+
+# Definte the input variables
+rave_inputs(
+
+    # compound Input allows to grow the number of independent conditions
+    compoundInput(
+        inputId = 'GROUPS',
+        label = 'Group',
+        components = {
+            textInput('GROUP_NAME', 'Name', value = '', placeholder = 'Name')
+            selectInput('GROUP', ' ', choices = '', multiple = TRUE)
+        }, inital_ncomp = 1
+    ),
+
+    sliderInput('FREQUENCY', 'Frequencies', min = 1, max = 200, value = c(1,200), step = 1, round = TRUE),
+    sliderInput('BASELINE', 'Baseline Range', min = 0, max = 1, value = c(0,1), step = 0.01, round = -2),
+    sliderInput('TIME_RANGE', 'Analysis Range', min = 0, max = 1, value = c(0,1), step = 0.01, round = -2),
+
+    selectInput('electrode', 'Electrode', choices = '', multiple = F),
+
+    numericInput('max_zlim', 'Maximum Plot Value', value = 0, min = 0, step = 1),
+    checkboxInput('sort_trials_by_type', 'Sort Trials by Type'),
+
+    selectInput('od_method', 'Detection Method (currently ignored)', choices = c('Consecutive significance', 'Linear Trend'), multiple = F),
+
+    numericInput('od_alpha', 'Detection Alpha', value = 0.05, min = 0, max=1, step=0.01),
+    numericInput('od_window_size', 'Window Size (time points)', value = 5, min = 1, max=20, step=1),
+
+    checkboxInput('collapse_using_median', 'Collapse using median'),
+
+    .tabsets = list(
+        'Global Variables' = c(
+            'GROUPS', 'FREQUENCY', 'BASELINE', 'TIME_RANGE'
+        )
+    )
+)
+
+
+# define the output options
+rave_outputs(
+    'Activity over time per trial (Collapse over frequency)' = plotOutput('od_by_trial_heat_map', width = 12),
+    'Activity over time (Collapse over freq and trial)' = plotOutput('od_over_time_plot', width = 8),
+    'Mean Activity during FIRST onset window' = plotOutput('od_trial_scatter_plot', width = 4),
+    'Side Message' = textOutput('od_msg_out', width = 2)
+    # ,'Async Message' = textOutput('od_async_out', width = 2)
+)
+
+
+# how are the variables updated
+rave_updates(
+    {
+        # Edited by Dipterix: trick to assign variables to runtime_env
+        power = module_tools$get_power(force = T)
+        electrodes = preload_info$electrodes
+        time_points = preload_info$time_points
+        frequencies = preload_info$frequencies
+        trials = preload_info$condition
+        baseline = module_tools$baseline
+    },
+    electrode = list(
+        choices = electrodes,
+        selected = electrodes[1]
+      ),
+    BASELINE = local({
+      list(
+        min = min(time_points),
+        max = max(time_points),
+        value = cache_input('BASELINE', c(min(time_points), 0))
+      )
+    }),
+    FREQUENCY = local({
+      list(
+        min = min(round(frequencies)),
+        max = max(round(frequencies)),
+        value = cache_input('FREQUENCY', range(round(frequencies)))
+      )
+    }),
+    TIME_RANGE = local({
+      list(
+        min = min(time_points),
+        max = max(time_points),
+        value = cache_input('TIME_RANGE', c(0, max(time_points)))
+      )
+    }),
+    GROUPS = list(
+        initialize = list(
+            GROUP = list(
+                choices = unique(trials)
+            )
+        ),
+        value = cache_input('GROUPS', list(
+            list(
+                GROUP = trials[1]
+            )
+        ))
+    )
+
+
+)

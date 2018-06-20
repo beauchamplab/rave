@@ -1,222 +1,217 @@
-
-#' @import future
-#' @import stringr
-#' @import signal
-#' @import miniUI
+#' RAVE Preprocess Function
+#' @usage rave_pre_process(sidebar_width = 3L, launch.browser = T, host = '127.0.0.1', ...)
 #' @import shiny
-#' @import magrittr
+#' @import rhdf5
+#' @import stringr
+#' @importFrom magrittr %>%
+#' @importFrom assertthat assert_that
 #' @export
-pre_process <- function(steps = c('notch', 'car', 'wavelet'),
-                        vis = c('notch', 'car', 'wavelet'),
-                        save_plot = T,
-                        wave_num = 7, frequencies = seq(4, 200, by = 4), compress = 2, replace = F,
-                        ncores = future::availableCores() - 2, plan = future::multisession, ...){
-  settings = mini_subject_info()
+rave_preprocess <- function(
+  sidebar_width = 3,
+  launch.browser = T,
+  host = '127.0.0.1',
+  quiet = T,
+  test.mode = F,
+  modules,
+  ver = '3',
+  ...
+){
+  # Steps 0 Variables
+  default_project_name = ''
+  default_subject_code = ''
+  model_instances = NULL
 
-  dirs = get_dir(subject_code = settings$subject_code, project_name = settings$project_name)
+  future::plan(future::multiprocess, workers = rave::rave_options('max_worker'))
 
 
-  if('notch' %in% steps){
-    logger('Notch filter started', level = 'INFO')
-    bulk_notch(project_name = settings$project_name,
-               subject_code = settings$subject_code,
-               blocks = settings$blocks,
-               channels = settings$channels, srate = settings$srate,
-               replace = replace, save_plot = save_plot, new_cache = F)
-  }
+  modules = list(
+    list(
+      ID = 'OVERVIEW',
+      name = 'Overview',
+      checklevel = 0,
+      ..func = 'rave_pre_overview3'
+    ),
+    list(
+      ID = 'NOTCH',
+      name = 'Notch Filter',
+      checklevel = 1,
+      ..func = 'rave_pre_notch3'
+    ),
+    list(
+      ID = 'WAVELET',
+      name = 'Wavelet',
+      checklevel = 2,
+      ..func = 'rave_pre_wavelet3'
+    ),
+    list(
+      ID = 'EPOCH',
+      name = 'Trial Epoch',
+      checklevel = 1,
+      ..func = 'pre_epoch3'
+    )
+  )
 
-  if('notch' %in% vis){
-    logger('Raw signal plots', level = 'INFO')
-    signals = list()
-    for(block_num in settings$blocks){
-      signals[[block_num]] = h5read(file.path(dirs$preprocess_dir, 'all_notch.h5'), name = block_num)
+  # Step 2: initialize models
+
+  model_instances <- lapply(modules, function(x){
+    with(x, {
+      ..func %?<-% str_c('rave_pre_', str_to_lower(ID), ver)
+      instance = do.call(..func, list(
+        module_id = ID %&% '_M',
+        sidebar_width = sidebar_width
+      ), envir = loadNamespace('rave'))
+
+      list(
+        ID = ID,
+        name = name,
+        call = ..func,
+        UI = instance$body,
+        server = instance$server,
+        checklevel = checklevel
+      )
+    })
+  })
+
+
+  ui = rave:::dashboardPage(
+    control = div(),
+    header = shinydashboard::dashboardHeader(
+      title = 'RAVE Preprocess'
+    ),
+    sidebar = shinydashboard::dashboardSidebar(
+      tagList(shinydashboard::sidebarMenu(
+        id = 'sidebar',
+        lapply(model_instances, function(x){
+          shinydashboard::menuItem(
+            x$name,
+            tabName = x$ID
+          )
+        }))
+      )
+    ),
+    body = shinydashboard::dashboardBody(
+      shinyjs::useShinyjs(),
+      singleton(
+        tags$head(tags$script(str_c(
+          'Shiny.addCustomMessageHandler("alertmessage",',
+          'function(message) {',
+          'alert(message);',
+          '});'
+        )))
+      ),
+
+      do.call(shinydashboard::tabItems, lapply(model_instances, function(x){
+        shinydashboard::tabItem(x$ID, x$UI)
+      }))
+    )
+  )
+
+
+
+
+  server = function(input, output, session){
+    user_data <- reactiveValues(
+      checklevel = 0,
+      reset = NULL
+    )
+
+    env <- environment()
+    utils <- rave_preprocess_tools(env = env)
+
+    # Reset modules
+    utils$reset = function(){
+      user_data$reset = Sys.time()
     }
-    mini_parallel_plots(signals, sample_rate = settings$srate,
-                        channel_names = settings$channels, project_name = settings$project_name,
-                        subject_code = settings$subject_code)
 
-    logger('Channel inspection', level = 'INFO')
+    utils$last_inputs = function(name){
+      last_project_name = rave_hist$get_or_save('.rave_pre_project_name', '', save = FALSE)
+      last_subject_code = rave_hist$get_or_save('.rave_pre_subject_code', '', save = FALSE)
+      last_notch_freq = rave_hist$get_or_save('.rave_pre_notch_freq', 60, save = FALSE)
 
-    mini_channel_inspection(process_name = 'notch', project_name = settings$project_name,
-                            subject_code = settings$subject_code, blocks = settings$blocks,
-                            channels = settings$channels, srate = settings$srate)
-  }
-
-
-  if('car' %in% steps){
-    electrodes = load_meta('electrodes', project_name = settings$project_name, subject_code = settings$subject_code)
-    if(is.null(electrodes)){
-      logger('You have not chosen CAR channels yet. Trying to launch channel selection program...', level = 'WARNING')
-      pre_process(settings, steps = '', vis = c('notch'))
+      return(list(
+        last_project_name = last_project_name,
+        last_subject_code = last_subject_code
+      ))
     }
-    logger('CAR Started', level = 'INFO')
-    channels = electrodes$Electrode[!(electrodes$Epichan | electrodes$Badchan)]
-    bulk_CAR(project_name = settings$project_name, subject_code = settings$subject_code, blocks = settings$blocks,
-             srate = settings$srate, channels = channels, replace = replace, save_plot = save_plot)
+
+    # Load subject
+    utils$load_subject = function(subject_code, project_name){
+      logger('Loading Subject')
+      dirs = get_dir(subject_code = subject_code, project_name = project_name)
+      assert_that(dir.exists(dirs$preprocess_dir), msg = 'Subject ' %&% subject_code %&% ' has no project folder ' %&% project_name)
+      s = SubjectInfo2$new(project_name = project_name, subject_code = subject_code)
+      id = s$project_name %&% '/' %&% s$subject_code
+
+      rave_hist$save(
+        .rave_pre_project_name = project_name,
+        .rave_pre_subject_code = subject_code
+      )
+
+      if(id != utils$get_subject_id()){
+        env$subject = s
+      }
+      utils$reset()
+      logger('Loaded Subject')
+    }
+
+
+
+
+    # # Save subject
+    # save_subject = function(subject_code, project_name){
+    #   logger('Saving Subject')
+    #   dirs = get_dir(subject_code = subject_code, project_name = project_name)
+    #   is_created = FALSE
+    #   if(!dir.exists(dirs$preprocess_dir)){
+    #     dirs = get_dir(subject_code = subject_code, project_name = project_name, mkdirs = c('preprocess_dir', 'cache_dir', 'meta_dir'))
+    #     is_created = TRUE
+    #   }else{
+    #     # save informations if subject exists
+    #     if(!is.null(env$subject) && (
+    #       env$subject$subject_code == subject_code &&
+    #       env$subject$project_name == project_name
+    #     )){
+    #       env$subject$save(action = 'Manual Save', message = '')
+    #     }
+    #   }
+    #
+    #   # call to load subject
+    #   utils$load_subject(subject_code, project_name)
+    #
+    #   logger('saved Subject')
+    #   return(is_created)
+    # },
+
+    # save_reference_table = function(tbl){
+    #   if(nrow(tbl)){
+    #     tbl$ChlType = sapply(tbl$Channel, utils$get_channel_type)
+    #   }
+    #   utils$save_to_subject(reference_table = tbl)
+    # },
+
+
+    # save_meta_electrodes = function(){
+    #   Channel = env$subject$channels
+    #   rave:::save_meta(
+    #     data = meta_elec,
+    #     meta_type = 'electrodes',
+    #     project_name = env$subject$project_name,
+    #     subject_code = env$subject$subject_code
+    #   )
+    # },
+
+    lapply(model_instances, function(x){
+      callModule(x$server, id = x$ID %&% '_M', user_data = user_data, utils = utils)
+    })
 
   }
 
-  if('car' %in% vis){
-    logger('CAR before vs after plots', level = 'INFO')
-    mini_channel_inspection(process_name = 'CAR', project_name = settings$project_name,
-                            subject_code = settings$subject_code, blocks = settings$blocks,
-                            channels = settings$channels, srate = settings$srate)
-  }
 
-
-  if('wavelet' %in% steps){
-    electrodes = load_meta('electrodes', project_name = settings$project_name, subject_code = settings$subject_code)
-    channels = electrodes$Electrode[!(electrodes$Epichan | electrodes$Badchan) & electrodes$Electrode %in% settings$channels]
-
-
-
-    logger('Wavelet started (Now grab a coffee. Don\'t close this session)', level = 'INFO')
-    bulk_wavelet(project_name = settings$project_name,
-                 subject_code = settings$subject_code,
-                 blocks = settings$blocks,
-                 channels = channels,
-                 srate = settings$srate,
-                 frequencies = frequencies,
-                 wave_num = wave_num,
-                 compress = compress, replace = replace,
-                 ncores = ncores, plan = plan) ->
-      check
-
-    return(check)
-  }
-
-
-
+  shinyApp(ui = ui, server = server, options = list(
+    host = host, launch.browser = launch.browser
+  ))
 }
 
-#' #' Shiny gadgets for Rstudio
-#' #' ECoG data pre-processing
-#' NULL
-#'
-#' #' Function to load pre-process modules
-#' #'
-#' #' @details
-#' #' You can write your own pre-process modules, please refer to the documents
-#' #' or type cat(readLines(system.file('preprocess/demo.R', package = 'rave')),sep="\\n")
-#' #' to view an example,
-#' #'
-#' #' Easiest way is to copy the demo files located at (run system.file('preprocess', package = 'rave'))
-#' #' and edit according to instructions
-#' #'
-#' #' Once finished, run load_preprocess_module(script = [path to your own script])
-#' load_preprocess_module <- function(script = NULL){
-#'   if(is.null(script)){
-#'     if(is.null(rave_opts$get_options('preprocess_module'))){
-#'       script = system.file('preprocess/main.R', package = 'rave')
-#'     }else{
-#'       script = rave_opts$get_options('preprocess_module')
-#'     }
-#'   }
-#'   logger('Try to load pre-processing modules - ', script)
-#'   source(script, local = T)
-#'
-#'   env = .load_preprocess_func(local = T)
-#'
-#'   # if everything works, save the options
-#'   rave_opts$set_options(preprocess_module = script)
-#'
-#'   return(env)
-#' }
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#'
-#' pre_process_visual <- function(process_name, project_name, subject_code, blocks,
-#'                                channels, srate = 2000,...){
-#'   data_dir = rave_opts$get_options('data_dir')
-#'   subject_dir = file.path(data_dir, sprintf('%s_%s', subject_code, project_name), 'preprocess')
-#'   # env = load_preprocess_module()
-#'
-#'   if(process_name %in% c('notch', 'CAR')){
-#'     signal_visual(process_name, project_name, subject_code, blocks, channels, ...)
-#'   }
-#'   if(process_name %in% c('CARinspect')){
-#'     # Check if CARinspect.h5 exists
-#'
-#'
-#'     # assume save_dir exists
-#'
-#'     CARinspect_file = file.path(subject_dir, 'CARinspect.h5')
-#'     if(!file.exists(CARinspect_file)){
-#'       rhdf5::h5createFile(CARinspect_file)
-#'     }
-#'     signals = list()
-#'     for(block_num in blocks){
-#'       if(!block_num %in% h5ls(CARinspect_file)){
-#'
-#'         ss = pre_inspect(
-#'           process_name = process_name, project_name = project_name,
-#'           subject_code = subject_code, block_num = block_num, chls = channels, compress = 20, ...
-#'         )
-#'
-#'         h5createDataset(CARinspect_file, block_num, dim(ss), chunk = c(1, 1024), level = 3)
-#'         h5write(ss, CARinspect_file, block_num)
-#'         H5close()
-#'       }else{
-#'         ss = h5read(CARinspect_file, block_num)
-#'       }
-#'       signals[[block_num]] = ss
-#'     }
-#'
-#'     signals_parallel_visual(signals, sample_rate = srate / 20, channel_names = channels, project_name, subject_code)
-#'
-#'   }
-#' }
-#'
-#'
-#'
-#'
-#'
-#' pre_process <- function(process_name, project_name, subject_code,
-#'                         blocks, channels, ...){
-#'   # example code:
-#'   # bulk_notch(project_name = 'Congruency',
-#'   #            subject_code = 'YAB',
-#'   #            blocks = c('010','011','012'),
-#'   #            channels = 1:84)
-#'   #
-#'   # allsignals = bulk_CAR(project_name = 'Congruency',
-#'   #          subject_code = 'YAB',
-#'   #          blocks = c('010','011','012'),
-#'   #          channels = (1:84)[-c(1:12, 32,64)])
-#'   #
-#'   # check = bulk_wavelet(project_name = 'Congruency',
-#'   #          subject_code = 'YAB',
-#'   #          blocks = c('008', '010','011','012'),
-#'   #          channels = (1:84)[-c(1:12, 32,64)])
-#'   # env = load_preprocess_module()
-#'
-#'   switch(
-#'     process_name,
-#'     'notch' = {
-#'       bulk_notch(project_name, subject_code, blocks, channels, ...)
-#'       return(invisible())
-#'     },
-#'     'CAR' = {
-#'       car = bulk_CAR(project_name, subject_code, blocks, channels, ...)
-#'       return(invisible(car))
-#'     },
-#'     'wavelet' = {
-#'       bulk_wavelet(project_name, subject_code, blocks, channels, ...)
-#'       return(invisible())
-#'     }
-#'   )
-#'
-#' }
-
-
-
-
-
-
+#' @export
+rave_pre_process = rave_preprocess
 

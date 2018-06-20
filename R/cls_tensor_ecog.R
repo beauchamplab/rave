@@ -30,9 +30,9 @@ ECoGTensor <- R6::R6Class(
 
       if(!missing(dim)){
         self$dim = dim
-        if(!assertthat::are_equal(dim(data), dim)){
-          logger('Dimension does not match', level = 'WARNING')
-        }
+        # if(!assertthat::are_equal(dim(data), dim)){  # omit check to save time.
+        #   logger('Dimension does not match', level = 'WARNING')
+        # }
       }else if(!is.null(base::dim(data))){
         self$dim = base::dim(data)
       }else{

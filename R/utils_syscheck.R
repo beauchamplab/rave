@@ -1,3 +1,5 @@
+
+
 setLoadActions(function(ns){
   bioc_pkgs = c('HDF5Array', 'rhdf5')
   bioc_pkgs = bioc_pkgs[!bioc_pkgs %in% utils::installed.packages()[,1]]
@@ -138,7 +140,7 @@ setLoadActions(function(ns){
 
   rave::rave_setup()
 
-  rave::logger("RAVE - (Code: Dipterix) is loaded!", level = 'INFO')
+  rave::logger("RAVE - (Code: Ent) is loaded!", level = 'INFO')
 
   if(is_changed_module || is_changed_data){
     message('--------------------')
@@ -157,5 +159,9 @@ setLoadActions(function(ns){
 
   rave::logger("Type '?rave_options' for details", level = 'INFO')
 }
+
+
+
+
 
 

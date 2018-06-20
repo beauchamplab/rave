@@ -36,7 +36,7 @@ rave_pre_overview <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
     )
   )
 
-  server = function(input, output, session = shiny::getDefaultReactiveDomain(), user_data){
+  server = function(input, output, session = getDefaultReactiveDomain(), user_data){
     local_data = reactiveValues(
       save = NULL
     )

@@ -73,16 +73,30 @@ SubjectInfo2 <- R6::R6Class(
       self$valid = TRUE
     },
     set_blocks = function(blocks){
+      is_changed = FALSE
       blocks = blocks[blocks %in% self$available_blocks]
-      self$blocks = blocks
+      if(!base::setequal(self$blocks, blocks)){
+        self$blocks = blocks
+        is_changed = TRUE
+      }
+      return(is_changed)
     },
     set_channels = function(channels, name = 'channels'){
+      is_changed = FALSE
       if(name == 'channels'){
-        self$channels = channels
+        if(!setequal(self[[name]], channels)){
+          self$channels = channels
+          is_changed = TRUE
+        }
+
       }else{
         channels = channels[channels %in% self$channels]
-        assign(name, channels, envir = self)
+        if(!setequal(self[[name]], channels)){
+          assign(name, channels, envir = self)
+          is_changed = TRUE
+        }
       }
+      return(is_changed)
     },
     save = function(action = '', message = '', ...){
       defaults = data.frame(

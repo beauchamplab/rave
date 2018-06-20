@@ -9,3 +9,11 @@ clear_env(env, all.names = T)
 \description{
 Function to clear all elements within environment
 }
+\examples{
+env = new.env()
+env$a = 1
+print(as.list(env))
+
+clear_env(env)
+print(as.list(env))
+}

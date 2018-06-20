@@ -202,6 +202,8 @@ wavelet <- function(data, freqs, srate, wave_num){
   # wave_spectrum = apply(fft_waves * fft_data, 2, fftwtools::fftw_c2c, inverse = 1) / wave_len
   wave_spectrum = fftwtools::mvfftw_c2c(fft_waves * fft_data, inverse = 1) / wave_len
 
+  # according to profile, fft_waves takes very large memory (3GB / 100 frequencies)
+  rm(fft_waves); gc()
 
   ind = (1:(ceiling(wave_len / 2)))
   # Normalizing and re-order
@@ -214,6 +216,8 @@ wavelet <- function(data, freqs, srate, wave_num){
   coef = Mod(wave_spectrum);
   power = coef^2
   phase = Arg(wave_spectrum);
+
+  rm(wave_spectrum); gc()
 
   list(
     coef = coef,

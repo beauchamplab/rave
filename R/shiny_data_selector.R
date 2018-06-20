@@ -1,31 +1,83 @@
+#' @export
+check_subjects <- function(
+  project_name, subject_code, check = T,
+  folders = c('Subject Folder', 'RAVE Folder', 'Preprocessing Folder', 'Meta Folder', 'Channel Folder'),
+  preprocess = c('Started Proprocess', 'Notch Filter', 'Wavelet'),
+  Meta = c("Electrode File", "Time point File", "Frequency File", "Epoch File")
+){
+  utils = rave_preprocess_tools()
+  miss_subject_code = missing(subject_code)
+  miss_project_name = missing(project_name)
+  if(miss_project_name){
+    projects = get_projects()
+  }else{
+    projects = project_name
+  }
+  sapply(projects, function(project_name){
+    if(miss_subject_code){
+      sc = list.dirs(file.path(rave_options('data_dir'), project_name), full.names = F, recursive = F)
+    }else{
+      sc = subject_code
+    }
+    sapply(sc, function(subject_code){
+      if(!check){
+        return(project_name %&% '/' %&% subject_code)
+      }
+
+      re = utils$check_load_subject(subject_code = subject_code, project_name = project_name)
+      errs = list()
+      l = unlist(re$Folders[folders]); l = l[!l]
+      if(length(l)){
+        errs[['Subject hierarchy is wrong. Please check existence of following folders: ']] = names(l)
+      }
+
+      l = unlist(re$Preprocess[preprocess]); l = l[!l]
+      if(length(l)){
+        errs[['Preprocess is needed: ']] = names(l)
+      }
+
+      l = unlist(re$Meta[Meta]); l = l[!l]
+      if(length(l)){
+        errs[['Subject meta file missing: ']] = names(l)
+      }
+
+      errs
+    }, simplify = F, USE.NAMES = T)
+  }, simplify = F, USE.NAMES = T) ->
+    re
+  if(!miss_project_name && !miss_subject_code){
+    if(length(re[[1]][[1]])){
+      error = re[[1]][[1]]
+    }else{
+      error = FALSE
+    }
+    re = list(
+      adapter = utils,
+      error = error
+    )
+  }
+  re
+}
+
+#' @export
+last_entry <- function(key, default, save = F, group = 'customized'){
+  assertthat::assert_that(is.character(key), msg = 'Key must be a string')
+  dict = rave_hist$get_or_save(key = group, val = list(), save = F)
+  val = dict[[key]]
+  val %?<-% default
+  if(save){
+    dict[[key]] = default
+    arg = list(dict); names(arg) = group
+    do.call(rave_hist$save, arg)
+    return(invisible(val))
+  }else{
+    return(val)
+  }
+}
+
 # data selector
 shiny_data_selector <- function(moduleId){
-  subject_choices = list.dirs(rave_options('data_dir'), full.names = F, recursive = F)
-  lapply(subject_choices, function(subject_id){
-    tryCatch({
-      subject = Subject$new(subject_id = subject_id)
-      return(TRUE)
-    }, error = function(e){
-      logger('Subject [', subject_id, '] invalid. Reason:', level = 'WARNING')
-      logger(e, level = 'WARNING')
-      return(FALSE)
-    })
-  }) %>%
-    unlist ->
-    subject_exists
-  subject_choices = subject_choices[subject_exists]
-  last_entry = rave_hist$get_or_save(key = 'main_app', val = list())
   ns = shiny::NS(moduleId)
-  get_epochs = function(subject_id){
-    dirs = get_dir(subject_id = subject_id)
-    epochs = list.files(dirs$meta_dir, pattern = 'epoch_[a-zA-Z0-9]+.csv')
-    if(length(epochs)){
-      epochs = str_match(epochs, 'epoch_([a-zA-Z0-9]+).csv')[,2]
-      return(epochs)
-    }else{
-      return('')
-    }
-  }
 
   header = function(){
     tags$li(
@@ -34,157 +86,275 @@ shiny_data_selector <- function(moduleId){
     )
   }
   control = function(){
-    tags$li(
-      actionLink(ns('auto_calculate'), 'Auto-Calculation ON',
-                 icon = shiny::icon('calculator'), role = 'button'),
-      class = 'control-sidebar-items'
-    )
+    NULL
   }
   server = function(input, output, session, global_reactives){
+    group = 'main_app'
     local_data = reactiveValues(
-      current_subject_id = last_entry[['current_subject_id']],
-      current_electrodes = last_entry[['current_electrodes']],
-      current_epoch = last_entry[['current_epoch']],
-      current_epoch_range = last_entry[['current_epoch_range']],
-      mask_path = NULL
+      error = TRUE,
+      error_info = list(),
+      last_subject = FALSE
     )
 
-    data_select_modal = function(){
-      s_choices = subject_choices
-      s_selected = local_data$current_subject_id
-      e_value = rave:::deparse_selections(local_data$current_electrodes)
-      e_selected = local_data$current_epoch
-      e_range = local_data$current_epoch_range
-      epochs = ''
-      if(!is.null(s_selected) && s_selected %in% subject_choices){
-        epochs = get_epochs(s_selected)
+    output$modal_error <- renderUI({
+      if(local_data$error){
+        error_msg = local_data$error_info
+        tagList(
+          tagList(
+            lapply(names(error_msg), function(nm){
+              p(
+                nm,
+                tags$ul(
+                  tagList(
+                    lapply(error_msg[[nm]], tags$li)
+                  )
+                )
+              )
+            })
+          )
+        )
+      }else{
+        NULL
       }
-      if(length(e_range) != 2){
-        e_range = c(1, 2)
+    })
+    output$modal_electrodes <- renderUI({
+      validate(need(!local_data$error, message = ''))
+      is_last = local_data$last_subject
+      if(is_last){
+        e = last_entry('electrodes', NULL, group = group)
       }
+      e %?<-% local_data$electrodes
+
+      if(length(e) > 1){
+        e = rave:::deparse_selections(e)
+      }
+
+      rs = local_data$references
+
+      tagList(
+        hr(),
+        textInput(ns('electrode_text'), 'Electrodes:', value = e, placeholder = 'E.g. 1-5,8,11-20'),
+        selectInput(ns('reference'), 'Reference Table:', selected = 'default', choices = rs)
+      )
+    })
+    output$modal_epochs <- renderUI({
+      validate(need(!local_data$error, message = ''))
+      is_last = local_data$last_subject
+
+
+      es = local_data$epochs
+      e = last_entry('epoch', es[1], group = group)
+      if(!e %in% es){
+        e = es[1]
+      }
+      e_range = last_entry('epoch_range', c(1,2), group = group)
+
+      tagList(
+        hr(),
+        selectInput(ns('epoch'), 'Epoch Selection', choices = es, selected = e),
+        div(
+          class = 'rave-grid-inputs',
+          div(
+            style = 'flex-basis:50%; max-width:50%',
+            numericInput(ns('pre'), 'Before onset', value = e_range[1], min = 0, step = 0.01)
+          ),
+          div(
+            style = 'flex-basis:50%; max-width:50%',
+            numericInput(ns('post'), 'After onset', value = e_range[2], min = 0, step = 0.01)
+          )
+        )
+      )
+    })
+    output$plot3dui <- renderUI({
+      if(!local_data$error){
+        plotly::plotlyOutput(ns('plot3d'))
+      }
+    })
+    output$plot3d <- plotly::renderPlotly({
+      if(!local_data$error){
+        project_name = input$project_name
+        subject_code = input$subject_code
+        loaded_electrodes = rave:::parse_selections(input$electrode_text)
+        tbl = load_meta('electrodes', project_name = project_name, subject_code = subject_code)
+        try({
+          rave:::render_3d_electrodes(tbl = tbl, loaded_electrodes = loaded_electrodes)
+        }, silent = T)
+      }
+    })
+
+    # Update subject_code according to project name
+    observe({
+      pn = input$project_name
+      if(length(pn) == 1){
+        subjects = get_subjects(project_name = pn)
+        if(!length(subjects)){
+          subjects = ''
+        }
+        sc = last_entry('subject_code', '', group = group)
+        if(!sc %in% subjects){
+          sc = subjects[1]
+          local_data$last_subject = FALSE
+        }else{
+          local_data$last_subject = TRUE
+        }
+        updateSelectInput(session, 'subject_code', choices = subjects, selected = sc)
+      }
+    }, priority = 10000L)
+
+    # Ckeck subject validity
+    observe({
+      project_name = input$project_name
+      subject_code = input$subject_code
+      if(length(subject_code) != 1 || subject_code == '') return()
+      # check subject
+      check_subjects(
+        project_name = project_name,
+        subject_code = subject_code) ->
+        subject_info
+      if(!is.logical(subject_info$error) ||subject_info$error != FALSE){
+        local_data$error = TRUE
+        local_data$error_info = subject_info$error
+      }else{
+        local_data$error = FALSE
+        local_data$electrodes = subject_info$adapter$get_electrodes()
+        local_data$epochs = subject_info$adapter$epochs()
+
+        dirs = subject_info$adapter$get_from_subject('dirs')
+        local_data$data_types = c('power', 'phase', 'voltage', list.dirs(dirs$module_data_dir, full.names = F, recursive = F))
+        local_data$references = subject_info$adapter$references()
+      }
+    })
+
+    data_modal = function(){
+      subject_list = check_subjects(check = F)
+      subject_ids = unlist(subject_list, use.names = F)
+
       shiny::modalDialog(
-        title = 'Data Selection',
+        title = 'Data Pre-loading',
+        easyClose = T,
+        size = 'l',
         fluidRow(
           column(
-            width = 4,
-            selectInput(ns('subject_id'), 'Subject ID', choices = s_choices, selected = s_selected),
-            hr(),
-            textInput(ns('electrode_text'), 'Electrodes', value = e_value, placeholder = 'E.g. 1-5,8,11-20'),
-            fileInput(ns('electrode_mask'), 'Electrode Mask', multiple = F),
-            hr(),
-            selectInput(ns('epoch'), 'Epoch Selection', choices = epochs, selected = e_selected),
-            fluidRow(
-              column(6, numericInput(ns('pre'), 'Before', value = e_range[1], min = 0, step = 0.01)),
-              column(6, numericInput(ns('post'), 'After', value = e_range[2], min = 0, step = 0.01))
+            width = 3,
+            selectInput(
+              ns('project_name'),
+              'Project Name:',
+              choices = get_projects(),
+              multiple = F,
+              selected = last_entry('project_name', NULL, group = group)
             ),
-            checkboxGroupInput(ns('data_types'), 'Data Types',
-                               selected = 'power',
-                               choiceNames = c('Power Data', 'Phase Data'),
-                               choiceValues = c('power', 'phase'))
+            selectInput(
+              ns('subject_code'),
+              'Subject Code:',
+              choices = '',
+              selected = NULL
+            ),
+            uiOutput(ns('modal_electrodes')),
+            uiOutput(ns('modal_epochs'))
           ),
-          shinydashboard::tabBox(
-            width = 8,
-            tabPanel(
-              title = 'Selected Electrodes'
+          column(
+            width = 7,
+            uiOutput(ns('modal_error')),
+            uiOutput(ns('plot3dui'))
+          ),
+          column(
+            width = 2,
+            div(
+              style = 'max-height: 60vh; overflow-y: scroll;',
+              uiOutput(ns('modal_data'))
             )
           )
         ),
-        size = 'l',
-        easyClose = T,
         footer = tagList(
           shiny::modalButton('Cancel'),
           actionButton(ns('data_import'), label = 'Import')
         )
       )
     }
-    get_selected_electrodes = function(){
-      s_choices = subject_choices
-      subject_id = input$subject_id
-      if(!is.null(subject_id) && subject_id %in% s_choices){
-        electrodes = rave:::parse_selections(input$electrode_text)
-        mask = input$electrode_mask
-        current_subject_id = local_data$current_subject_id
-        if(!is.null(mask)){
-          if(is.null(current_subject_id) || current_subject_id!=subject_id ||
-             is.null(local_data$mask_path) ||
-             local_data$mask_path != mask$datapath){
-            # use mask
-            mask = read.table(mask$datapath, header = F, quote = '\t')
-            electrodes = which(mask[[1]] > 0)
-          }
-        }
-        # electrodes
-        subject = Subject$new(subject_id = subject_id)
-        electrodes = subject$filter_valid_electrodes(electrodes)
-        return(electrodes)
-      }
-      return(NULL)
-    }
-    observeEvent(input$data_select, {
-      shiny::showModal(data_select_modal())
-    })
-    observeEvent(input$subject_id, {
-      # update electrodes
-      if(!is.null(local_data$current_subject_id) &&
-         local_data$current_subject_id == input$subject_id){
-        value = rave:::deparse_selections(local_data$current_electrodes)
-      }else if(!input$subject_id %in% subject_choices){
-        return(NULL)
+
+    output$modal_data <- renderUI({
+      if(!local_data$error){
+        l = local_data$data_types
+        last_data_types = last_entry('data_types', NULL, group = group)
+        last_data_types = last_data_types[last_data_types %in% l]
+
+        checkboxGroupInput(ns('data_types'), "Preloaded Data Types:", choices = l, selected = last_data_types)
       }else{
-        e = rave:::load_meta(meta_type = 'electrodes', subject_id = input$subject_id)
-        value = rave:::deparse_selections(e$Channel)
+        NULL
       }
-      updateTextInput(session, 'electrode_text', value = value)
-      # epoch types
-      epochs = get_epochs(subject_id = input$subject_id)
-      updateSelectInput(session, 'epoch', choices = epochs)
     })
-    observe({
-      electrodes = get_selected_electrodes()
+
+
+    observeEvent(input$data_select, {
+      shiny::showModal(data_modal())
     })
+
     observeEvent(input$data_import, {
-      electrodes = get_selected_electrodes()
-      data_types = input$data_types
-      if(length(data_types) == 0){
-        showNotification('You must choose at lease one data type', type = 'error')
+      error = local_data$error
+      electrodes = rave:::parse_selections(input$electrode_text)
+      if(error){
+        showNotification('This is an invalid subject. Please check data integrity.', type = 'error')
         return(NULL)
       }
+
+      if(length(electrodes) == 0){
+        showNotification('You must select at least one electrode', type = 'error')
+        return(NULL)
+      }
+      data_types = input$data_types
+      subject_code = input$subject_code
+      project_name = input$project_name
+      epoch = input$epoch
+      epoch_range = c(input$pre, input$post)
+      reference = input$reference
+      subject_id = project_name %&% '/' %&% subject_code
+
+      tmp_subject = Subject$new(project_name = project_name, subject_code = subject_code, reference = reference)
+      electrodes = tmp_subject$filter_valid_electrodes(electrodes)
+      if(length(electrodes) == 0){
+        showNotification('You must select at least one electrode', type = 'error')
+        return(NULL)
+      }
+
       rave_prepare(
-        subject = input$subject_id,
+        subject = subject_id,
         electrodes = electrodes,
-        epoch = input$epoch,
-        time_range = c(input$pre, input$post),
+        epoch = epoch,
+        time_range = epoch_range,
+        reference = reference,
         attach = F,
         data_types = data_types
       )
       # register
-      local_data$current_subject_id = input$subject_id
-      local_data$current_electrodes = electrodes
-      local_data$current_epoch = input$epoch
-      local_data$current_epoch_range = c(input$pre, input$post)
-      if(!is.null(input$mask)){
-        local_data$mask_path = mask$datapath
-      }
-      rave_hist$save(
-        main_app = list(
-          current_subject_id = input$subject_id,
-          current_electrodes = electrodes,
-          current_epoch = input$epoch,
-          current_epoch_range = c(input$pre, input$post)
-        )
-      )
-      global_reactives$has_data = TRUE
+
+      last_entry('project_name', project_name, save = T, group = group)
+      last_entry('subject_code', subject_code, save = T, group = group)
+      last_entry('electrodes', electrodes, save = T, group = group)
+      last_entry('epoch', epoch, save = T, group = group)
+      last_entry('epoch_range', epoch_range, save = T, group = group)
+      last_entry('data_types', data_types, save = T, group = group)
+
       global_reactives$force_refresh_all = Sys.time()
+      global_reactives$has_data = Sys.time()
       removeModal()
     })
 
     # onload, check if data has been loaded into datarepo
     data_env = getDefaultDataRepository()
-    data_loaded = rlang::env_has(data_env, nms = c(".repository", "electrodes", "frequencies", "meta", "phase", "power", "subject", "time_points", "trials", "valid_electrodes"),
-                                 inherit = F)
+    data_loaded = rlang::env_has(
+      data_env,
+      nms = c(
+        ".private",
+        "data_check",
+        "module_tools",
+        "preload_info",
+        "subject"
+      ),
+      inherit = F
+    )
     if(!(FALSE %in% data_loaded)){
-      global_reactives$has_data = TRUE
       global_reactives$force_refresh_all = Sys.time()
+      global_reactives$has_data = Sys.time()
     }
 
 
@@ -197,4 +367,17 @@ shiny_data_selector <- function(moduleId){
     control = control,
     server = server
   ))
+}
+
+
+# Test
+if(FALSE){
+  re = shiny_data_selector('A')
+  shinyApp(
+    ui = shiny::basicPage(re$header()),
+    server = function(input, output, session){
+      global_reactives = reactiveValues()
+      callModule(re$server, id = 'A', session = session, global_reactives = global_reactives)
+    }
+  )
 }

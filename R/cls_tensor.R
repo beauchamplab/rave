@@ -54,10 +54,15 @@ Tensor <- R6::R6Class(
       self$data = data
     },
     subset = function(..., drop = FALSE, data_only = F, .env = parent.frame()){
-      # env = list2env(self$dimnames)
-      expr = lapply(lazyeval::lazy_dots(...), function(x){x$env = .env; x})
-      class(expr) <- 'lazy_dots'
-      re = lazyeval::lazy_eval(expr, data = self$dimnames)
+      ..wrapper = list2env(self$dimnames, parent = .env)
+      # expr = lapply(lazyeval::lazy_dots(...), function(x){x$env = .env; x})
+      # class(expr) <- 'lazy_dots'
+      # re = lazyeval::lazy_eval(expr, data = self$dimnames)
+      quos = rlang::quos(...)
+      re = sapply(quos, function(quo){
+        quo = rlang::quo_set_env(quo, ..wrapper)
+        eval_tidy(quo)
+      }, simplify = F, USE.NAMES = T)
 
       dims = self$dim
       varnames = names(self$dimnames)

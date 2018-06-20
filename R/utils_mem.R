@@ -2,18 +2,7 @@
 
 
 
-safe_object_size <- function(obj, env = NULL){
-  if(is.character(obj) && !is.null(env)){
-    obj = get(obj, envir = env, inherits = F)
-  }
-  tryCatch({
-    pryr::object_size(obj)},
-    error = function(e){
-      return(0L)
-    })->
-    re
-  re
-}
+
 
 safe_env_size <- function(env, sum_up = TRUE){
   if(exists('.keys', envir = env)){

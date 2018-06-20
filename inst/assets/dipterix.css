@@ -182,3 +182,121 @@ li.control-sidebar-items>a {
     padding: 20px;
 }
 */
+
+.rave-ui-compound-ctrl{
+  margin-bottom: 15px;
+}
+
+
+.rave-grid-inputs{
+  display: -webkit-box;      /* OLD - iOS 6-, Safari 3.1-6 */
+  display: -moz-box;         /* OLD - Firefox 19- (buggy but mostly works) */
+  display: -ms-flexbox;      /* TWEENER - IE 10 */
+  display: -webkit-flex;     /* NEW - Chrome */
+  display: flex;
+  padding: 15px 5px 0 5px;
+  border: 1px solid #efefef;
+  flex-wrap: wrap;
+  align-items: baseline;
+  margin-bottom: 5px;
+}
+
+
+.rave-grid-inputs>div{
+  flex-basis: 33%;
+  padding-right: 5px;
+}
+
+
+.rave-grid-inputs>li{
+  display: inline-block;
+  flex-basis: 100%;
+  padding: 15px;
+  margin: -7px 5px 7px 5px;
+  -webkit-transition: background-color 0.5s ease-out;
+  -moz-transition: background-color 0.5s ease-out;
+  -o-transition: background-color 0.5s ease-out;
+  transition: background-color 0.5s ease-out;
+}
+
+.rave-grid-inputs>li:hover{
+  background-color: #f39c1247;
+}
+
+
+.rave-border-box {
+  border: 1px dashed #efefef;
+  height: 100%;
+  margin-bottom: 20px;
+  padding: 5px;
+}
+
+.rave-elastic{
+  -webkit-transition: all 0.5s ease-out;
+    -moz-transition: all 0.5s ease-out;
+    -o-transition: all 0.5s ease-out;
+    transition: all 0.5s ease-out;
+}
+
+.rave-elastic.rave-elastic-active [data-widget="collapse"]{
+  display: none;
+}
+
+
+.rave-elastic.rave-elastic-active {
+    right: 0 !important;
+    position: fixed !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    padding: 100px 50px 50px 50px !important;
+    overflow-y:  scroll !important;
+
+    z-index: 1000 !important;
+    width: 100%!important;
+    border-radius: unset !important;
+    border: none !important;
+    margin: unset !important;
+    box-shadow: none !important;
+    background: rgba(255,255,255);
+}
+
+
+
+.rave-elastic img {
+  width: 100%;
+  height: 100%;
+}
+
+.shiny-plot-output {
+  overflow: scroll;
+  resize: vertical;
+}
+
+.shiny-plot-output img {
+  margin-bottom:-10px;
+  padding-bottom:10px;
+  width: 100%;
+  height: 100%;
+}
+
+.rave-elastic-btn {
+    padding: 10px 15px;
+    background-color: #f2f2f2;
+    /*display: inline-block;*/
+    z-index: 1;
+    /*position: absolute;*/
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.rave-abs-right {
+  position: absolute;
+  right: 25px;
+  z-index: 1;
+}
+
+.rave-elastic.rave-elastic-active .rave-elastic-fixed-right {
+    position: fixed;
+    right: 0;
+}

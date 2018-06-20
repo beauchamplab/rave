@@ -24,6 +24,9 @@ py_source <- function(con, ..., workdir = tempdir(), file_only = FALSE,
   return(environment())
 }
 
+
+#' Launch python console within R
+#'
 #' @export
 py_console <- function(compiler_path = '', virtualenv = rave_options('py_virtualenv'), py3 = TRUE, ...){
   if(!missing(compiler_path)){
@@ -70,3 +73,5 @@ py_save <- function(..., file){
   }
   reticulate::py_save_object(args, file)
 }
+
+

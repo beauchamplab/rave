@@ -1,3 +1,4 @@
+
 #' @import stringr
 parse_selections <- function(text, sep = ',', sort = F, unique = T){
   if(length(text) == 0 || str_trim(text) == ''){

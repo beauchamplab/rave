@@ -4,6 +4,7 @@
 .Ruserdata
 .git
 .dropbox
+.DS_Store
 temp/
 NAMESPACE_old
 desktop.ini
@@ -13,3 +14,4 @@ src/*.dll
 adhoc/
 packrat/lib*/
 packrat/src/
+

@@ -58,7 +58,7 @@ iter_results <- function(
     assign(inputId, val, envir = execenv$runtime_env)
 
     tryCatch({
-      result = execenv$private$execute(plan = plan, async = async)
+      result = execenv$execute(plan = plan, async = async)
       if(async){
         # NOT IMPLEMENTED
       }

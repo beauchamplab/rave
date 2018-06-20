@@ -1,3 +1,274 @@
+#' @export
+time_diff <- function(start, end){
+  delta = unclass(end-start)
+  list(
+    delta = as.numeric(delta),
+    units = attr(delta, 'units')
+  )
+}
+
+#' For each element e1 ind1, find next element e2 in ind2 with e1<e2
+#' @export
+align_index = function(ind1, ind2, max_lag = 0){
+  if(zero_length(ind1, ind2)){
+    return(NULL)
+  }
+
+  if(max_lag == 0){
+    max_lag = max(c(ind1, ind2))
+  }
+
+  compare = function(a,b){
+    a < b & (b-a) < max_lag
+  }
+
+  o = outer(ind1, ind2, compare);o
+  i = apply(o, 1, function(x){
+    ifelse(sum(x) == 0, 0, min(which(x)))
+  })
+  sel = i>0
+  if(sum(sel)){
+    cbind(ind1[sel], ind2[i[sel]])
+  }else{
+    NULL
+  }
+}
+
+
+# to be tested
+#' @export
+to_color <- function(x, default_length = 1, palette = NULL, shift = 2){
+  if(length(x) == 1 && default_length > 1){
+    x = rep(x, default_length)
+  }
+  shift = max(0, shift)
+
+  env = new.env()
+  env$text = paste(x)
+
+  if(is.null(palette)){
+    # if x is numeric but in factors
+    z = x
+    if(is.factor(x)){
+      tryCatch({
+        as.numeric(paste(x))
+      }, error = function(e){
+        NA
+      }, warning = function(e){
+        NA
+      }) ->
+        z
+      if(sum(is.na(z))){
+        z = x
+      }
+    }
+    if(is.numeric(z)){
+      # z is not a integer or improper
+      if(sum(z < 1) || sum(abs(z - round(z))) > 1e-4){
+        x = paste('X', x)
+      }else{
+        x = z + shift
+      }
+    }
+
+
+    tryCatch({
+      col2rgb(x, alpha = 1) / 255
+    }, error = function(e){
+      x = as.numeric(as.factor(x)) + shift
+      col2rgb(x, alpha = 1) / 255
+    }) ->
+      cols
+    env$colors = apply(cols, 2, function(y){
+      do.call(rgb, as.list(y))
+    })
+
+
+  }else{
+    if(!is.factor(x)){
+      x = as.factor(x)
+    }
+    x = as.numeric(x)
+    ncols = length(unique(x))
+    if(is.function(palette)){
+      palette = palette(ncols)
+    }
+
+    assertthat::assert_that(ncols >= length(palette), msg = 'Palette does not have enough length.')
+    env$colors = palette[x]
+  }
+
+  # generate text
+  env$palette = with(env, {
+    unique(cbind(text, colors), MARGIN = 1)
+  })
+
+  return(as.list(env))
+
+}
+
+crop_data <- function(x, range){
+  assertthat::assert_that(length(range) == 2, msg = 'Range must have length 2.')
+  minr = min(range)
+  maxr = max(range)
+  x[x <= minr] = minr
+  x[x >= maxr] = maxr
+  x
+}
+
+
+test_colors <- function(cols){
+  plot(seq_along(cols), col = cols , pch = 20)
+}
+
+
+#' @export
+rave_palette <- function(n=1000, one_sided = F, colors = c(
+  '#1a237e', '#42b3d5', '#dcedc8', '#ffffff', '#ffecb3', '#e85285', '#6a1b9a'
+), width = c(0.5,1,4), alpha = T
+){
+
+  width = c(rev(width), width)
+  len = seq_along(width)
+  nn = round(width / sum(width) * n * (2-(one_sided == 0)))
+
+  cols = lapply(len, function(ii){
+    colorRampPalette(colors[ii + c(0,1)], interpolate = 'spline', alpha = alpha)(nn[ii])
+  })
+
+
+  m = length(width) / 2
+
+  if(one_sided == 0){
+    cols = c(
+      unlist(cols[1:m]), colors[m+1], unlist(cols[-(1:m)])
+    )
+    return(cols)
+  }else if(one_sided > 0){
+    cols = c(colors[m+1], unlist(cols[-(1:m)])
+    )
+    return(cols)
+  }else{
+    cols = c(unlist(cols[1:m]), colors[m+1])
+    return(cols)
+  }
+}
+
+# test_colors(rave_palette(1001))
+
+#' @export
+image_plot = function(z, x, y, crop = NULL, symmetric = F, precision = 1, main = '', sub_titles = NULL, col = rave_palette(), nrow = 1,
+                      cex.main = 2, cex.lab = 1.6, cex.axis = 1.4, las = 1, panel.last = NULL, ...){
+
+  miss_x = missing(x)
+  old.par = par(no.readonly = TRUE)
+  on.exit({
+    suppressWarnings(par(old.par))
+  })
+  mai = old.par$mai
+
+  # if z is a list
+  is_crop = length(crop) == 2
+  if(!is.list(z)){
+    z = list(z)
+  }
+
+  z_len = length(z)
+  sub_titles %?<-% names(z)
+  if(length(sub_titles) != z_len){
+    sub_titles = rep('', z_len)
+  }
+  sub_titles = paste0('\n', sub_titles)
+  zlim_actual = range(sapply(z, range))
+
+  if(is_crop){
+    z = lapply(z, crop_data, range = crop)
+    zlim = range(crop)
+  }else{
+    zlim = range(sapply(z, range))
+  }
+
+
+
+  if(symmetric){
+    zlim = max(abs(zlim))
+    zlim = c(-zlim, zlim)
+  }
+
+
+  layout_matrix = matrix(nrow + c(
+    seq_len(z_len),
+    seq_len(ceiling(z_len/nrow) * nrow - z_len) + z_len
+    ), nrow = nrow)
+  layout_matrix = cbind(layout_matrix, seq_len(nrow))
+
+  grid.newpage()
+  graphics::layout(layout_matrix, widths = c(rep(1, ncol(layout_matrix) - 1), lcm(3)))
+
+  # Legend first!
+  par(mai = c(mai[1], 0, mai[3], 0.8))
+  scales = seq(zlim[1], zlim[2], length.out = length(col))
+
+  numeric_format = sprintf('%%.%df', precision)
+
+  replicate(nrow, {
+    image(x = 0, y = scales, z = t(scales),
+          col = col, xaxt = 'n', yaxt = 'n', xlab = '', ylab = '')
+    axis(4, at = c(zlim, 0), labels = sprintf(numeric_format, c(zlim, 0)), las = las, cex.axis = cex.axis)
+  })
+
+  title(main = '\n' %&% main, outer = T, cex.main = cex.main, adj = 0)
+  sub = "Value Range: [" %&% paste(sprintf(numeric_format, zlim_actual), collapse = ', ') %&% ']'
+  title(main = '\n\n' %&% sub, adj = 1, outer = T, cex.main = cex.main * 0.8)
+
+  parent_env = parent.frame()
+
+  pl.fun = function(){}
+
+  body(pl.fun) = substitute(panel.last, env = environment())
+  environment(pl.fun) = parent_env
+
+
+  lapply(seq_len(length(z)), function(ii){
+
+    if(ii %in% (layout_matrix[,1] - nrow)){
+      par(mai = c(mai[1], mai[2], mai[3], 0.2))
+    }else{
+      par(mai = c(mai[1], 0.3, mai[3], 0.2))
+    }
+    # image(z = z[[ii]], zlim = zlim, col = col, las = las, cex.lab = cex.lab, cex.axis = cex.axis)
+    if(!miss_x){
+      image(x = x, y = y, z = z[[ii]], zlim = zlim, col = col, las = las, cex.lab = cex.lab,
+            cex.axis = cex.axis, cex.main = cex.main * 0.8,
+            main = sub_titles[ii], ...)
+    }else{
+      image(z = z[[ii]], zlim = zlim, las = las, col = col, cex.lab = cex.lab,
+            cex.axis = cex.axis, cex.main = cex.main * 0.8, main = sub_titles[ii], ...)
+    }
+
+    pl.fun()
+  })
+  invisible()
+
+}
+
+diff_arg = function(x, srate, freq){
+  delta = freq * 2 * pi / srate
+  dif = c(delta, diff(x)) - delta
+  di = exp(1i * dif)
+  da = Arg(di)
+  return(da)
+}
+
+is.na <- function(x, ...){
+  if(!length(x)){
+    return(logical(0L))
+  }else{
+    return(base::is.na(x))
+  }
+}
+
+############################################### Internal
 # utils, will be moved to rutabaga
 
 `set_if_null<-` <- function(x, values) {
@@ -5,9 +276,21 @@
   return (x)
 }
 
-#' Functions that wraps lapply with tagList
-tags_apply <- function(X, expr){
-  lapply_expr(X, expr, wrapper = shiny::tagList, env = environment())
+
+# Module exec environment
+add_to_session <- function(
+  session,
+  key = 'rave_id',
+  val = paste(sample(c(letters, LETTERS, 0:9), 20), collapse = ''),
+  override = FALSE
+){
+  if(!is.null(session)){
+    if(override || !exists(key, envir = session$userData)){
+      assign(key, val, envir = session$userData)
+    }
+    return(get(key, envir = session$userData))
+  }
+  return(NULL)
 }
 
 ################### Exported methods
@@ -33,13 +316,13 @@ tags_apply <- function(X, expr){
 #' print(a)  # Will be 1
 #' eval_dirty(expr, env)
 #' print(a)  # a is changed
-#' @importFrom rlang quo_get_expr
+#' @importFrom rlang quo_squash
 #' @importFrom rlang is_quosure
 #' @export
 eval_dirty <- function(expr, env = parent.frame(), data = NULL){
 
   if(is_quosure(expr)){
-    expr = quo_get_expr(expr)
+    expr = quo_squash(expr)
   }
 
   if(!is.null(data)){
@@ -140,11 +423,11 @@ is_within <- function(x, ref, strict = FALSE){
 #'   htmltools::tags$li(sprintf('line: %d', .x))
 #' }, wrapper = htmltools::tags$ul)
 #' @importFrom rlang !!
-#' @importFrom rlang quo
+#' @importFrom rlang as_quosure
 #' @importFrom rlang eval_tidy
 #' @export
-lapply_expr <- function(X, expr, wrapper = NULL, env = environment()){
-  expr = substitute(expr, env = env) # prevent pre-eval of expr
+lapply_expr <- function(X, expr, wrapper = NULL, env = parent.frame()){
+  expr = substitute(expr, env = environment()) # prevent pre-eval of expr
   ..nms = unique(names(X))
   if(length(..nms) != 1 || ..nms == '') ..nms = '.x'
   lapply(X, function(..x){
@@ -152,7 +435,7 @@ lapply_expr <- function(X, expr, wrapper = NULL, env = environment()){
       ..x = list(..x)
       names(..x) = ..nms
     }
-    eval_tidy(quo(!!expr), data = ..x)
+    eval_tidy(as_quosure(expr, env = env), data = ..x)
   }) ->
     re
   if(is.function(wrapper)){
@@ -191,6 +474,7 @@ lapply_expr <- function(X, expr, wrapper = NULL, env = environment()){
 #' @importFrom rlang fn_body
 #' @importFrom rlang quo
 #' @importFrom rlang eval_tidy
+#' @export
 eval_within <- function(FUN, env = parent.frame(), ..., .args = list(), .tidy = F){
   args = c(.args, list(...))
   if(is.null(env)){
@@ -213,7 +497,7 @@ eval_within <- function(FUN, env = parent.frame(), ..., .args = list(), .tidy = 
 
 #' Function to clear all elements within environment
 #' @usage clear_env(env, all.names = T)
-#' @example
+#' @examples
 #' env = new.env()
 #' env$a = 1
 #' print(as.list(env))
@@ -250,6 +534,11 @@ is.blank <- function(s){
 #' is_invalid('', .invalids = 'blank')
 #' @export
 is_invalid <- function(x, any = F, .invalids = c('null', 'na')){
+  if('null' %in% .invalids){
+    if(is.null(x) || !length(x)){
+      return(TRUE)
+    }
+  }
   for(func in paste0('is.', .invalids)){
     res = do.call(func, args = list(x))
     if(length(res) > 1){
@@ -341,7 +630,7 @@ zero_length <- function(..., any = T, na.rm = F){
 
 
 #' Drop nulls within lists/vectors
-#' @example
+#' @examples
 #' x <- list(NULL,NULL,1,2)
 #' dropNulls(x)
 #' @export
@@ -399,20 +688,126 @@ try_normalizePath <- function(path, sep = c('/', '\\\\')){
     attr(path, 'is_absolute') = TRUE
     return(path)
   }else{
-    p = unlist(str_split(path, pattern = paste(sprintf('(%s)', sep), collapse = '|')))
-    p = p[p != '']
-    pre = p[-length(p)]
-    if(length(pre)){
-      post = p[length(p)]
-      pre = try_normalizePath(str_c(pre, collapse = '/'), sep = sep)
-      path = file.path(pre, post, fsep = '/')
-      attr(path, 'is_absolute') = attr(pre, 'is_absolute')
+    # if dirname = itself
+    dirname = dirname(path)
+    if(dirname == path){
+      attr(path, 'is_absolute') = FALSE
       return(path)
     }else{
-      attr(path, 'is_absolute') = FALSE
+      pre = try_normalizePath(dirname, sep = sep)
+
+      p = unlist(str_split(path, pattern = paste(sprintf('(%s)', sep), collapse = '|')))
+      fname = tail(p, 1)
+
+      path = file.path(pre, fname, fsep = '/')
+      attr(path, 'is_absolute') = attr(pre, 'is_absolute')
       return(path)
     }
   }
+}
+
+
+safe_object_size <- function(obj, env = NULL){
+  if(is.character(obj) && !is.null(env)){
+    obj = get(obj, envir = env, inherits = F)
+  }
+  tryCatch({
+    pryr::object_size(obj)},
+    error = function(e){
+      return(0L)
+    })->
+    re
+  re
+}
+
+
+#' Cache object
+#' @usage cache(key, val, global = FALSE, swap = FALSE, file = tempfile(), name = 'data')
+#' @param key Any R object, a named list would be the best.
+#' @param val Value to cache, if key exists, then value will not be evaluated nor saved
+#' @param global option for shiny app, where if global, then the the cache will ignore sessions.
+#' @param swap When object size is too large, do you want to save it to local disk?
+#' @param file,name If you use swap=T, see \code{\link{save_h5}}
+#' @seealso \code{\link{clear_cache}}
+#' @examples
+#' \dontrun{
+#' cache('a', 1) # returns 1
+#' cache('a', 2) # still returns 1
+#'
+#' # clear cache
+#' clear_cache()
+#' cache('a', 2) # Now returns 2
+#'
+#' # Not run because a is cached
+#' cache('a', 2)
+#' cache('a', {Sys.sleep(10); 1})
+#'
+#' # Use swap
+#'
+#' y = cache('aa', 1:1000000, swap = T)
+#' pryr::object_size(1:1000000)
+#' pryr::object_size(y)
+#' y[1:5]
+#' }
+#' @importFrom digest digest
+#' @export
+cache <- function(key, val, global = FALSE, replace = FALSE, session = NULL, swap = FALSE, file = tempfile(), name = 'data'){
+  if(global){
+    session = NULL
+  }else{
+    session %?<-% getDefaultReactiveDomain()
+  }
+  cache_env = getDefaultCacheEnvironment(session = session)
+
+  k = digest(key)
+  if(replace){
+    cache_env[[k]] <- val
+  }else{
+    cache_env[[k]] %?<-% val
+  }
+
+  if(swap && any(
+    is.matrix(cache_env[[k]]),
+    is.array(cache_env[[k]]),
+    is.vector(cache_env[[k]])
+    ) &&
+    is.numeric(cache_env[[k]])
+  ){
+    f = file
+    name = 'junk'
+    save_h5(cache_env[[k]], f, name = name, chunk = NULL, replace = T, new_file = T, level = 0)
+    cache_env[[k]] = load_h5(f, name = name)
+  }
+
+  return(cache_env[[k]])
+}
+
+
+#' @title Clear cache
+#' @seealso \code{\link{cache}}
+#' @usage clear_cache(all = FALSE)
+#' @param all Clear all cache? Don't turn it on in shiny app. This is for debug use.
+#' @export
+clear_cache <- function(all = FALSE, session = NULL){
+  session %?<-% getDefaultReactiveDomain()
+  cache_env = getDefaultCacheEnvironment(session = session)
+  clear_env(cache_env)
+  if(all){
+    cache_env = getDefaultCacheEnvironment(session = NULL)
+    clear_env(cache_env)
+  }
+}
+
+
+
+#' @export
+getDefaultCacheEnvironment <- function(
+  session = getDefaultReactiveDomain()
+){
+  data_env = getDefaultDataRepository(session = session, session_based = T)
+  data_env$.cache_env %?<-% new.env(parent = baseenv())
+  data_env$.cache_env$.keys = c()
+  return(data_env$.cache_env)
 }
 
 ################################################### High performance functions
@@ -444,6 +839,7 @@ try_normalizePath <- function(path, sep = c('/', '\\\\')){
 #' @export
 lapply_async <- function(x, fun, ..., .ncores = 0, .future_plan = future::multiprocess,
                          .call_back = NULL, .packages = NULL, .envir = environment(), .globals = TRUE, .gc = TRUE){
+  .ncores = as.integer(.ncores)
   if(.ncores <= 0){
     .ncores = rave_options('max_worker')
   }
@@ -453,9 +849,7 @@ lapply_async <- function(x, fun, ..., .ncores = 0, .future_plan = future::multip
     .packages = rev(.packages[!is.na(.packages)])
   }
   .niter = length(x)
-  .ncores = as.integer(.ncores)
   .ncores = min(.ncores, .niter)
-  future::plan(.future_plan, workers = .ncores)
 
   .future_list = list()
   .future_values = list()
@@ -465,9 +859,17 @@ lapply_async <- function(x, fun, ..., .ncores = 0, .future_plan = future::multip
     .i = .i+1
     .x = x[[.i]]
 
+    if(is.function(.call_back)){
+      try({
+        .call_back(.i)
+      })
+    }
+
     .future_list[[length(.future_list) + 1]] = future::future({
       fun(.x)
-    }, envir = .envir, substitute = T, lazy = F, globals = .globals, .packages = .packages, gc = .gc)
+    }, envir = .envir, substitute = T, lazy = F, globals = .globals, .packages = .packages, gc = .gc,
+    evaluator = .future_plan, workers = .ncores)
+
 
     if(length(.future_list) >= .ncores){
       # wait for one of futures resolved
@@ -475,12 +877,36 @@ lapply_async <- function(x, fun, ..., .ncores = 0, .future_plan = future::multip
       .future_list[[1]] = NULL
     }
 
-    if(is.function(.call_back)){
-      try({
-        .call_back(.i)
-      })
-    }
   }
 
   return(c(.future_values, future::values(.future_list)))
+}
+
+
+
+#' @export
+restart_rave <- function(reload = T, quiet = FALSE){
+  unloadns = function(ns_){
+    ns = ns_
+    if(isNamespaceLoaded(ns)){
+      ns = asNamespace(ns)
+      sub_ns = getNamespaceUsers(ns)
+      for(sbns in sub_ns){
+        unloadns(sbns)
+      }
+      if(!quiet){
+        base::message("Unload namespace - ", ns_)
+      }
+      unloadNamespace(ns_)
+    }
+  }
+
+  unloadns('rave')
+
+  cmd = ''
+  if(reload){
+    cmd = 'base::library(rave)'
+  }
+
+  rstudioapi::restartSession(cmd)
 }

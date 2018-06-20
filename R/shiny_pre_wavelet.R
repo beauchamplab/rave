@@ -33,7 +33,7 @@ rave_pre_wavelet <- function(module_id = 'WAVELET_M', sidebar_width = 2){
     )
   )
 
-  server = function(input, output, session = shiny::getDefaultReactiveDomain(), user_data){
+  server = function(input, output, session = getDefaultReactiveDomain(), user_data){
     local_data = reactiveValues(
       save = NULL,
       refresh = NULL,
@@ -59,7 +59,7 @@ rave_pre_wavelet <- function(module_id = 'WAVELET_M', sidebar_width = 2){
         sliderInput(ns('wave_num'), 'Number of Wavelet Cycles: ', value = c(3,20), step = 1L, min = 1L, max = 30L, round = T),
         numericInput(ns('target_srate'), 'Target Sample Rate', value = 100, min = 10L, max = isolate(user_data$srate), step = 1L),
         checkboxInput(ns('save_original'), 'Save Original (Not Recommended)', value = FALSE),
-        numericInput(ns('ncores'), 'Parallel, Number of Cores:', value = future::availableCores(), min = 1L, max = rave_options('max_worker'), step = 1L),
+        numericInput(ns('ncores'), 'Parallel, Number of Cores:', value = 4, min = 1L, max = rave_options('max_worker'), step = 1L),
         actionButton(ns('do_wavelet'), 'Run Wavelet'),
         p(tags$small('Wavelet will run several hours.'))
       )
