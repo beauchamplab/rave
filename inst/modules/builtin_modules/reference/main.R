@@ -406,7 +406,7 @@ load_reference = function(){
 }
 
 gen_reference = function(electrodes){
-  electrodes = module_tools$get_valid_electrodes(electrodes)
+  electrodes = subject$filter_all_electrodes(electrodes)
   if(length(electrodes) == 0){
     return()
   }
@@ -727,7 +727,7 @@ observe({
   ref_calc_label = 'Generate Reference'
   ref_es = rave:::parse_selections(input$ref_electrodes)
   if(length(ref_es)){
-    ref_es = module_tools$get_valid_electrodes(ref_es)
+    ref_es = subject$filter_all_electrodes(ref_es)
 
     if(length(ref_es)){
       ref_calc_label = 'Generate [ref_' %&% rave:::deparse_selections(ref_es) %&% "]"
@@ -739,7 +739,7 @@ observe({
 
 observeEvent(input$ref_calc, {
   ref_es = rave:::parse_selections(isolate(input$ref_electrodes))
-  ref_es = module_tools$get_valid_electrodes(ref_es)
+  ref_es = subject$filter_all_electrodes(ref_es)
 
   if(length(ref_es) == 0){
     showNotification(p('No electrode(s) selected'), type = 'error')

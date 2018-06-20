@@ -351,8 +351,8 @@ Electrode <- R6::R6Class(
           ), varnames = c('Trial', 'Frequency', 'Time', 'Electrode'))
 
         }
+        rm(placehold)
       }
-      rm(placehold)
 
 
       re
