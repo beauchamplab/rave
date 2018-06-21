@@ -5,7 +5,7 @@ require(stringr)
 require(shiny)
 
 # give us some defaults to play with while we're working on the module code
-rave_prepare(subject = 'congruency1_sliding/YAB',
+rave_prepare(subject = 'Large/YAB',
              electrodes = 38,
              epoch = 'YABa',
              time_range = c(1, 2))
@@ -14,6 +14,10 @@ source('rave_calculators.R')
 source('condition_explorer_ui.R')
 source('condition_explorer_plots.R')
 
+if(F){
+  m = ModuleEnvir$new('id', 'CE', './inst/modules/builtin_modules/condition_explorer.R'); init_app(m)
+  m = ModuleEnvir$new('id', 'CE', 'condition_explorer.R'); init_app(m)
+}
 
 # time series plot
 over_time_plot <- function() {
@@ -126,15 +130,30 @@ condition_explorer_main = function(){
       x
     }
 
-    add_data(heat_map_data[[ii]]) <- collapse$over_trial(power)
-    add_data(by_trial_heat_map_data[[ii]]) <- collapse$over_frequency(power)
+    #### Commented by Dipterix - use rutabaga
+    # add_data(heat_map_data[[ii]]) <- collapse$over_trial(power)
+    # add_data(by_trial_heat_map_data[[ii]]) <- collapse$over_frequency(power)
+    #
+    # add_data(line_plot_data[[ii]]) <- collapse$over_frequency_and_trial(power)
+    # # we want to make a special range for the line plot data that takes into account mean +/- SE
+    # line_plot_data[[ii]]$range <- .fast_range(plus_minus(line_plot_data[[ii]]$data[,1],
+    #                                                      line_plot_data[[ii]]$data[,2]))
+    #
+    # add_data(scatter_bar_data[[ii]]) <- collapse$over_frequency_and_time(power)
+
+    add_data(heat_map_data[[ii]]) <- rutabaga::collapse(power$data, c(3,2)) / power$dim[1]
+    add_data(by_trial_heat_map_data[[ii]]) <- rutabaga::collapse(power$subset(Frequency=Frequency %within% FREQUENCY, data_only = TRUE, drop=FALSE), c(3,1)) / sum(power$dimnames$Frequency %within% FREQUENCY)
 
     add_data(line_plot_data[[ii]]) <- collapse$over_frequency_and_trial(power)
     # we want to make a special range for the line plot data that takes into account mean +/- SE
     line_plot_data[[ii]]$range <- .fast_range(plus_minus(line_plot_data[[ii]]$data[,1],
                                                          line_plot_data[[ii]]$data[,2]))
 
-    add_data(scatter_bar_data[[ii]]) <- collapse$over_frequency_and_time(power)
+    add_data(scatter_bar_data[[ii]]) <- rutabaga::collapse(
+      power$subset(Frequency = (Frequency %within% FREQUENCY),
+                Time = (Time %within% TIME_RANGE),
+                data_only = TRUE, drop = FALSE), c(1)
+    ) / sum(power$dimnames$Frequency %within% FREQUENCY) / sum(power$dimnames$Time %within% TIME_RANGE)
 
     # for the scatter_bar_data we also need to get m_se within condition
     scatter_bar_data[[ii]]$mse <- .fast_mse(scatter_bar_data[[ii]]$data)
