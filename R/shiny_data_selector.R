@@ -191,6 +191,9 @@ shiny_data_selector <- function(moduleId){
           subjects = ''
         }
         sc = last_entry('subject_code', '', group = group)
+        if(subjects == '' && !is.null(sc)){
+          subject = sc
+        }
         if(!sc %in% subjects){
           sc = subjects[1]
           local_data$last_subject = FALSE
@@ -229,6 +232,9 @@ shiny_data_selector <- function(moduleId){
       subject_list = check_subjects(check = F)
       subject_ids = unlist(subject_list, use.names = F)
 
+      subjects = get_subjects(project_name = last_entry('project_name', NULL, group = group))
+      if(length(subjects) == 0){ subjects = '' }
+
       shiny::modalDialog(
         title = 'Data Pre-loading',
         easyClose = T,
@@ -246,8 +252,8 @@ shiny_data_selector <- function(moduleId){
             selectInput(
               ns('subject_code'),
               'Subject Code:',
-              choices = '',
-              selected = NULL
+              choices = subjects,
+              selected = last_entry('subject_code', NULL, group = group)
             ),
             uiOutput(ns('modal_electrodes')),
             uiOutput(ns('modal_epochs'))
