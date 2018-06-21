@@ -241,6 +241,50 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
       data_env$.private$repo$baseline(from = from, to = to, electrodes = electrodes, ...)
     }
 
+    reload = function(epoch, epoch_range, reference, electrodes){
+      has_change = F
+      if(missing(electrodes)){
+        electrodes = data_env$preload_info$electrodes
+      }else{
+        has_change = T
+      }
+      if(missing(epoch)){
+        epoch = data_env$preload_info$epoch_name
+      }else{
+        has_change = T
+      }
+      if(missing(epoch_range)){
+        epoch_range = range(data_env$preload_info$time_points)
+        epoch_range = abs(epoch_range)
+      }else{
+        has_change = T
+      }
+      if(missing(reference)){
+        reference = data_env$preload_info$reference_name
+      }else{
+        has_change = T
+      }
+
+      rave::rave_prepare(
+        subject = data_env$subject$subject_id,
+        electrodes = electrodes,
+        epoch = epoch,
+        time_range = epoch_range,
+        reference = reference,
+        attach = F,
+        data_types = NULL
+      )
+
+      group = 'main_app'
+      last_entry('electrodes', electrodes, save = T, group = group)
+      last_entry('epoch', epoch, save = T, group = group)
+      last_entry('epoch_range', epoch_range, save = T, group = group)
+
+      # execenv$reloadUI()
+      # global_reactives$force_refresh_all = Sys.time()
+      # global_reactives$has_data = Sys.time()
+    }
+
 
   }, envir = tools)
 

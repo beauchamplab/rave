@@ -252,6 +252,7 @@ ExecEnvir <- R6::R6Class(
     register_output_events = NULL,
     register_input_events = NULL,
     execute = NULL,
+    reload = NULL,
     async_module = FALSE,
     finalize = function(){
       logger(sprintf('[%s] Runtime Environment Removed.', private$module_env$module_id))
@@ -276,6 +277,7 @@ ExecEnvir <- R6::R6Class(
     initialize = function(session = getDefaultReactiveDomain(),
                           parent_env = baseenv()){
       private$session = session
+      self$reload = do_nothing
 
       # wrapper has active bindings to data repository which allow us
       # the access to data loaded in data repo. It'll be sealed (locked)
@@ -311,6 +313,10 @@ ExecEnvir <- R6::R6Class(
         }else{
           return(val)
         }
+      }
+
+      self$wrapper_env$reloadUI = function(){
+        self$reload()
       }
 
       self$wrapper_env$rave_inputs = function(...){

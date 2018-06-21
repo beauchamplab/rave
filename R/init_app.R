@@ -224,8 +224,12 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
       refresh = global_reactives$force_refresh_all
       if(global_reactives$has_data && check_data_repo('subject')){
         data_repo = getDefaultDataRepository()
-        subject = data_repo[['subject']]
-        return(subject$id)
+        subject_id = data_repo$subject$id
+        epoch_name = data_repo$preload_info$epoch_name
+        reference_name = data_repo$preload_info$reference_name
+
+        rm(data_repo)
+        return(sprintf('[%s] - [%s] - [%s]', subject_id, epoch_name, reference_name))
       }else{
         return("")
       }
@@ -237,15 +241,16 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
       if(global_reactives$has_data && check_data_repo(c('subject', 'electrodes'))){
         data_repo = getDefaultDataRepository()
         subject = data_repo[['subject']]
-        electrodes = data_repo[['electrodes']]
+        electrodes = data_repo$preload_info$electrodes
         tbl = subject$electrodes
-        tbl = tbl[tbl$Channel %in% electrodes, c('Channel', 'Label')]
+        tbl = tbl[tbl$Electrode %in% electrodes, c('Electrode', 'Label')]
         rownames(tbl) = NULL
         if(nrow(tbl) > 10){
           tbl = tbl[1:10,]
           tbl[10,1] = ''
           tbl[10,2] = '...'
         }
+        rm(data_repo)
         return(tbl)
       }else{
         return(NULL)
@@ -273,7 +278,7 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
     observeEvent(input$curr_subj_details_btn, {
       data_repo = getDefaultDataRepository()
       subject = data_repo[['subject']]
-      electrodes = data_repo[['electrodes']]
+      electrodes = data_repo$preload_info$electrodes
       if(!is.null(subject) && length(electrodes)){
         showModal(
           subject_modal(subject = subject, current_electrodes = electrodes)
@@ -319,7 +324,10 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
       if(global_reactives$has_data && check_data_repo('subject')){
         data_repo = getDefaultDataRepository()
         subject = data_repo[['subject']]
-        return(subject$electrodes)
+        tbl = subject$electrodes
+        cols = names(tbl)
+        cols = cols[!cols %in% c('Coord_x', 'Coord_y', 'Coord_z')]
+        return(tbl[, cols])
       }else{
         return(NULL)
       }

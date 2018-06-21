@@ -649,15 +649,29 @@ observeEvent(input$do_export_cache, {
   })
 
   progress$close()
-  showNotification(p('Now data are cached according to [', fname, ']'), type = 'message', id = ns('ref_export_cache_notification'))
+  showNotification(p('Now data are cached according to [', fname, ']. Reloading subject.'), type = 'message', id = ns('ref_export_cache_notification'))
 
   removeModal()
+
+  fname = input[[('ref_export_name')]]
+  fname %?<-% 'default'
+  fname = str_replace_all(fname, '\\W', '')
+  fname = str_to_lower(fname)
+  module_tools$reload(reference = fname)
+  reloadUI()
 })
 
 observeEvent(input[[('do_export')]], {
   fname = export_ref_table()
-  showNotification(p('Reference table [', fname, '] exported.'), type = 'message', id = ns('ref_export_cache_notification'))
+  showNotification(p('Reference table [', fname, '] exported. Reloading subject.'), type = 'message', id = ns('ref_export_cache_notification'))
   removeModal()
+
+  fname = input[[('ref_export_name')]]
+  fname %?<-% 'default'
+  fname = str_replace_all(fname, '\\W', '')
+  fname = str_to_lower(fname)
+  module_tools$reload(reference = fname)
+  reloadUI()
 })
 
 check_load_volt = function(){
