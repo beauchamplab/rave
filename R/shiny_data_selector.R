@@ -167,10 +167,10 @@ shiny_data_selector <- function(moduleId){
     })
     output$plot3dui <- renderUI({
       if(!local_data$error){
-        plotly::plotlyOutput(ns('plot3d'))
+        threejsr::threejsOutput(ns('plot3d'), height = '600px')
       }
     })
-    output$plot3d <- plotly::renderPlotly({
+    output$plot3d <- threejsr::renderThreejs({
       if(!local_data$error){
         project_name = input$project_name
         subject_code = input$subject_code

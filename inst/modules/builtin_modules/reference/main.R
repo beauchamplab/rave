@@ -177,10 +177,16 @@ cur_group_ui = function(){
     group_name = group_info$rg_name
     electrodes = rave:::parse_selections(group_info$rg_electrodes)
     if(length(electrodes) == 0){
-      return(hr())
+      return(tagList(
+        hr(),
+        actionButton(ns('cur_group_save'), 'Preview & Export',width = '100%')
+      ))
     }
   }else{
-    return(hr())
+    return(tagList(
+      hr(),
+      actionButton(ns('cur_group_save'), 'Preview & Export',width = '100%')
+    ))
   }
 
   refs = get_refs()
@@ -238,7 +244,8 @@ cur_group_ui = function(){
         )
       )
     ),
-    hr()
+    hr(),
+    actionButton(ns('cur_group_save'), 'Preview & Export',width = '100%')
   )
 }
 
@@ -300,7 +307,7 @@ save_ref_table = function(tbl, is_new = FALSE){
 
 import_external = function(){
   dirs = module_tools$get_subject_dirs()
-  ref_name_alt %?<-% 'new..'
+  ref_name_alt %?<-% sprintf('reference_%s.csv', preload_info$reference_name)
   f = file.path(dirs$meta_dir, ref_name_alt)
   if(file.exists(f)){
     tbl = read.csv(f, stringsAsFactors = F)
@@ -329,7 +336,7 @@ import_external = function(){
 }
 load_reference = function(){
   dirs = module_tools$get_subject_dirs()
-  ref_name_alt %?<-% 'new..'
+  ref_name_alt %?<-% sprintf('reference_%s.csv', preload_info$reference_name)
   # Get current settings
   key = list(
     ref_name_alt = ref_name_alt,
@@ -675,7 +682,9 @@ observeEvent(input[[('do_export')]], {
 })
 
 check_load_volt = function(){
-  env$volt = module_tools$get_voltage2()
+  if(is.null(env$volt)){
+    env$volt = module_tools$get_voltage2()
+  }
 }
 
 # Rave Execute
@@ -691,37 +700,31 @@ rave_execute({
   local_data$refresh = Sys.time()
 
 
-  # Check if table needs to be saved
-  cur_group_save %?<-% 0
-  env$cur_group_save %?<-% 0
-  if(env$cur_group_save < cur_group_save){
-    # Save table
-    local_data$ref_tbl = get_ref_table()
-    showModal(
-      shiny::modalDialog(
-        title = 'Export Reference Table',
-        size = 'l',
-        easyClose = T,
-        footer = fluidRow(
-          div(
-            class = 'col-md-4 col-md-push-8 col-sm-12',
-            textInput(ns('ref_export_name'), 'Reference Name: ', value = 'default', placeholder = 'File name for reference table')
-          ),
-          column(
-            width = 12L,
-            modalButton('Cancel'),
-            actionButton(ns('do_export'), 'Export'),
-            actionButton(ns('do_export_cache'), 'Export & Cache')
-          )
+})
+
+observeEvent(input$cur_group_save, {
+  # Save table
+  local_data$ref_tbl = get_ref_table()
+  showModal(
+    shiny::modalDialog(
+      title = 'Export Reference Table',
+      size = 'l',
+      easyClose = T,
+      footer = fluidRow(
+        div(
+          class = 'col-md-4 col-md-push-8 col-sm-12',
+          textInput(ns('ref_export_name'), 'Reference Name: ', value = 'default', placeholder = 'File name for reference table')
         ),
-        DT::DTOutput(ns('export_table'))
-      )
+        column(
+          width = 12L,
+          modalButton('Cancel'),
+          actionButton(ns('do_export'), 'Export'),
+          actionButton(ns('do_export_cache'), 'Export & Cache')
+        )
+      ),
+      DT::DTOutput(ns('export_table'))
     )
-  }
-  env$cur_group_save = cur_group_save
-
-
-
+  )
 })
 
 

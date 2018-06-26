@@ -50,9 +50,9 @@ electrode_plot_ui = function(){
   electrode_plt_electrode %?<-% electrodes[1]; electrode_plt_electrode = as.integer(electrode_plt_electrode);
   if(!electrode_plt_electrode %in% electrodes){ electrode_plt_electrode = electrodes[1] };
 
-  electrode_plt_win = isolate(local_data$electrode_plt_win); electrode_plt_win %?<-% 7
-
   srate = subject$preprocess_info('srate')
+  electrode_plt_win = isolate(local_data$electrode_plt_win); electrode_plt_win %?<-% ceiling(srate * 2)
+
   electrode_plt_mfreq = isolate(local_data$electrode_plt_mfreq); electrode_plt_mfreq %?<-% min(300, srate/2);
 
 
@@ -75,7 +75,7 @@ electrode_plot_ui = function(){
       h4('Graphic Control'),
       hr(),
       h6('Periodogram'),
-      sliderInput(ns('electrode_plt_win'), 'Log2(Window Length)', min = 3, max = 10, value = electrode_plt_win),
+      sliderInput(ns('electrode_plt_win'), 'Pwelch Window Length', min = 100, max = ceiling(srate * 2), value = electrode_plt_win),
       sliderInput(ns('electrode_plt_mfreq'), 'Max Frequency', min = 10, max = floor(srate / 2), value = electrode_plt_mfreq)
     )
   )
@@ -168,6 +168,7 @@ load_ref = function(ref){
 output$electrode_plot_raw = renderPlot({
   ref_tbl = local_data$ref_tbl
 
+
   blocks = subject$preprocess_info('blocks'); blocks %?<-% ''
   block = local_data$electrode_plt_block; block %?<-% blocks[1]
 
@@ -222,7 +223,7 @@ output$electrode_plot_raw = renderPlot({
     which = 1, boundary = re$boundary
   )
 
-  win_len = (local_data$electrode_plt_win); win_len %?<-% 7
+  win_len = (local_data$electrode_plt_win); win_len %?<-% ceiling(srate * 2)
   max_freq = (local_data$electrode_plt_mfreq); max_freq %?<-% min(300, srate/2);
 
 
@@ -231,7 +232,7 @@ output$electrode_plot_raw = renderPlot({
     s2 = s,
     srate = srate,
     name = 'Reference',
-    cex = 2, window = 2^win_len, noverlap = 2^(win_len-2), max_freq = max_freq,
+    cex = 2, window = win_len, noverlap = win_len / 2, max_freq = max_freq,
     main = main, which = c(2,3,4)
   )
 })

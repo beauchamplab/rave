@@ -4,9 +4,9 @@
 \alias{pwelch}
 \title{Welch Periodogram}
 \usage{
-pwelch(x, fs, window = 64, noverlap = 8, col = "black", xlim = NULL,
-  ylim = NULL, main = "Welch periodogram", plot = TRUE, log = "xy",
-  spec_func = spectrum, cex = 1, ...)
+pwelch(x, fs, window = 64, noverlap = 8, nfft = 256, col = "black",
+  xlim = NULL, ylim = NULL, main = "Welch periodogram", plot = TRUE,
+  log = "xy", spec_func = spectrum, cex = 1, ...)
 }
 \arguments{
 \item{x}{signal}

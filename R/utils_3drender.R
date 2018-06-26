@@ -20,103 +20,27 @@ render_3d_electrodes <- function(
                "#AF0000", "#9F0000", "#8F0000", "#800000")
 ){
 
-  plotly::plot_ly(
-    x = ~Coord_x,
-    y = ~Coord_y,
-    z = ~Coord_z,
-    text = ~sprintf('%d - %s', Channel, ifelse(is.na(Label), 'No name', Label)),
-    hoverinfo = 'none'
-  ) ->
-    p
-#
-#   if(sum(tbl$EpilepsyChan)){
-#     p %>%
-#       plotly::add_markers(
-#         data = tbl[tbl$EpilepsyChan, ],
-#         name = "Epilepsey",
-#         mode = 'markers',
-#         hoverinfo = 'text',
-#         marker = list(
-#           symbol = 'cross',
-#           opacity = 0.5,
-#           color = "#8DA0CB"
-#         )
-#       ) ->
-#       p
-#   }
-#
-#
-#   if(sum((tbl$BadChan & !tbl$EpilepsyChan))){
-#     p %>%
-#       plotly::add_markers(
-#         data = tbl[(tbl$BadChan & !tbl$EpilepsyChan), ],
-#         name = "Bad Channels",
-#         mode = 'markers',
-#         marker = list(
-#           symbol = 'cross',
-#           opacity = 0.5,
-#           color = "#B3B3B3"
-#         )
-#       ) ->
-#       p
-#   }
+  col = rep(1, nrow(tbl));
+  col[tbl$Electrode %in% loaded_electrodes] = 2
 
-  # if(length(!(tbl$EpilepsyChan | tbl$BadChan | tbl$Channel %in% loaded_electrodes))){
-    p %>% plotly::add_markers(
-      data = tbl[!(tbl$EpilepsyChan | tbl$BadChan | tbl$Channel %in% loaded_electrodes), ],
-      name = "Good Channels",
-      mode = 'markers',
-      hoverinfo = 'text',
-      marker = list(
-        symbol = 'circle-open',
-        color = "#66C2A5"
-      )
+  rgbs = grDevices::col2rgb(col)
+
+  lapply(seq_len(nrow(tbl)), function(ii){
+    row = tbl[ii, ]
+    rgb = rgbs[, ii]; names(rgb) = NULL
+    threejsr::GeomSphere$new(
+      position = c(row$Coord_x, row$Coord_y, row$Coord_z),
+      mesh_name = sprintf('Electrode %d%s', row$Electrode, ifelse(
+        is.na(row$Label), '', sprintf(' (%s)', row$Label)
+      )),
+      radius = 4,
+      layer = 2
     ) ->
-      p
+      g
+    g$animation_event(event_data = list(rgb),loop = T)
+    g
+  }) ->
+    geoms
+  threejsr::threejs_scene(geoms)
 
-  # }
-
-  if(length(loaded_electrodes)){
-    if(length(loaded_electrodes) == length(values)){
-      p %>%
-        plotly::add_markers(
-          data = tbl[tbl$Channel %in% loaded_electrodes, ],
-          name = "Good [loaded]",
-          hoverinfo = 'text',
-          text = ~sprintf('%d - %s\n%.2f', Channel, ifelse(is.na(Label), 'No name', Label), values),
-          marker = list(
-            symbol = 'circle',
-            color = values,
-            colors = cont_pal,
-            showscale = T,
-            colorbar = list(
-              len = 0.5,
-              ypad = 0,
-              yanchor = 'top',
-              title = 'Value',
-              cauto = FALSE,
-              cmax = ~max(abs(values)),
-              cmin = ~(-max(abs(values))),
-              autocolorscale = F
-            )
-          ),
-          showlegend = T
-        ) ->
-        p
-    }else{
-      p %>%
-        plotly::add_markers(
-          data = tbl[tbl$Channel %in% loaded_electrodes, ],
-          name = "Good [loaded]",
-          mode = 'markers',
-          hoverinfo = 'text',
-          marker = list(
-            symbol = 'circle',
-            color = "#FC8D62"
-          )
-        ) ->
-        p
-    }
-  }
-  return(p)
 }

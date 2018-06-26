@@ -81,7 +81,9 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
       local_data$reset
       validate(need(local_data$has_raw_cache, message = 'Please import subject first.'))
 
-      winlen = get_val(isolate(local_data$winlen), default = 7)
+      srate = utils$get_srate()
+
+      winlen = get_val(isolate(local_data$winlen), default = ceiling(2 * srate))
       nclass = get_val(isolate(local_data$nclass), default = 100)
       freq_lim = get_val(isolate(local_data$freq_lim), default = 300)
       last_block = get_val(isolate(local_data$last_block), default = NULL)
@@ -109,9 +111,9 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
           actionButton(ns('prev'), 'Previous'),
           actionButton(ns('nxt'), 'Next'),
           hr(),
-          sliderInput(ns('winlen'), 'Log2(periodogram win-length): ',
-                      min = 2, max = 9, value = winlen, step = 1L),
-          sliderInput(ns('freq_lim'), 'Frequency limit', min = 20, max = 500, step = 1L, value = freq_lim),
+          sliderInput(ns('winlen'), 'Pwelch Window Length): ',
+                      min = 100, max = ceiling(2 * srate), value = winlen),
+          sliderInput(ns('freq_lim'), 'Frequency limit', min = 20, max = floor(srate / 2), step = 1L, value = freq_lim),
           sliderInput(ns('nclass'), 'Number of bins (histogram): ', min = 20, max = 200, value = nclass)
         )
       )
@@ -175,8 +177,8 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
           name = name,
           max_freq = freq_lim,
           srate = srate,
-          window = 2 ^ winlen,
-          noverlap = max(2, 2 ^ (winlen - 5)),
+          window = winlen,
+          noverlap = winlen / 2,
           nclass = nclass,
           cex = 2,
           std = 3,
@@ -349,7 +351,9 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
         if(!length(last_channel) || !last_channel %in% channels){
           last_channel = NULL
         }
-        winlen = get_val(isolate(local_data$winlen), default = 7)
+
+        srate = utils$get_srate()
+        winlen = get_val(isolate(local_data$winlen), default = ceiling(srate * 2))
         nclass = get_val(isolate(local_data$nclass), default = 100)
         freq_lim = get_val(isolate(local_data$freq_lim), default = 300)
         tagList(
@@ -361,9 +365,9 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
           selectInput(ns('chl_type'), 'Channel type', choices = CHANNEL_TYPES,
                       selected = isolate(CHANNEL_TYPES[local_data$chl_type])),
           hr(),
-          sliderInput(ns('winlen'), 'Log2(periodogram win-length): ',
-                       min = 2, max = 9, value = winlen, step = 1L),
-          sliderInput(ns('freq_lim'), 'Frequency limit', min = 20, max = 500, step = 1L, value = freq_lim),
+          sliderInput(ns('winlen'), 'Pwelch Window Length): ',
+                       min = 100, max = ceiling(srate * 2), value = ceiling(srate * 2)),
+          sliderInput(ns('freq_lim'), 'Frequency limit', min = 20, max = floor(srate / 2), step = 1L, value = freq_lim),
           sliderInput(ns('nclass'), 'Number of bins (histogram): ', min = 20, max = 200, value = nclass)
         )
       }
@@ -668,9 +672,8 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
       col = COLOR_SCHEME[ctype, ]
       ctext = CHANNEL_TYPES[ctype]
 
-      winlen = round(get_val(input$winlen, default = 7))
-      noverlap = 2^(max(winlen-3, 0))
-      winlen = 2^ winlen
+      winlen = round(get_val(input$winlen, default = ceiling(srate * 2)))
+      noverlap = winlen / 2
       nclass = round(get_val(input$nclass, default = 100))
       freq_lim = round(get_val(input$freq_lim, default = 300))
       if(!length(main)){
