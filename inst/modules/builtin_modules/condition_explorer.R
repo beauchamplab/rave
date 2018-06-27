@@ -56,8 +56,16 @@ async_out = function(){
 
 
 condition_explorer_main = function(){
+  # TODO: change GROUPS definition - Zhengjia
+  trials_ = module_tools$get_meta('trials')
+  vapply(trials_$ExcludedElectrodes, function(v){
+    electrode %in% parse_selections(v)
+  }, F) ->
+    exclude
+
+
   # TODO: change adhoc vars definition - Zhengjia
-  .power = module_tools$get_power(force = T)
+  .power = module_tools$get_power(force = T)[!exclude,,,]
   electrodes = .power$dimnames$Electrode
   trials = .power$dimnames$Trial
   frequencies = .power$dimnames$Frequency
@@ -76,9 +84,9 @@ condition_explorer_main = function(){
     key = list(subject$subject_id, electrode, BASELINE, any_trials, preload_info$reference_name),
     val = module_tools$baseline(BASELINE[1],  BASELINE[2], electrode)
   )
+  bl_power = bl_power[!exclude,,,]
 
-  # TODO: change GROUPS definition - Zhengjia
-  trials_ = module_tools$get_meta('trials')
+
   GROUPS = lapply(GROUPS_CMPD, function(g){
     g[['GROUP_NAME']] %?<-% ''
     cond = g[['GROUP']]

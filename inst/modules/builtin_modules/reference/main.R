@@ -435,6 +435,82 @@ load_reference = function(){
   cache(key = key, val = ref_info, replace = T)
 }
 
+gen_reference_blockwise = function(blockwise_table){
+  dirs = module_tools$get_subject_dirs()
+
+  blocks = blockwise_table$Block
+  refs = blockwise_table$Reference
+
+  involved_es = rave:::parse_selections(refs)
+  if(length(involved_es) == 0){
+    showNotification(p('No electrodes used. Why not use "noref"?'), type = 'error', session = session)
+    return(FALSE)
+  }
+  fname = 'ref_0,' %&% rave:::deparse_selections(involved_es) %&% '.h5'
+
+  f = file.path(dirs$channel_dir, 'reference', fname)
+  unlink(f)
+
+  subprogress = rave::progress('Loading Data', max = length(involved_es))
+  progress = rave::progress(sprintf('Generating reference [%s]', fname), max = length(blocks)+1)
+
+  ref_data = new.env()
+
+  for(ii in seq_along(blocks)){
+    b = blocks[[ii]]
+    subprogress$reset()
+    progress$inc('Loading data from block ' %&% b)
+    es = rave:::parse_selections(refs[ii])
+
+    ref_data[[b]] = new.env()
+    ref_data[[b]][['volt']] = 0
+    ref_data[[b]][['coef']] = 0
+
+    lapply(es, function(e){
+      subprogress$inc('Loading electrode ' %&% e)
+      # load channel
+      power = load_h5(file.path(dirs$channel_dir, 'power', sprintf('%d.h5', e)), name = '/raw/power/' %&% b)[]
+      phase = load_h5(file.path(dirs$channel_dir, 'phase', sprintf('%d.h5', e)), name = '/raw/phase/' %&% b)[]
+      volt = load_h5(file.path(dirs$channel_dir, 'voltage', sprintf('%d.h5', e)), name = '/raw/voltage/' %&% b)[]
+
+      ref_data[[b]][['volt']] = ref_data[[b]][['volt']] + volt
+      ref_data[[b]][['coef']] = ref_data[[b]][['coef']] + sqrt(power) * exp(1i * phase)
+
+    })
+    if(length(es)){
+      ref_data[[b]][['volt']] = ref_data[[b]][['volt']] / length(es)
+      ref_data[[b]][['coef']] = ref_data[[b]][['coef']] / length(es)
+    }else{
+      e = involved_es[1]
+      volt = load_h5(file.path(dirs$channel_dir, 'voltage', sprintf('%d.h5', e)), name = '/raw/voltage/' %&% b)
+      power = load_h5(file.path(dirs$channel_dir, 'power', sprintf('%d.h5', e)), name = '/raw/power/' %&% b)
+
+      ref_data[[b]][['volt']] = rep(0, length(volt))
+      ref_data[[b]][['coef']] = matrix(0, nrow = dim(power)[1], ncol = dim(power)[2])
+    }
+
+  }
+
+
+  progress$inc('Saving to disk...')
+  # Average
+  for(b in blocks){
+    volt = ref_data[[b]][['volt']]
+    coef = ref_data[[b]][['coef']]
+    coef = array(c(Mod(coef), Arg(coef)), dim = c(dim(coef), 2)) # Freq x Time x 2
+    save_h5(volt, file = f, name = sprintf('/voltage/%s', b), chunk = 1024, replace = T)
+    save_h5(coef, file = f, name = sprintf('/wavelet/coef/%s', b), chunk = c(dim(coef)[1], 128, 2), replace = T)
+  }
+
+  progress$close()
+  subprogress$close()
+  removeModal()
+
+  showNotification(p('Reference [', fname, '] exported.'), type = 'message')
+  local_data$has_new_ref = Sys.time()
+
+}
+
 gen_reference = function(electrodes){
   electrodes = subject$filter_all_electrodes(electrodes)
   if(length(electrodes) == 0){
@@ -759,9 +835,78 @@ console = function(){
 ref_generator_ui = function(){
   tagList(
     textInput(ns('ref_electrodes'), label = 'Electrodes', value = '', placeholder = 'e.g. 1-3,5'),
-    actionButton(ns('ref_calc'), 'Generate Reference', width = '100%')
+    actionButton(ns('ref_calc'), 'Generate Reference', width = '100%'),
+    hr(),
+    actionButton(ns('ref_blockwise'), 'Generate Reference for Each Blocks', width = '100%')
   )
 }
+
+observeEvent(input$ref_blockwise, {
+
+  env$blockwise_reference %?<-% data.frame(
+    Block = subject$preprocess_info('blocks'),
+    Reference = 'Zeros',
+    stringsAsFactors = F
+  )
+
+  showModal(modalDialog(
+    title = 'Reference Generator',
+    easyClose = F,
+    size = 'l',
+    footer = tagList(
+      actionButton(ns('ref_modal_cancel'), 'Discard'),
+      actionButton(ns('ref_modal_ok'), 'Generate Reference')
+    ),
+    div(
+      p('WARNING: Reference is not recommended on the block level. ',
+        'This module only provides partial support and please do NOT cache the referenced electrodes. ',
+        'Also, visualizations will be in accurate if reference by blocks, so use at your own risk.', style = 'color:red;'),
+      DT::DTOutput(ns('ref_modal_tbl'))
+    )
+  ))
+})
+
+observeEvent(input$ref_modal_cancel, { removeModal() })
+
+output$ref_modal_tbl <- DT::renderDT({
+  env$blockwise_reference
+}, env = ..runtime_env, editable = T)
+
+ref_modal_tbl_proxy = DT::dataTableProxy('ref_modal_tbl', session = session)
+
+observeEvent(input$ref_modal_tbl_cell_edit, {
+  info = input$ref_modal_tbl_cell_edit
+  i = info$row
+  j = info$col
+  v = info$value
+
+  # string match electrode
+  v = str_match(v, '(ref_|[\\ ]{0})([0-9,\\-]*)')[3]
+  if(is_invalid(v, .invalids = c('null', 'na', 'blank'))){
+    v = 'Zeros'
+  }else{
+    v = rave:::parse_selections(v)
+    v = subject$filter_all_electrodes(v)
+    if(length(v)){
+      v = rave:::deparse_selections(v)
+    }else{
+      v = 'Zeros'
+    }
+  }
+  blockwise_reference = env$blockwise_reference
+
+  if(names(blockwise_reference)[j] == 'Reference'){
+    env$blockwise_reference[i, j] = v
+    DT::replaceData(ref_modal_tbl_proxy, env$blockwise_reference, resetPaging = FALSE)  # important
+  }
+})
+
+observeEvent(input$ref_modal_ok, {
+  blockwise_reference = env$blockwise_reference
+  gen_reference_blockwise(blockwise_reference)
+})
+
+
 
 observe({
   ref_calc_label = 'Generate Reference'

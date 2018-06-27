@@ -104,7 +104,7 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
     }
     else if(meta_type == 'epoch'){
       epoch_file = file.path(meta_dir, sprintf('epoch_%s.csv', meta_name))
-      default_cols = c('Block', 'Time', 'Trial', 'Condition', 'Duration')
+      default_cols = c('Block', 'Time', 'Trial', 'Condition', 'Duration', 'ExcludedElectrodes')
 
       epochs = read.csv(epoch_file, header = T, stringsAsFactors = F,
                         colClasses = 'character')
@@ -116,6 +116,8 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
       epochs$Condition %?<-% 'NoCondition'
       epochs$Condition[is.na(epochs$Condition)] = 'NoCondition'
       epochs$Condition = as.character(epochs$Condition)
+
+      epochs$ExcludedElectrodes %?<-% ''
       # sort column orders
       nms = names(epochs)
       nms = c(default_cols, nms[!nms %in% default_cols])

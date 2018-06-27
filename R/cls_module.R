@@ -56,7 +56,7 @@ getDefaultDataRepository <- function(
   return(get(session_id, envir = data_repository))
 }
 
-
+#' @export
 attachDefaultDataRepository <- function(unload = F){
   if(unload){
     try({detach(rave_data)}, silent = T)
