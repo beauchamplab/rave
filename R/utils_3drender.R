@@ -5,42 +5,57 @@
 
 render_3d_electrodes <- function(
   tbl, loaded_electrodes = NULL, values = NULL,
-  cont_pal = c("#00008F", "#00009F", "#0000AF", "#0000BF", "#0000CF",
-               "#0000DF", "#0000EF", "#0000FF", "#0010FF", "#0020FF",
-               "#0030FF", "#0040FF", "#0050FF", "#0060FF", "#0070FF",
-               "#0080FF", "#008FFF", "#009FFF", "#00AFFF", "#00BFFF",
-               "#00CFFF", "#00DFFF", "#00EFFF", "#00FFFF", "#10FFEF",
-               "#20FFDF", "#30FFCF", "#40FFBF", "#50FFAF", "#60FF9F",
-               "#70FF8F", "#80FF80", "#8FFF70", "#9FFF60", "#AFFF50",
-               "#BFFF40", "#CFFF30", "#DFFF20", "#EFFF10", "#FFFF00",
-               "#FFEF00", "#FFDF00", "#FFCF00", "#FFBF00", "#FFAF00",
-               "#FF9F00", "#FF8F00", "#FF8000", "#FF7000", "#FF6000",
-               "#FF5000", "#FF4000", "#FF3000", "#FF2000", "#FF1000",
-               "#FF0000", "#EF0000", "#DF0000", "#CF0000", "#BF0000",
-               "#AF0000", "#9F0000", "#8F0000", "#800000")
+  cont_pal = colorRampPalette(colors = c('navy', 'black', 'red')), resolution = 1001
 ){
 
-  col = rep(1, nrow(tbl));
-  col[tbl$Electrode %in% loaded_electrodes] = 2
+  resolution = floor(resolution / 2) * 2 + 1
+  pal = cont_pal(resolution)
 
-  rgbs = grDevices::col2rgb(col)
+
+  loaded = tbl$Electrode %in% loaded_electrodes
+
+  # case 1: length(values) == 0
+  if(length(values) == 0){
+    cols = rep(pal[(resolution + 1) / 2], length(loaded))
+  }else if(length(values) == sum(loaded)){
+    cols = rep(pal[(resolution + 1) / 2], length(loaded))
+    cols[loaded] = values
+  }else{
+    assertthat::assert_that(length(values) == length(loaded), msg = 'values must have the same length as number of electrodes')
+    cols = values
+  }
 
   lapply(seq_len(nrow(tbl)), function(ii){
     row = tbl[ii, ]
-    rgb = rgbs[, ii]; names(rgb) = NULL
+    mesh_name = sprintf('Electrode %d%s %s', row$Electrode,
+                        ifelse(is.na(row$Label), '', sprintf(' (%s)', row$Label)),
+                        ifelse(loaded[ii] && !is.na(as.character(values[ii])), as.character(values[ii]), '')
+                        )
+
     threejsr::GeomSphere$new(
       position = c(row$Coord_x, row$Coord_y, row$Coord_z),
-      mesh_name = sprintf('Electrode %d%s', row$Electrode, ifelse(
-        is.na(row$Label), '', sprintf(' (%s)', row$Label)
-      )),
+      mesh_name = mesh_name,
+      mesh_info = mesh_name,
       radius = 4,
       layer = 2
     ) ->
       g
-    g$animation_event(event_data = list(rgb),loop = T)
+    if(loaded[ii]){
+      c = as.vector(get_color(cols[ii])); names(c) = NULL
+      g$animation_event(event_data = list(c),loop = T)
+    }
     g
   }) ->
     geoms
   threejsr::threejs_scene(geoms)
 
+}
+
+
+get_color <- function(col){
+  tryCatch({
+    col2rgb(col)
+  }, error = function(e){
+    col2rgb(as.numeric(col))
+  })
 }

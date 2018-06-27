@@ -285,6 +285,128 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
       # global_reactives$has_data = Sys.time()
     }
 
+    ###### Part 3: Visualization ######
+    plot_3d_electrodes = function(
+      tbl = NULL,
+      electrodes,
+      values = NULL,
+      marker = NULL,
+      palette = colorRampPalette(c('navy', 'white', 'red')),
+      resolution = 1001,
+      symmetric = T,
+      fps = 2,
+      loop = T,
+      radiu_normal = 5,
+      radiu_minis = 2
+    ){
+
+      tbl %?<-% data_env$subject$electrodes
+      tbl$Label[is.na(tbl$Label)] = ''
+      tbl$Name = stringr::str_trim(sprintf('Electrode %d %s', tbl$Electrode, tbl$Label))
+      tbl$Radius = radiu_normal
+      tbl$Radius[stringr::str_detect(tbl$Group, '^([Ee]pi)|([Mm]ini)')] = radiu_minis
+      electrodes = electrodes[electrodes %in% tbl$Electrode]
+      ind = sapply(electrodes, function(e){which(tbl$Electrode == e)})
+      n = nrow(tbl)
+
+      if(length(marker) == 0){
+        marker = with(tbl, {
+          stringr::str_trim(stringr::str_c('Electrode - ', Electrode, ' ', Label))
+        })
+      }else if(length(marker) == length(values)){
+        tmp = rep('', length(tbl$Electrode))
+        tmp[ind] = marker
+        marker = tmp
+      }
+
+      assertthat::assert_that(length(marker) == n, msg = 'Marker should have length equaling to number of electrodes')
+
+
+      if(length(electrodes) > 0 && length(values)){
+        if(!is.list(values)){
+          values = list(values)
+        }
+
+        resolution = floor(resolution / 2) * 2 + 1
+
+        rg = range(unlist(values))
+        if(rg[1] == rg[[2]]){
+          if(rg[1] == 0){
+            a = 0
+            b = 0
+          }else{
+            a = (resolution - 1) / 2 / abs(rg[1])
+            b = 0
+          }
+        }else{
+          if(symmetric){
+            a = (resolution - 3) / 2 / max(abs(rg))
+            b = 0
+          }else{
+            a = (resolution - 1) / (rg[2] - rg[1])
+            b = mean(rg)
+          }
+        }
+
+        colors = palette(resolution)
+
+
+
+
+        lapply(seq_len(n), function(ii){
+          e = tbl$Electrode[ii]
+          sel = electrodes == e
+          row = tbl[tbl$Electrode == e, ]
+          lapply(values, function(val){
+            re = as.integer(get_color(colors[round((val[sel] - b) * a + (resolution + 1) / 2)]))
+            names(re) = NULL
+            re
+          }) ->
+            re
+
+          re = rave:::dropNulls(re)
+
+          # generate electrode
+          with(row, {
+            threejsr::GeomSphere$new(
+              position = c(Coord_x, Coord_y, Coord_z),
+              mesh_name = Name,
+              mesh_info = marker[ii],
+              radius = Radius,
+              layer = 2
+            )
+          }) ->
+            g
+
+          if(length(re) == length(values)){
+            g$animation_event(event_data = re, loop = loop)
+          }
+
+          return(g)
+        }) ->
+          m
+      }else{
+        lapply(tbl$Electrode, function(e){
+          row = tbl[tbl$Electrode == e, ]
+          with(row, {
+            threejsr::GeomSphere$new(
+              position = c(Coord_x, Coord_y, Coord_z),
+              mesh_name = Name,
+              radius = Radius,
+              layer = 2
+            )
+          }) ->g
+
+          g
+        }) ->
+          m
+
+      }
+
+
+
+      threejsr::threejs_scene(m)
+    }
 
   }, envir = tools)
 

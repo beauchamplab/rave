@@ -56,6 +56,17 @@ getDefaultDataRepository <- function(
   return(get(session_id, envir = data_repository))
 }
 
+
+attachDefaultDataRepository <- function(unload = F){
+  if(unload){
+    try({detach(rave_data)}, silent = T)
+  }else{
+    rave_data = getDefaultDataRepository()
+    attach(rave_data)
+  }
+}
+
+
 #' @export
 ModuleEnvir <- R6::R6Class(
   classname = 'ModuleEnvir',

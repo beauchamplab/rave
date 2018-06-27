@@ -128,15 +128,38 @@ observeEvent(input[[('bipolar_table_cell_edit')]], {
   }
 })
 
-output[[('elec_loc')]] = renderPlot({
+output[[('elec_loc')]] = threejsr::renderThreejs({
   local_data$refresh
   logger('elec_loc')
   group_info = current_group()
   group_info %?<-% list(electrodes = NULL)
-  x = subject$electrodes$Coord_x
-  y = subject$electrodes$Coord_y
-  sel = subject$electrodes$Electrode %in% group_info$electrodes
-  plot(x,y, col = sel + 1, pch = 16)
+  name = group_info$rg_name
+  ref_tbl = get_ref_table()
+  if(is.blank(name)){ name = 'Current Group' }
+
+  # join electrodes.csv with ref table
+  tbl = merge(ref_tbl, subject$electrodes[,c('Electrode', 'Coord_x','Coord_y','Coord_z', 'Label')], id = 'Electrode', suffixes = c('.x', ''))
+  tbl$Label[is.na(tbl$Label)] = 'No Label'
+
+  electrodes = group_info$electrodes
+  with(tbl, {
+    sprintf('<p>Electrode - %d (%s)<br/>Reference - %s (%s)<br/>Reference to - %s</p>', Electrode, Label, Group, Type, Reference)
+  }) ->
+    marker
+
+  values = rep(-1, length(electrodes))
+  bad_electrodes = rave:::parse_selections(input[[('ref_bad')]])
+  values[electrodes %in% bad_electrodes] = 1
+
+
+  module_tools$plot_3d_electrodes(
+    tbl = tbl,
+    electrodes = electrodes,
+    values = values,
+    marker = marker,
+    palette = colorRampPalette(c('darkseagreen2', 'yellow1', 'orangered2')),
+    resolution = 11
+  )
 }, env = ..runtime_env)
 
 observeEvent(input[[('cur_save')]], {
@@ -224,7 +247,7 @@ cur_group_ui = function(){
 
   tagList(
     hr(),
-    plotOutput(ns('elec_loc')),
+    threejsr::threejsOutput(ns('elec_loc')),
     fluidRow(
       column(
         width = 7,
