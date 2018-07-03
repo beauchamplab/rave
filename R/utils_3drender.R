@@ -29,7 +29,7 @@ render_3d_electrodes <- function(
     row = tbl[ii, ]
     mesh_name = sprintf('Electrode %d%s %s', row$Electrode,
                         ifelse(is.na(row$Label), '', sprintf(' (%s)', row$Label)),
-                        ifelse(loaded[ii] && !is.na(as.character(values[ii])), as.character(values[ii]), '')
+                        ifelse(loaded[ii] && length(values[ii]) == 1 && !is.na(as.character(values[ii])), as.character(values[ii]), '')
                         )
 
     threejsr::GeomSphere$new(
@@ -37,17 +37,17 @@ render_3d_electrodes <- function(
       mesh_name = mesh_name,
       mesh_info = mesh_name,
       radius = 4,
-      layer = 2
+      layer = 3
     ) ->
       g
     if(loaded[ii]){
-      c = as.vector(get_color(cols[ii])); names(c) = NULL
-      g$animation_event(event_data = list(c),loop = T)
+      c = t(get_color(cols[ii])) / 255; colnames(c) = NULL
+      g$add_event(event_type = 'position', name = 'static', event_data = rbind(c,c), key_frames = 0:1)
     }
     g
   }) ->
     geoms
-  threejsr::threejs_scene(geoms)
+  threejsr:::threejs_scene.default(elements = geoms, control_gui = F)
 
 }
 

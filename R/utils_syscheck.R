@@ -3,6 +3,30 @@
 .onAttach <- function(libname, pkgname){
 
   try({
+
+    # Check if rutabaga and threejsr is installed
+    inst_pkg  = installed.packages()[,1]
+    if('rave' %in% loadedNamespaces()){
+      logger = function(...){ rave::logger(..., level = 'INFO') }
+    }else{
+      logger = message
+    }
+
+    if(!'threejsr' %in% inst_pkg){
+      logger('Installing RAVE THREE JS widget - github - dipterix/threejsr')
+      devtools::install_github('dipterix/threejsr')
+    }
+    if(!'rutabaga' %in% inst_pkg){
+      logger('Installing RAVE Toolbox widget - github - dipterix/threejsr')
+      devtools::install_github('dipterix/rutabaga')
+    }
+
+
+
+  }, silent = T)
+
+
+  try({
     shiny::registerInputHandler("rave.compoundInput", function(data, shinysession, name) {
       if (is.null(data)){
         return(NULL)
