@@ -299,7 +299,8 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
       radiu_normal = 5,
       radiu_minis = 2
     ){
-
+      # TODO
+      return()
       tbl %?<-% data_env$subject$electrodes
       tbl$Label[is.na(tbl$Label)] = ''
       tbl$Name = stringr::str_trim(sprintf('Electrode %d %s', tbl$Electrode, tbl$Label))

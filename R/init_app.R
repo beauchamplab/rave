@@ -264,8 +264,8 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
         size = 'l',
         tabsetPanel(
           tabPanel(
-            title = '3D Visualization',
-            plotly::plotlyOutput('curr_subj_elec_3d', height = '600px')
+            title = '3D Visualization'
+            # plotly::plotlyOutput('curr_subj_elec_3d', height = '600px')
           ),
           tabPanel(
             title = 'Table Details',
@@ -286,38 +286,38 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
       }
     })
 
-    output$curr_subj_elec_3d <- plotly::renderPlotly({
-      validate(need(global_reactives$has_data, "Please import subject first."))
-      btn = input$curr_subj_details_btn
-      has_data = global_reactives$has_data
-      data_repo = getDefaultDataRepository()
-      validate(need(has_data && check_data_repo('subject'), message = 'No Subject Loaded'))
-
-      tbl = data_repo[['subject']]$electrodes
-      loaded_electrodes = data_repo[['electrodes']]
-      # get latest value
-      tryCatch({
-        data_repo = getDefaultDataRepository()
-        suma_out_dir = data_repo$subject$dirs$suma_out_dir
-
-        module = modules[vapply(unlist(modules), function(x){
-          global_reactives$execute_module == str_to_upper(x$module_id)
-        }, FALSE)]
-        pattern = module[[1]]$label_name
-        pattern = sprintf('%s_([0-9_\\-]+).csv', str_replace_all(pattern, '[^a-zA-Z0-9_]', '_'))
-        dat = list.files(suma_out_dir, pattern = pattern)
-        fname = dat[which.max(as.numeric(strptime(str_match(dat, pattern)[,2], '%Y-%m-%d_%H_%M_%S')))]
-        dat = read.csv(file.path(suma_out_dir, fname))
-        dat = dat[dat[, 1] %in% loaded_electrodes, ]
-        values = loaded_electrodes * NA
-        values[loaded_electrodes %in% dat[,1]] = dat[,2]
-        values
-      }, error = function(e){
-        NULL
-      }) ->
-        values
-      rave:::render_3d_electrodes(tbl = tbl, loaded_electrodes = loaded_electrodes, values = values)
-    })
+    # output$curr_subj_elec_3d <- plotly::renderPlotly({
+    #   validate(need(global_reactives$has_data, "Please import subject first."))
+    #   btn = input$curr_subj_details_btn
+    #   has_data = global_reactives$has_data
+    #   data_repo = getDefaultDataRepository()
+    #   validate(need(has_data && check_data_repo('subject'), message = 'No Subject Loaded'))
+    #
+    #   tbl = data_repo[['subject']]$electrodes
+    #   loaded_electrodes = data_repo[['electrodes']]
+    #   # get latest value
+    #   tryCatch({
+    #     data_repo = getDefaultDataRepository()
+    #     suma_out_dir = data_repo$subject$dirs$suma_out_dir
+    #
+    #     module = modules[vapply(unlist(modules), function(x){
+    #       global_reactives$execute_module == str_to_upper(x$module_id)
+    #     }, FALSE)]
+    #     pattern = module[[1]]$label_name
+    #     pattern = sprintf('%s_([0-9_\\-]+).csv', str_replace_all(pattern, '[^a-zA-Z0-9_]', '_'))
+    #     dat = list.files(suma_out_dir, pattern = pattern)
+    #     fname = dat[which.max(as.numeric(strptime(str_match(dat, pattern)[,2], '%Y-%m-%d_%H_%M_%S')))]
+    #     dat = read.csv(file.path(suma_out_dir, fname))
+    #     dat = dat[dat[, 1] %in% loaded_electrodes, ]
+    #     values = loaded_electrodes * NA
+    #     values[loaded_electrodes %in% dat[,1]] = dat[,2]
+    #     values
+    #   }, error = function(e){
+    #     NULL
+    #   }) ->
+    #     values
+    #   rave:::render_3d_electrodes(tbl = tbl, loaded_electrodes = loaded_electrodes, values = values)
+    # })
 
     output$curr_subj_elec_table <- renderDataTable({
       btn = input$curr_subj_details_btn

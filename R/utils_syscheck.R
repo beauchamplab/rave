@@ -1,16 +1,5 @@
 
 
-setLoadActions(function(ns){
-  bioc_pkgs = c('HDF5Array', 'rhdf5')
-  bioc_pkgs = bioc_pkgs[!bioc_pkgs %in% utils::installed.packages()[,1]]
-  if(length(bioc_pkgs)){
-    message("Installing Dependencies from BIOCONDUCTOR...")
-    source("https://bioconductor.org/biocLite.R")
-    biocLite(bioc_pkgs, suppressUpdates = T, suppressAutoUpdate = T)
-  }
-})
-
-
 .onAttach <- function(libname, pkgname){
 
   try({
@@ -63,7 +52,6 @@ setLoadActions(function(ns){
     ui_register_function('shiny::tableOutput', shiny::renderTable)
     ui_register_function('shiny::verbatimTextOutput', shiny::renderPrint)
     ui_register_function('shiny::dataTableOutput', shiny::renderDataTable)
-    ui_register_function('plotly::plotlyOutput', plotly::renderPlotly)
     ui_register_function('shiny::uiOutput', shiny::renderUI)
     ui_register_function('shiny::imageOutput', shiny::renderImage, default_args = list(deleteFile = FALSE))
     ui_register_function('shiny::htmlOutput', shiny::renderText)

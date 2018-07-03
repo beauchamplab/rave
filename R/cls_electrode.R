@@ -21,7 +21,6 @@ print.rave_printable = function(env){
   return(env)
 }
 
-#' @import rhdf5
 #' @export
 Electrode <- R6::R6Class(
   classname = 'Electrode',
@@ -356,32 +355,32 @@ Electrode <- R6::R6Class(
 
 
       re
-    },
-    get_data = function(block_num, time = NULL,
-                        frequencies = NULL, name = 'power',
-                        time_point = NULL,
-                        use_ff = F){
-      if(is.null(time_point) && !is.null(time)){
-        time_point = round(time_point * private$subject$sample_rate)
-      }
-      if(name %in% c('power', 'phase', 'coef')){
-        dat = private$coef[[block_num]][frequencies, time_point]
-        switch(
-          name,
-          coef = {
-            return(dat)
-          },
-          'power' = {
-            return((base::Mod(dat))^2)
-          },
-          'phase' = {
-            return(base::Arg(dat))
-          }
-        )
-      }
-
-      return(NULL)
     }
+    # get_data = function(block_num, time = NULL,
+    #                     frequencies = NULL, name = 'power',
+    #                     time_point = NULL,
+    #                     use_ff = F){
+    #   if(is.null(time_point) && !is.null(time)){
+    #     time_point = round(time_point * private$subject$sample_rate)
+    #   }
+    #   if(name %in% c('power', 'phase', 'coef')){
+    #     dat = private$coef[[block_num]][frequencies, time_point]
+    #     switch(
+    #       name,
+    #       coef = {
+    #         return(dat)
+    #       },
+    #       'power' = {
+    #         return((base::Mod(dat))^2)
+    #       },
+    #       'phase' = {
+    #         return(base::Arg(dat))
+    #       }
+    #     )
+    #   }
+    #
+    #   return(NULL)
+    # }
   ),
   active = list(
     blocks = function(){

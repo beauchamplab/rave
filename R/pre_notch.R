@@ -799,8 +799,6 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
 
 ###################### version 2
 #' @import stringr
-#' @import signal
-#' @import rhdf5
 #' @import stringr
 #' @import magrittr
 #' @import future

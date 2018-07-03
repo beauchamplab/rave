@@ -70,7 +70,7 @@ NULL
 #'
 #' @section Part 4 - File IO, cache, etc:
 #' \enumerate{
-#'   \item \code{\link{load_h5}} Load HDF5 file via rhdf5 package with lazy mode
+#'   \item \code{\link{load_h5}} Load HDF5 file via hdf5r package with lazy mode
 #'   \item \code{\link{save_h5}} Save data to HDF5 file with no validity checking
 #'   \item \code{\link{cache}} Cache any R objects in case to save calculation time
 #'   \item \code{\link{clear_cache}} Clear cache environment
