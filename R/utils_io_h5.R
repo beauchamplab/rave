@@ -44,7 +44,9 @@ LazyH5 <- R6::R6Class(
       private$read_only = read_only
     },
 
-    save = function(x, chunk = 'auto', level = 7, replace = TRUE, new_file = FALSE, ctype = NULL, force = TRUE, ...){
+    save = function(x, chunk = 'auto', level = 7, replace = TRUE, new_file = FALSE,
+                    force = TRUE, ctype = NULL, size = NULL, ...){
+      # ctype and size is deprecated but kept in case of compatibility issues
       # ptr$create_dataset =
       # function (name, robj = NULL, dtype = NULL, space = NULL, dims = NULL,
       #           chunk_dims = "auto", gzip_level = 4, link_create_pl = h5const$H5P_DEFAULT,
@@ -68,7 +70,7 @@ LazyH5 <- R6::R6Class(
         file.remove(private$file)
       }
 
-      self$open(new_dataset = replace, robj = x, chunk = chunk, dtype = ctype, gzip_level = level, ...)
+      self$open(new_dataset = replace, robj = x, chunk = chunk, gzip_level = level, ...)
 
       self$close()
 
@@ -84,7 +86,17 @@ LazyH5 <- R6::R6Class(
         if(is.null(private$file_ptr) || !private$file_ptr$is_valid){
           # if no, create new link
           mode = ifelse(private$read_only, 'r', 'a')
-          private$file_ptr = hdf5r::H5File$new(private$file, mode)
+          tryCatch({
+            private$file_ptr = hdf5r::H5File$new(private$file, mode)
+          }, error = function(e){
+            # Open for writting, we should close all connections first
+            # then the file can be opened, otherwise, Access type: H5F_ACC_RDONLY
+            # will lock the file for writting
+            f = hdf5r::H5File$new(private$file, 'r')
+            logger('Closing all other connections to [', private$file, '] - ', f$get_obj_count() - 1)
+            f$close_all()
+            private$file_ptr = hdf5r::H5File$new(private$file, mode)
+          })
         }
 
         has_data = private$file_ptr$path_valid(private$name)
@@ -140,7 +152,7 @@ LazyH5 <- R6::R6Class(
 
       # if file link is valid, get_obj_ids() should return a vector of 1
       if(!is.null(private$file_ptr) && private$file_ptr$is_valid){
-        private$file_ptr$close()
+        private$file_ptr$close_all()
       }
     },
 
