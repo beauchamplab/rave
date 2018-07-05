@@ -18,7 +18,7 @@ if(F){
 
 }
 
-rave_prepare(subject = 'Complete/YAB', electrodes = 64:65, epoch = 'YABa', time_range = c(1,2), data_types = NULL)
+rave_prepare(subject = 'congruency1/YAB', electrodes = 64:65, epoch = 'YABa', time_range = c(1,2), data_types = NULL)
 
 # load libraries
 library(shiny)
@@ -629,6 +629,11 @@ export_ref_table = function(){
   fname = 'reference_' %&% fname %&% '.csv'
   fpath = file.path(dirs$meta_dir, fname)
   rave:::safe_write_csv(data = ref_tbl, file = fpath, row.names = F)
+  # write to preprocess that subject is already refrenced
+  utils = rave_preprocess_tools()
+  utils$load_subject(subject_code = subject$subject_code, project_name = subject$project_name)
+  utils$save_to_subject(checklevel = 4) # 4 means referenced
+  switch_to('condition_explorer')
   return(fname)
 }
 
@@ -787,7 +792,6 @@ check_load_volt = function(){
 # Rave Execute
 rave_execute({
   # Part 0: load voltage data on the fly
-  check_load_volt()
 
   # Part 1: Load or new reference scheme
   load_reference()

@@ -40,12 +40,19 @@ rave_inputs(
 
 rave_updates(
   {
+    env$switched %?<-% FALSE
+    # Check if subject has been referenced
+    # switch to condition explorer if subject already referenced
+    if(!env$switched && data_check$Preprocess$Referenced){
+      env$switched = T
+      switch_to('condition_explorer')
+      return()
+    }
     clear_all = FALSE
 
     if(length(env$subject_code) != 1 || env$subject_code != subject$subject_code || env$project_name != subject$project_name){
       clear_all = T
     }
-
 
     if(clear_all){
       # clean all caches
@@ -53,6 +60,8 @@ rave_updates(
       if(length(nms)){
         rm(list = nms, envir = env)
       }
+      env$switched = T
+
 
       # Trick 1, update all information at the first component
       env$dirs = module_tools$get_subject_dirs()
@@ -62,6 +71,9 @@ rave_updates(
       env$subject_code = subject$subject_code
       env$project_name = subject$project_name
     }
+
+    check_load_volt()
+
   },
   ref_name_alt = list(
     choices = unique(c('new..', env$existing_refs)),

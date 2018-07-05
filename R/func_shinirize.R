@@ -93,10 +93,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       #
       # Now let's init local_data (reactive) storing flags
       #### ####
-      execenv$reload = function(){
-        global_reactives$force_refresh_all = Sys.time()
-        global_reactives$has_data = Sys.time()
-      }
+      execenv$global_reactives = global_reactives
 
       local_data = reactiveValues(
 

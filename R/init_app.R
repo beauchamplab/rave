@@ -32,7 +32,7 @@ get_people = function(){
 #' @import shiny
 #' @import magrittr
 #' @export
-init_app <- function(modules = NULL, launch.browser = T, ...){
+init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, ...){
   tryCatch({
     rave_prepare()
   }, error = function(e){})
@@ -92,49 +92,35 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
       shinydashboard::sidebarMenu(
         id = 'sidebar',
         .list =
-          # local({
-          #   sel = names(modules) %in% "______"
-          #   grouped = modules[sel]
-          #   singles = modules[!sel]
-          #
-          #
-          #   if(length(grouped)){
-          #     lapply(names(grouped), function(group_name)){
-          #       quo({
-          #         shinydashboard::menuItem(
-          #           text = !!group_name,
-          #           expandedName = !!group_name,
-          #           startExpanded = F,
-          #
-          #         )
-          #       })
-          #     }
-          #   }
-          # })
-        tagList(
-          lapply(names(modules)[!names(modules) %in% "______"], function(nm){
-            m = modules[[nm]]
-            if(nm != "______"){
-              do.call(shinydashboard::menuItem, args = list(
-                text = nm,
-                expandedName = nm,
-                startExpanded = F,
-                lapply(m, function(smd){
-                  shinydashboard::menuSubItem(
-                    text = smd$label_name,
-                    tabName = str_to_upper(smd$module_id)
-                  )
-                })
-              ))
-            }
-          }),
-          lapply(unlist(modules[["______"]]), function(smd){
-            shinydashboard::menuItem(
-              text = smd$label_name,
-              tabName = str_to_upper(smd$module_id)
-            )
-          })
-        )
+          tagList(
+            lapply(names(modules)[!names(modules) %in% "______"], function(nm){
+              m = modules[[nm]]
+              mid_up = str_to_upper(smd$module_id)
+
+              if(nm != "______"){
+                do.call(shinydashboard::menuItem, args = list(
+                  text = nm,
+                  expandedName = nm,
+                  startExpanded = F,
+                  lapply(m, function(smd){
+                    shinydashboard::menuSubItem(
+                      text = smd$label_name,
+                      tabName = mid_up,
+                      selected = mid_up %in% active_module
+                    )
+                  })
+                ))
+              }
+            }),
+            lapply(unlist(modules[["______"]]), function(smd){
+              mid_up = str_to_upper(smd$module_id)
+              shinydashboard::menuItem(
+                text = smd$label_name,
+                tabName = mid_up,
+                selected = mid_up %in% active_module
+              )
+            })
+          )
       )
     ),
     control = dashboardControl(
@@ -183,14 +169,29 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
       check_results = NULL,
       check_inputs = NULL,
       execute_module = '',
-      has_data = FALSE
+      has_data = FALSE,
+      switch_module = NULL
     )
     observeEvent(async_timer(), {
       global_reactives$check_results = Sys.time()
     })
-    # observeEvent(input_timer(), {
-    #   global_reactives$check_inputs = Sys.time()
-    # })
+
+    module_ids = str_to_upper(sapply(unlist(modules), function(m){m$module_id}))
+
+    # Switch to module
+    observe({
+      module_info = global_reactives$switch_module
+      if(!is.null(module_info)){
+        mid = module_info$module_id = str_to_upper(module_info$module_id)
+        if(mid %in% module_ids){
+          logger('Switching to module - ', mid, level = 'INFO')
+          session$sendCustomMessage('rave_sidebar_switch', module_info)
+        }
+      }
+    })
+
+
+
     ##################################################################
     # Module to load data
     callModule(module = data_selector$server, id = 'DATA_SELECTOR', session = session, global_reactives = global_reactives)
@@ -217,6 +218,7 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
     lapply(shinirized_modules, function(m){
       output[[str_c(m$id, '_UI')]] <- renderUI(m$ui())
     })
+
 
     #################################################################
     # some navigations

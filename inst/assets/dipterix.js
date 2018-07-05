@@ -58,6 +58,14 @@ Shiny.addCustomMessageHandler("alertmessage",
   }
 );
 
+Shiny.addCustomMessageHandler("rave_sidebar_switch",
+  function(message) {
+    // find module link
+    var $el = $(".main-sidebar a[data-value='" + message.module_id + "']");
+    $el.trigger('click');
+  }
+);
+
 
 /*
 * Author: Zhengjia Wang
