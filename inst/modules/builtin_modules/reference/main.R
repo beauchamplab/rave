@@ -147,18 +147,16 @@ output[[('elec_loc')]] = threejsr::renderThreejs({
   }) ->
     marker
 
-  values = rep(-1, length(electrodes))
+  values = rep('darkseagreen2', length(electrodes))
   bad_electrodes = rave:::parse_selections(input[[('ref_bad')]])
-  values[electrodes %in% bad_electrodes] = 1
+  values[electrodes %in% bad_electrodes] = 'orangered2'
 
 
   module_tools$plot_3d_electrodes(
     tbl = tbl,
     electrodes = electrodes,
     values = values,
-    marker = marker,
-    palette = colorRampPalette(c('darkseagreen2', 'yellow1', 'orangered2')),
-    resolution = 11
+    marker = marker
   )
 }, env = ..runtime_env)
 

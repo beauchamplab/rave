@@ -294,11 +294,13 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
       palette = colorRampPalette(c('navy', 'grey', 'red'))(1001),
       symmetric = T,
       fps = 5,
+      control_gui = F,
       loop = T,
       radiu_normal = 5,
-      radiu_minis = 2
+      radiu_minis = 2,
+      ...
     ){
-      "marker MUST either be NULL or have the same length as electrodes"
+      "marker MUST be NULL or have length of electrodes, or of nrow(tbl)"
       "values can be MULL, vector or matrix, either numbers or colors/namedcolors"
       "if values is a matrix, then ncol(values)=length(electrodes), or if vector"
       "length(values)=length(electrodes). Rows of values will be used to generate animation"
@@ -322,12 +324,17 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
 
         # Markers
         marker %?<-% tbl$Name[ind]
-        assertthat::assert_that(length(marker) == length(electrodes), msg = "marker MUST either be NULL or have the same length as electrodes")
+        assertthat::assert_that(length(marker) %in% c(length(electrodes), nrow(tbl)), msg = "marker MUST be NULL or have length of electrodes, or of nrow(tbl)")
         # Add links to Marker if indicated
         # TODO
 
 
-        tbl$Marker[ind] = marker
+        if(length(marker) == length(electrodes)){
+          tbl$Marker[ind] = marker
+        }else{
+          tbl$Marker = marker
+        }
+
 
         # Values
         values %?<-% rep(0, length(electrodes))
@@ -365,6 +372,9 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
 
         has_value = T
       }else{
+        if(length(marker) == nrow(tbl)){
+          tbl$Marker = marker
+        }
         has_value = F
       }
 
@@ -385,7 +395,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
         if(row$active > 0){
           # has value
           sapply(values[,row$active], function(v){
-            get_color(col = v, alpha = T)
+            get_color(col = v, alpha = T) / 255
           }) ->
             col
           colnames(col) = NULL
@@ -408,10 +418,9 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
       threejsr:::threejs_scene.default(
         elements = geoms,
         fps = fps,
+        control_gui = control_gui,
         ...
       )
-
-      threejsr::threejs_scene(m)
     }
 
   }, envir = tools)
