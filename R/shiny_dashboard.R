@@ -8,51 +8,58 @@ dashboardControl = function (..., disable = FALSE, width = NULL, collapsed = FAL
   custom_css <- NULL
   if (!is.null(width)) {
     custom_css <- tags$head(tags$style(HTML(gsub("_WIDTH_",
-width, fixed = TRUE,
-"
+width, fixed = TRUE,"
 .control-sidebar, .right-side {
-width: _WIDTH_;
+    width: _WIDTH_;
 }
 @media (min-width: 768px) {
+  .content-wrapper,
+    .left-side,
+  .main-footer {
+    /* margin-right: _WIDTH_; */
+  }
+
+  .control-sidebar,
+  .right-side {
+  width: _WIDTH_;
+  }
+}
+@media (max-width: 767px) {
+  .sidebar-open .content-wrapper,
+  .sidebar-open .right-side,
+  .sidebar-open .main-footer {
+    -webkit-transform: translate(_WIDTH_, 0);
+    -ms-transform: translate(_WIDTH_, 0);
+    -o-transform: translate(_WIDTH_, 0);
+    transform: translate(_WIDTH_, 0);
+  }
+}
+@media (max-width: 767px) {
+  .main-sidebar,
+  .left-side {
+    -webkit-transform: translate(-_WIDTH_, 0);
+    -ms-transform: translate(-_WIDTH_, 0);
+    -o-transform: translate(-_WIDTH_, 0);
+    transform: translate(-_WIDTH_, 0);
+  }
+}
+@media (min-width: 768px) {
+  .sidebar-collapse .main-sidebar,
+  .sidebar-collapse .left-side {
+    -webkit-transform: translate(-_WIDTH_, 0);
+    -ms-transform: translate(-_WIDTH_, 0);
+    -o-transform: translate(-_WIDTH_, 0);
+    transform: translate(-_WIDTH_, 0);
+  }
+}
+
 .content-wrapper,
-.left-side,
-.main-footer {
-margin-right: _WIDTH_;
+.main-footer,
+.right-side{
+  margin-right:0 !important;
 }
-.control-sidebar,
-.right-side {
-width: _WIDTH_;
-}
-}
-@media (max-width: 767px) {
-.sidebar-open .content-wrapper,
-.sidebar-open .right-side,
-.sidebar-open .main-footer {
--webkit-transform: translate(_WIDTH_, 0);
--ms-transform: translate(_WIDTH_, 0);
--o-transform: translate(_WIDTH_, 0);
-transform: translate(_WIDTH_, 0);
-}
-}
-@media (max-width: 767px) {
-.main-sidebar,
-.left-side {
--webkit-transform: translate(-_WIDTH_, 0);
--ms-transform: translate(-_WIDTH_, 0);
--o-transform: translate(-_WIDTH_, 0);
-transform: translate(-_WIDTH_, 0);
-}
-}
-@media (min-width: 768px) {
-.sidebar-collapse .main-sidebar,
-.sidebar-collapse .left-side {
--webkit-transform: translate(-_WIDTH_, 0);
--ms-transform: translate(-_WIDTH_, 0);
--o-transform: translate(-_WIDTH_, 0);
-transform: translate(-_WIDTH_, 0);
-}
-}
-"))))
+"
+))))
   }
   dataValue <- shiny::restoreInput(id = "sidebarCollapsed",
                                    default = collapsed)
@@ -199,16 +206,17 @@ dashboardPage = function (
     tags$body(
       class = paste0("skin-", skin, cls), # if you want control-sidebar to be opened, add " control-sidebar-open"
       style = "min-height: 611px;",
-      shiny::bootstrapPage(shinyjs::useShinyjs(),
-                           div(
-                             id='__rave__mask__',
-                             class = ifelse(is.null(initial_mask), 'hidden', ''),
-                             div(
-                               class = 'loading_info',
-                               initial_mask
-                             )
-                           ),
-                           content, title = title)
+      shiny::bootstrapPage(
+        shinyjs::useShinyjs(),
+        div(
+          id = '__rave__mask__',
+          class = ifelse(is.null(initial_mask), 'hidden', ''),
+          div(class = 'loading_info',
+              initial_mask)
+        ),
+        content,
+        title = title
+      )
     )
   )
 }
