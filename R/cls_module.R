@@ -1136,21 +1136,29 @@ rave_outputs <- function(..., .output_tabsets = list()){
 #' @export
 rave_updates <- function(..., .env = globalenv()){
 
-  res = list(...)
-  if(exists('.tmp_init', envir = .env)){
-    init_val = get('.tmp_init', envir = .env)
+  res = rlang::quos(...)
+  nms = names(res)
+  if(length(nms) == 0){
+    return()
   }
-  for(nm in names(res)){
-    if(nm != '' && nm %in% names(init_val)){
-      val = res[[nm]]
-      if(is.list(val)){
-        val = val[[init_val[[nm]][['val_name']]]]
-      }
-      if(!is.null(val)){
-        assign(nm, val, envir = .env)
-      }
-    }
+  lapply(res[nms == ''], function(quo){
+    rave::eval_dirty(quo, env = .env)
+  })
+
+  nms = nms[nms != '']
+
+  parser = rave:::comp_parser()
+  for(nm in names(nms)){
+    val = rave::eval_dirty(res[[nm]], env = .env)
+    try({
+      re = val$value
+      re %?<-% val$selected
+      .env[[nm]] = re
+    })
   }
+
+  invisible(res)
+
 }
 
 
