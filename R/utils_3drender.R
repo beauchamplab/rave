@@ -52,10 +52,10 @@ render_3d_electrodes <- function(
 }
 
 
-get_color <- function(col){
+get_color <- function(col, alpha = F){
   tryCatch({
-    col2rgb(col)
+    col2rgb(col, alpha = alpha)
   }, error = function(e){
-    col2rgb(as.numeric(col))
+    col2rgb(as.numeric(col), alpha = alpha)
   })
 }

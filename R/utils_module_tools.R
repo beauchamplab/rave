@@ -291,120 +291,125 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
       electrodes,
       values = NULL,
       marker = NULL,
-      palette = colorRampPalette(c('navy', 'white', 'red')),
-      resolution = 1001,
+      palette = colorRampPalette(c('navy', 'grey', 'red'))(1001),
       symmetric = T,
-      fps = 2,
+      fps = 5,
       loop = T,
       radiu_normal = 5,
       radiu_minis = 2
     ){
-      # TODO
-      return()
+      "marker MUST either be NULL or have the same length as electrodes"
+      "values can be MULL, vector or matrix, either numbers or colors/namedcolors"
+      "if values is a matrix, then ncol(values)=length(electrodes), or if vector"
+      "length(values)=length(electrodes). Rows of values will be used to generate animation"
+
       tbl %?<-% data_env$subject$electrodes
+      tbl = as.data.frame(tbl, stringsAsFactors = F)
       tbl$Label[is.na(tbl$Label)] = ''
       tbl$Name = stringr::str_trim(sprintf('Electrode %d %s', tbl$Electrode, tbl$Label))
       tbl$Radius = radiu_normal
       tbl$Radius[stringr::str_detect(tbl$Group, '^([Ee]pi)|([Mm]ini)')] = radiu_minis
-      electrodes = electrodes[electrodes %in% tbl$Electrode]
-      ind = sapply(electrodes, function(e){which(tbl$Electrode == e)})
-      n = nrow(tbl)
+      tbl$active = 0
+      tbl$Marker = tbl$Name
 
-      if(length(marker) == 0){
-        marker = with(tbl, {
-          stringr::str_trim(stringr::str_c('Electrode - ', Electrode, ' ', Label))
-        })
-      }else if(length(marker) == length(values)){
-        tmp = rep('', length(tbl$Electrode))
-        tmp[ind] = marker
-        marker = tmp
-      }
+      if(!missing(electrodes) || length(electrodes)){
+        electrodes = electrodes[electrodes %in% tbl$Electrode]
 
-      assertthat::assert_that(length(marker) == n, msg = 'Marker should have length equaling to number of electrodes')
+        tbl$active = tbl$Electrode %in% electrodes
+        ind = sapply(electrodes, function(e){which(tbl$Electrode == e)})
+        tbl$active[ind] = seq_along(ind)
 
 
-      if(length(electrodes) > 0 && length(values)){
-        if(!is.list(values)){
-          values = list(values)
+        # Markers
+        marker %?<-% tbl$Name[ind]
+        assertthat::assert_that(length(marker) == length(electrodes), msg = "marker MUST either be NULL or have the same length as electrodes")
+        # Add links to Marker if indicated
+        # TODO
+
+
+        tbl$Marker[ind] = marker
+
+        # Values
+        values %?<-% rep(0, length(electrodes))
+        if(is.vector(values)){
+          values = matrix(values, nrow = 1)
         }
+        assertthat::assert_that(ncol(values) == length(electrodes), msg = "values MUST either be NULL or ncol(values) == length(electrodes)")
 
-        resolution = floor(resolution / 2) * 2 + 1
-
-        rg = range(unlist(values))
-        if(rg[1] == rg[[2]]){
-          if(rg[1] == 0){
-            a = 0
-            b = 0
+        # Assign colors
+        if(is.numeric(values)){
+          res = length(palette)
+          rg = range(values)
+          if(rg[1] == rg[2]){
+            values = array(palette[floor((res+1)/2)], dim = dim(values))
           }else{
-            a = (resolution - 1) / 2 / abs(rg[1])
-            b = 0
+            if(symmetric){
+              b = 0
+              a = (res-2) / 2 / max(abs(rg))
+              c = (res + 1) / 2
+            }else{
+              b = rg[1]
+              a = (res-1) / (rg[2]-rg[1])
+              c = 1
+            }
+            col_ind = floor(a * (values - b) +c)
+            col_ind[col_ind < 1] = 1
+            col_ind[col_ind > res] = res
+            values = matrix(palette[col_ind], ncol = length(electrodes))
           }
         }else{
-          if(symmetric){
-            a = (resolution - 3) / 2 / max(abs(rg))
-            b = 0
-          }else{
-            a = (resolution - 1) / (rg[2] - rg[1])
-            b = mean(rg)
-          }
+          # values are characters, we assume that those are colors that needs no
         }
+        # Set keyframes
+        key_frame = seq_len(nrow(values))
 
-        colors = palette(resolution)
-
-
-
-
-        lapply(seq_len(n), function(ii){
-          e = tbl$Electrode[ii]
-          sel = electrodes == e
-          row = tbl[tbl$Electrode == e, ]
-          lapply(values, function(val){
-            re = as.integer(get_color(colors[round((val[sel] - b) * a + (resolution + 1) / 2)]))
-            names(re) = NULL
-            re
-          }) ->
-            re
-
-          re = rave:::dropNulls(re)
-
-          # generate electrode
-          with(row, {
-            threejsr::GeomSphere$new(
-              position = c(Coord_x, Coord_y, Coord_z),
-              mesh_name = Name,
-              mesh_info = marker[ii],
-              radius = Radius,
-              layer = 2
-            )
-          }) ->
-            g
-
-          if(length(re) == length(values)){
-            g$animation_event(event_data = re, loop = loop)
-          }
-
-          return(g)
-        }) ->
-          m
+        has_value = T
       }else{
-        lapply(tbl$Electrode, function(e){
-          row = tbl[tbl$Electrode == e, ]
-          with(row, {
-            threejsr::GeomSphere$new(
-              position = c(Coord_x, Coord_y, Coord_z),
-              mesh_name = Name,
-              radius = Radius,
-              layer = 2
-            )
-          }) ->g
-
-          g
-        }) ->
-          m
-
+        has_value = F
       }
 
+      n = nrow(tbl)
 
+      lapply(seq_len(n), function(ii){
+        row = tbl[ii, ]
+        g = with(row, {
+          threejsr::GeomSphere$new(
+            position = c(Coord_x, Coord_y, Coord_z),
+            mesh_name = Name,
+            mesh_info = Marker,
+            radius = Radius
+          )
+
+        })
+
+        if(row$active > 0){
+          # has value
+          sapply(values[,row$active], function(v){
+            get_color(col = v, alpha = T)
+          }) ->
+            col
+          colnames(col) = NULL
+          col = t(col)
+
+          g$animation_event(
+            name = 'ani',
+            event_data = col,
+            key_frames = key_frame,
+            loop = loop,
+            pixel_size = 4
+          )
+        }
+
+        g
+
+      }) ->
+        geoms
+
+      threejsr:::threejs_scene.default(
+        elements = geoms,
+        fps = fps,
+        ...
+      )
 
       threejsr::threejs_scene(m)
     }
