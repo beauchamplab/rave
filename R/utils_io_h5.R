@@ -27,7 +27,7 @@ LazyH5 <- R6::R6Class(
       }
       invisible(self)
     },
-    initialize = function(file_path, data_name, read_only = T){
+    initialize = function(file_path, data_name, read_only = F){
 
       # First get absolute path, otherwise hdf5r may report file not found error
       if(read_only){
