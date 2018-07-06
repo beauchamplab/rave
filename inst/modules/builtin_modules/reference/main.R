@@ -156,7 +156,9 @@ output[[('elec_loc')]] = threejsr::renderThreejs({
     tbl = tbl,
     electrodes = electrodes,
     values = values,
-    marker = marker
+    marker = marker,
+    link_module = 'condition_explorer',
+    variable_name = 'electrode'
   )
 }, env = ..runtime_env)
 

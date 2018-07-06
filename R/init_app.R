@@ -176,7 +176,22 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, .
       global_reactives$check_results = Sys.time()
     })
 
+    # unlist(modules) will flatten modules but it's still a list
     module_ids = str_to_upper(sapply(unlist(modules), function(m){m$module_id}))
+    update_variable = function(module_id, variable_name, value, ...){
+      tryCatch({
+        module_id = str_to_upper(module_id)
+        m = unlist(modules)[module_ids %in% module_id]
+        if(length(m) == 1){
+          m = m[[1]]
+          e = m$get_or_new_exec_env()
+          e$cache_input(inputId = variable_name, val = value, read_only = F)
+        }
+      }, error = function(e){
+        logger('Cannot update variable ', variable_name, ' in module ', module_id, level = 'WARNING')
+        logger(e, level = 'WARNING')
+      })
+    }
 
     # Switch to module
     observe({
@@ -185,8 +200,22 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, .
         mid = module_info$module_id = str_to_upper(module_info$module_id)
         if(mid %in% module_ids){
           logger('Switching to module - ', mid, level = 'INFO')
+          do.call(update_variable, module_info)
           session$sendCustomMessage('rave_sidebar_switch', module_info)
         }
+      }
+    })
+
+    # Threejs 3D viewer click callback
+    observeEvent(input[['__rave_threejsr_callback']], {
+      dat = input[['__rave_threejsr_callback']]
+      # dat = list(
+      #   module_id, electrode, variable_name
+      # )
+      mid = dat$module_id = str_to_upper(dat$module_id)
+      if(mid %in% module_ids){
+        do.call(update_variable, dat)
+        session$sendCustomMessage('rave_sidebar_switch', dat)
       }
     })
 
@@ -218,6 +247,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, .
     lapply(shinirized_modules, function(m){
       output[[str_c(m$id, '_UI')]] <- renderUI(m$ui())
     })
+
 
 
     #################################################################

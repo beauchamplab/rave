@@ -291,6 +291,9 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
       electrodes,
       values = NULL,
       marker = NULL,
+      link_module = NULL,
+      variable_name = 'electrode',
+      link_text = 'View Electrode',
       palette = colorRampPalette(c('navy', 'grey', 'red'))(1001),
       symmetric = T,
       fps = 5,
@@ -304,6 +307,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
       "values can be MULL, vector or matrix, either numbers or colors/namedcolors"
       "if values is a matrix, then ncol(values)=length(electrodes), or if vector"
       "length(values)=length(electrodes). Rows of values will be used to generate animation"
+
 
       tbl %?<-% data_env$subject$electrodes
       tbl = as.data.frame(tbl, stringsAsFactors = F)
@@ -392,6 +396,15 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
 
         })
 
+        if(!is.null(link_module)){
+          g$extra_data(
+            text = link_text,
+            module_id = link_module,
+            variable_name = variable_name,
+            value = row$Electrode
+          )
+        }
+
         if(row$active > 0){
           # has value
           sapply(values[,row$active], function(v){
@@ -419,6 +432,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
         elements = geoms,
         fps = fps,
         control_gui = control_gui,
+        callback_id = '__rave_threejsr_callback',
         ...
       )
     }

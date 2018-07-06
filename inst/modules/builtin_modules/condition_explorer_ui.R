@@ -102,8 +102,10 @@ rave_outputs(
 rave_updates(
   electrode = {
     e = preload_info$electrodes
+    val = cache_input('electrode', e[1])
+    if(!val %in% e){ val = e[1] }
     list(choices = e,
-         selected = e[1])
+         selected = val)
   },
   GROUPS_CMPD = {
     trials = unique(preload_info$condition)

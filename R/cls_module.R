@@ -271,15 +271,6 @@ ExecEnvir <- R6::R6Class(
         self$global_reactives$has_data = Sys.time()
       }
     },
-    switch_to = function(module_id, ...){
-      if(is.reactivevalues(self$global_reactives)){
-        self$global_reactives$switch_module = c(
-          list(
-            module_id = module_id
-          ), list(...)
-        )
-      }
-    },
     finalize = function(){
       logger(sprintf('[%s] Runtime Environment Removed.', private$module_env$module_id))
     },
@@ -344,8 +335,24 @@ ExecEnvir <- R6::R6Class(
         self$reload()
       }
 
-      self$wrapper_env$switch_to = function(module_id, ...){
-        self$switch_to(module_id, ...)
+      self$wrapper_env$switch_to = function(module_id, varriable_name = NULL, value = NULL, ...){
+        if(is.reactivevalues(self$global_reactives)){
+          self$global_reactives$switch_module = c(
+            list(
+              module_id = module_id,
+              varriable_name = varriable_name,
+              value = value
+            ),
+            list(...)
+          )
+        }
+      }
+
+      self$wrapper_env$current_module = function(){
+        if(is.reactivevalues(self$global_reactives)){
+          return(isolate(get_val(self$global_reactives, 'execute_module', default = '')))
+        }
+        return('')
       }
 
       self$wrapper_env$rave_inputs = function(...){
@@ -861,7 +868,7 @@ ExecEnvir <- R6::R6Class(
       quos = rlang::quos(...)
       private$update = quos
 
-      self$input_update = function(input, session = NULL, init = FALSE){
+      self$input_update = function(input, session = NULL, init = FALSE, var_names = NULL, value = NULL){
         start = Sys.time()
         input = dropNulls(input)
         if(!init){
@@ -871,7 +878,7 @@ ExecEnvir <- R6::R6Class(
         if(is.null(session)){
           session = getDefaultReactiveDomain() #private$session
         }
-        var_names = names(private$update)
+        var_names %?<-% names(private$update)
         if('' %in% var_names){
           lapply(private$update[var_names == ''], function(quo){
             tryCatch({
@@ -891,9 +898,20 @@ ExecEnvir <- R6::R6Class(
           lapply(var_names[var_names != ''], function(varname){
             tryCatch({
               comp = private$inputs$comp[[varname]]
+              if(is.null(comp)){
+                return()
+              }
               new_args = eval_dirty(
                 private$update[[varname]], data = input, env = self$param_env
               )
+
+              if(!is.null(value)){
+                if('value' %in% names(new_args)){
+                  new_args[['value']] = value
+                }else{
+                  new_args[['selected']] = value
+                }
+              }
 
               comp$updates(session = session, .args = new_args)
             },error = function(e){
