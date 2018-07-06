@@ -300,3 +300,107 @@ li.control-sidebar-items>a {
     position: fixed;
     right: 0;
 }
+
+
+
+.rave-input-panel{
+  -webkit-transition:-webkit-transform .3s ease-in-out, margin .3s ease-in-out;
+  -moz-transition:-moz-transform .3s ease-in-out, margin .3s ease-in-out;
+  -o-transition:-o-transform .3s ease-in-out, margin .3s ease-in-out;
+  transition: transition .3s ease-in-out, margin .3s ease-in-out;
+}
+
+.rave-output-panel{
+  -webkit-transition:width .3s ease-in-out;
+  -moz-transition:width .3s ease-in-out;
+  -o-transition:width .3s ease-in-out;
+  transition: width .3s ease-in-out;
+  z-index: 3;
+}
+
+.rave-hide-inputs .rave-input-panel{
+  -webkit-transform: translateX(-100vw);
+  -ms-transform: translateX(-100vw);
+  -o-transform: translateX(-100vw);
+  transform: translateX(-100vw);
+  margin-right: -100%;
+}
+
+.rave-hide-inputs .rave-output-panel{
+  width: 100% !important;
+}
+
+
+
+
+
+
+
+
+
+/* shiny dashboard */
+
+:root {
+    --rave-control-width: 60vh;
+}
+
+
+.control-sidebar, .right-side {
+    width: var(--rave-control-width);
+}
+
+/*
+@media (min-width: 768px) {
+  .content-wrapper,
+    .left-side,
+  .main-footer {
+    /* margin-right: var(--rave-control-width); /
+  }
+}
+@media (max-width: 767px) {
+  .sidebar-open .content-wrapper,
+  .sidebar-open .right-side,
+  .sidebar-open .main-footer {
+    -webkit-transform: translate(var(--rave-control-width), 0);
+    -ms-transform: translate(var(--rave-control-width), 0);
+    -o-transform: translate(var(--rave-control-width), 0);
+    transform: translate(var(--rave-control-width), 0);
+  }
+}
+@media (max-width: 767px) {
+  .main-sidebar,
+  .left-side {
+    -webkit-transform: translate(-var(--rave-control-width), 0);
+    -ms-transform: translate(-var(--rave-control-width), 0);
+    -o-transform: translate(-var(--rave-control-width), 0);
+    transform: translate(-var(--rave-control-width), 0);
+  }
+}
+@media (min-width: 768px) {
+  .sidebar-collapse .main-sidebar,
+  .sidebar-collapse .left-side {
+    -webkit-transform: translate(-var(--rave-control-width), 0);
+    -ms-transform: translate(-var(--rave-control-width), 0);
+    -o-transform: translate(-var(--rave-control-width), 0);
+    transform: translate(-var(--rave-control-width), 0);
+  }
+}
+*/
+
+.control-sidebar,
+.control-sidebar-bg {
+  width: var(--rave-control-width)!important;
+  right: -100vw!important;
+}
+
+.control-sidebar-open .control-sidebar,
+.control-sidebar-open .control-sidebar-bg{
+  right: 0!important;
+}
+
+.content-wrapper,
+.main-footer,
+.right-side{
+  margin-right:0 !important;
+}
+

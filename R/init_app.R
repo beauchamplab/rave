@@ -124,7 +124,12 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, .
       )
     ),
     control = dashboardControl(
-      data_selector$control()
+      fluidRow(
+        column(
+          width = 12L,
+          p('asdasdadad')
+        )
+      )
     ),
     body = shinydashboard::dashboardBody(
       do.call(
@@ -178,7 +183,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, .
 
     # unlist(modules) will flatten modules but it's still a list
     module_ids = str_to_upper(sapply(unlist(modules), function(m){m$module_id}))
-    update_variable = function(module_id, variable_name = NULL, value = NULL, ...){
+    update_variable = function(module_id, variable_name = NULL, value = NULL, flush = T, ...){
       if(is.null(variable_name)){
         return()
       }
@@ -189,6 +194,10 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, .
           m = m[[1]]
           e = m$get_or_new_exec_env()
           e$cache_input(inputId = variable_name, val = value, read_only = F)
+          if(flush && mid == str_to_upper(isolate(input$sidebar))){
+            # When target module is not the same as current module, we need manually refresh current module
+            e$input_update(input = list(), init = T)
+          }
         }
       }, error = function(e){
         logger('Cannot update variable ', variable_name, ' in module ', module_id, level = 'WARNING')
@@ -297,16 +306,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, .
         title = subject$id,
         easyClose = T,
         size = 'l',
-        tabsetPanel(
-          tabPanel(
-            title = '3D Visualization',
-            threejsr::threejsOutput('curr_subj_elec_3d', height = '600px')
-          ),
-          tabPanel(
-            title = 'Table Details',
-            dataTableOutput('curr_subj_elec_table')
-          )
-        )
+        dataTableOutput('curr_subj_elec_table')
       )
     }
 
@@ -319,39 +319,6 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, .
           subject_modal(subject = subject, current_electrodes = electrodes)
         )
       }
-    })
-
-    output$curr_subj_elec_3d <- plotly::renderPlotly({
-      validate(need(global_reactives$has_data, "Please import subject first."))
-      btn = input$curr_subj_details_btn
-      has_data = global_reactives$has_data
-      data_repo = getDefaultDataRepository()
-      validate(need(has_data && check_data_repo('subject'), message = 'No Subject Loaded'))
-
-      tbl = data_repo[['subject']]$electrodes
-      loaded_electrodes = data_repo[['electrodes']]
-      # get latest value
-      tryCatch({
-        data_repo = getDefaultDataRepository()
-        suma_out_dir = data_repo$subject$dirs$suma_out_dir
-
-        module = modules[vapply(unlist(modules), function(x){
-          global_reactives$execute_module == str_to_upper(x$module_id)
-        }, FALSE)]
-        pattern = module[[1]]$label_name
-        pattern = sprintf('%s_([0-9_\\-]+).csv', str_replace_all(pattern, '[^a-zA-Z0-9_]', '_'))
-        dat = list.files(suma_out_dir, pattern = pattern)
-        fname = dat[which.max(as.numeric(strptime(str_match(dat, pattern)[,2], '%Y-%m-%d_%H_%M_%S')))]
-        dat = read.csv(file.path(suma_out_dir, fname))
-        dat = dat[dat[, 1] %in% loaded_electrodes, ]
-        values = loaded_electrodes * NA
-        values[loaded_electrodes %in% dat[,1]] = dat[,2]
-        values
-      }, error = function(e){
-        NULL
-      }) ->
-        values
-      rave:::render_3d_electrodes(tbl = tbl, loaded_electrodes = loaded_electrodes, values = values)
     })
 
     output$curr_subj_elec_table <- renderDataTable({

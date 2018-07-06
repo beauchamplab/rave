@@ -868,7 +868,7 @@ ExecEnvir <- R6::R6Class(
       quos = rlang::quos(...)
       private$update = quos
 
-      self$input_update = function(input, session = NULL, init = FALSE, var_names = NULL, value = NULL){
+      self$input_update = function(input, session = NULL, init = FALSE){
         start = Sys.time()
         input = dropNulls(input)
         if(!init){
@@ -878,7 +878,7 @@ ExecEnvir <- R6::R6Class(
         if(is.null(session)){
           session = getDefaultReactiveDomain() #private$session
         }
-        var_names %?<-% names(private$update)
+        var_names = names(private$update)
         if('' %in% var_names){
           lapply(private$update[var_names == ''], function(quo){
             tryCatch({
@@ -904,14 +904,6 @@ ExecEnvir <- R6::R6Class(
               new_args = eval_dirty(
                 private$update[[varname]], data = input, env = self$param_env
               )
-
-              if(!is.null(value)){
-                if('value' %in% names(new_args)){
-                  new_args[['value']] = value
-                }else{
-                  new_args[['selected']] = value
-                }
-              }
 
               comp$updates(session = session, .args = new_args)
             },error = function(e){
@@ -1057,8 +1049,8 @@ ExecEnvir <- R6::R6Class(
 
 
       names(more_btns) = NULL
-      shiny::column(
-        sidebar_width,
+      div(
+        class = sprintf('col-sm-%d rave-input-panel', sidebar_width),
         rlang::eval_tidy(private$inputs$quos, env = env),
         fluidRow(
           shinydashboard::box(
@@ -1076,8 +1068,8 @@ ExecEnvir <- R6::R6Class(
     generate_output_ui = function(sidebar_width = 3L){
       ns = self$ns
       env = environment()
-      shiny::column(
-        12L - sidebar_width,
+      div(
+        class = sprintf('col-sm-%d rave-output-panel', 12L - sidebar_width),
         rlang::eval_tidy(private$outputs$quos, env = env)
       )
 
@@ -1148,7 +1140,7 @@ rave_inputs <- function(..., .input_panels = list(), .env = globalenv()){
   parser = rave:::comp_parser()
   lapply(quos, function(quo){
     comp = parser$parse_quo(quo)
-    value = comp$initial_value
+    value = eval(comp$initial_value, envir = .env)
     inputId = comp$inputId
     .env[[inputId]] = value
 

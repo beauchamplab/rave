@@ -24,6 +24,10 @@ $(document).ready(function(){
 	  $(window).trigger("resize");
 	});
 
+	$(document).on('click', '.nav-link[data-toggle="rave-toggle-inputs"]', function(){
+	  $('.content-wrapper').toggleClass('rave-hide-inputs');
+	});
+
 
 	$(document).on("click", ".rave-elastic-btn", function() {
 	  // find its parent div and add class "rave-elastic"
