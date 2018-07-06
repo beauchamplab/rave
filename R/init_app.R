@@ -178,7 +178,10 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, .
 
     # unlist(modules) will flatten modules but it's still a list
     module_ids = str_to_upper(sapply(unlist(modules), function(m){m$module_id}))
-    update_variable = function(module_id, variable_name, value, ...){
+    update_variable = function(module_id, variable_name = NULL, value = NULL, ...){
+      if(is.null(variable_name)){
+        return()
+      }
       tryCatch({
         module_id = str_to_upper(module_id)
         m = unlist(modules)[module_ids %in% module_id]
