@@ -139,7 +139,6 @@ ECoGRepository <- R6::R6Class(
           epoch_name = epoch_name,
           pre = pre, post = post, types = data_type, raw = !referenced
         ) -> elc;
-        rhdf5::H5close();
 
         if(is.function(func)){
           elc = func(elc)

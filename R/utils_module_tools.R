@@ -86,7 +86,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
         lapply_async(electrodes, function(e){
           sapply(blocks, function(b){
             f = file.path(dirs$channel_dir, 'voltage', sprintf('%d.h5', e))
-            load_h5(f, '/raw/voltage/' %&% b)[]
+            load_h5(f, '/raw/voltage/' %&% b, ram = T)
           }, simplify = F, USE.NAMES = T)
         }, .call_back = function(i){
           progress$inc(sprintf('Loading voltage data - %d', electrodes[i]))
@@ -241,6 +241,201 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
       data_env$.private$repo$baseline(from = from, to = to, electrodes = electrodes, ...)
     }
 
+    reload = function(epoch, epoch_range, reference, electrodes){
+      has_change = F
+      if(missing(electrodes)){
+        electrodes = data_env$preload_info$electrodes
+      }else{
+        has_change = T
+      }
+      if(missing(epoch)){
+        epoch = data_env$preload_info$epoch_name
+      }else{
+        has_change = T
+      }
+      if(missing(epoch_range)){
+        epoch_range = range(data_env$preload_info$time_points)
+        epoch_range = abs(epoch_range)
+      }else{
+        has_change = T
+      }
+      if(missing(reference)){
+        reference = data_env$preload_info$reference_name
+      }else{
+        has_change = T
+      }
+
+      rave::rave_prepare(
+        subject = data_env$subject$subject_id,
+        electrodes = electrodes,
+        epoch = epoch,
+        time_range = epoch_range,
+        reference = reference,
+        attach = F,
+        data_types = NULL
+      )
+
+      group = 'main_app'
+      last_entry('electrodes', electrodes, save = T, group = group)
+      last_entry('epoch', epoch, save = T, group = group)
+      last_entry('epoch_range', epoch_range, save = T, group = group)
+
+      # execenv$reloadUI()
+      # global_reactives$force_refresh_all = Sys.time()
+      # global_reactives$has_data = Sys.time()
+    }
+
+    ###### Part 3: Visualization ######
+    plot_3d_electrodes = function(
+      tbl = NULL,
+      electrodes,
+      values = NULL,
+      marker = NULL,
+      link_module = NULL,
+      variable_name = 'electrode',
+      link_text = 'View Electrode',
+      palette = colorRampPalette(c('navy', 'grey', 'red'))(1001),
+      symmetric = T,
+      fps = 5,
+      control_gui = F,
+      loop = T,
+      radiu_normal = 5,
+      radiu_minis = 2,
+      ...
+    ){
+      "marker MUST be NULL or have length of electrodes, or of nrow(tbl)"
+      "values can be MULL, vector or matrix, either numbers or colors/namedcolors"
+      "if values is a matrix, then ncol(values)=length(electrodes), or if vector"
+      "length(values)=length(electrodes). Rows of values will be used to generate animation"
+
+
+      tbl %?<-% data_env$subject$electrodes
+      tbl = as.data.frame(tbl, stringsAsFactors = F)
+      tbl$Label[is.na(tbl$Label)] = ''
+      tbl$Name = stringr::str_trim(sprintf('Electrode %d %s', tbl$Electrode, tbl$Label))
+      tbl$Radius = radiu_normal
+      tbl$Radius[stringr::str_detect(tbl$Group, '^([Ee]pi)|([Mm]ini)')] = radiu_minis
+      tbl$active = 0
+      tbl$Marker = tbl$Name
+
+      if(!missing(electrodes) || length(electrodes)){
+        electrodes = electrodes[electrodes %in% tbl$Electrode]
+
+        tbl$active = tbl$Electrode %in% electrodes
+        ind = sapply(electrodes, function(e){which(tbl$Electrode == e)})
+        tbl$active[ind] = seq_along(ind)
+
+
+        # Markers
+        marker %?<-% tbl$Name[ind]
+        assertthat::assert_that(length(marker) %in% c(length(electrodes), nrow(tbl)), msg = "marker MUST be NULL or have length of electrodes, or of nrow(tbl)")
+        # Add links to Marker if indicated
+        # TODO
+
+
+        if(length(marker) == length(electrodes)){
+          tbl$Marker[ind] = marker
+        }else{
+          tbl$Marker = marker
+        }
+
+
+        # Values
+        values %?<-% rep(0, length(electrodes))
+        if(is.vector(values)){
+          values = matrix(values, nrow = 1)
+        }
+        assertthat::assert_that(ncol(values) == length(electrodes), msg = "values MUST either be NULL or ncol(values) == length(electrodes)")
+
+        # Assign colors
+        if(is.numeric(values)){
+          res = length(palette)
+          rg = range(values)
+          if(rg[1] == rg[2]){
+            values = array(palette[floor((res+1)/2)], dim = dim(values))
+          }else{
+            if(symmetric){
+              b = 0
+              a = (res-2) / 2 / max(abs(rg))
+              c = (res + 1) / 2
+            }else{
+              b = rg[1]
+              a = (res-1) / (rg[2]-rg[1])
+              c = 1
+            }
+            col_ind = floor(a * (values - b) +c)
+            col_ind[col_ind < 1] = 1
+            col_ind[col_ind > res] = res
+            values = matrix(palette[col_ind], ncol = length(electrodes))
+          }
+        }else{
+          # values are characters, we assume that those are colors that needs no
+        }
+        # Set keyframes
+        key_frame = seq_len(nrow(values))
+
+        has_value = T
+      }else{
+        if(length(marker) == nrow(tbl)){
+          tbl$Marker = marker
+        }
+        has_value = F
+      }
+
+      n = nrow(tbl)
+
+      lapply(seq_len(n), function(ii){
+        row = tbl[ii, ]
+        g = with(row, {
+          threejsr::GeomSphere$new(
+            position = c(Coord_x, Coord_y, Coord_z),
+            mesh_name = Name,
+            mesh_info = Marker,
+            radius = Radius
+          )
+
+        })
+
+        if(!is.null(link_module)){
+          g$extra_data(
+            text = link_text,
+            module_id = link_module,
+            variable_name = variable_name,
+            value = row$Electrode
+          )
+        }
+
+        if(row$active > 0){
+          # has value
+          sapply(values[,row$active], function(v){
+            get_color(col = v, alpha = T) / 255
+          }) ->
+            col
+          colnames(col) = NULL
+          col = t(col)
+
+          g$animation_event(
+            name = 'ani',
+            event_data = col,
+            key_frames = key_frame,
+            loop = loop,
+            pixel_size = 4
+          )
+        }
+
+        g
+
+      }) ->
+        geoms
+
+      threejsr:::threejs_scene.default(
+        elements = geoms,
+        fps = fps,
+        control_gui = control_gui,
+        callback_id = '__rave_threejsr_callback',
+        ...
+      )
+    }
 
   }, envir = tools)
 

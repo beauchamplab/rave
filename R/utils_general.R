@@ -1,4 +1,12 @@
 #' @export
+color_console <- function(enable = T){
+  re = rave_options(crayon_enabled = enable)
+  if(re){
+    logger('RAVE switched to color console', level = 'INFO')
+  }
+}
+
+#' @export
 time_diff <- function(start, end){
   delta = unclass(end-start)
   list(

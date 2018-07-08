@@ -2,78 +2,34 @@
 
 #' @import shiny
 #' @export
-dashboardControl = function (..., disable = FALSE, width = NULL, collapsed = FALSE)
+dashboardControl = function (...,
+                             disable = FALSE,
+                             collapsed = FALSE)
 {
-  width <- validateCssUnit(width)
-  custom_css <- NULL
-  if (!is.null(width)) {
-    custom_css <- tags$head(tags$style(HTML(gsub("_WIDTH_",
-width, fixed = TRUE,
-"
-.control-sidebar, .right-side {
-width: _WIDTH_;
-}
-@media (min-width: 768px) {
-.content-wrapper,
-.left-side,
-.main-footer {
-margin-right: _WIDTH_;
-}
-.control-sidebar,
-.right-side {
-width: _WIDTH_;
-}
-}
-@media (max-width: 767px) {
-.sidebar-open .content-wrapper,
-.sidebar-open .right-side,
-.sidebar-open .main-footer {
--webkit-transform: translate(_WIDTH_, 0);
--ms-transform: translate(_WIDTH_, 0);
--o-transform: translate(_WIDTH_, 0);
-transform: translate(_WIDTH_, 0);
-}
-}
-@media (max-width: 767px) {
-.main-sidebar,
-.left-side {
--webkit-transform: translate(-_WIDTH_, 0);
--ms-transform: translate(-_WIDTH_, 0);
--o-transform: translate(-_WIDTH_, 0);
-transform: translate(-_WIDTH_, 0);
-}
-}
-@media (min-width: 768px) {
-.sidebar-collapse .main-sidebar,
-.sidebar-collapse .left-side {
--webkit-transform: translate(-_WIDTH_, 0);
--ms-transform: translate(-_WIDTH_, 0);
--o-transform: translate(-_WIDTH_, 0);
-transform: translate(-_WIDTH_, 0);
-}
-}
-"))))
-  }
   dataValue <- shiny::restoreInput(id = "sidebarCollapsed",
                                    default = collapsed)
   if (disable)
     dataValue <- TRUE
   dataValueString <- if (dataValue)
     "true"
-  else "false"
+  else
+    "false"
   tagList(
-    tags$aside(class = "control-sidebar control-sidebar-dark",
-               `data-collapsed` = dataValueString,
-               custom_css, tags$section(class = "sidebar", `data-disable` = if (disable)
-                 1
-                 else NULL, list(...))),
-    div(class="control-sidebar-bg")
+    tags$aside(
+      class = "control-sidebar control-sidebar-light",
+      `data-collapsed` = dataValueString,
+      div(
+        class = 'tab-content',
+        ...
+      )
+    ),
+    div(class = "control-sidebar-bg")
   )
 }
 
 #' @import shiny
 #' @export
-dashboardHeader = function (..., title = NULL, titleWidth = NULL, disable = FALSE,
+dashboardHeader = function (..., title = NULL, titleWidth = NULL, disable = FALSE, btn_text_right = '3D Viewer',
                             .list = NULL)
 {
   items <- .list
@@ -101,6 +57,13 @@ dashboardHeader = function (..., title = NULL, titleWidth = NULL, disable = FALS
               shiny::icon('th'), span('Modules')
             )
           ),
+          tags$li(
+            a(href = "#", class = "nav-item nav-link force-recalculate",
+              `data-toggle` = "rave-toggle-inputs",
+              role = "button", span(class = "sr-only", "Toggle input panel"),
+              shiny::icon('keyboard-o'), span('Input Panels')
+            )
+          ),
           ...
         )
       ),
@@ -115,7 +78,7 @@ dashboardHeader = function (..., title = NULL, titleWidth = NULL, disable = FALS
                 `data-toggle` = "control-sidebar",
                 role = "button",
                 span(class = "sr-only", "Toggle control"),
-                shiny::icon('cogs'), span('Controls')
+                shiny::icon('hand-o-right'), span(btn_text_right)
               )
             )
           )
@@ -199,16 +162,17 @@ dashboardPage = function (
     tags$body(
       class = paste0("skin-", skin, cls), # if you want control-sidebar to be opened, add " control-sidebar-open"
       style = "min-height: 611px;",
-      shiny::bootstrapPage(shinyjs::useShinyjs(),
-                           div(
-                             id='__rave__mask__',
-                             class = ifelse(is.null(initial_mask), 'hidden', ''),
-                             div(
-                               class = 'loading_info',
-                               initial_mask
-                             )
-                           ),
-                           content, title = title)
+      shiny::bootstrapPage(
+        shinyjs::useShinyjs(),
+        div(
+          id = '__rave__mask__',
+          class = ifelse(is.null(initial_mask), 'hidden', ''),
+          div(class = 'loading_info',
+              initial_mask)
+        ),
+        content,
+        title = title
+      )
     )
   )
 }

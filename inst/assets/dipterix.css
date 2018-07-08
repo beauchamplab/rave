@@ -300,3 +300,68 @@ li.control-sidebar-items>a {
     position: fixed;
     right: 0;
 }
+
+
+
+.rave-input-panel{
+  -webkit-transition:-webkit-transform .3s ease-in-out, margin .3s ease-in-out;
+  -moz-transition:-moz-transform .3s ease-in-out, margin .3s ease-in-out;
+  -o-transition:-o-transform .3s ease-in-out, margin .3s ease-in-out;
+  transition: transition .3s ease-in-out, margin .3s ease-in-out;
+}
+
+.rave-output-panel{
+  -webkit-transition:width .3s ease-in-out;
+  -moz-transition:width .3s ease-in-out;
+  -o-transition:width .3s ease-in-out;
+  transition: width .3s ease-in-out;
+  z-index: 3;
+}
+
+.rave-hide-inputs .rave-input-panel{
+  -webkit-transform: translateX(-100vw);
+  -ms-transform: translateX(-100vw);
+  -o-transform: translateX(-100vw);
+  transform: translateX(-100vw);
+  margin-right: -100%;
+}
+
+.rave-hide-inputs .rave-output-panel{
+  width: 100% !important;
+}
+
+
+
+
+
+
+
+
+
+/* shiny dashboard */
+
+:root {
+    --rave-control-width: 75vh;
+}
+
+
+
+#__rave_control__ {
+  width: var(--rave-control-width);
+  right: -100vw!important;
+  position: absolute;
+  width: var(--rave-control-width);
+  height: 100vh;
+  background-color: #ffffff;
+}
+
+.rave-control-open #__rave_control__{
+  right: 0;
+}
+
+.content-wrapper,
+.main-footer,
+.right-side{
+  margin-right:0 !important;
+}
+

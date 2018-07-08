@@ -1,7 +1,6 @@
 #' RAVE Preprocess Function
 #' @usage rave_pre_process(sidebar_width = 3L, launch.browser = T, host = '127.0.0.1', ...)
 #' @import shiny
-#' @import rhdf5
 #' @import stringr
 #' @importFrom magrittr %>%
 #' @importFrom assertthat assert_that

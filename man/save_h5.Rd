@@ -4,7 +4,7 @@
 \alias{save_h5}
 \title{Save objects to H5 file without trivial checkings}
 \usage{
-save_h5(x, file, name, chunk, level = 7, replace = FALSE,
+save_h5(x, file, name, chunk = "auto", level = 4, replace = TRUE,
   new_file = FALSE, ctype = NULL, ...)
 }
 \description{
@@ -24,5 +24,5 @@ y[]
 }
 }
 \seealso{
-\code{\link[rhdf5]{h5save}}, \code{\link{load_h5}}
+\code{\link{load_h5}}
 }

@@ -1,26 +1,3 @@
-#' Library to re-sample data
-#' decimate_fir is more recommended
-
-#' @description Down sampling a signal after low pass filtering
-#' @param s signal to be re-sampled
-#' @param p target frequency
-#' @param q Current signal frequency
-#' @param d tolerance
-#' @details This function is a wrapper for \code{signal::resample}:
-#'  Note that p and q do not need to be integers since this routine does not use
-#'  a polyphase rate change algorithm, but instead uses bandlimited
-#'  interpolation, wherein the continuous time signal is estimated by summing
-#'  the sinc functions of the nearest neighbouring points up to distance d.
-#'
-#'  Note that resample computes all samples up to but not including time n+1.
-#'  If you are increasing the sample rate, this means that it will generate
-#'  samples beyond the end of the time range of the original signal.
-compress_signal <- function(s, p, q, d = 5){
-  signal::resample(s, p, q, d = 5)
-}
-
-
-
 
 
 #' @description Decimate signal via FIR1 filter

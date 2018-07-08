@@ -2,12 +2,12 @@
 % Please edit documentation in R/utils_io_h5.R
 \name{load_h5}
 \alias{load_h5}
-\title{Lazy load HDF5 file via rhdf5 package}
+\title{Lazy load HDF5 file via hdf5r package}
 \usage{
 load_h5(file, name, read_only = T)
 }
 \description{
-Lazy load HDF5 file via rhdf5 package
+Lazy load HDF5 file via hdf5r package
 }
 \details{
 load_h5 is a wrapper for class LazyH5, which load data with "lazy" mode -

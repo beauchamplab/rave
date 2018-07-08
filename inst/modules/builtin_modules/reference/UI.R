@@ -14,7 +14,6 @@ rave_inputs(
   # Group inspection
   selectInput('cur_group', 'Group Number', choices = 1:20, selected = NULL),
   customizedUI('cur_group_ui'),
-  actionButton('cur_group_save', 'Preview & Export',width = '100%'),
 
 
   # generator
@@ -31,8 +30,7 @@ rave_inputs(
     ),
     '[-] Group Inspection' = list(
       'cur_group',
-      'cur_group_ui',
-      'cur_group_save'
+      'cur_group_ui'
     ),
     '[-] Reference Generator' = list(
       'ref_generator_ui'
@@ -41,25 +39,46 @@ rave_inputs(
 )
 
 rave_updates(
-  ref_name_alt = local({
-    # clean all caches
-    nms = ls(env, all.names = T)
-    if(length(nms)){
-      rm(list = nms, envir = env)
+  {
+    env$switched %?<-% FALSE
+    # Check if subject has been referenced
+    # switch to condition explorer if subject already referenced
+    if(!env$switched && data_check$Preprocess$Referenced){
+      env$switched = T
+      switch_to('condition_explorer')
+      return()
+    }
+    clear_all = FALSE
+
+    if(length(env$subject_code) != 1 || env$subject_code != subject$subject_code || env$project_name != subject$project_name){
+      clear_all = T
     }
 
-    # Trick 1, update all information at the first component
-    env$dirs = module_tools$get_subject_dirs()
-    env$existing_refs = list.files(env$dirs$meta_dir, pattern = '^reference_.*\\.[cC][sS][vV]$')
-    env$ref_dir = file.path(env$dirs$channel_dir, 'reference')
-    env$last_import = 'new..'
-    choices = unique(c('new..', env$existing_refs))
+    if(clear_all){
+      # clean all caches
+      nms = ls(env, all.names = T)
+      if(length(nms)){
+        rm(list = nms, envir = env)
+      }
+      env$switched = T
 
-    list(
-      choices = choices,
-      selected = 'new..'
-    )
-  })
+
+      # Trick 1, update all information at the first component
+      env$dirs = module_tools$get_subject_dirs()
+      env$existing_refs = list.files(env$dirs$meta_dir, pattern = '^reference_.*\\.[cC][sS][vV]$')
+      env$ref_dir = file.path(env$dirs$channel_dir, 'reference')
+      env$last_import = 'new..'
+      env$subject_code = subject$subject_code
+      env$project_name = subject$project_name
+    }
+
+    check_load_volt()
+
+  },
+  ref_name_alt = list(
+    choices = unique(c('new..', env$existing_refs)),
+    selected = env$last_import
+  )
 )
 
 

@@ -32,7 +32,7 @@
 #' @export
 diagnose_signal <- function(
   s1, s2 = NULL, sc = NULL, srate, name = '', try_compress = TRUE,
-  max_freq = 300, window = 128, noverlap = 8, std = 3,
+  max_freq = 300, window = ceiling(srate * 2), noverlap = window / 2, std = 3,
   cex = 1.5, lwd = 0.5, flim = NULL, nclass = 100,
   main = 'Channel Inspection', col = c('black', 'red'),
   which = NULL, start_time = 0, boundary = NULL,
@@ -125,7 +125,38 @@ diagnose_signal <- function(
 }
 
 
+#' Hanning window
+#' @usage hanning(n)
+hanning <- function(n) {
+  if(n == 1){
+    return(1)
+  }else{
+    return(0.5 - 0.5 * cos (2 * pi * seq(0, n - 1) / (n - 1)))
+  }
+}
 
+detrend.naive <- function(x, y){
+  if(missing(y)){
+    y = x
+    x = seq_along(y)
+  }else{
+    assertthat::assert_that(length(x) == length(y), msg = 'x and y must have the same length.')
+  }
+  n = length(y)
+  b = ( y[n] - y[1] ) / ( x[n] - x[1] )
+  a = y[1] - b * x[1]
+  list(Y = y - (a + b * x), a = a, b = b)
+}
+
+postpad <- function(x, n){
+  x_len <- length(x)
+  if (n > x_len) {
+    return(c(x, rep(0, n - x_len)))
+  }
+  else{
+    return(x[seq_len(n)])
+  }
+}
 
 
 #' Welch Periodogram
@@ -140,104 +171,97 @@ diagnose_signal <- function(
 #' @param ... will be passed to plot
 #' @export
 pwelch <- function (
-  x, fs, window = 64, noverlap = 8,
+  x, fs, window = 64, noverlap = 8, nfft = 256,
   col = 'black', xlim = NULL, ylim = NULL, main = 'Welch periodogram',
   plot = TRUE, log = 'xy', spec_func = spectrum, cex = 1, ...) {
 
-  hamming.local <- function(n) {
-    n <- round(n)
-    if (n < 0)
-      stop("n must round to a positive integer")
-    if (n == 1)
-      c <- 1
-    else {
-      n <- n - 1
-      pi <- 4 * atan2(1, 1)
-      c <- 0.54 - 0.46 * cos(2 * pi * (0:n)/n)
-    }
-    c
-  }
-  detrend <- function (x, y)
-  {
-    if (missing(x))
-      stop("must give x")
-    n <- length(x)
-    if (missing(y)) {
-      y <- x
-      x <- seq_along(y)
-    }
-    else {
-      if (length(y) != n)
-        stop("x and y must be of same length, but they are ",
-             n, " and ", length(y))
-    }
-    first <- which(is.finite(y))[1]
-    last <- 1 + length(y) - which(is.finite(rev(y)))[1]
-    if (x[first] == x[last])
-      stop("the first and last x values must be distinct")
-    b <- (y[first] - y[[last]])/(x[first] - x[[last]])
-    a <- y[first] - b * x[first]
-    list(Y = y - (a + b * x), a = a, b = b)
-  }
 
   x <- as.vector(x)
-  x.len = length(x)
-  window <- hamming.local(floor(x.len/window))
+  x_len = length(x)
+
+  nfft = max(min(nfft, length(x)), window)
+
+  window <- hanning(window)
+
+  window_norm = norm(window, '2')
+  window_len <- length(window)
 
   normalization <- mean(window^2)
-  window.len <- length(window)
 
-  step <- max(floor(window.len - noverlap + 1), 0)
+  step <- max(floor(window_len - noverlap + 0.99), 1)
+
+  ## Average the slices
+  offset = seq(1, x_len-window_len+1, by = step)
+
+  N = length(offset);
+
+  sapply(seq_len(N), function(i){
+    a = detrend.naive(x[offset[i] - 1 + seq_len(window_len)])
+    a = fftwtools::fftw_r2c(postpad(a$Y * window, nfft))
+    Mod(a)^2
+  }) ->
+    re
+
+  NN = floor((nfft + 1) / 2)
+
+  freq = seq(1, fs / 2, length.out = NN)
+  spec = rowMeans(re[seq_len(NN),,drop = F]) / (window_len / 2)^2
 
 
-  psd <- NULL
-  nrow <- 0
-  start <- 1
-  end <- window.len
-  args <- list(...)
-  names.args <- names(args)
-  if (!("taper" %in% names.args))
-    args$taper <- 0
-  if (!("plot" %in% names.args))
-    args$plot <- FALSE
-  if (!("demean" %in% names.args))
-    args$demean <- TRUE
-  if (!("detrend" %in% names.args))
-    args$detrend <- TRUE
+  res = list(
+    freq = freq,
+    spec = spec,
+    method = "Welch"
+  )
 
-  xx <- ts(window * detrend(x[start:end])$Y, frequency = fs)
-  s <- do.call(spec_func, args = c(args, list(x = xx)))
-  freq <- s$freq
-
-  rowMeans(sapply(seq(window.len, x.len, by = window.len), function(end){
-    start = end - window.len + 1
-    xx <- ts(window * detrend(x[start:end])$Y, frequency = fs)
-    args$x <- xx
-    s <- do.call(spec_func, args = args)
-    s$spec / normalization
-  })) ->
-    spec
-  res <- list(freq = freq, spec = spec, method = "Welch",
-              df = s$df * (x.len/length(window)),
-              bandwidth = s$bandwidth, demean = FALSE, detrend = TRUE)
-  class(res) <- "spec"
+  # psd <- NULL
+  # nrow <- 0
+  # start <- 1
+  # end <- window_len
+  # args <- list(...)
+  # names.args <- names(args)
+  # if (!("taper" %in% names.args))
+  #   args$taper <- 0
+  # if (!("plot" %in% names.args))
+  #   args$plot <- FALSE
+  # if (!("demean" %in% names.args))
+  #   args$demean <- TRUE
+  # if (!("detrend" %in% names.args))
+  #   args$detrend <- TRUE
+  #
+  # xx <- ts(window * detrend(x[start:end])$Y, frequency = fs)
+  # s <- do.call(spec_func, args = c(args, list(x = xx)))
+  # freq <- s$freq
+  #
+  # rowMeans(sapply(seq(window_len, x_len, by = window_len), function(end){
+  #   start = end - window_len + 1
+  #   xx <- ts(window * detrend(x[start:end])$Y, frequency = fs)
+  #   args$x <- xx
+  #   s <- do.call(spec_func, args = args)
+  #   s$spec / normalization
+  # })) ->
+  #   spec
+  # res <- list(freq = freq, spec = spec, method = "Welch",
+  #             df = s$df * (x_len/length(window)),
+  #             bandwidth = s$bandwidth, demean = FALSE, detrend = TRUE)
+  # class(res) <- "spec"
   if (plot) {
     if(log == 'xy'){
-      xlab = 'Log10(frequency)'
-      ylab = 'Log10(spectrum)'
+      xlab = 'Log10(Frequency)'
+      ylab = 'Power/Frequency (dB/Hz)'
       freq = log10(freq)
-      spec = log10(spec)
+      spec = log10(spec) * 10
     }else if(log == 'y'){
-      xlab = 'frequency'
-      ylab = 'Log10(spectrum)'
-      spec = log10(spec)
+      xlab = 'Frequency'
+      ylab = 'Power/Frequency (dB/Hz)'
+      spec = log10(spec) * 10
     }else if(log == 'x'){
-      xlab = 'Log10(frequency)'
-      ylab = 'spectrum'
+      xlab = 'Log10(Frequency)'
+      ylab = 'Power'
       freq = log10(freq)
     }else{
-      xlab = 'frequency'
-      ylab = 'spectrum'
+      xlab = 'Frequency'
+      ylab = 'Power'
     }
     if(plot == 2){
       points(freq, spec, type = 'l', col = col)

@@ -18,7 +18,7 @@ if(F){
 
 }
 
-rave_prepare(subject = 'Complete/YAB', electrodes = 64:65, epoch = 'YABa', time_range = c(1,2), data_types = NULL)
+rave_prepare(subject = 'congruency1/YAB', electrodes = 64:65, epoch = 'YABa', time_range = c(1,2), data_types = NULL)
 
 # load libraries
 library(shiny)
@@ -128,15 +128,38 @@ observeEvent(input[[('bipolar_table_cell_edit')]], {
   }
 })
 
-output[[('elec_loc')]] = renderPlot({
+output[[('elec_loc')]] = threejsr::renderThreejs({
   local_data$refresh
   logger('elec_loc')
   group_info = current_group()
   group_info %?<-% list(electrodes = NULL)
-  x = subject$electrodes$Coord_x
-  y = subject$electrodes$Coord_y
-  sel = subject$electrodes$Electrode %in% group_info$electrodes
-  plot(x,y, col = sel + 1, pch = 16)
+  name = group_info$rg_name
+  ref_tbl = get_ref_table()
+  if(is.blank(name)){ name = 'Current Group' }
+
+  # join electrodes.csv with ref table
+  tbl = merge(ref_tbl, subject$electrodes[,c('Electrode', 'Coord_x','Coord_y','Coord_z', 'Label')], id = 'Electrode', suffixes = c('.x', ''))
+  tbl$Label[is.na(tbl$Label)] = 'No Label'
+
+  electrodes = group_info$electrodes
+  with(tbl, {
+    sprintf('<p>Electrode - %d (%s)<br/>Reference - %s (%s)<br/>Reference to - %s</p>', Electrode, Label, Group, Type, Reference)
+  }) ->
+    marker
+
+  values = rep('darkseagreen2', length(electrodes))
+  bad_electrodes = rave:::parse_selections(input[[('ref_bad')]])
+  values[electrodes %in% bad_electrodes] = 'orangered2'
+
+
+  module_tools$plot_3d_electrodes(
+    tbl = tbl,
+    electrodes = electrodes,
+    values = values,
+    marker = marker,
+    link_module = 'condition_explorer',
+    variable_name = 'electrode'
+  )
 }, env = ..runtime_env)
 
 observeEvent(input[[('cur_save')]], {
@@ -177,10 +200,16 @@ cur_group_ui = function(){
     group_name = group_info$rg_name
     electrodes = rave:::parse_selections(group_info$rg_electrodes)
     if(length(electrodes) == 0){
-      return(hr())
+      return(tagList(
+        hr(),
+        actionButton(ns('cur_group_save'), 'Preview & Export',width = '100%')
+      ))
     }
   }else{
-    return(hr())
+    return(tagList(
+      hr(),
+      actionButton(ns('cur_group_save'), 'Preview & Export',width = '100%')
+    ))
   }
 
   refs = get_refs()
@@ -218,7 +247,7 @@ cur_group_ui = function(){
 
   tagList(
     hr(),
-    plotOutput(ns('elec_loc')),
+    threejsr::threejsOutput(ns('elec_loc')),
     fluidRow(
       column(
         width = 7,
@@ -238,7 +267,8 @@ cur_group_ui = function(){
         )
       )
     ),
-    hr()
+    hr(),
+    actionButton(ns('cur_group_save'), 'Preview & Export',width = '100%')
   )
 }
 
@@ -300,7 +330,7 @@ save_ref_table = function(tbl, is_new = FALSE){
 
 import_external = function(){
   dirs = module_tools$get_subject_dirs()
-  ref_name_alt %?<-% 'new..'
+  ref_name_alt %?<-% sprintf('reference_%s.csv', preload_info$reference_name)
   f = file.path(dirs$meta_dir, ref_name_alt)
   if(file.exists(f)){
     tbl = read.csv(f, stringsAsFactors = F)
@@ -329,7 +359,7 @@ import_external = function(){
 }
 load_reference = function(){
   dirs = module_tools$get_subject_dirs()
-  ref_name_alt %?<-% 'new..'
+  ref_name_alt %?<-% sprintf('reference_%s.csv', preload_info$reference_name)
   # Get current settings
   key = list(
     ref_name_alt = ref_name_alt,
@@ -403,6 +433,82 @@ load_reference = function(){
   }
 
   cache(key = key, val = ref_info, replace = T)
+}
+
+gen_reference_blockwise = function(blockwise_table){
+  dirs = module_tools$get_subject_dirs()
+
+  blocks = blockwise_table$Block
+  refs = blockwise_table$Reference
+
+  involved_es = rave:::parse_selections(refs)
+  if(length(involved_es) == 0){
+    showNotification(p('No electrodes used. Why not use "noref"?'), type = 'error', session = session)
+    return(FALSE)
+  }
+  fname = 'ref_0,' %&% rave:::deparse_selections(involved_es) %&% '.h5'
+
+  f = file.path(dirs$channel_dir, 'reference', fname)
+  unlink(f)
+
+  subprogress = rave::progress('Loading Data', max = length(involved_es))
+  progress = rave::progress(sprintf('Generating reference [%s]', fname), max = length(blocks)+1)
+
+  ref_data = new.env()
+
+  for(ii in seq_along(blocks)){
+    b = blocks[[ii]]
+    subprogress$reset()
+    progress$inc('Loading data from block ' %&% b)
+    es = rave:::parse_selections(refs[ii])
+
+    ref_data[[b]] = new.env()
+    ref_data[[b]][['volt']] = 0
+    ref_data[[b]][['coef']] = 0
+
+    lapply(es, function(e){
+      subprogress$inc('Loading electrode ' %&% e)
+      # load channel
+      power = load_h5(file.path(dirs$channel_dir, 'power', sprintf('%d.h5', e)), name = '/raw/power/' %&% b)[]
+      phase = load_h5(file.path(dirs$channel_dir, 'phase', sprintf('%d.h5', e)), name = '/raw/phase/' %&% b)[]
+      volt = load_h5(file.path(dirs$channel_dir, 'voltage', sprintf('%d.h5', e)), name = '/raw/voltage/' %&% b)[]
+
+      ref_data[[b]][['volt']] = ref_data[[b]][['volt']] + volt
+      ref_data[[b]][['coef']] = ref_data[[b]][['coef']] + sqrt(power) * exp(1i * phase)
+
+    })
+    if(length(es)){
+      ref_data[[b]][['volt']] = ref_data[[b]][['volt']] / length(es)
+      ref_data[[b]][['coef']] = ref_data[[b]][['coef']] / length(es)
+    }else{
+      e = involved_es[1]
+      volt = load_h5(file.path(dirs$channel_dir, 'voltage', sprintf('%d.h5', e)), name = '/raw/voltage/' %&% b)
+      power = load_h5(file.path(dirs$channel_dir, 'power', sprintf('%d.h5', e)), name = '/raw/power/' %&% b)
+
+      ref_data[[b]][['volt']] = rep(0, length(volt))
+      ref_data[[b]][['coef']] = matrix(0, nrow = dim(power)[1], ncol = dim(power)[2])
+    }
+
+  }
+
+
+  progress$inc('Saving to disk...')
+  # Average
+  for(b in blocks){
+    volt = ref_data[[b]][['volt']]
+    coef = ref_data[[b]][['coef']]
+    coef = array(c(Mod(coef), Arg(coef)), dim = c(dim(coef), 2)) # Freq x Time x 2
+    save_h5(volt, file = f, name = sprintf('/voltage/%s', b), chunk = 1024, replace = T)
+    save_h5(coef, file = f, name = sprintf('/wavelet/coef/%s', b), chunk = c(dim(coef)[1], 128, 2), replace = T)
+  }
+
+  progress$close()
+  subprogress$close()
+  removeModal()
+
+  showNotification(p('Reference [', fname, '] exported.'), type = 'message')
+  local_data$has_new_ref = Sys.time()
+
 }
 
 gen_reference = function(electrodes){
@@ -525,6 +631,11 @@ export_ref_table = function(){
   fname = 'reference_' %&% fname %&% '.csv'
   fpath = file.path(dirs$meta_dir, fname)
   rave:::safe_write_csv(data = ref_tbl, file = fpath, row.names = F)
+  # write to preprocess that subject is already refrenced
+  utils = rave_preprocess_tools()
+  utils$load_subject(subject_code = subject$subject_code, project_name = subject$project_name)
+  utils$save_to_subject(checklevel = 4) # 4 means referenced
+  switch_to('condition_explorer')
   return(fname)
 }
 
@@ -649,25 +760,40 @@ observeEvent(input$do_export_cache, {
   })
 
   progress$close()
-  showNotification(p('Now data are cached according to [', fname, ']'), type = 'message', id = ns('ref_export_cache_notification'))
+  showNotification(p('Now data are cached according to [', fname, ']. Reloading subject.'), type = 'message', id = ns('ref_export_cache_notification'))
 
   removeModal()
+
+  fname = input[[('ref_export_name')]]
+  fname %?<-% 'default'
+  fname = str_replace_all(fname, '\\W', '')
+  fname = str_to_lower(fname)
+  module_tools$reload(reference = fname)
+  reloadUI()
 })
 
 observeEvent(input[[('do_export')]], {
   fname = export_ref_table()
-  showNotification(p('Reference table [', fname, '] exported.'), type = 'message', id = ns('ref_export_cache_notification'))
+  showNotification(p('Reference table [', fname, '] exported. Reloading subject.'), type = 'message', id = ns('ref_export_cache_notification'))
   removeModal()
+
+  fname = input[[('ref_export_name')]]
+  fname %?<-% 'default'
+  fname = str_replace_all(fname, '\\W', '')
+  fname = str_to_lower(fname)
+  module_tools$reload(reference = fname)
+  reloadUI()
 })
 
 check_load_volt = function(){
-  env$volt = module_tools$get_voltage2()
+  if(is.null(env$volt)){
+    env$volt = module_tools$get_voltage2()
+  }
 }
 
 # Rave Execute
 rave_execute({
   # Part 0: load voltage data on the fly
-  check_load_volt()
 
   # Part 1: Load or new reference scheme
   load_reference()
@@ -677,37 +803,31 @@ rave_execute({
   local_data$refresh = Sys.time()
 
 
-  # Check if table needs to be saved
-  cur_group_save %?<-% 0
-  env$cur_group_save %?<-% 0
-  if(env$cur_group_save < cur_group_save){
-    # Save table
-    local_data$ref_tbl = get_ref_table()
-    showModal(
-      shiny::modalDialog(
-        title = 'Export Reference Table',
-        size = 'l',
-        easyClose = T,
-        footer = fluidRow(
-          div(
-            class = 'col-md-4 col-md-push-8 col-sm-12',
-            textInput(ns('ref_export_name'), 'Reference Name: ', value = 'default', placeholder = 'File name for reference table')
-          ),
-          column(
-            width = 12L,
-            modalButton('Cancel'),
-            actionButton(ns('do_export'), 'Export'),
-            actionButton(ns('do_export_cache'), 'Export & Cache')
-          )
+})
+
+observeEvent(input$cur_group_save, {
+  # Save table
+  local_data$ref_tbl = get_ref_table()
+  showModal(
+    shiny::modalDialog(
+      title = 'Export Reference Table',
+      size = 'l',
+      easyClose = T,
+      footer = fluidRow(
+        div(
+          class = 'col-md-4 col-md-push-8 col-sm-12',
+          textInput(ns('ref_export_name'), 'Reference Name: ', value = 'default', placeholder = 'File name for reference table')
         ),
-        DT::DTOutput(ns('export_table'))
-      )
+        column(
+          width = 12L,
+          modalButton('Cancel'),
+          actionButton(ns('do_export'), 'Export'),
+          actionButton(ns('do_export_cache'), 'Export & Cache')
+        )
+      ),
+      DT::DTOutput(ns('export_table'))
     )
-  }
-  env$cur_group_save = cur_group_save
-
-
-
+  )
 })
 
 
@@ -719,9 +839,78 @@ console = function(){
 ref_generator_ui = function(){
   tagList(
     textInput(ns('ref_electrodes'), label = 'Electrodes', value = '', placeholder = 'e.g. 1-3,5'),
-    actionButton(ns('ref_calc'), 'Generate Reference', width = '100%')
+    actionButton(ns('ref_calc'), 'Generate Reference', width = '100%'),
+    hr(),
+    actionButton(ns('ref_blockwise'), 'Generate Reference for Each Blocks', width = '100%')
   )
 }
+
+observeEvent(input$ref_blockwise, {
+
+  env$blockwise_reference %?<-% data.frame(
+    Block = subject$preprocess_info('blocks'),
+    Reference = 'Zeros',
+    stringsAsFactors = F
+  )
+
+  showModal(modalDialog(
+    title = 'Reference Generator',
+    easyClose = F,
+    size = 'l',
+    footer = tagList(
+      actionButton(ns('ref_modal_cancel'), 'Discard'),
+      actionButton(ns('ref_modal_ok'), 'Generate Reference')
+    ),
+    div(
+      p('WARNING: Reference is not recommended on the block level. ',
+        'This module only provides partial support and please do NOT cache the referenced electrodes. ',
+        'Also, visualizations will be in accurate if reference by blocks, so use at your own risk.', style = 'color:red;'),
+      DT::DTOutput(ns('ref_modal_tbl'))
+    )
+  ))
+})
+
+observeEvent(input$ref_modal_cancel, { removeModal() })
+
+output$ref_modal_tbl <- DT::renderDT({
+  env$blockwise_reference
+}, env = ..runtime_env, editable = T)
+
+ref_modal_tbl_proxy = DT::dataTableProxy('ref_modal_tbl', session = session)
+
+observeEvent(input$ref_modal_tbl_cell_edit, {
+  info = input$ref_modal_tbl_cell_edit
+  i = info$row
+  j = info$col
+  v = info$value
+
+  # string match electrode
+  v = str_match(v, '(ref_|[\\ ]{0})([0-9,\\-]*)')[3]
+  if(is_invalid(v, .invalids = c('null', 'na', 'blank'))){
+    v = 'Zeros'
+  }else{
+    v = rave:::parse_selections(v)
+    v = subject$filter_all_electrodes(v)
+    if(length(v)){
+      v = rave:::deparse_selections(v)
+    }else{
+      v = 'Zeros'
+    }
+  }
+  blockwise_reference = env$blockwise_reference
+
+  if(names(blockwise_reference)[j] == 'Reference'){
+    env$blockwise_reference[i, j] = v
+    DT::replaceData(ref_modal_tbl_proxy, env$blockwise_reference, resetPaging = FALSE)  # important
+  }
+})
+
+observeEvent(input$ref_modal_ok, {
+  blockwise_reference = env$blockwise_reference
+  gen_reference_blockwise(blockwise_reference)
+})
+
+
 
 observe({
   ref_calc_label = 'Generate Reference'

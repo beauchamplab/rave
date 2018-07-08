@@ -26,6 +26,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
     },
     server = function(input, output, session, global_reactives, env = new.env()){
 
+      ##### #####
       # This is a really frustrating process, like flushing a toilet, you don't want to wait too long before flushing, nor miss a single one of them - Zhengjia
       # So I decided to write down workflows/conditions down here. I swear that I always compile all the process in my mind when writing codes, until now.
       # To start, here's the normal workflow:
@@ -91,6 +92,9 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       # show_results - receive signals that output should be rendered
       #
       # Now let's init local_data (reactive) storing flags
+      #### ####
+      execenv$global_reactives = global_reactives
+
       local_data = reactiveValues(
 
         # Flag indicating if data is present

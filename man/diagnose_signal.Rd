@@ -5,10 +5,10 @@
 \title{Signal Inspection Plots}
 \usage{
 diagnose_signal(s1, s2 = NULL, sc = NULL, srate, name = "",
-  try_compress = TRUE, max_freq = 300, window = 128, noverlap = 8,
-  std = 3, cex = 1.5, lwd = 0.5, flim = NULL, nclass = 100,
-  main = "Channel Inspection", col = c("black", "red"), which = NULL,
-  start_time = 0, boundary = NULL, ...)
+  try_compress = TRUE, max_freq = 300, window = ceiling(srate * 2),
+  noverlap = window/2, std = 3, cex = 1.5, lwd = 0.5, flim = NULL,
+  nclass = 100, main = "Channel Inspection", col = c("black", "red"),
+  which = NULL, start_time = 0, boundary = NULL, ...)
 }
 \arguments{
 \item{s1}{Signal for inspection}

@@ -15,7 +15,7 @@ source('condition_explorer_ui.R')
 source('condition_explorer_plots.R')
 
 if(F){
-  m = ModuleEnvir$new('id', 'CE', './inst/modules/builtin_modules/condition_explorer.R'); init_app(m)
+  m = ModuleEnvir$new('id', 'CE', './inst/modules/builtin_modules/condition_explorer/condition_explorer.R'); init_app(m)
   m = ModuleEnvir$new('id', 'CE', 'condition_explorer.R'); init_app(m)
 }
 

@@ -120,6 +120,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
 
       showNotification(p('Wavelet start!'), type = 'message')
 
+      logger('[WAVELET] Number of electrodes: ', length(w_e))
 
       utils$apply_wavelet(
         electrodes = w_e,
@@ -216,8 +217,6 @@ bulk_wavelet <- function(
   logger('Time to grab a cup of coffee/go home.', level = 'INFO')
   lapply_async(channels, function(chl){
     require(rave)
-    require(signal)
-    require(rhdf5)
     require(stringr)
     cfile = file.path(dirs[[save_dir]], sprintf(filename, chl))
     for(block_num in blocks){
@@ -225,7 +224,7 @@ bulk_wavelet <- function(
 
       save = channel_file(chl)
 
-      s = rhdf5::h5read(save, name = sprintf('/%s/%s', reference_name, block_num))
+      s = load_h5(save, name = sprintf('/%s/%s', reference_name, block_num), ram = T)
 
       if(compress > 1){
         s = rave::decimate_fir(s, compress)
@@ -239,7 +238,6 @@ bulk_wavelet <- function(
       cname_cumsum = sprintf('wavelet/cumsum/%s', block_num)
 
       if(save_original){
-        rhdf5::H5close()
         save_h5(re$coef, file = save, name = cname_coef,
                 chunk = c(length(frequencies), 1024), replace = replace, ctype = 'double')
 
@@ -249,7 +247,6 @@ bulk_wavelet <- function(
         save_h5(re$phase, file = save, name = cname_phase,
                 chunk = c(length(frequencies), 1024), replace = replace, ctype = 'double')
       }
-      rhdf5::H5close()
 
 
       # down-sample power and phase to 100Hz
@@ -259,25 +256,21 @@ bulk_wavelet <- function(
       cfile = file.path(dirs[[save_dir]], sprintf(filename, chl))
       save_h5(power, file = cfile, name = cname_power,
               chunk = c(length(frequencies), 1024), replace = replace, ctype = 'double')
-      rhdf5::H5close()
 
       # coef
       coef = re$coef[, ind]
       save_h5(coef, file = cfile, name = cname_coef,
               chunk = c(length(frequencies), 1024), replace = replace, ctype = 'double')
-      rhdf5::H5close()
 
       # phase
       phs = re$phase[, ind]
       save_h5(phs, file = cfile, name = cname_phase,
               chunk = c(length(frequencies), 1024), replace = replace, ctype = 'double')
-      rhdf5::H5close()
 
       # cumsum
       cumsum = t(apply(power, 1, cumsum))
       save_h5(cumsum, file = cfile, name = cname_cumsum,
               chunk = c(length(frequencies), 1024), replace = replace, ctype = 'double')
-      rhdf5::H5close()
 
       # save time_points info
       if(chl == channels[1]){

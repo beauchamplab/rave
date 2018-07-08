@@ -32,7 +32,7 @@ get_people = function(){
 #' @import shiny
 #' @import magrittr
 #' @export
-init_app <- function(modules = NULL, launch.browser = T, ...){
+init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, ...){
   tryCatch({
     rave_prepare()
   }, error = function(e){})
@@ -92,53 +92,45 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
       shinydashboard::sidebarMenu(
         id = 'sidebar',
         .list =
-          # local({
-          #   sel = names(modules) %in% "______"
-          #   grouped = modules[sel]
-          #   singles = modules[!sel]
-          #
-          #
-          #   if(length(grouped)){
-          #     lapply(names(grouped), function(group_name)){
-          #       quo({
-          #         shinydashboard::menuItem(
-          #           text = !!group_name,
-          #           expandedName = !!group_name,
-          #           startExpanded = F,
-          #
-          #         )
-          #       })
-          #     }
-          #   }
-          # })
-        tagList(
-          lapply(names(modules)[!names(modules) %in% "______"], function(nm){
-            m = modules[[nm]]
-            if(nm != "______"){
-              do.call(shinydashboard::menuItem, args = list(
-                text = nm,
-                expandedName = nm,
-                startExpanded = F,
-                lapply(m, function(smd){
-                  shinydashboard::menuSubItem(
-                    text = smd$label_name,
-                    tabName = str_to_upper(smd$module_id)
-                  )
-                })
-              ))
-            }
-          }),
-          lapply(unlist(modules[["______"]]), function(smd){
-            shinydashboard::menuItem(
-              text = smd$label_name,
-              tabName = str_to_upper(smd$module_id)
-            )
-          })
-        )
+          tagList(
+            lapply(names(modules)[!names(modules) %in% "______"], function(nm){
+              m = modules[[nm]]
+              mid_up = str_to_upper(smd$module_id)
+
+              if(nm != "______"){
+                do.call(shinydashboard::menuItem, args = list(
+                  text = nm,
+                  expandedName = nm,
+                  startExpanded = F,
+                  lapply(m, function(smd){
+                    shinydashboard::menuSubItem(
+                      text = smd$label_name,
+                      tabName = mid_up,
+                      selected = mid_up %in% active_module
+                    )
+                  })
+                ))
+              }
+            }),
+            lapply(unlist(modules[["______"]]), function(smd){
+              mid_up = str_to_upper(smd$module_id)
+              shinydashboard::menuItem(
+                text = smd$label_name,
+                tabName = mid_up,
+                selected = mid_up %in% active_module
+              )
+            })
+          )
       )
     ),
     control = dashboardControl(
-      data_selector$control()
+      fluidRow(
+        column(
+          width = 12L,
+          # 3D viewer
+          ''#threejsr::threejsOutput('__rave_3dviewer', width = '100%', height = '60vh')
+        )
+      )
     ),
     body = shinydashboard::dashboardBody(
       do.call(
@@ -183,14 +175,110 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
       check_results = NULL,
       check_inputs = NULL,
       execute_module = '',
-      has_data = FALSE
+      has_data = FALSE,
+      switch_module = NULL
     )
     observeEvent(async_timer(), {
       global_reactives$check_results = Sys.time()
     })
-    # observeEvent(input_timer(), {
-    #   global_reactives$check_inputs = Sys.time()
+
+    # unlist(modules) will flatten modules but it's still a list
+    module_ids = str_to_upper(sapply(unlist(modules), function(m){m$module_id}))
+    update_variable = function(module_id, variable_name = NULL, value = NULL, flush = T, ...){
+      if(is.null(variable_name)){
+        return()
+      }
+      tryCatch({
+        module_id = str_to_upper(module_id)
+        m = unlist(modules)[module_ids %in% module_id]
+        if(length(m) == 1){
+          m = m[[1]]
+          e = m$get_or_new_exec_env()
+          e$cache_input(inputId = variable_name, val = value, read_only = F)
+          if(flush && mid == str_to_upper(isolate(input$sidebar))){
+            # When target module is not the same as current module, we need manually refresh current module
+            e$input_update(input = list(), init = T)
+          }
+        }
+      }, error = function(e){
+        logger('Cannot update variable ', variable_name, ' in module ', module_id, level = 'WARNING')
+        logger(e, level = 'WARNING')
+      })
+    }
+
+    # Switch to module
+    observe({
+      module_info = global_reactives$switch_module
+      if(!is.null(module_info)){
+        mid = module_info$module_id = str_to_upper(module_info$module_id)
+        if(mid %in% module_ids){
+          logger('Switching to module - ', mid, level = 'INFO')
+          do.call(update_variable, module_info)
+          session$sendCustomMessage('rave_sidebar_switch', module_info)
+        }
+      }
+    })
+
+    # Threejs 3D viewer click callback
+    # observeEvent(input[['__rave_threejsr_callback']], {
+    #   dat = input[['__rave_threejsr_callback']]
+    #   # dat = list(
+    #   #   module_id, electrode, variable_name
+    #   # )
+    #   mid = dat$module_id = str_to_upper(dat$module_id)
+    #   if(mid %in% module_ids){
+    #     do.call(update_variable, dat)
+    #     session$sendCustomMessage('rave_sidebar_switch', dat)
+    #   }
     # })
+
+    ##############
+    # Control panel
+    output[['__rave_3dviewer']] <- threejsr::renderThreejs({
+      if(global_reactives$has_data){
+        tbl = subject$electrodes
+        es = subject$valid_electrodes
+        sel = tbl$Electrode %in% es
+
+
+        # Set2 and Paired from RColorBrewer, hard coded
+        pal = c(
+          "#66C2A5",  "#FC8D62",  "#8DA0CB",  "#E78AC3",  "#A6D854",  "#FFD92F",  "#E5C494",  "#B3B3B3",
+          "#A6CEE3",  "#1F78B4",  "#B2DF8A",  "#33A02C",  "#FB9A99",  "#E31A1C",  "#FDBF6F",  "#FF7F00",  "#CAB2D6",  "#6A3D9A",  "#FFFF99",  "#B15928"
+        )
+
+        tbl$marker = with(tbl, {
+          Label[is.na(Label)] = ''
+          sprintf('Group - %s [%s]<br/>Electrode - %d %s<br/>Position - %.1f,%.1f,%.1f<br/>', Group, Type, Electrode, Label, Coord_x, Coord_y, Coord_z)
+        })
+        value = with(tbl[sel, ], {
+          pal[as.numeric(as.factor(Group))]
+        })
+
+        # get data_env
+        module_tools$plot_3d_electrodes(
+          tbl = tbl,
+          electrodes = es,
+          values = value,
+          marker = tbl$marker,
+          palette = pal,
+          symmetric = F,
+          fps = 2,
+          control_gui = F,
+          loop = F,
+          sidebar = tagList(
+            fileInput('__rave_3dviewer_data', label = 'Upload')
+          )
+        )
+      }
+    })
+
+    observeEvent(input[['__rave_3dviewer_data']], {
+      print(input[['__rave_3dviewer_data']])
+    })
+
+
+
     ##################################################################
     # Module to load data
     callModule(module = data_selector$server, id = 'DATA_SELECTOR', session = session, global_reactives = global_reactives)
@@ -218,14 +306,20 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
       output[[str_c(m$id, '_UI')]] <- renderUI(m$ui())
     })
 
+
+
     #################################################################
     # some navigations
     output$curr_subj_code <- renderText({
       refresh = global_reactives$force_refresh_all
       if(global_reactives$has_data && check_data_repo('subject')){
         data_repo = getDefaultDataRepository()
-        subject = data_repo[['subject']]
-        return(subject$id)
+        subject_id = data_repo$subject$id
+        epoch_name = data_repo$preload_info$epoch_name
+        reference_name = data_repo$preload_info$reference_name
+
+        rm(data_repo)
+        return(sprintf('[%s] - [%s] - [%s]', subject_id, epoch_name, reference_name))
       }else{
         return("")
       }
@@ -237,15 +331,16 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
       if(global_reactives$has_data && check_data_repo(c('subject', 'electrodes'))){
         data_repo = getDefaultDataRepository()
         subject = data_repo[['subject']]
-        electrodes = data_repo[['electrodes']]
+        electrodes = data_repo$preload_info$electrodes
         tbl = subject$electrodes
-        tbl = tbl[tbl$Channel %in% electrodes, c('Channel', 'Label')]
+        tbl = tbl[tbl$Electrode %in% electrodes, c('Electrode', 'Label')]
         rownames(tbl) = NULL
         if(nrow(tbl) > 10){
           tbl = tbl[1:10,]
           tbl[10,1] = ''
           tbl[10,2] = '...'
         }
+        rm(data_repo)
         return(tbl)
       }else{
         return(NULL)
@@ -257,23 +352,14 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
         title = subject$id,
         easyClose = T,
         size = 'l',
-        tabsetPanel(
-          tabPanel(
-            title = '3D Visualization',
-            plotly::plotlyOutput('curr_subj_elec_3d', height = '600px')
-          ),
-          tabPanel(
-            title = 'Table Details',
-            dataTableOutput('curr_subj_elec_table')
-          )
-        )
+        dataTableOutput('curr_subj_elec_table')
       )
     }
 
     observeEvent(input$curr_subj_details_btn, {
       data_repo = getDefaultDataRepository()
       subject = data_repo[['subject']]
-      electrodes = data_repo[['electrodes']]
+      electrodes = data_repo$preload_info$electrodes
       if(!is.null(subject) && length(electrodes)){
         showModal(
           subject_modal(subject = subject, current_electrodes = electrodes)
@@ -281,45 +367,15 @@ init_app <- function(modules = NULL, launch.browser = T, ...){
       }
     })
 
-    output$curr_subj_elec_3d <- plotly::renderPlotly({
-      validate(need(global_reactives$has_data, "Please import subject first."))
-      btn = input$curr_subj_details_btn
-      has_data = global_reactives$has_data
-      data_repo = getDefaultDataRepository()
-      validate(need(has_data && check_data_repo('subject'), message = 'No Subject Loaded'))
-
-      tbl = data_repo[['subject']]$electrodes
-      loaded_electrodes = data_repo[['electrodes']]
-      # get latest value
-      tryCatch({
-        data_repo = getDefaultDataRepository()
-        suma_out_dir = data_repo$subject$dirs$suma_out_dir
-
-        module = modules[vapply(unlist(modules), function(x){
-          global_reactives$execute_module == str_to_upper(x$module_id)
-        }, FALSE)]
-        pattern = module[[1]]$label_name
-        pattern = sprintf('%s_([0-9_\\-]+).csv', str_replace_all(pattern, '[^a-zA-Z0-9_]', '_'))
-        dat = list.files(suma_out_dir, pattern = pattern)
-        fname = dat[which.max(as.numeric(strptime(str_match(dat, pattern)[,2], '%Y-%m-%d_%H_%M_%S')))]
-        dat = read.csv(file.path(suma_out_dir, fname))
-        dat = dat[dat[, 1] %in% loaded_electrodes, ]
-        values = loaded_electrodes * NA
-        values[loaded_electrodes %in% dat[,1]] = dat[,2]
-        values
-      }, error = function(e){
-        NULL
-      }) ->
-        values
-      rave:::render_3d_electrodes(tbl = tbl, loaded_electrodes = loaded_electrodes, values = values)
-    })
-
     output$curr_subj_elec_table <- renderDataTable({
       btn = input$curr_subj_details_btn
       if(global_reactives$has_data && check_data_repo('subject')){
         data_repo = getDefaultDataRepository()
         subject = data_repo[['subject']]
-        return(subject$electrodes)
+        tbl = subject$electrodes
+        cols = names(tbl)
+        cols = cols[!cols %in% c('Coord_x', 'Coord_y', 'Coord_z')]
+        return(tbl[, cols])
       }else{
         return(NULL)
       }

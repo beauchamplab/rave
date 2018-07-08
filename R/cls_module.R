@@ -57,6 +57,17 @@ getDefaultDataRepository <- function(
 }
 
 #' @export
+attachDefaultDataRepository <- function(unload = F){
+  if(unload){
+    try({detach(rave_data)}, silent = T)
+  }else{
+    rave_data = getDefaultDataRepository()
+    attach(rave_data)
+  }
+}
+
+
+#' @export
 ModuleEnvir <- R6::R6Class(
   classname = 'ModuleEnvir',
   portable = FALSE,
@@ -141,31 +152,43 @@ ModuleEnvir <- R6::R6Class(
       # read in script, get package info
       src = readLines(self$script_path)
 
-
-
-
       # get
       static_env = self$get_or_new_exec_env(session = session)$static_env
-      runtime_env = self$get_or_new_exec_env(session = session)$runtime_env
+      parse_env = self$get_or_new_exec_env(session = session)$parse_env
+      clear_env(parse_env)
+
 
       parsed = parse(text = src)
       for(i in 1:length(parsed)){
-        comp = lazyeval::as.lazy(str_c(parsed[i]), env = static_env)
+
+        # Use eval_dirty
+        # Do not use str_c, use as.character instead to avoid warnings
         tryCatch({
-          lazyeval::lazy_eval(comp)
-          # logger('[Parsed]: ', str_c(parsed[i]), level = 'DEBUG')
+          eval_dirty(parsed[i], env = parse_env)
         }, error = function(e){
-          logger('[Ignored]: ', str_c(parsed[i]), level = 'INFO')
+          logger('[Ignored]: ', as.character(parsed[i]), level = 'INFO')
           logger(paste(e, sep = '\n'), level = 'WARNING')
         })
+
+        # comp = lazyeval::as.lazy(str_c(parsed[i]), env = static_env)
+        # tryCatch({
+        #   lazyeval::lazy_eval(comp)
+        #   # logger('[Parsed]: ', str_c(parsed[i]), level = 'DEBUG')
+        # }, error = function(e){
+        #   logger('[Ignored]: ', str_c(parsed[i]), level = 'INFO')
+        #   logger(paste(e, sep = '\n'), level = 'WARNING')
+        # })
       }
 
+      # Move everything to statis env
+      list2env(as.list(parse_env, all.names = T), envir = static_env)
+
       # re-direct function environment to runtime-env where rave_execute take place.
-      for(nm in ls(static_env, all.names = T)){
-        if(is.function(static_env[[nm]])){
-          environment(static_env[[nm]]) <- runtime_env
-        }
-      }
+      # for(nm in ls(static_env, all.names = T)){
+      #   if(is.function(static_env[[nm]])){
+      #     environment(static_env[[nm]]) <- runtime_env
+      #   }
+      # }
 
       # lockEnvironment(static_env)
 
@@ -246,6 +269,7 @@ ExecEnvir <- R6::R6Class(
     wrapper_env = NULL,
     static_env = NULL,
     runtime_env = NULL,
+    parse_env = NULL,
     param_env = NULL,
     ns = NULL,
     input_update = NULL,
@@ -253,7 +277,15 @@ ExecEnvir <- R6::R6Class(
     register_input_events = NULL,
     execute = NULL,
     async_module = FALSE,
+    global_reactives = NULL,
+    reload = function(){
+      if(is.reactivevalues(self$global_reactives)){
+        self$global_reactives$force_refresh_all = Sys.time()
+        self$global_reactives$has_data = Sys.time()
+      }
+    },
     finalize = function(){
+      self$clean()
       logger(sprintf('[%s] Runtime Environment Removed.', private$module_env$module_id))
     },
     print = function(...){
@@ -268,10 +300,11 @@ ExecEnvir <- R6::R6Class(
     },
     clean = function(){
       # WARNING: this is not clean, but should be able to clear most of the large objects
+      clear_env(self$parse_env)
+      clear_env(self$param_env)
       clear_env(self$runtime_env)
       # clear_env(self$static_env)
       clear_env(private$cache_env)
-      # clear_env(self$wrapper_env)
     },
     initialize = function(session = getDefaultReactiveDomain(),
                           parent_env = baseenv()){
@@ -296,6 +329,12 @@ ExecEnvir <- R6::R6Class(
       self$static_env$.env = self$runtime_env
       self$static_env$..param_env = self$param_env
 
+      # Environment for parsers. All source file will be parsed here
+      # it can get access to runtime_env.
+      # Old scheme was to parse src in static env and change function environment to
+      # runtime_env, this is dangerous. So I come up with this solution
+      self$parse_env = new.env(parent = self$runtime_env)
+
       private$cache_env = new.env()
       private$cache_env$.keys = c()
       self$ns = base::I
@@ -311,6 +350,30 @@ ExecEnvir <- R6::R6Class(
         }else{
           return(val)
         }
+      }
+
+      self$wrapper_env$reloadUI = function(){
+        self$reload()
+      }
+
+      self$wrapper_env$switch_to = function(module_id, varriable_name = NULL, value = NULL, ...){
+        if(is.reactivevalues(self$global_reactives)){
+          self$global_reactives$switch_module = c(
+            list(
+              module_id = module_id,
+              varriable_name = varriable_name,
+              value = value
+            ),
+            list(...)
+          )
+        }
+      }
+
+      self$wrapper_env$current_module = function(){
+        if(is.reactivevalues(self$global_reactives)){
+          return(isolate(get_val(self$global_reactives, 'execute_module', default = '')))
+        }
+        return('')
       }
 
       self$wrapper_env$rave_inputs = function(...){
@@ -366,16 +429,27 @@ ExecEnvir <- R6::R6Class(
           return()
         }
 
-        # try to find file, if not, try to use the one under modules's dir
-        if(!file.exists(file)){
-          logger('File [', file, '] does not exists, try to look for it.', level = 'INFO')
-          dir = dirname(private$module_env$script_path)
-          file = tail(as.vector(str_split(file, '/', simplify = T)), 1)
-          file = file.path(dir, file)
+        # Try to use the file under the same dir
+        dir = dirname(private$module_env$script_path)
+        tmp_file = file.path(dir, file)
+        if(file.exists(tmp_file)){
+          logger('Try to source from [', tmp_file, ']')
+          self$static_env$.__tmp_file = tmp_file
+          eval(quote(base::source(.__tmp_file, local = T)), self$parse_env)
+        }else if(file.exists(file)){
+          logger('File [', tmp_file, '] does not exists, try to look for it.', level = 'INFO')
+          self$static_env$.__tmp_file = file
+          eval(quote(base::source(.__tmp_file, local = T)), self$parse_env)
+        }else{
+          logger('File [', file, '] does not exists.', level = 'ERROR')
+          return()
         }
-        logger('Trying to source [', file, ']')
-        self$static_env$.__tmp_file = file
-        eval(quote(base::source(.__tmp_file, local = T)), self$static_env)
+
+        # Speed up
+        # rave:::copy_env(self$parse_env, self$static_env, deep = F)
+        list2env(as.list(self$parse_env, all.names = T), envir = self$static_env)
+
+
       }
 
       self$wrapper_env$require = function(package, ..., character.only = TRUE){
@@ -569,8 +643,8 @@ ExecEnvir <- R6::R6Class(
               electrodes = e,
               epoch = epoch_info$name,
               time_range = epoch_info$time_range,
+              reference = rave_data$preload_info$reference_name,
               data_types = NULL,
-              quiet = T,
               attach = F
             )
           }
@@ -584,7 +658,7 @@ ExecEnvir <- R6::R6Class(
           fs
         return(fs)
       }, error = function(e){
-        logger(str_c(capture.output({traceback()}), collapse = '\n'), level = 'ERROR')
+        logger(str_c(capture.output({traceback(e)}), collapse = '\n'), level = 'ERROR')
         return(NULL)
       })
     },
@@ -856,6 +930,9 @@ ExecEnvir <- R6::R6Class(
           lapply(var_names[var_names != ''], function(varname){
             tryCatch({
               comp = private$inputs$comp[[varname]]
+              if(is.null(comp)){
+                return()
+              }
               new_args = eval_dirty(
                 private$update[[varname]], data = input, env = self$param_env
               )
@@ -983,18 +1060,18 @@ ExecEnvir <- R6::R6Class(
       more_btns = list(
         vignette = tags$li(actionLink(self$ns('..vignette'), 'Show Module Description')),
         async = tags$li(actionLink(self$ns('..async_run'), 'Run Algorithm (Async)')),
-        niml = tags$li(actionLink(self$ns('..incubator'), 'Exports'))
+        export = tags$li(actionLink(self$ns('..incubator'), 'Exports'))
       )
 
       # TODO Vignette
 
       # NIML
-      niml_func = names(as.list(self$static_env))
-      is_niml_func = vapply(niml_func, function(x){
-        is.function(self$static_env[[x]]) && str_detect(x, 'niml_')
+      export_func = names(as.list(self$static_env))
+      is_export_func = vapply(export_func, function(x){
+        is.function(self$static_env[[x]]) && str_detect(x, 'export_')
       }, FUN.VALUE = logical(1))
-      if(length(is_niml_func) == 0 || sum(is_niml_func) == 0){
-        more_btns[['niml']] = NULL
+      if(length(is_export_func) == 0 || sum(is_export_func) == 0){
+        more_btns[['export']] = NULL
       }
 
       # Async
@@ -1004,12 +1081,13 @@ ExecEnvir <- R6::R6Class(
 
 
       names(more_btns) = NULL
-      shiny::column(
-        sidebar_width,
+      div(
+        class = sprintf('col-sm-%d rave-input-panel', sidebar_width),
         rlang::eval_tidy(private$inputs$quos, env = env),
         fluidRow(
           shinydashboard::box(
             title = 'More...',
+            collapsed = T,
             tags$ul(
               class = 'rave-grid-inputs',
               tagList(more_btns)
@@ -1023,8 +1101,8 @@ ExecEnvir <- R6::R6Class(
     generate_output_ui = function(sidebar_width = 3L){
       ns = self$ns
       env = environment()
-      shiny::column(
-        12L - sidebar_width,
+      div(
+        class = sprintf('col-sm-%d rave-output-panel', 12L - sidebar_width),
         rlang::eval_tidy(private$outputs$quos, env = env)
       )
 
@@ -1095,7 +1173,7 @@ rave_inputs <- function(..., .input_panels = list(), .env = globalenv()){
   parser = rave:::comp_parser()
   lapply(quos, function(quo){
     comp = parser$parse_quo(quo)
-    value = comp$initial_value
+    value = eval(comp$initial_value, envir = .env)
     inputId = comp$inputId
     .env[[inputId]] = value
 
@@ -1119,21 +1197,29 @@ rave_outputs <- function(..., .output_tabsets = list()){
 #' @export
 rave_updates <- function(..., .env = globalenv()){
 
-  res = list(...)
-  if(exists('.tmp_init', envir = .env)){
-    init_val = get('.tmp_init', envir = .env)
+  res = rlang::quos(...)
+  nms = names(res)
+  if(length(nms) == 0){
+    return()
   }
-  for(nm in names(res)){
-    if(nm != '' && nm %in% names(init_val)){
-      val = res[[nm]]
-      if(is.list(val)){
-        val = val[[init_val[[nm]][['val_name']]]]
-      }
-      if(!is.null(val)){
-        assign(nm, val, envir = .env)
-      }
-    }
+  lapply(res[nms == ''], function(quo){
+    rave::eval_dirty(quo, env = .env)
+  })
+
+  nms = nms[nms != '']
+
+  parser = rave:::comp_parser()
+  for(nm in names(nms)){
+    val = rave::eval_dirty(res[[nm]], env = .env)
+    try({
+      re = val$value
+      re %?<-% val$selected
+      .env[[nm]] = re
+    })
   }
+
+  invisible(res)
+
 }
 
 
