@@ -611,8 +611,8 @@ ExecEnvir <- R6::R6Class(
               electrodes = e,
               epoch = epoch_info$name,
               time_range = epoch_info$time_range,
+              reference = rave_data$preload_info$reference_name,
               data_types = NULL,
-              quiet = T,
               attach = F
             )
           }
@@ -626,7 +626,7 @@ ExecEnvir <- R6::R6Class(
           fs
         return(fs)
       }, error = function(e){
-        logger(str_c(capture.output({traceback()}), collapse = '\n'), level = 'ERROR')
+        logger(str_c(capture.output({traceback(e)}), collapse = '\n'), level = 'ERROR')
         return(NULL)
       })
     },
@@ -1028,18 +1028,18 @@ ExecEnvir <- R6::R6Class(
       more_btns = list(
         vignette = tags$li(actionLink(self$ns('..vignette'), 'Show Module Description')),
         async = tags$li(actionLink(self$ns('..async_run'), 'Run Algorithm (Async)')),
-        niml = tags$li(actionLink(self$ns('..incubator'), 'Exports'))
+        export = tags$li(actionLink(self$ns('..incubator'), 'Exports'))
       )
 
       # TODO Vignette
 
       # NIML
-      niml_func = names(as.list(self$static_env))
-      is_niml_func = vapply(niml_func, function(x){
-        is.function(self$static_env[[x]]) && str_detect(x, 'niml_')
+      export_func = names(as.list(self$static_env))
+      is_export_func = vapply(export_func, function(x){
+        is.function(self$static_env[[x]]) && str_detect(x, 'export_')
       }, FUN.VALUE = logical(1))
-      if(length(is_niml_func) == 0 || sum(is_niml_func) == 0){
-        more_btns[['niml']] = NULL
+      if(length(is_export_func) == 0 || sum(is_export_func) == 0){
+        more_btns[['export']] = NULL
       }
 
       # Async
@@ -1055,6 +1055,7 @@ ExecEnvir <- R6::R6Class(
         fluidRow(
           shinydashboard::box(
             title = 'More...',
+            collapsed = T,
             tags$ul(
               class = 'rave-grid-inputs',
               tagList(more_btns)
