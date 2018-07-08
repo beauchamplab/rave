@@ -393,7 +393,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
       dirs = utils$get_from_subject('dirs')
       f = file.path(dirs$channel_dir, 'spectrum', sprintf('%d.h5', electrode))
       sapply(blocks, function(b){
-        d = load_h5(f, name = sprintf('/wavelet/coef/%s', b))[]
+        d = load_h5(f, name = sprintf('/wavelet/coef/%s', b), ram = T)
         d[,,1] * exp(1i * d[,,2])
       }, simplify = F, USE.NAMES = T) ->
         re
@@ -429,7 +429,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
           bandwidths[[block]] %?<-% bandwidths[['default']]
           bands = bandwidths[[block]][['centers']]
           width = bandwidths[[block]][['widths']]
-          s = load_h5(cfile, name = sprintf('/raw/%s', block), read_only = T)[]
+          s = load_h5(cfile, name = sprintf('/raw/%s', block), read_only = T, ram = T)
           v = notch_channel(s, sample_rate = srate, bands = bands, width = width)
           # Save filtered
           save_h5(as.vector(v), file = cfile, name = '/notch/' %&% block, chunk = c(1024))
@@ -485,7 +485,11 @@ rave_preprocess_tools <- function(env = new.env(), ...){
         lapply_async(seq_along(electrodes), function(ii){
           # This is electrode
           e = electrodes[[ii]]
-          s = load_h5(file = file.path(dirs$preprocess_dir, 'voltage', sprintf('electrode_%d.h5', e)), name = sprintf('/notch/%s', block))[1,]
+          s = load_h5(
+            file = file.path(dirs$preprocess_dir, 'voltage', sprintf('electrode_%d.h5', e)),
+            name = sprintf('/notch/%s', block),
+            ram = T
+          )
 
           re = wavelet(s, freqs = frequencies, srate = srate, wave_num = wave_num)
 

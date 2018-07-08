@@ -218,9 +218,9 @@ Electrode <- R6::R6Class(
             if(length(es)){
               # Bipolar ref
               fname = sprintf("%d.h5", es[1])
-              self$raw_power[[b]] = load_h5(file.path(cache_dir, 'power', fname), '/raw/power/' %&% b)[]
-              self$raw_phase[[b]] = load_h5(file.path(cache_dir, 'phase', fname), '/raw/phase/' %&% b)[]
-              self$raw_volt[[b]] = load_h5(file.path(cache_dir, 'voltage', fname), '/raw/voltage/' %&% b)[]
+              self$raw_power[[b]] = load_h5(file.path(cache_dir, 'power', fname), '/raw/power/' %&% b, ram = T)
+              self$raw_phase[[b]] = load_h5(file.path(cache_dir, 'phase', fname), '/raw/phase/' %&% b, ram = T)
+              self$raw_volt[[b]] = load_h5(file.path(cache_dir, 'voltage', fname), '/raw/voltage/' %&% b, ram = T)
             }else{
               # Noref or bad electrodes
               # this is a special reference where power, volt, phase = 0

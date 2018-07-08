@@ -341,61 +341,22 @@ li.control-sidebar-items>a {
 /* shiny dashboard */
 
 :root {
-    --rave-control-width: 60vh;
+    --rave-control-width: 75vh;
 }
 
 
-.control-sidebar, .right-side {
-    width: var(--rave-control-width);
-}
 
-/*
-@media (min-width: 768px) {
-  .content-wrapper,
-    .left-side,
-  .main-footer {
-    /* margin-right: var(--rave-control-width); /
-  }
-}
-@media (max-width: 767px) {
-  .sidebar-open .content-wrapper,
-  .sidebar-open .right-side,
-  .sidebar-open .main-footer {
-    -webkit-transform: translate(var(--rave-control-width), 0);
-    -ms-transform: translate(var(--rave-control-width), 0);
-    -o-transform: translate(var(--rave-control-width), 0);
-    transform: translate(var(--rave-control-width), 0);
-  }
-}
-@media (max-width: 767px) {
-  .main-sidebar,
-  .left-side {
-    -webkit-transform: translate(-var(--rave-control-width), 0);
-    -ms-transform: translate(-var(--rave-control-width), 0);
-    -o-transform: translate(-var(--rave-control-width), 0);
-    transform: translate(-var(--rave-control-width), 0);
-  }
-}
-@media (min-width: 768px) {
-  .sidebar-collapse .main-sidebar,
-  .sidebar-collapse .left-side {
-    -webkit-transform: translate(-var(--rave-control-width), 0);
-    -ms-transform: translate(-var(--rave-control-width), 0);
-    -o-transform: translate(-var(--rave-control-width), 0);
-    transform: translate(-var(--rave-control-width), 0);
-  }
-}
-*/
-
-.control-sidebar,
-.control-sidebar-bg {
-  width: var(--rave-control-width)!important;
+#__rave_control__ {
+  width: var(--rave-control-width);
   right: -100vw!important;
+  position: absolute;
+  width: var(--rave-control-width);
+  height: 100vh;
+  background-color: #ffffff;
 }
 
-.control-sidebar-open .control-sidebar,
-.control-sidebar-open .control-sidebar-bg{
-  right: 0!important;
+.rave-control-open #__rave_control__{
+  right: 0;
 }
 
 .content-wrapper,

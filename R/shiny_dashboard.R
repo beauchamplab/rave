@@ -18,7 +18,10 @@ dashboardControl = function (...,
     tags$aside(
       class = "control-sidebar control-sidebar-light",
       `data-collapsed` = dataValueString,
-      ...
+      div(
+        class = 'tab-content',
+        ...
+      )
     ),
     div(class = "control-sidebar-bg")
   )

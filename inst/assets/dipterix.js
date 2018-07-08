@@ -4,7 +4,7 @@
 ** Date 6/2/2017
 */
 
-
+/*
 var AdminLTEOptions = {
   sidebarExpandOnHover: true,
   controlSidebarOptions: {
@@ -16,6 +16,7 @@ var AdminLTEOptions = {
     slide: true
   }
 };
+*/
 
 $(document).ready(function(){
 	// Whenever the sidebar expand/collapse button is clicked:
@@ -26,6 +27,10 @@ $(document).ready(function(){
 
 	$(document).on('click', '.nav-link[data-toggle="rave-toggle-inputs"]', function(){
 	  $('.content-wrapper').toggleClass('rave-hide-inputs');
+	});
+
+	$(document).on('click', "[data-toggle='control-sidebar']", function(){
+	  $('body').toggleClass('rave-control-open');
 	});
 
 
