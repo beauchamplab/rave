@@ -1,5 +1,3 @@
 PackageID,GroupName,ModuleID,Name,ScriptPath,Active,Author,Version,Packages
 ,,reference,Electrode Reference,~/rave_modules/modules/builtin_modules/reference/main.R,TRUE,[Zhengjia Wang]<dipterix.wang@gmail.com>,0.4.0,rave;magrittr;stringr;shiny;
-,,condition_explorer,Condition Explorer,~/rave_modules/modules/builtin_modules/condition_explorer.R,TRUE,"[John Magnotti]<john.Magnotti@bcm.edu>, [Zhengjia Wang]<dipterix.wang@gmail.com>",0.1.6,rave;magrittr;stringr;shiny;MASS
-,,onset_detection,Onset Detection,~/rave_modules/modules/builtin_modules/onset_detection.R,FALSE,"[John Magnotti]<john.Magnotti@bcm.edu>, [Zhengjia Wang]<dipterix.wang@gmail.com>",0.1.0,rave;magrittr;stringr;shiny;MASS
-,,across_elec_correlation,Electrode Connectivity,~/rave_modules/modules/builtin_modules/across_electrode_correlations.R,FALSE,"[John Magnotti]<john.Magnotti@bcm.edu>, [Zhengjia Wang]<dipterix.wang@gmail.com>",0.1.0,rave;magrittr;stringr;shiny;MASS
+,,condition_explorer,Condition Explorer,~/rave_modules/modules/builtin_modules/condition_explorer/condition_explorer.R,TRUE,"[John Magnotti]<john.Magnotti@bcm.edu>, [Zhengjia Wang]<dipterix.wang@gmail.com>",0.1.6,rave;magrittr;stringr;shiny;MASS

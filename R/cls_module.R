@@ -152,31 +152,43 @@ ModuleEnvir <- R6::R6Class(
       # read in script, get package info
       src = readLines(self$script_path)
 
-
-
-
       # get
       static_env = self$get_or_new_exec_env(session = session)$static_env
-      runtime_env = self$get_or_new_exec_env(session = session)$runtime_env
+      parse_env = self$get_or_new_exec_env(session = session)$parse_env
+      clear_env(parse_env)
+
 
       parsed = parse(text = src)
       for(i in 1:length(parsed)){
-        comp = lazyeval::as.lazy(str_c(parsed[i]), env = static_env)
+
+        # Use eval_dirty
+        # Do not use str_c, use as.character instead to avoid warnings
         tryCatch({
-          lazyeval::lazy_eval(comp)
-          # logger('[Parsed]: ', str_c(parsed[i]), level = 'DEBUG')
+          eval_dirty(parsed[i], env = parse_env)
         }, error = function(e){
-          logger('[Ignored]: ', str_c(parsed[i]), level = 'INFO')
+          logger('[Ignored]: ', as.character(parsed[i]), level = 'INFO')
           logger(paste(e, sep = '\n'), level = 'WARNING')
         })
+
+        # comp = lazyeval::as.lazy(str_c(parsed[i]), env = static_env)
+        # tryCatch({
+        #   lazyeval::lazy_eval(comp)
+        #   # logger('[Parsed]: ', str_c(parsed[i]), level = 'DEBUG')
+        # }, error = function(e){
+        #   logger('[Ignored]: ', str_c(parsed[i]), level = 'INFO')
+        #   logger(paste(e, sep = '\n'), level = 'WARNING')
+        # })
       }
 
+      # Move everything to statis env
+      list2env(as.list(parse_env, all.names = T), envir = static_env)
+
       # re-direct function environment to runtime-env where rave_execute take place.
-      for(nm in ls(static_env, all.names = T)){
-        if(is.function(static_env[[nm]])){
-          environment(static_env[[nm]]) <- runtime_env
-        }
-      }
+      # for(nm in ls(static_env, all.names = T)){
+      #   if(is.function(static_env[[nm]])){
+      #     environment(static_env[[nm]]) <- runtime_env
+      #   }
+      # }
 
       # lockEnvironment(static_env)
 
@@ -257,6 +269,7 @@ ExecEnvir <- R6::R6Class(
     wrapper_env = NULL,
     static_env = NULL,
     runtime_env = NULL,
+    parse_env = NULL,
     param_env = NULL,
     ns = NULL,
     input_update = NULL,
@@ -272,6 +285,7 @@ ExecEnvir <- R6::R6Class(
       }
     },
     finalize = function(){
+      self$clean()
       logger(sprintf('[%s] Runtime Environment Removed.', private$module_env$module_id))
     },
     print = function(...){
@@ -286,10 +300,11 @@ ExecEnvir <- R6::R6Class(
     },
     clean = function(){
       # WARNING: this is not clean, but should be able to clear most of the large objects
+      clear_env(self$parse_env)
+      clear_env(self$param_env)
       clear_env(self$runtime_env)
       # clear_env(self$static_env)
       clear_env(private$cache_env)
-      # clear_env(self$wrapper_env)
     },
     initialize = function(session = getDefaultReactiveDomain(),
                           parent_env = baseenv()){
@@ -313,6 +328,12 @@ ExecEnvir <- R6::R6Class(
       self$static_env$..runtime_env = self$runtime_env
       self$static_env$.env = self$runtime_env
       self$static_env$..param_env = self$param_env
+
+      # Environment for parsers. All source file will be parsed here
+      # it can get access to runtime_env.
+      # Old scheme was to parse src in static env and change function environment to
+      # runtime_env, this is dangerous. So I come up with this solution
+      self$parse_env = new.env(parent = self$runtime_env)
 
       private$cache_env = new.env()
       private$cache_env$.keys = c()
@@ -408,16 +429,27 @@ ExecEnvir <- R6::R6Class(
           return()
         }
 
-        # try to find file, if not, try to use the one under modules's dir
-        if(!file.exists(file)){
-          logger('File [', file, '] does not exists, try to look for it.', level = 'INFO')
-          dir = dirname(private$module_env$script_path)
-          file = tail(as.vector(str_split(file, '/', simplify = T)), 1)
-          file = file.path(dir, file)
+        # Try to use the file under the same dir
+        dir = dirname(private$module_env$script_path)
+        tmp_file = file.path(dir, file)
+        if(file.exists(tmp_file)){
+          logger('Try to source from [', tmp_file, ']')
+          self$static_env$.__tmp_file = tmp_file
+          eval(quote(base::source(.__tmp_file, local = T)), self$parse_env)
+        }else if(file.exists(file)){
+          logger('File [', tmp_file, '] does not exists, try to look for it.', level = 'INFO')
+          self$static_env$.__tmp_file = file
+          eval(quote(base::source(.__tmp_file, local = T)), self$parse_env)
+        }else{
+          logger('File [', file, '] does not exists.', level = 'ERROR')
+          return()
         }
-        logger('Trying to source [', file, ']')
-        self$static_env$.__tmp_file = file
-        eval(quote(base::source(.__tmp_file, local = T)), self$static_env)
+
+        # Speed up
+        # rave:::copy_env(self$parse_env, self$static_env, deep = F)
+        list2env(as.list(self$parse_env, all.names = T), envir = self$static_env)
+
+
       }
 
       self$wrapper_env$require = function(package, ..., character.only = TRUE){
