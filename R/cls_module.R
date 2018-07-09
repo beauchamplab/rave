@@ -165,7 +165,7 @@ ModuleEnvir <- R6::R6Class(
         # Use eval_dirty
         # Do not use str_c, use as.character instead to avoid warnings
         tryCatch({
-          eval_dirty(parsed[i], env = static_env)
+          eval_dirty(parsed[i], env = runtime_env)
         }, error = function(e){
           logger('[Ignored]: ', as.character(parsed[i]), level = 'INFO')
           logger(paste(e, sep = '\n'), level = 'WARNING')
@@ -182,14 +182,15 @@ ModuleEnvir <- R6::R6Class(
       }
 
       # Move everything to statis env
-      # list2env(as.list(parse_env, all.names = T), envir = static_env)
+      list2env(as.list(runtime_env, all.names = T), envir = static_env)
+      clear_env(runtime_env)
 
       # re-direct function environment to runtime-env where rave_execute take place.
-      for(nm in ls(static_env, all.names = T)){
-        if(is.function(static_env[[nm]])){
-          environment(static_env[[nm]]) <- runtime_env
-        }
-      }
+      # for(nm in ls(static_env, all.names = T)){
+      #   if(is.function(static_env[[nm]])){
+      #     environment(static_env[[nm]]) <- runtime_env
+      #   }
+      # }
 
       # lockEnvironment(static_env)
 
@@ -435,12 +436,12 @@ ExecEnvir <- R6::R6Class(
         tmp_file = file.path(dir, file)
         if(file.exists(tmp_file)){
           logger('Try to source from [', tmp_file, ']')
-          self$static_env$.__tmp_file = tmp_file
-          eval(quote(base::source(.__tmp_file, local = T)), self$static_env)
+          self$runtime_env$.__tmp_file = tmp_file
+          eval(quote(base::source(.__tmp_file, local = T)), self$runtime_env)
         }else if(file.exists(file)){
           logger('File [', tmp_file, '] does not exists, try to look for it.', level = 'INFO')
-          self$static_env$.__tmp_file = file
-          eval(quote(base::source(.__tmp_file, local = T)), self$static_env)
+          self$runtime_env$.__tmp_file = file
+          eval(quote(base::source(.__tmp_file, local = T)), self$runtime_env)
         }else{
           logger('File [', file, '] does not exists.', level = 'ERROR')
           return()
@@ -448,7 +449,7 @@ ExecEnvir <- R6::R6Class(
 
         # Speed up
         # rave:::copy_env(self$parse_env, self$static_env, deep = F)
-        # list2env(as.list(self$parse_env, all.names = T), envir = self$static_env)
+        list2env(as.list(self$runtime_env, all.names = T), envir = self$static_env)
 
 
       }
