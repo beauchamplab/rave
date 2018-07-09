@@ -1044,6 +1044,7 @@ ExecEnvir <- R6::R6Class(
           return(val)
         }
       }else{
+        logger('Caching ', inputId)
         v = self$cache(
           key = list(
             type = '.rave-inputs-Dipterix',

@@ -272,6 +272,12 @@ cur_group_ui = function(){
   )
 }
 
+observeEvent(input[['elec_loc_callback']], {
+  dat = input[['elec_loc_callback']]
+  print(dat)
+  do.call(switch_to, dat)
+})
+
 output[[('bad_electrodes_out')]] = renderText({
   bad_electrodes = rave:::parse_selections(input[[('ref_bad')]])
   bad_electrodes = subject$filter_all_electrodes(bad_electrodes)

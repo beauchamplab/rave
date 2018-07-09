@@ -195,7 +195,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, .
           m = m[[1]]
           e = m$get_or_new_exec_env()
           e$cache_input(inputId = variable_name, val = value, read_only = F)
-          if(flush && mid == str_to_upper(isolate(input$sidebar))){
+          if(flush && module_id == str_to_upper(isolate(input$sidebar))){
             # When target module is not the same as current module, we need manually refresh current module
             e$input_update(input = list(), init = T)
           }

@@ -432,7 +432,6 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
         elements = geoms,
         fps = fps,
         control_gui = control_gui,
-        callback_id = '__rave_threejsr_callback',
         ...
       )
     }
