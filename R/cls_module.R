@@ -615,7 +615,7 @@ ExecEnvir <- R6::R6Class(
       return(invisible(self$runtime_env))
     },
     export_report = function(expr, inputId = 'electrode', electrodes = NULL, async = F){
-      assign('aaa', environment(), envir = globalenv())
+      # assign('aaa', environment(), envir = globalenv())
       expr = substitute(expr)
       params = as.list(self$param_env)
 

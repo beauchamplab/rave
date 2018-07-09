@@ -39,9 +39,6 @@
       inputId = as.character(data$inputId)
       value =  data$val
 
-      assign('aaa', value, envir = globalenv())
-
-
       ids = names(meta)
       ncomp = as.integer(data$ncomp)
       if(length(ids) == 0 || is.null(ncomp) || ncomp <= 0){
