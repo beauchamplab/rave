@@ -112,7 +112,10 @@ rave_updates(
   GROUPS_CMPD = {
     trials = unique(preload_info$condition)
     value = cache_input('GROUPS_CMPD', list(
-      list(GROUP = list(trials)),
+      list(
+        GROUP_NAME = list('AllConditions'),
+        GROUP = list(trials)
+      ),
       list(GROUP = list(trials[1]))
     ))
     list(initialize = list(GROUP = list(choices = trials)),

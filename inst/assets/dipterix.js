@@ -267,7 +267,9 @@ binding.getValue = function(el) {
             newsel = subel.split(',').join(ns_id + ',') + ns_id,
             sub = ui.find(newsel);
         if(typeof(shinybinds) !== 'undefined' && sub.length > 0){
-          val[subId] = shinybinds.binding.getValue(sub[0]);
+          // One problem when serializing selectInput: all elements will be part of list. Solution is to stringify values and deserialize in R
+          // val[subId] = shinybinds.binding.getValue(sub[0]);
+          val[subId] = JSON.stringify(shinybinds.binding.getValue(sub[0]));
         }
       }
 
