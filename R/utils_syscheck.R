@@ -39,18 +39,25 @@
       inputId = as.character(data$inputId)
       value =  data$val
 
-
       ids = names(meta)
       ncomp = as.integer(data$ncomp)
       if(length(ids) == 0 || is.null(ncomp) || ncomp <= 0){
         return(NULL)
       }
 
-      nvalid = length(dropInvalid(value, deep = T))
-      nvalid = max(1, nvalid)
-      nvalid = min(nvalid, ncomp)
+      # nvalid = length(dropInvalid(value, deep = T))
+      # nvalid = max(1, nvalid)
+      # nvalid = min(nvalid, ncomp)
 
-      re = value[1:nvalid]
+      re = lapply(value, function(val){
+        sapply(val, function(v){
+          tryCatch({
+            jsonlite::fromJSON(v)
+          }, error = function(e){
+            NULL
+          })
+        }, simplify = F, USE.NAMES = T)
+      })
 
       attr(re, 'ncomp') <- ncomp
       attr(re, 'meta') <- meta
@@ -61,25 +68,25 @@
     }, force = TRUE)
 
 
-    ui_register_function('shiny::textInput', shiny::updateTextInput)
-    ui_register_function('shiny::selectInput', shiny::updateSelectInput, value_field = 'selected')
-    ui_register_function('shiny::numericInput', shiny::updateNumericInput)
-    ui_register_function('shiny::sliderInput', shiny::updateSliderInput)
-    ui_register_function('shiny::checkboxInput', shiny::updateCheckboxInput)
-    ui_register_function('shiny::textAreaInput', shiny::updateTextAreaInput)
-    ui_register_function('shiny::dateInput', shiny::updateDateInput)
-    ui_register_function('shiny::dateRangeInput', shiny::updateDateRangeInput)
-    ui_register_function('shiny::checkboxGroupInput', shiny::updateDateInput, value_field = 'selected')
-    ui_register_function('rave::compoundInput', rave:::updateCompoundInput, update_value = T)
-
-    ui_register_function('shiny::plotOutput', shiny::renderPlot, default_args = list(res = 72))
-    ui_register_function('shiny::tableOutput', shiny::renderTable)
-    ui_register_function('shiny::verbatimTextOutput', shiny::renderPrint)
-    ui_register_function('shiny::dataTableOutput', shiny::renderDataTable)
-    ui_register_function('shiny::uiOutput', shiny::renderUI)
-    ui_register_function('shiny::imageOutput', shiny::renderImage, default_args = list(deleteFile = FALSE))
-    ui_register_function('shiny::htmlOutput', shiny::renderText)
-    ui_register_function('shiny::textOutput', shiny::renderText)
+    # ui_register_function('shiny::textInput', shiny::updateTextInput)
+    # ui_register_function('shiny::selectInput', shiny::updateSelectInput, value_field = 'selected')
+    # ui_register_function('shiny::numericInput', shiny::updateNumericInput)
+    # ui_register_function('shiny::sliderInput', shiny::updateSliderInput)
+    # ui_register_function('shiny::checkboxInput', shiny::updateCheckboxInput)
+    # ui_register_function('shiny::textAreaInput', shiny::updateTextAreaInput)
+    # ui_register_function('shiny::dateInput', shiny::updateDateInput)
+    # ui_register_function('shiny::dateRangeInput', shiny::updateDateRangeInput)
+    # ui_register_function('shiny::checkboxGroupInput', shiny::updateDateInput, value_field = 'selected')
+    # ui_register_function('rave::compoundInput', rave:::updateCompoundInput, update_value = T)
+    #
+    # ui_register_function('shiny::plotOutput', shiny::renderPlot, default_args = list(res = 72))
+    # ui_register_function('shiny::tableOutput', shiny::renderTable)
+    # ui_register_function('shiny::verbatimTextOutput', shiny::renderPrint)
+    # ui_register_function('shiny::dataTableOutput', shiny::renderDataTable)
+    # ui_register_function('shiny::uiOutput', shiny::renderUI)
+    # ui_register_function('shiny::imageOutput', shiny::renderImage, default_args = list(deleteFile = FALSE))
+    # ui_register_function('shiny::htmlOutput', shiny::renderText)
+    # ui_register_function('shiny::textOutput', shiny::renderText)
 
 
 

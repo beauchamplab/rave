@@ -419,6 +419,9 @@ comp_parser <- function(){
         base_args = args$initialize
 
         to = args[['to']]
+        if(is.null(to)){
+          to = length(args$value)
+        }
 
         if(!is.null(to)){
           args[['to']] = NULL
@@ -432,7 +435,15 @@ comp_parser <- function(){
           if(ii <= length(args$value)){
             more_args = args$value[[ii]]
             for(ma in names(more_args)){
-              base_args[[ma]] = c(base_args[[ma]], more_args[[ma]])
+              val = more_args[[ma]]
+              if(is.list(val)){
+                tmp = c(val[['value']], val[['selected']])
+                if(!length(tmp) && length(val)){
+                  tmp = val[[1]]
+                }
+                val = tmp
+              }
+              base_args[[ma]] = c(base_args[[ma]], list(val))
             }
           }
           lapply(sub_names, function(nm){

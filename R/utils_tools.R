@@ -386,15 +386,18 @@ rave_preprocess_tools <- function(env = new.env(), ...){
       re
     }
 
-    load_wavelet = function(electrode, blocks){
+    load_wavelet = function(electrode, blocks, referenced = F){
       assertthat::assert_that(utils$waveleted(), msg = 'Wavelet is needed. Run preprocess first.')
       # only load raw wavelet
       blocks %?<-% utils$get_blocks()
       dirs = utils$get_from_subject('dirs')
-      f = file.path(dirs$channel_dir, 'spectrum', sprintf('%d.h5', electrode))
+      fpower = file.path(dirs$channel_dir, 'power', sprintf('%d.h5', electrode))
+      fphase = file.path(dirs$channel_dir, 'phase', sprintf('%d.h5', electrode))
+      prefix = ifelse(referenced, '/ref', '/raw')
       sapply(blocks, function(b){
-        d = load_h5(f, name = sprintf('/wavelet/coef/%s', b), ram = T)
-        d[,,1] * exp(1i * d[,,2])
+        power = load_h5(fpower, name = sprintf('%s/power/%s', prefix, b), ram = T)
+        phase = load_h5(fphase, name = sprintf('%s/phase/%s', prefix, b), ram = T)
+        sqrt(power) * exp(1i * phase)
       }, simplify = F, USE.NAMES = T) ->
         re
       re
