@@ -269,7 +269,7 @@ li.control-sidebar-items>a {
 }
 
 .shiny-plot-output {
-  overflow: scroll;
+  overflow: overlay;
   resize: vertical;
 }
 
