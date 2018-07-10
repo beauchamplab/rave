@@ -1,20 +1,40 @@
 # RAVE
-R Analysis and Visualization of ECOG Data
+R Analysis and Visualization of ECOG/iEEG Data
 
 ## A. Installation
 
 ### 1. Environment Setup
 
-In this section, you'll install R, RStudio, devtools and all other dependencies.
+In this section, you'll install R, RStudio, devtools and all other dependencies. To start, let me explain what these terms mean:
 
-**R** is a functional programming language that *RAVE* uses. **Devtools** are necessary to enable advanced features. **RStudio** is an *IDE (Intergrated Development Environment)* for easy and better code management especially designed for R. If you are hosting a server in RAVE, or prefer to using command lines, RStudio is not necessary.
+- **R** is a functional programming language that *RAVE* uses. Similar to Matlab, Python, C++, it's a language.
+- **Devtools** are necessary to enable advanced features, especially when you want to compile R packages.
+- **RStudio** is an IDE *(Intergrated Development Environment)* for easy and better code management especially designed for R.
 
 You need to check your operating system before installtion:
 
+As of 07/10/2018, the following systems are tested:
+
 + [Mac OS](#macos)
 + [Windows (Windows 10, with Bash enabled)](#windows)
-+ Linux (Ubuntu-Like)
++ [Ubuntu 16.04+](#ubuntu)
 + Linux (Others)
+
+Minimum system requirement:
+
+- Multicore CPU (2+)
+- 8GB RAM
+- 128 GB Free Hard Disk Space
+- 512 MB Video Memory
+- WebGL-enabled Web Browser
+
+Suggested system requirement:
+
+- 8 Core CPU
+- 64GB RAM (6-8GB per CPU)
+- 1T Hard Disk Space
+- 2 GB Video Memory
+- WebGL-enabled Web Browser
 
 
 #### MacOS
@@ -39,97 +59,142 @@ xcode-select --install
 
 #### Windows
 
-On Windows, RAVE is limited because *AFNI* doesn't support windows. However, most of RAVE functions should work. To install RAVE, you need to have *bash* enabled on Windows 10.
-
-It's easy to install on Windows. 
-
-1. First, go to Cran-R official website and download install the latest R:
+1. Install R with the **latest** version
 
 [https://cran.r-project.org/bin/windows/base/](https://cran.r-project.org/bin/windows/base/)
 
-2. After installing R, download and install *Rtools*. Please install the latest version:
+2. Install *Rtools*. Please install the **latest** version:
 
 [https://cran.r-project.org/bin/windows/Rtools/](https://cran.r-project.org/bin/windows/Rtools/)
 
-3. RStudio
+3. Download and install RStudio for Windows
 
 [https://www.rstudio.com/products/rstudio/download/](https://www.rstudio.com/products/rstudio/download/)
 
-### 2. Install R dependencies and RAVE
+4. Install `devtools` and `RAVE`
 
-**If you have installed RStudio, open it, or if you are using terminal/command line, type `R` to enter R.**
-
-There are two ways to install RAVE. 
-
-#### 2.1 If you want to install recommended version of RAVE (strongly recommended)
-
-I have written a very simple and easy script for you. Open R, or RStudio, enter:
-
-```
-source('https://raw.githubusercontent.com/dipterix/instrave/master/R/hello.R')
-```
-
-If you fail, don't worry, try it several times, since there are so many packages to be installed and "turn R off and on again" is the easiest way to clean the installation environment :) However, if you try more than five times and still get errors, this might be an issue. Please report the issue on Github or contact me via my [email](mailto:dipterix.wang@gmail.com?Subject=[RAVE_Issues_Github]&Body=Hi%20Dipterix).
-
-Then you will see that `RAVE` is installed and attached. Type 
-
-```
-init_app()
-```
-
-to enjoy :)
-
-#### 2.2 If you want to install specific version of RAVE
-
-Inside of R, install `devtools` and `rhdf5` by typing the following commands:
+Open RStudio, enter the following command in RStudio **console**
 
 ```
 install.packages('devtools')
-source("https://bioconductor.org/biocLite.R")
-biocLite(c("rhdf5", "HDF5Array"), suppressUpdates = T, suppressAutoUpdate = T)
 ```
 
-Next, install RAVE,
+To install `RAVE`
 
-There are two versions of RAVE, **Alpha**, **Beta** version. To see the difference, please check [RAVE updates]()
+```
+devtools::install_github('beauchamplab/rave')
+```
 
-#### Alpha version (NOT recommended now)
+*Little problem you might get*
 
-This version was last updated at *Dec/2017* and is no-longer supported. This version is only developed for [Beauchamp's Lab](https://openwetware.org/wiki/Beauchamp). However, you can still see the [demo here](http://34.214.213.191:8080/)
+Sometimes, `devtools` will report errors like
 
-`devtools::install_github('beauchamplab/rave')`
+```
+WARNING: Rtools is required to build R packages, but no version of Rtools 
+compatible with R ... was found. (Only the following incompatible 
+version(s) of Rtools were found ...
+```
 
-*Please make sure that your R has packages `devtools`, `tidyverse` installed.*
-*It is also recommended that other packages (`rhdf5`, `HDF5Array`) be installed.*
+Please make sure that you have the right `RTools` installed. Please check [RTools website](https://cran.r-project.org/bin/windows/Rtools/)
 
-#### Beta Version
+If you install the right version of RTools, then run the following command in RStudio to force it.
 
-IMPORTANT: I'm Still maturing this version. However, it's runnable and contains more features than the alpha version. Please go to [RAVE_dev-cycle]() to see the todo-list.
+```
+assignInNamespace("version_info", c(devtools:::version_info, list("3.5" = list(version_min = "3.3.0", version_max = "3.5.999", path = "bin"))), "devtools")
+```
 
-To install this version of RAVE, simply enter the following command:
 
-`devtools::install_github('beauchamplab/rave@rave-dipterix')`
+#### Ubuntu
 
-or -
+1. Add Cran repository to your system
 
-`devtools::install_github('beauchamplab/rave', ref = 'rave-dipterix')`
+Add R-Cran repository to your app list:
 
-Please make sure that you have latest `yaml` package installed. Upon failure, you might want to try: `install.packages('yaml')`.
-All other dependencies should be installed automatically
+Open terminal (if you don't know how, look at your sidebar in ubuntu, `search your computer` enter "terminal"), type the following code:
+
+```
+sudo gedit /etc/apt/sources.list
+```
+
+Then there will be a text editor with lots of "deb"s in it. Append the following line at the end of this file
+
+
+```
+deb https://cloud.r-project.org/bin/linux/ubuntu xenial-cran35/
+```
+
+**IMPORTANT** Based on you system, you might want to enter different repositories (https://cran.r-project.org/bin/linux/). However, this line should be with a format of `deb` + `[repository URL]` + `xenial` (or `xenial-cran35`) + `/`. The difference between `xenial` and `xenial-cran35` will affect the version of R to be installed.
+
+Save the file and close text editor. In your terminal, update `apt-get` repository:
+
+```
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+sudo apt-get update
+```
+
+The first line gives you access to the new repository (it adds keys to your computer so that you can safely download R). 
+
+2. Install R
+
+Copy the following command line by line into your terminal and run
+
+```
+sudo apt-get install r-base
+```
+
+```
+sudo apt-get install r-base-dev
+```
+
+3. Install compiling tools and system dependencies
+
+After installing R, copy the following command to your terminal and run:
+
+```
+sudo apt-get install libssl-dev libcurl4-openssl-dev libssh2-1-dev libv8-3.14-dev libxml2-dev libfftw3-dev libtiff5-dev libhdf5-dev
+```
+
+The first three packages `libssl-dev` `libcurl4-openssl-dev` `libssh2-1-dev` are necessary for `devtools` (compilers). `libv8-3.14-dev` is for 
+`V8` package to enable JavaScript. `libxml2-dev` is for `xml2`. `libfftw3-dev` `libtiff5-dev` are necessary for fast-fourier transformations and 
+`libhdf5-dev` is for reading and writing data in open data format `HDF5`.
+
+4. Install RStudio
+
+Go to https://www.rstudio.com/products/rstudio/download/#download and download `RStudio 1.1.453 - Ubuntu 16.04+/Debian 9+ (64-bit)` to your **desktop** 
+and type the folloing command in your terminal
+
+```
+cd ~/Desktop
+sudo apt-get install libjpeg62
+```
+
+Then we can install RStudio
+
+```
+sudo dpkg -i ./rstudio-xenial-1.1.453-amd64.deb 
+```
+
+and `RStudio` should be in your application list. Again, if you don't know where it is, look at your sidebar in ubuntu, click `search your computer` and enter "RStudio".
+
+5. Install `RAVE`
+
+Open RStudio,
+
+In your RStudio **console**, run:
+
+```
+install.packages('devtools')
+devtools::install_github('beauchamplab/rave')
+```
 
 
 ## B. Toy example
 
-*Depending on the version of `RAVE` that you have installed*
-
-### Beta version
-
-Beta version is very easy. This version comes with some "real" data
 
 To play with **preprocess**, type the following R command 
 
 ```
-rave_pre_process()
+rave_preprocess()
 ```
 
 In the `subject code`, type `Subject` and press `load` button
@@ -139,31 +204,4 @@ To play with **Main**, type:
 ```
 init_app()
 ```
-
-### Alpha version
-
-If you have installed `Alpha` version, you can use the following code to launch
-
-```
-# Load packages
-library(rave)
-require(tidyverse)
-require(magrittr)
-
-# Re-direct ECOG data directory and module index file
-rave_opts$set_options(
-  data_dir = system.file('example/data', package='rave'),
-  module_lookup_file = system.file('modules.csv', package='rave')
-);
-
-# Launch web service
-init_app()
-```
-
-Please check `vignettes/user_guide` for details such as 
-*data format*, *SUMA connection*, *Matlab options*. To know how to 
-*write modules*, or *use command lines* (import subject data and perform 
-quick analysis), check `vignettes/rafe-cookbook`.
-
-
 
