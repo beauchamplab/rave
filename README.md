@@ -194,6 +194,8 @@ devtools::install_github('beauchamplab/rave')
 ## B. Toy example
 
 
+#### Preprocess
+
 To play with **preprocess**, type the following R command 
 
 ```
@@ -205,7 +207,12 @@ rave_preprocess()
 * Set `sample rate` to be `2000`
 * Set `electrodes` to be `1-6`.
 
-press `load subject` button
+Press `load subject` button
+
+Next, please go through `Notch filter`, `Wavelet` and `Epoch` modules.
+
+
+#### Main App
 
 To play with **Main**, type:
 
