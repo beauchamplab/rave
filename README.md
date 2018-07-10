@@ -200,7 +200,12 @@ To play with **preprocess**, type the following R command
 rave_preprocess()
 ```
 
-In the `subject code`, type `Subject` and press `load` button
+* Set `subject code` to be `Subject` 
+* Set `project name` to be `Demo`.
+* Set `sample rate` to be `2000`
+* Set `electrodes` to be `1-6`.
+
+press `load subject` button
 
 To play with **Main**, type:
 
