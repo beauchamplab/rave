@@ -1,6 +1,8 @@
 # RAVE
 R Analysis and Visualization of ECOG/iEEG Data
 
+![RAVE Module - Condition Explorer](https://raw.githubusercontent.com/dipterix/instrave/master/img/mainapp/mainapp_demo.png)
+
 ## A. Installation
 
 ### 1. Environment Setup
