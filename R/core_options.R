@@ -2,9 +2,10 @@
 
 opt <- list(
   debug = FALSE,
-  raw_data_dir = '../Researches/rave/adhoc/Dipterix/Data/ECoG/neuralData/originalData/',
-  data_dir = '../rafe/hdf5_data/',
-  module_root_dir = '~/rave_modules',
+  check_updates_onstartup = T,
+  raw_data_dir = '~/rave_data/raw_dir/',
+  data_dir = '~/rave_data/data_dir/',
+  module_root_dir = '~/rave_modules/',
   big_object_size = 500000,
   server_time_zone = 'America/Chicago',
   module_export = './export',
