@@ -76,12 +76,22 @@ arrange_modules <- function(
         if(is.na(row$Version) || !is.character(row$Version)){
           row$Version = '0'
         }
-        if(length(row$Version_old) == 1 &&
-           !is.na(row$Version_old) &&
-           is.character(row$Version_old) &&
-           utils::compareVersion(row$Version, row$Version_old) < 0
-        ){
-          row$Version = row$Version_old
+
+        if(!reset){
+          if(length(row$Version_old) == 1 &&
+             !is.na(row$Version_old) &&
+             is.character(row$Version_old) &&
+             utils::compareVersion(row$Version, row$Version_old) < 0
+          ){
+            # New packages are not new! DO not change module file, this guy is a developer!
+            row$Version = row$Version_old
+            row$PackageID = row$PackageID_old
+            row$GroupName = row$GroupName_old
+            row$Name = row$Name_old
+            row$ScriptPath = row$ScriptPath_old
+            row$Author = row$Author_old
+            row$Packages = row$Packages_old
+          }
         }
         row[, columns]
       }) ->
@@ -113,8 +123,8 @@ arrange_modules <- function(
 
     # Move modules to module_root_dir
     # migrate new modules and overwrite
-    new_repo = system.file('modules', package = 'rave')
-    file.copy(new_repo, target_dir, overwrite = T, recursive = T)
+    file.copy(system.file('modules', package = 'rave'), target_dir, overwrite = T, recursive = T)
+    file.copy(system.file('packages.txt', package = 'rave'), target_dir, overwrite = T)
 
   }
 

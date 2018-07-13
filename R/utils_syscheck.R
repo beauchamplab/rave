@@ -3,7 +3,7 @@ check_updates <- function(file){
     file = '~/rave_modules/packages.txt'
   }
   if(!file.exists(file)){
-    file = system.file('modules/packages.txt', package = 'rave')
+    file = system.file('packages.txt', package = 'rave')
   }
   s = readLines(file)
   s = stringr::str_trim(s)
@@ -57,15 +57,6 @@ rave_version <- function(){
 
 
 .onAttach <- function(libname, pkgname){
-
-  try({
-    check_updates_onstartup = rave_options('check_updates_onstartup')
-    check_updates_onstartup %?<-% T
-    if(check_updates_onstartup){
-      check_updates()
-    }
-  }, silent = T)
-
 
   try({
     shiny::registerInputHandler("rave.compoundInput", function(data, shinysession, name) {
@@ -140,6 +131,16 @@ rave_version <- function(){
       rave::arrange_modules(F)
       has_data = rave::arrange_data_dir(F)
     }
+
+    try({
+      check_updates_onstartup = rave_options('check_updates_onstartup')
+      check_updates_onstartup %?<-% T
+      if(check_updates_onstartup){
+        suppressMessages({
+          check_updates()
+        })
+      }
+    }, silent = T)
 
     rave::save_options()
 
