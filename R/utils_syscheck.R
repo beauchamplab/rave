@@ -3,7 +3,7 @@ check_updates <- function(file){
     file = '~/rave_modules/packages.txt'
   }
   if(!file.exists(file)){
-    return(invisible())
+    file = system.file('modules/packages.txt', package = 'rave')
   }
   s = readLines(file)
   s = stringr::str_trim(s)

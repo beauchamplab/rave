@@ -76,6 +76,13 @@ arrange_modules <- function(
         if(is.na(row$Version) || !is.character(row$Version)){
           row$Version = '0'
         }
+        if(length(row$Version_old) == 1 &&
+           !is.na(row$Version_old) &&
+           is.character(row$Version_old) &&
+           utils::compareVersion(row$Version, row$Version_old) < 0
+        ){
+          row$Version = row$Version_old
+        }
         row[, columns]
       }) ->
         modules
