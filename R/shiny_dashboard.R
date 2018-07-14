@@ -72,15 +72,16 @@ dashboardHeader = function (..., title = NULL, titleWidth = NULL, disable = FALS
           tags$ul(
             class = "nav navbar-nav",
             items %>%
-              tagList(),
-            tags$li(
-              a(href = "#", class = "nav-item nav-link force-recalculate",
-                `data-toggle` = "control-sidebar",
-                role = "button",
-                span(class = "sr-only", "Toggle control"),
-                shiny::icon('hand-o-right'), span(btn_text_right)
-              )
-            )
+              tagList()
+            #,
+            # tags$li(
+            #   a(href = "#", class = "nav-item nav-link force-recalculate",
+            #     `data-toggle` = "control-sidebar",
+            #     role = "button",
+            #     span(class = "sr-only", "Toggle control"),
+            #     shiny::icon('hand-o-right'), span(btn_text_right)
+            #   )
+            # )
           )
         )
       )
