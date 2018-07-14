@@ -104,7 +104,7 @@ Options <- R6::R6Class(
         }
         mw = self$get_options('max_worker')
         if(length(mw) > 0 && mw == 3L && 'parallel' %in% installed.packages()[,1]){
-          self$set_options(max_worker = parallel::detectCores() - 1)
+          self$set_options(max_worker = future::availableCores() - 1)
         }
       }
       opt = private$opts

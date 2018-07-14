@@ -1,4 +1,3 @@
-#' @import parallel
 #' @import stringr
 #' @export
 ECoGRepository <- R6::R6Class(

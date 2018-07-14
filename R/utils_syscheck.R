@@ -320,7 +320,7 @@ rave_version <- function(){
     if(is_new){
       rave::rave_options(
         delay_input = 20,
-        max_worker = parallel::detectCores() - 1,
+        max_worker = future::availableCores() - 1,
         crayon_enabled = TRUE
       )
       rave::save_options()

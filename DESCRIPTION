@@ -28,7 +28,6 @@ Imports:
     future (>= 1.6.2),
     grid,
     magrittr (>= 1.5),
-    parallel,
     shiny (>= 1.0.5),
     stringr (>= 1.2.0),
     yaml (>= 2.1.15),
