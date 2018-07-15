@@ -11,9 +11,11 @@ local_data = reactiveValues(
   to_be_imported = NULL
 )
 env = new.env()
-env$masks = list()
+env$masks = new.env(parent = baseenv())
 .module_path = 'Viewer3D'
 .module_id = 'viewer_3d'
+bgcolor = '#ffffff'
+mouse_control = 'trackball'
 
 source('UI.R')
 source('import.R')
@@ -38,40 +40,55 @@ if(F){
 data_controls_name = function(){
   local_data$refresh_controller
   name = local_data$mask_name
-  if(!length(name) == 1 || !name %in% names(env$masks)){
+  if(!length(name) == 1 || !name %in% names(as.list(env$masks))){
     name = NULL
   }
   local_data$refresh_control_pane = Sys.time()
-  selectInput(ns('mask_name'), 'Select a Dataset for Visualization', choices = c('_Blank', names(env$masks)), selected = name)
+  selectInput(ns('mask_name'), 'Select a Dataset for Visualization', choices = c('_Blank', names(as.list(env$masks))), selected = name)
 }
 
+data_controls_misc = function(){
+  tagList(
+    checkboxInput(ns('col_sym'), 'Symmetric Color', value = T),
+    downloadLink(ns('export'), 'Download 3D Viewer')
+  )
+}
+
+output$export <- downloadHandler(
+  filename = function(){
+    'rave_3d_viewer.html'
+  },
+  content = function(con){
+    showNotification(p('Generating... This will take a while'), type = 'message', duration = NULL, id = ns(.module_id))
+    htmlwidgets::saveWidget(viewer(), con)
+    showNotification(p('Done!'), type = 'message', id = ns(.module_id), duration = 5)
+  }
+)
 
 data_controls_details = function(){
   local_data$refresh_control_pane
   name = local_data$mask_name
   name %?<-% '_Blank'
   ui = NULL
-  if(name %in% names(env$masks)){
+  if(name %in% names(as.list(env$masks))){
     mask = env$masks[[name]]
     local_data$controller_data = mask
-    switch(
-      mask$type,
-      'static' = {
-        ui = tagList(
-          selectInput(ns('main_var'), 'Display Colours', choices = mask$header),
-          selectInput(ns('thred_var'), 'Threshold', choices = mask$header),
-          sliderInput(ns('thred_rg'), 'Range', min = 0, max = 1, value = c(0,1), round = -2L),
-          selectInput(ns('info_var'), 'Click Info', choices = mask$header, multiple = T, selected = mask$header),
-          checkboxInput(ns('col_sym'), 'Symmetric Color', value = T)
-        )
-      },
-      'animation' = {
-        ui = tagList(
-          sliderInput(ns('ani_log_fps'), 'Speed', min = -2, max = 2, value = 0, step = 0.01),
-          checkboxInput(ns('col_sym'), 'Symmetric Color', value = T)
-        )
-      }
-    )
+    if(!is.null(mask)){
+      switch(
+        mask$type,
+        'static' = {
+          ui = tagList(
+            selectInput(ns('main_var'), 'Display Colours', choices = mask$header),
+            selectInput(ns('thred_var'), 'Threshold', choices = mask$header),
+            sliderInput(ns('thred_rg'), 'Range', min = 0, max = 1, value = c(0,1), round = -2L),
+            selectInput(ns('info_var'), 'Click Info', choices = mask$header, multiple = T, selected = mask$header)
+          )
+        },
+        'animation' = {
+          ui = tagList()
+        }
+      )
+    }
   }
   ui
 }
@@ -118,7 +135,7 @@ viewer = function(){
   try({
     name = local_data$mask_name
     name %?<-% '_Blank'
-    if(name %in% names(env$masks)){
+    if(name %in% names(as.list(env$masks))){
       mask = local_data$controller_data
     }else{
       mask = NULL
@@ -142,15 +159,18 @@ viewer = function(){
 
     switch (mask$type,
             '_blank' = {
-              module_tools$plot_3d_electrodes(
-                tbl = subject$electrodes,
-                marker = marker,
-                fps = 1,
-                loop = F,
-                control_gui = F,
-                background_colors = c(bgcolor, '#000000'),
-                control = mouse_control
+              return(
+                module_tools$plot_3d_electrodes(
+                  tbl = subject$electrodes,
+                  marker = marker,
+                  fps = 1,
+                  loop = F,
+                  control_gui = F,
+                  background_colors = c(bgcolor, '#000000'),
+                  control = mouse_control
+                )
               )
+
             },
             'static' = {
               main_var = local_data$main_var
@@ -204,32 +224,39 @@ viewer = function(){
                 marker = NULL
               }
 
-              module_tools$plot_3d_electrodes(
-                tbl = subject$electrodes,
-                electrodes = electrodes,
-                values = values,
-                symmetric = col_sym,
-                marker = marker,
-                fps = 1,
-                loop = F,
-                control_gui = F,
-                background_colors = c(bgcolor, '#000000'),
-                control = mouse_control
+              return(
+                module_tools$plot_3d_electrodes(
+                  tbl = subject$electrodes,
+                  electrodes = electrodes,
+                  values = values,
+                  symmetric = col_sym,
+                  marker = marker,
+                  fps = 1,
+                  loop = F,
+                  control_gui = F,
+                  background_colors = c(bgcolor, '#000000'),
+                  control = mouse_control
+                )
               )
+
             },
             'animation' = {
-              module_tools$plot_3d_electrodes(
-                tbl = subject$electrodes,
-                electrodes = mask$electrodes,
-                values = t(mask$body),
-                symmetric = col_sym,
-                marker = marker,
-                fps = 1,
-                loop = T,
-                control_gui = T,
-                background_colors = c(bgcolor, '#000000'),
-                control = mouse_control
+              return(
+                module_tools$plot_3d_electrodes(
+                  tbl = subject$electrodes,
+                  electrodes = mask$electrodes,
+                  key_frame = mask$header,
+                  values = t(mask$body),
+                  symmetric = col_sym,
+                  marker = marker,
+                  fps = 1,
+                  loop = T,
+                  control_gui = T,
+                  background_colors = c(bgcolor, '#000000'),
+                  control = mouse_control
+                )
               )
+
             }
     )
   }, silent = T)

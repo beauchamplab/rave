@@ -164,7 +164,7 @@ rave_prepare <- function(
     # actually load data to environment
 
     # load power phase
-    tmp = c('power', 'phase'); tmp = tmp[tmp %in% data_types]
+    tmp = c('power', 'phase', 'volt', 'voltage'); tmp = tmp[tmp %in% data_types]
     if(length(tmp)){
       repo$epoch(epoch_name = epoch, pre = time_range[1], post = time_range[2], names = tmp, quiet = quiet)
     }
@@ -203,12 +203,12 @@ rave_prepare <- function(
     env$.module_data = new.env(parent = baseenv())
 
     # Load voltage and customized data
-    if('voltage' %in% data_types){
-      env$.private[['voltage']] = env$module_tools$get_voltage(force = T)
-    }
+    # if('voltage' %in% data_types){
+    #   env$.private[['voltage']] = env$module_tools$get_voltage(force = T)
+    # }
 
     # Load other data
-    other_data_types = data_types[!data_types %in% c('power', 'phase', 'voltage')]
+    other_data_types = data_types[!data_types %in% c('power', 'phase', 'voltage', 'volt')]
     if(length(other_data_types)){
       module_data_dir = subject$dirs$module_data_dir
       lapply(other_data_types, function(path){

@@ -172,7 +172,7 @@ init_preprocess = function(){
         )
       )
     ),
-    skin = 'purple', title = 'R Analysis and Visualization of ECOG Data',
+    skin = 'black', title = 'R Analysis and Visualization of ECOG Data',
     controlbar_opened = TRUE
   ))
 

@@ -291,6 +291,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
       tbl = NULL,
       electrodes,
       values = NULL,
+      key_frame = NULL,
       marker = NULL,
       link_module = NULL,
       variable_name = 'electrode',
@@ -373,7 +374,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
           # values are characters, we assume that those are colors that needs no
         }
         # Set keyframes
-        key_frame = seq_len(nrow(values))
+        key_frame %?<-% seq_len(nrow(values))
 
         has_value = T
       }else{

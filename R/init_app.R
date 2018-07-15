@@ -49,7 +49,8 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, .
 
   data_selector = rave:::shiny_data_selector('DATA_SELECTOR')
   ui = rave::dashboardPage(
-    title = 'R Analysis and Visualization of ECoG Data',
+    skin = "purple",
+    title = 'R Analysis and Visualization of ECoG/iEEG Data',
     header = dashboardHeader(
       title = 'RAVE',
       data_selector$header(),

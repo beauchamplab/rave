@@ -315,6 +315,9 @@ shiny_data_selector <- function(moduleId){
       reference = input$reference
       subject_id = project_name %&% '/' %&% subject_code
 
+      if('voltage' %in% data_types){
+        data_types[data_types == 'voltage'] = 'volt'
+      }
       tmp_subject = Subject$new(project_name = project_name, subject_code = subject_code, reference = reference)
       electrodes = tmp_subject$filter_valid_electrodes(electrodes)
       if(length(electrodes) == 0){

@@ -105,7 +105,14 @@ observeEvent(input$import, {
     current_mask$cached = TRUE
     env$masks[[name]] = current_mask
     local_data$to_be_imported = current_mask
-    module_tools$save_subject_data(data = env$masks, name = 'file_list', path = .module_path)
+    tmp_env = new.env(parent = baseenv())
+    tmp_env = rave:::copy_env(env$masks, tmp_env)
+    tmp_env[['Voltage Referenced']] = NULL
+    module_tools$save_subject_data(
+      data = tmp_env,
+      name = 'file_list',
+      path = .module_path
+    )
     local_data$mask_name = name
     local_data$refresh_controller = Sys.time()
     showNotification(p(sprintf(
