@@ -41,6 +41,8 @@ observeEvent(input$file, {
       if(is.numeric(header)){
         # This is animation and header is keyframes
         type = 'animation'
+        # keyframe always starts from 0
+        header = header - min(header)
       }else{
         # This is static and header is variable name
         type = 'static'

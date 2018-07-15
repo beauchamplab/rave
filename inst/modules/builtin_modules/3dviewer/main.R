@@ -1,5 +1,7 @@
 require(threejsr)
 require(colourpicker)
+require(stringr)
+require(rave)
 
 session = getDefaultReactiveDomain()
 input = getDefaultReactiveInput()
@@ -24,6 +26,11 @@ if(F){
     name = 'CE_2018-07-08_14_51_13.csv',
     datapath = '~/rave_data/data_dir/Complete/YAB/rave/suma/CE_2018-07-08_14_51_13.csv'
   )
+
+
+  e = m$private$exec_env$mwtNxMl52FzoHsdDbYEp
+  local_data = isolate(reactiveValuesToList(e$static_env$local_data))
+  env = e$static_env$env
 }
 
 
@@ -34,11 +41,13 @@ data_controls_name = function(){
   if(!length(name) == 1 || !name %in% names(env$masks)){
     name = NULL
   }
+  local_data$refresh_control_pane = Sys.time()
   selectInput(ns('mask_name'), 'Select a Dataset for Visualization', choices = c('_Blank', names(env$masks)), selected = name)
 }
 
 
 data_controls_details = function(){
+  local_data$refresh_control_pane
   name = local_data$mask_name
   name %?<-% '_Blank'
   ui = NULL
@@ -116,22 +125,23 @@ viewer = function(){
     }
     mask %?<-% list(
       electrodes = NULL,
-      values = NULL,
-      type = '_blank'
+      values = NULL
     )
+    mask$type %?<-% '_blank'
 
     col_sym = local_data$col_sym
     col_sym %?<-% T
 
+    marker = apply(subject$electrodes, 1, function(x){
+      as.character(div(
+        h5('Electrode - ', x['Electrode'], ' ', tags$small(sprintf(
+          '%s [%s, %s]', x['Label'], x['Group'], x['Type']
+        )))
+      ))
+    })
+
     switch (mask$type,
             '_blank' = {
-              marker = apply(subject$electrodes, 1, function(x){
-                as.character(div(
-                  h5('Electrode - ', x['Electrode'], ' ', tags$small(sprintf(
-                    '%s [%s, %s]', x['Label'], x['Group'], x['Type']
-                  )))
-                ))
-              })
               module_tools$plot_3d_electrodes(
                 tbl = subject$electrodes,
                 marker = marker,
@@ -146,6 +156,7 @@ viewer = function(){
               main_var = local_data$main_var
               thred_var = local_data$thred_var
               thred_rg = local_data$thred_rg
+              thred_rg %?<-% c(-Inf, Inf)
               info_var = local_data$info_var
               body = mask$body[order(mask$electrodes), ]
               mask$electrodes = sort(mask$electrodes)
@@ -162,9 +173,10 @@ viewer = function(){
               if(length(info_var)){
                 # marker should be shown even the electrode is filtered out
                 sapply(info_var, function(v){
-                  mk = mask$body[, mask$header == v]
+                  mk = unlist(mask$body[, mask$header == v])
                   if(is.numeric(mk)){
-                    mk = sprintf('%.4f', mk)
+                    # mk = sprintf('%.4f', mk)
+                    mk = prettyNum(mk, digits=4, format="fg")
                   }
                   sapply(mk, function(x){
                     as.character(
@@ -183,13 +195,6 @@ viewer = function(){
                   str_remove_all(s, '\\n')
                 }) ->
                   tmp
-                marker = apply(subject$electrodes, 1, function(x){
-                  as.character(div(
-                    h5('Electrode - ', x['Electrode'], ' ', tags$small(sprintf(
-                      '%s [%s, %s]', x['Label'], x['Group'], x['Type']
-                    )))
-                  ))
-                })
                 in_mask = subject$electrodes$Electrode %in% mask$electrodes
                 marker[in_mask] = str_c(
                   marker[in_mask],
@@ -208,6 +213,20 @@ viewer = function(){
                 fps = 1,
                 loop = F,
                 control_gui = F,
+                background_colors = c(bgcolor, '#000000'),
+                control = mouse_control
+              )
+            },
+            'animation' = {
+              module_tools$plot_3d_electrodes(
+                tbl = subject$electrodes,
+                electrodes = mask$electrodes,
+                values = t(mask$body),
+                symmetric = col_sym,
+                marker = marker,
+                fps = 1,
+                loop = T,
+                control_gui = T,
                 background_colors = c(bgcolor, '#000000'),
                 control = mouse_control
               )
