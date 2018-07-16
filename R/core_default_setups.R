@@ -51,11 +51,31 @@ arrange_modules <- function(
 
   if(first_time || reset || !dir.exists(target_dir) || !file.exists(look_up_file)){
     # unlike data dir, we need to update this every time!
+    # Move modules to module_root_dir
+    # migrate new modules and overwrite
+    # IMPORTANT: migrate before module_lookup_file. since new packages need to have valid path
+    file.copy(system.file('modules', package = 'rave'), target_dir, overwrite = T, recursive = T)
+    file.copy(system.file('packages.txt', package = 'rave'), target_dir, overwrite = T)
+
+    # Tricky part: update module lookup file
+    # Rule is:
+    # if new module, and valid (active and script path exists), activate
+    # if update module, newer version will be kept. also if old module is deactivated, then deactivate
+    # if script path invalid, module will be deactivate anyway
+    #
+    # as for order, new modules will always on the top
+
     try({
       columns = names(new_modules)
+      n_new = nrow(new_modules)
+
       if(file.exists(look_up_file)){
         old_modules = read.csv(look_up_file, stringsAsFactors = F)
       }
+      old_modules$Order %?<-% seq_len(nrow(old_modules)) -1
+      old_modules$Order = as.numeric(old_modules$Order)
+      old_modules$Order[is.na(old_modules$Order)] = n_new + nrow(old_modules) + seq_along(old_modules$Order[is.na(old_modules$Order)])
+
       new = merge(new_modules, old_modules, by = 'ModuleID', all = T, sort = F, suffixes = c('', '_old'))
 
       # check ModuleID
@@ -77,6 +97,9 @@ arrange_modules <- function(
         }
         if(is.na(row$Version) || !is.character(row$Version)){
           row$Version = '0'
+        }
+        if(is.na(row$Order)){
+          row$Order = row$Order_old
         }
 
         if(!reset){
@@ -119,14 +142,14 @@ arrange_modules <- function(
       modules = do.call(rbind, modules)
       new_modules = modules[!duplicated(modules[,c('ModuleID', 'Version')]), ]
 
+      new_modules = new_modules[order(new_modules$Order), ]
+      new_modules$Order = seq_len(nrow(new_modules))
+
     }, silent = T)
 
     safe_write_csv(new_modules, look_up_file)
 
-    # Move modules to module_root_dir
-    # migrate new modules and overwrite
-    file.copy(system.file('modules', package = 'rave'), target_dir, overwrite = T, recursive = T)
-    file.copy(system.file('packages.txt', package = 'rave'), target_dir, overwrite = T)
+
 
   }
 

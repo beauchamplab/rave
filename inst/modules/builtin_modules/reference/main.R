@@ -3,8 +3,12 @@
 
 # Init virtualenv for module dev
 if(F){
-
+  library(rave)
   m = ModuleEnvir$new(module_id = 'mid', 'ref', script_path = './inst/modules/builtin_modules/reference/main.R'); init_app(m)
+
+
+  rave_prepare('Lang_loc/YCB', 1, 'YCBpd', c(1,2), data_types = NULL)
+
 
   profvis::profvis({
     rave_prepare(subject = 'Large/YAB', electrodes = c(1:10, 13:20), epoch = 'YABa', time_range = c(1,2), data_types = 'power', attach = F, reference = 'test')
@@ -22,7 +26,6 @@ rave_prepare(subject = 'congruency1/YAB', electrodes = 64:65, epoch = 'YABa', ti
 
 # load libraries
 library(shiny)
-library(rave)
 library(stringr)
 library(magrittr)
 
