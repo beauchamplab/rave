@@ -847,6 +847,22 @@ getDefaultCacheEnvironment <- function(
 #' @export
 lapply_async <- function(x, fun, ..., .ncores = 0, .future_plan = future::multiprocess,
                          .call_back = NULL, .packages = NULL, .envir = environment(), .globals = TRUE, .gc = TRUE){
+  # compatible with windows
+  if(stringr::str_detect(Sys.info()['sysname'], '^[wW]in')){
+    args = list(...)
+    return(lapply(seq_along(x), function(ii){
+      if(is.function(.call_back)){
+        try({
+          .call_back(ii)
+        })
+      }
+      do.call(fun, c(
+        list(x[ii]),
+        args
+      ), envir = .envir)
+    }))
+  }
+
   .ncores = as.integer(.ncores)
   if(.ncores <= 0){
     .ncores = rave_options('max_worker')
