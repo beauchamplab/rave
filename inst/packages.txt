@@ -1,5 +1,5 @@
 # Package Versions
 # name, version, source, details
 
-threejsr, 0.1.0, github, dipterix/threejsr
+threejsr, 0.1.9, github, dipterix/threejsr
 rutabaga, 0.1.0, github, dipterix/rutabaga
