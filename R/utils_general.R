@@ -851,15 +851,15 @@ lapply_async <- function(x, fun, ..., .ncores = 0, .future_plan = future::multip
   if(stringr::str_detect(Sys.info()['sysname'], '^[wW]in')){
     args = list(...)
     return(lapply(seq_along(x), function(ii){
+      do.call(fun, c(
+        list(x[ii]),
+        args
+      ), envir = .envir)
       if(is.function(.call_back)){
         try({
           .call_back(ii)
         })
       }
-      do.call(fun, c(
-        list(x[ii]),
-        args
-      ), envir = .envir)
     }))
   }
 
