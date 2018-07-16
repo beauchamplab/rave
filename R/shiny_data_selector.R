@@ -266,7 +266,7 @@ shiny_data_selector <- function(moduleId){
           column(
             width = 2,
             div(
-              style = 'max-height: 60vh; overflow-y: scroll;',
+              style = 'max-height: 60vh; overflow-y: auto;',
               uiOutput(ns('modal_data'))
             )
           )

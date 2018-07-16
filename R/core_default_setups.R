@@ -69,7 +69,9 @@ arrange_modules <- function(
             row[[col]] = row[[paste0(col, '_old')]]
           }
         }
-        row$Active = row$Active & row$Active_old
+        if(is.na(row$Active_old)){ row$Active = TRUE }else{
+          row$Active = row$Active & row$Active_old
+        }
         if(is_invalid(row$ScriptPath, .invalids = c('null', 'na', 'blank')) || !file.exists(row$ScriptPath)){
           row$Active = F
         }
