@@ -1,4 +1,4 @@
 Order,PackageID,GroupName,ModuleID,Name,ScriptPath,Active,Author,Version,Packages
-0,,,viewer_3d,3D Viewer,~/rave_modules/modules/builtin_modules/3dviewer/main.R,TRUE,[Zhengjia Wang]<dipterix.wang@gmail.com>,0.0.2,rave;stringr;shiny;
+0,,,viewer_3d,3D Viewer,~/rave_modules/modules/builtin_modules/3dviewer/main.R,TRUE,[Zhengjia Wang]<dipterix.wang@gmail.com>,0.0.3,rave;stringr;shiny;
 1,,,reference,Electrode Reference,~/rave_modules/modules/builtin_modules/reference/main.R,TRUE,[Zhengjia Wang]<dipterix.wang@gmail.com>,0.4.0,rave;magrittr;stringr;shiny;
 2,,,condition_explorer,Condition Explorer,~/rave_modules/modules/builtin_modules/condition_explorer/condition_explorer.R,TRUE,"[John Magnotti]<john.Magnotti@bcm.edu>, [Zhengjia Wang]<dipterix.wang@gmail.com>",0.1.6,rave;magrittr;stringr;shiny;MASS

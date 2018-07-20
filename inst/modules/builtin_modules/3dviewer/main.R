@@ -1,5 +1,4 @@
 require(threejsr)
-require(colourpicker)
 require(stringr)
 require(rave)
 
@@ -19,6 +18,7 @@ mouse_control = 'trackball'
 
 source('UI.R')
 source('import.R')
+source('utils.R')
 if(F){
   m = ModuleEnvir$new(module_id = 'id', label_name = 'lb', script_path = './inst/modules/builtin_modules/3dviewer/main.R'); init_app(m)
 
@@ -70,6 +70,11 @@ data_controls_details = function(){
   name = local_data$mask_name
   name %?<-% '_Blank'
   ui = NULL
+  if(name %in% .preserved){
+    # mask = env$masks[[name]]
+    # local_data$controller_data = mask
+    return(get_ui(name))
+  }
   if(name %in% names(as.list(env$masks))){
     mask = env$masks[[name]]
     local_data$controller_data = mask
@@ -105,6 +110,9 @@ observe({
 observe({
   try({
     mask = local_data$controller_data
+    if(is.null(mask) || is.null(mask$body)){
+      return()
+    }
     thred_var = local_data$thred_var
     col = mask$header == thred_var
     val = mask$body[, col]
@@ -116,7 +124,7 @@ observe({
       if(val[1] < val[2]){
         val[1] = floor(val[1] * 100) / 100
         val[2] = ceiling(val[2] * 100) / 100
-        updateSliderInput(session, 'thred_rg', label = sprintf('Range (%s)', thred_var), min = val[1], max = val[2], value = val)
+        updateSliderInput(session, 'thred_rg', label = sprintf('Range (%s)', thred_var), min = val[1], max = val[2], value = val, step = 0.001)
       }
     }
   }, silent = T)
@@ -133,7 +141,8 @@ rave_execute({
 
 viewer = function(){
   try({
-    name = local_data$mask_name
+    local_data$controller_data
+    name = isolate(local_data$mask_name)
     name %?<-% '_Blank'
     if(name %in% names(as.list(env$masks))){
       mask = local_data$controller_data

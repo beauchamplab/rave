@@ -1,17 +1,26 @@
+.module_path = 'Viewer3D'
+.module_id = 'viewer_3d'
+.preserved = c('Voltage, Referenced', 'Power, Referenced', 'Phase, Raw')
+
+
 
 rave_inputs(
   customizedUI('data_picker'),
   customizedUI('data_controls_name'),
+  customizedUI('data_controls_import'),
   customizedUI('data_controls_details'),
   customizedUI('data_controls_misc'),
   .input_panels = list(
-    'Data Import' = list(
-      'data_picker'
+    'Dataset' = list(
+      'data_controls_name',
+      'data_controls_import'
     ),
     'Controls' = list(
-      'data_controls_name',
       'data_controls_details',
       'data_controls_misc'
+    ),
+    '[-] Data Import' = list(
+      'data_picker'
     )
   )
 )
@@ -28,25 +37,9 @@ rave_updates({
     masks = new.env(parent = baseenv())
   }
 
-  # Load volt-raw if not exist
-  volt = module_tools$get_voltage(force = F, referenced = T)
-  if(!is.null(masks[['Voltage Referenced']])){
-    rm('Voltage Referenced', envir = masks)
+  for(p in .preserved){
+    masks[[p]] = NULL
   }
-  if(!is.null(volt) && is(volt, 'Tensor')){
-    masks[['Voltage Referenced']] = list(
-      name = 'Voltage Referenced',
-      header = seq_len(volt$dim[2]) * (100 / subject$preprocess_info('srate')),
-      body = rutabaga::collapse(volt$data, c(3,2)) / volt$dim[1],
-      type = 'animation',
-      electrodes = volt$dimnames$Electrode,
-      loaded = rep(T, length(volt$dimnames$Electrode)),
-      valid = volt$dimnames$Electrode %in% subject$valid_electrodes,
-      cached = TRUE
-    )
-  }
-
-
   env$masks = masks
 })
 

@@ -1,5 +1,59 @@
 # In charge of 'Data Import' section
 
+
+data_controls_import = function(){
+  # react to input$mask_name
+  local_data$mask_loaded
+  mask_name = input$mask_name
+  nms = ls(env$masks)
+  if(!length(mask_name)){
+    mask_name = '_Blank'
+  }
+  if(mask_name %in% nms){
+    mask = env$masks[[mask_name]]
+    if(check_mask_format(mask)){
+      # generate summary info
+      tags$ul(
+        tags$li('Name: ', mask$name),
+        tags$li('# of variables/time points: ', length(mask$header)),
+        tags$li('Type: ', mask$type),
+        tags$li('# of electrodes: ', length(mask$electrodes)),
+        tags$li('Valid electrodes: ', deparse_selections((mask$electrodes)[mask$valid]))
+      ) ->
+        ui
+      local_data$refresh_controller = Sys.time()
+      return(ui)
+    }
+
+    if(mask_name %in% .preserved || is.null(mask)){
+      return(
+        actionButton(ns('do_get_data'), 'Load Data')
+      )
+    }
+  }
+}
+
+observeEvent(input$do_get_data, {
+  mask_name = input$mask_name
+  m = str_trim(unlist(str_split(str_to_lower(mask_name), ',')))
+  di = list(
+    'power' = 'power',
+    'voltage' = 'volt',
+    'phase' = 'phase'
+  )
+
+  showNotification(p('loading'), type = 'message', id = ns(.module_id))
+
+  trials = module_tools$get_meta('trials')
+
+  mask = get_data(di[[m[1]]], referenced = (m[2] == 'referenced'), frequencies = preload_info$frequencies, trial_num = trials$Trial)
+
+  env$masks[[mask_name]] = mask
+  showNotification(p('Done!'), type = 'message', id = ns(.module_id), duration = 2)
+
+  local_data$mask_loaded = Sys.time()
+})
+
 data_picker = function(){
   # name                        size              type              datapath
   # local_sparse_function.md    2419              text/markdown     ...
