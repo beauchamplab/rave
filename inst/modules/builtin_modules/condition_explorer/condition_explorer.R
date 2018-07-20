@@ -65,11 +65,11 @@ condition_explorer_main = function(){
 
 
   # TODO: change adhoc vars definition - Zhengjia
-  .power = module_tools$get_power(force = T)[!exclude,,,]
-  electrodes = .power$dimnames$Electrode
-  trials = .power$dimnames$Trial
-  frequencies = .power$dimnames$Frequency
-  time_points = .power$dimnames$Time
+  junk = module_tools$get_power(force = T)
+  electrodes = preload_info$electrodes
+  trials = module_tools$get_meta('trials')$Trial[!exclude]
+  frequencies = preload_info$frequencies
+  time_points = preload_info$time_points
 
 
   electrode = as.integer(electrode)
