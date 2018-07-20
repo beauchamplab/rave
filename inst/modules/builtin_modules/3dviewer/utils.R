@@ -118,14 +118,17 @@ observeEvent(input$gen_3d, {
       on.exit({progress$close()}, add = T, after = FALSE)
       # Step 1, baseline
       progress$inc('Calculating Baseline')
-      bl = module_tools$baseline(from = bs[1], to = bs[2])
+
+      bl = cache(list(bs, preload_info), module_tools$baseline(from = bs[1], to = bs[2]))
+
 
       progress$inc('Subset...')
       mask$electrodes = bl$dimnames$Electrode
       bl = bl$subset(Trial = Trial %in% trial_ind, Frequency = Frequency %within% freqs, drop = F, data_only = T)
 
       progress$inc('Collapse...')
-      mask$body = rutabaga::collapse(bl, keep = c(4, 3)) / prod(dim(bl)[1:2])
+      mask$body = apply(bl, c(4,3), median)
+      # mask$body = rutabaga::collapse(bl, keep = c(4, 3)) / prod(dim(bl)[1:2])
 
 
 
