@@ -16,7 +16,7 @@ if(F){
 # rave:::attachDefaultDataRepository()
 }
 
-source('../utils/rave_calculators.R')
+source('rave_calculators.R')
 source('condition_explorer_ui.R')
 source('condition_explorer_plots.R')
 

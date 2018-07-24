@@ -2,6 +2,31 @@
 # some of them depend on RAVE globals (FREQUENCIES, TIME_RANGE, etc)
 
 
+# this can be better than baselining using cumsum over the network
+.local_baseline <- function(e_tensor, baseline_range, data_only=FALSE) {
+    bl_data <- e_tensor$data
+
+    bsl <- e_tensor$dimnames$Time %within% baseline_range
+
+    for(ei in seq_len(dim(bl_data)[4L])) {
+        bl <- vapply(seq_along(e_tensor$dimnames$Frequency), function(fi) {
+            rowMeans(e_tensor$data[,fi,bsl,ei])
+        }, FUN.VALUE = array(0, dim=dim(e_tensor$data)[1]))
+
+        bl_data[,,,ei] <- (100 * (e_tensor$data[,,,ei] / as.vector(bl) -1))
+    }
+
+    if(data_only) return (bl_data)
+
+    return (ECoGTensor$new(
+        data = bl_data,
+        dimnames = e_tensor$dimnames,
+        varnames = names(e_tensor$dimnames)
+    ))
+}
+
+
+
 # mean for each time/frequency across trials
 collapse_over_trial <- function(el) {
     # ~ 230 ms
@@ -112,7 +137,7 @@ collapse_over_freq.median <- function(el) {
 
 # first take mean over frequency
 # then grab mean and SE across trials
-collapse_over_freq_and_trial <- function(el){
+collapse_over_freq_and_trial <- function(el, include_standard_error=TRUE){
     if(prod(dim(el))<1) return(matrix(NA, ncol=2, nrow=1))
 
     # ~ 278ms
@@ -126,11 +151,21 @@ collapse_over_freq_and_trial <- function(el){
     eCon <- el$subset(Frequency = (Frequency %within% FREQUENCY), data_only = TRUE, drop=TRUE)
 
     # not sure if we can avoid the transpose here
-    t(vapply(seq_len(dim(eCon)[3L]), function(ii) {
-        .fast_mse(.rowMeans(eCon[,,ii], dim(eCon)[1L], dim(eCon)[2L]))
-    }, rep(0, 2)))
+    if(include_standard_error) {
+        return (
+            t(vapply(seq_len(dim(eCon)[3L]), function(ii) {
+                .fast_mse(.rowMeans(eCon[,,ii], dim(eCon)[1L], dim(eCon)[2L]))
+            }, rep(0, 2)))
+        )
+    }
+
+    # if we just want the mean, then flatten out the trial/freq axes and
+    # just take the column means--way faster
+    dim(eCon) <- c(prod(dim(eCon)[1:2]), dim(eCon)[3])
+    colMeans(eCon)
 }
 
+.fast_mean <- function(x) sum(x)/length(x)
 
 collapse_over_freq_and_trial.median <- function(el){
     if(prod(dim(el))<1) return(matrix(NA, ncol=2, nrow=1))
@@ -208,14 +243,27 @@ get_favored_collapsers <- function(swap_var = 'collapse_using_median') {
     sided*(pt(a[1]/a[2], length(y)-1, lower.tail = FALSE))
 }
 
-# returns the tail probability from a t-test for each ROW in the supplied
+
+.fast_one_sample_tscore <- function(y) {
+    a <- .fast_mse(y)
+    return(a[1]/a[2])
+}
+
+
+# returns the tail probability from a t-test (against 0) for each *ROW* in the supplied
 # matrix
 # Because we usually want  t > t*, we take the upper tail probability, lower.tail=FALSE
 # by default we return a one-sided p-value, but you can multiply by 2 using sided=2
-.fast_one_sample_t_mat <- function(ymat, sided=1, lower.tail=FALSE) {
-    sided*pt(.rowMeans(y, nrow(y), ncol(y)) / .fast_column_se(t(y)),
-         dim(y)[2L]-1, lower.tail=lower.tail)
+.fast_one_sample_t_pval_mat <- function(ymat, sided=1, lower.tail=FALSE) {
+    sided*pt(.fast_one_sample_tscore_mat(ymat), dim(ymat)[2L]-1, lower.tail=lower.tail)
 }
+
+# returns the t-score from a t-test (against 0) for each *ROW* in the supplied matrix
+.fast_one_sample_tscore_mat <- function(ymat) {
+    .rowMeans(ymat, nrow(ymat), ncol(ymat)) / .fast_column_se(t(ymat))
+}
+
+
 
 # selecting out the diagonal from the cov matrix is faster than
 # per-column se calculation,

@@ -17,28 +17,11 @@ rave_inputs(
 
 
     # --- Local variables ---
-    compoundInput(
-        inputId = 'FROM_ELEC_GROUPS',
-        label = 'From/Sender Electrodes',
-        components = {
-            textInput('GROUP_NAME', 'Name', value = '', placeholder = 'Elec Group Name')
-            selectInput('GROUP', ' ', choices = '', multiple = TRUE)
-        }, inital_ncomp = 1
-    ),
-
-    compoundInput(
-        inputId = 'TO_ELEC_GROUPS',
-        label = 'To/Receiver Electrodes',
-        components = {
-            textInput('GROUP_NAME', 'Name', value = '', placeholder = 'Elec Group Name')
-            selectInput('GROUP', ' ', choices = '', multiple = TRUE)
-        }, inital_ncomp = 1
-    ),
-
     selectInput('collapse_method', choices=c('mean', 'median', 'PCA 95%', 'PCA Eigen > 1'),
                 label='Choose time/electrode collapse technique'),
     selectInput('connectivity_method', choices=c('Pearson', 'Spearman', 'Granger (not yet)', 'Cannonical Correlation (not yet)'),
                 label='Choose connectivity measure'),
+
     checkboxInput('sort_trials_by_type', 'Sort Trials by Type'),
 
     numericInput('max_zlim', 'Maximum Plot Value', value = 0, min = 0, step = 1),
@@ -68,15 +51,6 @@ rave_outputs(
 
 # how are the variables updated
 rave_updates(
-  {
-    # Edited by Dipterix: trick to assign variables to runtime_env
-    power = module_tools$get_power(force = T)
-    electrodes = preload_info$electrodes
-    time_points = preload_info$time_points
-    frequencies = preload_info$frequencies
-    trials = preload_info$condition
-    baseline = module_tools$baseline
-  },
     GROUPS = list(
         initialize = list(
             GROUP = list(
@@ -85,7 +59,7 @@ rave_updates(
         ),
         value = cache_input('GROUPS', list(
             list(
-                GROUP = trials[1]
+                GROUP = unique(trials)
             )
         ))
     ),

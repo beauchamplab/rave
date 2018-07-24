@@ -73,6 +73,7 @@ rave_preprocess <- function(
 
 
   ui = rave:::dashboardPage(
+    skin = 'purple',
     control = div(),
     header = shinydashboard::dashboardHeader(
       title = 'RAVE Preprocess'

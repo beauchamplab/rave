@@ -21,9 +21,6 @@ RAVEHistory <- R6::R6Class(
       }
     },
     save = function(...){
-      try(
-        logger('new save')
-      )
       private$env$.save_time = Sys.time()
       args = list(...)
       for(nm in names(args)){

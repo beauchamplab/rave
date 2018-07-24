@@ -1,40 +1,29 @@
 #rm(list=ls()); gc()
-
-# setwd('~/Dropbox/RAVE_DEV/modules/john_ce/')
-
 require(rave)
 require(magrittr)
 require(stringr)
 require(shiny)
-require(MASS)
 
-# give us some defaults to play with
-# this needs to be ABOVE the call to the *_ui.R script because it needs to environment variables that will be created
-rave_prepare(
-    subject = 'KC_Congruency1_sliding',
-    electrodes = c(6:7, 14:15, 22:23, 71:72),
-    # electrodes = c(14:15, 22:23, 71:72),
-    epoch = 'KCa',
-    time_range = c(1, 2)
-)
+# give us some defaults to play with while we're working on the module code
+rave_prepare(subject = 'Words/PAA',
+             electrodes = 1:16,
+             epoch = 'PAAaudonset',
+             time_range = c(2, 4))
 
-source('rave_calculators.R')
+
+source('../utils/rave_calculators.R')
 source('condition_explorer_plots.R')
 source('across_electrode_correlations_ui.R')
-source('draw_shapes.R')
-
-if(F){
-  m = ModuleEnvir$new(module_id = 'mid', 'ref', script_path = './inst/modules/builtin_modules/across_electrode_correlations.R'); init_app(m)
-}
+source('../utils/draw_shapes.R')
 
 # setup the groups and some data for us
 rave_ignore({
 
     GROUPS = list(
         list(
-            GROUP_NAME = 'DL_A',
-            GROUP = c('drive_a', 'last_a', 'meant_a', 'known_a')
-        )
+            GROUP_NAME = 'G1',
+            GROUP = unique(epoch_data$Condition)#c('moth_D', 'moth_D_a')
+            )
         # ,
         # list(
         #     GROUP_NAME = 'DL_V',
@@ -48,30 +37,24 @@ rave_ignore({
 
     FROM_ELEC_GROUPS = list(
         list(
-            GROUP_NAME ='AUD',
-            GROUP = 6:7
+            GROUP_NAME ='FE1',
+            GROUP = 3:4
         ),
         list(
-            GROUP_NAME = 'AUD14-15',
-            GROUP=14:15
-        )#,
-        # list(
-        #     GROUP_NAME = 'VIS',
-        #     GROUP = 71#:72
-        # )
+            GROUP_NAME = 'FE2',
+            GROUP=6:7
+        )
     )
 
     TO_ELEC_GROUPS = list(
         list(
-            GROUP_NAME='AV',
-            GROUP = 22:23
+            GROUP_NAME='TE_AV',
+            GROUP = 12:13
         )
-        # ,        list(GROUP_NAME = 'AV_2', GROUP = 23)
     )
 
-    TIME_RANGE <- c(-.25, 1.0)
-    FREQUENCY <- c(75,150)
-    BASELINE <- c(-1,-.3)
+    BASELINE <- c(-2.00, -0.64)
+    TIME_RANGE <- c(-0.48, 1.8)
 })
 
 
@@ -88,12 +71,13 @@ aec_plot_connections <- function() {
     par(mfrow=c(1,ntrials), mar=rep(1,4))
 
     # helper function to extract a specified connection value and it's p-value
-    get_r <- function(val) {
-        res[[ii]][1] %>%
-            sapply(function(ri) 'r=' %&% paste0(ri[[val]], collapse='\np='))
-    }
 
     for(ii in seq_len(ntrials)) {
+        get_r <- function(val) {
+            res[[ii]][[1]] %>%
+                sapply(function(ri) 'r=' %&% paste0(ri[[val]], collapse='\np='))
+        }
+
         # we need to figure out which ones are significant and change lty/lwd
         ul <- get_r('conditional')
         ll <- get_r('unconditional')
@@ -122,21 +106,65 @@ aec_plot_timeseries <- function() {
             )
         }
 
+        cat('TR: ', TIME_RANGE, '\n')
+        cat('dim otd$data: ', dim(otd[[1]]$data), '\n')
+        cat('length time_points: ', length(time_points[time_points %within% TIME_RANGE]), '\n')
+
         time_series_plot(otd,
                          x=time_points[time_points %within% TIME_RANGE], title='Condition: ' %&% nm,
                         SHADER = function(...){}, DECORATOR = function(...){})
-        legend('topright',x.intersp=-2,
+        legend('topright',
                legend = sapply(otd, '[[', 'name'),
                text.col = get_color(seq_len(length(otd))), bty='n', ncol=2)
         abline(h=0, col='gray70')
+
     }, over_time_data, names(over_time_data))
 }
+
+
+aec_plot_trial_means_without_time <- function() {
+    validate(need(exists('res') && dim(res[[1]]$time_series)[2L] > 1, "Not enough for calculation"))
+
+    # par(mfrow=c(length(res), 1), mar=rep(2.5,4))
+    par(mfcol=c(ncol(res[[1]]$time_series)-1, length(res)), mar=c(4, 5, 2, 1))
+
+    lapply(seq_along(res), function(ri) {
+        ts <- res[[ri]]$time_series
+
+        #we need to make room for the legend in the top left
+        yrange <- pretty(c(ts, 1.1*max(c(ts))))
+
+        for(ii in 2:ncol(ts)) {
+            .label = paste(colnames(ts)[c(1,ii)], collapse=' ~ ')
+            plot.clean(yrange, yrange, xlab=colnames(ts)[ii], ylab=colnames(ts)[1])
+            rave_main(names(res)[ri] %&% ': ' %&% .label)
+            abline(0,1, col='lightgray')
+
+            points(ts[,ii], ts[,1], pch=16)
+
+            rave_axis(1, at=pretty(yrange))
+            rave_axis(2, at=pretty(yrange))
+            if(ri == 1) {
+                 legend('topleft', legend=c('Y=X', .label), inset=c(0,0), horiz=FALSE,
+                        bty='n', lty=1:2, cex=rave_cex.lab, col = c('lightgray', 'black'))
+            }
+
+            abline(lm(ts[,1] ~ ts[,ii]), lty=2)
+        }
+
+
+        # for(ii in seq_len(dim(ts)[2L])) {
+            # lines(ts[,ii], type='o', col=get_color(ii), pch=16)
+        # }
+    })
+}
+
 
 aec_plot_trial_means <- function () {
     validate(need(exists('res') && dim(res[[1]]$time_series)[2L] > 1, "Not enough for calculation"))
 
     # par(mfrow=c(length(res), 1), mar=rep(2.5,4))
-    par(mfrow=c(length(res),1))
+    par(mfrow=c(length(res),1), mar=c(3, 3, 2, 1))
 
     lapply(seq_along(res), function(ri) {
         ts <- res[[ri]]$time_series
@@ -225,9 +253,6 @@ rave_execute({
 
     logger('Electrodes: ', paste0(electrodes, collapse=', '))
 
-    has_trials <- vapply(GROUPS, function(g) length(g$GROUP) > 0, TRUE)
-    any_trials = has_data = any(has_trials)
-
     #we only need to get the electrodes that are in one of the groups
     from <- FROM_ELEC_GROUPS %>% lapply('[[', 'GROUP')
     to <- TO_ELEC_GROUPS %>% lapply('[[', 'GROUP')
@@ -237,12 +262,18 @@ rave_execute({
     CONN <- spearman_conn
 
     # 1. baseline
-    # bl_power <- baseline(BASELINE[1], BASELINE[2], electrodes = electrodes)
-    bl_power <- cache(
-        key = list(subject$subject_id, electrodes, has_trials, BASELINE),
-        val = baseline(BASELINE[1],  BASELINE[2], electrodes)
-    )
+    #using the local basline here as it is much faster for multiple electrodes than using the cumsum file from the network
+    # this function is in rave_calculators
+    GROUPS = lapply(GROUPS, function(g){ g$Trial_num = epoch_data$Trial[epoch_data$Condition %in% g$GROUP]; g })
+    has_trials <- vapply(GROUPS, function(g) length(g$GROUP) > 0, TRUE)
+    any_trials = any(has_trials)
 
+    bl_power <- cache(
+        key = list(subject$id, electrodes, BASELINE, any_trials, preload_info),
+        #having problems with rutabaga
+        val = module_tools$baseline(BASELINE[1],  BASELINE[2], electrodes)
+        # val = .local_baseline(tmp, BASELINE)
+    )
     collapsers <- get_favored_collapsers()
 
     gnames <- sapply(GROUPS, '[[', 'GROUP_NAME') %>% fix_names(prfx = 'TTYPE_')
@@ -252,11 +283,11 @@ rave_execute({
     power_by_ttype <- lapply(GROUPS, function(group) {
         if(length(group$GROUP) > 0) {
             # get collapsed data for all the electrodes
-                lapply(electrodes, function(ei) {
-                c(collapsers$over_frequency_and_time(bl_power$subset(Trial=Trial %in% group$GROUP,
+                lapply(elecs, function(ei) {
+                c(collapsers$over_frequency_and_time(bl_power$subset(Trial=Trial %in% group$Trial_num,
                                                                      Time=Time %within% TIME_RANGE,
                                                                      Electrode = Electrode==ei)))
-            }) %>% set_names('e' %&% electrodes)
+            }) %>% set_names('e' %&% elecs)
         } else {
             NULL
         }
@@ -265,12 +296,12 @@ rave_execute({
     by_f_and_t <- lapply(GROUPS, function(group) {
         if(length(group$GROUP) > 0) {
             # get collapsed data for all the electrodes
-            lapply(electrodes, function(ei) {
-                data = collapsers$over_frequency_and_trial(bl_power$subset(Trial=Trial %in% group$GROUP,
+            lapply(elecs, function(ei) {
+                data = collapsers$over_frequency_and_trial(bl_power$subset(Trial=Trial %in% group$Trial_num,
                                                                      Time=Time %within% TIME_RANGE,
                                                                      Electrode = Electrode==ei))
                 list('data'=data, 'name'=group$GROUP_NAME)
-            }) %>% set_names('e' %&% electrodes)
+            }) %>% set_names('e' %&% elecs)
         } else {
             list('data'=NULL, 'range'=NULL, 'has_trials'=FALSE, 'name'=group$GROUP_NAME)
         }
@@ -288,7 +319,7 @@ rave_execute({
         cbind(.colMeans(emat, nrow(emat), ncol(emat)), .fast_column_se(emat))
     }
 
-    otd <- by_f_and_t[[1]]
+    # otd <- by_f_and_t[[1]]
     over_time_data <- by_f_and_t %>% lapply(function(otd) {
         if(is.null(otd)) return (otd)
         # feg <- FROM_ELEC_GROUPS[[1]]
@@ -354,6 +385,7 @@ async_out = function(){
     validate(need(exists('async_msg', envir = environment()), 'Press "Force run" Button.'))
     return (async_msg)
 }
+
 msg_out = function() {
     # put analysis information in here
     if(not_null(get0('lda_msg')))
@@ -368,10 +400,17 @@ niml_default <- function() {
 
 
 if(FALSE) {
+
+    require(rave)
     setwd('~/Dropbox/RAVE_DEV/modules/john_ce/')
 
     rave_options(data_dir = '/Volumes/data/rave_data/data/', module_lookup_file='~/Dropbox/RAVE_DEV/module_dev_john.csv')
     rave_options(data_dir='~/rave_data/data_dir/')
+
+    init_app()
+
+    # system('open ~/Dropbox/RAVE_DEV/module_dev_john.csv')
+
 
     module = ModuleEnvir$new('id', 'LABEL', './across_electrode_correlations.R')
     init_app(list(module))

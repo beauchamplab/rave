@@ -170,9 +170,10 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
           data = default
           try({
             data = try_load_file(file[[1]], name, ..., simplify = T)
+            return(data)
           })
         }
-        return(data)
+        return(NULL)
       }else{
         return(file)
       }
@@ -290,6 +291,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
       tbl = NULL,
       electrodes,
       values = NULL,
+      key_frame = NULL,
       marker = NULL,
       link_module = NULL,
       variable_name = 'electrode',
@@ -318,7 +320,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
       tbl$active = 0
       tbl$Marker = tbl$Name
 
-      if(!missing(electrodes) || length(electrodes)){
+      if(!missing(electrodes) && length(electrodes)){
         electrodes = electrodes[electrodes %in% tbl$Electrode]
 
         tbl$active = tbl$Electrode %in% electrodes
@@ -372,7 +374,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
           # values are characters, we assume that those are colors that needs no
         }
         # Set keyframes
-        key_frame = seq_len(nrow(values))
+        key_frame %?<-% seq_len(nrow(values))
 
         has_value = T
       }else{

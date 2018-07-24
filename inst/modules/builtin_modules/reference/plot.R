@@ -178,7 +178,9 @@ output$electrode_plot_raw = renderPlot({
 
   srate = subject$preprocess_info('srate')
 
-  s = env$volt[[block]][[electrode]]
+  # s = env$volt[[block]][[electrode]] has one problem, when electrode is not from 1-XXX, some
+  # electrodes are excluded at the very first
+  s = env$volt[[block]][ref_tbl$Electrode == electrode][[1]]
 
   # get reference info
   ref_name = ref_tbl$Reference[ref_tbl$Electrode == electrode]
@@ -285,7 +287,6 @@ parallel_plot_ui = function(){
   parallel_plt_duration %?<-% 5;
 
   parallel_plt_excl = isolate(local_data$parallel_plt_excl)
-  group_info = current_group()
   parallel_plt_excl = parallel_plt_excl[parallel_plt_excl %in% group_info$electrodes]
 
   parallel_plt_refed_hidden = isolate(local_data$parallel_plt_refed_hidden); parallel_plt_refed_hidden %?<-% 'all'
@@ -334,7 +335,9 @@ channel_plot = function(){
   col = rep('cornflowerblue', sum(sel))
   isbad = ref[sel] == ''
   col[isbad] = 'red'
-  all_electrodes = ref_tbl$Electrode
+  all_electrodes = seq_along(ref_tbl$Electrode)
+
+  n_electrode_total = length(ref_tbl$Electrode)
 
   sel_hide = group_info$electrodes %in% local_data$parallel_plt_excl
 
@@ -355,10 +358,10 @@ channel_plot = function(){
   sapply(ref, function(r){
     r = str_extract(r, '[0-9,\\-]+')
     if(is.na(r)){
-      return(rep(0, length(all_electrodes)))
+      return(rep(0, n_electrode_total))
     }
     s = rave:::parse_selections(r)
-    s = all_electrodes %in% s
+    s = ref_tbl$Electrode %in% s
     s / sum(s)
   }) ->
     mat
@@ -376,7 +379,7 @@ channel_plot = function(){
     if(!length(r)){
       s_mean = s_na
     }else{
-      s_mean = colMeans(s[all_electrodes %in% rave:::parse_selections(r), , drop = F])
+      s_mean = colMeans(s[ref_tbl$Electrode %in% rave:::parse_selections(r), , drop = F])
     }
   }
 

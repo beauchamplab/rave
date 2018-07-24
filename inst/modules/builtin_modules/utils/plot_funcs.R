@@ -1,8 +1,24 @@
 require(magrittr)
 
+# this doesn't really work
+brushed = function(event, env){
+    if(is.null(event)){
+        msg = 'Please Choose on plot'
+    } else{
+        fmax = 200#max(power$dimnames$Frequency)
+        tmax = 2#max(power$dimnames$Time)
+        tmin = -1#min(power$dimnames$Time)
+        msg = sprintf('Frequency range: %.1fHz - %.1fHz',
+                      event$ymin * fmax, event$ymax * fmax, event$xmin * (tmax-tmin), event$xmax * (tmax-tmin))
+    }
+    logger(msg)
+    # env$msg = msg
+}
+
+
 
 #this file and plot_helpers.R should be merged/sorted
-source('plot_helpers.R')
+source('../utils/plot_helpers.R')
 
 rave_color_ramp_palette <- colorRampPalette(c('navy', 'white', 'red'), interpolate='linear', space='Lab')
 
@@ -26,20 +42,6 @@ rave_main <- function(main, cex=rave_cex.main, col='black', font=1) {
 }
 
 ### FIXME
-# this doesn't really work and it isn't clear where it should go
-brushed = function(event, env){
-    if(is.null(event)){
-        msg = 'Please Choose on plot'
-    } else{
-        fmax = max(power$dimnames$Frequency)
-        tmax = max(power$dimnames$Time)
-        tmin = min(power$dimnames$Time)
-        msg = sprintf('Frequency range: %.1fHz - %.1fHz',
-                      event$ymin * fmax, event$ymax * fmax, event$xmin * (tmax-tmin), event$xmax * (tmax-tmin))
-    }
-    env$msg = msg
-}
-
 
 
 #' @author John Magnotti
@@ -84,8 +86,11 @@ draw_many_heat_maps <- function(hmaps, x, y, xlab='Time', ylab='Frequency',
         }
     })
 
-    if(show_color_bar)
+    if(show_color_bar){
+        par(mai = c(0.6732, 0.5412, 0.5412, 0.2772))
         rave_color_bar(max_zlim, actual_lim)
+    }
+
 }
 
 
@@ -110,7 +115,8 @@ draw_img <- function(zmat, x, y, xlab='Time (s)', ylab='Frequency (Hz)',
 # ratio: heatmap to color bar width ratio
 # k is the number of heatmaps, excluding the color bar
 layout_heat_maps <- function(k, ratio=4) {
-    layout(matrix(1:(k+1), nrow=1), widths=c(rep(ratio, k), 1) )
+    layout(matrix(1:(k+1), nrow=1), widths=c(rep(ratio, k), lcm(5)) )
+
     par(mar=c(5.1, 4.5, 2, 2))
 }
 

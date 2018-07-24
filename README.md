@@ -1,6 +1,9 @@
 # RAVE
 R Analysis and Visualization of ECOG/iEEG Data
 
+![RAVE Module - Condition Explorer](https://raw.githubusercontent.com/dipterix/instrave/master/img/mainapp/mainapp_demo.png)
+
+
 ## A. Installation
 
 ### 1. Environment Setup
@@ -191,13 +194,25 @@ devtools::install_github('beauchamplab/rave')
 ## B. Toy example
 
 
+#### Preprocess
+
 To play with **preprocess**, type the following R command 
 
 ```
 rave_preprocess()
 ```
 
-In the `subject code`, type `Subject` and press `load` button
+* Set `subject code` to be `Subject` 
+* Set `project name` to be `Demo`.
+* Set `sample rate` to be `2000`
+* Set `electrodes` to be `1-6`.
+
+Press `load subject` button
+
+Next, please go through `Notch filter`, `Wavelet` and `Epoch` modules.
+
+
+#### Main App
 
 To play with **Main**, type:
 

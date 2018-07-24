@@ -5,49 +5,40 @@ require(stringr)
 require(shiny)
 
 # give us some defaults to play with while we're working on the module code
-rave_prepare(subject = 'KC_congruency1_sliding',
-             electrodes = 23,
-             epoch = 'KCa',
-             time_range = c(1, 2))
+rave_prepare(subject = 'Words/PAA',
+             electrodes = 3,
+             epoch = 'PAAaudonset',
+             time_range = c(2, 6))
 
-
-source('rave_calculators.R')
+source('../utils/rave_calculators.R')
 source('onset_detection_raveui.R')
 source('condition_explorer_plots.R')
 
-if(F){
-  m = ModuleEnvir$new(module_id = 'id', 'Test', script_path = './inst/modules/builtin_modules/onset_detection.R'); init_app(m)
-}
-
-
-
 rave_ignore({
-    rave_options(data_dir = '/Volumes/data/rave_data/data/',
-                 module_lookup_file = '~/Dropbox/RAVE_DEV/module_dev_john.csv.csv',
-                 crayon_enabled=TRUE)
 
     GROUPS = list(
         list(
             GROUP_NAME = 'G1',
-            GROUP = c('drive_a', 'known_v')
+            GROUP = c(trials)#c('CHIEF_JAMES_a', 'CHIEF_JAMES')
         )
-        ,
-        list(
-            GROUP_NAME = 'G2',
-            GROUP = c('drive_a')
-        ),
-        list(
-            GROUP_NAME = 'G3',
-            GROUP = c('known_v')
-        ),
-        list(
-            GROUP_NAME = '',
-            GROUP=c()
-        )
+        # ,
+        # list(
+        #     GROUP_NAME = 'G2',
+        #     GROUP = c('CHIEF_JAMES')
+        # ),
+        # list(
+        #     GROUP_NAME = 'G3',
+        #     GROUP = c('VACUUM_HEIDI','VACUUM_HEIDI_a')
+        # ),
+        # list(
+        #     GROUP_NAME = '',
+        #     GROUP=c()
+        # )
     )
 
     max_zlim=100
     collapse_using_median=FALSE
+    BASELINE <- c(-1,0)
 })
 
 
@@ -146,7 +137,7 @@ detect_onset.consecutive_sig <- function(ymat, consecutive=3,
 
     # turns out to be faster to just do ALL the t-tests rather than do only the ones needed
     # this function does a one-sample t-test per ROW
-    ps <- .fast_one_sample_t_mat(ymat, sided=ifelse(Halt=='two.sided', 2, 1)) < alpha
+    ps <- .fast_one_sample_t_pval_mat(ymat, sided=ifelse(Halt=='two.sided', 2, 1)) < alpha
 
     # get the run length encoding to find how many TRUEs and FALSEs we have in a row
     prle <- rle(ps)
@@ -203,22 +194,34 @@ detect_onset.lm <- function(bsl, y, half_window=5, ALPHA=0.025, two.sided=FALSE)
 
 
 rave_execute({
+
+    if(is.null(electrode)) {
+        electrode = power$dimnames$Electrode[1]
+    }
+
     assertthat::assert_that(length(electrode) == 1,msg = 'No electrode selected')
 
     electrode = as.integer(electrode)
 
+    GROUPS = lapply(GROUPS, function(g){ g$Trial_num = epoch_data$Trial[epoch_data$Condition %in% g$GROUP]; g })
     has_trials <- vapply(GROUPS, function(g) length(g$GROUP) > 0, TRUE)
     any_trials = any(has_trials)
 
-    # I think the cache persists across modules, so may as well take advantage
+    # which(power$dimnames$Time %within% BASELINE) %>% range
+    # plot(power$dimnames$Time,power$dimnames$Time)
+    # abline(v=BASELINE)
+
+    logger('baseline: ' %&% min(BASELINE) %&% ':' %&% max(BASELINE))
+
     bl_power <- cache(
-        key = list(subject$subject_id, electrode, BASELINE, any_trials, preload_info$reference_name),
-        val = baseline(BASELINE[1],  BASELINE[2], electrode)
+        key = list(subject$id, electrode, BASELINE, any_trials, preload_info),
+        val = module_tools$baseline(BASELINE[1],  BASELINE[2], electrode)
+        # val = .local_baseline(power, BASELINE)
     )
+
 
     # we were repeating a lot of calculations and looping over GROUPS too many times
     # let's clean that up
-    has_trials <- unlist(lapply(GROUPS, function(g) length(g$GROUP) > 0))
 
     #helper file to build lists with common elements pre-populated
     build_list <- function() {
@@ -246,18 +249,20 @@ rave_execute({
 
     # now we loop through only those groups with data
     for(ii in which(has_trials)) {
-        power = bl_power$subset(Trial = Trial %in% GROUPS[[ii]]$GROUP)
+        .power = bl_power$subset(Trial = Trial %in% GROUPS[[ii]]$Trial_num)
 
         #helper function to clean up the syntax below, value here should be a function
         # we're relying on power being defined above, so don't move this function out of this scope
         `add_data<-` <- function(x, value) {
-            x[c('data', 'range', 'N', 'trials')] <- list(value, .fast_range(value), dim(power)[1L], power$dimnames$Trial)
-            x
+            x[c('data', 'range', 'N', 'trials')] <-
+                list(value, .fast_range(value), dim(.power)[1L], epoch_data$Condition)
+
+            return(x)
         }
 
-        add_data(by_trial_heat_map_data[[ii]]) <- collapse$over_frequency(power)
+        add_data(by_trial_heat_map_data[[ii]]) <- collapse$over_frequency(.power)
 
-        add_data(line_plot_data[[ii]]) <- collapse$over_frequency_and_trial(power)
+        add_data(line_plot_data[[ii]]) <- collapse$over_frequency_and_trial(.power)
         # we want to make a special range for the line plot data that takes into account mean +/- SE
         line_plot_data[[ii]]$range <- .fast_range(plus_minus(line_plot_data[[ii]]$data[,1],
                                                              line_plot_data[[ii]]$data[,2]))
@@ -265,6 +270,12 @@ rave_execute({
         # this should be set to a particular function based on the users checkbox selector
         baseline_window <- time_points %within% BASELINE
         analysis_window <- time_points %within% TIME_RANGE
+
+        logger(min(time_points) %&% ':' %&% max(time_points))
+        logger(TIME_RANGE[1] %&% ':' %&% TIME_RANGE[2])
+        logger(min(which(analysis_window)) %&% ':' %&% max(which(analysis_window)))
+        logger('Dim btymd: ' %&% nrow(by_trial_heat_map_data[[ii]]$data) %&% ', ' %&%
+                   ncol(by_trial_heat_map_data[[ii]]$data))
 
         y <- by_trial_heat_map_data[[ii]]$data[analysis_window,]
         bsl <- by_trial_heat_map_data[[ii]]$data[baseline_window,]
@@ -310,9 +321,10 @@ rave_execute({
     } else {
         compare_window <- with(line_plot_data[[fastest]], on_time + c(0, window))
         od_trial_data <- lapply(seq_along(GROUPS), function(ii){
+            # print(ii)
             if(has_trials[ii]) {
-                power = bl_power$subset(Trial = Trial %in% GROUPS[[ii]]$GROUP)
-                data=collapse$over_frequency_and_time(power, trange = compare_window)
+                .power = bl_power$subset(Trial = Trial %in% GROUPS[[ii]]$Trial_num)
+                data=collapse$over_frequency_and_time(.power, trange = compare_window)
                 mse <- .fast_mse(data)
                 list(
                     'data' = data,
@@ -357,11 +369,11 @@ niml_default = function(){
 
 if(FALSE) {
 #
-#     module = ModuleEnvir$new('id', 'LABEL', './condition_explorer.R')
-#     init_app(list(module))
+     module = ModuleEnvir$new('id', 'LABEL', './onset_detection.R')
+     init_app(list(module))
 
 
-    ls(rave:::.ui_update_repo)
+    # ls(rave:::.ui_update_repo)
 
     # h = rave:::RAVEHistory$new(path = '~/rave_modules', name = 'John', use_yaml = T)
     # h$save(

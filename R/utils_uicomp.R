@@ -154,7 +154,7 @@ comp_parser <- function(){
       updates = function(...){}
       observers = function(input, output, session, local_data, exec_env){
         if(length(outputId)){
-          fun_name = tail(unlist(str_split(expr[[1]], ':')), 1)
+          fun_name = tail(unlist(str_split(as.character(expr[[1]]), ':')), 1)
           fun_name = str_c('render', str_to_upper(str_sub(fun_name, end = 1L)), str_sub(fun_name, start = 2L))
           fun_name = str_replace(fun_name, 'Output', '')
 
@@ -326,7 +326,6 @@ comp_parser <- function(){
       }
       return(re)
     }
-
   )
 
   parsers[['rave']] = list(
@@ -467,7 +466,28 @@ comp_parser <- function(){
       )
     }
   )
-
+#
+#   parsers[['threejsr']] = list(
+#     'threejsOutput' = function(expr, env = environment()){
+#       re = parsers[['.default_parser']](expr, env)
+#       outputId = re$outputId
+#
+#       re$observers = function(input, output, session, local_data, exec_env){
+#         output[[outputId]] = do.call(threejsr::renderThreejs, args = list(quote({
+#           local_data$show_results
+#           if (isolate(local_data$has_data)) {
+#             func = get(outputId, envir = exec_env$param_env,
+#                        inherits = T)
+#             if (is.function(func)) {
+#               func()
+#             }
+#           }
+#         })))
+#       }
+#       return(re)
+#     }
+#   )
+#
 
 
 

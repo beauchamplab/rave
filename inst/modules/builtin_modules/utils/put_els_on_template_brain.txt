@@ -1,0 +1,14 @@
+
+
+Surf2VolCoord -i SUMA/std.141.lh.pial.asc -i SUMA/std.141.rh.pial.asc -sv rave/suma/fs_SurfVol_Alnd_Exp+orig -closest_nodes rave/suma/xyz.1D -qual LR -prefix kc_141_nodes
+
+
+SurfMeasures -spec ../../standard_dir/N27/std.141.fs_both.spec -sv ../../standard_dir/N27/T1.nii -surf_A rh.pial -nodes_1D kc_1col -func coord_A -out_1D nodes_on_141
+
+
+
+
+the last step is to move these coordinates up to the dura, so they are 'on' rather than potentially 'in' the surface
+
+
+kc_1col was created from kc_141_nodes by removing the "R" infront of the node name and removing the second column
