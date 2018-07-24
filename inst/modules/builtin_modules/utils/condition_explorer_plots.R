@@ -1,5 +1,5 @@
-source('../utils/plot_funcs.R')
-source('../utils/rave_calculators.R')
+source('plot_funcs.R')
+source('rave_calculators.R')
 
 # the only difference between this plot and the time x freq heat_map_plot
 # is the data and the decoration. Use the core heatmap function

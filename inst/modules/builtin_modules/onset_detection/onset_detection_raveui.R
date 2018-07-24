@@ -21,19 +21,35 @@ rave_inputs(
 
     numericInput('max_zlim', 'Maximum Plot Value', value = 0, min = 0, step = 1),
     checkboxInput('sort_trials_by_type', 'Sort Trials by Type'),
+    checkboxInput('collapse_using_median', 'Use median'),
 
+    #specific to onset detection
     selectInput('od_method', 'Detection Method (currently ignored)', choices = c('Consecutive significance', 'Linear Trend'), multiple = F),
-
     numericInput('od_alpha', 'Detection Alpha', value = 0.05, min = 0, max=1, step=0.01),
-    numericInput('od_window_size', 'Window Size (time points)', value = 5, min = 1, max=20, step=1),
+    numericInput('od_window_size', 'Window Size (# time points)', value = 5, min = 1, max=100, step=1),
 
-    checkboxInput('collapse_using_median', 'Collapse using median'),
-
-    .tabsets = list(
-        'Global Variables' = c(
-            'GROUPS', 'FREQUENCY', 'BASELINE', 'TIME_RANGE'
+    .input_panels = list(
+        '[#cccccc]Electrode' = list(
+            c('electrode')
+        ),
+        '[#99ccff]Trial Selector' = list(
+            c('GROUPS')
+        ),
+        'Analysis Settings' = list(
+            'FREQUENCY',
+            'BASELINE',
+            'TIME_RANGE'
+        ),
+        'Detection Settings' = list(
+          c('od_method'),
+          c('od_alpha', 'od_window_size')
+        ),
+        '[-]Plotting' = list(
+            c('sort_trials_by_type', 'collapse_using_median'),
+            c('max_zlim')
         )
     )
+    
 )
 
 
@@ -50,39 +66,20 @@ rave_outputs(
 # how are the variables updated
 rave_updates(
     {
-        # Edited by Dipterix: trick to assign variables to runtime_env
-        power = module_tools$get_power(force = T)
+        #make easier names for key variables
+        power = module_tools$get_power()
         electrodes = preload_info$electrodes
-        time_points = preload_info$time_points
         frequencies = preload_info$frequencies
+        time_points = preload_info$time_points
         trials = preload_info$condition
-        baseline = module_tools$baseline
+        epoch_data = module_tools$get_meta('trials')
+        
+        frange <- c(max(c(min(frequencies), 75)), min(c(max(frequencies), 150)))
     },
     electrode = list(
         choices = electrodes,
         selected = electrodes[1]
-      ),
-    BASELINE = local({
-      list(
-        min = min(time_points),
-        max = max(time_points),
-        value = cache_input('BASELINE', c(min(time_points), 0))
-      )
-    }),
-    FREQUENCY = local({
-      list(
-        min = min(round(frequencies)),
-        max = max(round(frequencies)),
-        value = cache_input('FREQUENCY', range(round(frequencies)))
-      )
-    }),
-    TIME_RANGE = local({
-      list(
-        min = min(time_points),
-        max = max(time_points),
-        value = cache_input('TIME_RANGE', c(0, max(time_points)))
-      )
-    }),
+    ),
     GROUPS = list(
         initialize = list(
             GROUP = list(
@@ -91,10 +88,30 @@ rave_updates(
         ),
         value = cache_input('GROUPS', list(
             list(
-                GROUP = trials[1]
+                GROUP = list(trials)
             )
         ))
-    )
+    ),
 
-
+    BASELINE = local({
+        list(
+            min = min(time_points),
+            max = max(time_points),
+            value = cache_input('BASELINE', c(min(time_points), 0))
+        )
+    }),
+    FREQUENCY = local({
+        list(
+            min = min(round(frequencies)),
+            max = max(round(frequencies)),
+            value = cache_input('FREQUENCY', round(frange))
+        )
+    }),
+    TIME_RANGE = local({
+        list(
+            min = min(time_points),
+            max = max(time_points),
+            value = cache_input('TIME_RANGE', c(0, max(time_points)))
+        )
+    })
 )
