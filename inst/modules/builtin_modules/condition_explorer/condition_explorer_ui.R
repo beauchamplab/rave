@@ -72,7 +72,7 @@ rave_updates(
         epoch_data = module_tools$get_meta('trials')
 
         frange <- c(max(c(min(frequencies), 75)), min(c(max(frequencies), 150)))
-        volt <- module_tools$get_voltage(force=TRUE, referenced = TRUE)
+        # volt <- module_tools$get_voltage(force=TRUE, referenced = TRUE)
     },
     electrode = list(
         choices = electrodes,
