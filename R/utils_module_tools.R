@@ -316,7 +316,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
       tbl$Label[is.na(tbl$Label)] = ''
       tbl$Name = stringr::str_trim(sprintf('Electrode %d %s', tbl$Electrode, tbl$Label))
       tbl$Radius = radiu_normal
-      tbl$Radius[stringr::str_detect(tbl$Group, '^([Ee]pi)|([Mm]ini)')] = radiu_minis
+      tbl$Radius[stringr::str_detect(tbl$Group, '^([Mm]ini)')] = radiu_minis
       tbl$active = 0
       tbl$Marker = tbl$Name
 

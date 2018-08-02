@@ -8,7 +8,7 @@ R Analysis and Visualization of ECOG/iEEG Data
 
 ### 1. Environment Setup
 
-In this section, you'll install R, RStudio, devtools and all other dependencies. To start, let me explain what these terms mean:
+In this section, you'll install R, RStudio, devtools and all other dependencies. To start, we need to know what are R, RStudio, devtools
 
 - **R** is a functional programming language that *RAVE* uses. Similar to Matlab, Python, C++, it's a language.
 - **Devtools** are necessary to enable advanced features, especially when you want to compile R packages.
@@ -59,6 +59,20 @@ xcode-select --install
 3. RStudio
 
 [https://www.rstudio.com/products/rstudio/download/](https://www.rstudio.com/products/rstudio/download/)
+
+4. Install `devtools` and `RAVE`
+
+Open RStudio, enter the following command in RStudio **console**
+
+```
+install.packages('devtools')
+```
+
+To install `RAVE`
+
+```
+devtools::install_github('beauchamplab/rave')
+```
 
 #### Windows
 

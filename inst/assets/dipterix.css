@@ -365,3 +365,8 @@ li.control-sidebar-items>a {
   margin-right:0 !important;
 }
 
+.rave-input-panel,
+.left-side,
+.main-sidebar{
+  z-index: 0 !important;
+}
