@@ -1,9 +1,20 @@
-# functions to create environment
-#' @export
+#' Function to load subject and create ECoG data environment
+#' @param subject characters, format: "PROJECT/SUBJECT"
+#' @param electrodes numeric vector, which electrodes to be loaded
+#' @param epoch, characters, depending on subject meta data. For example, use "epoch1" if exists epoch file "epoch_epoch1.csv"
+#' @param time_range, vector of length 2 - before and after onset. For example, c(1,2), means 1 second before onset and 2 seconds after onset.
+#' @param frequency_range, vector of length 2 - lowest and highest frequencies. By default is all frequencies. Only applied to power and phase data.
+#' @param data_types, vector of characters, data to be preloaded. "power" - referenced power data, "phase" - referenced phase data, "volt" - referenced voltage data
+#' @param reference, similar to epoch, For example, use "default" if exists reference file "reference_default.csv"
+#' @param attach, characters or NULL, NULL if you don't want to attach it, "r" if want to load data as R environment, "py" if python, "matlab" for matlab.
+#' @param data_env, environment to load data into.
+#' @details Usually this function is for module writters and for debug use, or adhoc analysis.
 #' @export
 rave_prepare <- function(
-  subject, electrodes,
+  subject,
+  electrodes,
   epoch , time_range,
+  frequency_range,
   data_types = c('power'),
   reference = 'default', attach = 'r',
   data_env = rave::getDefaultDataRepository()
@@ -21,6 +32,12 @@ rave_prepare <- function(
   logger('Data type(s): ', paste(data_types, collapse = ', '))
   logger('Epoch name: ', epoch)
   logger('From: ', -(time_range[1]), ' sec - to: ', time_range[2], ' sec.')
+  if(!missing(frequency_range)){
+    logger('Frequencies: ', (frequency_range[1]), ' Hz - to: ', frequency_range[2], ' Hz.')
+  }else{
+    frequency_range = NULL
+    logger('Frequencies: All')
+  }
 
   repo = ECoGRepository$new(subject = subject, autoload = F, reference = reference)
   repo$load_electrodes(electrodes = electrodes, reference = reference)
@@ -32,6 +49,7 @@ rave_prepare <- function(
     pre = time_range[1],
     post = time_range[2],
     electrodes = electrodes,
+    frequency_range = frequency_range,
     data_type = tmp,
     referenced = T,
     func = NULL
@@ -46,6 +64,15 @@ rave_prepare <- function(
     name = epoch,
     time_range = time_range
   )
+  # Change frequencies if specified
+  freqs = subject$frequencies$Frequency
+  if(!is.null(frequency_range)){
+    freq_subset = freqs %within% frequency_range
+    if(!sum(freq_subset)){
+      freq_subset[which.min(abs(freqs - frequency_range[1]))] = T
+    }
+    freqs = freqs[freq_subset]
+  }
   data_env$.private = new.env(parent = baseenv())
   data_env$.private$repo = repo
   data_env$.private$meta = meta
@@ -57,7 +84,7 @@ rave_prepare <- function(
     reference_name = reference,
     time_points = seq(-time_range[1], time_range[2], by = 1/subject$sample_rate),
     electrodes = subject$filter_valid_electrodes(electrodes),
-    frequencies = subject$frequencies$Frequency,
+    frequencies = freqs,
     condition = unique(data_env$.private$meta$epoch_data$Condition)
   )
   data_env$.module_data = new.env(parent = baseenv())
