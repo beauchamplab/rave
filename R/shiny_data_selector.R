@@ -165,6 +165,22 @@ shiny_data_selector <- function(moduleId){
         )
       )
     })
+
+    output$modal_frequencies <- renderUI({
+      validate(need(!local_data$error, message = ''))
+      subject_code = input$subject_code
+      project_name = input$project_name
+      freqs = load_meta('frequencies', project_name = project_name, subject_code = subject_code)
+      if(!is.null(freqs)){
+        freqs = freqs$Frequency
+        tagList(
+          hr(),
+          sliderInput(ns('frequency_range'), 'Frequency Range', min = min(freqs), max = max(freqs),
+                      value = range(freqs), round = T, post = ' Hz', step = 1L, ticks = F)
+        )
+      }
+    })
+
     output$plot3dui <- renderUI({
       if(!local_data$error){
         threejsr::threejsOutput(ns('plot3d'), height = '600px')
@@ -256,7 +272,8 @@ shiny_data_selector <- function(moduleId){
               selected = last_entry('subject_code', NULL, group = group)
             ),
             uiOutput(ns('modal_electrodes')),
-            uiOutput(ns('modal_epochs'))
+            uiOutput(ns('modal_epochs')),
+            uiOutput(ns('modal_frequencies'))
           ),
           column(
             width = 7,
@@ -310,6 +327,7 @@ shiny_data_selector <- function(moduleId){
       data_types = input$data_types
       subject_code = input$subject_code
       project_name = input$project_name
+      frequency_range = input$frequency_range
       epoch = input$epoch
       epoch_range = c(input$pre, input$post)
       reference = input$reference
@@ -330,6 +348,7 @@ shiny_data_selector <- function(moduleId){
         electrodes = electrodes,
         epoch = epoch,
         time_range = epoch_range,
+        frequency_range = frequency_range,
         reference = reference,
         attach = F,
         data_types = data_types

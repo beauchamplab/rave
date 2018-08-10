@@ -104,7 +104,7 @@ ECoGRepository <- R6::R6Class(
       }
       invisible()
     },
-    epoch = function(epoch_name, pre, post, electrodes = NULL, data_type = 'power', referenced = T, func = NULL, quiet = FALSE){
+    epoch = function(epoch_name, pre, post, electrodes = NULL, frequency_range = NULL, data_type = 'power', referenced = T, func = NULL, quiet = FALSE){
       if(is.null(electrodes)){
         electrodes = self$subject$valid_electrodes
       }else{
@@ -121,7 +121,14 @@ ECoGRepository <- R6::R6Class(
         meta_name = epoch_name
       ))
       self$epochs$set('electrodes', electrodes)
+      self$epochs$set('frequency_range', frequency_range)
       freqs = load_meta(subject_id = self$subject$subject_id, meta_type = 'frequencies')
+      frequency_range %?<-% range(freqs$Frequency)
+      freq_subset = freqs$Frequency %within% frequency_range
+      if(!sum(freq_subset)){
+        logger('Frequency range is invalid, looking for the nearest frequency', level = 'WARNING')
+        freq_subset[which.min(abs(freqs$Frequency - frequency_range[1]))] = T
+      }
 
       progress = progress(title = 'Loading data...', max = (length(electrodes) + 1) * length(data_type), quiet = quiet)
       on.exit({progress$close()})
@@ -138,6 +145,13 @@ ECoGRepository <- R6::R6Class(
           epoch_name = epoch_name,
           pre = pre, post = post, types = data_type, raw = !referenced
         ) -> elc;
+
+        if(is(elc$power, 'ECoGTensor')){
+          elc$power = elc$power$subset(Frequency = freq_subset, drop = F)
+        }
+        if(is(elc$phase, 'ECoGTensor')){
+          elc$phase = elc$phase$subset(Frequency = freq_subset, drop = F)
+        }
 
         if(is.function(func)){
           elc = func(elc)
