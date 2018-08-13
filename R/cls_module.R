@@ -906,7 +906,7 @@ ExecEnvir <- R6::R6Class(
         start = Sys.time()
         input = dropNulls(input)
         if(!init){
-          # Not yet implemented
+          # Deprecated, do nothing
           return(invisible())
         }
         if(is.null(session)){

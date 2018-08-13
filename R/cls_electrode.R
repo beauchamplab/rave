@@ -108,7 +108,7 @@ Electrode <- R6::R6Class(
         }
 
         for(type in types){
-          env = self[[types]]
+          env = self[[type]]
           rm(list = ls(env, all.names = T), envir = env)
         }
       }
@@ -274,7 +274,7 @@ Electrode <- R6::R6Class(
         dim_1 = length(ep)
         dim_2 = nrow(freqs)   # Freq
         dim_3 = post + pre + 1     # Time
-        sample = matrix(rep(0, dim_2 * dim_3), c(dim_2, dim_3))
+        sample = matrix(rep(0, dim_1 * dim_3), c(dim_1, dim_3))
         lapply(ep, function(row){
           block = row[['Block']]
           i = round(row[['Time']] * srate)

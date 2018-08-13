@@ -2,6 +2,7 @@
 
 opt <- list(
   debug = FALSE,
+  max_mem = 1000000,
   check_updates_onstartup = T,
   raw_data_dir = '~/rave_data/raw_dir/',
   data_dir = '~/rave_data/data_dir/',
