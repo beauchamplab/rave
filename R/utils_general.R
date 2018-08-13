@@ -1,4 +1,60 @@
 #' @export
+to_ram_size <- function(s, kb_to_b = 1000){
+  base = floor(log(max(abs(s), 1), kb_to_b))
+  s = s / (kb_to_b ^ (base))
+  attr(s, 'unit') = c('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB')[base+1]
+  s
+}
+
+#' @export
+mem_limit <- function(){
+  sys_info = Sys.info()
+  sys_name = str_to_lower(sys_info['sysname'])
+  default_return = list(
+    total = NA,
+    free = NA
+  )
+  if(str_detect(sys_name, '^win')){
+    # windows
+  }
+  if(str_detect(sys_name, '^darwin')){
+    tryCatch({
+      ram_info = system2('sysctl', '-a', wait = T, stdout = T)
+      ram_info = ram_info[str_detect(ram_info, 'mem')]
+      ram_info = as.numeric(str_extract(ram_info, '[0-9]+$'))
+
+      ram = list(
+        total = max(ram_info),
+        free = NA
+      )
+    }, error = function(e){
+      default_return
+    }) ->
+      ram
+    return(ram)
+  }
+
+  # linux
+  tryCatch({
+    units = str_to_lower(c('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'))
+    ram_info = system2('cat', '/proc/meminfo', stdout = T)
+    ram_info = str_to_lower(ram_info)
+    memtotal = ram_info[str_detect(ram_info, '(memtotal)|(memfree):')]
+    ram_size = str_match(memtotal, '([0-9]+) ([\\w]b)$')
+    ram = as.numeric(ram_size[,2]) * 1024^(-1 + sapply(ram_size[,3], function(x){which(units == x)}))
+    list(
+      total = max(ram),
+      free = min(ram)
+    )
+  }, error = function(e){
+    default_return
+  }) ->
+    ram
+  return(ram)
+
+}
+
+#' @export
 color_console <- function(enable = T){
   re = rave_options(crayon_enabled = enable)
   if(re){

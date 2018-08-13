@@ -183,7 +183,7 @@ shiny_data_selector <- function(moduleId){
 
     output$plot3dui <- renderUI({
       if(!local_data$error){
-        threejsr::threejsOutput(ns('plot3d'), height = '600px')
+        threejsr::threejsOutput(ns('plot3d'), height = '500px')
       }
     })
     output$plot3d <- threejsr::renderThreejs({
@@ -237,9 +237,15 @@ shiny_data_selector <- function(moduleId){
         local_data$error = FALSE
         local_data$electrodes = subject_info$adapter$get_electrodes()
         local_data$epochs = subject_info$adapter$epochs()
+        wave_info = subject_info$adapter$get_from_subject('wavelet_log', list(), customized = T)
+        if(length(wave_info)){
+          wave_info = wave_info[[length(wave_info)]]
+        }
+        local_data$wavelet_info = wave_info
+        local_data$volt_srate = subject_info$adapter$get_sample_rate()
 
         dirs = subject_info$adapter$get_from_subject('dirs')
-        local_data$data_types = c('power', 'phase', 'voltage', list.dirs(dirs$module_data_dir, full.names = F, recursive = F))
+        # local_data$data_types = c('power', 'phase', 'voltage')
         local_data$references = subject_info$adapter$references()
       }
     })
@@ -253,7 +259,7 @@ shiny_data_selector <- function(moduleId){
 
       shiny::modalDialog(
         title = 'Data Pre-loading',
-        easyClose = T,
+        easyClose = F,
         size = 'l',
         fluidRow(
           column(
@@ -276,16 +282,11 @@ shiny_data_selector <- function(moduleId){
             uiOutput(ns('modal_frequencies'))
           ),
           column(
-            width = 7,
+            width = 9,
             uiOutput(ns('modal_error')),
+            column(3, uiOutput(ns('modal_data'))),
+            column(9, uiOutput(ns('modal_summary'))),
             uiOutput(ns('plot3dui'))
-          ),
-          column(
-            width = 2,
-            div(
-              style = 'max-height: 60vh; overflow-y: auto;',
-              uiOutput(ns('modal_data'))
-            )
           )
         ),
         footer = tagList(
@@ -297,13 +298,112 @@ shiny_data_selector <- function(moduleId){
 
     output$modal_data <- renderUI({
       if(!local_data$error){
-        l = local_data$data_types
+        l = c('power', 'phase', 'voltage')
         last_data_types = last_entry('data_types', NULL, group = group)
         last_data_types = last_data_types[last_data_types %in% l]
 
-        checkboxGroupInput(ns('data_types'), "Preloaded Data Types:", choices = l, selected = last_data_types)
+        tagList(
+          checkboxGroupInput(ns('data_types'), "Preloaded Data Types:", selected = NULL, choiceNames = c('Power', 'Phase', 'Voltage'), choiceValues = l)
+        )
       }else{
         NULL
+      }
+    })
+
+    output$modal_summary <- renderUI({
+      if(!local_data$error){
+        data_types = input$data_types
+        electrode_text = input$electrode_text
+        electrodes = rave:::parse_selections(electrode_text)
+        epoch_range = c(input$pre, input$post)
+        epoch = input$epoch
+        reference = input$reference
+        subject_code = input$subject_code
+        project_name = input$project_name
+        frequency_range = input$frequency_range
+        wave_info = local_data$wavelet_info
+        electrodes = electrodes[electrodes %in% wave_info$channels]
+        ref_table = load_meta(meta_type = 'references', project_name = project_name, subject_code = subject_code, meta_name = reference)
+        if(is.data.frame(ref_table)){
+          electrodes = electrodes[electrodes %in% ref_table$Electrode[ref_table$Reference != '']]
+        }
+
+        wave_srate = wave_info$target_srate
+        volt_srate = local_data$volt_srate
+        electrode_text = deparse_selections(electrodes)
+        freqs = wave_info$frequencies
+        freqs = freqs[freqs %within% frequency_range]
+        if(!length(freqs)){
+          freqs = NA
+        }
+
+        trial = load_meta(meta_type = 'epoch', project_name = project_name, subject_code = subject_code, meta_name = epoch)
+        if(is.data.frame(trial)){
+          n_trials = nrow(trial)
+        }else{
+          n_trials = NA
+        }
+
+        base_size = 8.25 * n_trials * sum(epoch_range) * length(electrodes)
+        power_usage = base_size * wave_srate * length(freqs)
+        phase_usage = base_size * wave_srate * length(freqs)
+        volt_usage = base_size * volt_srate
+
+        if(length(data_types)){
+          total_usage = power_usage * ('power' %in% data_types) +
+            phase_usage * ('phase' %in% data_types) +
+            volt_usage * ('voltage' %in% data_types)
+          data_types_c = paste(data_types, collapse = ', ')
+        }else{
+          total_usage = 0
+          data_types_c = ''
+        }
+        power_usage = to_ram_size(power_usage)
+        phase_usage = to_ram_size(phase_usage)
+        volt_usage = to_ram_size(volt_usage)
+
+        max_mem_opt = rave_options('max_mem')
+        max_mem_opt %?<-% Inf
+        max_mem = max_mem_opt * 1000^3
+        warn_msg = ''
+        if(max_mem < total_usage){
+          warn_msg = span(sprintf('WARNING: Data is too large to load! ("max_mem"=%.0fGB)', max_mem_opt), style = 'color:crimson')
+        }
+
+        total_usage = to_ram_size(total_usage)
+
+
+
+
+        fluidRow(
+
+          column(
+            width = 5,
+            strong(sprintf('%s/%s', project_name, subject_code)), br(),
+            HTML(
+              sprintf('Electrode: %s <br />Reference: %s <br />Frequency: %.0f~%.0f Hz <br />Epoch: %s (%.1f~%.1f s) <br />Number of trials: %d <br/>', electrode_text, reference, min(freqs), max(freqs), epoch, -epoch_range[1], epoch_range[2], n_trials)
+            )
+          ),
+          column(
+            width = 7,
+            strong('Estimated Memory Needed:'), br(),
+            HTML(
+              sprintf(
+                'Power: %.1f %s<br>Phase: %.1f %s<br>Voltage: %.1f %s',
+                power_usage * ('power' %in% data_types),
+                attr(power_usage, 'unit'),
+                phase_usage * ('phase' %in% data_types),
+                attr(phase_usage, 'unit'),
+                volt_usage * ('voltage' %in% data_types),
+                attr(volt_usage, 'unit')
+              )
+            ), br(),
+            'Preload data: ', data_types_c, br(),
+            sprintf('Total estimated minimum RAM: %.1f %s', total_usage, attr(total_usage, 'unit')),
+            br(),
+            warn_msg
+          )
+        )
       }
     })
 
