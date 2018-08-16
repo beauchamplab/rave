@@ -3,8 +3,23 @@ to_ram_size <- function(s, kb_to_b = 1000){
   base = floor(log(max(abs(s), 1), kb_to_b))
   s = s / (kb_to_b ^ (base))
   attr(s, 'unit') = c('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB')[base+1]
+  class(s) = c('rave_bytes', class(s))
   s
 }
+
+
+#' @export
+as.character.rave_bytes <- function(s, digit=1){
+  sprintf(sprintf('%%.%df %s', digit, attr(s, 'unit')), s)
+}
+
+#' @export
+print.rave_bytes <- function(s, digit=1){
+  re = as.character(s)
+  cat(re)
+  invisible(re)
+}
+
 
 #' @export
 mem_limit <- function(){

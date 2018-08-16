@@ -28,11 +28,74 @@ get_people = function(){
 }
 
 
+get_mem_usage <- function(modules, data_envir){
+  if(missing(data_envir)){
+    data_envir = getDefaultDataRepository()
+  }
+  if(missing(modules)){
+    modules = NULL
+  }else{
+    modules = unlist(modules)
+  }
+  session = getDefaultReactiveDomain()
+  on.exit({rm(data_envir, modules, session)})
+
+
+  # get total memory used
+  total_mem = pryr::mem_used()
+  data_usage = pryr::object_size(data_envir)
+  if(length(modules)){
+    lapply(modules, function(m){
+
+      module_ram = pryr::object_size(m)
+
+      exec_env = m$get_or_new_exec_env(session = session)
+
+      elem_ram = sapply(as.list(exec_env$runtime_env), function(o){
+        tryCatch({
+          pryr::object_size(o)
+        }, error = function(e){
+          0
+        })
+      })
+
+      usage = 0
+      if(length(elem_ram)){
+        usage = sum(elem_ram[elem_ram < module_ram])
+      }
+
+      list(
+        Name = m$label_name,
+        usage = usage
+      )
+    }) ->
+      module_usage
+    names(module_usage) = NULL
+
+    module_total = sum(sapply(module_usage, '[[', 'usage'))
+
+  }else{
+    module_usage = list()
+    module_total = 0
+  }
+
+
+  misc_usage = total_mem - data_usage - module_total
+  misc_usage = max(misc_usage, 0)
+  list(
+    total_mem = total_mem,
+    data_usage = data_usage,
+    module_usage = module_usage,
+    other_usage = misc_usage
+  )
+}
+
+
 #' @import stringr
 #' @import shiny
 #' @import magrittr
 #' @export
-init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, ...){
+init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, theme = "purple", ...){
   tryCatch({
     rave_prepare()
   }, error = function(e){})
@@ -49,10 +112,14 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, .
 
   data_selector = rave:::shiny_data_selector('DATA_SELECTOR')
   ui = rave::dashboardPage(
-    skin = "purple",
+    skin = theme,
     title = 'R Analysis and Visualization of ECoG/iEEG Data',
     header = dashboardHeader(
-      title = 'RAVE',
+      title = local({
+        ver = packageVersion('rave')
+        sprintf('RAVE (%s)', paste(unlist(ver), collapse = '.'))
+      }),
+      btn_text_right = 'Control Panel',
       data_selector$header(),
       .list = tagList(
         tags$li(
@@ -82,10 +149,14 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, .
               ),
               div(
                 class = 'pull-right',
-                actionButton('curr_subj_launch_suma', 'Launch SUMA')
+                ''
               )
             )
           )
+        ),
+        tags$li(
+          class = 'user user-menu',
+          actionLink('curr_subj_launch_suma', 'Launch SUMA')
         )
       )
     ),
@@ -125,13 +196,8 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, .
       )
     ),
     control = dashboardControl(
-      fluidRow(
-        column(
-          width = 12L,
-          # 3D viewer
-          ''#threejsr::threejsOutput('__rave_3dviewer', width = '100%', height = '60vh')
-        )
-      )
+      uiOutput('mem_usage'),
+      actionLink('control_panel_refresh', 'Click here to refresh!')
     ),
     body = shinydashboard::dashboardBody(
       do.call(
@@ -171,16 +237,24 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, .
 
     # Global variable, timer etc.
     async_timer = reactiveTimer(1000)
+    slow_timer = reactiveTimer(5000)
     # input_timer = reactiveTimer(rave_options('delay_input') / 2)
     global_reactives = reactiveValues(
       check_results = NULL,
       check_inputs = NULL,
       execute_module = '',
       has_data = FALSE,
-      switch_module = NULL
+      switch_module = NULL,
+      timer_count = 0
+    )
+    local_data = reactiveValues(
+      mem_usage = NULL
     )
     observeEvent(async_timer(), {
       global_reactives$check_results = Sys.time()
+
+      count = isolate(global_reactives$timer_count)
+      global_reactives$timer_count = count + 1
     })
 
     # unlist(modules) will flatten modules but it's still a list
@@ -393,6 +467,66 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, .
         )
       }
     })
+
+    observe({
+      input$control_panel_refresh
+      local_data$mem_usage = rave:::get_mem_usage(modules)
+    })
+
+    output$mem_usage <- renderUI({
+      mem_usage = local_data$mem_usage
+      if(is.null(mem_usage)){
+        return()
+      }
+
+      name = c(
+        'Total Usage',
+        'Data Usage',
+        sapply(mem_usage$module_usage, '[[', 'Name'),
+        'Misc & Others Sessions'
+      )
+
+      usage = c(
+        mem_usage$total_mem,
+        mem_usage$data_usage,
+        sapply(mem_usage$module_usage, '[[', 'usage'),
+        mem_usage$other_usage
+      )
+
+      perc = usage / max(usage)
+
+
+      tagList(
+        h3(class = 'control-sidebar-heading', 'Memory Usage'),
+        tags$ul(
+          class="control-sidebar-menu",
+          style = 'padding:15px;',
+          tagList(
+            lapply(seq_along(name), function(ii){
+              nm = name[[ii]]
+              us = usage[[ii]]
+              pc = perc[[ii]]
+              status = switch (nm,
+                               'Total Usage' = 'success',
+                               {
+                                 ind = (pc < 0.2) + (pc < 0.5) + (pc < 0.8) + 1
+                                 c('danger', 'warning', 'success', 'primary')[ind]
+                               }
+              )
+              tags$li(
+                h4(class = 'control-sidebar-subheading', nm, span(class=sprintf('label label-%s pull-right', status), as.character(to_ram_size(us)))),
+                div(class = 'progress progress-xxs',
+                    div(class = sprintf("progress-bar progress-bar-%s", status), style = sprintf('width: %d%%', as.integer(pc*100))))
+              )
+            })
+          )
+        ),
+        hr()
+      )
+
+    })
+
+
 
 
 
