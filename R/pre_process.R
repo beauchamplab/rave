@@ -13,6 +13,7 @@ rave_preprocess <- function(
   test.mode = F,
   modules,
   ver = '3',
+  theme = 'purple',
   ...
 ){
   # Steps 0 Variables
@@ -73,7 +74,7 @@ rave_preprocess <- function(
 
 
   ui = rave:::dashboardPage(
-    skin = 'purple',
+    skin = theme,
     control = div(),
     header = shinydashboard::dashboardHeader(
       title = 'RAVE Preprocess'

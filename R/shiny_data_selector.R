@@ -399,7 +399,7 @@ shiny_data_selector <- function(moduleId){
               )
             ), br(),
             'Preload data: ', data_types_c, br(),
-            sprintf('Total estimated minimum RAM: %.1f %s', total_usage, attr(total_usage, 'unit')),
+            sprintf('Estimated minimum RAM: %.1f~%.1f %s', total_usage, total_usage*2, attr(total_usage, 'unit')),
             br(),
             warn_msg
           )

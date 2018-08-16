@@ -16,7 +16,7 @@ dashboardControl = function (...,
     "false"
   tagList(
     tags$aside(
-      class = "control-sidebar control-sidebar-light",
+      class = "control-sidebar control-sidebar-dark",
       `data-collapsed` = dataValueString,
       div(
         class = 'tab-content',
@@ -29,7 +29,7 @@ dashboardControl = function (...,
 
 #' @import shiny
 #' @export
-dashboardHeader = function (..., title = NULL, titleWidth = NULL, disable = FALSE, btn_text_right = '3D Viewer',
+dashboardHeader = function (..., title = NULL, titleWidth = NULL, disable = FALSE, btn_text_right = 'Controls',
                             .list = NULL)
 {
   items <- .list
@@ -72,16 +72,15 @@ dashboardHeader = function (..., title = NULL, titleWidth = NULL, disable = FALS
           tags$ul(
             class = "nav navbar-nav",
             items %>%
-              tagList()
-            #,
-            # tags$li(
-            #   a(href = "#", class = "nav-item nav-link force-recalculate",
-            #     `data-toggle` = "control-sidebar",
-            #     role = "button",
-            #     span(class = "sr-only", "Toggle control"),
-            #     shiny::icon('hand-o-right'), span(btn_text_right)
-            #   )
-            # )
+              tagList(),
+            tags$li(
+              a(href = "#", class = "nav-item nav-link force-recalculate",
+                `data-toggle` = "control-sidebar",
+                role = "button",
+                span(class = "sr-only", "Toggle control"),
+                span(btn_text_right)
+              )
+            )
           )
         )
       )
@@ -91,7 +90,7 @@ dashboardHeader = function (..., title = NULL, titleWidth = NULL, disable = FALS
 
 #' @import shiny
 #' @export
-dashboardPage = function (
+dashboardPage <- function (
   header, sidebar, control, body, title = NULL,
   skin = c("blue", "black", "purple", "green", "red", "yellow"), controlbar_opened = FALSE,
   initial_mask = NULL
