@@ -370,3 +370,37 @@ li.control-sidebar-items>a {
 .main-sidebar{
   z-index: 0 !important;
 }
+
+
+.centered {
+  padding: 70px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  background-color: wheat;
+  width: fit-content;
+  -o-transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
+
+.blurred {
+ background: inherit;
+ position: absolute;
+ overflow: hidden;
+}
+
+.blurred:before{
+ content: '';
+ width: 150%;
+ height: 150%;
+ background: inherit;
+ position: absolute;
+ box-shadow: inset 0 0 0 200px rgba(255,255,255,0.3);
+ filter: blur(10px);
+ z-index: -1;
+}
+

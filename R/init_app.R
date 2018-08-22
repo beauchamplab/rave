@@ -236,8 +236,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
     #################################################################
 
     # Global variable, timer etc.
-    async_timer = reactiveTimer(1000)
-    slow_timer = reactiveTimer(5000)
+    async_timer = reactiveTimer(5000)
     # input_timer = reactiveTimer(rave_options('delay_input') / 2)
     global_reactives = reactiveValues(
       check_results = NULL,
@@ -252,9 +251,6 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
     )
     observeEvent(async_timer(), {
       global_reactives$check_results = Sys.time()
-
-      count = isolate(global_reactives$timer_count)
-      global_reactives$timer_count = count + 1
     })
 
     # unlist(modules) will flatten modules but it's still a list
@@ -507,21 +503,36 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
               us = usage[[ii]]
               pc = perc[[ii]]
               status = switch (nm,
-                               'Total Usage' = 'success',
+                               'Total Usage' = {
+                                 max_ram = rave_options('max_mem') * 1000^3
+                                 pc_total = us / max_ram
+                                 ind = (pc_total < 0.75) + (pc_total < 0.9) + 1
+                                 c('danger', 'warning', 'success')[ind]
+                               },
+                               'Data Usage' = 'primary',
+                               'Misc & Others Sessions' = 'primary',
                                {
-                                 ind = (pc < 0.2) + (pc < 0.5) + (pc < 0.8) + 1
-                                 c('danger', 'warning', 'success', 'primary')[ind]
+                                 ind = (pc < 0.5) + 1
+                                 c('warning', 'primary')[ind]
                                }
               )
+              txt_size = as.character(to_ram_size(us))
+              txt_perc = sprintf('%d%%', as.integer(pc*100))
+              if(stringr::str_length(nm) > 22){
+                nm_alt = paste0(stringr::str_sub(nm, end = 19), '...')
+              }else{
+                nm_alt = nm
+              }
+
               tags$li(
-                h4(class = 'control-sidebar-subheading', nm, span(class=sprintf('label label-%s pull-right', status), as.character(to_ram_size(us)))),
+                h4(class = 'control-sidebar-subheading', nm_alt, span(class=sprintf('label label-%s pull-right', status), txt_size)),
                 div(class = 'progress progress-xxs',
-                    div(class = sprintf("progress-bar progress-bar-%s", status), style = sprintf('width: %d%%', as.integer(pc*100))))
+                    div(class = sprintf("progress-bar progress-bar-%s", status), style = sprintf('width: %s', txt_perc)))
               )
             })
           )
         ),
-        hr()
+        div(style = 'margin-bottom:20px')
       )
 
     })
