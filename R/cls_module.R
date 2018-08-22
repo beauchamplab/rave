@@ -149,8 +149,11 @@ ModuleEnvir <- R6::R6Class(
       return(private$exec_env[[session_id]])
     },
     load_script = function(session = getDefaultReactiveDomain()){
+      # load default script
+      default_src = readLines(system.file('default_module.R', package = 'rave'))
       # read in script, get package info
       src = readLines(self$script_path)
+      src = c(default_src, src)
 
       # get
       static_env = self$get_or_new_exec_env(session = session)$static_env
@@ -220,6 +223,7 @@ ModuleEnvir <- R6::R6Class(
     render_ui = function(session = getDefaultReactiveDomain()){
       e = self$get_or_new_exec_env(session = session)
       shiny::fluidRow(
+        uiOutput(e$ns('.__rave_modal__.')),
         e$generate_input_ui(),
         e$generate_output_ui()
       )
@@ -369,6 +373,10 @@ ExecEnvir <- R6::R6Class(
             list(...)
           )
         }
+      }
+
+      self$wrapper_env$reload_module = function(){
+        self$input_update(list(), init = TRUE)
       }
 
       self$wrapper_env$current_module = function(){

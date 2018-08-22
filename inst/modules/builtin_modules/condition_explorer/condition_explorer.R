@@ -4,11 +4,17 @@ require(magrittr)
 require(stringr)
 require(shiny)
 
+
 # give us some defaults to play with while we're working on the module code
 rave_prepare(subject = 'Words/PAA',
              electrodes = 1:5,
              epoch = 'PAAaudonset',
              time_range = c(2, 4))
+
+rave_prepare(subject = 'Complete/YAB',
+             electrodes = 13:15,
+             epoch = 'YABa',
+             time_range = c(1, 2))
 
 if(F){
     m = ModuleEnvir$new(module_id = 'id', label_name = 'CE',

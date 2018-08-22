@@ -63,6 +63,7 @@ rave_outputs(
 # how are the variables updated
 rave_updates(
     {
+        rave_checks('power referenced')
         #creating easy variable names
         power = module_tools$get_power()
         electrodes = preload_info$electrodes
