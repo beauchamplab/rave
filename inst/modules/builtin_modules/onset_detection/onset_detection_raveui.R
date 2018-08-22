@@ -49,7 +49,7 @@ rave_inputs(
             c('max_zlim')
         )
     )
-    
+
 )
 
 
@@ -66,6 +66,7 @@ rave_outputs(
 # how are the variables updated
 rave_updates(
     {
+        rave_checks('power referenced')
         #make easier names for key variables
         power = module_tools$get_power()
         electrodes = preload_info$electrodes
@@ -73,7 +74,7 @@ rave_updates(
         time_points = preload_info$time_points
         trials = preload_info$condition
         epoch_data = module_tools$get_meta('trials')
-        
+
         frange <- c(max(c(min(frequencies), 75)), min(c(max(frequencies), 150)))
     },
     electrode = list(

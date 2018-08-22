@@ -40,6 +40,7 @@ rave_inputs(
 
 rave_updates(
   {
+    rave_checks('voltage full')
     # # If the first module is 3D viewer, there's no need to switch module
     # env$switched %?<-% FALSE
     # # Check if subject has been referenced
