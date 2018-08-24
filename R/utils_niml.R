@@ -90,7 +90,7 @@ write.niml <- function(values_matrix, electrode_numbers=NULL, value_labels=NULL,
       '-prefix', sprintf('"%s"', niml_fname)
     ),
     env = c(sprintf('PATH=$PATH:"%s"', AFNI_PATH),
-            'DYLD_LIBRARY_PATH=/opt/X11/lib/flat_namespace')
+            rave_options('suma_lib'))
   ))
   system2(
     'ConvertDset',
@@ -103,7 +103,7 @@ write.niml <- function(values_matrix, electrode_numbers=NULL, value_labels=NULL,
       '-prefix', sprintf('"%s"', niml_fname)
     ),
     env = c(sprintf('PATH=$PATH:"%s"', AFNI_PATH),
-            'DYLD_LIBRARY_PATH=/opt/X11/lib/flat_namespace'),
+            rave_options('suma_lib')),
     wait = F
   )
 
@@ -165,6 +165,11 @@ launch_suma <- function(
   suma_path = try_normalizePath(rave_options('suma_path'))
   spec_file = try_normalizePath(file.path(root_dir, spec_file))
 
+  # El Captitan 'DYLD_LIBRARY_PATH=/opt/X11/lib/flat_namespace'
+  # High Sierra "DYLD_FALLBACK_LIBRARY_PATH=/Applications/AFNI"
+  suma_lib = rave_options('suma_lib')
+
+
   wd = getwd()
   on.exit({setwd(wd)})
   if(dir.exists(root_dir)){
@@ -172,7 +177,7 @@ launch_suma <- function(
     system2('suma',
             args = c('-spec', sprintf('"%s"', spec_file)),
             env = c(sprintf('PATH=$PATH:"%s"', suma_path),
-                    'DYLD_LIBRARY_PATH=/opt/X11/lib/flat_namespace'),
+                    suma_lib),
             wait = F)
   }
 
