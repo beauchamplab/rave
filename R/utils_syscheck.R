@@ -159,7 +159,7 @@ rave_version <- function(){
         rave::logger(nm, nms[[nm]], level = 'INFO')
       }
 
-      rave::logger("Type '?rave_options' for details", level = 'INFO')
+      rave::logger("Type 'rave_options(launch_gui = T)' or '?rave_options' for details", level = 'INFO')
     }else{
       logger('An error or more occur during loading process', level = 'ERROR')
     }
