@@ -141,7 +141,7 @@ rave_options <- function(..., .save = T, launch_gui = F){
     re = ..setup_env$rave_opts$get_options(...)
     if(launch_gui){
       # make a small shiny app to set options
-      rave_options_gui()
+      return(rave_options_gui())
     }
   }
 
