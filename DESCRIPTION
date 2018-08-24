@@ -2,7 +2,7 @@
 Package: rave
 Type: Package
 Title: R Analysis and Visualization of ECOG Data
-Version: 0.1.5.0030
+Version: 0.1.5.0031
 Author: Beauchamplab
 Maintainer: Zhengjia Wang <dipterix.wang@gmail.com>,
             Beauchamplab <beauchamplab@gmail.com>
