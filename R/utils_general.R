@@ -33,30 +33,7 @@ fprintf <- function(..., collapse = '\n', lookup_env = parent.frame()){
 }
 
 
-#' File or any R objects to Data URI, base64 encoded
-#' @export
-as_data_uri <- function(obj, is_file = FALSE, mime = "text/plain;charset=US-ASCII", ...){
-  if(is_file){
-    con = file(obj, "rb")
-    on.exit(close(con))
-    if (isTRUE(summary(con)$text == "binary")) {
-      l <- raw()
-      while (length(r <- readBin(con, raw(0), 1048576L))) l <- c(l, r)
-      data = l
-    }else{
-      data = readLines(con)
-      data = paste(data, collapse = '\n')
-      data = jsonlite::toJSON(data)
-    }
-  }else{
-    data = jsonlite::toJSON(obj, ...)
-  }
-  sprintf(
-    'data:%s;base64,%s',
-    mime,
-    jsonlite::base64_enc(data)
-  )
-}
+
 
 #' Convert bytes to KB, MB, GB,...
 #' @usage to_ram_size(s, kb_to_b = 1000)
