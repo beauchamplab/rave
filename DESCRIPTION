@@ -106,6 +106,7 @@ Collate:
     'shiny_pre_wavelet.R'
     'shiny_preprocess.R'
     'shiny_preprocess2.R'
+    'shiny_rave_options.R'
     'singleelectrode.R'
     'utils_3drender.R'
     'utils_async.R'

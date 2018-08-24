@@ -18,7 +18,6 @@ suma_send_niml: ~/abin/DriveSuma -com surf_cont -load_dset %s
 suma_nodes_per_electrodes: 42
 suma_parallel_cores: 2
 suma_gifti_name_regex: electrode_[a-zA-Z0-9]+.gii
-dyld_library_path: /opt/X11/lib/flat_namespace
 suma_path: ~/abin
 suma_spec_file: test.spec
 unbuffer_path: /usr/local/bin

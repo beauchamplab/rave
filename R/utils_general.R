@@ -1,3 +1,65 @@
+#' Format Print Strings
+#' @export
+fprintf <- function(..., collapse = '\n', lookup_env = parent.frame()){
+  s = list(...)
+  s = paste(sapply(s, as.character), collapse = collapse)
+  s = stringr::str_remove_all(s, '\\$\\{\\{[\\ ]*\\}\\}')
+  # find something wrapped with ${{...}}
+  pattern = '\\$\\{\\{(.+?)\\}\\}'
+  var_names = unlist(
+    stringr::str_extract_all(s, pattern)
+  )
+  if(length(var_names)){
+    var_names = stringr::str_match(var_names, pattern)[,2]
+    var_keys = unique(var_names)
+    vars = sapply(var_keys, function(nm){
+
+      re = as.character(rlang::eval_tidy(rlang::parse_expr(nm), env = lookup_env))
+      if(length(re) > 1){
+        re = paste(re, collapse = ' ')
+      }else if(!length(re)){
+        re = ''
+      }
+      re
+    }, simplify = F, USE.NAMES = T)
+    vars = unlist(vars[var_names])
+    s = stringr::str_split(s, pattern, simplify = T)
+    # append '' to vars
+    vars = c(vars, rep('', length(s) - length(vars)))
+    s = as.vector(matrix(c(s, vars), nrow = 2, byrow = T))
+    s = paste(s, collapse = '')
+  }
+  s
+}
+
+
+#' File or any R objects to Data URI, base64 encoded
+#' @export
+as_data_uri <- function(obj, is_file = FALSE, mime = "text/plain;charset=US-ASCII", ...){
+  if(is_file){
+    con = file(obj, "rb")
+    on.exit(close(con))
+    if (isTRUE(summary(con)$text == "binary")) {
+      l <- raw()
+      while (length(r <- readBin(con, raw(0), 1048576L))) l <- c(l, r)
+      data = l
+    }else{
+      data = readLines(con)
+      data = paste(data, collapse = '\n')
+      data = jsonlite::toJSON(data)
+    }
+  }else{
+    data = jsonlite::toJSON(obj, ...)
+  }
+  sprintf(
+    'data:%s;base64,%s',
+    mime,
+    jsonlite::base64_enc(data)
+  )
+}
+
+#' Convert bytes to KB, MB, GB,...
+#' @usage to_ram_size(s, kb_to_b = 1000)
 #' @export
 to_ram_size <- function(s, kb_to_b = 1000){
   base = floor(log(max(abs(s), 1), kb_to_b))
@@ -20,7 +82,7 @@ print.rave_bytes <- function(s, digit=1){
   invisible(re)
 }
 
-
+#' Get max RAM size (experimental)
 #' @export
 mem_limit <- function(){
   sys_info = Sys.info()

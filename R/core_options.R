@@ -24,7 +24,8 @@ opt <- list(
   suma_nodes_per_electrodes = 42L,
   suma_parallel_cores = 2L,
   suma_gifti_name_regex = 'electrode_[a-zA-Z0-9]+.gii',
-  dyld_library_path = '/opt/X11/lib/flat_namespace',
+  # dyld_library_path = '/opt/X11/lib/flat_namespace',
+  suma_lib = c('DYLD_LIBRARY_PATH=/opt/X11/lib/flat_namespace', "DYLD_FALLBACK_LIBRARY_PATH=/Applications/AFNI"),
   suma_path = '~/abin',
   suma_spec_file = 'test.spec',
 
@@ -123,7 +124,7 @@ save_options <- function(){
 }
 
 #' @export
-rave_options <- function(..., .save = T){
+rave_options <- function(..., .save = T, launch_gui = F){
   if(!exists('rave_opts', envir = ..setup_env, inherits = F)){
     ..setup_env$rave_opts <- Options$new(conf_path = '~/.rave.yaml', save_default = T)
   }
@@ -138,10 +139,21 @@ rave_options <- function(..., .save = T){
   }else{
     # get options
     re = ..setup_env$rave_opts$get_options(...)
+    if(launch_gui){
+      # make a small shiny app to set options
+      rave_options_gui()
+    }
   }
 
   return(re)
 }
+
+
+
+
+
+
+
 
 #' @export
 rave_setup <- function(func = NULL){
