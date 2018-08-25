@@ -921,6 +921,9 @@ ExecEnvir <- R6::R6Class(
           session = getDefaultReactiveDomain() #private$session
         }
         var_names = names(private$update)
+        n_errors = c(0,0)
+        envir = environment()
+        errors = NULL
         if('' %in% var_names){
           lapply(private$update[var_names == ''], function(quo){
             tryCatch({
@@ -931,6 +934,8 @@ ExecEnvir <- R6::R6Class(
               logger('Error in updating input (initialization)', level = 'ERROR')
               s = capture.output(traceback(e))
               lapply(s, logger, level = 'ERROR')
+              envir$n_errors[1] = envir$n_errors[1] + 1
+              envir$errors = c(envir$errors, as.character(e))
             })
             NULL
           })
@@ -952,6 +957,7 @@ ExecEnvir <- R6::R6Class(
               logger('Error in updating input ', varname, level = 'ERROR')
               s = capture.output(traceback(e))
               lapply(s, logger, level = 'ERROR')
+              envir$n_errors[2] = envir$n_errors[2] + 1
             })
 
           })
@@ -961,8 +967,12 @@ ExecEnvir <- R6::R6Class(
 
         end = Sys.time()
         delta = time_diff(start, end)
-        logger(sprintf('Updating inputs takes %.2f %s', delta$delta, delta$units))
+        logger(sprintf('Updating inputs takes %.2f %s. Total errors: %d + %d', delta$delta, delta$units, n_errors[1], n_errors[2]))
 
+        return(list(
+          n_errors = n_errors,
+          init_error_msgs = errors
+        ))
       }
       invisible()
     },

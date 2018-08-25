@@ -41,15 +41,6 @@ rave_inputs(
 rave_updates(
   {
     rave_checks('voltage full')
-    # # If the first module is 3D viewer, there's no need to switch module
-    # env$switched %?<-% FALSE
-    # # Check if subject has been referenced
-    # # switch to condition explorer if subject already referenced
-    # if(!env$switched && data_check$Preprocess$Referenced){
-    #   env$switched = T
-    #   switch_to('condition_explorer')
-    #   return()
-    # }
     clear_all = FALSE
 
     if(length(env$subject_code) != 1 || env$subject_code != subject$subject_code || env$project_name != subject$project_name){

@@ -87,13 +87,16 @@ rave_checks = function(..., data = NULL){
     referenced = 'referenced' %in% d
     full = 'full' %in% d
 
+    # 8 bytes is the default value. However, reference might not be cached, therefore in reference cases RAM size doubles. 8.25 takes into account for left-over objects
+    base_size = ifelse(referenced, 16.5, 8.25)
+
     if('power' %in% d){
       dat = module_tools$get_power(force = F, referenced = referenced)
       if(is.null(dat)){
         quos = c(quos, rlang::quo({
           module_tools$get_power(referenced = !!referenced)
         }))
-        size = to_ram_size(n1 * n2 * n3 * n4 * 16)
+        size = to_ram_size(n1 * n2 * n3 * n4 * base_size)
 
         msg = c(msg, sprintf('Power (%s, %s)', ifelse(referenced, 'Referenced', 'Raw'), size))
       }
@@ -104,7 +107,7 @@ rave_checks = function(..., data = NULL){
         quos = c(quos, rlang::quo({
           module_tools$get_phase(referenced = !!referenced)
         }))
-        size = to_ram_size(n1 * n2 * n3 * n4 * 16)
+        size = to_ram_size(n1 * n2 * n3 * n4 * base_size)
         msg = c(msg, sprintf('Phase (%s, %s)', ifelse(referenced, 'Referenced', 'Raw'), size))
       }
       rm(dat)
@@ -119,7 +122,7 @@ rave_checks = function(..., data = NULL){
           }))
           n_tp = nrow(subject$time_points) / srate_wave * srate_volt
           n_el = nrow(subject$electrodes)
-          size = to_ram_size(n_el * n_tp * 16)
+          size = to_ram_size(n_el * n_tp * base_size)
           msg = c(msg, sprintf('Voltage (No epoch, %s)', size))
         }
       }else{
@@ -128,7 +131,7 @@ rave_checks = function(..., data = NULL){
           quos = c(quos, rlang::quo({
             module_tools$get_voltage(referenced = !!referenced)
           }))
-          size = to_ram_size(n1 * n3 * n4 * 16 / srate_wave * srate_volt)
+          size = to_ram_size(n1 * n3 * n4 * base_size / srate_wave * srate_volt)
           msg = c(msg, sprintf('Voltage (%s, %s)', ifelse(referenced, 'Referenced', 'Raw'), size))
         }
       }

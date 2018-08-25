@@ -265,14 +265,22 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         local_data$initialized = T
 
         # step 3: update UI
-        execenv$input_update(input = params, session = session, init = TRUE)
+        err_info = execenv$input_update(input = params, session = session, init = TRUE)
 
         # step 4: in case no UI updated, force trigger last_input()
         # TODO: since updating UI takes time, if it exceed 0.1 sec, then
         # this statement will force running the result and yield, most of
         # time, errors. Also, it is likely that rave_execute will be called
         # twice.
-        local_data$last_input = Sys.time()
+        # However, if n_errors[1] > 0, which means initial update has errors, we stop the process
+        # because the module might encounter fatal error (lack of data or code error)
+        n_errors = err_info$n_errors
+        if(n_errors[1] > 0){
+          logger('Terminate the process due to initialization failures. Data not loaded? or code error? See the following information', level = 'INFO')
+          sapply(err_info$init_error_msgs, logger, level = 'ERROR')
+        }else{
+          local_data$last_input = Sys.time()
+        }
       }
 
       # last_input()

@@ -1,5 +1,5 @@
 ls <- function(envir = parent.frame(), all.names = FALSE,
-               pattern, sorted = FALSE){
+               pattern, sorted = FALSE, ...){
   if(missing(pattern) && !sorted){
     names(as.list(envir, all.names = all.names))
   }else if (missing(pattern)){
