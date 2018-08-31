@@ -34,6 +34,7 @@ async_start <- function(){
 #'  those objects if they are mentioned in the expression. Therefore please
 #'  optimize your code carefully.
 #' @examples
+#' \dontrun{
 #' # NOT RUN
 #' # Will not block
 #' library(future)
@@ -55,6 +56,7 @@ async_start <- function(){
 #' resolved(f)
 #' get_async_result('test')
 #' # END
+#' }
 #' @import future
 #' @export
 async <- function(expr, name = NULL, envir = parent.frame(), plan = future::multisession){

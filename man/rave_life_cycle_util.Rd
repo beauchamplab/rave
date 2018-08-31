@@ -3,6 +3,9 @@
 \name{rave_life_cycle_util}
 \alias{rave_life_cycle_util}
 \title{RAVE development cycle - Utils}
+\description{
+RAVE development cycle - Utils
+}
 \section{Part 1 - Operators}{
 
 \enumerate{

@@ -4,7 +4,8 @@
 \alias{notch_channel}
 \title{Filter line noise out from ECoG channels}
 \usage{
-notch_channel(s, sample_rate, bands = c(60, 120, 180), width = c(1, 2, 2))
+notch_channel(s, sample_rate, bands = c(60, 120, 180), width = c(1, 2,
+  2))
 }
 \arguments{
 \item{s}{signal, time domain}
