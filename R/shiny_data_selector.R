@@ -286,7 +286,7 @@ shiny_data_selector <- function(moduleId){
             uiOutput(ns('modal_error')),
             column(3, uiOutput(ns('modal_data'))),
             column(9, uiOutput(ns('modal_summary'))),
-            uiOutput(ns('plot3dui'))
+            column(12, uiOutput(ns('plot3dui')))
           )
         ),
         footer = tagList(

@@ -18,7 +18,7 @@ Description: R Analysis and Visualization of ECOG Data
 License: GNU
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 Imports:
     devtools,
     roxygen2 (>= 6.0.0),
@@ -109,6 +109,7 @@ Collate:
     'shiny_preprocess2.R'
     'shiny_rave_options.R'
     'singleelectrode.R'
+    'suma_io.R'
     'utils_3drender.R'
     'utils_async.R'
     'utils_check_repo.R'
