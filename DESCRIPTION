@@ -68,6 +68,7 @@ Collate:
     'func_iter_results.R'
     'func_load_modules.R'
     'func_makemodule.R'
+    'func_module_debug.R'
     'func_rave_prepare.R'
     'func_shinirize.R'
     'init_app.R'

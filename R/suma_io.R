@@ -315,7 +315,7 @@ suma_surface_volume_parse <- function(file_path){
 
 
 #' @export
-freesurfer_mesh <- function(subject, spec_file = NULL, state = 'pial'){
+freesurfer_mesh <- function(subject, spec_file = NULL, state = 'pial', center = c(0,0,30)){
   if(is.character(subject)){
     subject = str_split_fixed(subject, '/', 2)
     subject = Subject$new(project_name = subject[1], subject_code = subject[2])
@@ -361,7 +361,7 @@ freesurfer_mesh <- function(subject, spec_file = NULL, state = 'pial'){
 
         # generate threejsr GEOM object
         mesh = threejsr::GeomFreeMesh$new(
-          position = c(0, 0, -30),
+          position = -center,
           mesh_name = surf_name,
           mesh_info = surf_name,
           vertices = mesh_data$vertices,
@@ -398,7 +398,7 @@ freesurfer_mesh <- function(subject, spec_file = NULL, state = 'pial'){
     mat %?<-% diag(rep(1,4))
     pos = c(row$Coord_x, row$Coord_y, row$Coord_z, -1)
     pos = mat[1:3,] %*% pos
-    pos = pos * c(-1,-1,1) + c(0,0,-30)
+    pos = pos * c(-1,-1,1) - center
 
     threejsr::GeomSphere$new(
       position = pos,

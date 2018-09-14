@@ -1,70 +1,13 @@
-session = getDefaultReactiveDomain()
-output = getDefaultReactiveOutput()
-input = getDefaultReactiveInput()
+# This script stores some default functions used to debug modules
+# These functions will be override by RAVE during actual runtime
 
-
-# Default script for modules
-`.__internal_reactives__.` = reactiveValues(
-  miss_data = FALSE,
-  miss_data_message = '',
-  miss_data_comps = NULL
-)
-
-# for debug
-if(is.null(session)){
-  ns = I
-  ..runtime_env = environment()
-}
-
-
-output[['.__rave_modal__.']] <- renderUI({
-  miss_data = `.__internal_reactives__.`[['miss_data']]
-  miss_data_message = `.__internal_reactives__.`[['miss_data_message']]
-  # miss_data_comps = `.__internal_reactives__.`[['miss_data_comps']]
-  if(!miss_data || !length(miss_data_message)){
-    return(NULL)
-  }
-
-  div(
-    style = "width: 100%;
-    height: 100vh;
-    margin-bottom: -100vh;
-    background: rgba(0,0,0,0.8);
-    margin-top:  -35px;
-    z-index: 1000;
-    position: relative;",
-    div(
-      class = 'centered',
-      h3('More Data Needed...'),
-      p('The following datasets need to be loaded.'),
-      tags$ul(
-        tagList(
-          lapply(miss_data_message, tags$li)
-        )
-      ),
-      actionButton(ns('.__load_data__.'), 'Load Data')
-    )
-  )
-})
-
-observeEvent(input[['.__load_data__.']], {
-  miss_data = `.__internal_reactives__.`[['miss_data']]
-  quos = `.__internal_reactives__.`[['miss_data_comps']]
-  msg = `.__internal_reactives__.`[['miss_data_message']]
-  if(miss_data && length(quos) && length(msg) == length(quos)){
-    # load data
-    n_data = length(msg)
-    progress = progress('Loading data', max = n_data)
-    on.exit({progress$close()})
-    for(i in seq_len(n_data)){
-      progress$inc(message = msg[[i]])
-      eval_dirty(quos[[i]], env = ..runtime_env)
-    }
-    `.__internal_reactives__.`[['miss_data']] = F
-    reload_module()
-  }
-})
-
+#' Check if data is loaded for current module
+#' @usage rave_checks('power referenced', 'voltage raw', ...)
+#' @details This function checks whether ECoG data is loaded. The format is: DATA+(blankspace)+TYPE. DATA can be
+#' "power" (Wavelet transform amplitude), "phase" (Complex angle), or "volt"/"voltage" (Before wavelet). TYPE can
+#' be "raw" (no reference), "referenced" (referenced by common average reference, white matter reference, or bipolar reference).
+#' For voltage data, there is one more special type "full" which loads voltage data for all electrodes.
+#' @export
 rave_checks = function(..., data = NULL){
   data = unlist(c(data, list(...)))
   if(!length(data)){
@@ -169,4 +112,4 @@ rave_checks = function(..., data = NULL){
 }
 
 
-rave_execute({})
+

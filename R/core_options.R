@@ -124,7 +124,7 @@ save_options <- function(){
 }
 
 #' @export
-rave_options <- function(..., .save = T, launch_gui = F){
+rave_options <- function(..., .save = T, launch_gui = T){
   if(!exists('rave_opts', envir = ..setup_env, inherits = F)){
     ..setup_env$rave_opts <- Options$new(conf_path = '~/.rave.yaml', save_default = T)
   }
@@ -139,7 +139,7 @@ rave_options <- function(..., .save = T, launch_gui = F){
   }else{
     # get options
     re = ..setup_env$rave_opts$get_options(...)
-    if(launch_gui){
+    if(length(args) == 0 && launch_gui){
       # make a small shiny app to set options
       return(rave_options_gui())
     }
