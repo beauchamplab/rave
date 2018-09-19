@@ -7,7 +7,8 @@ input = getDefaultReactiveInput()
 `.__internal_reactives__.` = reactiveValues(
   miss_data = FALSE,
   miss_data_message = '',
-  miss_data_comps = NULL
+  miss_data_comps = NULL,
+  miss_data_size = 0
 )
 
 # for debug
@@ -20,6 +21,16 @@ if(is.null(session)){
 output[['.__rave_modal__.']] <- renderUI({
   miss_data = `.__internal_reactives__.`[['miss_data']]
   miss_data_message = `.__internal_reactives__.`[['miss_data_message']]
+  total_size = `.__internal_reactives__.`[['miss_data_size']]
+  if(!is.numeric(total_size) || length(total_size) != 1){
+    total_size = NA
+  }
+  speed = rave_options('drive_speed')
+  if(!is.numeric(speed) || length(speed) != 2){
+    speed = 0.01
+  }else{
+    speed = speed[2]
+  }
   # miss_data_comps = `.__internal_reactives__.`[['miss_data_comps']]
   if(!miss_data || !length(miss_data_message)){
     return(NULL)
@@ -54,6 +65,9 @@ output[['.__rave_modal__.']] <- renderUI({
           "Load Data"
         )
         # actionButton(ns('.__load_data__.'), 'Load Data')
+      ),
+      p(
+        sprintf('Estimated size: %s, (%.1f seconds)', to_ram_size(total_size), total_size * 3 * speed / 1e6)
       )
     )
   )
@@ -106,6 +120,7 @@ rave_checks = function(..., data = NULL){
 
   quos = NULL
   msg = NULL
+  total_size = 0
   for(d in data){
     referenced = 'referenced' %in% d
     full = 'full' %in% d
@@ -119,7 +134,9 @@ rave_checks = function(..., data = NULL){
         quos = c(quos, rlang::quo({
           module_tools$get_power(referenced = !!referenced)
         }))
-        size = to_ram_size(n1 * n2 * n3 * n4 * base_size)
+        size = n1 * n2 * n3 * n4 * base_size
+        total_size = total_size + size
+        size = to_ram_size(size)
 
         msg = c(msg, sprintf('Power (%s, %s)', ifelse(referenced, 'Referenced', 'Raw'), size))
       }
@@ -130,7 +147,9 @@ rave_checks = function(..., data = NULL){
         quos = c(quos, rlang::quo({
           module_tools$get_phase(referenced = !!referenced)
         }))
-        size = to_ram_size(n1 * n2 * n3 * n4 * base_size)
+        size = n1 * n2 * n3 * n4 * base_size
+        total_size = total_size + size
+        size = to_ram_size(size)
         msg = c(msg, sprintf('Phase (%s, %s)', ifelse(referenced, 'Referenced', 'Raw'), size))
       }
       rm(dat)
@@ -145,7 +164,11 @@ rave_checks = function(..., data = NULL){
           }))
           n_tp = nrow(subject$time_points) / srate_wave * srate_volt
           n_el = nrow(subject$electrodes)
-          size = to_ram_size(n_el * n_tp * base_size)
+
+          size = n_el * n_tp * base_size
+          total_size = total_size + size
+
+          size = to_ram_size(size)
           msg = c(msg, sprintf('Voltage (No epoch, %s)', size))
         }
       }else{
@@ -154,7 +177,11 @@ rave_checks = function(..., data = NULL){
           quos = c(quos, rlang::quo({
             module_tools$get_voltage(referenced = !!referenced)
           }))
-          size = to_ram_size(n1 * n3 * n4 * base_size / srate_wave * srate_volt)
+
+          size = n1 * n3 * n4 * base_size / srate_wave * srate_volt
+          total_size = total_size + size
+
+          size = to_ram_size(size)
           msg = c(msg, sprintf('Voltage (%s, %s)', ifelse(referenced, 'Referenced', 'Raw'), size))
         }
       }
@@ -167,10 +194,12 @@ rave_checks = function(..., data = NULL){
     order = order(msg)
     msg = msg[order]
     quos = quos[order]
+
     # show modal
     `.__internal_reactives__.`[['miss_data']] = T
     `.__internal_reactives__.`[['miss_data_message']] = msg
     `.__internal_reactives__.`[['miss_data_comps']] = quos
+    `.__internal_reactives__.`[['miss_data_size']] = total_size
     stop('Needs to load data')
   }else{
     `.__internal_reactives__.`[['miss_data']] = F

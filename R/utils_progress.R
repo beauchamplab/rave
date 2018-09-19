@@ -18,7 +18,7 @@ progress <- function(
     #   options(rave.logger.disabled = FALSE)
     # }
     progress = NULL
-    inc = function(message){logger(message)}
+    inc = function(message){if(!quiet) logger(message)}
     close = function(){}
     reset = function(message = NULL, detail = NULL){}
   }else{

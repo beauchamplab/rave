@@ -33,6 +33,13 @@ arrange_data_dir <- function(first_time = F, reset = F){
   }else{
     rave_options(data_dir = tools::file_path_as_absolute(data_dir))
     rave_options(raw_data_dir = tools::file_path_as_absolute(raw_dir))
+
+    # Test speed
+    if(!isTRUE(rave_options('disable_startup_speed_check'))){
+      speed = test_hdspeed(quiet = T)
+      rave_options(drive_speed = speed)
+    }
+
     return(T)
   }
 

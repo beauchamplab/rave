@@ -3,6 +3,7 @@ local({
     # Systems
     'max_mem' = 'Max RAM for this machine in GB',
     'max_worker' = 'Maximum number of CPU cores to be used',
+    'drive_speed' = 'Hard drive speed',
 
     # Core Option
     'raw_data_dir' = 'Raw subject data path',
@@ -129,6 +130,10 @@ local({
             arg = list(dir)
             names(arg) = opt_id
             do.call(set_opt, arg)
+
+            # test speed
+            speed = test_hdspeed()
+            set_opt(drive_speed = speed)
             showNotification('RAVE data directory is set.', type = 'message', id = paste0(opt_id, '_noty'))
 
           }else{
@@ -165,6 +170,7 @@ local({
       })
     )
   }
+
 
   ##### suma_path
   {
@@ -495,6 +501,47 @@ local({
   }
 
 
+
+  ##### Drive-Speed
+  {
+
+    comps[[length(comps) + 1]] = list(
+      type = 'System',
+      opt_name = 'drive_speed',
+      observer = rlang::quo({
+        opt_id = 'drive_speed'
+        output_uiid = paste0(opt_id, '_input')
+        resp_uiid = paste0(opt_id, '_ui')
+        output[[output_uiid]] <- renderUI({
+          speed = local_data[[opt_id]]
+
+          # if speed is blank, test speed
+          if(!is.numeric(speed) || length(speed) != 2){
+            speed = test_hdspeed()
+            if(!any(is.na(speed))){
+              set_opt(drive_speed = speed)
+            }
+          }
+
+          speed = 1 / speed * 1000000
+
+          # Upload speed
+          upload_speed = to_ram_size(speed[1])
+          download_speed = to_ram_size(speed[2])
+
+          tagList(
+            span(strong(opt_names[[opt_id]]), sprintf(': Write - %s/sec, Read - %s/sec ', upload_speed, download_speed),
+                 actionLink(opt_id, 're-test speed'))
+          )
+        })
+        observeEvent(input[[opt_id]], {
+          speed = test_hdspeed()
+          set_opt(drive_speed = speed)
+        })
+      })
+    )
+  }
+
   ######## Module file
   load_module_table = function(){
     .module_lookup_file = rave_options('module_lookup_file')
@@ -816,3 +863,43 @@ local({
   rave_options_gui
 
 # rave_options_gui()
+
+
+test_hdspeed <- function(file_size = 1e7, quiet = F){
+  data_dir = rave_options('data_dir')
+
+  if(!dir.exists(data_dir)){
+    logger(fprintf('RAVE data_dir is missing, please make sure the following directory exists: ${{data_dir}}'), level = 'ERROR')
+    return(c(NA, NA))
+  }
+
+  # create tempdir for testing
+  test_dir = file.path(data_dir, '.rave_hd_test', paste(sample(LETTERS, 8), collapse = ''))
+  dir.create(test_dir, recursive = T, showWarnings = T)
+
+  progress = progress(title = 'Testing read/write speed', max = 2, quiet = quiet)
+  on.exit({
+    unlink(test_dir, recursive = T)
+    progress$close()
+  })
+
+  progress$inc(message = 'Write to disk...')
+
+  # generate 10M file, tested
+  file = tempfile(tmpdir = test_dir)
+  dat = paste0(sample(LETTERS, file_size - 1, replace = T), collapse = '')
+  upload = system.time(writeLines(dat, file, useBytes = T))
+
+  progress$inc(message = 'Read from disk...')
+  download = system.time({dat_c = readLines(file)})
+
+  if(exists('dat_c') && dat_c != dat){
+    logger('Uploaded data is broken...', level = 'WARNING')
+  }
+
+  ratio = file.info(file)$size / 1000000
+
+  speed = c(upload[3], download[3]) / ratio
+  names(speed) = NULL
+  return(speed)
+}
