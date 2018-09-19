@@ -16,7 +16,7 @@ if(is.null(session)){
   ..runtime_env = environment()
 }
 
-
+#global_reactives$execute_module
 output[['.__rave_modal__.']] <- renderUI({
   miss_data = `.__internal_reactives__.`[['miss_data']]
   miss_data_message = `.__internal_reactives__.`[['miss_data_message']]
@@ -35,16 +35,32 @@ output[['.__rave_modal__.']] <- renderUI({
     position: relative;",
     div(
       class = 'centered',
-      h3('More Data Needed...'),
-      p('The following datasets need to be loaded.'),
+      h3('Load Data...', style = 'color: cadetblue;'),
+      p('This module requires the following datasets to be loaded.', style = 'font-style: italic; color: cadetblue;'),
       tags$ul(
         tagList(
           lapply(miss_data_message, tags$li)
         )
       ),
-      actionButton(ns('.__load_data__.'), 'Load Data')
+      hr(),
+      div(
+        style = 'float: right;',
+        actionButton(ns('.__switch_back__.'), 'Go Back'),
+        tags$button(
+          id = ns('.__load_data__.'),
+          type = "button",
+          class = "btn btn-primary action-button shiny-bound-input",
+          style = 'margin-left:15px;',
+          "Load Data"
+        )
+        # actionButton(ns('.__load_data__.'), 'Load Data')
+      )
     )
   )
+})
+
+observeEvent(input[['.__switch_back__.']], {
+  switch_to()
 })
 
 observeEvent(input[['.__load_data__.']], {

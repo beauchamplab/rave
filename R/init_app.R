@@ -562,4 +562,5 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
 
 
 
-# init_app()
+#' @export
+rave_main <- init_app
