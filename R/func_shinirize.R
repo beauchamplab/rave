@@ -230,6 +230,16 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         if(length(m) && m == str_to_upper(MODULE_ID)){
           logger('Sidebar switched to ', m)
           local_data$focused = T
+
+          # Add to global_reactives current module ID
+          # this is used to keep track of user view history
+          global_reactives$view_history = c(
+            isolate(global_reactives$view_history),
+            list(list(
+              module_id = m,
+              activated = F
+            ))
+          )
         }else{
           local_data$focused = F
         }
@@ -303,6 +313,8 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         }
       })
 
+      # observe({print(global_reactives$view_history); assign('aaa', global_reactives$view_history, envir = globalenv())})
+
       ##### Scripts #####
       exec_script <- function(async = FALSE){
         logger('Executing Script')
@@ -322,6 +334,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
           local_data$last_executed = T
           cache_all_inputs()
           execenv$cache_input('..onced', TRUE, read_only = F, sig = 'special')
+
         }, error = function(e){
           sapply(capture.output(traceback(e)), logger, level = 'ERROR')
           local_data$last_executed = F

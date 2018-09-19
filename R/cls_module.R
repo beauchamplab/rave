@@ -362,16 +362,38 @@ ExecEnvir <- R6::R6Class(
         self$reload()
       }
 
-      self$wrapper_env$switch_to = function(module_id, varriable_name = NULL, value = NULL, ...){
+      self$wrapper_env$switch_to = function(module_id, varriable_name = NULL, value = NULL, quiet = F, ...){
         if(is.reactivevalues(self$global_reactives)){
-          self$global_reactives$switch_module = c(
-            list(
-              module_id = module_id,
-              varriable_name = varriable_name,
-              value = value
-            ),
-            list(...)
-          )
+          # if missing module_id, jump to last activated module
+          # This is a hidden feature if not specifying module_id
+          # 1. in the dev mode, I'll raise error if module_id is not string
+          # 2. Be careful when using this hidden feature since it might cause infinite loop
+          if(missing(module_id)){
+            module_id = NULL
+            hist = isolate(global_reactives$view_history)
+            if(length(hist) > 1){
+              ind = which(vapply(hist, '[[', logical(1L), 'activated'))
+              if(length(ind)){
+                ind = ind[length(ind)]
+                module_id = hist[[ind]]$module_id
+              }
+            }
+          }
+          if(length(module_id)){
+            self$global_reactives$switch_module = c(
+              list(
+                module_id = module_id,
+                varriable_name = varriable_name,
+                value = value,
+                timestamp = Sys.time()
+              ),
+              list(...)
+            )
+          }else{
+            showNotification(p('Cannot switch back. You have not opened any modules yet.'), type = 'warning')
+          }
+
+
         }
       }
 
@@ -968,6 +990,18 @@ ExecEnvir <- R6::R6Class(
         end = Sys.time()
         delta = time_diff(start, end)
         logger(sprintf('Updating inputs takes %.2f %s. Total errors: %d + %d', delta$delta, delta$units, n_errors[1], n_errors[2]))
+
+
+        # Activate this module if no error occurred during input-update phase
+        hist_len = isolate(length(self$global_reactives$view_history))
+        if(length(hist_len)){
+          if(sum(n_errors)){
+            global_reactives$view_history[[hist_len]]$activated = FALSE
+          }else{
+            global_reactives$view_history[[hist_len]]$activated = TRUE
+          }
+        }
+
 
         return(list(
           n_errors = n_errors,

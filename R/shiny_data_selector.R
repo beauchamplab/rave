@@ -291,7 +291,7 @@ shiny_data_selector <- function(moduleId){
         ),
         footer = tagList(
           shiny::modalButton('Cancel'),
-          actionButton(ns('data_import'), label = 'Import')
+          actionButtonStyled(ns('data_import'), label = 'Import', type = 'primary')
         )
       )
     }

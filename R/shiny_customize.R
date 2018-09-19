@@ -1,3 +1,29 @@
+#' @importFrom htmltools tags
+#' @export
+actionButtonStyled <- function(inputId, label, icon = NULL, width = NULL, type = 'default', ...){
+  value <- shiny::restoreInput(id = inputId, default = NULL)
+
+  args = list(...)
+  style = args[['style']]
+  width %?<-% 'auto'
+  style %?<-% ''
+  style = paste0("width: ", validateCssUnit(width), ";", style)
+
+  args[['style']] = style
+  args[['id']] = inputId
+  args[['type']] = 'button'
+  args[['class']] = sprintf("btn btn-%s action-button", type)
+  args[['data-val']] = value
+  args[['id']] = inputId
+
+  do.call(
+    tags$button,
+    c(
+      list(list(icon, label)),
+      args
+    )
+  )
+}
 
 
 #' @export
