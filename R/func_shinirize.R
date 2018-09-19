@@ -313,8 +313,6 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         }
       })
 
-      # observe({print(global_reactives$view_history); assign('aaa', global_reactives$view_history, envir = globalenv())})
-
       ##### Scripts #####
       exec_script <- function(async = FALSE){
         logger('Executing Script')

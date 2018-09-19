@@ -25,15 +25,18 @@ $(document).ready(function(){
 	  $(window).trigger("resize");
 	});
 
+  // listeners to hide inputs
 	$(document).on('click', '.nav-link[data-toggle="rave-toggle-inputs"]', function(){
 	  $('.content-wrapper').toggleClass('rave-hide-inputs');
 	});
 
+  // Nav-link to toggle control panel
 	$(document).on('click', "[data-toggle='control-sidebar']", function(){
 	  $('body').toggleClass('rave-control-open');
 	});
 
 
+  // Zoom in panels
 	$(document).on("click", ".rave-elastic-btn", function() {
 	  // find its parent div and add class "rave-elastic"
 	  var el = $(this),
@@ -58,6 +61,32 @@ $(document).ready(function(){
 	    el.html('<i class="fa fa-compress" aria-hidden="true"></i>');
 	  }
 	});
+
+	// Making form button with "primary" and data-value='13' listen to keyboard "enter"
+	// This is tricky since forms might be generated dyynamically. We have to use 'e.target'
+	// to identify where the "enter" key occurs.
+	$("body").keypress(function (e) {
+	  var target = e.target,
+	      tag_name = target.tagName,
+	      enter_hit = (e.which && e.which == 13) || (e.keyCode && e.keyCode == 13);
+	   if(enter_hit && tag_name === 'INPUT'){
+	     // Look for the form ID
+	     var form = $(target).parents('form');
+	     if(form.length > 0){
+	       form = form[0];
+	       var form_id = $(form).attr('id');
+	       if(form_id !== undefined){
+	         // find target button
+	         var btn = $('button.btn-primary[data-value="13"][form="' + form_id + '"]');
+	         if(btn.length > 0){
+	           $(btn[0]).click();
+	           return false;
+	         }
+	       }
+	     }
+	   }
+	   return true;
+  });
 });
 
 

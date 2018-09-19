@@ -41,6 +41,9 @@ fprintf <- function(..., collapse = '\n', lookup_env = parent.frame()){
 to_ram_size <- function(s, kb_to_b = 1000){
   base = floor(log(max(abs(s), 1), kb_to_b))
   s = s / (kb_to_b ^ (base))
+  if(is.na(base)){
+    base = 0
+  }
   attr(s, 'unit') = c('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB')[base+1]
   class(s) = c('rave_bytes', class(s))
   s

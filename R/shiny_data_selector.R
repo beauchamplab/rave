@@ -261,37 +261,40 @@ shiny_data_selector <- function(moduleId){
         title = 'Data Pre-loading',
         easyClose = F,
         size = 'l',
-        fluidRow(
-          column(
-            width = 3,
-            selectInput(
-              ns('project_name'),
-              'Project Name:',
-              choices = get_projects(),
-              multiple = F,
-              selected = last_entry('project_name', NULL, group = group)
+        tags$form(
+          id = 'data-selector',
+          fluidRow(
+            column(
+              width = 3,
+              selectInput(
+                ns('project_name'),
+                'Project Name:',
+                choices = get_projects(),
+                multiple = F,
+                selected = last_entry('project_name', NULL, group = group)
+              ),
+              selectInput(
+                ns('subject_code'),
+                'Subject Code:',
+                choices = subjects,
+                selected = last_entry('subject_code', NULL, group = group)
+              ),
+              uiOutput(ns('modal_electrodes')),
+              uiOutput(ns('modal_epochs')),
+              uiOutput(ns('modal_frequencies'))
             ),
-            selectInput(
-              ns('subject_code'),
-              'Subject Code:',
-              choices = subjects,
-              selected = last_entry('subject_code', NULL, group = group)
-            ),
-            uiOutput(ns('modal_electrodes')),
-            uiOutput(ns('modal_epochs')),
-            uiOutput(ns('modal_frequencies'))
-          ),
-          column(
-            width = 9,
-            uiOutput(ns('modal_error')),
-            column(3, uiOutput(ns('modal_data'))),
-            column(9, uiOutput(ns('modal_summary'))),
-            column(12, uiOutput(ns('plot3dui')))
+            column(
+              width = 9,
+              uiOutput(ns('modal_error')),
+              column(3, uiOutput(ns('modal_data'))),
+              column(9, uiOutput(ns('modal_summary'))),
+              column(12, uiOutput(ns('plot3dui')))
+            )
           )
         ),
         footer = tagList(
           shiny::modalButton('Cancel'),
-          actionButtonStyled(ns('data_import'), label = 'Import', type = 'primary')
+          actionButtonStyled(ns('data_import'), label = 'Import', type = 'primary', form = 'data-selector', `data-value`="13")
         )
       )
     }
@@ -349,11 +352,21 @@ shiny_data_selector <- function(moduleId){
         phase_usage = base_size * wave_srate * length(freqs)
         volt_usage = base_size * volt_srate
 
+        est_time = 0.1 * length(electrodes)
+        drive_speed = rave_options('drive_speed')
+        if(length(drive_speed) == 2){
+          drive_speed = drive_speed[2]
+        }
+        if(!is.numeric(drive_speed)){
+          drive_speed = NA
+        }
+
         if(length(data_types)){
           total_usage = power_usage * ('power' %in% data_types) +
             phase_usage * ('phase' %in% data_types) +
             volt_usage * ('voltage' %in% data_types)
           data_types_c = paste(data_types, collapse = ', ')
+          est_time = est_time + drive_speed * total_usage / 1000000
         }else{
           total_usage = 0
           data_types_c = ''
@@ -400,6 +413,7 @@ shiny_data_selector <- function(moduleId){
             ), br(),
             'Preload data: ', data_types_c, br(),
             sprintf('Estimated minimum RAM: %.1f~%.1f %s', total_usage, total_usage*2, attr(total_usage, 'unit')),
+            sprintf('Estimated time: %.1f seconds', est_time * 3),
             br(),
             warn_msg
           )

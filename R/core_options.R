@@ -2,7 +2,9 @@
 
 opt <- list(
   debug = FALSE,
-  max_mem = 1000000,
+  max_mem = 256,
+  drive_speed = c(0.02, 0.05),
+  disable_startup_speed_check = FALSE,
   check_updates_onstartup = T,
   raw_data_dir = '~/rave_data/raw_dir/',
   data_dir = '~/rave_data/data_dir/',
