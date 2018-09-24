@@ -4,8 +4,8 @@
 \alias{plot_signal}
 \title{to be junked}
 \usage{
-plot_signal(s, sample_rate, time = NULL, boundary = 1000,
-  xbins = 1000, details = F, ...)
+plot_signal(s, sample_rate, time = NULL, boundary = 1000, xbins = 1000,
+  details = F, ...)
 }
 \description{
 to be junked

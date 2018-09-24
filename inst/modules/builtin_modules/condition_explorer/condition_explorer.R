@@ -172,7 +172,8 @@ main_function = function(electrode, use_cache = F){
 
       collapse$over_frequency(.power)
 
-      add_data(heat_map_data[[ii]]) <- rutabaga::collapse(.power$data, c(3,2))/ dim(.power)[1] #collapse$over_trial(.power)
+      add_data(heat_map_data[[ii]]) <- .power$collapse(keep = c(3,2), method = 'mean')
+        #rutabaga::collapse(.power$data, c(3,2))/ dim(.power)[1] #collapse$over_trial(.power)
       add_data(by_trial_heat_map_data[[ii]]) <-
         rutabaga::collapse(.power$subset(Frequency=Frequency %within% FREQUENCY, data_only = TRUE, drop=TRUE),
                            c(3,1)) / dim(.power)[2]

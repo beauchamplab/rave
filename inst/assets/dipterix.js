@@ -65,7 +65,7 @@ $(document).ready(function(){
 	// Making form button with "primary" and data-value='13' listen to keyboard "enter"
 	// This is tricky since forms might be generated dyynamically. We have to use 'e.target'
 	// to identify where the "enter" key occurs.
-	$("body").keypress(function (e) {
+	$(document).keypress(function (e) {
 	  var target = e.target,
 	      tag_name = target.tagName,
 	      enter_hit = (e.which && e.which == 13) || (e.keyCode && e.keyCode == 13);

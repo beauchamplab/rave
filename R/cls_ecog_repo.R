@@ -139,95 +139,207 @@ ECoGRepository <- R6::R6Class(
       subject_id = self$subject$id
 
       raws = self$raw
-      lapply_async(electrodes, function(e){
-        electrode = raws$get(as.character(e))
-        electrode$epoch(
-          epoch_name = epoch_name,
-          pre = pre, post = post, types = data_type, raw = !referenced
-        ) -> elc;
 
-        if(is(elc$power, 'ECoGTensor')){
-          elc$power = elc$power$subset(Frequency = freq_subset, drop = F)
-        }
-        if(is(elc$phase, 'ECoGTensor')){
-          elc$phase = elc$phase$subset(Frequency = freq_subset, drop = F)
-        }
-
-        if(is.function(func)){
-          elc = func(elc)
-        }
-        return(elc)
-      }, .call_back = function(i){
-        progress$inc(sprintf('Preparing electrode - %d', electrodes[i]))
-      }) ->
-        results
-
-      progress$inc('Finalizing...')
+      # progress$inc('Finalizing...')
+      # Get dimension names
+      # 1. Trial
+      epochs = load_meta(
+        meta_type = 'epoch',
+        meta_name = epoch_name,
+        project_name = self$subject$project_name,
+        subject_code = self$subject$subject_code
+      )
+      trial_order = order(epochs$Trial)
+      dn_trial = epochs$Trial[trial_order]
+      dn_freqs = freqs$Frequency[freq_subset]
+      n_dt = length(data_type)
+      n_elec = length(electrodes)
+      dimnames_wave = list(
+        Trial = dn_trial,
+        Frequency = dn_freqs,
+        Time = seq(-pre, post, by = 1 / subject$sample_rate),
+        Electrode = electrodes
+      )
+      dimnames_volt = list(
+        Trial = dn_trial,
+        Time = seq(-pre, post, by = 1 / subject$preprocess_info('srate')),
+        Electrode = electrodes
+      )
 
       # collapse results
       if(!is.function(func)){
-        env = environment()
-
-        # spectrum
 
         if('power' %in% data_type){
-          sample_spec = results[[1]]$power$data[,,,1]
-          .dim = dim(sample_spec)
-          .dimnames = dimnames(sample_spec)
+          lapply_async(electrodes, function(e){
+            electrode = raws$get(as.character(e))
+            electrode$epoch(
+              epoch_name = epoch_name,
+              pre = pre,
+              post = post,
+              types = 'power',
+              raw = !referenced
+            ) ->
+              elc
+
+            power = elc$power$subset(Frequency = freq_subset, drop = T, data_only = T)
+            rm(elc)
+            power = as.vector(power)
+            return(power)
+          }, .call_back = function(i){
+            progress$inc(sprintf('Step 1 (of %d) electrode %d (power)', n_dt, electrodes[i]))
+          }) ->
+            results
+          gc()
+
+          names(results) = paste0('V', seq_along(electrodes))
+          results = do.call('data.frame', results)
+
+          # Generate tensor for power
+          power = ECoGTensor$new(0, dim = c(1,1,1,1), varnames = names(dimnames_wave), hybrid = F)
+
+          # erase data
+          power$set_data(NULL)
+          # reset dim and dimnames
+          power$dim = vapply(dimnames_wave, length, FUN.VALUE = 0, USE.NAMES = F)
+          power$dimnames = dimnames_wave
+
+          # generate local cache for power
+          file = tempfile()
+          fst::write_fst(results, file, compress = 20)
+          rm(results)
+          gc()
+
+          # change tensor file path
+          power$swap_file = file
+          power$hybrid = T
+          power$use_index = TRUE
+
           nm = ifelse(referenced, 'power', 'raw_power')
-          self[[nm]] = ECoGTensor$new(
-            data = vapply(seq_len(length(results)), function(i){
-              data = env$results[[i]]$power$data
-              env$results[[i]]$power = NULL
-              # dimnames(data) = NULL
-              return(as.vector(data))
-            }, FUN.VALUE = sample_spec),
-            dimnames = c(.dimnames, list(Electrode = electrodes)),
-            varnames = c(names(.dimnames), 'Electrode')
-          )
-          rm(sample_spec)
+          self[[nm]] = power
         }
 
         if('phase' %in% data_type){
-          sample_spec = results[[1]]$phase$data[,,,1]
-          .dim = dim(sample_spec)
-          .dimnames = dimnames(sample_spec)
+          lapply_async(electrodes, function(e){
+            electrode = raws$get(as.character(e))
+            electrode$epoch(
+              epoch_name = epoch_name,
+              pre = pre,
+              post = post,
+              types = 'phase',
+              raw = !referenced
+            ) ->
+              elc
+
+            phase = elc$phase$subset(Frequency = freq_subset, drop = T, data_only = T)
+            rm(elc)
+            phase = as.vector(phase)
+            return(phase)
+          }, .call_back = function(i){
+            progress$inc(sprintf('Step 2 (of %d) electrode %d (phase)', n_dt, electrodes[i]))
+          }) ->
+            results
+          gc()
+
+          names(results) = paste0('V', seq_along(electrodes))
+          results = do.call('data.frame', results)
+
+          # Generate tensor for phase
+          phase = ECoGTensor$new(0, dim = c(1,1,1,1), varnames = names(dimnames_wave), hybrid = F)
+
+          # erase data
+          phase$set_data(NULL)
+          # reset dim and dimnames
+          phase$dim = vapply(dimnames_wave, length, FUN.VALUE = 0, USE.NAMES = F)
+          phase$dimnames = dimnames_wave
+
+          # generate local cache for phase
+          file = tempfile()
+          fst::write_fst(results, file, compress = 20)
+          rm(results)
+          gc()
+
+          # change tensor file path
+          phase$swap_file = file
+          phase$hybrid = T
+          phase$use_index = TRUE
+
           nm = ifelse(referenced, 'phase', 'raw_phase')
-          self[[nm]] = ECoGTensor$new(
-            data = vapply(seq_len(length(results)), function(i){
-              data = env$results[[i]]$phase$data
-              env$results[[i]]$phase = NULL
-              # dimnames(data) = NULL
-              return(as.vector(data))
-            }, FUN.VALUE = sample_spec),
-            dimnames = c(.dimnames, list(Electrode = electrodes)),
-            varnames = c(names(.dimnames), 'Electrode')
-          )
-          rm(sample_spec)
+          self[[nm]] = phase
         }
 
         if('volt' %in% data_type){
-          sample_volt = results[[1]]$volt$data[,,1]
-          .dim = dim(sample_volt)
-          .dimnames = dimnames(sample_volt)
+          lapply_async(electrodes, function(e){
+            electrode = raws$get(as.character(e))
+            electrode$epoch(
+              epoch_name = epoch_name,
+              pre = pre,
+              post = post,
+              types = 'volt',
+              raw = !referenced
+            ) ->
+              elc
+            volt = elc$volt$get_data()
+            rm(elc)
+            volt = as.vector(volt)
+            return(volt)
+          }, .call_back = function(i){
+            progress$inc(sprintf('Step 3 (of %d) electrode %d (voltage)', n_dt, electrodes[i]))
+          }) ->
+            results
+          gc()
+
+          names(results) = paste0('V', seq_along(electrodes))
+          results = do.call('data.frame', results)
+
+          # Generate tensor for voltage
+          volt = ECoGTensor$new(0, dim = c(1,1,1), varnames = names(dimnames_volt), hybrid = F)
+
+          # erase data
+          volt$set_data(NULL)
+          # reset dim and dimnames
+          volt$dim = vapply(dimnames_volt, length, FUN.VALUE = 0, USE.NAMES = F)
+          volt$dimnames = dimnames_volt
+
+          # generate local cache for phase
+          file = tempfile()
+          fst::write_fst(results, file, compress = 20)
+          rm(results)
+          gc()
+
+          # change tensor file path
+          volt$swap_file = file
+          volt$hybrid = T
+          volt$use_index = TRUE
+
           nm = ifelse(referenced, 'volt', 'raw_volt')
-          self[[nm]] = Tensor$new(
-            data = vapply(seq_len(length(results)), function(i){
-              data = env$results[[i]]$volt$data
-              env$results[[i]]$volt = NULL
-              dimnames(data) = NULL
-              return(data)
-            }, FUN.VALUE = sample_volt),
-            dimnames = list(
-              Trial = as.integer(.dimnames$Trial),
-              Time = as.numeric(.dimnames$Time),
-              Electrode = as.integer(electrodes)),
-            varnames = c(names(.dimnames), 'Electrode')
-          )
+          self[[nm]] = volt
         }
 
         return(invisible())
       }else{
+
+        lapply_async(electrodes, function(e){
+          electrode = raws$get(as.character(e))
+          electrode$epoch(
+            epoch_name = epoch_name,
+            pre = pre, post = post, types = data_type, raw = !referenced
+          ) -> elc;
+
+          if(is(elc$power, 'ECoGTensor')){
+            elc$power = elc$power$subset(Frequency = freq_subset, drop = F)
+          }
+          if(is(elc$phase, 'ECoGTensor')){
+            elc$phase = elc$phase$subset(Frequency = freq_subset, drop = F)
+          }
+
+          elc = func(elc)
+          return(elc)
+        }, .call_back = function(i){
+          progress$inc(sprintf('Preparing electrode - %d', electrodes[i]))
+        }) ->
+          results
+        gc()
+
         return(results)
       }
 
@@ -405,3 +517,93 @@ ECoGRepository <- R6::R6Class(
 #   }
 #   return(bld)
 # }
+
+
+
+
+
+#
+#
+#           gc()
+#           sample_spec = (results[[1]]$power[,,,1])$get_data()
+#           gc()
+#           base::print(pryr::mem_used())
+#           .dim = results[[1]]$power$dim[1:3]
+#           .dimnames = results[[1]]$power$dimnames[1:3]
+#           dim(sample_spec) = .dim
+#           dimnames(sample_spec) = NULL
+#           nm = ifelse(referenced, 'power', 'raw_power')
+#           gc()
+#           base::print(pryr::mem_used())
+#           data = vapply(seq_len(length(results)), function(i){
+#             data = env$results[[i]]$power$get_data()
+#             env$results[[i]]$power = NULL
+#             # dimnames(data) = NULL
+#             rm(env)
+#             return(as.vector(data))
+#           }, FUN.VALUE = sample_spec)
+#           force(data)
+#           gc()
+#           base::print(pryr::mem_used())
+#           self[[nm]] = ECoGTensor$new(
+#             data,
+#             dimnames = c(.dimnames, list(Electrode = electrodes)),
+#             varnames = c(names(.dimnames), 'Electrode'),
+#             hybrid = T
+#           )
+#           gc()
+#           base::print(pryr::mem_used())
+#           rm(sample_spec, data)
+#           gc()
+#           base::print(pryr::mem_used())
+#         }
+#
+#         if('phase' %in% data_type){
+#           sample_spec = (results[[1]]$phase[,,,1])$get_data() #results[[1]]$phase$data[,,,1]
+#           .dim = results[[1]]$phase$dim[1:3]
+#           .dimnames = results[[1]]$phase$dimnames[1:3]
+#           dim(sample_spec) = .dim
+#           dimnames(sample_spec) = NULL
+#
+#           nm = ifelse(referenced, 'phase', 'raw_phase')
+#           data = vapply(seq_len(length(results)), function(i){
+#             data = env$results[[i]]$phase$get_data()
+#             env$results[[i]]$phase = NULL
+#             # dimnames(data) = NULL
+#             rm(env)
+#             return(as.vector(data))
+#           }, FUN.VALUE = sample_spec)
+#           force(data)
+#           self[[nm]] = ECoGTensor$new(
+#             data,
+#             dimnames = c(.dimnames, list(Electrode = electrodes)),
+#             varnames = c(names(.dimnames), 'Electrode'),
+#             hybrid = T
+#           )
+#           rm(sample_spec, data)
+#         }
+#
+#         if('volt' %in% data_type){
+#           sample_volt = (results[[1]]$volt[,,1])$get_data() #results[[1]]$volt$data[,,1]
+#           .dim = results[[1]]$volt$dim[1:2]
+#           .dimnames = results[[1]]$volt$dimnames[1:2]
+#           dim(sample_volt) = .dim
+#           dimnames(sample_volt) = NULL
+#           nm = ifelse(referenced, 'volt', 'raw_volt')
+#           self[[nm]] = Tensor$new(
+#             data = vapply(seq_len(length(results)), function(i){
+#               data = env$results[[i]]$volt$get_data()
+#               env$results[[i]]$volt = NULL
+#               dimnames(data) = NULL
+#               rm(env)
+#               return(data)
+#             }, FUN.VALUE = sample_volt),
+#             dimnames = list(
+#               Trial = as.integer(.dimnames$Trial),
+#               Time = as.numeric(.dimnames$Time),
+#               Electrode = as.integer(electrodes)),
+#             varnames = c(names(.dimnames), 'Electrode')
+#           )
+#
+#           rm(sample_volt)
+#         }

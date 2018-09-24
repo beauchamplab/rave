@@ -377,7 +377,7 @@ li.control-sidebar-items>a {
   position: absolute;
   top: 50%;
   left: 50%;
-  background-color: wheat;
+  background-color: white;
   width: fit-content;
   min-width: 50vw;
   -o-transform: translate(-50%, -50%);

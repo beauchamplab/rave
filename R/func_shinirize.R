@@ -314,12 +314,16 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       })
 
       ##### Scripts #####
-      exec_script <- function(async = FALSE){
+      exec_script <- function(async = FALSE, force = FALSE){
+        if(!execenv$auto_execute && !force){
+          # Do not execute
+          return()
+        }
         logger('Executing Script')
         tryCatch({
           # record time
           start_time = Sys.time()
-          execenv$execute(async = async)
+          execenv$execute(async = async, force = force)
           if(async){
             local_data$suspended = FALSE
           }else{
@@ -356,10 +360,11 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         is_run = !is.null(local_data$run_async)
         if(is_run){
           logger('Running the script with async')
-          exec_script(async = TRUE)
+          exec_script(async = TRUE, force = TRUE)
           showNotification(p('Running in the background. Results will be shown once finished.'), type = 'message', id = 'async_msg')
         }
       })
+
 
       observeEvent(global_reactives$check_results, {
         if(!isolate(local_data$suspended)){
@@ -559,6 +564,50 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         }
       )
 
+      # Special output - if module is not auto updated
+      last_params = new.env()
+      output[['..params_current']] <- renderUI({
+        input_changed = NULL
+        update_btn = NULL
+        if(!execenv$auto_execute){
+          # Check if any params changed
+          vapply(execenv$input_ids, function(inputId){
+            !are_same(last_params[[inputId]], input[[inputId]])
+          }, FUN.VALUE = FALSE) ->
+            input_changed
+          if(length(input_changed) && any(input_changed)){
+            update_btn = actionButtonStyled('..force_execute', 'Update Output', type = 'warning', width = '100%')
+          }else{
+            update_btn = actionButtonStyled('..force_execute', 'Update Output', type = 'default', disabled = TRUE, width = '100%')
+          }
+
+          shinydashboard::box(
+            width = 12L,
+            update_btn
+            # p(tagList(info))
+          )
+        }
+        # We need to generate snapshot for current inputs
+        # lapply(seq_along(execenv$input_ids), function(ii){
+        #   inputId = execenv$input_ids[[ii]]
+        #   if(length(input_changed) >= ii){
+        #     changed = input_changed[[ii]]
+        #   }else{
+        #     changed = FALSE
+        #   }
+        #   tagList(
+        #     span(style = ifelse(changed, 'color:red;', 'color:black;'), strong(inputId), ': ', beautify(last_params[[inputId]])),
+        #     br()
+        #   )
+        # }) ->
+        #   info
+
+      })
+
+      observeEvent(input[['..force_execute']], {
+        exec_script(async = FALSE, force = TRUE)
+      })
+
 
 
 
@@ -578,3 +627,65 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
     }
   )
 }
+
+
+
+are_same <- function(a, b){
+  isTRUE(digest::digest(a) == digest::digest(b))
+}
+
+beautify <- function(v, max_len = 20, is_vector = TRUE, level = 0){
+  max_level = 3
+  if(level > max_level){
+    return('...')
+  }
+  re = ''
+
+  switch (typeof(v),
+    'list' = {
+      nms = names(v)
+      sapply(seq_along(v), function(ii){
+        if(length(nms) >= ii){
+          nm = nms[[ii]]
+          if(is.blank(nm)){ nm = sprintf('(%d)', ii) }
+        }else{
+          nm = sprintf('(%d)', ii)
+        }
+        paste0(nm, ': ', paste0(unlist(beautify(v[[ii]], max_len = max_len, level = level + 1)), collapse = ''))
+      }) ->
+        re
+    },
+    'NULL' = { return(NULL) },
+    {
+      if(length(v) && is_vector){
+        # First 3 elements
+        re = paste0(sapply(v[seq_len(min(3L, length(v)))], beautify, max_len = max_len, is_vector = FALSE), collapse = ', ')
+        if(stringr::str_length(re) > max_len){
+          re = paste(stringr::str_sub(re, end = max_len - 4), '...')
+        }else if(length(v) > 3L){
+          re = paste0(re, '...')
+        }
+        return(re)
+      }
+      if(is.integer(v)){
+        return(sprintf('%d', v))
+      }else if(is.numeric(v)){
+        return(sprintf('%.1f', v))
+      }else if(is.environment(v)){
+        re = paste('<environment>: ', paste(ls(v), collapse = ', '))
+        re = paste(stringr::str_sub(re, end = max_len - 4), '...')
+        return(re)
+      }
+      expr = rlang::quo_text(rlang::quo({!!v}))
+      return(stringr::str_replace_all(expr, '(\\{\\n)|(\\n\\})|([ ]{2})|(\\n)', ''))
+    }
+  )
+
+  pre = paste0(rep(' ', level), collapse = '')
+  re = paste0(pre, re, collapse = '\n')
+  if(level >= 1){
+    re = paste('\n', re)
+  }
+  return(re)
+}
+# cat(str_c(beautify(as.list(input)[execenv$input_ids]), collapse = '\n'))

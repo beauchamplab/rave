@@ -3,9 +3,6 @@
 \name{rave_life_cycle_general}
 \alias{rave_life_cycle_general}
 \title{RAVE development cycle - General}
-\description{
-RAVE development cycle - General
-}
 \author{
 Zhengjia Wang
 

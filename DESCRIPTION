@@ -2,7 +2,7 @@
 Package: rave
 Type: Package
 Title: R Analysis and Visualization of ECOG/iEEG Data
-Version: 0.1.5.0031
+Version: 0.1.5.0032
 Author: Beauchamplab
 Maintainer: Zhengjia Wang <dipterix.wang@gmail.com>,
             Beauchamplab <beauchamplab@gmail.com>
@@ -46,7 +46,8 @@ Imports:
     httpuv (>= 1.3.6.1),
     DT (>= 0.4),
     reticulate (>= 1.6),
-    hdf5r (>= 1.0.0)
+    hdf5r (>= 1.0.0),
+    fst (>= 0.8.8)
 Collate: 
     'utils_syscheck.R'
     'aaa.R'
@@ -55,6 +56,7 @@ Collate:
     'cls_electrode.R'
     'cls_map.R'
     'cls_module.R'
+    'cls_module_env.R'
     'cls_subject.R'
     'cls_subjectinfo.R'
     'cls_tensor.R'

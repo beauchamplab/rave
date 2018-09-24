@@ -6,9 +6,6 @@
 \usage{
 wavelet(data, freqs, srate, wave_num)
 }
-\description{
-Wavelet Transformation With Phase
-}
 \details{
 Wavelet
 Function for decomposing time series data into time-frequency
