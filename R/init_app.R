@@ -349,6 +349,11 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
     })
 
 
+    observeEvent(input[['..keyboard_event..']], {
+      global_reactives$keyboard_event = input[['..keyboard_event..']]
+    })
+
+
 
     ##################################################################
     # Module to load data

@@ -122,7 +122,10 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         suspended = TRUE,
 
         # A flag: sidebar == this module (active module?)
-        focused = FALSE
+        focused = FALSE,
+
+        # current input data
+        current_param = list()
       )
 
       local_static = new.env()
@@ -147,7 +150,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       reactive({
         re = local_data$run_script
         if(check_active()){
-          logger('Ready, executing scripts.')
+          logger('Ready, prepared to execute scripts.')
           return(re)
         }
         return(FALSE)
@@ -192,10 +195,11 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       }
 
       cache_all_inputs <- function(save = T){
-        params = isolate(reactiveValuesToList(input))
+        # params = isolate(reactiveValuesToList(input))
         lapply(execenv$input_ids, function(inputId){
-          val = params[[inputId]]
+          val = isolate(input[[inputId]])
           execenv$cache_input(inputId, val, read_only = !save)
+          local_data$current_param[[inputId]] = val
         }) ->
           altered_params
         names(altered_params) = execenv$input_ids
@@ -326,6 +330,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
           execenv$execute(async = async, force = force)
           if(async){
             local_data$suspended = FALSE
+            showNotification(p('Running in the background. Results will be shown once finished.'), type = 'message', id = 'async_msg')
           }else{
             local_data$has_results = Sys.time()
             end_time = Sys.time()
@@ -361,7 +366,6 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         if(is_run){
           logger('Running the script with async')
           exec_script(async = TRUE, force = TRUE)
-          showNotification(p('Running in the background. Results will be shown once finished.'), type = 'message', id = 'async_msg')
         }
       })
 
@@ -386,7 +390,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
               # exec_script(async = F)
               local_data$run_script = Sys.time()
               local_data$run_async = NULL
-              showNotification(p('Async evaluation is finished - ', MODULE_LABEL), duration = 8, type = 'message')
+              showNotification(p('Async evaluation is finished - ', MODULE_LABEL), duration = NULL, type = 'message')
             }
           }else{
             local_data$suspended = TRUE
@@ -565,20 +569,27 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       )
 
       # Special output - if module is not auto updated
-      last_params = new.env()
       output[['..params_current']] <- renderUI({
         input_changed = NULL
         update_btn = NULL
         if(!execenv$auto_execute){
           # Check if any params changed
           vapply(execenv$input_ids, function(inputId){
-            !are_same(last_params[[inputId]], input[[inputId]])
+            re = !isTRUE(all.equal(local_data$current_param[[inputId]], input[[inputId]], check.attributes = F))
+            if(re){
+              print(inputId)
+              print(local_data$current_param[[inputId]])
+              print(input[[inputId]])
+            }
+            re
           }, FUN.VALUE = FALSE) ->
             input_changed
           if(length(input_changed) && any(input_changed)){
-            update_btn = actionButtonStyled('..force_execute', 'Update Output', type = 'warning', width = '100%')
+            update_btn = actionButtonStyled(execenv$ns('..force_execute'), 'Update Output', type = 'warning', width = '100%')
+            showNotification(p('Input changed, click ', actionLink(execenv$ns('..force_execute_1'), 'here'), ' or press ', strong('Ctrl/Command+Enter'), ' to update output.'), duration = NULL, id = '..input_updated')
           }else{
-            update_btn = actionButtonStyled('..force_execute', 'Update Output', type = 'default', disabled = TRUE, width = '100%')
+            update_btn = actionButtonStyled(execenv$ns('..force_execute'), 'Update Output', type = 'default', disabled = TRUE, width = '100%')
+            removeNotification(id = '..input_updated')
           }
 
           shinydashboard::box(
@@ -604,8 +615,20 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
       })
 
+      observeEvent(input[['..force_execute_1']], {
+        exec_script(async = FALSE, force = TRUE)
+      })
       observeEvent(input[['..force_execute']], {
         exec_script(async = FALSE, force = TRUE)
+      })
+
+      observeEvent(global_reactives$keyboard_event, {
+        if(local_data$focused){
+          e = global_reactives$keyboard_event
+          if(e$enter_hit && e$ctrl_hit){
+            exec_script(async = e$shift_hit, force = TRUE)
+          }
+        }
       })
 
 

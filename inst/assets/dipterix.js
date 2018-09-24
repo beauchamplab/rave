@@ -65,26 +65,21 @@ $(document).ready(function(){
 	// Making form button with "primary" and data-value='13' listen to keyboard "enter"
 	// This is tricky since forms might be generated dyynamically. We have to use 'e.target'
 	// to identify where the "enter" key occurs.
-	$(document).keypress(function (e) {
-	  var target = e.target,
-	      tag_name = target.tagName,
-	      enter_hit = (e.which && e.which == 13) || (e.keyCode && e.keyCode == 13);
-	   if(enter_hit && tag_name === 'INPUT'){
-	     // Look for the form ID
-	     var form = $(target).parents('form');
-	     if(form.length > 0){
-	       form = form[0];
-	       var form_id = $(form).attr('id');
-	       if(form_id !== undefined){
-	         // find target button
-	         var btn = $('button.btn-primary[data-value="13"][form="' + form_id + '"]');
-	         if(btn.length > 0){
-	           $(btn[0]).click();
-	           return false;
-	         }
-	       }
-	     }
-	   }
+	$(document).keydown(function (e) {
+	  var enter_hit = (e.which && e.which == 13) || (e.keyCode && e.keyCode == 13),
+	      ctrl_hit = (e.metaKey || e.ctrlKey),
+	      shift_hit = e.shiftKey,
+	      alt_key = e.altKey,
+	      key_code = e.which || e.keyCode;
+	   // send to shiny
+     Shiny.onInputChange('..keyboard_event..', {
+       ctrl_hit: ctrl_hit,
+       shift_hit: shift_hit,
+       enter_hit: enter_hit,
+       alt_hit : alt_key,
+       key_code : key_code,
+       timestamp: new Date() // String(new Date())
+     });
 	   return true;
   });
 });
