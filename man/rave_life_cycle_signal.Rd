@@ -3,6 +3,9 @@
 \name{rave_life_cycle_signal}
 \alias{rave_life_cycle_signal}
 \title{RAVE development cycle - Signal Processing}
+\description{
+RAVE development cycle - Signal Processing
+}
 \section{Part 1 - Transformations}{
 
 \enumerate{

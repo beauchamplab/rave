@@ -119,7 +119,7 @@ observeEvent(input$gen_3d, {
       # Step 1, baseline
       progress$inc('Calculating Baseline')
 
-      bl = cache(list(bs, preload_info), module_tools$baseline(from = bs[1], to = bs[2]))
+      bl = cache(list(bs, preload_info), module_tools$baseline(module_tools$get_power(), from = bs[1], to = bs[2]))
 
 
       progress$inc('Subset...')

@@ -115,7 +115,8 @@ rave_execute({
     bl_power <- cache(
         key = list(subject$id, electrode, BASELINE, any_trials, preload_info),
         #having problems with rutabaga
-        val = module_tools$baseline(BASELINE[1],  BASELINE[2], electrode)
+        val = baseline(power$subset(Electrode = Electrode == electrode), from = BASELINE[1],  to = BASELINE[2], hybrid = F, unit = '%')
+        #module_tools$baseline(BASELINE[1],  BASELINE[2], electrode)
         # val = .local_baseline(tmp, BASELINE)
     )
 

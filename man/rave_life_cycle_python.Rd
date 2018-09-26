@@ -3,6 +3,9 @@
 \name{rave_life_cycle_python}
 \alias{rave_life_cycle_python}
 \title{RAVE development cycle - Python Support}
+\description{
+RAVE development cycle - Python Support
+}
 \section{Part 1 - Install Python}{
 
 \enumerate{

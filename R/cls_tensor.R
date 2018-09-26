@@ -324,16 +324,17 @@ Tensor <- R6::R6Class(
       }
 
       f_c = function(d){
-        switch (method,
-                'mean' = {
-                  d = rutabaga::collapse(d, keep = keep)
-                  d = d / prod(self$dim[-keep])
-                },
-                'median' = {
-                  apply(d, keep, median)
-                }, {
-                  d = rutabaga::collapse(d, keep = keep)
-                }
+        switch (
+          method,
+          'mean' = {
+            d = rutabaga::collapse(d, keep = keep)
+            d = d / prod(self$dim[-keep])
+          },
+          'median' = {
+            d = apply(d, keep, median)
+          }, {
+            d = rutabaga::collapse(d, keep = keep)
+          }
         )
         d
       }

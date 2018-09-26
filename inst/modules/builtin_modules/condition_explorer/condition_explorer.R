@@ -123,7 +123,8 @@ main_function = function(electrode, use_cache = F){
   # }else{
   #   bl_power = module_tools$baseline(BASELINE[1],  BASELINE[2], electrode)
   # }
-  bl_power = module_tools$baseline(BASELINE[1],  BASELINE[2], electrode)
+  bl_power = baseline(power$subset(Electrode = Electrode == electrode), from = BASELINE[1],  to = BASELINE[2], hybrid = F, unit = '%')
+  # bl_power = module_tools$baseline(BASELINE[1],  BASELINE[2], electrode)
 
   # we were repeating a lot of calculations and looping over GROUPS too many times
   # let's clean that up

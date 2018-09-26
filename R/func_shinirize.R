@@ -199,7 +199,6 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         lapply(execenv$input_ids, function(inputId){
           val = isolate(input[[inputId]])
           execenv$cache_input(inputId, val, read_only = !save)
-          local_data$current_param[[inputId]] = val
         }) ->
           altered_params
         names(altered_params) = execenv$input_ids
@@ -341,6 +340,11 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
           local_data$last_executed = T
           cache_all_inputs()
           execenv$cache_input('..onced', TRUE, read_only = F, sig = 'special')
+
+          lapply(execenv$input_ids, function(inputId){
+            val = isolate(input[[inputId]])
+            local_data$current_param[[inputId]] = val
+          })
 
         }, error = function(e){
           sapply(capture.output(traceback(e)), logger, level = 'ERROR')
@@ -576,11 +580,6 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
           # Check if any params changed
           vapply(execenv$input_ids, function(inputId){
             re = !isTRUE(all.equal(local_data$current_param[[inputId]], input[[inputId]], check.attributes = F))
-            if(re){
-              print(inputId)
-              print(local_data$current_param[[inputId]])
-              print(input[[inputId]])
-            }
             re
           }, FUN.VALUE = FALSE) ->
             input_changed

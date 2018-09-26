@@ -26,7 +26,7 @@ BASELINE <- c(-1.0, -0.3)
 
 
 # 1. baseline the data
-bl_power <- baseline(BASELINE[1], BASELINE[2], electrodes)
+bl_power <- baseline(power$subset(Electrode = Electrode == electrode), from = BASELINE[1],  to = BASELINE[2], hybrid = F, unit = '%')#baseline(BASELINE[1], BASELINE[2], electrodes)
 
 # 2. select only the trials that you want and the time period that you want
 all_trials <- trials %>% unique

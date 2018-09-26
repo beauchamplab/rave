@@ -276,7 +276,7 @@ rave_execute({
 
     bl_power <- cache(
         key = list(subject$subject_id, electrode, BASELINE, any_trials, preload_info),
-        val = module_tools$baseline(BASELINE[1],  BASELINE[2], electrode)
+        val = baseline(power$subset(Electrode = Electrode == electrode), from = BASELINE[1],  to = BASELINE[2], hybrid = F, unit = '%')#module_tools$baseline(BASELINE[1],  BASELINE[2], electrode)
     )
 
     # we were repeating a lot of calculations and looping over GROUPS too many times
