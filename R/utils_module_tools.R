@@ -236,11 +236,12 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
       data_env[['subject']]$filter_valid_electrodes(electrodes = electrodes)
     }
 
-    baseline = function(from, to, electrodes = NULL, ...){
-      repo = data_env$.private$repo
-      on.exit(rm(repo))
-      data_env$.private$repo$baseline(from = from, to = to, electrodes = electrodes, ...)
-    }
+    # baseline = function(from, to, electrodes = NULL, ...){
+    #   repo = data_env$.private$repo
+    #   on.exit(rm(repo))
+    #   data_env$.private$repo$baseline(from = from, to = to, electrodes = electrodes, ...)
+    # }
+    baseline = rave::baseline
 
     reload = function(epoch, epoch_range, reference, electrodes){
       has_change = F

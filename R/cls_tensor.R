@@ -314,17 +314,38 @@ Tensor <- R6::R6Class(
       }
       d = self$get_data()
 
-      switch (method,
-        'mean' = {
-          d = rutabaga::collapse(d, keep = keep)
-          d = d / prod(self$dim[-keep])
-        },
-        'median' = {
-          apply(d, keep, median)
-        }, {
-          d = rutabaga::collapse(d, keep = keep)
-        }
-      )
+      if(!is.numeric(d) && !is.complex(d)){
+        stop('This tensor is not a numeric tensor')
+      }
+
+      if(any(!is.finite(d))){
+        logger('Tensor contains NaNs, converting to zeros', level = 'WARNING')
+        d[!is.finite(d)] = 0
+      }
+
+      f_c = function(d){
+        switch (method,
+                'mean' = {
+                  d = rutabaga::collapse(d, keep = keep)
+                  d = d / prod(self$dim[-keep])
+                },
+                'median' = {
+                  apply(d, keep, median)
+                }, {
+                  d = rutabaga::collapse(d, keep = keep)
+                }
+        )
+        d
+      }
+
+
+      if(is.complex(d)){
+        d = f_c(Re(d)) + 1i * f_c(Im(d))
+      }else{
+        d = f_c(d)
+      }
+
+
 
       return(d)
     },
