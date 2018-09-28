@@ -86,7 +86,7 @@ ModuleEnvir <- R6::R6Class(
     packages = NULL,
     rmd_path = NULL,
     externalpackage = FALSE,
-    print = function(){
+    info = function(){
       cat('Module Name:', self$label_name, '\n')
       cat('Version:', self$version, '\n')
       cat('Script Path:', self$script_path, '\n')
@@ -94,6 +94,9 @@ ModuleEnvir <- R6::R6Class(
       for(a in self$author){
         cat(' -', a, '\n')
       }
+    },
+    print = function(){
+      pryr::address(self)
     },
     initialize = function(
       module_id,

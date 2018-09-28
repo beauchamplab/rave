@@ -41,14 +41,15 @@ Electrode <- R6::R6Class(
     preload = NULL,
     reference = NULL,
 
-
-    print = function(...){
-
+    info = function(){
       cat('Subject: ', self$subject_id, '\nElectrode: ', self$electrode, ifelse(self$reference_electrode, ' (Reference)',''), '\n', sep = '')
       if(length(self$power) > 0){
         cat('Blocks: [', paste(self$blocks, collapse = ', '), ']\n')
       }
-      invisible(self)
+    },
+    print = function(...){
+      # To compatible with globals package
+      pryr::address(self)
     },
 
     switch_reference = function(new_reference){

@@ -58,38 +58,45 @@ ECoGRepository <- R6::R6Class(
     volt = NULL,
     power = NULL,
     phase = NULL,
+    info = function(print = TRUE){
+      id = self$subject$subject_id
+      epoch_info = self$epochs$get('epoch_name')
+      if(length(epoch_info)){
+        epoch_param = self$epochs$get('epoch_params');
+
+        epoch_info = 'Epoch: ' %&% epoch_info %&% '\n' %&%
+          ' - Electrodes: ' %&% rave:::deparse_selections(self$epochs$get('electrodes')) %&% '\n' %&%
+          sprintf(' - From %.2f to %.2f (sec)\n', -epoch_param[1], epoch_param[2])
+      }else{
+        epoch_info = '(Not epoched yet.)\n'
+      }
+
+      ref_name = self$reference$get('.reference_name')
+      ref_name %?<-% '(No reference table)'
+      ref_name = 'Reference table: ' %&% ref_name
+
+      refed = self$reference$get('.is_referenced')
+      if(!is.null(self$coef)){
+        wave_info = sprintf('Wavelet coefficients: Loaded (%s)', ifelse(refed$spectrum, 'Referenced', 'Raw'))
+      }else{
+        wave_info = 'Wavelet coefficients: Not loaded'
+      }
+
+      if(!is.null(self$volt)){
+        volt_info = sprintf('Voltage signal: Loaded (%s)', ifelse(refed$voltage, 'Referenced', 'Raw'))
+      }else{
+        volt_info = 'Voltage signal: Not loaded'
+      }
+
+      if(print){
+        cat(sprintf('<ECoG Repository> [%s]\n\n%s\n%s\n%s\n%s\n', id, epoch_info, ref_name, wave_info, volt_info))
+      }
+      invisible(list(
+        id = id, epoch_info = epoch_info, ref_name = ref_name, wave_info = wave_info, volt_info = volt_info
+      ))
+    },
     print = function(...){
-      # id = self$subject$subject_id
-      # epoch_info = self$epochs$get('epoch_name')
-      # if(length(epoch_info)){
-      #   epoch_param = self$epochs$get('epoch_params');
-      #
-      #   epoch_info = 'Epoch: ' %&% epoch_info %&% '\n' %&%
-      #     ' - Electrodes: ' %&% rave:::deparse_selections(self$epochs$get('electrodes')) %&% '\n' %&%
-      #     sprintf(' - From %.2f to %.2f (sec)\n', -epoch_param[1], epoch_param[2])
-      # }else{
-      #   epoch_info = '(Not epoched yet.)\n'
-      # }
-      #
-      # ref_name = self$reference$get('.reference_name')
-      # ref_name %?<-% '(No reference table)'
-      # ref_name = 'Reference table: ' %&% ref_name
-      #
-      # refed = self$reference$get('.is_referenced')
-      # if(!is.null(self$coef)){
-      #   wave_info = sprintf('Wavelet coefficients: Loaded (%s)', ifelse(refed$spectrum, 'Referenced', 'Raw'))
-      # }else{
-      #   wave_info = 'Wavelet coefficients: Not loaded'
-      # }
-      #
-      # if(!is.null(self$volt)){
-      #   volt_info = sprintf('Voltage signal: Loaded (%s)', ifelse(refed$voltage, 'Referenced', 'Raw'))
-      # }else{
-      #   volt_info = 'Voltage signal: Not loaded'
-      # }
-      #
-      # cat(sprintf('<ECoG Repository> [%s]\n\n%s\n%s\n%s\n%s\n', id, epoch_info, ref_name, wave_info, volt_info))
-      # return(self)
+      # To compatible with globals package
       pryr::address(self)
     },
     initialize = function(subject, reference = 'default', autoload = T){

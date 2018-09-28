@@ -13,9 +13,11 @@ Subject <- R6::R6Class(
     subject_code = NULL,
     project_name = NULL,
     dirs = NULL,
-    print = function(){
+    info = function(){
       cat('<Subject> [', self$subject_id, ']\n - Total electrodes: ', length(self$valid_electrodes), '\n', sep = '')
-
+    },
+    print = function(){
+      pryr::address(self)
     },
     finalize = function(){
       rm(list = ls(private$loaded), envir = private$loaded)

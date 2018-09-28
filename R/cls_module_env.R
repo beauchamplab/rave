@@ -38,7 +38,7 @@ ExecEnvir <- R6::R6Class(
       self$clean()
       logger(sprintf('[%s] Runtime Environment Removed.', private$module_env$module_id))
     },
-    print = function(...){
+    info = function(){
       cat('- wrapper environment -\n')
       cat(ls(self$wrapper_env))
       cat('\n- static environment -\n')
@@ -47,7 +47,9 @@ ExecEnvir <- R6::R6Class(
       cat(ls(self$param_env))
       cat('\n- runtime environment -\n')
       cat(ls(self$runtime_env))
-      invisible(self)
+    },
+    print = function(...){
+      pryr::address(self)
     },
     clean = function(){
       # WARNING: this is not clean, but should be able to clear most of the large objects
