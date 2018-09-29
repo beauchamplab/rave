@@ -2,8 +2,8 @@
 Package: rave
 Type: Package
 Title: R Analysis and Visualization of ECOG/iEEG Data
-Version: 0.1.5.0033
-Date: 2018-09-28
+Version: 0.1.5.0023
+Date: 2018-09-29
 Authors@R: c(
     person("Zhengjia", "Wang", email = "dipterix.wang@gmail.com", role = c("aut", "cre")),
     person("John", "Magnotti", role = c("aut")),
@@ -60,6 +60,7 @@ Collate:
     'utils_syscheck.R'
     'aaa.R'
     'bulk_preprocess.R'
+    'cls_brain.R'
     'cls_ecog_repo.R'
     'cls_electrode.R'
     'cls_map.R'

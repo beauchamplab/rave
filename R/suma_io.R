@@ -195,16 +195,19 @@ read_mgrid <- function(con, raw = F){
 #' suma_spec_parse(subject)
 #' }
 #' @export
-suma_spec_parse <- function(subject, spec_file = NULL){
-  if(is.character(subject)){
-    subject = str_split_fixed(subject, '/', 2)
-    subject = Subject$new(project_name = subject[1], subject_code = subject[2])
+suma_spec_parse <- function(subject, spec_file){
+  if(missing(spec_file)){
+    if(is.character(subject)){
+      subject = str_split_fixed(subject, '/', 2)
+      subject = Subject$new(project_name = subject[1], subject_code = subject[2])
+    }
+    suma_dir = subject$dirs$suma_dir
+    spec_file %?<-% file.path(suma_dir, fprintf('${{rave_options("suma_spec_file")}}'))
+    if(!file.exists(spec_file)){
+      spec_file = file.path(suma_dir, spec_file)
+    }
   }
-  suma_dir = subject$dirs$suma_dir
-  spec_file %?<-% file.path(suma_dir, fprintf('${{rave_options("suma_spec_file")}}'))
-  if(!file.exists(spec_file)){
-    spec_file = file.path(suma_dir, spec_file)
-  }
+
   s = readLines(spec_file)
 
   s = s[!str_detect(s, '^[\\ \\t]*#')]
