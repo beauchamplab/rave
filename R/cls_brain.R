@@ -36,6 +36,12 @@ RaveBrain <- R6::R6Class(
         self$load_subject(subject)
       }
     },
+    copy = function(){
+      re = self$clone(deep = TRUE)
+      re$.__enclos_env__$private$three_electrodes = lapply(private$three_electrodes, function(x){x$clone()})
+      re$.__enclos_env__$private$three_pial = lapply(private$three_pial, function(x){x$clone()})
+      re
+    },
     load_electrodes = function(tbl){
       lapply(seq_len(nrow(tbl)), function(ii){
         row = tbl[ii,]
@@ -425,7 +431,7 @@ RaveBrain <- R6::R6Class(
     set_electrode_value = function(which, value, keyframe){
       # keyframe always starts from 0, hence if length of value is 1, keyframe will be set to 0
       if(length(value) == 1){
-        keyframe = c(0, 1)
+        keyframe = c(0, 100)
         value = rep(value, 2)
       }
       private$ani_electrodes[[which]] = list(
@@ -442,6 +448,7 @@ RaveBrain <- R6::R6Class(
       }
     },
     set_electrode_size = function(which, radius = 2){
+      assertthat::assert_that(is.numeric(radius) && length(radius) == 1, msg = "invalid radius")
       for(ii in which){
         private$three_electrodes[[ii]]$.__enclos_env__$private$radius = radius
       }

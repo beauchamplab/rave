@@ -301,7 +301,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
       ...
     ){
 
-      if(missing(electrodes)){
+      if(missing(electrodes) || !length(values)){
         return(data_env$.private$brain$view(...))
       }
 
@@ -315,36 +315,65 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
       key_frame %?<-% seq_len(nrow(values))
       nk = length(key_frame)
 
-      brain = data_env$.private$brain$clone()
+      brain = data_env$.private$brain$copy()
       if(is.null(tbl)){
         tbl = data_env$.private$repo$subject$electrodes
       }else{
         brain$load_electrodes(tbl = tbl)
       }
+      n_total = nrow(tbl)
 
 
       assertthat::assert_that(ne == ncol(values), msg = 'values must have column count == length of electrodes')
       assertthat::assert_that(nk == nrow(values), msg = 'values must have row count == length of key_frame')
-      assertthat::assert_that(length(marker) %in% c(ne, 0, nrow(tbl)), msg = 'marker must be 0, # of electrodes, or # of total electrodes')
-      assertthat::assert_that(length(size) %in% c(ne, 0, nrow(tbl)), msg = 'size must be 0, # of electrodes, or # of total electrodes')
+      assertthat::assert_that(length(marker) %in% c(ne, 0, n_total), msg = 'marker must be 0, # of electrodes, or # of total electrodes')
+      assertthat::assert_that(length(size) %in% c(ne, 0, n_total), msg = 'size must be 0, # of electrodes, or # of total electrodes')
 
 
 
       # set value
+      ms = which(length(size) == c(0, ne, n_total))[1]
+      mm = which(length(marker) == c(0, ne, n_total))[1]
+
+
       lapply(seq_len(nrow(tbl)), function(ii){
         if(ii %in% electrodes){
           brain$set_electrode_value(which = ii, value = values[, ii], keyframe = key_frame)
         }
+
         # set size
-        if(length(size) >= ii){
-          brain$set_electrode_size(which = ii, radius = size[ii])
-        }
+        switch (
+          as.character(ms),
+          '2' = {
+            if(ii %in% electrodes){
+              brain$set_electrode_size(which = ii, radius = size[electrodes == ii])
+            }
+          },
+          '3' = {
+            brain$set_electrode_size(which = ii, radius = size[ii])
+          }
+        )
 
         # set mesh_info
-        if(length(marker) >= ii){
-          brain$set_electrode_label(which = ii, label = sprintf('Electrode %d - %s<br />%s', ii, tbl$Label[tbl$Electrode == ii], marker[ii]))
-        }
-
+        switch (
+          as.character(mm),
+          '2' = {
+            if(ii %in% electrodes){
+              brain$set_electrode_label(
+                which = ii,
+                label = sprintf('Electrode %d - %s<br />%s', ii,
+                                tbl$Label[tbl$Electrode == ii],
+                                marker[electrodes == ii])
+              )
+            }
+          },
+          '3' = {
+            brain$set_electrode_label(
+              which = ii,
+              label = sprintf('Electrode %d - %s<br />%s', ii, tbl$Label[tbl$Electrode == ii], marker[ii])
+            )
+          }
+        )
       })
 
       brain$view(...)
