@@ -291,152 +291,64 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
     plot_3d_electrodes = function(
       tbl = NULL,
       electrodes,
-      values = NULL,
-      key_frame = NULL,
-      marker = NULL,
-      link_module = NULL,
-      variable_name = 'electrode',
-      link_text = 'View Electrode',
-      palette = colorRampPalette(c('navy', 'grey', 'red'))(1001),
-      symmetric = T,
-      fps = 5,
-      control_gui = F,
-      loop = T,
-      radiu_normal = 5,
-      radiu_minis = 2,
+      key_frame = NULL,   # = # of rows of values
+      values = NULL,      # Each column is an electrode (# of key_frame x # of electrodes)
+      marker = NULL,      # = # of electrodes
+      size = NULL,
+      # link_module = NULL, # Not used I guess...
+      # variable_name = 'electrode',
+      # link_text = 'View Electrode',
       ...
     ){
-      "marker MUST be NULL or have length of electrodes, or of nrow(tbl)"
-      "values can be MULL, vector or matrix, either numbers or colors/namedcolors"
-      "if values is a matrix, then ncol(values)=length(electrodes), or if vector"
-      "length(values)=length(electrodes). Rows of values will be used to generate animation"
 
-
-      tbl %?<-% data_env$subject$electrodes
-      tbl = as.data.frame(tbl, stringsAsFactors = F)
-      tbl$Label[is.na(tbl$Label)] = ''
-      tbl$Name = stringr::str_trim(sprintf('Electrode %d %s', tbl$Electrode, tbl$Label))
-      tbl$Radius = radiu_normal
-      tbl$Radius[stringr::str_detect(tbl$Group, '^([Mm]ini)')] = radiu_minis
-      tbl$active = 0
-      tbl$Marker = tbl$Name
-
-      if(!missing(electrodes) && length(electrodes)){
-        electrodes = electrodes[electrodes %in% tbl$Electrode]
-
-        tbl$active = tbl$Electrode %in% electrodes
-        ind = sapply(electrodes, function(e){which(tbl$Electrode == e)})
-        tbl$active[ind] = seq_along(ind)
-
-
-        # Markers
-        marker %?<-% tbl$Name[ind]
-        assertthat::assert_that(length(marker) %in% c(length(electrodes), nrow(tbl)), msg = "marker MUST be NULL or have length of electrodes, or of nrow(tbl)")
-        # Add links to Marker if indicated
-        # TODO
-
-
-        if(length(marker) == length(electrodes)){
-          tbl$Marker[ind] = marker
-        }else{
-          tbl$Marker = marker
-        }
-
-
-        # Values
-        values %?<-% rep(0, length(electrodes))
-        if(is.vector(values)){
-          values = matrix(values, nrow = 1)
-        }
-        assertthat::assert_that(ncol(values) == length(electrodes), msg = "values MUST either be NULL or ncol(values) == length(electrodes)")
-
-        # Assign colors
-        if(is.numeric(values)){
-          res = length(palette)
-          rg = range(values)
-          if(rg[1] == rg[2]){
-            values = array(palette[floor((res+1)/2)], dim = dim(values))
-          }else{
-            if(symmetric){
-              b = 0
-              a = (res-2) / 2 / max(abs(rg))
-              c = (res + 1) / 2
-            }else{
-              b = rg[1]
-              a = (res-1) / (rg[2]-rg[1])
-              c = 1
-            }
-            col_ind = floor(a * (values - b) +c)
-            col_ind[col_ind < 1] = 1
-            col_ind[col_ind > res] = res
-            values = matrix(palette[col_ind], ncol = length(electrodes))
-          }
-        }else{
-          # values are characters, we assume that those are colors that needs no
-        }
-        # Set keyframes
-        key_frame %?<-% seq_len(nrow(values))
-
-        has_value = T
-      }else{
-        if(length(marker) == nrow(tbl)){
-          tbl$Marker = marker
-        }
-        has_value = F
+      if(missing(electrodes)){
+        return(data_env$.private$brain$view(...))
       }
 
-      n = nrow(tbl)
+      # Validata
+      ne = length(electrodes)
 
-      lapply(seq_len(n), function(ii){
-        row = tbl[ii, ]
-        g = with(row, {
-          threejsr::GeomSphere$new(
-            position = c(Coord_x, Coord_y, Coord_z),
-            mesh_name = Name,
-            mesh_info = Marker,
-            radius = Radius
-          )
+      if(!is.matrix(values)){
+        values = matrix(values, ncol = ne, byrow = T)
+      }
 
-        })
+      key_frame %?<-% seq_len(nrow(values))
+      nk = length(key_frame)
 
-        if(!is.null(link_module)){
-          g$extra_data(
-            text = link_text,
-            module_id = link_module,
-            variable_name = variable_name,
-            value = row$Electrode
-          )
+      brain = data_env$.private$brain$clone()
+      if(is.null(tbl)){
+        tbl = data_env$.private$repo$subject$electrodes
+      }else{
+        brain$load_electrodes(tbl = tbl)
+      }
+
+
+      assertthat::assert_that(ne == ncol(values), msg = 'values must have column count == length of electrodes')
+      assertthat::assert_that(nk == nrow(values), msg = 'values must have row count == length of key_frame')
+      assertthat::assert_that(length(marker) %in% c(ne, 0, nrow(tbl)), msg = 'marker must be 0, # of electrodes, or # of total electrodes')
+      assertthat::assert_that(length(size) %in% c(ne, 0, nrow(tbl)), msg = 'size must be 0, # of electrodes, or # of total electrodes')
+
+
+
+      # set value
+      lapply(seq_len(nrow(tbl)), function(ii){
+        if(ii %in% electrodes){
+          brain$set_electrode_value(which = ii, value = values[, ii], keyframe = key_frame)
+        }
+        # set size
+        if(length(size) >= ii){
+          brain$set_electrode_size(which = ii, radius = size[ii])
         }
 
-        if(row$active > 0){
-          # has value
-          sapply(values[,row$active], function(v){
-            get_color(col = v, alpha = T) / 255
-          }) ->
-            col
-          colnames(col) = NULL
-          col = t(col)
-
-          g$animation_event(
-            name = 'ani',
-            event_data = col,
-            key_frames = key_frame,
-            loop = loop,
-            pixel_size = 4
-          )
+        # set mesh_info
+        if(length(marker) >= ii){
+          brain$set_electrode_label(which = ii, label = sprintf('Electrode %d - %s<br />%s', ii, tbl$Label[tbl$Electrode == ii], marker[ii]))
         }
 
-        g
+      })
 
-      }) ->
-        geoms
+      brain$view(...)
 
-      threejsr:::threejs_scene.default(
-        elements = geoms,
-        fps = fps,
-        control_gui = control_gui,
-        ...
-      )
     }
 
   }, envir = tools)

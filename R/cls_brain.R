@@ -17,6 +17,10 @@ RaveBrain <- R6::R6Class(
     three_pial = list(),  # 1 for left, 2 for right
     three_electrodes = list(),
 
+    # Animation/color objects
+    ani_pial = list(),
+    ani_electrodes = list(),
+
     # Sapces
     # 1: MRI space - Experiment space
     # 2: FreeSurfer space
@@ -29,23 +33,31 @@ RaveBrain <- R6::R6Class(
   public = list(
     initialize = function(subject){
       if(!missing(subject)){
-        if(!is(subject, 'Subject')){
-          subject = stringr::str_split_fixed(subject, '/', 2)
-          subject = Subject$new(project_name = subject[1], subject_code = subject[2])
-        }
-        # try to import electrodes from subject
-        private$subject = subject
-
-        tbl = subject$electrodes
-        for(ii in seq_len(nrow(tbl))){
-          row = tbl[ii,]
-          self$set_electrode(which = row$Electrode, position = c(row$Coord_x, row$Coord_y, row$Coord_z), label = row$Label, show_warning = FALSE)
-        }
-
-
-
-
+        self$load_subject(subject)
       }
+    },
+    load_electrodes = function(tbl){
+      lapply(seq_len(nrow(tbl)), function(ii){
+        row = tbl[ii,]
+        if(is_invalid(row$Label, .invalids = c('null','na','blank'))){
+          row$Label = sprintf('Electrode %d', row$Electrode)
+        }else{
+          row$Label = sprintf('Electrode %d - %s', row$Electrode, row$Label)
+        }
+        self$set_electrode(which = row$Electrode, position = c(row$Coord_x, row$Coord_y, row$Coord_z), label = row$Label, show_warning = FALSE)
+      })
+      invisible()
+    },
+    load_subject = function(subject){
+      if(!is(subject, 'Subject')){
+        subject = stringr::str_split_fixed(subject, '/', 2)
+        subject = Subject$new(project_name = subject[1], subject_code = subject[2])
+      }
+      # try to import electrodes from subject
+      private$subject = subject
+
+      tbl = subject$electrodes
+      self$load_electrodes(tbl)
     },
     set_electrode = function(which, position, label = sprintf('Electrode %d', which), show_warning = T){
       if(show_warning && (length(label) != 1 || is_invalid(label, .invalids = c('null', 'na')))){
@@ -255,7 +267,7 @@ RaveBrain <- R6::R6Class(
 
       invisible(dropNulls(surf_info))
     },
-    compute_nearest_face = function(electrode, which_pials = c(1,2), max_dist = 10){
+    compute_nearest_face = function(electrode, which_pials = c(1,2), max_dist = 30){
       # get electrode info
       e = private$electrodes[[electrode]]
 
@@ -275,7 +287,7 @@ RaveBrain <- R6::R6Class(
 
         wm = which.min(d)
         md = d[[wm]]
-        if(md <= max_dist){
+        if(md <= max_dist^2){
           d = f == wm # should be sum = 6
           dim(d) = c(3, length(d) / 3)
           face_ind = which(rutabaga::collapse(d, 2) > 0)
@@ -298,10 +310,77 @@ RaveBrain <- R6::R6Class(
         }
       }
     },
-    view = function(show_mesh = T, width = '100vw', height = '100vh', control_gui = F, ...){
+    hook_electrodes = function(which){
+      if(missing(which)){
+        which = seq_along(private$three_electrodes)
+      }
+      for(ii in which){
+        try({
+          # Set electrode hooks
+          if(length(private$electrodes))
+            info = private$electrodes[[ii]]
+          nearest_face = get_val(info, 'nearest_face', NULL)
+          if(length(nearest_face)){
+            # Find hooker
+            nearest_face$target_name = c("Left Pial", "Right Pial")[nearest_face$which_pial]
+            private$three_electrodes[[ii]]$set_hook(nearest_face)
+          }else{
+            # Remove hooks
+            private$three_electrodes[[ii]]$set_hook()
+          }
+        }, silent = T)
+      }
+    },
+
+    render_electrodes = function(which, pal = colorRampPalette(c('navy', 'white', 'red'))(101), center = 0, name = 'Animation'){
+      if(missing(which)){
+        which = seq_along(private$three_electrodes)
+      }
+      # Get all the values for electrodes
+      vals = unlist(lapply(private$ani_electrodes, '[', 'value'))
+      if(!length(vals)){
+        # No value assigned, stop
+        return()
+      }
+      val_range = range(vals)
+      key_frames = unlist(lapply(private$ani_electrodes, '[', 'keyframe'))
+      key_frames = sort(unique(key_frames))
+
+      # center the value
+      n_pal = length(pal)
+      scale = floor(n_pal / 2) / max(abs(val_range - center))
+
+      f = function(x){
+        x = round((x - center) * scale + floor(n_pal / 2)+1)
+        x[x<1] = 1; x[x>n_pal] = n_pal
+        col2rgb(pal[x]) / 255
+      }
 
 
-      if(show_mesh){
+      for(ii in which){
+        tryCatch({
+          # Set electrode hooks
+          info = private$ani_electrodes[[ii]] # keyframe and value
+          if(!length(info)){
+            stop
+          }
+          private$three_electrodes[[ii]]$animation_event(
+            name = name,
+            event_data = t(f(info$value)),
+            key_frames = info$keyframe,
+            loop = F
+          )
+        }, error = function(err){
+          private$three_electrodes[[ii]]$remove_event(event_type = 'animation', name)
+        })
+      }
+    },
+    view = function(show_mesh = T, pal = colorRampPalette(c('navy', 'white', 'red'))(101), center = 0,
+                    width = '100vw', height = '100vh', control_gui = F, ...){
+
+
+      # Add gui controls to pials
+      if(show_mesh && length(private$three_pial) == 2){
         for(ii in 1:2){
           pial = private$three_pial[[ii]]
           pial$set_transform(mat = diag(c(-1,-1,1,1)), append = F)
@@ -310,7 +389,8 @@ RaveBrain <- R6::R6Class(
             type = pial$name,
             name = 'visibility',
             label = 'Show/Hide',
-            initial = TRUE
+            initial = TRUE,
+            index = 1
           )
           pial$add_custom_control(
             type = pial$name,
@@ -319,22 +399,19 @@ RaveBrain <- R6::R6Class(
               label = 'Wireframe',
               initial = FALSE,
               callback = 'function(value, mesh){mesh.material.wireframe=value;}'
-            )
+            ),
+            index = 2
           )
         }
       }
-      for(ii in seq_along(private$three_electrodes)){
-        info = private$electrodes[[ii]]
-        nearest_face = get_val(info, 'nearest_face', NULL)
-        if(length(nearest_face)){
-          # Find hooker
-          nearest_face$target_name = c("Left Pial", "Right Pial")[nearest_face$which_pial]
-          private$three_electrodes[[ii]]$set_hook(nearest_face)
-        }else{
-          # Remove hooks
-          private$three_electrodes[[ii]]$set_hook()
-        }
-      }
+
+      # Link electrodes to closest pial vertex
+      self$hook_electrodes()
+
+      # set color/animations to electrodes
+      self$render_electrodes(pal = pal, center = center)
+
+      # Render via threejsr
       elements = c(private$three_pial, private$three_electrodes)
       threejsr:::threejs_scene.default(
         elements = elements,
@@ -344,6 +421,30 @@ RaveBrain <- R6::R6Class(
         mouse_control_target = c(0,0,30),
         ...
       )
+    },
+    set_electrode_value = function(which, value, keyframe){
+      # keyframe always starts from 0, hence if length of value is 1, keyframe will be set to 0
+      if(length(value) == 1){
+        keyframe = c(0, 1)
+        value = rep(value, 2)
+      }
+      private$ani_electrodes[[which]] = list(
+        keyframe = keyframe,
+        value = value
+      )
+    },
+    set_electrode_label = function(which, label, name){
+      for(ii in which){
+        private$three_electrodes[[ii]]$mesh_info = label
+        if(is.na(private$three_electrodes[[ii]]$name)){
+          private$three_electrodes[[ii]]$.__enclos_env__$private$mesh_name = label
+        }
+      }
+    },
+    set_electrode_size = function(which, radius = 2){
+      for(ii in which){
+        private$three_electrodes[[ii]]$.__enclos_env__$private$radius = radius
+      }
     }
   )
 )
@@ -353,9 +454,9 @@ RaveBrain <- R6::R6Class(
 # require(rave)
 # require(stringr)
 # ii=1
-# self = RaveBrain$new('Complete/YAB'); private = self$.__enclos_env__$private
-# self$import_spec( include_electrodes = T )
-#
-# self$view(control_gui = T)
-#
-# # pial = private$three_pial[[1]]
+# self = RaveBrain$new('congruency/YAB'); private = self$.__enclos_env__$private
+# self$import_spec( include_electrodes = F )
+# a = lapply(1:84, function(i) { self$set_electrode_value(i, seq_len(i), seq_len(i)) })
+# self$view(control_gui = T, center = 40)
+
+# pial = private$three_pial[[1]]

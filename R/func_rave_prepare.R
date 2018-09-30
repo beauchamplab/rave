@@ -55,6 +55,14 @@ rave_prepare <- function(
     func = NULL
   )
 
+  # Load brain
+  brain = RaveBrain$new()
+  try({
+    brain$load_subject(subject = repo$subject)
+    brain$import_spec()
+  }, silent = T)
+
+
 
   # Register to data_env
   subject = repo$subject
@@ -76,6 +84,7 @@ rave_prepare <- function(
   data_env$.private = new.env(parent = baseenv())
   data_env$.private$repo = repo
   data_env$.private$meta = meta
+  data_env$.private$brain = brain
   data_env$.private$preproc_tools = rave:::rave_preprocess_tools()
   data_env$data_check = data_env$.private$preproc_tools$check_load_subject(subject_code = subject$subject_code, project_name = subject$project_name)
   data_env$subject = subject

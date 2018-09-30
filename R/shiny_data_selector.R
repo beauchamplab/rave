@@ -181,20 +181,58 @@ shiny_data_selector <- function(moduleId){
       }
     })
 
+
+
+
     output$plot3dui <- renderUI({
       if(!local_data$error){
-        threejsr::threejsOutput(ns('plot3d'), height = '500px')
+        tagList(
+          threejsr::threejsOutput(ns('plot3d'), height = '500px'),
+          div( style = 'width:100%;',
+            div(style = 'float:right;',
+                actionLink(ns('load_mesh'), 'Load brain surface'))
+          )
+        )
+
       }
     })
+
+
+
+    env = new.env()
+    observeEvent(input$load_mesh, {
+      env$load_mesh = T
+      local_data$refresh_mesh = Sys.time()
+    })
     output$plot3d <- threejsr::renderThreejs({
+      local_data$refresh_mesh
       if(!local_data$error){
         project_name = input$project_name
         subject_code = input$subject_code
-        loaded_electrodes = rave:::parse_selections(input$electrode_text)
-        tbl = load_meta('electrodes', project_name = project_name, subject_code = subject_code)
-        try({
-          rave:::render_3d_electrodes(tbl = tbl, loaded_electrodes = loaded_electrodes)
-        }, silent = T)
+        es = rave:::parse_selections(input$electrode_text)
+
+        env$load_mesh %?<-% FALSE
+        if(env$load_mesh){
+          env$load_mesh = FALSE
+          brain = RaveBrain$new(subject = sprintf('%s/%s', project_name, subject_code))
+          tryCatch({
+            brain$import_spec()
+          }, error = function(e){
+            showNotification(p('Cannot load mesh from spec file. Make sure ', rave_options('suma_spec_file'), ' exists and all files are ASCII encoded.'),
+                             type = 'error', id = ns('noti'))
+          })
+
+        }else{
+          brain = RaveBrain$new()
+          tbl = load_meta('electrodes', project_name = project_name, subject_code = subject_code)
+          brain$load_electrodes(tbl = tbl)
+        }
+
+
+        # Render electrodes if selected
+        lapply(es, brain$set_electrode_value, value = -1, keyframe = 0)
+
+        brain$view(control_gui = F)
       }
     })
 

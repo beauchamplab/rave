@@ -159,10 +159,10 @@ viewer = function(){
     col_sym %?<-% T
 
     marker = apply(subject$electrodes, 1, function(x){
-      as.character(div(
-        h5('Electrode - ', x['Electrode'], ' ', tags$small(sprintf(
+      as.character(p(
+        tags$small(sprintf(
           '%s [%s, %s]', x['Label'], x['Group'], x['Type']
-        )))
+        ))
       ))
     })
 
@@ -171,12 +171,12 @@ viewer = function(){
               return(
                 module_tools$plot_3d_electrodes(
                   tbl = subject$electrodes,
-                  marker = marker,
-                  fps = 1,
-                  loop = F,
-                  control_gui = F,
-                  background_colors = c(bgcolor, '#000000'),
-                  control = mouse_control
+                  # marker = marker,
+                  # fps = 1,
+                  # loop = F,
+                  control_gui = T
+                  # background_colors = c(bgcolor, '#000000'),
+                  # control = mouse_control
                 )
               )
 

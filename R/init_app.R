@@ -362,7 +362,12 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
 
     ##################################################################
     # load modules
-    shinirized_modules = lapply(unlist(modules), rave:::shinirize, test.mode = test.mode)
+    .progress = progress('Loading modules', max = length(unlist(modules)))
+    shinirized_modules = lapply(unlist(modules), function(m){
+      .progress$inc(m$label_name)
+      rave:::shinirize(m, test.mode = test.mode)
+    })
+    .progress$close()
 
     observe({
       if(global_reactives$has_data){
