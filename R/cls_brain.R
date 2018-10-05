@@ -28,7 +28,7 @@ RaveBrain <- R6::R6Class(
     sp_electrodes = 1,
 
     # Transforms: All mat are: from space n to MRI space
-    tf_2 = diag(rep(1,4))
+    tf_2 = diag(c(-1,-1,1,1))
   ),
   public = list(
     initialize = function(subject){
@@ -110,6 +110,14 @@ RaveBrain <- R6::R6Class(
         hover_enabled = F,
         is_clipper = F
       )
+    },
+    reset_transform = function(which){
+      if(!which %in% c(1, 2)){
+        stop('which must be:\n\t1: Ignored\n\t2: Freesurfer to MRI Space')
+      }
+      if(which == 2){
+        private$tf_2 = daig(c(-1,-1,1,1))
+      }
     },
     set_transform = function(which, mat){
       if(!which %in% c(1, 2)){
@@ -273,6 +281,75 @@ RaveBrain <- R6::R6Class(
 
       invisible(dropNulls(surf_info))
     },
+    to_freesurf_space = function(pos){
+
+      if(!is.matrix(pos)){
+        pos = matrix(pos, ncol = 3, byrow = T)
+      }
+
+      if(length(private$tf_2)){
+        pos = ((private$tf_2) %*% t(cbind(pos, -1))) * c(-1,-1,1, 0)
+        pos = t(pos)[,1:3]
+      }
+
+      pos
+    },
+    get_electrode_position = function(freesurf_space = T){
+      t(
+        sapply(private$electrodes, function(e){
+          e$position
+        })
+      ) ->
+        re
+      if(freesurf_space){
+        re = self$to_freesurf_space(re)
+      }
+      re
+    },
+    get_face_position = function(which_pial, face_id){
+      # Get pial
+
+      vertex_idx = private$three_pial[[which_pial]]$get_face(face_id)
+      pos = rowMeans(sapply(vertex_idx, function(i){
+        private$three_pial[[which_pial]]$get_vertex_position(i, start_from = 0)
+      }))
+      pos
+    },
+    get_nearest_face_id = function(compute = T){
+      if(compute){
+        lapply(seq_along(private$electrodes), function(e){
+          self$compute_nearest_face(e, max_dist = Inf)
+        })
+      }
+      t(
+        sapply(private$electrodes, function(e){
+          fidx = e$nearest_face$which_faces
+
+          if(length(fidx) > 1){
+
+            pial = private$three_pial[[e$nearest_face$which_pial]]
+
+            e_pos = self$to_freesurf_space(e$position)
+
+            sapply(fidx, function(f){
+              vid = pial$get_face(f)
+              mean(sapply(vid, function(v){
+                pos = pial$get_vertex_position(v, start_from = 0)
+                sum((e_pos - pos)^2)
+              }))
+            }) ->
+              d
+            fidx = fidx[which.min(d)]
+          }else if(length(fidx) == 0){
+            fidx = NA
+          }
+          c(
+            e$nearest_face$which_pial,
+            fidx
+          )
+        })
+      )
+    },
     compute_nearest_face = function(electrode, which_pials = c(1,2), max_dist = 30){
       # get electrode info
       e = private$electrodes[[electrode]]
@@ -280,7 +357,12 @@ RaveBrain <- R6::R6Class(
       nearest_face = NULL
 
       # apply inverse transformation:
-      sp2_position = (private$tf_2[1:3, ] %*% c(e$position, -1)) * c(-1,-1,1)
+      if(length(private$tf_2)){
+        sp2_position = (private$tf_2[1:3, ] %*% c(e$position, -1)) * c(-1,-1,1)
+      }else{
+        sp2_position = e$position
+      }
+
       for(ii in which_pials){
         pial = private$three_pial[[ii]]
         v = pial$.__enclos_env__$private$vertices
@@ -292,9 +374,9 @@ RaveBrain <- R6::R6Class(
         d = colSums(v^2)
 
         wm = which.min(d)
-        md = d[[wm]]
-        if(md <= max_dist^2){
-          d = f == wm # should be sum = 6
+        md = sqrt(d[[wm]])
+        if(md <= max_dist){
+          d = f == wm - 1 # should be sum = 6
           dim(d) = c(3, length(d) / 3)
           face_ind = which(rutabaga::collapse(d, 2) > 0)
           # register
@@ -389,8 +471,10 @@ RaveBrain <- R6::R6Class(
       if(show_mesh && length(private$three_pial) == 2){
         for(ii in 1:2){
           pial = private$three_pial[[ii]]
-          pial$set_transform(mat = diag(c(-1,-1,1,1)), append = F)
-          pial$set_transform(mat = private$tf_2, append = T)
+          if(length(private$tf_2)){
+            pial$set_transform(mat = diag(c(-1,-1,1,1)), append = F)
+            pial$set_transform(mat = private$tf_2, append = T)
+          }
           pial$add_visibility_control(
             type = pial$name,
             name = 'visibility',

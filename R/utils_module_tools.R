@@ -338,7 +338,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
 
       lapply(seq_len(nrow(tbl)), function(ii){
         if(ii %in% electrodes){
-          brain$set_electrode_value(which = ii, value = values[, ii], keyframe = key_frame)
+          brain$set_electrode_value(which = ii, value = values[, electrodes == ii], keyframe = key_frame)
         }
 
         # set size
