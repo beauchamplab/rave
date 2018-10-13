@@ -1,6 +1,6 @@
 #' @importFrom htmltools tags
 #' @export
-actionButtonStyled <- function(inputId, label, icon = NULL, width = NULL, type = 'default', ...){
+actionButtonStyled <- function(inputId, label, icon = NULL, width = NULL, type = 'default', btn_type = 'button', class = '', ...){
   value <- shiny::restoreInput(id = inputId, default = NULL)
 
   args = list(...)
@@ -11,8 +11,8 @@ actionButtonStyled <- function(inputId, label, icon = NULL, width = NULL, type =
 
   args[['style']] = style
   args[['id']] = inputId
-  args[['type']] = 'button'
-  args[['class']] = sprintf("btn btn-%s action-button", type)
+  args[['type']] = btn_type
+  args[['class']] = sprintf("btn btn-%s action-button %s", type, class)
   args[['data-val']] = value
   args[['id']] = inputId
 

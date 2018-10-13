@@ -436,6 +436,10 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         export_func = export_func[is_export_func]
 
         if(length(export_func)){
+
+          # find all analysis names
+          analysis_names = group_analysis_names(module_id = MODULE_ID)
+
           showModal(
             modalDialog(
               title = '',
@@ -450,6 +454,18 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
                   selectInput(
                     execenv$ns('.export_func'), label = 'Which function to apply?',
                     choices = export_func
+                  ),
+                  selectInput(
+                    execenv$ns('.export_name'), 'Analysis Name',
+                    choices = c('[New..]', analysis_names)
+                  ),
+                  conditionalPanel(
+                    condition = 'input[".export_name"] == "[New..]"',
+                    textInput(
+                      execenv$ns('.export_name_txt'), 'Enter a New Analysis Name',
+                      placeholder = 'Alphabets or digits, or `_` only'
+                    ),
+                    ns = execenv$ns
                   )
                 )
               )
@@ -463,19 +479,32 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
       observeEvent(input$.export_ready, {
         fun_name = input$.export_func
+        analysis_name = input$.export_name
+        if(analysis_name == '[New..]'){
+          analysis_name = input$.export_name_txt
+          analysis_name = stringr::str_remove_all(analysis_name, '[^a-zA-Z0-9_]')
+        }
+        analysis_name = stringr::str_to_upper(analysis_name)
 
         tryCatch({
-          # write.niml(
-          #   res,
-          #   electrode_numbers = data_env$electrodes,
-          #   value_labels = NULL,
-          #   prefix = sprintf('%s', str_replace_all(MODULE_LABEL, '[^A-Za-z0-9_]', '_')),
-          #   add_electrodes_as_column = TRUE,
-          #   value_file = '__vals.dat',
-          #   index_file = '__ind.dat',
-          #   work_dir = data_env$subject$dirs$suma_out_dir) ->
-          #   cmd
-          res = execenv$static_env[[fun_name]]()
+          f = execenv$static_env[[fun_name]]
+          fm = formals(f)
+          if(is.null(fm[['...']])){
+            fm %?<-% list()
+            fm[['...']] = rlang::sym('')
+            formals(f) = fm
+          }
+          con = subject_tmpfile(pattern = sprintf(
+            '[%s][%s][%s]_',
+            abbreviate(stringr::str_replace_all(MODULE_ID, '_', ' ')),
+            stringr::str_remove(fun_name, '^export_'),
+            strftime(Sys.time(), '%Y%m%d-%H%M%S')
+          ))
+
+          res = f(con, analysis_name)
+          # Save to group analysis
+          logger('Saving to group analysis tables...')
+          group_analysis_save(module_id = MODULE_ID, analysis_name = analysis_name, file = con, meta = res)
           assign('..rave_exported', res, envir = globalenv())
           if(!(length(res) == 1 && is.character(res))){
             res = 'Exported!'

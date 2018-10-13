@@ -87,6 +87,14 @@ RaveBrain <- R6::R6Class(
         is_clipper = FALSE,
         clippers = NULL
       )
+
+      # Add click callback
+      private$three_electrodes[[which]]$add_custom_control(
+        type = 'hidden',
+        label = 'hidden',
+        index = 1,
+        l = list(hidden = TRUE, name = 'mouse_callback', mouse_event = TRUE, callback = "function(value, mesh){var pos = mesh.position; var plane_x = canvas.scene.getObjectByName('plane_x'), plane_y = canvas.scene.getObjectByName('plane_y'), plane_z = canvas.scene.getObjectByName('plane_z'), label, any_update = false;if(plane_x.isMesh || false){label = plane_x.userData.__params.position_x.label;plane_x.userData.__params.position_x.__values[label] = pos.x;plane_x.userData.__funs['position_x'](pos.x); any_update = true;}if(plane_y.isMesh || false){label = plane_y.userData.__params.position_y.label;plane_y.userData.__params.position_y.__values[label] = pos.y;plane_y.userData.__funs['position_y'](pos.y);any_update = true;}if(plane_z.isMesh || false){label = plane_z.userData.__params.position_z.label;plane_z.userData.__params.position_z.__values[label] = pos.z;plane_z.userData.__funs['position_z'](pos.z);any_update = true;}  if(any_update){(gui.__folders['Position'].__controllers.map(k => k.updateDisplay()));}}")
+      )
       invisible()
     },
 

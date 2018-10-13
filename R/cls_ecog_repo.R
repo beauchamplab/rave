@@ -1,6 +1,6 @@
 #' @export
-baseline = function(el, from, to, method = 'mean', unit = '%',
-                    data_only = F, hybrid = T, swap_file = tempfile(), mem_optimize = T){
+baseline <- function(el, from, to, method = 'mean', unit = '%',
+                    data_only = F, hybrid = T, swap_file = tempfile(), mem_optimize = T, preop = NULL, op){
   if(missing(el)){
     logger('baseline(el...) is changed now. Please update.', level = 'WARNING')
     el = module_tools$get_power()
@@ -8,30 +8,38 @@ baseline = function(el, from, to, method = 'mean', unit = '%',
   assertthat::assert_that(is(el, 'Tensor'), msg = 'el must be an Tensor object.')
   assertthat::assert_that('Time' %in% el$varnames, msg = 'Need one dimname to be "Time".')
 
+  assertthat::assert_that(unit %in% c('dB', '%', 'C'), msg = 'unit must be %-percent signal change or dB-dB difference, or C to customize')
+
   time_ind = which(el$varnames == 'Time')
   rest_dim = seq_along(el$dim)[-time_ind]
 
-  bs = el$subset(Time = Time %within% c(from, to))
+  if(unit == 'dB'){
+    bs = el$subset(Time = Time %within% c(from, to))
 
-  op = function(e1, e2){ e1 / e2 * 100 - 100 }
+    # log 10 of data, collapse by mean
+    bs$set_data(log10(bs$get_data()))
 
-  switch (unit,
-    'dB' = {
-      stop('Not implemented yet.')
-      d = bs$get_data()
-      if(any(!is.finite(d))){
-        stop('transformed el has NaNs')
-      }
-    },
-    '%' = {
-      op = function(e1, e2){ e1 / e2 * 100 - 100 }
-    },
-    {
-      stop('unit must be %-percent signal change or dB-dB difference.')
+    # Use better format of collapse function to avoid crashing
+    bs = bs$collapse(keep = rest_dim, method = method)
+
+    # for each time points, log10 and substract, Since dB is 10*log10(.)
+    op = function(e1, e2){ 10 * (log10(e1) - e2) }
+
+    bs = el$operate(by = bs, match_dim = rest_dim, mem_optimize = mem_optimize, fun = op)
+  }else if(unit == '%'){
+    bs = el$subset(Time = Time %within% c(from, to))
+    op = function(e1, e2){ e1 / e2 * 100 - 100 }
+    bs = bs$collapse(keep = rest_dim, method = method)
+    bs = el$operate(by = bs, match_dim = rest_dim, mem_optimize = mem_optimize, fun = op)
+  }else{
+    # customizing
+    bs = el$subset(Time = Time %within% c(from, to))
+    if(is.function(preop)){
+      bs$set_data(preop(bs$get_data()))
     }
-  )
-  bs = bs$collapse(keep = rest_dim, method = method)
-  bs = el$operate(by = bs, match_dim = rest_dim, mem_optimize = mem_optimize, fun = op)
+    bs = bs$collapse(keep = rest_dim, method = method)
+    bs = el$operate(by = bs, match_dim = rest_dim, mem_optimize = mem_optimize, fun = op)
+  }
 
   if(data_only){
     return(bs)

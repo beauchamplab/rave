@@ -20,11 +20,15 @@ get_subjects <- function(project_name){
 
 
 #' @export
-get_dir <- function(subject_code, project_name, block_num, mkdirs = NULL, subject_id){
+get_dir <- function(subject_code, project_name, block_num, mkdirs = NULL, subject_id, relative = F){
   re = list()
 
   re$data_dir = rave_options('data_dir')
   re$raw_data_dir = rave_options('raw_data_dir')
+
+  if(relative){
+    re$data_dir = '.'
+  }
 
   if(!(missing(subject_code) || missing(project_name))){
     re$subject_name = paste0(project_name, '/', subject_code)
