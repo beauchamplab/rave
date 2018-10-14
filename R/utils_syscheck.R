@@ -5,7 +5,7 @@ check_updates <- function(file){
   if(!file.exists(file)){
     file = system.file('packages.txt', package = 'rave')
   }
-  s = readLines(file)
+  s = unique(c(readLines(file), readLines(system.file('packages.txt', package = 'rave'))))
   s = stringr::str_trim(s)
   s = s[!stringr::str_detect(s, '^#') & s!='']
   lapply(s, function(ss){
