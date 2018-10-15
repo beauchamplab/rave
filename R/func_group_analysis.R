@@ -65,11 +65,6 @@ group_analysis_table <- function(project_name, module_id, analysis_name, check_v
   lookup_file = file.path(lookup_dir, sprintf('%s-%s.csv', module_id, analysis_name))
   if(file.exists(lookup_file)){
     tbl = read.csv(lookup_file, stringsAsFactors = F)
-    use_safe = F
-    if(any(!tbl$valid)){
-      use_safe = TRUE
-    }
-    tbl = tbl[tbl$valid, ]
     if(check_valid){
       # Check if all path is valid
       # Only check valid ones
@@ -78,6 +73,7 @@ group_analysis_table <- function(project_name, module_id, analysis_name, check_v
       }) ->
         paths
       is_valid = vapply(paths, function(p){!is.null(p)}, FUN.VALUE = TRUE)
+      use_safe = F
       if(any(!is_valid)){
         use_safe = TRUE
       }
@@ -90,7 +86,10 @@ group_analysis_table <- function(project_name, module_id, analysis_name, check_v
       }else{
         write.csv(tbl, lookup_file, row.names = F)
       }
+    }else{
+      tbl = tbl[tbl$valid, ]
     }
+
   }else{
     tbl = data.frame()
   }
