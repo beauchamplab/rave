@@ -104,6 +104,9 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
     }
     else if(meta_type == 'epoch'){
       epoch_file = file.path(meta_dir, sprintf('epoch_%s.csv', meta_name))
+      if(!length(epoch_file) || !file.exists(epoch_file)){
+        return(NULL)
+      }
       default_cols = c('Block', 'Time', 'Trial', 'Condition', 'Duration', 'ExcludedElectrodes')
 
       epochs = read.csv(epoch_file, header = T, stringsAsFactors = F,
@@ -140,11 +143,11 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
     }
     else if(meta_type == 'references'){
       file = file.path(meta_dir, sprintf('reference_%s.csv', meta_name))
-      if(!file.exists(file)){
+      if(!length(file) || !file.exists(file)){
         return(NULL)
       }
       ref_tbl = read.csv(file, header = T, stringsAsFactors = F)
-      if(names(ref_tbl)[1] != 'Electrode'){
+      if(length(names(ref_tbl)) && names(ref_tbl)[1] != 'Electrode'){
         ref_tbl = ref_tbl[,-1]
       }
       return(ref_tbl)

@@ -9,13 +9,15 @@ NULL
 #' @export
 get_projects <- function(){
   data_dir = rave_options('data_dir')
-  list.dirs(data_dir, full.names = F, recursive = F)
+  pj = list.dirs(data_dir, full.names = F, recursive = F)
+  pj[str_detect(pj, '^[a-zA-Z0-9]') & pj != 'rave']
 }
 
 #' @export
 get_subjects <- function(project_name){
   data_dir = rave_options('data_dir')
-  list.dirs(file.path(data_dir, project_name), full.names = F, recursive = F)
+  sub = list.dirs(file.path(data_dir, project_name), full.names = F, recursive = F)
+  sub[str_detect(sub, '^[a-zA-Z0-9]') & sub!= 'rave']
 }
 
 

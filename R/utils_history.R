@@ -77,4 +77,22 @@ RAVEHistory <- R6::R6Class(
 
 
 
+#' @export
+last_entry <- function(key, default, save = F, group = 'customized'){
+  assertthat::assert_that(is.character(key), msg = 'Key must be a string')
+  dict = rave_hist$get_or_save(key = group, val = list(), save = F)
+  val = dict[[key]]
+  val %?<-% default
 
+  str_v = paste(val, collapse = ' ')
+  str_v = str_sub(str_v, end = min(str_length(str_v), 20))
+  logger(sprintf('[ %s ] Last entry of %s: %s', group, paste(key, collapse = ''), str_v))
+  if(save){
+    dict[[key]] = default
+    arg = list(dict); names(arg) = group
+    do.call(rave_hist$save, arg)
+    return(invisible(val))
+  }else{
+    return(val)
+  }
+}

@@ -59,21 +59,6 @@ check_subjects <- function(
   re
 }
 
-#' @export
-last_entry <- function(key, default, save = F, group = 'customized'){
-  assertthat::assert_that(is.character(key), msg = 'Key must be a string')
-  dict = rave_hist$get_or_save(key = group, val = list(), save = F)
-  val = dict[[key]]
-  val %?<-% default
-  if(save){
-    dict[[key]] = default
-    arg = list(dict); names(arg) = group
-    do.call(rave_hist$save, arg)
-    return(invisible(val))
-  }else{
-    return(val)
-  }
-}
 
 # data selector
 shiny_data_selector <- function(moduleId){
@@ -92,7 +77,9 @@ shiny_data_selector <- function(moduleId){
     group = 'main_app'
     local_data = reactiveValues(
       error = TRUE,
-      error_info = list(),
+      error_info = list(
+        'Wait... ' = 'Initializing'
+      ),
       last_subject = FALSE
     )
 
@@ -122,12 +109,11 @@ shiny_data_selector <- function(moduleId){
       is_last = local_data$last_subject
       if(is_last){
         e = last_entry('electrodes', NULL, group = group)
+      }else{
+        e = local_data$electrodes
       }
-      e %?<-% local_data$electrodes
 
-      if(length(e) > 1){
-        e = rave:::deparse_selections(e)
-      }
+      e = rave:::deparse_selections(e)
 
       rs = local_data$references
 
@@ -246,9 +232,9 @@ shiny_data_selector <- function(moduleId){
         }
         sc = last_entry('subject_code', '', group = group)
         if(subjects == '' && !is.null(sc)){
-          subject = sc
-        }
-        if(!sc %in% subjects){
+          subjects = sc
+          local_data$last_subject = TRUE
+        }else if(!sc %in% subjects){
           sc = subjects[1]
           local_data$last_subject = FALSE
         }else{
@@ -352,7 +338,7 @@ shiny_data_selector <- function(moduleId){
     })
 
     output$modal_summary <- renderUI({
-      if(!local_data$error){
+      if(length(local_data$error) && !local_data$error){
         data_types = input$data_types
         electrode_text = input$electrode_text
         electrodes = rave:::parse_selections(electrode_text)
@@ -365,13 +351,18 @@ shiny_data_selector <- function(moduleId){
         wave_info = local_data$wavelet_info
         electrodes = electrodes[electrodes %in% wave_info$channels]
         ref_table = load_meta(meta_type = 'references', project_name = project_name, subject_code = subject_code, meta_name = reference)
+
         if(is.data.frame(ref_table)){
           electrodes = electrodes[electrodes %in% ref_table$Electrode[ref_table$Reference != '']]
+        }
+        if(length(electrodes)){
+          electrode_text = deparse_selections(electrodes)
+        }else{
+          electrode_text = NA
         }
 
         wave_srate = wave_info$target_srate
         volt_srate = local_data$volt_srate
-        electrode_text = deparse_selections(electrodes)
         freqs = wave_info$frequencies
         freqs = freqs[freqs %within% frequency_range]
         if(!length(freqs)){
@@ -514,6 +505,7 @@ shiny_data_selector <- function(moduleId){
       last_entry('epoch_range', epoch_range, save = T, group = group)
       last_entry('data_types', data_types, save = T, group = group)
 
+      # refresh UIs
       global_reactives$force_refresh_all = Sys.time()
       global_reactives$has_data = Sys.time()
       removeModal()
