@@ -494,22 +494,18 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
             fm[['...']] = rlang::sym('')
             formals(f) = fm
           }
-          con = subject_tmpfile(pattern = sprintf(
-            '[%s][%s][%s]_',
-            abbreviate(stringr::str_replace_all(MODULE_ID, '_', ' ')),
-            stringr::str_remove(fun_name, '^export_'),
-            strftime(Sys.time(), '%Y%m%d-%H%M%S')
+          con = subject_tmpfile(
+            module_id = MODULE_ID,
+            fun_name = stringr::str_remove(fun_name, '^export_'),
+            pattern = sprintf(
+            '[%s]_', strftime(Sys.time(), '%Y%m%d-%H%M%S')
           ))
 
-          res = f(con, analysis_name)
+          res = f(con, analysis_name, dirname(con))
           # Save to group analysis
           logger('Saving to group analysis tables...')
           group_analysis_save(module_id = MODULE_ID, analysis_name = analysis_name, file = con, meta = res)
-          assign('..rave_exported', res, envir = globalenv())
-          if(!(length(res) == 1 && is.character(res))){
-            res = 'Exported!'
-          }
-          showNotification(p(res), type = 'message')
+          showNotification(p('Module ID: ', MODULE_ID, ' exported!'), type = 'message')
         }, error = function(e){
           showNotification(p('Export failed: (message)', br(), e$message, br(), 'Please check console for error messages.'), type = 'error')
         })

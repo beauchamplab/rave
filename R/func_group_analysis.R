@@ -10,8 +10,7 @@ group_analysis_names <- function(module_id, project_name){
   }
 
   # abuse function get_dir
-  group_dir = get_dir('_group_analysis', project_name = project_name)$subject_dir
-  lookup_dir = file.path(group_dir, 'lookup')
+  lookup_dir = get_dir('_export_lookup', project_name = project_name)$subject_dir
 
   if(!dir.exists(lookup_dir)){
     dir.create(lookup_dir, recursive = T, showWarnings = F)
@@ -33,7 +32,7 @@ group_analysis_names <- function(module_id, project_name){
 
 
 #' @export
-subject_tmpfile <- function(project_name, subject_code, pattern = 'file_'){
+subject_tmpfile <- function(module_id, fun_name = '', project_name, subject_code, pattern = 'file_'){
   if(missing(project_name)){
     data_env = getDefaultDataRepository()
     on.exit(rm(data_env))
@@ -44,6 +43,7 @@ subject_tmpfile <- function(project_name, subject_code, pattern = 'file_'){
   assertthat::assert_that(!is.blank(project_name) && !is.blank(subject_code), msg = 'subject_code or project_name is blank while creating subject tmpfile.')
 
   tmpdir = get_dir(subject_code = subject_code, project_name = project_name)$module_data_dir
+  tmpdir = file.path(tmpdir, module_id, fun_name)
   if(!dir.exists(tmpdir)){
     dir.create(tmpdir, recursive = T, showWarnings = F)
   }
@@ -52,7 +52,7 @@ subject_tmpfile <- function(project_name, subject_code, pattern = 'file_'){
 
 
 #' @export
-group_analysis_table <- function(project_name, module_id, analysis_name, check_valid = TRUE){
+group_analysis_table <- function(project_name, module_id, analysis_name, check_valid = FALSE){
   # if missing project_name, get from current repository
   if(missing(project_name)){
     data_env = getDefaultDataRepository()
@@ -61,12 +61,35 @@ group_analysis_table <- function(project_name, module_id, analysis_name, check_v
   }
   module_id = stringr::str_to_upper(module_id)
   analysis_name = stringr::str_to_upper(analysis_name)
-  group_dir = get_dir('_group_analysis', project_name = project_name)$subject_dir
-  lookup_file = file.path(group_dir, 'lookup', sprintf('%s-%s.csv', module_id, analysis_name))
+  lookup_dir = get_dir('_export_lookup', project_name = project_name)$subject_dir
+  lookup_file = file.path(lookup_dir, sprintf('%s-%s.csv', module_id, analysis_name))
   if(file.exists(lookup_file)){
     tbl = read.csv(lookup_file, stringsAsFactors = F)
+    use_safe = F
+    if(any(!tbl$valid)){
+      use_safe = TRUE
+    }
+    tbl = tbl[tbl$valid, ]
     if(check_valid){
+      # Check if all path is valid
+      # Only check valid ones
+      lapply(tbl$file, function(path){
+        find_path(path)
+      }) ->
+        paths
+      is_valid = vapply(paths, function(p){!is.null(p)}, FUN.VALUE = TRUE)
+      if(any(!is_valid)){
+        use_safe = TRUE
+      }
+      tbl$valid = is_valid
+      tbl$file[is_valid] = unlist(paths[is_valid])
       tbl = tbl[tbl$valid, ]
+      # write back to file
+      if(use_safe){
+        safe_write_csv(tbl, lookup_file, row.names = F)
+      }else{
+        write.csv(tbl, lookup_file, row.names = F)
+      }
     }
   }else{
     tbl = data.frame()
@@ -105,8 +128,7 @@ group_analysis_save <- function(project_name, subject_code, module_id, analysis_
   }
 
   # abuse function get_dir
-  group_dir = get_dir('_group_analysis', project_name = project_name)$subject_dir
-  lookup_dir = file.path(group_dir, 'lookup')
+  lookup_dir = get_dir('_export_lookup', project_name = project_name)$subject_dir
 
   if(!dir.exists(lookup_dir)){
     dir.create(lookup_dir, recursive = T, showWarnings = F)
@@ -126,9 +148,13 @@ group_analysis_save <- function(project_name, subject_code, module_id, analysis_
   }
 
   valid = FALSE
-  if(exists(file)){
+  if(file.exists(file)){
+    logger('File detected, export meta info')
     file = normalizePath(file)
     valid = TRUE
+  }else{
+    logger('File not detected, meta info will be ignored')
+    return()
   }
 
   v = data.frame(
