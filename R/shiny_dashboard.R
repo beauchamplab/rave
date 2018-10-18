@@ -132,7 +132,8 @@ dashboardPage <- function (
       htmltools::htmlDependency(
         "Dipterix", "0.0.1",
         c(file = system.file('assets/', package = 'rave')),
-        script = 'dipterix.js', stylesheet = 'dipterix.css'),
+        script = 'dipterix.js', stylesheet = 'dipterix.css'
+      ),
 
       # load AdminLTE
       htmltools::htmlDependency(

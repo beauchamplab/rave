@@ -28,7 +28,7 @@ actionButtonStyled <- function(inputId, label, icon = NULL, width = NULL, type =
 
 #' @export
 compoundInput <- function(
-  inputId, label = '', components = NULL, max_ncomp = 10, inital_ncomp = 1
+  inputId, label = '', components = NULL, max_ncomp = 10, inital_ncomp = 1, prefix = 'Group', style = ''
 ){
   value <- deparse(substitute(components))
   dots = lazyeval::as.lazy(value)
@@ -53,8 +53,8 @@ compoundInput <- function(
             class = paste('rave-ui-compound-inner', ifelse(inital_ncomp < ind, 'hidden', '')),
             'data-value' = ind,
             tags$fieldset(
-              style = 'border: 1px solid #efefef; padding:.35em .625em .75em; margin-bottom: 15px;',
-              tags$legend('Group ' %&% ind, style = 'border:none; margin: 0; padding: 0 10px; font-size: 14px;'),
+              style = sprintf('border: 1px solid #efefef; padding:.35em .625em .75em; margin-bottom: 15px;%s', style),
+              tags$legend(prefix %&% ' ' %&% ind, style = 'border:none; margin: 0; padding: 0 10px; font-size: 14px;'),
               tagList(
                 lapply(dots, function(comp){
                   comp = comp$.change_param(

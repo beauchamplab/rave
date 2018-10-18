@@ -1,7 +1,7 @@
 # functions for group analysis
 
 #' @export
-group_analysis_names <- function(module_id, project_name){
+module_analysis_names <- function(module_id, project_name){
   # if missing project_name, get from current repository
   if(missing(project_name)){
     data_env = getDefaultDataRepository()
@@ -52,7 +52,7 @@ subject_tmpfile <- function(module_id, fun_name = '', project_name, subject_code
 
 
 #' @export
-group_analysis_table <- function(project_name, module_id, analysis_name, check_valid = FALSE){
+module_analysis_table <- function(project_name, module_id, analysis_name, check_valid = FALSE){
   # if missing project_name, get from current repository
   if(missing(project_name)){
     data_env = getDefaultDataRepository()
@@ -117,7 +117,7 @@ find_path <- function(path, root_dir){
 }
 
 #' @export
-group_analysis_save <- function(project_name, subject_code, module_id, analysis_name, file, meta = NULL){
+module_analysis_save <- function(project_name, subject_code, module_id, analysis_name, file, meta = NULL){
   # if missing project_name, get from current repository
   if(missing(project_name) || missing(subject_code)){
     data_env = getDefaultDataRepository()

@@ -1,3 +1,16 @@
+#' Convert file to base64 format
+to_datauri <- function(file, mime = ''){
+  info = file.info(file)
+  ss = jsonlite::base64_enc(input = readBin(file, what = 'raw', n = info$size))
+  ss = sprintf('data:%s;base64,%s', mime, ss)
+  ss
+}
+# s = base64enc::dataURI(mime = 'image/*', file = '~/Desktop/Enlight1.jpg', encoding = 'base64')
+# stringr::str_sub(s, end = 500)
+#
+# stringr::str_sub(ss, end = 500)
+
+
 #' Format Print Strings
 #' @export
 fprintf <- function(..., collapse = '\n', lookup_env = parent.frame()){

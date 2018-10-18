@@ -1,6 +1,14 @@
 # module to load data
 
 get_people = function(){
+  default_fn = function(e){
+    return(list(
+      name = 'Beauchamplab',
+      src = system.file('beauchamplab.png', package = 'rave'),
+      text = "Beauchamp's lab @CAMRI, BCM, 2018",
+      index = 0
+    ))
+  }
   tryCatch({
     # get yaml file from dipterix repo
     genv = globalenv()
@@ -17,14 +25,7 @@ get_people = function(){
     img_list = sample(img_list, 1)[[1]]
     genv[['..last_index']] = img_list
     return(img_list)
-  }, error = function(e){
-    return(list(
-      name = 'Beauchamplab',
-      src = system.file('beauchamplab.png', package = 'rave'),
-      text = "Beauchamp's lab @CAMRI, BCM, 2018",
-      index = 0
-    ))
-  })
+  }, error = default_fn, warning = default_fn)
 }
 
 

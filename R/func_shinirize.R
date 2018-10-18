@@ -438,7 +438,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         if(length(export_func)){
 
           # find all analysis names
-          analysis_names = group_analysis_names(module_id = MODULE_ID)
+          analysis_names = module_analysis_names(module_id = MODULE_ID)
 
           showModal(
             modalDialog(
@@ -504,7 +504,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
           res = f(con, analysis_name, dirname(con))
           # Save to group analysis
           logger('Saving to group analysis tables...')
-          group_analysis_save(module_id = MODULE_ID, analysis_name = analysis_name, file = con, meta = res)
+          module_analysis_save(module_id = MODULE_ID, analysis_name = analysis_name, file = con, meta = res)
           showNotification(p('Module ID: ', MODULE_ID, ' exported!'), type = 'message')
         }, error = function(e){
           showNotification(p('Export failed: (message)', br(), e$message, br(), 'Please check console for error messages.'), type = 'error')

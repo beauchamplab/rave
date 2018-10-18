@@ -201,10 +201,28 @@ li.control-sidebar-items>a {
   margin-bottom: 5px;
 }
 
+.rave-grid-inputs .shiny-input-container{
+  width: auto;
+}
+
 
 .rave-grid-inputs>div{
   flex-basis: 33%;
   padding-right: 5px;
+}
+
+
+.rave-grid-inputs>.rave-grid-inputs-legend {
+    position: absolute;
+    /* float: right; */
+    /* right: 0; */
+    /* top: 0; */
+    margin-top: -25px;
+    background-color: white;
+    padding: 3px;
+    font-size: smaller;
+    font-weight: 900;
+    color: #e2e2e2;
 }
 
 
@@ -221,6 +239,10 @@ li.control-sidebar-items>a {
 
 .rave-grid-inputs>li:hover{
   background-color: #f39c1247;
+}
+
+.rave-grid-inputs:hover{
+  background-color: aliceblue;
 }
 
 
@@ -261,7 +283,9 @@ li.control-sidebar-items>a {
     background: rgba(255,255,255);
 }
 
-
+.margin-top-20 {
+  margin-top: 20px;
+}
 
 .rave-elastic img {
   width: 100%;
@@ -403,5 +427,189 @@ li.control-sidebar-items>a {
  box-shadow: inset 0 0 0 200px rgba(255,255,255,0.3);
  filter: blur(10px);
  z-index: -1;
+}
+
+.no-border-inputs input,
+.no-border-inputs .selectize-input {
+  border: 1px solid transparent;
+}
+
+.no-border-inputs .selectize-input:after{
+  visibility: hidden;
+}
+
+.no-border-inputs .selectize-input:hover:after{
+  visibility: visible;
+}
+
+.no-border-inputs input:hover,
+.no-border-inputs .selectize-input:hover {
+  border: 1px solid #ccc;
+}
+
+
+
+/* Tooltip CSS */
+/* START TOOLTIP STYLES */
+[tooltip] {
+  position: relative; /* opinion 1 */
+}
+
+/* Applies to all tooltips */
+[tooltip]::before,
+[tooltip]::after,
+[tooltip]>.tooltip-content {
+  text-transform: none; /* opinion 2 */
+  font-size: .9em; /* opinion 3 */
+  line-height: 1.2em;
+  user-select: none;
+  pointer-events: none;
+  position: absolute;
+  display: none;
+  opacity: 0;
+}
+[tooltip]::before {
+  content: '';
+  border: 5px solid transparent; /* opinion 4 */
+  z-index: 1001; /* absurdity 1 */
+}
+[tooltip]>.tooltip-content {
+  /* content: attr(tooltip); /* magic! */
+
+  /* most of the rest of this is opinion */
+  font-family: Helvetica, sans-serif;
+  text-align: center;
+
+  /*
+    Let the content set the size of the tooltips
+    but this will also keep them from being obnoxious
+    */
+  min-width: 3em;
+  max-width: 21em;
+  white-space: pre-line;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 1ch 1.5ch;
+  border-radius: .3ch;
+  box-shadow: 0 1em 2em -.5em rgba(0, 0, 0, 0.35);
+  background: #333;
+  color: #fff;
+  z-index: 1000; /* absurdity 2 */
+}
+
+/* Make the tooltips respond to hover */
+[tooltip]:hover::before,
+[tooltip]:hover>.tooltip-content {
+  display: block;
+}
+
+/* don't show empty tooltips */
+[tooltip='']::before,
+[tooltip='']>.tooltip-content {
+  white-space: pre-line;
+  display: none !important;
+}
+
+/* FLOW: UP */
+[tooltip]:not([flow])::before,
+[tooltip][flow^="up"]::before {
+  bottom: 100%;
+  border-bottom-width: 0;
+  border-top-color: #333;
+}
+[tooltip]:not([flow])>.tooltip-content,
+[tooltip][flow^="up"]>.tooltip-content {
+  bottom: calc(100% + 5px);
+}
+[tooltip]:not([flow])::before,
+[tooltip]:not([flow])>.tooltip-content,
+[tooltip][flow^="up"]::before,
+[tooltip][flow^="up"]>.tooltip-content {
+  left: 50%;
+  transform: translate(-50%, -.5em);
+}
+
+/* FLOW: DOWN */
+[tooltip][flow^="down"]::before {
+  top: 100%;
+  border-top-width: 0;
+  border-bottom-color: #333;
+}
+[tooltip][flow^="down"]>.tooltip-content {
+  top: calc(100% + 5px);
+}
+[tooltip][flow^="down"]::before,
+[tooltip][flow^="down"]>.tooltip-content {
+  left: 50%;
+  transform: translate(-50%, .5em);
+}
+
+/* FLOW: LEFT */
+[tooltip][flow^="left"]::before {
+  top: 50%;
+  border-right-width: 0;
+  border-left-color: #333;
+  left: calc(0em - 5px);
+  transform: translate(-.5em, -50%);
+}
+[tooltip][flow^="left"]>.tooltip-content {
+  top: 50%;
+  right: calc(100% + 5px);
+  transform: translate(-.5em, -50%);
+}
+
+/* FLOW: RIGHT */
+[tooltip][flow^="right"]::before {
+  top: 50%;
+  border-left-width: 0;
+  border-right-color: #333;
+  right: calc(0em - 5px);
+  transform: translate(.5em, -50%);
+}
+[tooltip][flow^="right"]>.tooltip-content {
+  top: 50%;
+  left: calc(100% + 5px);
+  transform: translate(.5em, -50%);
+}
+
+/* KEYFRAMES */
+@keyframes tooltips-vert {
+  to {
+    opacity: .9;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes tooltips-horz {
+  to {
+    opacity: .9;
+    transform: translate(0, -50%);
+  }
+}
+
+/* FX All The Things */
+[tooltip]:not([flow]):hover::before,
+[tooltip]:not([flow]):hover>.tooltip-content,
+[tooltip][flow^="up"]:hover::before,
+[tooltip][flow^="up"]:hover>.tooltip-content,
+[tooltip][flow^="down"]:hover::before,
+[tooltip][flow^="down"]:hover>.tooltip-content {
+  animation: tooltips-vert 300ms ease-out forwards;
+}
+
+[tooltip][flow^="left"]:hover::before,
+[tooltip][flow^="left"]:hover>.tooltip-content,
+[tooltip][flow^="right"]:hover::before,
+[tooltip][flow^="right"]:hover>.tooltip-content {
+  animation: tooltips-horz 300ms ease-out forwards;
+}
+
+[tooltip][tooltip-image]:hover>.tooltip-content {
+  background-repeat: no-repeat;
+  min-height: 200px;
+  min-width: 480px;
+  background-size: 300px 200px;
+  padding-left: 310px;
+  text-align: left;
 }
 

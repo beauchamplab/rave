@@ -2,6 +2,11 @@
 #' @export
 RaveBrain <- R6::R6Class(
   classname = 'Brain',
+  active = list(
+    mesh_count = function(){
+      length(private$three_pial)
+    }
+  ),
   private = list(
 
     data = list(
@@ -36,10 +41,13 @@ RaveBrain <- R6::R6Class(
         self$load_subject(subject)
       }
     },
+    `_set_threejs` = function(key, val){
+      private[[key]] = val
+    },
     copy = function(){
       re = self$clone(deep = TRUE)
-      re$.__enclos_env__$private$three_electrodes = lapply(private$three_electrodes, function(x){x$clone()})
-      re$.__enclos_env__$private$three_pial = lapply(private$three_pial, function(x){x$clone()})
+      re[['_set_threejs']]('three_electrodes', lapply(private$three_electrodes, function(x){x$clone()}))
+      re[['_set_threejs']]('three_pial', lapply(private$three_pial, function(x){x$clone()}))
       re
     },
     load_electrodes = function(tbl){
@@ -373,8 +381,8 @@ RaveBrain <- R6::R6Class(
 
       for(ii in which_pials){
         pial = private$three_pial[[ii]]
-        v = pial$.__enclos_env__$private$vertices
-        f = pial$.__enclos_env__$private$faces
+        v = pial$get_data('vertices', reshape = F)
+        f = pial$get_data('faces', reshape = F)
         dim(v) = c(3, length(v) / 3)
 
         v = v - as.vector(sp2_position)
@@ -501,16 +509,18 @@ RaveBrain <- R6::R6Class(
             index = 2
           )
         }
+        pials = private$three_pial
+        # Link electrodes to closest pial vertex
+        self$hook_electrodes()
+      }else{
+        pials = NULL
       }
-
-      # Link electrodes to closest pial vertex
-      self$hook_electrodes()
 
       # set color/animations to electrodes
       self$render_electrodes(pal = pal, center = center)
 
       # Render via threejsr
-      elements = c(private$three_pial, private$three_electrodes)
+      elements = c(pials, private$three_electrodes)
       threejsr:::threejs_scene.default(
         elements = elements,
         width = width,
@@ -535,14 +545,14 @@ RaveBrain <- R6::R6Class(
       for(ii in which){
         private$three_electrodes[[ii]]$mesh_info = label
         if(is.na(private$three_electrodes[[ii]]$name)){
-          private$three_electrodes[[ii]]$.__enclos_env__$private$mesh_name = label
+          private$three_electrodes[[ii]]$set_name(label)
         }
       }
     },
     set_electrode_size = function(which, radius = 2){
       assertthat::assert_that(is.numeric(radius) && length(radius) == 1, msg = "invalid radius")
       for(ii in which){
-        private$three_electrodes[[ii]]$.__enclos_env__$private$radius = radius
+        private$three_electrodes[[ii]]$set_radius(radius)
       }
     }
   )
