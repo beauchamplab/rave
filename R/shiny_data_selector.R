@@ -415,7 +415,8 @@ shiny_data_selector <- function(module_id){
           div(
             class = 'tooltip-content',
             style = 'width: 17em; max-width: 300px; text-align: left; padding: 0 1em;',
-            p(HTML(paste(sapply(seq_along(fband), function(ii){
+            p(h4('Presets:'), br(),
+              HTML(paste(sapply(seq_along(fband), function(ii){
               nm = names(fband)[[ii]]
               b = fband[[ii]]
               sprintf('%s wave: %.1f - %.1f', nm, b[1], b[2])
