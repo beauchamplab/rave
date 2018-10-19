@@ -380,7 +380,7 @@ shiny_data_selector <- function(module_id){
           `tooltip-image` = TRUE,
           div(
             class = 'tooltip-content',
-            style = 'background-image:url("Dipterix-0.0.1/images/data_selectior_epoch.png")',
+            style = 'background-image:url("Dipterix-0.0.1/images/data_selectior_epoch.gif")',
             p(
               "`Epoch table` defines experiment onset and trial condition types. Usually these files are stored in [subject]/rave/meta/epoch_[names].csv. `Pre` means seconds before onset. `Post` is the seconds after onset."
             )

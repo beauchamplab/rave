@@ -575,14 +575,14 @@ li.control-sidebar-items>a {
 /* KEYFRAMES */
 @keyframes tooltips-vert {
   to {
-    opacity: .9;
+    opacity: 1;
     transform: translate(-50%, 0);
   }
 }
 
 @keyframes tooltips-horz {
   to {
-    opacity: .9;
+    opacity: 1;
     transform: translate(0, -50%);
   }
 }
