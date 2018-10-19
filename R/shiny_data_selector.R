@@ -66,7 +66,7 @@ check_subjects2 <- function(
   re[['meta_frequency']] = file.exists(file.path(dirs$meta_dir, 'frequencies.csv'))
 
   # Find epoch and referenced
-  re[['meta_epoch']] = length(list.files(dirs$meta_dir, pattern = '^epoch_.*\\.[cC][sS][vV]$')) > 0
+  re[['meta_epoch']] = length(list.files(dirs$meta_dir, pattern = '^epoch_[a-zA-Z0-9_]*\\.[cC][sS][vV]$')) > 0
   re[['meta_reference']] = length(list.files(dirs$meta_dir, pattern = '^reference_[a-zA-Z0-9_]*\\.[cC][sS][vV]$')) > 0
 
   # check validity
@@ -100,8 +100,8 @@ check_subjects2 <- function(
 
   # Get epoch names
   if(re$meta_epoch){
-    epochs = list.files(dirs$meta_dir, pattern = '^epoch_.*[cC][sS][vV]$')
-    epochs = stringr::str_match(epochs, '^epoch_(.*)\\.[cC][sS][vV]$')[,2]
+    epochs = list.files(dirs$meta_dir, pattern = '^epoch_[a-zA-Z0-9_]*\\.[cC][sS][vV]$')
+    epochs = stringr::str_match(epochs, '^epoch_([a-zA-Z0-9_]*)\\.[cC][sS][vV]$')[,2]
   }else{
     epochs = ''
   }
@@ -203,10 +203,14 @@ shiny_data_selector <- function(module_id){
   }
   server = function(input, output, session, global_reactives){
     # Vars
-    group = 'main_app'
+    group = 'main_app2'
     local_data = reactiveValues(
       has_subject = FALSE,
-      check_result = list()
+      check_result = list(),
+      # Prevent mis-clicking
+      # If "import" button is clicked multiple times, data will be reloaded multiple times.
+      # prevent will be set to false only when modal expanded
+      prevent_dblclick = TRUE
     )
 
     ##### Show modal when 'data_select' is clicked
@@ -232,6 +236,7 @@ shiny_data_selector <- function(module_id){
       # Gather data
       projects = get_projects()
       local_data$modal_refresh = Sys.time()
+      local_data$prevent_dblclick = FALSE
       last_project = last_entry('project_name', default = NULL, group = group)
       if(length(projects) == 0){
         return(p(strong('No valid project detected. Make sure there is at least one project folder in your data directory!')))
@@ -742,7 +747,6 @@ shiny_data_selector <- function(module_id){
               ),
               div(
                 style="flex-basis: 100%;",
-                h4('Resource Usage'),
                 uiOutput(ns('ui_summary'))
               )
             )
@@ -901,6 +905,13 @@ shiny_data_selector <- function(module_id){
 
     observeEvent(input$import, {
       check_result = local_data$check_result
+      if(local_data$prevent_dblclick){
+        return()
+      }
+      if(!local_data$has_subject || is.null(check_result)){
+        showNotification(p('Invalid subject. Please make sure you have run preprocess and generate epoch files.'), type = 'error', id = ns('data_import'))
+        return()
+      }
       subject_code = input$subject_code
       project_name = input$project_name
       frequencies = input$frequencies
@@ -914,18 +925,18 @@ shiny_data_selector <- function(module_id){
       electrodes = tmp_subject$filter_valid_electrodes(electrodes)
 
       if(length(electrodes) == 0){
-        showNotification('You must select at least one electrode', type = 'error')
+        showNotification('You must select at least one electrode', type = 'error', id = ns('data_import'))
         return(NULL)
       }
 
       freqs = tmp_subject$frequencies$Frequency %within% frequencies
       if(!sum(freqs)){
-        showNotification('No frequency found in your selected frequency band', type = 'error')
+        showNotification('No frequency found in your selected frequency band', type = 'error', id = ns('data_import'))
         return(NULL)
       }
 
       if(sum(epoch_range) == 0){
-        showNotification('Please select valid time range', type = 'error')
+        showNotification('Please select valid time range', type = 'error', id = ns('data_import'))
         return(NULL)
       }
 
@@ -951,7 +962,10 @@ shiny_data_selector <- function(module_id){
       # refresh UIs
       global_reactives$force_refresh_all = Sys.time()
       global_reactives$has_data = Sys.time()
+
       removeModal()
+      # Remove
+      local_data$prevent_dblclick = TRUE
     })
 
 
@@ -1003,7 +1017,7 @@ shiny_data_selector_old <- function(moduleId){
     NULL
   }
   server = function(input, output, session, global_reactives){
-    group = 'main_app2'
+    group = 'main_app'
     local_data = reactiveValues(
       error = TRUE,
       error_info = list(
