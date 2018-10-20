@@ -241,11 +241,9 @@ shiny_data_selector <- function(module_id){
       if(length(projects) == 0){
         return(p(strong('No valid project detected. Make sure there is at least one project folder in your data directory!')))
       }
-      if(length(projects) != 1 || !last_project %in% projects){
+      if(length(last_project) != 1 || !last_project %in% projects){
         last_project = projects[1]
       }
-
-
 
       # Return UI
       fluidRow(

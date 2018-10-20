@@ -105,7 +105,8 @@ ECoGRepository <- R6::R6Class(
     },
     print = function(...){
       # To compatible with globals package
-      pryr::address(self)
+      cat(pryr::address(self))
+      invisible()
     },
     initialize = function(subject, reference = 'default', autoload = T){
       self$raw = Map$new()
@@ -224,6 +225,7 @@ ECoGRepository <- R6::R6Class(
         Time = seq(-pre, post, by = 1 / subject$preprocess_info('srate')),
         Electrode = electrodes
       )
+      count = 1
 
       # collapse results
       if(!is.function(func)){
@@ -245,9 +247,10 @@ ECoGRepository <- R6::R6Class(
             power = as.vector(power)
             return(power)
           }, .call_back = function(i){
-            progress$inc(sprintf('Step 1 (of %d) electrode %d (power)', n_dt, electrodes[i]))
+            progress$inc(sprintf('Step %d (of %d) electrode %d (power)', count, n_dt, electrodes[i]))
           }) ->
             results
+          count = count + 1
           gc()
 
           names(results) = paste0('V', seq_along(electrodes))
@@ -294,9 +297,10 @@ ECoGRepository <- R6::R6Class(
             phase = as.vector(phase)
             return(phase)
           }, .call_back = function(i){
-            progress$inc(sprintf('Step 2 (of %d) electrode %d (phase)', n_dt, electrodes[i]))
+            progress$inc(sprintf('Step %d (of %d) electrode %d (phase)', count, n_dt, electrodes[i]))
           }) ->
             results
+          count = count + 1
           gc()
 
           names(results) = paste0('V', seq_along(electrodes))
@@ -342,9 +346,10 @@ ECoGRepository <- R6::R6Class(
             volt = as.vector(volt)
             return(volt)
           }, .call_back = function(i){
-            progress$inc(sprintf('Step 3 (of %d) electrode %d (voltage)', n_dt, electrodes[i]))
+            progress$inc(sprintf('Step %d (of %d) electrode %d (voltage)', count, n_dt, electrodes[i]))
           }) ->
             results
+          count = count + 1
           gc()
 
           names(results) = paste0('V', seq_along(electrodes))

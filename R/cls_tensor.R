@@ -402,6 +402,7 @@ Tensor <- R6::R6Class(
     data = function(v){
       if(missing(v)){
         logger('Tensor$data is deprecated, use Tensor$get_data() instead!', level = 'WARNING')
+        # stop('Tensor$data is deprecated, use Tensor$set_data(data) instead!')
         self$get_data()
       }else{
         stop('Tensor$data is deprecated, use Tensor$set_data(data) instead!')

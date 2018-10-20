@@ -17,6 +17,7 @@ rave_prepare <- function(
   frequency_range,
   data_types = c('power'),
   reference = 'default', attach = 'r',
+  load_brain = TRUE,
   data_env = rave::getDefaultDataRepository()
 ){
   # subject = 'congruency1/YAB'; electrodes = 14:15; epoch = 'YABa'; time_range = c(1,2); data_types = NULL; reference = 'default'
@@ -59,8 +60,13 @@ rave_prepare <- function(
   brain = RaveBrain$new()
   try({
     brain$load_subject(subject = repo$subject)
-    brain$import_spec()
   }, silent = T)
+
+  if(load_brain){
+    try({
+      brain$import_spec()
+    }, silent = T)
+  }
 
 
 
