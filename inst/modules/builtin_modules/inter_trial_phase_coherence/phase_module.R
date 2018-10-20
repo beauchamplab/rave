@@ -224,10 +224,10 @@ output$viewer_download <- downloadHandler(
 
 output$three_viewer <- threejsr::renderThreejs({
   validate(
-    need(has_groups && !is.null(input$viewer_var) && is.list(local_data$viewer_data),
+    need(!is.null(input$viewer_var) && is.list(local_data$viewer_data),
          message = 'Click the link "Refresh/Generate Data" to start.')
   )
-  viewer_data = isolate(local_data$viewer_data)
+  viewer_data = local_data$viewer_data
   viewer_var = input$viewer_var
 
   # Get data

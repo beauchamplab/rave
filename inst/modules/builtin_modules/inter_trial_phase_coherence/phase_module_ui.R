@@ -69,7 +69,7 @@ rave_updates(
   {
     rave_checks('phase referenced')
     #creating easy variable names
-    phase = module_tools$get_phase(referenced = F)
+    phase = module_tools$get_phase()
     electrodes = preload_info$electrodes
     frequencies = preload_info$frequencies
     time_points = preload_info$time_points
