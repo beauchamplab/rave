@@ -82,10 +82,19 @@ rave_updates(
     frange <- c(0, 20)
     # volt <- module_tools$get_voltage(force=TRUE, referenced = TRUE)
   },
-  electrode = list(
-    choices = electrodes,
-    selected = electrodes[1]
-  ),
+  electrode = local({
+    e = cache_input('electrodes', electrodes[1])
+    if(is.character(e)){
+      e = as.integer(e)
+    }
+    if(!e %in% electrodes){
+      e = electrodes[1]
+    }
+    list(
+      choices = electrodes,
+      selected = e
+    )
+  }),
   GROUPS = list(
     initialize = list(
       GROUP = list(

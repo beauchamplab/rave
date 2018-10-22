@@ -90,10 +90,26 @@ rave_updates(
 
         frange <- c(max(c(min(frequencies), 75)), min(c(max(frequencies), 150)))
     },
-    electrode_text = list(
-      value = electrodes[1],
-      label = 'Electrodes (' %&% deparse_selections(electrodes) %&% ')'
-    ),
+    electrode_text = local({
+      txt = deparse_selections(electrodes)
+      e = cache_input('electrode_text', txt)
+
+      if(!is.character(e)){
+        e = electrodes[1]
+      }else{
+        e = parse_selections(e)
+        e = e[e %in% electrodes]
+        if(!length(e)){
+          e = electrodes[1]
+        }else{
+          e = deparse_selections(e)
+        }
+      }
+      list(
+        value = e,
+        label = 'Electrodes (' %&% txt %&% ')'
+      )
+    }),
     GROUPS = list(
         initialize = list(
             GROUP = list(
