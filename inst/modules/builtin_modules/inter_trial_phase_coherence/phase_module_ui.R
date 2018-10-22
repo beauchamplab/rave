@@ -83,7 +83,7 @@ rave_updates(
     # volt <- module_tools$get_voltage(force=TRUE, referenced = TRUE)
   },
   electrode = local({
-    e = cache_input('electrodes', electrodes[1])
+    e = cache_input('electrode', electrodes[1])
     if(is.character(e)){
       e = as.integer(e)
     }
