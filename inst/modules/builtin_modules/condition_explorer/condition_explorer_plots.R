@@ -1,5 +1,5 @@
-source('../utils/plot_funcs.R')
-source('../utils/rave_calculators.R')
+source('plot_funcs.R')
+source('rave_calculators.R')
 
 # the only difference between this plot and the time x freq heat_map_plot
 # is the data and the decoration. Use the core heatmap function
@@ -52,6 +52,32 @@ vertical_borders <- function(x, y, lbl, clr, ..., alpha=150, lwd=4, draw_labels=
         text(median(x), max(y), '<- ' %&% lbl %&% ' ->', col=clr)
 }
 
+# helper to show multiple different time windows
+# this is written as a function generator so you can effectively cache the TIMES list
+create_multi_window_shader <- function(TIMES, clrs) {
+    
+    if(missing(clrs)) clrs <- rep('gray30', length(TIMES))
+    if(length(clrs) < length(TIMES)) {
+        clrs <- c(clrs, rep(clrs, length.out=length(TIMES)-length(clrs)))
+    }
+    
+    return (function(ylim, draw_labels, ...) {
+        for(ti in seq_along(TIMES)){
+            x <- unlist(TIMES[[ti]]$RANGE)
+            if(diff(x) > 0) {
+                vertical_borders(
+                    x, ylim, TIMES[[ti]]$TIME_NAME,
+                    clrs[ti], lty=1 + (ti-1)%%6
+                )
+            }
+        }
+        vertical_borders(BASELINE, ylim,
+                         'baseline', rave_colors$BASELINE_WINDOW)
+        abline(h=0, col='gray70')
+    })
+}
+
+
 window_lines <- function(ylim, draw_labels=TRUE) {
     txts <- c('baseline', 'analysis')
     mapply(vertical_borders,
@@ -73,7 +99,7 @@ ts_labels_only <- function(plot_data) {
 }
 
 # show power over time with MSE by condition
-time_series_plot <- function(plot_data, x, DECORATOR=ts_labels_only, SHADER=window_highlighter,
+time_series_plot <- function(plot_data, x, xlab='Time (s)', ylab='% Signal Change', DECORATOR=ts_labels_only, SHADER=window_highlighter,
                              title, draw_labels=TRUE) {
     # validate(need((exists('has_data') && (has_data)), "No Condition Specified"))
 
@@ -89,7 +115,7 @@ time_series_plot <- function(plot_data, x, DECORATOR=ts_labels_only, SHADER=wind
                         ' || Ns ' %&% paste0(ns, collapse=', ')
     }
 
-    plot.clean(x, ylim, xlab='Time (s)', ylab='% Signal Change', main='')
+    plot.clean(x, ylim, xlab=xlab, ylab=ylab, main='')
     rave_main(title)
 
     # draw polys and labels for baseline and analysis ranges
