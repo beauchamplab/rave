@@ -116,6 +116,29 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
             # Check if subject has been imported or not
             if(!utils$has_raw_cache() && length(utils$get_blocks()) && length(utils$get_electrodes())){
               # Subject is created but not imported
+              # Check if channels are matched with subject raw files
+              electrodes = utils$get_electrodes()
+              blocks = utils$get_blocks()
+              pre_dir = utils$get_from_subject('dirs')$pre_subject_dir
+              # check if block maches
+              wrong_blocks = blocks[!blocks %in% list.dirs(pre_dir, recursive = F, full.names = F)]
+              if(length(wrong_blocks)){
+                showNotification(p('Subject ', subject_code, '(', project_name, ')', ' has invalid block(s) - ', paste(wrong_blocks, collapse = ', '), '!'), type = 'error')
+                return()
+              }
+              for(b in blocks){
+                f = list.files(file.path(pre_dir, b), pattern = '_ch[0-9]+.[mM][aA][tT]$')
+                f = stringr::str_match(f, '_ch([0-9]+).[mM][aA][tT]$')[,2]
+                f = as.integer(f)
+                w_e = electrodes[!electrodes %in% f]
+                if(length(w_e)){
+                  showNotification(p('Subject ', subject_code, '(', project_name, ')', ' missing file for electrode(s) - ',
+                                     deparse_selections(w_e), '! Please check.'), type = 'error')
+                  return()
+                }
+              }
+
+
               utils$collect_raw_voltage()
             }
 

@@ -16,6 +16,10 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
   )
 
   server = function(input, output, session, user_data, utils){
+    local_data = reactiveValues(
+      prevent_rewavelet = TRUE
+    )
+
     output$wavelet_inputs1 <- renderUI({
       user_data$reset
       validate(
@@ -64,6 +68,9 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
       fstep = max(1, round(input$freq_step))
       w_freqs = seq(frange[1], frange[2], by = fstep)
 
+      local_data$prevent_rewavelet = FALSE
+
+
       if(length(w_e) && length(w_freqs) > 1){
         showModal(
           modalDialog(
@@ -111,6 +118,10 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
     })
 
     observeEvent(input$ok, {
+      if(isolate(local_data$prevent_rewavelet)){
+        return()
+      }
+      local_data$prevent_rewavelet = TRUE
       w_e = rave:::parse_selections(input$wave_electrodes)
       es = utils$get_electrodes()
       w_e = w_e[w_e %in% es]

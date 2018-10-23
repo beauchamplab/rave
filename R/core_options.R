@@ -44,7 +44,10 @@ opt <- list(
   logger_level = 'DEBUG',
   crayon_enabled = TRUE,
   session_based_datarepo = FALSE,
-  test_mode = TRUE
+  test_mode = TRUE,
+
+  # Cache
+  fast_cache = TRUE
 )
 
 # TODO We can use this to make sure we are attaching the dataset to the correct surface, asuming we know / can set the surface name of the electrodes

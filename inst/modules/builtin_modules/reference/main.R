@@ -526,8 +526,9 @@ gen_reference = function(electrodes){
     return()
   }
   dirs = module_tools$get_subject_dirs()
-  fname = sprintf('ref_%s.h5', rave:::deparse_selections(electrodes))
-  f = file.path(dirs$channel_dir, 'reference', fname)
+  fname_h5 = sprintf('ref_%s.h5', rave:::deparse_selections(electrodes))
+  fname_fst = sprintf('ref_%s.fst', rave:::deparse_selections(electrodes))
+  f = file.path(dirs$channel_dir, 'reference', fname_h5)
   # generate reference
   # Step 0: chunk matrix
   ncores = rave_options('max_worker')
@@ -541,7 +542,7 @@ gen_reference = function(electrodes){
   env$gen_coef = list()
 
 
-  progress = rave::progress(sprintf('Generating reference [%s]', fname), max = length(electrodes)+1)
+  progress = rave::progress(sprintf('Generating reference [%s]', fname_h5), max = length(electrodes)+1)
   on.exit(progress$close())
 
   blocks = subject$preprocess_info('blocks')
@@ -553,12 +554,32 @@ gen_reference = function(electrodes){
 
     lapply_async(es, function(e){
       root_dir = dirs$channel_dir
-      fname = sprintf('%d.h5', e)
+      fname_h5 = sprintf('%d.h5', e)
+      fname_fst = sprintf('%d.fst', e)
       sapply(blocks, function(b){
-        coef = sqrt(load_h5(file.path(root_dir, 'power', fname), name = sprintf('/raw/power/%s', b))[])
-        phase = exp(1i * load_h5(file.path(root_dir, 'phase', fname), name = sprintf('/raw/phase/%s', b))[])
+        coef = NULL
+        try({
+          coef = fst::read_fst(file.path(root_dir, 'cache', 'power', 'raw', b, fname_fst))
+          coef = t(sqrt(as.matrix(coef)))
+        }, silent = T)
+        coef %?<-% sqrt(load_h5(file.path(root_dir, 'power', fname_h5), name = sprintf('/raw/power/%s', b))[])
+
+        phase = NULL
+        try({
+          phase = fst::read_fst(file.path(root_dir, 'cache', 'phase', 'raw', b, fname_fst))
+          phase = exp(1i * t((as.matrix(phase))))
+        }, silent = T)
+        phase %?<-% exp(1i * load_h5(file.path(root_dir, 'phase', fname_h5), name = sprintf('/raw/phase/%s', b))[])
+
+        volt = NULL
+        try({
+          volt = fst::read_fst(file.path(root_dir, 'cache', 'voltage', 'raw', b, fname_fst))[,1]
+        }, silent = T)
+        volt %?<-% load_h5(file.path(root_dir, 'voltage', fname_h5), name = sprintf('/raw/voltage/%s', b))[]
+
+
         list(
-          volt = load_h5(file.path(root_dir, 'voltage', fname), name = sprintf('/raw/voltage/%s', b))[],
+          volt = volt,
           coef = coef * phase
         )
       }, USE.NAMES = T, simplify = F) ->
@@ -588,6 +609,8 @@ gen_reference = function(electrodes){
 
   progress$inc(message = 'Saving to disk.')
 
+  ref_dir = file.path(dirs$channel_dir, 'cache', 'reference')
+
   # Average
   for(b in blocks){
     volt = env$gen_volt[[b]] / nes
@@ -595,9 +618,29 @@ gen_reference = function(electrodes){
     coef = array(c(Mod(coef), Arg(coef)), dim = c(dim(coef), 2)) # Freq x Time x 2
     save_h5(volt, file = f, name = sprintf('/voltage/%s', b), chunk = 1024, replace = T)
     save_h5(coef, file = f, name = sprintf('/wavelet/coef/%s', b), chunk = c(dim(coef)[1], 128, 2), replace = T)
+
+    # fast_cache
+    fast_cache = rave_options('fast_cache'); fast_cache %?<-% TRUE
+    fst_coef = file.path(ref_dir, 'coef', b)
+    fst_phase = file.path(ref_dir, 'phase', b)
+    fst_volt = file.path(ref_dir, 'voltage', b)
+    dir.create(fst_coef, recursive = T, showWarnings = F)
+    dir.create(fst_phase, recursive = T, showWarnings = F)
+    dir.create(fst_volt, recursive = T, showWarnings = F)
+    if(fast_cache){
+      # fast cache referenced signals
+      dat = as.data.frame(t(coef[,,1]))
+      fst::write_fst(dat, file.path(fst_coef, fname_fst), compress = 100)
+
+      dat = as.data.frame(t(coef[,,2]))
+      fst::write_fst(dat, file.path(fst_phase, fname_fst), compress = 100)
+
+      dat = data.frame(V1 = volt)
+      fst::write_fst(dat, file.path(fst_volt, fname_fst), compress = 100)
+    }
   }
 
-  showNotification(p('Reference [', fname, '] exported.'), type = 'message')
+  showNotification(p('Reference [', fname_h5, '] exported.'), type = 'message')
   local_data$has_new_ref = Sys.time()
 }
 

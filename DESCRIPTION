@@ -134,6 +134,7 @@ Collate:
     'utils_ff_mann.R'
     'utils_general.R'
     'utils_h5_mann.R'
+    'utils_io_fst.R'
     'utils_io_h5.R'
     'utils_lapply.R'
     'utils_logger.R'
