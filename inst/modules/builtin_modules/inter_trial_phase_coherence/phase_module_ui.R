@@ -98,13 +98,13 @@ rave_updates(
   GROUPS = list(
     initialize = list(
       GROUP = list(
-        choices = unique(trials)
+        choices = unique(preload_info$condition)
       )
     ),
     value = cache_input('GROUPS', list(
       list(
-        GROUP = list(trials),
-        GROUP_NAME = 'All Conditions'
+        GROUP = list(selected = unique(preload_info$condition)),
+        GROUP_NAME = list(value = 'All Conditions')
       )
     ))
   ),
