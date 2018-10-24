@@ -466,7 +466,7 @@ RaveBrain <- R6::R6Class(
           # Set electrode hooks
           info = private$ani_electrodes[[ii]] # keyframe and value
           if(!length(info)){
-            stop
+            stop('')
           }
           private$three_electrodes[[ii]]$animation_event(
             name = name,

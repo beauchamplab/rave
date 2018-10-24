@@ -58,14 +58,12 @@ rave_prepare <- function(
 
   # Load brain
   brain = RaveBrain$new()
-  try({
-    brain$load_subject(subject = repo$subject)
-  }, silent = T)
+  brain$load_subject(subject = repo$subject)
 
   if(load_brain){
     try({
-      brain$import_spec()
-    }, silent = T)
+      brain$import_spec(nearest_face = F)
+    }, silent = TRUE)
   }
 
 
