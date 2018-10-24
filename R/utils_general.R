@@ -891,6 +891,7 @@ cache <- function(key, val, global = FALSE, replace = FALSE, session = NULL, swa
   }else{
     session %?<-% getDefaultReactiveDomain()
   }
+
   cache_env = getDefaultCacheEnvironment(session = session)
 
   k = digest(key)
@@ -938,10 +939,14 @@ clear_cache <- function(all = FALSE, session = NULL){
 getDefaultCacheEnvironment <- function(
   session = getDefaultReactiveDomain()
 ){
-  data_env = getDefaultDataRepository(session = session, session_based = T)
-  data_env$.cache_env %?<-% new.env(parent = baseenv())
-  data_env$.cache_env$.keys = c()
-  return(data_env$.cache_env)
+  session_id = add_to_session(session)
+  session_id %?<-% '.TEMP'
+  global_env = globalenv()
+  if(!is.environment(global_env[['.cache_rave']])){
+    global_env[['.cache_rave']] = new.env(parent = emptyenv())
+  }
+  global_env[['.cache_rave']][[session_id]] %?<-% new.env(parent = emptyenv())
+  return(global_env[['.cache_rave']][[session_id]])
 }
 
 ################################################### High performance functions

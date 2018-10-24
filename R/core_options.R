@@ -44,7 +44,7 @@ opt <- list(
   logger_level = 'DEBUG',
   crayon_enabled = TRUE,
   session_based_datarepo = FALSE,
-  test_mode = TRUE,
+  test_mode = FALSE,
 
   # Cache
   fast_cache = TRUE

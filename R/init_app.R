@@ -214,24 +214,23 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
       )
     ),
     initial_mask = tagList(
-      h2('R Analysis and Visualizations for Electrocorticography Data'),
-      hr(),
-      uiOutput('.init_mask'),
-      actionLink('.init_mask_f5', "I'm Lucky Today!")
+      h2('R Analysis and Visualizations for Electrocorticography Data')
+      # hr(),
+      # uiOutput('.init_mask'),
+      # actionLink('.init_mask_f5', "I'm Lucky Today!")
     )
   )
 
   server = function(input, output, session){
-    output$.init_mask <- renderUI({
-      input$.init_mask_f5
-      img_list = get_people()
-      p(
-        img(src = sprintf("%s/%s", 'https://raw.githubusercontent.com/dipterix/instrave/master/mask_img', img_list$src), alt = img_list$name),
-        br(),
-        HTML("<span>&#8220;", img_list$text, "&#8221;</span>"),br(),
-        span('- ', img_list$name)
-      )
-    })
+    # output$.init_mask <- renderUI({
+    #   input$.init_mask_f5
+    #   img_list = get_people()
+    #   p(
+    #     img(src = sprintf("%s/%s", 'https://raw.githubusercontent.com/dipterix/instrave/master/mask_img', img_list$src), alt = img_list$name),
+    #     br(),
+    #     span('- ', img_list$name)
+    #   )
+    # })
 
 
     #################################################################
@@ -562,8 +561,6 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
         lapply(unlist(modules), function(x){
           x$clean(session_id = session_id)
         })
-        logger('Clean up data repository.')
-        data_repository[[session_id]]$.clean()
       })
     }
 

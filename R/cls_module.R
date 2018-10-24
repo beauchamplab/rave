@@ -21,40 +21,56 @@ getDefaultDataRepository <- function(
   session_id,
   session_based = NULL
 ){
-  if(is.null(session_based)){
-    session_based = rave_options('session_based_datarepo')
-  }
-  if(missing(session_id)){
-    if(!session_based){
-      session_id = NULL
-    }else{
-      session_id = add_to_session(session)
-    }
-  }
-  if(!is.character(session_id)){
-    session_id = '.TEMP'
+  session_based = F
+  if(missing(session_id) || !is.character(session_id)){
+    session_id %?<-% '.TEMP'
   }
   if(!exists(session_id, envir = data_repository)){
     e = new.env(parent = do.call('loadNamespace', list('rave')))
-    e$.clean = function(){
-      if(is.null(session)){
-        return(invisible())
-      }
-      rm(list = ls(envir = e, all.names = T), envir = e, inherits = F)
-      data_repository$.sessions[[session_id]] = NULL
-    }
-    assign(session_id, e, envir = data_repository)
-
-
-    if(!is.null(session)){
-      new_l = list(session); names(new_l) = session_id
-      data_repository$.sessions = c(
-        data_repository$.sessions, new_l
-      )
-    }
+    e$.clean = function(){}
+    data_repository[[session_id]] = e
   }
-  return(get(session_id, envir = data_repository))
+  return(data_repository[[session_id]])
 }
+# getDefaultDataRepository <- function(
+#   session = getDefaultReactiveDomain(),
+#   session_id,
+#   session_based = NULL
+# ){
+#   if(is.null(session_based)){
+#     session_based = rave_options('session_based_datarepo')
+#   }
+#   if(missing(session_id)){
+#     if(!session_based){
+#       session_id = NULL
+#     }else{
+#       session_id = add_to_session(session)
+#     }
+#   }
+#   if(!is.character(session_id)){
+#     session_id = '.TEMP'
+#   }
+#   if(!exists(session_id, envir = data_repository)){
+#     e = new.env(parent = do.call('loadNamespace', list('rave')))
+#     e$.clean = function(){
+#       if(is.null(session)){
+#         return(invisible())
+#       }
+#       rm(list = ls(envir = e, all.names = T), envir = e, inherits = F)
+#       data_repository$.sessions[[session_id]] = NULL
+#     }
+#     assign(session_id, e, envir = data_repository)
+#
+#
+#     if(!is.null(session)){
+#       new_l = list(session); names(new_l) = session_id
+#       data_repository$.sessions = c(
+#         data_repository$.sessions, new_l
+#       )
+#     }
+#   }
+#   return(get(session_id, envir = data_repository))
+# }
 
 #' @export
 attachDefaultDataRepository <- function(unload = F){
