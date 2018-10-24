@@ -559,7 +559,7 @@ gen_reference = function(electrodes){
       sapply(blocks, function(b){
         fst_file = file.path(root_dir, 'cache', 'power', 'raw', b, fname_fst)
         if(file.exists(fst_file)){
-          coef = fst::read_fst()
+          coef = fst::read_fst(fst_file)
           coef = t(sqrt(as.matrix(coef)))
         }else{
           coef = sqrt(load_h5(file.path(root_dir, 'power', fname_h5), name = sprintf('/raw/power/%s', b))[])
@@ -760,6 +760,18 @@ observeEvent(input$do_export_cache, {
 
   ref_names = names(ref)
 
+  for(b in blocks){
+    dir.create(file.path(subject_channel_dir, 'cache', 'power', 'ref', b), showWarnings = F, recursive = T)
+    dir.create(file.path(subject_channel_dir, 'cache', 'phase', 'ref', b), showWarnings = F, recursive = T)
+    dir.create(file.path(subject_channel_dir, 'cache', 'voltage', 'ref', b), showWarnings = F, recursive = T)
+  }
+  # write a 'noref' table to this file in case exporting scheme screw up
+  cr_csv = file.path(subject_channel_dir, 'cache', 'cached_reference.csv')
+  rave:::safe_write_csv(data.frame(
+    Electrode = electrodes,
+    Reference = 'noref'
+  ), cr_csv, row.names = F)
+
 
   lapply_async(electrodes, function(e){
     fname = sprintf('%d.h5', e)
@@ -769,6 +781,7 @@ observeEvent(input$do_export_cache, {
     volt_fname = file.path(subject_channel_dir, 'voltage', fname)
     power_fname = file.path(subject_channel_dir, 'power', fname)
     phase_fname = file.path(subject_channel_dir, 'phase', fname)
+
     lapply(blocks, function(b){
       # load electrode - raw
       volt = load_h5(volt_fname, '/raw/voltage/' %&% b, ram = T)
@@ -777,6 +790,8 @@ observeEvent(input$do_export_cache, {
       volt_ref %?<-% 0
       volt = volt - volt_ref
       save_h5(volt, volt_fname, name = '/ref/voltage/' %&% b, replace = T, chunk = 1024)
+      fst::write_fst(data.frame(V1 = volt), path =
+                       file.path(subject_channel_dir, 'cache', 'voltage', 'ref', b, sprintf('%d.fst', e)))
 
       # load electrode - coef
       power = load_h5(power_fname, '/raw/power/' %&% b, ram = T)
@@ -799,10 +814,17 @@ observeEvent(input$do_export_cache, {
 
       # save power and phase
       power = Mod(coef)^2
-      phase = Arg(phase)
+      phase = Arg(coef)
       dim = dim(power); dim[2] = 128
       save_h5(power, power_fname, name = '/ref/power/' %&% b, replace = T, chunk = dim)
+      fst::write_fst(as.data.frame(t(power)), path =
+                       file.path(subject_channel_dir, 'cache', 'power', 'ref', b, sprintf('%d.fst', e)))
+
+
       save_h5(phase, phase_fname, name = '/ref/phase/' %&% b, replace = T, chunk = dim)
+      fst::write_fst(as.data.frame(t(phase)), path =
+                       file.path(subject_channel_dir, 'cache', 'phase', 'ref', b, sprintf('%d.fst', e)))
+
       rm(list = ls(envir = environment())); gc()
       invisible()
     })
@@ -811,9 +833,18 @@ observeEvent(input$do_export_cache, {
     save_h5(r, file = volt_fname, name = '/reference', replace = T, chunk = 1, size = 1000)
     save_h5(r, file = power_fname, name = '/reference', replace = T, chunk = 1, size = 1000)
     save_h5(r, file = phase_fname, name = '/reference', replace = T, chunk = 1, size = 1000)
+    return(r)
   }, .call_back = function(ii){
     progress$inc(sprintf('Referencing electrode - %d', electrodes[[ii]]))
-  })
+  }) ->
+    refs
+
+
+  # overwrite cached_reference.csv
+  write.csv(data.frame(
+    Electrode = electrodes,
+    Reference = unlist(refs)
+  ), cr_csv, row.names = F)
 
   progress$close()
   showNotification(p('Now data are cached according to [', fname, ']. Reloading subject.'), type = 'message', id = ns('ref_export_cache_notification'))
