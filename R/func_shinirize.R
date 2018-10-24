@@ -323,6 +323,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
           return()
         }
         logger('Executing Script')
+        showNotification(p(MODULE_LABEL, 'is running. Please wait...'), id = '.rave_main', duration = NULL)
         tryCatch({
           # record time
           start_time = Sys.time()
@@ -350,6 +351,8 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
           sapply(capture.output(traceback(e)), logger, level = 'ERROR')
           local_data$last_executed = F
         })
+
+        removeNotification(id = '.rave_main')
       }
 
       ##### Async #####
