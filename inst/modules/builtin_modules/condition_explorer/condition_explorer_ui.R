@@ -92,9 +92,9 @@ rave_updates(
     },
     electrode_text = local({
       txt = deparse_selections(electrodes)
-      e = cache_input('electrode_text', txt)
+      e = cache_input('electrode_text', NULL)
 
-      if(!is.character(e)){
+      if(!is.character(e) || !length(e)){
         e = electrodes[1]
       }else{
         e = parse_selections(e)
