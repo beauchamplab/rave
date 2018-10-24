@@ -48,8 +48,7 @@ Electrode <- R6::R6Class(
       }
     },
     print = function(...){
-      # To compatible with globals package
-      pryr::address(self)
+      self$info()
     },
 
     switch_reference = function(new_reference){
@@ -143,8 +142,22 @@ Electrode <- R6::R6Class(
 
       # Get reference info
       if(!is_reference){
-        file = file.path(cache_dir, 'power', sprintf("%d.h5", electrode))
-        ref = load_h5(file, '/reference', ram = T)
+
+        # check cached reference table first
+        file = file.path(cache_dir, 'cache', 'cached_reference.csv')
+        ref = NULL
+        if(file.exists(file)){
+          tbl = read.csv(file, stringsAsFactors = F)
+          if(electrode %in% tbl$Electrode){
+            ref = tbl$Reference[tbl$Electrode == electrode]
+          }
+        }
+        if(is.null(ref)){
+          file = file.path(cache_dir, 'power', sprintf("%d.h5", electrode))
+          ref = load_h5(file, '/reference', ram = T)
+        }
+
+
         need_ref = F
         if(is.character(reference_by) && reference_by != ref){
           reference_by = Electrode$new(subject, electrode = reference_by, reference_by = NULL, is_reference = T)
@@ -167,26 +180,114 @@ Electrode <- R6::R6Class(
       # For each block, link data
       for(b in blocks){
         if(!is_reference){
-          # power
-          file = file.path(cache_dir, 'power', sprintf("%d.h5", electrode))
-          self$raw_power[[b]] = load_h5(file, sprintf('/raw/power/%s', b), ram = ('raw_power' %in% preload))
+          # power: load from cache or, if cache miss, load from original h5
+          h5_path = file.path(cache_dir, 'power', sprintf("%d.h5", electrode))
+          self$raw_power[[b]] = load_fst_or_h5(
+            fst_path = file.path(cache_dir, 'cache', 'power', 'raw', b, sprintf("%d.fst", electrode)),
+            h5_path = h5_path,
+            h5_name = sprintf('/raw/power/%s', b),
+            fst_need_transpose = T,
+            fst_need_drop = F,
+            ram = ('raw_power' %in% preload)
+          )
+
           if(!need_ref){
-            self$power[[b]] = load_h5(file, sprintf('/ref/power/%s', b), ram = ('power' %in% preload))
+            self$power[[b]] = load_fst_or_h5(
+              fst_path = file.path(cache_dir, 'cache', 'power', 'ref', b, sprintf("%d.fst", electrode)),
+              h5_path = h5_path,
+              h5_name = sprintf('/ref/power/%s', b),
+              fst_need_transpose = T,
+              fst_need_drop = F,
+              ram = ('power' %in% preload)
+            )
           }
 
-          # phase
-          file = file.path(cache_dir, 'phase', sprintf("%d.h5", electrode))
-          self$raw_phase[[b]] = load_h5(file, sprintf('/raw/phase/%s', b), ram = ('raw_phase' %in% preload))
+          # original code: load from non-cached
+          #
+          # self$raw_power[[b]] = load_h5(file, sprintf('/raw/power/%s', b), ram = ('raw_power' %in% preload))
+          # if(!need_ref){
+          #   self$power[[b]] = load_h5(file, sprintf('/ref/power/%s', b), ram = ('power' %in% preload))
+          # }
+          #
+          # # test code: uncomment the lines below
+          # #
+          #
+          # preload = c('power'); preload = c(preload, paste0('raw_', preload))
+          # range(self$raw_power[[b]] - load_h5(h5_path, sprintf('/raw/power/%s', b))[])
+          # range(self$power[[b]] - load_h5(h5_path, sprintf('/ref/power/%s', b))[])
+
+
+
+          # phase: load from cache or, if cache miss, load from original h5
+          h5_path = file.path(cache_dir, 'phase', sprintf("%d.h5", electrode))
+          self$raw_phase[[b]] = load_fst_or_h5(
+            fst_path = file.path(cache_dir, 'cache', 'phase', 'raw', b, sprintf("%d.fst", electrode)),
+            h5_path = h5_path,
+            h5_name = sprintf('/raw/phase/%s', b),
+            fst_need_transpose = T,
+            fst_need_drop = F,
+            ram = ('raw_power' %in% preload)
+          )
+
           if(!need_ref){
-            self$phase[[b]] = load_h5(file, sprintf('/ref/phase/%s', b), ram = ('phase' %in% preload))
+            self$phase[[b]] = load_fst_or_h5(
+              fst_path = file.path(cache_dir, 'cache', 'phase', 'ref', b, sprintf("%d.fst", electrode)),
+              h5_path = h5_path,
+              h5_name = sprintf('/ref/phase/%s', b),
+              fst_need_transpose = T,
+              fst_need_drop = F,
+              ram = ('phase' %in% preload)
+            )
           }
 
-          # voltage
-          file = file.path(cache_dir, 'voltage', sprintf("%d.h5", electrode))
-          self$raw_volt[[b]] = load_h5(file, sprintf('/raw/voltage/%s', b), ram = ('raw_volt' %in% preload))
+          # # original code: load from non-cached
+          # file = file.path(cache_dir, 'phase', sprintf("%d.h5", electrode))
+          # self$raw_phase[[b]] = load_h5(file, sprintf('/raw/phase/%s', b), ram = ('raw_phase' %in% preload))
+          # if(!need_ref){
+          #   self$phase[[b]] = load_h5(file, sprintf('/ref/phase/%s', b), ram = ('phase' %in% preload))
+          # }
+          # # test code: uncomment the lines below
+          # #
+          #
+          # preload = c('phase'); preload = c(preload, paste0('raw_', preload))
+          # range(self$raw_phase[[b]] - load_h5(h5_path, sprintf('/raw/phase/%s', b), ram = ('raw_phase' %in% preload))[])
+          # range(self$phase[[b]] - load_h5(h5_path, sprintf('/ref/phase/%s', b))[])
+
+
+
+          # voltage: load from cache or, if cache miss, load from original h5
+          h5_path = file.path(cache_dir, 'voltage', sprintf("%d.h5", electrode))
+          self$raw_volt[[b]] = load_fst_or_h5(
+            fst_path = file.path(cache_dir, 'cache', 'voltage', 'raw', b, sprintf("%d.fst", electrode)),
+            h5_path = h5_path,
+            h5_name = sprintf('/raw/voltage/%s', b),
+            fst_need_transpose = F,
+            fst_need_drop = T,
+            ram = ('raw_volt' %in% preload)
+          )
+
           if(!need_ref){
-            self$volt[[b]] = load_h5(file, sprintf('/ref/voltage/%s', b), ram = ('volt' %in% preload))
+            self$volt[[b]] = load_fst_or_h5(
+              fst_path = file.path(cache_dir, 'cache', 'voltage', 'ref', b, sprintf("%d.fst", electrode)),
+              h5_path = h5_path,
+              h5_name = sprintf('/ref/voltage/%s', b),
+              fst_need_transpose = F,
+              fst_need_drop = T,
+              ram = ('voltage' %in% preload)
+            )
           }
+
+          # # original code: load from non-cached
+          # file = file.path(cache_dir, 'voltage', sprintf("%d.h5", electrode))
+          # self$raw_volt[[b]] = load_h5(file, sprintf('/raw/voltage/%s', b), ram = ('raw_volt' %in% preload))
+          # if(!need_ref){
+          #   self$volt[[b]] = load_h5(file, sprintf('/ref/voltage/%s', b), ram = ('volt' %in% preload))
+          # }
+          # # test code: uncomment the lines below
+          # #
+          #
+          # range(self$raw_volt[[b]] - load_h5(h5_path, sprintf('/raw/voltage/%s', b))[])
+          # range(self$volt[[b]] - load_h5(h5_path, sprintf('/ref/voltage/%s', b))[])
 
           # If reference_by is an instance of electrode, reference it
           if(need_ref){
@@ -206,10 +307,34 @@ Electrode <- R6::R6Class(
           # this is reference signal, only load raw_*
           file = file.path(cache_dir, 'reference', sprintf("%s.h5", electrode))
           if(file.exists(file)){
-            coef = load_h5(file, name = '/wavelet/coef/' %&% b, ram = T)
-            self$raw_power[[b]] = (coef[,,1])^2
-            self$raw_phase[[b]] = (coef[,,2])
-            self$raw_volt[[b]] = load_h5(file, name = '/voltage/' %&% b, ram = T)
+            # try to load coef from cache
+            fst_coef = file.path(cache_dir, 'cache', 'reference', 'coef', b, sprintf("%s.fst", electrode))
+            fst_phase = file.path(cache_dir, 'cache', 'reference', 'phase', b, sprintf("%s.fst", electrode))
+            if(file.exists(fst_coef) && file.exists(fst_phase)){
+              # load from cached reference
+              self$raw_power[[b]] = t(as.matrix(fst::read_fst(fst_coef)))^2
+              self$raw_phase[[b]] = t(as.matrix(fst::read_fst(fst_phase)))
+              # test, result should be 0 0
+              # coef = load_h5(file, name = '/wavelet/coef/' %&% b, ram = T)
+              # range(self$raw_power[[b]] - (coef[,,1])^2)
+              # range(self$raw_phase[[b]] - (coef[,,2]))
+            }else{
+              coef = load_h5(file, name = '/wavelet/coef/' %&% b, ram = T)
+              self$raw_power[[b]] = (coef[,,1])^2
+              self$raw_phase[[b]] = (coef[,,2])
+            }
+
+            # volt
+            self$raw_volt[[b]] = load_fst_or_h5(
+              fst_path = file.path(cache_dir, 'cache', 'reference', 'voltage', b, sprintf("%s.fst", electrode)),
+              h5_path = file,
+              h5_name = '/voltage/' %&% b,
+              fst_need_transpose = F,
+              fst_need_drop = T,
+              ram = T
+            )
+            # test
+            # range(self$raw_volt[[b]] - load_h5(file, name = '/voltage/' %&% b, ram = T))
           }else{
             # File not exist, usually this happens to norefs or bipolar refs, therefore, extract first one
             es = str_extract_all(electrode, '[0-9,\\-]+')
@@ -218,10 +343,53 @@ Electrode <- R6::R6Class(
             es = subject$filter_all_electrodes(es)
             if(length(es)){
               # Bipolar ref
-              fname = sprintf("%d.h5", es[1])
-              self$raw_power[[b]] = load_h5(file.path(cache_dir, 'power', fname), '/raw/power/' %&% b, ram = T)
-              self$raw_phase[[b]] = load_h5(file.path(cache_dir, 'phase', fname), '/raw/phase/' %&% b, ram = T)
-              self$raw_volt[[b]] = load_h5(file.path(cache_dir, 'voltage', fname), '/raw/voltage/' %&% b, ram = T)
+              h5_path = sprintf("%d.h5", es[1])
+              fst_path = sprintf("%d.fst", es[1])
+
+              self$raw_power[[b]] = load_fst_or_h5(
+                fst_path = file.path(cache_dir, 'cache', 'power', 'raw', b, fst_path),
+                h5_path = file.path(cache_dir, 'power', h5_path),
+                h5_name = '/raw/power/' %&% b,
+                fst_need_transpose = T,
+                fst_need_drop = F,
+                ram = T
+              )
+              # test: should be 0 0
+              # range(self$raw_power[[b]] - load_h5(file.path(cache_dir, 'power', h5_path), '/raw/power/' %&% b, ram = T))
+
+              # original code
+              # self$raw_power[[b]] = load_h5(file.path(cache_dir, 'power', h5_path), '/raw/power/' %&% b, ram = T)
+
+
+              self$raw_phase[[b]] = load_fst_or_h5(
+                fst_path = file.path(cache_dir, 'cache', 'phase', 'raw', b, fst_path),
+                h5_path = file.path(cache_dir, 'phase', h5_path),
+                h5_name = '/raw/phase/' %&% b,
+                fst_need_transpose = T,
+                fst_need_drop = F,
+                ram = T
+              )
+              # test: should be 0 0
+              # range(self$raw_phase[[b]] - load_h5(file.path(cache_dir, 'phase', h5_path), '/raw/phase/' %&% b, ram = T))
+
+              # original code
+              # self$raw_phase[[b]] = load_h5(file.path(cache_dir, 'phase', h5_path), '/raw/phase/' %&% b, ram = T)
+
+
+              self$raw_volt[[b]] = load_fst_or_h5(
+                fst_path = file.path(cache_dir, 'cache', 'voltage', 'raw', b, fst_path),
+                h5_path = file.path(cache_dir, 'voltage', h5_path),
+                h5_name = '/raw/voltage/' %&% b,
+                fst_need_transpose = F,
+                fst_need_drop = T,
+                ram = T
+              )
+
+              # test: should be 0 0
+              # range(self$raw_volt[[b]] - load_h5(file.path(cache_dir, 'voltage', h5_path), '/raw/voltage/' %&% b, ram = T))
+
+              # original code
+              # self$raw_volt[[b]] = load_h5(file.path(cache_dir, 'voltage', h5_path), '/raw/voltage/' %&% b, ram = T)
             }else{
               # Noref or bad electrodes
               # this is a special reference where power, volt, phase = 0
