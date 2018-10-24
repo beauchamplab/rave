@@ -181,3 +181,31 @@ Arg.LazyFST <- function(obj){
 exp.LazyFST <- function(obj){
   base::exp(obj$subset())
 }
+
+
+
+
+load_fst_or_h5 <- function(
+  fst_path, h5_path, h5_name, fst_need_transpose = F, fst_need_drop = F, ram = F
+){
+  # check if fst_path exists
+  if(file.exists(fst_path)){
+    if(ram){
+      re = as.matrix(fst::read_fst(fst_path))
+      dimnames(re) = NULL
+      if(fst_need_transpose){
+        re = t(re)
+      }
+      if(fst_need_drop){
+        re = drop(re)
+      }
+      return(re)
+    }else{
+      re = rave:::LazyFST$new(file_path = fst_path, transpose = fst_need_transpose)
+      return(re)
+    }
+  }else{
+    re = load_h5(file = h5_path, name = h5_name, read_only = T, ram = ram)
+    return(re)
+  }
+}

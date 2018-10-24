@@ -557,25 +557,29 @@ gen_reference = function(electrodes){
       fname_h5 = sprintf('%d.h5', e)
       fname_fst = sprintf('%d.fst', e)
       sapply(blocks, function(b){
-        coef = NULL
-        try({
-          coef = fst::read_fst(file.path(root_dir, 'cache', 'power', 'raw', b, fname_fst))
+        fst_file = file.path(root_dir, 'cache', 'power', 'raw', b, fname_fst)
+        if(file.exists(fst_file)){
+          coef = fst::read_fst()
           coef = t(sqrt(as.matrix(coef)))
-        }, silent = T)
-        coef %?<-% sqrt(load_h5(file.path(root_dir, 'power', fname_h5), name = sprintf('/raw/power/%s', b))[])
+        }else{
+          coef = sqrt(load_h5(file.path(root_dir, 'power', fname_h5), name = sprintf('/raw/power/%s', b))[])
+        }
 
-        phase = NULL
-        try({
-          phase = fst::read_fst(file.path(root_dir, 'cache', 'phase', 'raw', b, fname_fst))
+
+        fst_file = file.path(root_dir, 'cache', 'phase', 'raw', b, fname_fst)
+        if(file.exists(fst_file)){
+          phase = fst::read_fst(fst_file)
           phase = exp(1i * t((as.matrix(phase))))
-        }, silent = T)
-        phase %?<-% exp(1i * load_h5(file.path(root_dir, 'phase', fname_h5), name = sprintf('/raw/phase/%s', b))[])
+        }else{
+          phase = exp(1i * load_h5(file.path(root_dir, 'phase', fname_h5), name = sprintf('/raw/phase/%s', b))[])
+        }
 
-        volt = NULL
-        try({
-          volt = fst::read_fst(file.path(root_dir, 'cache', 'voltage', 'raw', b, fname_fst))[,1]
-        }, silent = T)
-        volt %?<-% load_h5(file.path(root_dir, 'voltage', fname_h5), name = sprintf('/raw/voltage/%s', b))[]
+        fst_file = file.path(root_dir, 'cache', 'voltage', 'raw', b, fname_fst)
+        if(file.exists(fst_file)){
+          volt = fst::read_fst(fst_file)[,1]
+        }else{
+          volt = load_h5(file.path(root_dir, 'voltage', fname_h5), name = sprintf('/raw/voltage/%s', b))[]
+        }
 
 
         list(
