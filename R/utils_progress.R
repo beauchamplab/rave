@@ -1,22 +1,33 @@
+#' A wrapper for shiny Progress object
+#' @details shiny::Progress class cannot be used under non-reactive environment.
+#' rave::progress function wrap it up so that you can use it in non-reactive settings.
+#' @param title Main title for progress bar
+#' @param max How many steps you have for this process
+#' @param session shiny session, default is getDefaultReactiveDomain()
+#' @param quiet nonreactive-only mode? default is FALSE. If TRUE, then progress bar will be hidden in shiny app
+#' @examples
+#' \dontrun{
+#' # case 1: non-reactive settings
+#' p = progress('This is title', max = 10)
+#' for(i in 1:10) p$inc(i)
+#'
+#' # case 2: shiny app
+#' shinyApp(ui = fluidPage(actionLink('click', 'Click Me')),
+#'   server = function(input, output, session){
+#'     observeEvent(input$click, {
+#'     p = progress('This is Title', max = 10)
+#'     on.exit({p$close()})
+#'     for(i in 1:10) { p$inc(i); Sys.sleep(0.3); }
+#'   })
+#' })
+#' }
 #' @export
 progress <- function(
   title, max = 1,
   session = getDefaultReactiveDomain(),
   quiet = FALSE
 ){
-  env = environment()
   if(is.null(session) || quiet){
-    # progress = txtProgressBar(title = title, initial = 0, max = max)
-    #
-    # val = 0
-    # inc = function(message){
-    #   env$val = env$val + 1
-    #   setTxtProgressBar(progress, 0, label=message)
-    #   setTxtProgressBar(progress, env$val, label = message)
-    # }
-    # close = function(){
-    #   options(rave.logger.disabled = FALSE)
-    # }
     progress = NULL
     inc = function(message){if(!quiet) logger(message)}
     close = function(){}
@@ -45,3 +56,4 @@ progress <- function(
     reset = reset
   ))
 }
+
