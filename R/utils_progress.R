@@ -27,6 +27,11 @@ progress <- function(
   session = getDefaultReactiveDomain(),
   quiet = FALSE
 ){
+  env = environment()
+  if(is.null(title)){
+    title = ''
+  }
+
   if(is.null(session) || quiet){
     progress = NULL
     inc = function(message){if(!quiet) logger(message)}
@@ -45,7 +50,15 @@ progress <- function(
       progress$close()
     }
     reset = function(message = NULL, detail = NULL){
-      progress$set(value = 0, message = message, detail = detail)
+      if(is.null(message)){
+        env$title = ''
+      }else{
+        env$title = message
+      }
+      if(is.null(detail)){
+        detail = ''
+      }
+      progress$set(value = 0, message = env$title, detail = detail)
     }
   }
 
