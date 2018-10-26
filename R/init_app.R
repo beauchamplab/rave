@@ -362,9 +362,11 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
 
     ##################################################################
     # load modules
-    .progress = progress('Loading modules', max = length(unlist(modules)))
+    # progress bar won't show title here, this is because shiny render detail information first and then
+    # message
+    .progress = progress(title = '', max = length(unlist(modules)))
     shinirized_modules = lapply(unlist(modules), function(m){
-      .progress$inc(m$label_name)
+      .progress$inc(sprintf('Loading - %s', m$label_name))
       rave:::shinirize(m, test.mode = test.mode)
     })
     .progress$close()
