@@ -119,8 +119,14 @@ LazyFST <- R6::R6Class(
 
 
 #' @export
-`[.LazyFST` <- function(obj, ...){
-  obj$subset(...)
+`[.LazyFST` <- function(obj, i, j, ..., drop = F){
+  if(missing(i)){
+    i = NULL
+  }
+  if(missing(j)){
+    j = NULL
+  }
+  obj$subset(i, j, ..., drop = drop)
 }
 
 #' @export
