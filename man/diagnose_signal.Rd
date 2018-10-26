@@ -9,7 +9,7 @@ diagnose_signal(s1, s2 = NULL, sc = NULL, srate, name = "",
   noverlap = window/2, std = 3, cex = 1.5, lwd = 0.5,
   flim = NULL, nclass = 100, main = "Channel Inspection",
   col = c("black", "red"), which = NULL, start_time = 0,
-  boundary = NULL, ...)
+  boundary = NULL, mar = c(5.2, 5.1, 4.1, 2.1), ...)
 }
 \arguments{
 \item{s1}{Signal for inspection}

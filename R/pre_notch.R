@@ -111,7 +111,7 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
           actionButton(ns('prev'), 'Previous'),
           actionButton(ns('nxt'), 'Next'),
           hr(),
-          sliderInput(ns('winlen'), 'Pwelch Window Length): ',
+          sliderInput(ns('winlen'), 'Pwelch Window Length: ',
                       min = 100, max = ceiling(2 * srate), value = winlen),
           sliderInput(ns('freq_lim'), 'Frequency limit', min = 20, max = floor(srate / 2), step = 1L, value = freq_lim),
           sliderInput(ns('nclass'), 'Number of bins (histogram): ', min = 20, max = 200, value = nclass)
@@ -365,7 +365,7 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
           selectInput(ns('chl_type'), 'Channel type', choices = CHANNEL_TYPES,
                       selected = isolate(CHANNEL_TYPES[local_data$chl_type])),
           hr(),
-          sliderInput(ns('winlen'), 'Pwelch Window Length): ',
+          sliderInput(ns('winlen'), 'Pwelch Window Length: ',
                        min = 100, max = ceiling(srate * 2), value = ceiling(srate * 2)),
           sliderInput(ns('freq_lim'), 'Frequency limit', min = 20, max = floor(srate / 2), step = 1L, value = freq_lim),
           sliderInput(ns('nclass'), 'Number of bins (histogram): ', min = 20, max = 200, value = nclass)

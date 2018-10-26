@@ -35,7 +35,7 @@ diagnose_signal <- function(
   max_freq = 300, window = ceiling(srate * 2), noverlap = window / 2, std = 3,
   cex = 1.5, lwd = 0.5, flim = NULL, nclass = 100,
   main = 'Channel Inspection', col = c('black', 'red'),
-  which = NULL, start_time = 0, boundary = NULL,
+  which = NULL, start_time = 0, boundary = NULL, mar = c(5.2, 5.1, 4.1, 2.1),
   ...){
 
   # is sc not specified, and srate is too high, compress s1
@@ -57,8 +57,9 @@ diagnose_signal <- function(
 
   # Grid layout
   if(length(which) == 0){
-    grid::grid.newpage()
+    # grid::grid.newpage()
     lay <- rbind(c(1,1,1), c(2,3,4))
+    par(mar = mar)
     graphics::layout(mat = lay)
     # mai = par('mai');
     # on.exit({par(mai = mai)}, add = T)

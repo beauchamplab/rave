@@ -134,6 +134,7 @@ Collate:
     'utils_debug.R'
     'utils_dir.R'
     'utils_execfunc.R'
+    'utils_export.R'
     'utils_ff_mann.R'
     'utils_general.R'
     'utils_h5_mann.R'
