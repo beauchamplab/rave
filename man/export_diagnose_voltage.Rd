@@ -20,13 +20,15 @@ export_diagnose_voltage(subject, electrodes, blocks,
 
 \item{winlen}{window length, default is 2*subject_sample_rate}
 
-\item{freq_lim}{default is half of voltage sample rate}
+\item{freq_lim}{default is half of voltage sample rate, however I woould recommend: 300 Hz}
 
 \item{nclass}{number of classes in histogram plot, default is 50}
 
 \item{fore_col}{Notch filtered color}
 
 \item{back_col}{Raw filtered color}
+
+\item{...}{All other params will be passed to \code{\link{pdf}} function}
 }
 \description{
 You must import subject throught rave_preprocess() and then run this function
@@ -34,4 +36,7 @@ You must import subject throught rave_preprocess() and then run this function
 \details{
 Run "rave_preprocess()" first, import subject. If the subject is notch filtered, then it will compare
 both raw and filtered signals, otherwise it will just show the raw voltage plots
+}
+\seealso{
+\code{\link{pdf}}, \code{\link{diagnose_signal}}, \code{\link{pwelch}}
 }

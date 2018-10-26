@@ -5,10 +5,12 @@
 #' @param blocks default is all blocks of this subject
 #' @param save_dir which directory you want to export default will create a folder "exportr" in current path
 #' @param winlen window length, default is 2*subject_sample_rate
-#' @param freq_lim default is half of voltage sample rate
+#' @param freq_lim default is half of voltage sample rate, however I woould recommend: 300 Hz
 #' @param nclass number of classes in histogram plot, default is 50
 #' @param fore_col Notch filtered color
 #' @param back_col Raw filtered color
+#' @param ... All other params will be passed to \code{\link{pdf}} function
+#' @seealso \code{\link{pdf}}, \code{\link{diagnose_signal}}, \code{\link{pwelch}}
 #' @details Run "rave_preprocess()" first, import subject. If the subject is notch filtered, then it will compare
 #' both raw and filtered signals, otherwise it will just show the raw voltage plots
 #' @export
