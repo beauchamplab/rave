@@ -2,8 +2,8 @@
 Package: rave
 Type: Package
 Title: R Analysis and Visualization of ECOG/iEEG Data
-Version: 0.1.5.0025
-Date: 2018-10-20
+Version: 0.1.5.0026
+Date: 2018-10-26
 Authors@R: c(
     person("Zhengjia", "Wang", email = "dipterix.wang@gmail.com", role = c("aut", "cre")),
     person("John", "Magnotti", role = c("aut")),
@@ -57,6 +57,8 @@ Imports:
     reticulate (>= 1.6),
     hdf5r (>= 1.0.0),
     fst (>= 0.8.8)
+Suggests:
+    gifti
 Collate: 
     'utils_syscheck.R'
     'aaa.R'
@@ -125,6 +127,7 @@ Collate:
     'singleelectrode.R'
     'suma_io.R'
     'utils_3drender.R'
+    'utils_afni.R'
     'utils_async.R'
     'utils_check_repo.R'
     'utils_checkvalid.R'

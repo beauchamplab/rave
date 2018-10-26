@@ -46,8 +46,18 @@ RaveBrain <- R6::R6Class(
     },
     copy = function(){
       re = self$clone(deep = TRUE)
-      re[['_set_threejs']]('three_electrodes', lapply(private$three_electrodes, function(x){x$clone()}))
-      re[['_set_threejs']]('three_pial', lapply(private$three_pial, function(x){x$clone()}))
+      re[['_set_threejs']]('three_electrodes', lapply(private$three_electrodes, function(x){
+        if(is.null(x)){
+          return(NULL)
+        }
+        x$clone()
+      }))
+      re[['_set_threejs']]('three_pial', lapply(private$three_pial, function(x){
+        if(is.null(x)){
+          return(NULL)
+        }
+        x$clone()
+      }))
       re
     },
     load_electrodes = function(tbl){
@@ -165,9 +175,17 @@ RaveBrain <- R6::R6Class(
       tmp
     },
     import_spec = function(spec_file, include_electrodes = FALSE, nearest_face = TRUE, ...){
+      # shiny_mode
+      if(is.null(getDefaultReactiveDomain())){
+        shiny_mode = F
+      }else{
+        shiny_mode = T
+      }
+
       if(missing(spec_file)){
         if(is.null(private$subject)){
-          stop('Please provide spec_file')
+          s = 'Please provide spec_file'
+          if(shiny_mode){ return(s) }else{ stop(s) }
         }
         # try to load from private subject
         suma_dir = private$subject$dirs$suma_dir
@@ -176,7 +194,8 @@ RaveBrain <- R6::R6Class(
         spec_file = file.path(suma_dir, rave_options('suma_spec_file'))
       }
       if(!file.exists(spec_file)){
-        stop('spec_file not exists')
+        s = 'spec_file not exists'
+        if(shiny_mode){ return(s) }else{ stop(s) }
       }
 
       # This will be a long process (maybe?)
@@ -259,7 +278,26 @@ RaveBrain <- R6::R6Class(
             return(NULL)
           }
 
-          mesh_data = threejsr::read.freesurf.asc(f)
+          # check type
+          if(stringr::str_detect(f, '[gG][iI][iI]$')){
+            # this is gifti file
+            if('gif')
+            tryCatch({
+              mesh_data = threejsr::read.freesurf.gii(f)
+            }, error = function(e){
+              # gifti package is not loaded
+              logger('Please run `install.packages("gifti")` to enable reading from gii files.', level = 'WARNING')
+              return(NULL)
+            }) ->
+              mesh_data
+            if(is.null(mesh_data)){
+              return()
+            }
+          }else if(stringr::str_detect(f, '[aA][sS][cC]$')){
+            mesh_data = threejsr::read.freesurf.asc(f)
+          }else{
+            require()
+          }
 
           if(which %in% c(1,2)){
             # generate threejsr GEOM object
@@ -462,20 +500,24 @@ RaveBrain <- R6::R6Class(
 
 
       for(ii in which){
+        el = private$three_electrodes[[ii]]
+        if(!is(el, 'TGeom')){
+          next
+        }
         tryCatch({
           # Set electrode hooks
           info = private$ani_electrodes[[ii]] # keyframe and value
           if(!length(info)){
             stop('')
           }
-          private$three_electrodes[[ii]]$animation_event(
+          el$animation_event(
             name = name,
             event_data = t(f(info$value)),
             key_frames = info$keyframe,
             loop = F
           )
         }, error = function(err){
-          private$three_electrodes[[ii]]$remove_event(event_type = 'animation', name)
+          el$remove_event(event_type = 'animation', name)
         })
       }
     },
@@ -521,6 +563,10 @@ RaveBrain <- R6::R6Class(
 
       # Render via threejsr
       elements = c(pials, private$three_electrodes)
+      elements = dropNulls(elements)
+      if(!length(elements)){
+        return('No elements detected!')
+      }
       threejsr:::threejs_scene.default(
         elements = elements,
         width = width,
@@ -543,16 +589,24 @@ RaveBrain <- R6::R6Class(
     },
     set_electrode_label = function(which, label, name){
       for(ii in which){
-        private$three_electrodes[[ii]]$mesh_info = label
-        if(is.na(private$three_electrodes[[ii]]$name)){
-          private$three_electrodes[[ii]]$set_name(label)
+        el = private$three_electrodes[[ii]]
+        if(!is(el, 'TGeom')){
+          next
+        }
+        el$mesh_info = label
+        if(is.na(el$name)){
+          el$set_name(label)
         }
       }
     },
     set_electrode_size = function(which, radius = 2){
       assertthat::assert_that(is.numeric(radius) && length(radius) == 1, msg = "invalid radius")
       for(ii in which){
-        private$three_electrodes[[ii]]$set_radius(radius)
+        el = private$three_electrodes[[ii]]
+        if(!is(el, 'TGeom')){
+          next
+        }
+        el$set_radius(radius)
       }
     }
   )

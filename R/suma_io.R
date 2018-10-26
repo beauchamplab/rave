@@ -317,7 +317,7 @@ suma_surface_volume_parse <- function(file_path){
 
 
 
-#' @export
+
 freesurfer_mesh <- function(subject, spec_file = NULL, state = 'pial', center = c(0,0,30)){
   if(is.character(subject)){
     subject = str_split_fixed(subject, '/', 2)

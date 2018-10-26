@@ -25,7 +25,7 @@ updatePackageVersion <- function(packageLocation ="."){
   newVersion <- oldVersion + 1
 
   ## Build final version number
-  vFinal <- paste(vNumberKeep, stringr::str_pad('23', 4, 'left', '0'), sep = ".")
+  vFinal <- paste(vNumberKeep, stringr::str_pad(newVersion, 4, 'left', '0'), sep = ".")
 
   ## Update DESCRIPTION file (in R)
   desc[vLine] <- paste0("Version: ", vFinal )
