@@ -242,6 +242,7 @@ RaveBrain <- R6::R6Class(
 
           # save mat volume_info[['VOLREG_MATVEC_000000']]
           mat = volume_info[['VOLREG_MATVEC_000000']]
+          mat %?<-% volume_info[['ALLINEATE_MATVEC_B2S_000000']]
           if(length(mat) && length(mat$value) >= 12){
             mat = c(mat$value[seq_len(12)], 0,0,0,1)
             mat = matrix(mat, nrow = 4, ncol = 4, byrow = T)
@@ -263,10 +264,10 @@ RaveBrain <- R6::R6Class(
         f = self$find_file(surf_name, default = NULL, alt_dir = dirname(spec_file))
 
         if(length(f) && file.exists(f)){
-          if(stringr::str_detect(surf_name, '^lh')){
+          if(stringr::str_detect(surf_name, '[\\.]{0,1}lh\\.')){
             which = 1
             progress$inc(message = fprintf('Loading left pial'))
-          }else if(stringr::str_detect(surf_name, '^rh')){
+          }else if(stringr::str_detect(surf_name, '[\\.]{0,1}rh\\.')){
             which = 2
             progress$inc(message = fprintf('Loading right pial'))
           }else if(include_electrodes){
@@ -281,7 +282,6 @@ RaveBrain <- R6::R6Class(
           # check type
           if(stringr::str_detect(f, '[gG][iI][iI]$')){
             # this is gifti file
-            if('gif')
             tryCatch({
               mesh_data = threejsr::read.freesurf.gii(f)
             }, error = function(e){
