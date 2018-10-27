@@ -467,16 +467,11 @@ shiny_data_selector <- function(module_id){
               ),
               tags$label(
                 class = 'label label-default bg-green', style = 'display: inline-block;',
-                tags$a('Mu', style = 'color:white!important', class = 'action-button',
-                       id = ns('freq_preset_4'), href = '#')
-              ),
-              tags$label(
-                class = 'label label-default bg-blue', style = 'display: inline-block;',
                 tags$a('Beta', style = 'color:white!important', class = 'action-button',
                        id = ns('freq_preset_5'), href = '#')
               ),
               tags$label(
-                class = 'label label-default bg-aqua', style = 'display: inline-block;',
+                class = 'label label-default bg-blue', style = 'display: inline-block;',
                 tags$a('Low Gamma', style = 'color:white!important', class = 'action-button',
                        id = ns('freq_preset_6'), href = '#')
               ),
