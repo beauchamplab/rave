@@ -1,32 +1,29 @@
----
-title: RAVE
-author: Zhengjia Wang
-date: Oct 26, 2018
----
-<span style="color:#ffa500">**R**</span> <span style="color:#1874cd">**A**</span>*nalysis and* <span style="color:#006400">**V**</span>*isualization of intracranial* <span style="color:#7d26cd">**E**</span>*lectroencephalography*
+# RAVE
 
-<div style = "width:100%; display:flex;">
-<div style = "width:60%; flex-basis:60%; margin-right:15px;">
-```
+`R` `A`*nalysis and* `V`*isualization of intracranial* `E`*lectroencephalography*
+
+*Author: Zhengjia Wang*
+
+*Last Updated: Oct 26, 2018*
+
+
+<img src="https://raw.githubusercontent.com/dipterix/instrave/master/img/mainapp/mainapp_demo_small.png" width="46%" align="right" />
+
+```r
 # Install rave
 install.packages('devtools')
 devtools::install_github('beauchamplab/rave')
 ```
 
-```
+```r
 # Launch main app
 rave::init_app()
 ```
 
-```
-# Show document
+```r
+# Show documents
 help(package = 'rave')
 ```
-</div>
-<div style = "width:40%; flex-basis:40%">
-![RAVE Builtin Module - **Condition Explorer** by *John F. Magnotti*, *Zhengjia Wang*](https://raw.githubusercontent.com/dipterix/instrave/master/img/mainapp/mainapp_demo.png)
-</div>
-</div>
 
 <hr />
 
@@ -35,7 +32,7 @@ help(package = 'rave')
 
 If you have `R` and `RStudio` installed (on Windows, you will also need `RTools` to be installed), just run the following commands in RStudio console, otherwise click here for full-installation guide (should only take less than *10 min*).
 
-```
+```r
 # Step 1. install devtools
 install.packages('devtools')
 
@@ -58,7 +55,7 @@ Before starting the first part, let's make sure you are all set.
 
 First, open `RStudio`, in the console tab, enter the following line:
 
-```
+```r
 library(rave)
 ```
 
@@ -79,19 +76,20 @@ According to [/Users/beauchamplab/rave_modules/modules.csv]
 [ INFO ]: Type 'rave_options(launch_gui = T)' or '?rave_options' for details
 ```
 
-Now, configure settings. This usually only needs to be done once. In your console, enter:
+#### RAVE Settings (optional)
 
-```
+Now, configure settings. This is *Optional* if no error occur during `library(rave)`, or you don't have `AFNI/SUMA` installed. Usually you only needs to set up once. In the console, enter:
+
+```r
 rave_options()
 ```
 
 You will see this from your default browser:
 
-<div style = "width:100%; display:flex;">
-<div style = "width:60%; flex-basis:60%; margin-right:15px;">
-![RAVE settings, an HTML GUI lauched by a single line of code `rave_options()`](https://raw.githubusercontent.com/dipterix/instrave/master/img/settings/rave_options.png)
-</div>
-<div style = "width:40%; flex-basis:40%">
+<img src="https://raw.githubusercontent.com/dipterix/instrave/master/img/settings/rave_options.png" width="65%" align="left" />
+RAVE settings, an HTML GUI lauched by a single line of code `rave_options()`
+
+
 The most important part of this settings is **Raw subject data path** and **RAVE subject data path**. 
 
 The first one specifies the raw data directory for RAVE. It stores the original Matlab files, by default is `~/rave_data/raw_dir`. 
@@ -104,10 +102,19 @@ If you have `SUMA` installed, you can also specify SUMA path on the right panel.
 
 *See more topics on:
 
-* RAVE options
-* Directory Structure
-* RAVE-SUMA
-* 3D Viewer
+RAVE options <br />
+Directory Structure <br />
+RAVE-SUMA <br />
+3D Viewer <br />
 
-</div>
-</div>
+
+<br>
+
+#### Main Application
+
+Once set the correct SUMA path and data repository paths, you can now launch the main application by typing
+
+```r
+init_app()
+```
+
