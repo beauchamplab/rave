@@ -7,26 +7,24 @@ date: Oct 26, 2018
 
 <div style = "width:100%; display:flex;">
 <div style = "width:60%; flex-basis:60%; margin-right:15px;">
-
-```r
+```
 # Install rave
 install.packages('devtools')
 devtools::install_github('beauchamplab/rave')
 ```
 
-```r
+```
 # Launch main app
 rave::init_app()
 ```
 
-```r
+```
 # Show document
 help(package = 'rave')
 ```
 </div>
 <div style = "width:40%; flex-basis:40%">
-<img src="https://raw.githubusercontent.com/dipterix/instrave/master/img/mainapp/mainapp_demo.png" width="100%" />
-RAVE Builtin Module - **Condition Explorer** by *John F. Magnotti*, *Zhengjia Wang*
+![RAVE Builtin Module - **Condition Explorer** by *John F. Magnotti*, *Zhengjia Wang*](https://raw.githubusercontent.com/dipterix/instrave/master/img/mainapp/mainapp_demo.png)
 </div>
 </div>
 
@@ -37,7 +35,7 @@ RAVE Builtin Module - **Condition Explorer** by *John F. Magnotti*, *Zhengjia Wa
 
 If you have `R` and `RStudio` installed (on Windows, you will also need `RTools` to be installed), just run the following commands in RStudio console, otherwise click here for full-installation guide (should only take less than *10 min*).
 
-```r
+```
 # Step 1. install devtools
 install.packages('devtools')
 
@@ -60,7 +58,7 @@ Before starting the first part, let's make sure you are all set.
 
 First, open `RStudio`, in the console tab, enter the following line:
 
-```r
+```
 library(rave)
 ```
 
@@ -83,7 +81,7 @@ According to [/Users/beauchamplab/rave_modules/modules.csv]
 
 Now, configure settings. This usually only needs to be done once. In your console, enter:
 
-```r
+```
 rave_options()
 ```
 
