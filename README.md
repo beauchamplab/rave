@@ -1,236 +1,113 @@
-# RAVE
-R Analysis and Visualization of ECOG/iEEG Data
+---
+title: RAVE
+author: Zhengjia Wang
+date: Oct 26, 2018
+---
+<span style="color:#ffa500">**R**</span> <span style="color:#1874cd">**A**</span>*nalysis and* <span style="color:#006400">**V**</span>*isualization of intracranial* <span style="color:#7d26cd">**E**</span>*lectroencephalography*
 
-![RAVE Module - Condition Explorer](https://raw.githubusercontent.com/dipterix/instrave/master/img/mainapp/mainapp_demo.png)
-
-
-## A. Installation
-
-### 1. Environment Setup
-
-In this section, you'll install R, RStudio, devtools and all other dependencies. To start, we need to know what are R, RStudio, devtools
-
-- **R** is a functional programming language that *RAVE* uses. Similar to Matlab, Python, C++, it's a language.
-- **Devtools** are necessary to enable advanced features, especially when you want to compile R packages.
-- **RStudio** is an IDE *(Intergrated Development Environment)* for easy and better code management especially designed for R.
-
-You need to check your operating system before installtion:
-
-As of 07/10/2018, the following systems are tested:
-
-+ [Mac OS](#macos)
-+ [Windows (Windows 10, with Bash enabled)](#windows)
-+ [Ubuntu 16.04+](#ubuntu)
-+ Linux (Others)
-
-Minimum system requirement:
-
-- Multicore CPU (2+)
-- 8GB RAM
-- 128 GB Free Hard Disk Space
-- 512 MB Video Memory
-- WebGL-enabled Web Browser
-
-Suggested system requirement:
-
-- 8 Core CPU
-- 64GB RAM (6-8GB per CPU)
-- 1T Hard Disk Space
-- 2 GB Video Memory
-- WebGL-enabled Web Browser
-
-
-#### MacOS
-
-1. First, go to Cran-R official website and download install the latest R:
-
-[https://cran.r-project.org/bin/macosx/](https://cran.r-project.org/bin/macosx/)
-
-2. After installing R, make sure that you install Xcode from the Mac App Store:
-
-The best way is to google **How to install Xcode**. Moncef Belyamani has a great article [here](https://www.moncefbelyamani.com/how-to-install-xcode-homebrew-git-rvm-ruby-on-mac/).
-
-Or if you have `AFNI` installed, you must have Xcode installed, then you need xcode command line tool. Open terminal (from Application), enter
-
+<div style = "width:100%; display:flex;">
+<div style = "width:60%; flex-basis:60%; margin-right:15px;">
 ```
-xcode-select --install
-```
-
-3. RStudio
-
-[https://www.rstudio.com/products/rstudio/download/](https://www.rstudio.com/products/rstudio/download/)
-
-4. Install `devtools` and `RAVE`
-
-Open RStudio, enter the following command in RStudio **console**
-
-```
-install.packages('devtools')
-```
-
-To install `RAVE`
-
-```
-devtools::install_github('beauchamplab/rave')
-```
-
-#### Windows
-
-1. Install R with the **latest** version
-
-[https://cran.r-project.org/bin/windows/base/](https://cran.r-project.org/bin/windows/base/)
-
-2. Install *Rtools*. Please install the **latest** version:
-
-[https://cran.r-project.org/bin/windows/Rtools/](https://cran.r-project.org/bin/windows/Rtools/)
-
-3. Download and install RStudio for Windows
-
-[https://www.rstudio.com/products/rstudio/download/](https://www.rstudio.com/products/rstudio/download/)
-
-4. Install `devtools` and `RAVE`
-
-Open RStudio, enter the following command in RStudio **console**
-
-```
-install.packages('devtools')
-```
-
-To install `RAVE`
-
-```
-devtools::install_github('beauchamplab/rave')
-```
-
-*Little problem you might get*
-
-Sometimes, `devtools` will report errors like
-
-```
-WARNING: Rtools is required to build R packages, but no version of Rtools 
-compatible with R ... was found. (Only the following incompatible 
-version(s) of Rtools were found ...
-```
-
-Please make sure that you have the right `RTools` installed. Please check [RTools website](https://cran.r-project.org/bin/windows/Rtools/)
-
-If you install the right version of RTools, then run the following command in RStudio to force it.
-
-```
-assignInNamespace("version_info", c(devtools:::version_info, list("3.5" = list(version_min = "3.3.0", version_max = "3.5.999", path = "bin"))), "devtools")
-```
-
-
-#### Ubuntu
-
-1. Add Cran repository to your system
-
-Add R-Cran repository to your app list:
-
-Open terminal (if you don't know how, look at your sidebar in ubuntu, `search your computer` enter "terminal"), type the following code:
-
-```
-sudo gedit /etc/apt/sources.list
-```
-
-Then there will be a text editor with lots of "deb"s in it. Append the following line at the end of this file
-
-
-```
-deb https://cloud.r-project.org/bin/linux/ubuntu xenial-cran35/
-```
-
-**IMPORTANT** Based on you system, you might want to enter different repositories (https://cran.r-project.org/bin/linux/). However, this line should be with a format of `deb` + `[repository URL]` + `xenial` (or `xenial-cran35`) + `/`. The difference between `xenial` and `xenial-cran35` will affect the version of R to be installed.
-
-Save the file and close text editor. In your terminal, update `apt-get` repository:
-
-```
-sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
-sudo apt-get update
-```
-
-The first line gives you access to the new repository (it adds keys to your computer so that you can safely download R). 
-
-2. Install R
-
-Copy the following command line by line into your terminal and run
-
-```
-sudo apt-get install r-base
-```
-
-```
-sudo apt-get install r-base-dev
-```
-
-3. Install compiling tools and system dependencies
-
-After installing R, copy the following command to your terminal and run:
-
-```
-sudo apt-get install libssl-dev libcurl4-openssl-dev libssh2-1-dev libv8-3.14-dev libxml2-dev libfftw3-dev libtiff5-dev libhdf5-dev
-```
-
-The first three packages `libssl-dev` `libcurl4-openssl-dev` `libssh2-1-dev` are necessary for `devtools` (compilers). `libv8-3.14-dev` is for 
-`V8` package to enable JavaScript. `libxml2-dev` is for `xml2`. `libfftw3-dev` `libtiff5-dev` are necessary for fast-fourier transformations and 
-`libhdf5-dev` is for reading and writing data in open data format `HDF5`.
-
-4. Install RStudio
-
-Go to https://www.rstudio.com/products/rstudio/download/#download and download `RStudio 1.1.453 - Ubuntu 16.04+/Debian 9+ (64-bit)` to your **desktop** 
-and type the folloing command in your terminal
-
-```
-cd ~/Desktop
-sudo apt-get install libjpeg62
-```
-
-Then we can install RStudio
-
-```
-sudo dpkg -i ./rstudio-xenial-1.1.453-amd64.deb 
-```
-
-and `RStudio` should be in your application list. Again, if you don't know where it is, look at your sidebar in ubuntu, click `search your computer` and enter "RStudio".
-
-5. Install `RAVE`
-
-Open RStudio,
-
-In your RStudio **console**, run:
-
-```
+# Install rave
 install.packages('devtools')
 devtools::install_github('beauchamplab/rave')
 ```
 
-
-## B. Toy example
-
-
-#### Preprocess
-
-To play with **preprocess**, type the following R command 
-
 ```
-rave_preprocess()
+# Launch main app
+rave::init_app()
 ```
 
-* Set `subject code` to be `Subject` 
-* Set `project name` to be `Demo`.
-* Set `sample rate` to be `2000`
-* Set `electrodes` to be `1-6`.
+```
+# Show document
+help(package = 'rave')
+```
+</div>
+<div style = "width:40%; flex-basis:40%">
+![RAVE Builtin Module - **Condition Explorer** by *John F. Magnotti*, *Zhengjia Wang*](https://raw.githubusercontent.com/dipterix/instrave/master/img/mainapp/mainapp_demo.png)
+</div>
+</div>
 
-Press `load subject` button
-
-Next, please go through `Notch filter`, `Wavelet` and `Epoch` modules.
+<hr />
 
 
-#### Main App
+## Installation
 
-To play with **Main**, type:
+If you have `R` and `RStudio` installed (on Windows, you will also need `RTools` to be installed), just run the following commands in RStudio console, otherwise click here for full-installation guide (should only take less than *10 min*).
 
 ```
-init_app()
+# Step 1. install devtools
+install.packages('devtools')
+
+# Step 2. install RAVE
+devtools::install_github('beauchamplab/rave')
+
+# Step 3. (optional) check additional dependencies just in case.
+#         Should be installed automatically. 
+rave:::check_updates()
+
+# Step 4. check modules update
+arrange_modules(T)
 ```
 
+## Quick Guide
+
+`RAVE` comes with two toy examples: one only contains raw `Matlab` files, the other has gone though full preprocessing pipeline. We start by introducing the main application (second subject, full preprocessed), and then introduce preprocessing pipeline.
+
+Before starting the first part, let's make sure you are all set. 
+
+First, open `RStudio`, in the console tab, enter the following line:
+
+```
+library(rave)
+```
+
+This should print something like this: 
+
+```
+Active modules: 
+ - 3D Viewer(viewer_3d)
+ - Electrode Reference(reference)
+ - Condition Explorer(condition_explorer)
+ - Inter-Trial Phase Coherence(itpc_phase)
+ - Onset Detection(onset_detection)
+According to [/Users/beauchamplab/rave_modules/modules.csv]
+[ INFO ]: RAVE - (Code: Ent) is loaded!
+[ INFO ]: Module File:        	/Users/beauchamplab/rave_modules/modules.csv
+[ INFO ]: Data Repository:    	/Users/beauchamplab/rave_data/data_dir
+[ INFO ]: Raw-data Repository:	/Users/beauchamplab/rave_data/raw_dir
+[ INFO ]: Type 'rave_options(launch_gui = T)' or '?rave_options' for details
+```
+
+Now, configure settings. This usually only needs to be done once. In your console, enter:
+
+```
+rave_options()
+```
+
+You will see this from your default browser:
+
+<div style = "width:100%; display:flex;">
+<div style = "width:60%; flex-basis:60%; margin-right:15px;">
+![RAVE settings, an HTML GUI lauched by a single line of code `rave_options()`](https://raw.githubusercontent.com/dipterix/instrave/master/img/settings/rave_options.png)
+</div>
+<div style = "width:40%; flex-basis:40%">
+The most important part of this settings is **Raw subject data path** and **RAVE subject data path**. 
+
+The first one specifies the raw data directory for RAVE. It stores the original Matlab files, by default is `~/rave_data/raw_dir`. 
+
+RAVE will import raw data into the second folder, which stores the data that RAVE uses for all its scripts and dependencies. The second directory is usually very large and can be a network mapping. By default it is `~/rave_data/data_dir`
+
+
+
+If you have `SUMA` installed, you can also specify SUMA path on the right panel. Make sure all paths are absolute paths. You can press "Test SUMA" to see if it launches.
+
+*See more topics on:
+
+* RAVE options
+* Directory Structure
+* RAVE-SUMA
+* 3D Viewer
+
+</div>
+</div>
