@@ -9,7 +9,7 @@
 *Last Updated: Oct 26, 2018*
 
 
-<img src="https://raw.githubusercontent.com/dipterix/instrave/master/img/mainapp/mainapp_demo_small.png" width="46%" align="right" />
+<img src="https://raw.githubusercontent.com/dipterix/instrave/master/img/mainapp/mainapp_demo_small.png" width="60%" align="right" />
 
 ```r
 # Install rave
@@ -49,11 +49,14 @@ arrange_modules(T)
 
 ## Quick Guide
 
-`RAVE` comes with two toy examples: one only contains raw `Matlab` files, the other has gone though full preprocessing pipeline. We start by introducing the main application (second subject, full preprocessed), and then introduce preprocessing pipeline.
+In this part, you will
 
-Before starting the first part, let's make sure you are all set. 
+1. Change RAVE general settings
+2. Download demo data
+3. Start to main app
+4. Start preprocessing
 
-First, open `RStudio`, in the console tab, enter the following line:
+Before starting the first part, you need to import package `rave` first. Open `RStudio`, in the console tab, enter the following line:
 
 ```r
 library(rave)
@@ -76,9 +79,12 @@ According to [/Users/beauchamplab/rave_modules/modules.csv]
 [ INFO ]: Type 'rave_options(launch_gui = T)' or '?rave_options' for details
 ```
 
-#### RAVE Settings (optional)
 
-Now, configure settings. This is *Optional* and you can skip this part if no error occur during `library(rave)`, or you have no `AFNI/SUMA` installed. Usually you only needs to set up once. In the console, enter:
+### 1. Change RAVE general settings (optional)
+
+This is *Optional* and you can skip this part if no error occur during `library(rave)`, or you have no `AFNI/SUMA` installed. Usually you only needs to set up once. 
+
+In the console, enter:
 
 ```r
 rave_options()
@@ -87,8 +93,6 @@ rave_options()
 You will see this from your default browser:
 
 <img src="https://raw.githubusercontent.com/dipterix/instrave/master/img/settings/rave_options.png" width="65%" align="left" />
-RAVE settings, an HTML GUI lauched by a single line of code `rave_options()`
-
 
 The most important part of this settings is **Raw subject data path** and **RAVE subject data path**. 
 
@@ -107,12 +111,24 @@ Directory Structure <br />
 RAVE-SUMA <br />
 3D Viewer <br />
 
+### 2. Download demo data
 
-#### Main Application
+
+
+### Main Application
 
 Once set the correct SUMA path and data repository paths, you can now launch the main application by typing
 
 ```r
 init_app()
 ```
+
+
+
+
+
+
+
+
+
 
