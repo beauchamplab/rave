@@ -903,7 +903,7 @@ shiny_data_selector <- function(module_id){
       }
 
       if(load_mesh && brain$mesh_count == 0){
-        brain$import_spec()
+        brain$import_spec(nearest_face = F)
       }
 
 

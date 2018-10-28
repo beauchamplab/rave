@@ -1,3 +1,5 @@
+
+
 # RAVE
 
 `R` `A`*nalysis and* `V`*isualization of intracranial* `E`*lectroencephalography*
@@ -24,8 +26,6 @@ rave::init_app()
 # Show documents
 help(package = 'rave')
 ```
-
-<hr />
 
 
 ## Installation
@@ -78,7 +78,7 @@ According to [/Users/beauchamplab/rave_modules/modules.csv]
 
 #### RAVE Settings (optional)
 
-Now, configure settings. This is *Optional* if no error occur during `library(rave)`, or you don't have `AFNI/SUMA` installed. Usually you only needs to set up once. In the console, enter:
+Now, configure settings. This is *Optional* and you can skip this part if no error occur during `library(rave)`, or you have no `AFNI/SUMA` installed. Usually you only needs to set up once. In the console, enter:
 
 ```r
 rave_options()
@@ -107,8 +107,6 @@ Directory Structure <br />
 RAVE-SUMA <br />
 3D Viewer <br />
 
-
-<br>
 
 #### Main Application
 
