@@ -2,7 +2,7 @@
 
 # RAVE
 
-`R` `A`*nalysis and* `V`*isualization of intracranial* `E`*lectroencephalography*
+__R__ __A__*nalysis and* __V__*isualization of intracranial* __E__*lectroencephalography*
 
 *Author: Zhengjia Wang*
 
@@ -14,15 +14,14 @@
 ```r
 # Install rave
 install.packages('devtools')
-devtools::install_github('beauchamplab/rave')
-```
+library(devtools)
+install_github('beauchamplab/rave')
 
-```r
 # Launch main app
 rave::init_app()
-```
+# Preprocess
+rave::rave_preprocess()
 
-```r
 # Show documents
 help(package = 'rave')
 ```
@@ -30,7 +29,11 @@ help(package = 'rave')
 
 ## Installation
 
-If you have `R` and `RStudio` installed (on Windows, you will also need `RTools` to be installed), just run the following commands in RStudio console, otherwise click here for full-installation guide (should only take less than *10 min*).
+If this is your first time using `R` or `RStudio`, please click here for full-installation guide (around *10-15 min*).
+
+If you have `R` and `RStudio` installed (on Windows, you will also need `RTools` to be installed).
+
+Run the following commands in RStudio console:
 
 ```r
 # Step 1. install devtools
@@ -43,18 +46,17 @@ devtools::install_github('beauchamplab/rave')
 #         Should be installed automatically. 
 rave:::check_updates()
 
-# Step 4. check modules update
+# Step 4. (optional) check modules updates
 arrange_modules(T)
 ```
 
 ## Quick Guide
 
-In this part, you will
+In this part, you will know how to
 
 1. Change RAVE general settings
 2. Download demo data
-3. Start to main app
-4. Start preprocessing
+3. Start main application with demo data
 
 Before starting the first part, you need to import package `rave` first. Open `RStudio`, in the console tab, enter the following line:
 
@@ -62,7 +64,7 @@ Before starting the first part, you need to import package `rave` first. Open `R
 library(rave)
 ```
 
-This should print something like this: 
+This should print something like: 
 
 ```
 Active modules: 
@@ -104,31 +106,65 @@ RAVE will import raw data into the second folder, which stores the data that RAV
 
 If you have `SUMA` installed, you can also specify SUMA path on the right panel. Make sure all paths are absolute paths. You can press "Test SUMA" to see if it launches.
 
-*See more topics on:
+*_See more topics on:_
 
-RAVE options <br />
-Directory Structure <br />
-RAVE-SUMA <br />
-3D Viewer <br />
+RAVE options, Directory Structure, RAVE-SUMA, 3D Viewer
 
 ### 2. Download demo data
 
+We've made downloading sample subject data really simple. As of _oct 28, 2018_, we only have one demo subject available. This number will increase in the future.
+
+In the RStudio console, enter:
+
+```r
+download_sample_data(subject = 'sub1')
+```
+
+If you see messages as follows, then the subject is downloaded and you can proceed to the next part to view the subject details.
+
+```
+[ INFO ]: Expanding zip file
+[ INFO ]: Copy from tempdir to data repository
+[ INFO ]: Clean up
+[ INFO ]: Done. Subject [sub1] is now at 
+[Raw Data]: /Users/beauchamplab/rave_data/raw_dir/sub1
+[RAVE Data]: /Users/beauchamplab/rave_data/raw_dir/demo
+```
 
 
-### Main Application
 
-Once set the correct SUMA path and data repository paths, you can now launch the main application by typing
+### 3. Start main app
+
+Once set the correct SUMA path and data repository paths, you can now launch the main application by typing. Since `RAVE` comes with no data, please refer to the [last part](#2-download-demo-data) to download demo data.
+
+Enter the following command, and your browser will show up with one HTML page like this:
+
+
+<img src="https://raw.githubusercontent.com/dipterix/instrave/master/img/mainapp/welcome page.png" width="60%" align="right" />
 
 ```r
 init_app()
 ```
 
+In the navigation bar, click `Select Data`, and you'll see a panel showing up. There are four input sections and two output sections:
+
+**Inputs**:
+
+* **Project/Subject** select project (`demo`) and subject `sub1` that you downloaded in the last part
+* **Epoch Selection** select how you want to epoch each blocks. `pre` is seconds before onset and `post` is seconds after onset.
+* **Frequency** can subset frequencies at loading stage. This is useful when your computer doesn't have enough memories
+* **Electrode & Reference** select electrodes `14-15,35,38,53,63` to load (we removed other electrodes for `sub1` and only leave 6 electrodes for demo). 
+
+**Outputs**:
+
+* **Load Estimation** will give you estimated data size and roughly estimated loading time. _Make sure_ the data size is not too large (cannot exceed your actual memory, otherwise the program will fail)
+* **3D Viewer** A 3D visualization of brain based on [dipterix/threejsr](https://github.com/dipterix/threejsr) showing the location of electrodes. (Make sure `Load Mesh` is on if you want to view pials)
+
+<img src="https://raw.githubusercontent.com/dipterix/instrave/master/img/mainapp/data selection.png" />
 
 
+Hit `Import` button, go to `Condition Explorer` module and load power data (press button `Load Data`). You will see the following user interface showing power activities of subject `sub1`.
 
-
-
-
-
+<img src="https://raw.githubusercontent.com/dipterix/instrave/master/img/mainapp/full.png" />
 
 

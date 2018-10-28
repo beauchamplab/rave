@@ -133,6 +133,7 @@ Collate:
     'utils_checkvalid.R'
     'utils_debug.R'
     'utils_dir.R'
+    'utils_download_sample.R'
     'utils_execfunc.R'
     'utils_export.R'
     'utils_ff_mann.R'
