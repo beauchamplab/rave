@@ -29,7 +29,7 @@ help(package = 'rave')
 
 ## Installation
 
-* If this is your first time using `R` or `RStudio`, please click here for full-installation guide (around *10-15 min*) and then proceed directly to the next section.
+* If this is your first time using `R` or `RStudio`, please [click here for full-installation guide](./installation.md) (around *10-15 min*) and then proceed directly to the next section.
 
 * Read the rest of the section if you have `R` and `RStudio` installed.
 

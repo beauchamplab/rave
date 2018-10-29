@@ -39,21 +39,21 @@ Please jump according to your operating system.
 
 [https://cran.r-project.org/bin/macosx/](https://cran.r-project.org/bin/macosx/)
 
-2. After installing R, make sure that you install Xcode from the Mac App Store:
+2. After installing R, make sure that you install Xcode from the Mac App Store: ( [here](https://www.moncefbelyamani.com/how-to-install-xcode-homebrew-git-rvm-ruby-on-mac/) is an article in case of errors)
 
-The best way is to google **How to install Xcode**. There's also a great guide  [here](https://www.moncefbelyamani.com/how-to-install-xcode-homebrew-git-rvm-ruby-on-mac/).
-
-Or if you have `AFNI` installed, you must have Xcode installed, then you need xcode command line tool. Open terminal (from Application), enter
+Open terminal (from Application), enter
 
 ```
 xcode-select --install
 ```
 
-Don't worry if the following error occurs. It just means you have already installed xcode cammand line tools.
+Click **yes** to proceed installing command-line tools.
 
-`
-xcode-select: error: command line tools are already installed, use "Software Update" to install updates
-`
+*Don't worry if the following error occurs. It just means you have already installed xcode cammand line tools.*
+
+```javascript
+// xcode-select: error: command line tools are already installed, use "Software Update" to install updates
+```
 
 3. Install RStudio here:
 
