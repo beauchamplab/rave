@@ -328,6 +328,12 @@ shiny_data_selector <- function(module_id){
       project = input$project_name
       subject = input$subject_code
 
+      if(is.null(project) || is.blank(project) || is.null(subject) || is.blank(subject)){
+        local_data$has_subject = FALSE
+        local_data$check_result = NULL
+        return()
+      }
+
       # Check validity of subject
       tryCatch({
         check_result = check_subjects2(project_name = project, subject_code = subject)

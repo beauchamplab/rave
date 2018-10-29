@@ -33,7 +33,7 @@ itpc_plot = function(plot_data = NULL){
   validate(need(
     has_groups &&
     is.list(plot_data) && !is.null(plot_data$n_groups) && plot_data$n_groups > 0,
-    message = 'No Condition Specified'
+    message = 'No Condition/Data Found'
   ))
 
   mar = c(5.1, 5.1, 2, 2)
@@ -75,7 +75,7 @@ itpc_time_plot = function(plot_data = NULL, merge_plots){
 
   validate(need(
     has_groups && is.list(plot_data) && !is.null(plot_data$n_groups) && plot_data$n_groups > 0,
-    message = 'No Condition Specified'
+    message = 'No Condition/Data Found'
   ))
 
   n_groups = plot_data$n_groups

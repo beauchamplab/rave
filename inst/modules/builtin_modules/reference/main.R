@@ -37,7 +37,8 @@ output = getDefaultReactiveOutput()
 local_data = shiny::reactiveValues(
   group_number = NULL,
   refresh = NULL,
-  do_parallel_plot = NULL
+  do_parallel_plot = NULL,
+  load_mesh = F
 )
 
 ref_group %?<-% list()
@@ -131,9 +132,9 @@ observeEvent(input[[('bipolar_table_cell_edit')]], {
   }
 })
 
-output[[('elec_loc')]] = threejsr::renderThreejs({
+
+output[['elec_loc']] <- threejsr::renderThreejs({
   local_data$refresh
-  logger('elec_loc')
   group_info = current_group()
   group_info %?<-% list(electrodes = NULL)
   name = group_info$rg_name
@@ -146,24 +147,41 @@ output[[('elec_loc')]] = threejsr::renderThreejs({
 
   electrodes = group_info$electrodes
   with(tbl, {
-    sprintf('<p>Electrode - %d (%s)<br/>Reference - %s (%s)<br/>Reference to - %s</p>', Electrode, Label, Group, Type, Reference)
+    sprintf('<p>Reference - %s (%s)<br/>Reference to - %s</p>', Group, Type, Reference)
   }) ->
     marker
 
-  values = rep('darkseagreen2', length(electrodes))
+  values = rep(-1, length(electrodes))
   bad_electrodes = rave:::parse_selections(input[[('ref_bad')]])
-  values[electrodes %in% bad_electrodes] = 'orangered2'
+  values[electrodes %in% bad_electrodes] = 1
 
 
   module_tools$plot_3d_electrodes(
     tbl = tbl,
     electrodes = electrodes,
     values = values,
-    marker = marker
+    marker = marker,
+    pal = colorRampPalette(c('navy', 'black', 'red'))(11),
+    show_mesh = local_data$load_mesh
     # link_module = 'condition_explorer',
     # variable_name = 'electrode'
   )
-}, env = ..runtime_env)
+})
+
+observeEvent(input$load_mesh, {
+  load_mesh = isolate(!local_data$load_mesh)
+  local_data$load_mesh = load_mesh
+  updateActionButton(session, 'load_mesh', label = ifelse(load_mesh, 'Hide Mesh', 'Show Mesh'))
+})
+
+
+elec_loc_ui = function(){
+  tagList(
+    actionLink(ns('load_mesh'), 'Show Mesh'),
+    threejsr::threejsOutput(ns('elec_loc'))
+  )
+
+}
 
 observeEvent(input[[('cur_save')]], {
   ref_to = input[[('ref_to')]]
@@ -249,8 +267,6 @@ cur_group_ui = function(){
 
 
   tagList(
-    hr(),
-    threejsr::threejsOutput(ns('elec_loc')),
     fluidRow(
       column(
         width = 7,

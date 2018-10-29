@@ -1,9 +1,11 @@
 # pre-process functions to save meta files
 
-safe_write_csv <- function(data, file, ...){
+safe_write_csv <- function(data, file, ..., quiet = F){
   if(file.exists(file)){
     oldfile = str_replace(file, '\\.[cC][sS][vV]$', strftime(Sys.time(), '_[%Y%m%d_%H%M%S].csv'))
-    logger('Renaming file ', file, ' >> ', oldfile)
+    if(!quiet){
+      logger('Renaming file ', file, ' >> ', oldfile)
+    }
     file.rename(file, oldfile)
   }
   write.csv(data, file, ...)

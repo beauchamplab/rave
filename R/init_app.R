@@ -102,8 +102,14 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
   }, error = function(e){})
 
   test.mode = list(...)[['test.mode']]
-  if(is.null(test.mode)) test.mode = rave_options('test_mode')
-  if(length(modules) == 0){
+  if(is.null(test.mode)) {
+    if(is.null(modules)){
+      test.mode = rave_options('test_mode')
+    }else{
+      test.mode = F
+    }
+  }
+  if(!length(modules)){
     modules = load_modules()
   }
 
@@ -120,44 +126,16 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
         ver = packageVersion('rave')
         sprintf('RAVE (%s)', paste(unlist(ver), collapse = '.'))
       }),
-      btn_text_right = 'Control Panel',
+      btn_text_right = 'RAM Usage',
       data_selector$header(),
       .list = tagList(
         tags$li(
-          class = 'dropdown user user-menu',
-          a(
-            href = '#', class='dropdown-toggle', `data-toggle` = 'dropdown',
-            `aria-expanded` = "false",
-            span(class = "hidden-xs", textOutput('curr_subj_code', inline = TRUE))
-          ),
-          tags$ul(
-            class = 'dropdown-menu',
-            tags$li(
-              class = 'user-body',
-              fluidRow(
-                column(
-                  width = 12L,
-                  class = 'full-width-table',
-                  tableOutput('curr_subj_electrodes')
-                )
-              )
-            ),
-            tags$li(
-              class = 'user-footer',
-              div(
-                class = 'pull-left',
-                actionButton('curr_subj_details_btn', 'View Details')
-              ),
-              div(
-                class = 'pull-right',
-                ''
-              )
-            )
-          )
+          class = 'user user-menu',
+          actionLink('curr_subj_details_btn', '')
         ),
         tags$li(
           class = 'user user-menu',
-          actionLink('curr_subj_launch_suma', 'Launch SUMA')
+          actionLink('curr_subj_launch_suma', '')
         )
       )
     ),
@@ -393,7 +371,8 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
 
     #################################################################
     # some navigations
-    output$curr_subj_code <- renderText({
+
+    observe({
       refresh = global_reactives$force_refresh_all
       if(global_reactives$has_data && check_data_repo('subject')){
         data_repo = getDefaultDataRepository()
@@ -402,10 +381,13 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
         reference_name = data_repo$preload_info$reference_name
 
         rm(data_repo)
-        return(sprintf('[%s] - [%s] - [%s]', subject_id, epoch_name, reference_name))
+        sub_label = (sprintf('[%s] - [%s] - [%s]', subject_id, epoch_name, reference_name))
+        suma_label = 'Launch SUMA'
       }else{
-        return("")
+        suma_label = sub_label = ("")
       }
+      updateActionButton(session, 'curr_subj_details_btn', label = sub_label)
+      updateActionButton(session, 'curr_subj_launch_suma', label = suma_label)
     })
 
     output$curr_subj_electrodes <- renderTable({
@@ -489,16 +471,14 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
 
       name = c(
         'Total Usage',
-        'Data Usage',
-        sapply(mem_usage$module_usage, '[[', 'Name'),
-        'Misc & Others Sessions'
+        'Shared Data Usage',
+        sapply(mem_usage$module_usage, '[[', 'Name')
       )
 
       usage = c(
         mem_usage$total_mem,
-        mem_usage$data_usage,
-        sapply(mem_usage$module_usage, '[[', 'usage'),
-        mem_usage$other_usage
+        mem_usage$data_usage + mem_usage$other_usage,
+        sapply(mem_usage$module_usage, '[[', 'usage')
       )
 
       perc = usage / max(usage)
@@ -521,7 +501,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
                                  ind = (pc_total < 0.75) + (pc_total < 0.9) + 1
                                  c('danger', 'warning', 'success')[ind]
                                },
-                               'Data Usage' = 'primary',
+                               'Shared Data Usage' = 'primary',
                                'Misc & Others Sessions' = 'primary',
                                {
                                  ind = (pc < 0.5) + 1
@@ -563,6 +543,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
         lapply(unlist(modules), function(x){
           x$clean(session_id = session_id)
         })
+        gc()
       })
     }
 

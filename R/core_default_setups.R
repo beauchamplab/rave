@@ -47,7 +47,7 @@ arrange_data_dir <- function(first_time = F, reset = F){
 
 #' @export
 arrange_modules <- function(
-  first_time = FALSE, reset = F
+  first_time = FALSE, reset = F, quiet = F
 ){
 
   look_up_file = rave::rave_options('module_lookup_file')
@@ -154,7 +154,7 @@ arrange_modules <- function(
 
     }, silent = T)
 
-    safe_write_csv(new_modules, look_up_file)
+    safe_write_csv(new_modules, look_up_file, quiet = quiet)
 
 
 

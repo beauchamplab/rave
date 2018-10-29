@@ -13,6 +13,8 @@ rave_inputs(
 
   # Group inspection
   selectInput('cur_group', 'Group Number', choices = 1:20, selected = NULL),
+  customizedUI('elec_loc_ui'),
+  # threejsr::threejsOutput(ns('elec_loc')),
   customizedUI('cur_group_ui'),
 
 
@@ -30,6 +32,7 @@ rave_inputs(
     ),
     '[-] Group Inspection' = list(
       'cur_group',
+      'elec_loc_ui',
       'cur_group_ui'
     ),
     '[-] Reference Generator' = list(

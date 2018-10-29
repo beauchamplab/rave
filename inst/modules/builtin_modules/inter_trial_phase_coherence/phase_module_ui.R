@@ -19,6 +19,7 @@ rave_inputs(
   ),
 
   sliderInput('FREQUENCY', 'Frequency', min = 1, max = 200, value = c(1,200), step = 1, round = 1),
+  customizedUI('preset_freq_ui'),
   sliderInput('TIME_RANGE', 'Analysis', min = 0, max = 1, value = c(0,1), step = 0.01, round = -2),
 
   selectInput('electrode', 'Electrode', choices = '', multiple = F),
@@ -45,7 +46,7 @@ rave_inputs(
     ),
     'Analysis Settings' = list(
       'FREQUENCY',
-      'BASELINE',
+      'preset_freq_ui',
       'TIME_RANGE'
     ),
     '[-]Plotting' = list(
@@ -77,7 +78,7 @@ rave_updates(
     epoch_data = module_tools$get_meta('trials')
     epoch_tbl = epoch_data
     freq_tbl = module_tools$get_meta('frequencies')
-    phase_max_freq = max(freq_tbl$Frequency) / 2
+    phase_max_freq = module_tools$get_sample_rate() / 2
 
     frange <- c(0, 20)
     # volt <- module_tools$get_voltage(force=TRUE, referenced = TRUE)
@@ -112,8 +113,8 @@ rave_updates(
     min = min(phase_max_freq - 1, min(round(frequencies)))
     max = min(phase_max_freq, max(round(frequencies)))
     list(
-      min = min,
-      max = max,
+      min = floor(min),
+      max = ceiling(max),
       value = cache_input('FREQUENCY', round(frange))
     )
   }),
@@ -127,3 +128,60 @@ rave_updates(
 )
 
 
+
+fband = list(
+  'Delta' = c(0.5, 3),
+  'Theta' = c(4, 7),
+  'Alpha' = c(8, 13),
+  'Mu' = c(7.5, 12.5),
+  'Beta' = c(16, 31),
+  'Low Gamma' = c(32, 74),
+  'High Gamma' = c(75, 150)
+)
+
+preset_freq_ui = function(){
+  tagList(
+    tags$label('Presets'),
+    p(
+      tags$label(
+        class = 'label label-default bg-red', style = 'display: inline-block;',
+        tags$a('Delta', style = 'color:white!important', class = 'action-button',
+               id = ns('freq_preset_1'), href = '#')
+      ),
+      tags$label(
+        class = 'label label-default bg-orange', style = 'display: inline-block;',
+        tags$a('Theta', style = 'color:white!important', class = 'action-button',
+               id = ns('freq_preset_2'), href = '#')
+      ),
+      tags$label(
+        class = 'label label-default bg-yellow', style = 'display: inline-block;',
+        tags$a('Alpha', style = 'color:white!important', class = 'action-button',
+               id = ns('freq_preset_3'), href = '#')
+      ),
+      tags$label(
+        class = 'label label-default bg-green', style = 'display: inline-block;',
+        tags$a('Beta', style = 'color:white!important', class = 'action-button',
+               id = ns('freq_preset_5'), href = '#')
+      ),
+      tags$label(
+        class = 'label label-default bg-blue', style = 'display: inline-block;',
+        tags$a('Low Gamma', style = 'color:white!important', class = 'action-button',
+               id = ns('freq_preset_6'), href = '#')
+      ),
+      tags$label(
+        class = 'label label-default bg-purple', style = 'display: inline-block;',
+        tags$a('High Gamma', style = 'color:white!important', class = 'action-button',
+               id = ns('freq_preset_7'), href = '#')
+      )
+    )
+  )
+}
+
+
+lapply(1:7, function(ii){
+  env = environment()
+  observeEvent(input[['freq_preset_' %&% ii]], {
+    fs = fband[[ii]]
+    updateSliderInput(session = session, inputId = 'FREQUENCY', value = fs)
+  }, event.env = env, handler.env = env)
+})
