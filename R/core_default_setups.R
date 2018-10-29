@@ -31,8 +31,8 @@ arrange_data_dir <- function(first_time = F, reset = F){
     logger('Check existence of these folders, or reset default data repository by typing arrange_data_dir(reset = T)', level = 'ERROR')
     return(F)
   }else{
-    rave_options(data_dir = tools::file_path_as_absolute(data_dir))
-    rave_options(raw_data_dir = tools::file_path_as_absolute(raw_dir))
+    rave_options(data_dir = base::normalizePath(data_dir))
+    rave_options(raw_data_dir = base::normalizePath(raw_dir))
 
     # Test speed
     if(!isTRUE(rave_options('disable_startup_speed_check'))){
@@ -160,8 +160,8 @@ arrange_modules <- function(
 
   }
 
-  rave_options(module_root_dir = tools::file_path_as_absolute(target_dir))
-  rave_options(module_lookup_file = tools::file_path_as_absolute(look_up_file))
+  rave_options(module_root_dir = base::normalizePath(target_dir))
+  rave_options(module_lookup_file = base::normalizePath(look_up_file))
 
   logger('\nActive modules: \n', paste0(' - ', new_modules$Name[new_modules$Active], '(', new_modules$ModuleID[new_modules$Active], ')', collapse = '\n'),
           '\nAccording to [', look_up_file, ']', level = 'INFO')

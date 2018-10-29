@@ -793,7 +793,7 @@ local({
             },
             'ScriptPath' = {
               tryCatch({
-                val = tools::file_path_as_absolute(val)
+                val = base::normalizePath(val)
                 assertthat::assert_that(file.exists(val), !file.info(val)$isdir)
                 val
               }, error = function(e){

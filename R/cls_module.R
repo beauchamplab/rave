@@ -142,7 +142,7 @@ ModuleEnvir <- R6::R6Class(
       }
 
       assertthat::validate_that(file.exists(script_path), msg = sprintf('[File Not Found] %s', script_path))
-      script_path = tools::file_path_as_absolute(script_path)
+      script_path = base::normalizePath(script_path)
       self$script_path = script_path
 
     },

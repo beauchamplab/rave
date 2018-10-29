@@ -477,7 +477,7 @@ rave_pre_ref <- function(module_id = 'REF_M', sidebar_width = 2){
             p("Invalid Strategy! This shouldn't happen. Please remove the following file manually and try again. ",
               " If this error still occurs, contact author."),
             tags$blockquote(
-              tools::file_path_as_absolute(file.path(user_data$subject$dirs$preprocess_dir,
+              base::normalizePath(file.path(user_data$subject$dirs$preprocess_dir,
                                                      'rave.RData'))),
             easyClose = T
           )

@@ -31,7 +31,7 @@ LazyH5 <- R6::R6Class(
 
       # First get absolute path, otherwise hdf5r may report file not found error
       if(read_only){
-        private$file = tools::file_path_as_absolute(file_path)
+        private$file = base::normalizePath(file_path)
 
         assertthat::assert_that(
           hdf5r::is_hdf5(private$file),

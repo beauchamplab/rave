@@ -103,7 +103,7 @@ SubjectInfo2 <- R6::R6Class(
         Index = 0,
         Date = strftime(Sys.time(), '%Y-%m-%d %H:%M:%S %Z'),
         Action = 'Initialization',
-        Message = sprintf('Subject folder created - %s', tools::file_path_as_absolute(self$dirs$subject_dir)),
+        Message = sprintf('Subject folder created - %s', base::normalizePath(self$dirs$subject_dir)),
         stringsAsFactors = F
       )
       history = self$logger$get_or_save('log', defaults, save = T, inherits = FALSE)
