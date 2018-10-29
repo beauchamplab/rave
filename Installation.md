@@ -1,12 +1,10 @@
----
-title: "A Brief Full Installation Guide for RAVE"
-author: "Zhengjia Wang"
-date: "10/27/2018"
----
+# A Brief Full Installation Guide for RAVE
 
-## A. Installation
+*Author: Zhengjia Wang*
 
-### 1. System Requirement
+*Date: Oct 28, 2018*
+
+# 1. System Requirement
 
 Minimum system requirement:
 
@@ -25,17 +23,17 @@ Suggested system requirement:
 - WebGL-enabled Web Browser (such as Chrome)
 
 
-### 1. Environment Setup
+# 2. Environment Setup
 
 Please jump according to your operating system.
 
 + [Mac OS](#macos)
 + [Windows (Windows 10, with Bash enabled)](#windows)
-+ [Ubuntu 16.04+](#ubuntu)
++ [Ubuntu 16.04+ (To be added)](#ubuntu)
 + Linux (Others)
 
 
-#### MacOS
+## MacOS
 
 1. First, go to Cran-R official website and download install the latest R:
 
@@ -43,7 +41,7 @@ Please jump according to your operating system.
 
 2. After installing R, make sure that you install Xcode from the Mac App Store:
 
-The best way is to google **How to install Xcode**. Moncef Belyamani has a great article [here](https://www.moncefbelyamani.com/how-to-install-xcode-homebrew-git-rvm-ruby-on-mac/).
+The best way is to google **How to install Xcode**. There's also a great guide  [here](https://www.moncefbelyamani.com/how-to-install-xcode-homebrew-git-rvm-ruby-on-mac/).
 
 Or if you have `AFNI` installed, you must have Xcode installed, then you need xcode command line tool. Open terminal (from Application), enter
 
@@ -51,7 +49,13 @@ Or if you have `AFNI` installed, you must have Xcode installed, then you need xc
 xcode-select --install
 ```
 
-3. RStudio
+Don't worry if the following error occurs. It just means you have already installed xcode cammand line tools.
+
+`
+xcode-select: error: command line tools are already installed, use "Software Update" to install updates
+`
+
+3. Install RStudio here:
 
 [https://www.rstudio.com/products/rstudio/download/](https://www.rstudio.com/products/rstudio/download/)
 
@@ -63,23 +67,23 @@ Open RStudio, enter the following command in RStudio **console**
 install.packages('devtools')
 ```
 
-To install `RAVE`
+5. Install `RAVE`
 
 ```
 devtools::install_github('beauchamplab/rave')
 ```
 
-#### Windows
+6. Restart RStudio
 
-1. Install R with the **latest** version
+## Windows
+
+1. Install R **latest** version
 
 [https://cran.r-project.org/bin/windows/base/](https://cran.r-project.org/bin/windows/base/)
 
 2. Install *Rtools*. Please install the **latest** version. Please make sure your RTools version matches with your R version. For example, your R version is `3.5.1`, then download RTools version of `3.5`. 
 
 [https://cran.r-project.org/bin/windows/Rtools/](https://cran.r-project.org/bin/windows/Rtools/)
-
-Usually RTools will automatically add its path as your system variable. However, sometimes it just forget to do so. Just in case, open system variable settings.
 
 3. Download and install RStudio for Windows. Desktop
 
@@ -93,38 +97,21 @@ Open RStudio, enter the following command in RStudio **console**
 install.packages('devtools')
 ```
 
-To install `RAVE`
+5. Install `RAVE`
+
+In RStudio, 
 
 ```
 devtools::install_github('beauchamplab/rave')
 ```
 
-*Little problem you might get*
+6. Restart RStudio.
 
-Sometimes, `devtools` will report errors like
+## Ubuntu
 
-```
-WARNING: Rtools is required to build R packages, but no version of Rtools 
-compatible with R ... was found. (Only the following incompatible 
-version(s) of Rtools were found ...
-```
+1. Add R-Cran repository to your app list:
 
-Please make sure that you have the right `RTools` installed. Please check [RTools website](https://cran.r-project.org/bin/windows/Rtools/)
-
-If you install the right version of RTools, then run the following command in RStudio to force it.
-
-```
-assignInNamespace("version_info", c(devtools:::version_info, list("3.5" = list(version_min = "3.3.0", version_max = "3.5.999", path = "bin"))), "devtools")
-```
-
-
-#### Ubuntu
-
-1. Add Cran repository to your system
-
-Add R-Cran repository to your app list:
-
-Open terminal (if you don't know how, look at your sidebar in ubuntu, `search your computer` enter "terminal"), type the following code:
+Open terminal (if you don't know how, look at your sidebar in ubuntu, `search your computer` enter "terminal", and open it), type the following code:
 
 ```
 sudo gedit /etc/apt/sources.list
@@ -139,7 +126,9 @@ deb https://cloud.r-project.org/bin/linux/ubuntu xenial-cran35/
 
 **IMPORTANT** Based on you system, you might want to enter different repositories (https://cran.r-project.org/bin/linux/). However, this line should be with a format of `deb` + `[repository URL]` + `xenial` (or `xenial-cran35`) + `/`. The difference between `xenial` and `xenial-cran35` will affect the version of R to be installed.
 
-Save the file and close text editor. In your terminal, update `apt-get` repository:
+Save the file and close text editor. 
+
+2. In your terminal, update `apt-get` repository:
 
 ```
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
@@ -148,7 +137,7 @@ sudo apt-get update
 
 The first line gives you access to the new repository (it adds keys to your computer so that you can safely download R). 
 
-2. Install R
+3. Install R
 
 Copy the following command line by line into your terminal and run
 
@@ -160,7 +149,7 @@ sudo apt-get install r-base
 sudo apt-get install r-base-dev
 ```
 
-3. Install compiling tools and system dependencies
+4. Install compiling tools and system dependencies
 
 After installing R, copy the following command to your terminal and run:
 
@@ -172,25 +161,26 @@ The first three packages `libssl-dev` `libcurl4-openssl-dev` `libssh2-1-dev` are
 `V8` package to enable JavaScript. `libxml2-dev` is for `xml2`. `libfftw3-dev` `libtiff5-dev` are necessary for fast-fourier transformations and 
 `libhdf5-dev` is for reading and writing data in open data format `HDF5`.
 
-4. Install RStudio
+5. Install RStudio
 
-Go to https://www.rstudio.com/products/rstudio/download/#download and download `RStudio 1.1.453 - Ubuntu 16.04+/Debian 9+ (64-bit)` to your **desktop** 
-and type the folloing command in your terminal
+Go to https://www.rstudio.com/products/rstudio/download/#download and download one with keywords "Ubuntu 16.04+/Debian 9+ (64-bit)", move the downloaded file to your **desktop**, rename it "rstudio.deb".
+
+Open terminal, type the folloing command in your terminal
 
 ```
 cd ~/Desktop
 sudo apt-get install libjpeg62
 ```
 
-Then we can install RStudio
+Then you can install RStudio.
 
 ```
-sudo dpkg -i ./rstudio-xenial-1.1.453-amd64.deb 
+sudo dpkg -i ./rstudio.deb 
 ```
 
-and `RStudio` should be in your application list. Again, if you don't know where it is, look at your sidebar in ubuntu, click `search your computer` and enter "RStudio".
+and `RStudio` should be in your application list. Again, if you don't know where it is, look at your sidebar in ubuntu, click **search your computer** and enter "RStudio".
 
-5. Install `RAVE`
+6. Install `RAVE`
 
 Open RStudio,
 
@@ -201,32 +191,6 @@ install.packages('devtools')
 devtools::install_github('beauchamplab/rave')
 ```
 
-
-## B. Toy example
-
-
-#### Preprocess
-
-To play with **preprocess**, type the following R command 
-
-```
-rave_preprocess()
-```
-
-* Set `subject code` to be `Subject` 
-* Set `project name` to be `Demo`.
-* Set `sample rate` to be `2000`
-* Set `electrodes` to be `1-6`.
-
-Press `load subject` button
-
-Next, please go through `Notch filter`, `Wavelet` and `Epoch` modules.
+7. Restart RStudio
 
 
-#### Main App
-
-To play with **Main**, type:
-
-```
-init_app()
-```

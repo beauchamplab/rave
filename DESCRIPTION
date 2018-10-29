@@ -56,7 +56,8 @@ Imports:
     DT (>= 0.4),
     reticulate (>= 1.6),
     hdf5r (>= 1.0.0),
-    fst (>= 0.8.8)
+    fst (>= 0.8.8),
+    data.table (>= 1.11.8)
 Suggests:
     gifti
 Collate: 

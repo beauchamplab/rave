@@ -442,6 +442,10 @@ shiny_data_selector <- function(module_id){
             }), collapse = '<br />')))
           ),
           div(
+            class = 'rave-grid-inputs-legend',
+            'Frequency'
+          ),
+          div(
             style="flex-basis: 60%;",
             sliderInput(ns('frequencies'), 'Frequency Range', min = max(min(freqs)-1, 0), ticks = F,
                         max = max(freqs)+1, value = range(freqs), step = 0.1, round = TRUE, post = 'Hz')

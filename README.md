@@ -29,11 +29,36 @@ help(package = 'rave')
 
 ## Installation
 
-If this is your first time using `R` or `RStudio`, please click here for full-installation guide (around *10-15 min*).
+* If this is your first time using `R` or `RStudio`, please click here for full-installation guide (around *10-15 min*) and then proceed directly to the next section.
 
-If you have `R` and `RStudio` installed (on Windows, you will also need `RTools` to be installed).
+* Read the rest of the section if you have `R` and `RStudio` installed.
 
-Run the following commands in RStudio console:
+### 1. Dependencies
+
+There might be some dependencies to be installed. 
+
+On **MacOS**, open terminal (you can find it using "spotlight" and searching "terminal"), and enter
+
+```
+xcode-select --install
+```
+
+or check [this](https://www.moncefbelyamani.com/how-to-install-xcode-homebrew-git-rvm-ruby-on-mac/) on how to install `xcode` to your macos.
+
+On **Windows**, install [Rtools](https://cran.r-project.org/bin/windows/Rtools/). Make sure to install the right version. For example, your `R` version is `3.5.1`, install `RTools` version `3.5`.
+
+On **Ubuntu**, open terminal, install packages:
+
+```
+sudo apt-get install libssl-dev libcurl4-openssl-dev libssh2-1-dev libv8-3.14-dev libxml2-dev libfftw3-dev libtiff5-dev libhdf5-dev
+```
+
+Other linux systems might need to check [recommended system packages](./inst/markdowns/Installation_questions.md#recommended-settings)
+
+
+### 2. Install RAVE
+
+Launch RStudio, run the following commands in RStudio console:
 
 ```r
 # Step 1. install devtools
@@ -50,9 +75,11 @@ rave:::check_updates()
 arrange_modules(T)
 ```
 
+Please **restart RStudio**.
+
 ## Quick Guide
 
-In this part, you will know how to
+In this section, you will know how to
 
 1. Change RAVE general settings
 2. Download demo data
