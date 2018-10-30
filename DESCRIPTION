@@ -60,6 +60,11 @@ Imports:
     data.table (>= 1.11.8)
 Suggests:
     gifti
+Remotes:
+    github::dipterix/threejsr,
+    github::dipterix/rutabaga
+Depends:
+    R (>= 3.4)
 Collate: 
     'utils_syscheck.R'
     'aaa.R'
