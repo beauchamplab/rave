@@ -27,6 +27,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
           pre = time_range[1],
           post = time_range[2],
           electrodes = data_env$preload_info$electrodes,
+          frequency_range = data_env$preload_info$frequencies,
           data_type = 'power',
           referenced = referenced
         )
@@ -46,6 +47,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
           pre = time_range[1],
           post = time_range[2],
           electrodes = data_env$preload_info$electrodes,
+          frequency_range = data_env$preload_info$frequencies,
           data_type = 'phase',
           referenced = referenced
         )

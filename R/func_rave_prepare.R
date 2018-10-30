@@ -20,7 +20,7 @@ rave_prepare <- function(
   load_brain = TRUE,
   data_env = rave::getDefaultDataRepository()
 ){
-  # subject = 'congruency1/YAB'; electrodes = 14:15; epoch = 'YABa'; time_range = c(1,2); data_types = NULL; reference = 'default'
+  # subject = 'congruency/YAB'; electrodes = 14:15; epoch = 'YABa'; time_range = c(1,2); data_types = NULL; reference = 'default'
   if(missing(subject)){
     # detach enironment
     if('rave_data' %in% search()){
