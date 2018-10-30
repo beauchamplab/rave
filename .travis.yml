@@ -7,3 +7,5 @@ after_success:
 after_failure:
   - ./travis-tool.sh dump_logs
 warnings_are_errors: true
+apt_packages:
+  - libfftw3-dev
