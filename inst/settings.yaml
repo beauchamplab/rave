@@ -8,8 +8,8 @@ content_regex: e([0-9]+)[^0-9]*
 content_format: mat
 module_root_dir: ~/rave_modules
 module_lookup_file: ~/rave_modules/modules.csv
-delay_input: 200
-max_worker: 20
+delay_input: 20
+max_worker: 8
 export_path: ./export
 temp_dir: temp
 suma_monitor_dir: temp/monitor
