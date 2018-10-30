@@ -68,10 +68,9 @@ opt <- list(
   # Use fst package to cache power phase volt after wavelet and reference?
   # If running in the local machine, we don't need it because h5 is fast enough
   # and h5 with mpi is even faster
-  # However, if data is stored at data server, we might consider it
-  # I need to test this
+  # However, if data is stored at data server, fst is way faster than h5 (single threaded with forked)
   # Also on windows, fst should be faster than hdf5 in general
-  fast_cache = FALSE,
+  fast_cache = TRUE,
 
 
 
