@@ -394,10 +394,17 @@ I got result on my computer: `home/linuxbrew/.linuxbrew/Cellar/hdf5/1.10.4/bin/h
 Replace `configure.vars` below with your results.
 
 ```
+# One of the following two works
+install.packages(
+  'hdf5r',
+  configure.args = '--with-hdf5 [YOUR h5cc PATH]',
+  type = 'source'
+)
+
 install.packages(
   'hdf5r',
   configure.args = 'with-hdf5',
-  configure.vars = 'home/linuxbrew/.linuxbrew/Cellar/hdf5/1.10.4/bin/h5cc'
+  configure.vars = '[YOUR h5cc PATH]'
 )
 ```
 

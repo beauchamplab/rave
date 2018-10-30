@@ -1,3 +1,5 @@
+#' Check dependencies and update them at start up (Highly recommended)
+#' @export
 check_updates <- function(file){
   if(missing(file)){
     file = '~/rave_modules/packages.txt'

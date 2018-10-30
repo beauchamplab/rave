@@ -4,19 +4,19 @@
 
 *Date: Oct 28, 2018*
 
-# 1. System Requirement
+# 1. System Requirement for `RAVE`
 
 Minimum system requirement:
 
-- Multicore CPU (2+)
+- Multicore CPU
 - 16GB RAM
 - 128 GB Free Hard Disk Space
-- 512 MB Shared Video Memory (Most laptops )
+- 512 MB Shared Video Memory
 - WebGL-enabled Web Browser (such as Chrome)
 
 Suggested system requirement:
 
-- 8 Core CPU
+- 4 Core CPU (e.g. core i5)
 - 64GB RAM
 - 1T Hard Disk Space
 - 1 GB Video Memory
