@@ -1,19 +1,26 @@
 language: r
+sudo: true
+cache: packages
+warnings_are_errors: true
 os:
   - linux
-
-sudo: required
-cache: packages
-
+  - osx
 r:
   - 3.4
   - devel
 
+env:
+  global:
+    - PKG_CFLAGS="-pedantic"
+    - _R_CHECK_CRAN_INCOMING_=FALSE
+    - ASAN="-fsanitize=address -fno-omit-frame-pointer"
+    - HDF5_RELEASE_URL="https://support.hdfgroup.org/ftp/HDF5/releases"
+    - LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+    - HDF5_VERSION=1.10.3
+
 after_success:
   - Rscript -e 'library(rave)'
-after_failure:
-  - ./travis-tool.sh dump_logs
-warnings_are_errors: true
+
 
 
 addons:
@@ -28,18 +35,18 @@ addons:
       - libfftw3-dev
       - libv8-3.14-dev
       - libxml2-dev
+      - subversion
+      - autoconf
+      - libtool
+      - libmagick++-dev
 
 notifications:
-  email: false
+  email: dipterix.wang@gmail.com
 
 
 before_install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    brew update;
-    fi
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)";
-    /home/linuxbrew/.linuxbrew/bin/brew install hdf5;
-    fi
+  - chmod +x travis_setup.sh
+  - ./travis_setup.sh
+
 
 

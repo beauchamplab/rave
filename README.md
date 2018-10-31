@@ -8,6 +8,8 @@ __R__ __A__*nalysis and* __V__*isualization of intracranial* __E__*lectroencepha
 
 *Last Updated: Oct 26, 2018*
 
+[![Build Status](https://travis-ci.org/beauchamplab/rave.svg?branch=rave-ent)](https://travis-ci.org/beauchamplab/rave)
+
 
 <img src="https://raw.githubusercontent.com/dipterix/instrave/master/img/mainapp/mainapp_demo_small.png" width="60%" align="right" />
 
