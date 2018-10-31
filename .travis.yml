@@ -1,9 +1,10 @@
 language: r
+os:
+  - linux
+  - osx
 cache: packages
-r_github_packages:
-  - jimhester/covr
 after_success:
-  - Rscript -e 'library(covr);codecov()'
+  - Rscript -e 'library(rave)'
 after_failure:
   - ./travis-tool.sh dump_logs
 warnings_are_errors: true
