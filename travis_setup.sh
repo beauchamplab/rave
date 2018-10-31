@@ -1,11 +1,3 @@
-- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-    brew update;
-    fi
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)";
-    /home/linuxbrew/.linuxbrew/bin/brew install hdf5;
-    fi
-
 #!/bin/bash
 
 if [ "$TRAVIS_OS_NAME" == "osx" ]; then # use homebrew version
