@@ -6,6 +6,11 @@
 \usage{
 rave_checks('power referenced', 'voltage raw', ...)
 }
+\arguments{
+\item{...}{see defails}
+
+\item{data}{same as ..., but can be a vector}
+}
 \description{
 Check if data is loaded for current module
 }

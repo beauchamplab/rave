@@ -37,7 +37,8 @@ output = getDefaultReactiveOutput()
 local_data = shiny::reactiveValues(
   group_number = NULL,
   refresh = NULL,
-  do_parallel_plot = NULL
+  do_parallel_plot = NULL,
+  load_mesh = F
 )
 
 ref_group %?<-% list()
@@ -131,9 +132,9 @@ observeEvent(input[[('bipolar_table_cell_edit')]], {
   }
 })
 
-output[[('elec_loc')]] = threejsr::renderThreejs({
+
+output[['elec_loc']] <- threejsr::renderThreejs({
   local_data$refresh
-  logger('elec_loc')
   group_info = current_group()
   group_info %?<-% list(electrodes = NULL)
   name = group_info$rg_name
@@ -146,13 +147,13 @@ output[[('elec_loc')]] = threejsr::renderThreejs({
 
   electrodes = group_info$electrodes
   with(tbl, {
-    sprintf('<p>Electrode - %d (%s)<br/>Reference - %s (%s)<br/>Reference to - %s</p>', Electrode, Label, Group, Type, Reference)
+    sprintf('<p>Reference - %s (%s)<br/>Reference to - %s</p>', Group, Type, Reference)
   }) ->
     marker
 
-  values = rep('darkseagreen2', length(electrodes))
+  values = rep(-1, length(electrodes))
   bad_electrodes = rave:::parse_selections(input[[('ref_bad')]])
-  values[electrodes %in% bad_electrodes] = 'orangered2'
+  values[electrodes %in% bad_electrodes] = 1
 
 
   module_tools$plot_3d_electrodes(
@@ -160,10 +161,27 @@ output[[('elec_loc')]] = threejsr::renderThreejs({
     electrodes = electrodes,
     values = values,
     marker = marker,
-    link_module = 'condition_explorer',
-    variable_name = 'electrode'
+    pal = colorRampPalette(c('navy', 'black', 'red'))(11),
+    show_mesh = local_data$load_mesh
+    # link_module = 'condition_explorer',
+    # variable_name = 'electrode'
   )
-}, env = ..runtime_env)
+})
+
+observeEvent(input$load_mesh, {
+  load_mesh = isolate(!local_data$load_mesh)
+  local_data$load_mesh = load_mesh
+  updateActionButton(session, 'load_mesh', label = ifelse(load_mesh, 'Hide Mesh', 'Show Mesh'))
+})
+
+
+elec_loc_ui = function(){
+  tagList(
+    actionLink(ns('load_mesh'), 'Show Mesh'),
+    threejsr::threejsOutput(ns('elec_loc'))
+  )
+
+}
 
 observeEvent(input[[('cur_save')]], {
   ref_to = input[[('ref_to')]]
@@ -249,8 +267,6 @@ cur_group_ui = function(){
 
 
   tagList(
-    hr(),
-    threejsr::threejsOutput(ns('elec_loc')),
     fluidRow(
       column(
         width = 7,
@@ -526,8 +542,9 @@ gen_reference = function(electrodes){
     return()
   }
   dirs = module_tools$get_subject_dirs()
-  fname = sprintf('ref_%s.h5', rave:::deparse_selections(electrodes))
-  f = file.path(dirs$channel_dir, 'reference', fname)
+  fname_h5 = sprintf('ref_%s.h5', rave:::deparse_selections(electrodes))
+  fname_fst = sprintf('ref_%s.fst', rave:::deparse_selections(electrodes))
+  f = file.path(dirs$channel_dir, 'reference', fname_h5)
   # generate reference
   # Step 0: chunk matrix
   ncores = rave_options('max_worker')
@@ -541,7 +558,7 @@ gen_reference = function(electrodes){
   env$gen_coef = list()
 
 
-  progress = rave::progress(sprintf('Generating reference [%s]', fname), max = length(electrodes)+1)
+  progress = rave::progress(sprintf('Generating reference [%s]', fname_h5), max = length(electrodes)+1)
   on.exit(progress$close())
 
   blocks = subject$preprocess_info('blocks')
@@ -553,12 +570,36 @@ gen_reference = function(electrodes){
 
     lapply_async(es, function(e){
       root_dir = dirs$channel_dir
-      fname = sprintf('%d.h5', e)
+      fname_h5 = sprintf('%d.h5', e)
+      fname_fst = sprintf('%d.fst', e)
       sapply(blocks, function(b){
-        coef = sqrt(load_h5(file.path(root_dir, 'power', fname), name = sprintf('/raw/power/%s', b))[])
-        phase = exp(1i * load_h5(file.path(root_dir, 'phase', fname), name = sprintf('/raw/phase/%s', b))[])
+        fst_file = file.path(root_dir, 'cache', 'power', 'raw', b, fname_fst)
+        if(file.exists(fst_file)){
+          coef = fst::read_fst(fst_file)
+          coef = t(sqrt(as.matrix(coef)))
+        }else{
+          coef = sqrt(load_h5(file.path(root_dir, 'power', fname_h5), name = sprintf('/raw/power/%s', b))[])
+        }
+
+
+        fst_file = file.path(root_dir, 'cache', 'phase', 'raw', b, fname_fst)
+        if(file.exists(fst_file)){
+          phase = fst::read_fst(fst_file)
+          phase = exp(1i * t((as.matrix(phase))))
+        }else{
+          phase = exp(1i * load_h5(file.path(root_dir, 'phase', fname_h5), name = sprintf('/raw/phase/%s', b))[])
+        }
+
+        fst_file = file.path(root_dir, 'cache', 'voltage', 'raw', b, fname_fst)
+        if(file.exists(fst_file)){
+          volt = fst::read_fst(fst_file)[,1]
+        }else{
+          volt = load_h5(file.path(root_dir, 'voltage', fname_h5), name = sprintf('/raw/voltage/%s', b))[]
+        }
+
+
         list(
-          volt = load_h5(file.path(root_dir, 'voltage', fname), name = sprintf('/raw/voltage/%s', b))[],
+          volt = volt,
           coef = coef * phase
         )
       }, USE.NAMES = T, simplify = F) ->
@@ -588,6 +629,8 @@ gen_reference = function(electrodes){
 
   progress$inc(message = 'Saving to disk.')
 
+  ref_dir = file.path(dirs$channel_dir, 'cache', 'reference')
+
   # Average
   for(b in blocks){
     volt = env$gen_volt[[b]] / nes
@@ -595,9 +638,29 @@ gen_reference = function(electrodes){
     coef = array(c(Mod(coef), Arg(coef)), dim = c(dim(coef), 2)) # Freq x Time x 2
     save_h5(volt, file = f, name = sprintf('/voltage/%s', b), chunk = 1024, replace = T)
     save_h5(coef, file = f, name = sprintf('/wavelet/coef/%s', b), chunk = c(dim(coef)[1], 128, 2), replace = T)
+
+    # fast_cache
+    fast_cache = rave_options('fast_cache'); fast_cache %?<-% TRUE
+    fst_coef = file.path(ref_dir, 'coef', b)
+    fst_phase = file.path(ref_dir, 'phase', b)
+    fst_volt = file.path(ref_dir, 'voltage', b)
+    dir.create(fst_coef, recursive = T, showWarnings = F)
+    dir.create(fst_phase, recursive = T, showWarnings = F)
+    dir.create(fst_volt, recursive = T, showWarnings = F)
+    if(fast_cache){
+      # fast cache referenced signals
+      dat = as.data.frame(t(coef[,,1]))
+      fst::write_fst(dat, file.path(fst_coef, fname_fst), compress = 100)
+
+      dat = as.data.frame(t(coef[,,2]))
+      fst::write_fst(dat, file.path(fst_phase, fname_fst), compress = 100)
+
+      dat = data.frame(V1 = volt)
+      fst::write_fst(dat, file.path(fst_volt, fname_fst), compress = 100)
+    }
   }
 
-  showNotification(p('Reference [', fname, '] exported.'), type = 'message')
+  showNotification(p('Reference [', fname_h5, '] exported.'), type = 'message')
   local_data$has_new_ref = Sys.time()
 }
 
@@ -713,6 +776,18 @@ observeEvent(input$do_export_cache, {
 
   ref_names = names(ref)
 
+  for(b in blocks){
+    dir.create(file.path(subject_channel_dir, 'cache', 'power', 'ref', b), showWarnings = F, recursive = T)
+    dir.create(file.path(subject_channel_dir, 'cache', 'phase', 'ref', b), showWarnings = F, recursive = T)
+    dir.create(file.path(subject_channel_dir, 'cache', 'voltage', 'ref', b), showWarnings = F, recursive = T)
+  }
+  # write a 'noref' table to this file in case exporting scheme screw up
+  cr_csv = file.path(subject_channel_dir, 'cache', 'cached_reference.csv')
+  rave:::safe_write_csv(data.frame(
+    Electrode = electrodes,
+    Reference = 'noref'
+  ), cr_csv, row.names = F)
+
 
   lapply_async(electrodes, function(e){
     fname = sprintf('%d.h5', e)
@@ -722,6 +797,7 @@ observeEvent(input$do_export_cache, {
     volt_fname = file.path(subject_channel_dir, 'voltage', fname)
     power_fname = file.path(subject_channel_dir, 'power', fname)
     phase_fname = file.path(subject_channel_dir, 'phase', fname)
+
     lapply(blocks, function(b){
       # load electrode - raw
       volt = load_h5(volt_fname, '/raw/voltage/' %&% b, ram = T)
@@ -730,6 +806,8 @@ observeEvent(input$do_export_cache, {
       volt_ref %?<-% 0
       volt = volt - volt_ref
       save_h5(volt, volt_fname, name = '/ref/voltage/' %&% b, replace = T, chunk = 1024)
+      fst::write_fst(data.frame(V1 = volt), path =
+                       file.path(subject_channel_dir, 'cache', 'voltage', 'ref', b, sprintf('%d.fst', e)))
 
       # load electrode - coef
       power = load_h5(power_fname, '/raw/power/' %&% b, ram = T)
@@ -752,10 +830,17 @@ observeEvent(input$do_export_cache, {
 
       # save power and phase
       power = Mod(coef)^2
-      phase = Arg(phase)
+      phase = Arg(coef)
       dim = dim(power); dim[2] = 128
       save_h5(power, power_fname, name = '/ref/power/' %&% b, replace = T, chunk = dim)
+      fst::write_fst(as.data.frame(t(power)), path =
+                       file.path(subject_channel_dir, 'cache', 'power', 'ref', b, sprintf('%d.fst', e)))
+
+
       save_h5(phase, phase_fname, name = '/ref/phase/' %&% b, replace = T, chunk = dim)
+      fst::write_fst(as.data.frame(t(phase)), path =
+                       file.path(subject_channel_dir, 'cache', 'phase', 'ref', b, sprintf('%d.fst', e)))
+
       rm(list = ls(envir = environment())); gc()
       invisible()
     })
@@ -764,9 +849,18 @@ observeEvent(input$do_export_cache, {
     save_h5(r, file = volt_fname, name = '/reference', replace = T, chunk = 1, size = 1000)
     save_h5(r, file = power_fname, name = '/reference', replace = T, chunk = 1, size = 1000)
     save_h5(r, file = phase_fname, name = '/reference', replace = T, chunk = 1, size = 1000)
+    return(r)
   }, .call_back = function(ii){
     progress$inc(sprintf('Referencing electrode - %d', electrodes[[ii]]))
-  })
+  }) ->
+    refs
+
+
+  # overwrite cached_reference.csv
+  write.csv(data.frame(
+    Electrode = electrodes,
+    Reference = unlist(refs)
+  ), cr_csv, row.names = F)
 
   progress$close()
   showNotification(p('Now data are cached according to [', fname, ']. Reloading subject.'), type = 'message', id = ns('ref_export_cache_notification'))

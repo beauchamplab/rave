@@ -1,3 +1,5 @@
+#' Check dependencies and update them at start up (Highly recommended)
+#' @export
 check_updates <- function(file){
   if(missing(file)){
     file = '~/rave_modules/packages.txt'
@@ -5,7 +7,7 @@ check_updates <- function(file){
   if(!file.exists(file)){
     file = system.file('packages.txt', package = 'rave')
   }
-  s = readLines(file)
+  s = unique(c(readLines(file), readLines(system.file('packages.txt', package = 'rave'))))
   s = stringr::str_trim(s)
   s = s[!stringr::str_detect(s, '^#') & s!='']
   lapply(s, function(ss){
@@ -104,8 +106,17 @@ rave_version <- function(){
     # get rave_version
     old_ver = rave_options('rave_ver')
     old_ver %?<-% rave::rave_hist$get_or_save('..rave_ver..', '0.0.0.0000')
-    new_ver = rave:::rave_version()
-    if(utils::compareVersion(old_ver, new_ver) < 0){
+    new_ver = rave_version()
+    is_newer = tryCatch({
+      is_newer = utils::compareVersion(old_ver, new_ver) < 0
+      if(!length(is_newer) || !is.logical(is_newer)){
+        is_newer = TRUE
+      }
+      is_newer
+    }, error = function(e){
+      return(TRUE)
+    })
+    if(is_newer){
       logger('RAVE Updated from ', old_ver, ' ==> ', new_ver)
       logger('Updating module information', level = 'INFO')
       # New RAVE installed! update
@@ -147,7 +158,7 @@ rave_version <- function(){
     rave::rave_setup()
 
     if(has_data){
-      rave::logger("RAVE - (Code: Ent) is loaded!", level = 'INFO')
+      rave::logger("RAVE - (Code: Fir) is loaded!", level = 'INFO')
 
       nms = list(
         'Module File:        \t' =  rave::rave_options('module_lookup_file'),

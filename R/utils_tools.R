@@ -107,7 +107,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
       dirs = get_dir(subject_code = subject_code, project_name = project_name)
       is_created = FALSE
       if(!dir.exists(dirs$preprocess_dir)){
-        dirs = get_dir(subject_code = subject_code, project_name = project_name, mkdirs = c('preprocess_dir', 'cache_dir', 'meta_dir'))
+        dirs = get_dir(subject_code = subject_code, project_name = project_name, mkdirs = c('preprocess_dir', 'cache_dir', 'meta_dir', 'suma_dir'))
         is_created = TRUE
       }else{
         # save informations if subject exists
@@ -240,7 +240,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
           if(length(channels) > 1){
             channels = as.integer(channels)
           }else{
-            channels = rave:::parse_selections(channels)
+            channels = parse_selections(channels)
           }
         }
         # checks
@@ -257,7 +257,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
           }
           # set channels
           env$subject$set_channels(channels = channels, name = name)
-          env$subject$save(action = 'Set Electrodes (' %&% name %&%')', message = rave:::deparse_selections(channels))
+          env$subject$save(action = 'Set Electrodes (' %&% name %&%')', message = deparse_selections(channels))
           msg = 'Electrodes set (' %&% name %&% ')'
           type = 'message'
           return(TRUE)
@@ -414,7 +414,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
       blocks = utils$get_blocks()
       srate = utils$get_srate()
 
-      progress = rave:::progress('Notch filter in progress...', max = length(electrodes))
+      progress = progress('Notch filter in progress...', max = length(electrodes))
       on.exit({progress$close()})
 
       dirs = utils$get_from_subject('dirs', list(), customized = F)
@@ -449,13 +449,19 @@ rave_preprocess_tools <- function(env = new.env(), ...){
     }
 
     apply_wavelet = function(electrodes, target_srate, frequencies, wave_num, ncores = 4){
+      fast_cache = rave_options('fast_cache')
+      fast_cache %?<-% TRUE
       # vars
       blocks = utils$get_blocks()
       if(missing(electrodes)){
         electrodes = utils$get_electrodes()
       }
       srate = utils$get_srate()
-      dirs = utils$get_from_subject('dirs', list(), customized = F)
+      dirs = utils$get_from_subject('dirs', NULL, customized = F)
+      if(!length(dirs)){
+        utils$showNotification(msg = 'Fatal error: Cannot obtain subject directory information.', type = 'error')
+        return()
+      }
 
       compress_rate = srate / target_srate
 
@@ -468,8 +474,17 @@ rave_preprocess_tools <- function(env = new.env(), ...){
 
       ### Prepare for the wavelet file. Since users may specify different sample rate, we need to remove files if they exists
       # 1. reference file
-      # ref_file = file.path(dirs$channel_dir, 'reference', sprintf('ref_%s.h5', rave:::deparse_selections(electrodes)))
+      # ref_file = file.path(dirs$channel_dir, 'reference', sprintf('ref_%s.h5', deparse_selections(electrodes)))
       # unlink(ref_file)
+      # Create dir
+      for(block in blocks){
+        for(nm in c('raw', 'ref')){
+          dir.create(file.path(dirs$channel_dir, 'cache', 'power', nm, block), recursive = T, showWarnings = F)
+          dir.create(file.path(dirs$channel_dir, 'cache', 'phase', nm, block), recursive = T, showWarnings = F)
+          dir.create(file.path(dirs$channel_dir, 'cache', 'voltage', nm, block), recursive = T, showWarnings = F)
+        }
+      }
+
 
       # 2. raw channel files and power/phase files
       lapply(electrodes, function(e){
@@ -477,6 +492,12 @@ rave_preprocess_tools <- function(env = new.env(), ...){
         unlink(file.path(dirs$channel_dir, 'power', sprintf('%d.h5', e)))
         unlink(file.path(dirs$channel_dir, 'phase', sprintf('%d.h5', e)))
         unlink(file.path(dirs$channel_dir, 'voltage', sprintf('%d.h5', e)))
+        for(block in blocks){
+          unlink(file.path(dirs$channel_dir, 'cache', 'power', 'raw', block, sprintf('%d.fst', e)))
+          unlink(file.path(dirs$channel_dir, 'cache', 'phase', 'raw', block, sprintf('%d.fst', e)))
+          # unlink(file.path(dirs$channel_dir, 'cache', 'power', 'raw', block, sprintf('%d.fst', e)))
+          # unlink(file.path(dirs$channel_dir, 'cache', 'power', 'raw', block, sprintf('%d.fst', e)))
+        }
       })
 
       # load signals
@@ -493,6 +514,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
             name = sprintf('/notch/%s', block),
             ram = T
           )
+
 
           re = wavelet(s, freqs = frequencies, srate = srate, wave_num = wave_num)
 
@@ -532,6 +554,16 @@ rave_preprocess_tools <- function(env = new.env(), ...){
             chunk = 1,
             replace = T, size = 1000
           )
+          # If fast_cache, cache power data to data/cache/power/raw/block
+          if(fast_cache){
+            # create fast cache to power
+            power = as.data.frame(t(power))
+            # write
+            cache_file = file.path(dirs$channel_dir, 'cache', 'power', 'raw', block, sprintf('%d.fst', e))
+
+            fst::write_fst(power, cache_file, compress = 100)
+          }
+
 
           # phase
           save_h5(
@@ -556,6 +588,16 @@ rave_preprocess_tools <- function(env = new.env(), ...){
             replace = T, size = 1000
           )
 
+          # If fast_cache, cache phase data to data/cache/phase/raw/block
+          if(fast_cache){
+            # create fast cache to phase
+            phase = as.data.frame(t(phase))
+            # write
+            cache_file = file.path(dirs$channel_dir, 'cache', 'phase', 'raw', block, sprintf('%d.fst', e))
+
+            fst::write_fst(phase, cache_file, compress = 100)
+          }
+
           # voltage
           save_h5(
             x = s,
@@ -578,6 +620,15 @@ rave_preprocess_tools <- function(env = new.env(), ...){
             chunk = 1,
             replace = T, size = 1000
           )
+          # If fast_cache, cache phase data to data/cache/phase/raw/block
+          if(fast_cache){
+            # create fast cache to phase
+            s = data.frame(V1 = s)
+            # write
+            cache_file = file.path(dirs$channel_dir, 'cache', 'voltage', 'raw', block, sprintf('%d.fst', e))
+
+            fst::write_fst(s, cache_file, compress = 100)
+          }
 
           # # Raw complex coefficient
           # coef = c(coef, phase)
@@ -595,6 +646,16 @@ rave_preprocess_tools <- function(env = new.env(), ...){
         }, .ncores = ncores, .call_back = function(i){
           progress2$inc(message = 'Electrode - ' %&% electrodes[i])
         })
+        # write a reference table to cache
+        # safe_write_csv(data.frame(
+        #   Electrode = rep(electrodes, length(blocks)),
+        #   Block = rep(blocks, each = length(electrodes)),
+        #   Reference = 'noref'
+        # ), file.path(dirs$channel_dir, 'cache', 'cached_reference.csv'), row.names = F)
+        safe_write_csv(data.frame(
+          Electrode = electrodes,
+          Reference = 'noref'
+        ), file.path(dirs$channel_dir, 'cache', 'cached_reference.csv'), row.names = F)
 
         invisible()
       })

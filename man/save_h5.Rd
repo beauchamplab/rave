@@ -16,7 +16,7 @@ file <- tempfile()
 x <- 1:120; dim(x) <- 2:5
 
 # save x to file with name /group/dataset/1
-rave:::save_h5(x, file, '/group/dataset/1', chunk = dim(x))
+save_h5(x, file, '/group/dataset/1', chunk = dim(x))
 
 # read data
 y <- load_h5(file, '/group/dataset/1')

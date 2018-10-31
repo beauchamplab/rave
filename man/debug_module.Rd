@@ -6,6 +6,16 @@
 \usage{
 debug_module(m, private_id)
 }
+\arguments{
+\item{m}{module object see ModuleEnvir}
+
+\item{private_id}{session rave_id}
+}
 \description{
 Function for module writers to debug modules
+}
+\details{
+To use this function, you must use test.mode=TRUE, i.e. call init_app(m, test.mode=TRUE)
+otherwise objects will be removed. Once imported data, close rave session and run debug_module(m)
+to see variables within the module
 }

@@ -2,10 +2,18 @@
 Package: rave
 Type: Package
 Title: R Analysis and Visualization of ECOG/iEEG Data
-Version: 0.1.5.0031
-Author: Beauchamplab
-Maintainer: Zhengjia Wang <dipterix.wang@gmail.com>,
-            Beauchamplab <beauchamplab@gmail.com>
+Version: 0.1.5.0040
+Date: 2018-10-29
+Authors@R: c(
+    person("Zhengjia", "Wang", email = "dipterix.wang@gmail.com", role = c("aut", "cre")),
+    person("John", "Magnotti", role = c("aut")),
+    person("Michael S.", "Beauchamp", role = c("aut", "fnd")),
+    person("Beauchamp lab", email = "beauchamplab@gmail.com", role = c("cph", "fnd"))
+    )
+Maintainer@R: c(
+    person("Zhengjia", "Wang", email = "dipterix.wang@gmail.com", role = c("aut", "cre")),
+    person("Beauchamp lab", email = "beauchamplab@gmail.com", role = c("cph", "fnd"))
+    )
 Description: R Analysis and Visualization of ECOG Data 
     (Internal code version: "Ent")
     RAVE provides cross-platform analysis and visualizations for neuroscience 
@@ -15,19 +23,23 @@ Description: R Analysis and Visualization of ECOG Data
     in real time; (c) Users can write customized analysis in R and easily 
     insert into RAVE for interactive visualizations. 
     Also RAVE follows BIDS (http://bids.neuroimaging.io/) format.
-License: GNU
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.0
 Imports:
+    utils,
+    htmltools (>= 0.3.6),
     devtools,
+    grid,
+    hdf5r (>= 1.0.0),
     roxygen2 (>= 6.0.0),
     R.matlab (>= 3.6.1),
     R6 (>= 2.2.2),
     jsonlite (>= 1.5),
     crayon (>= 1.3.4),
-    future (>= 1.6.2),
-    grid,
+    globals (>= 0.12.4),
+    future (>= 1.10.0),
     magrittr (>= 1.5),
     shiny (>= 1.0.5),
     stringr (>= 1.2.0),
@@ -46,46 +58,41 @@ Imports:
     httpuv (>= 1.3.6.1),
     DT (>= 0.4),
     reticulate (>= 1.6),
-    hdf5r (>= 1.0.0)
+    fst (>= 0.8.8),
+    data.table (>= 1.11.8)
+Suggests:
+    gifti
+Remotes:
+    github::dipterix/threejsr,
+    github::dipterix/rutabaga
 Collate: 
     'utils_syscheck.R'
     'aaa.R'
-    'bulk_preprocess.R'
+    'cls_brain.R'
     'cls_ecog_repo.R'
     'cls_electrode.R'
     'cls_map.R'
     'cls_module.R'
+    'cls_module_env.R'
     'cls_subject.R'
     'cls_subjectinfo.R'
     'cls_tensor.R'
     'cls_tensor_ecog.R'
-    'controllers.R'
     'core_default_setups.R'
     'core_options.R'
     'utils_history.R'
     'core_singletons.R'
-    'func_cache.R'
+    'func_group_analysis.R'
     'func_iter_results.R'
-    'func_load_modules.R'
-    'func_makemodule.R'
     'func_module_debug.R'
     'func_rave_prepare.R'
     'func_shinirize.R'
     'init_app.R'
     'io_raw_signal.R'
     'lib_notch_filter.R'
-    'lib_plot_car.R'
     'lib_plot_notch.R'
-    'lib_plot_signal.R'
     'lib_resample.R'
     'lib_wavelet.R'
-    'load_meta.R'
-    'mini_channel_inspection.R'
-    'mini_events_gen.R'
-    'mini_parallel_plots.R'
-    'mini_subject_info.R'
-    'pre_adhoc.R'
-    'pre_common_ang_ref.R'
     'pre_epoch.R'
     'pre_load_settings.R'
     'pre_notch.R'
@@ -93,34 +100,24 @@ Collate:
     'pre_post_reference.R'
     'pre_process.R'
     'pre_reference.R'
-    'pre_units.R'
     'pre_wavelet.R'
     'save_meta.R'
-    'server.R'
     'shiny_customize.R'
     'shiny_dashboard.R'
     'shiny_data_selector.R'
-    'shiny_pre_car.R'
-    'shiny_pre_epoch.R'
-    'shiny_pre_notch.R'
-    'shiny_pre_overview.R'
-    'shiny_pre_reference.R'
-    'shiny_pre_wavelet.R'
-    'shiny_preprocess.R'
-    'shiny_preprocess2.R'
     'shiny_rave_options.R'
-    'singleelectrode.R'
     'suma_io.R'
     'utils_3drender.R'
+    'utils_afni.R'
     'utils_async.R'
     'utils_check_repo.R'
     'utils_checkvalid.R'
     'utils_debug.R'
     'utils_dir.R'
-    'utils_execfunc.R'
-    'utils_ff_mann.R'
+    'utils_download_sample.R'
+    'utils_export.R'
     'utils_general.R'
-    'utils_h5_mann.R'
+    'utils_io_fst.R'
     'utils_io_h5.R'
     'utils_lapply.R'
     'utils_logger.R'

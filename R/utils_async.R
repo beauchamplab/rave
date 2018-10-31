@@ -2,6 +2,7 @@
 .queue = new.env()
 .queue_result = new.env()
 
+#' Start async process (deprecated)
 async_start <- function(){
   future::plan(future::multisession)
 
@@ -22,10 +23,11 @@ async_start <- function(){
   })
 }
 
-#' @description Async function to execute code
+#' Async function to execute code (depricated)
 #' @param expr expression for async exe
 #' @param name see 'details'
 #' @param envir environment of code
+#' @param plan see future::plan
 #' @details If \code{name} is NULL, expression will be evaluated and nothing will be
 #'  returned. However, if name is specified, you can call function
 #'  \code{get_async_result(name)} later to get the results if once evaluated.
@@ -77,6 +79,9 @@ async <- function(expr, name = NULL, envir = parent.frame(), plan = future::mult
 }
 
 
+#' Get async process result (deprecated)
+#' @param name async name
+#' @param remove remove future object?
 #' @export
 get_async_result <- function(name, remove = T){
   if(name %in% ls(.queue_result)){

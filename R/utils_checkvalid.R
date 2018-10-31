@@ -1,5 +1,8 @@
 
-
+#' Similar to dropNulls
+#' @param x list to drop
+#' @param deep iterativly apply this function
+#' @param nulls see is_invalid
 dropInvalid <- function(x, deep = FALSE, nulls = c('')){
   if(deep && is.list(x)){
     x = lapply(x, dropInvalid, deep = deep, nulls = nulls)
@@ -13,6 +16,9 @@ dropInvalid <- function(x, deep = FALSE, nulls = c('')){
   x
 }
 
+#' Check if object is invalid
+#' @param x object
+#' @param nulls 'na' for is.na, '' for is.blank, 'Inf' for is.infinite, default is.null is also checked
 is_valid <- function(x, nulls = c('')){
   if(
     length(x) == 0 || is.null(x) ||

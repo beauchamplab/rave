@@ -4,6 +4,7 @@ customizedUI <- function(inputId, width = 12L, ...){
 }
 
 
+#' @import htmltools
 #' @export
 div_elastic <- function(css_selector, any = T){
   div(
@@ -19,7 +20,7 @@ div_elastic <- function(css_selector, any = T){
 }
 
 
-
+#' @import htmltools
 expand_box <- function(
   ..., title = NULL, footer = NULL, status = NULL, solidHeader = FALSE,
   background = NULL, width = 12L, height = NULL, collapsible = T,

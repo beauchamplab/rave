@@ -17,9 +17,11 @@ does not exist. try_normalizePath will check parent directories and try to
 find absolute path for parent directories.
 }
 \examples{
+\dontrun{
 # "./" exist
 try_normalizePath('./')
 
 # Case when path not exist
 try_normalizePath("./this/path/does/not/exist/")
+}
 }

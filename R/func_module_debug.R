@@ -2,6 +2,8 @@
 # These functions will be override by RAVE during actual runtime
 
 #' Check if data is loaded for current module
+#' @param ... see defails
+#' @param data same as ..., but can be a vector
 #' @usage rave_checks('power referenced', 'voltage raw', ...)
 #' @details This function checks whether ECoG data is loaded. The format is: DATA+(blankspace)+TYPE. DATA can be
 #' "power" (Wavelet transform amplitude), "phase" (Complex angle), or "volt"/"voltage" (Before wavelet). TYPE can

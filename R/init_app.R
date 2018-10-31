@@ -1,6 +1,15 @@
 # module to load data
 
+#' Get people who uses this app
 get_people = function(){
+  default_fn = function(e){
+    return(list(
+      name = 'Beauchamplab',
+      src = system.file('beauchamplab.png', package = 'rave'),
+      text = "Beauchamp's lab @CAMRI, BCM, 2018",
+      index = 0
+    ))
+  }
   tryCatch({
     # get yaml file from dipterix repo
     genv = globalenv()
@@ -17,17 +26,12 @@ get_people = function(){
     img_list = sample(img_list, 1)[[1]]
     genv[['..last_index']] = img_list
     return(img_list)
-  }, error = function(e){
-    return(list(
-      name = 'Beauchamplab',
-      src = system.file('beauchamplab.png', package = 'rave'),
-      text = "Beauchamp's lab @CAMRI, BCM, 2018",
-      index = 0
-    ))
-  })
+  }, error = default_fn, warning = default_fn)
 }
 
-
+#' Get RAM usage
+#' @param modules which module(s)
+#' @param data_envir default uses getDefaultDataRepository
 get_mem_usage <- function(modules, data_envir){
   if(missing(data_envir)){
     data_envir = getDefaultDataRepository()
@@ -90,7 +94,12 @@ get_mem_usage <- function(modules, data_envir){
   )
 }
 
-
+#' Initialize main application
+#' @param modules which modules to show. Default uses "modules.csv" (see load_modules)
+#' @param active_module which module to focus at start up (use module ID)
+#' @param launch.browser launch browsers, default is on
+#' @param theme color theme for GUI
+#' @param ... other params like test.mode for module debugging
 #' @import stringr
 #' @import shiny
 #' @import magrittr
@@ -101,8 +110,14 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
   }, error = function(e){})
 
   test.mode = list(...)[['test.mode']]
-  if(is.null(test.mode)) test.mode = rave_options('test_mode')
-  if(length(modules) == 0){
+  if(is.null(test.mode)) {
+    if(is.null(modules)){
+      test.mode = rave_options('test_mode')
+    }else{
+      test.mode = F
+    }
+  }
+  if(!length(modules)){
     modules = load_modules()
   }
 
@@ -110,7 +125,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
     modules = list("______" = list(modules))
   }
 
-  data_selector = rave:::shiny_data_selector('DATA_SELECTOR')
+  data_selector = shiny_data_selector('DATA_SELECTOR')
   ui = rave::dashboardPage(
     skin = theme,
     title = 'R Analysis and Visualization of ECoG/iEEG Data',
@@ -119,44 +134,16 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
         ver = packageVersion('rave')
         sprintf('RAVE (%s)', paste(unlist(ver), collapse = '.'))
       }),
-      btn_text_right = 'Control Panel',
+      btn_text_right = 'RAM Usage',
       data_selector$header(),
       .list = tagList(
         tags$li(
-          class = 'dropdown user user-menu',
-          a(
-            href = '#', class='dropdown-toggle', `data-toggle` = 'dropdown',
-            `aria-expanded` = "false",
-            span(class = "hidden-xs", textOutput('curr_subj_code', inline = TRUE))
-          ),
-          tags$ul(
-            class = 'dropdown-menu',
-            tags$li(
-              class = 'user-body',
-              fluidRow(
-                column(
-                  width = 12L,
-                  class = 'full-width-table',
-                  tableOutput('curr_subj_electrodes')
-                )
-              )
-            ),
-            tags$li(
-              class = 'user-footer',
-              div(
-                class = 'pull-left',
-                actionButton('curr_subj_details_btn', 'View Details')
-              ),
-              div(
-                class = 'pull-right',
-                ''
-              )
-            )
-          )
+          class = 'user user-menu',
+          actionLink('curr_subj_details_btn', '')
         ),
         tags$li(
           class = 'user user-menu',
-          actionLink('curr_subj_launch_suma', 'Launch SUMA')
+          actionLink('curr_subj_launch_suma', '')
         )
       )
     ),
@@ -213,24 +200,23 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
       )
     ),
     initial_mask = tagList(
-      h2('R Analysis and Visualizations for Electrocorticography Data'),
-      hr(),
-      uiOutput('.init_mask'),
-      actionLink('.init_mask_f5', "I'm Lucky Today!")
+      h2('R Analysis and Visualizations for Electrocorticography Data')
+      # hr(),
+      # uiOutput('.init_mask'),
+      # actionLink('.init_mask_f5', "I'm Lucky Today!")
     )
   )
 
   server = function(input, output, session){
-    output$.init_mask <- renderUI({
-      input$.init_mask_f5
-      img_list = get_people()
-      p(
-        img(src = sprintf("%s/%s", 'https://raw.githubusercontent.com/dipterix/instrave/master/mask_img', img_list$src), alt = img_list$name),
-        br(),
-        HTML("<span>&#8220;", img_list$text, "&#8221;</span>"),br(),
-        span('- ', img_list$name)
-      )
-    })
+    # output$.init_mask <- renderUI({
+    #   input$.init_mask_f5
+    #   img_list = get_people()
+    #   p(
+    #     img(src = sprintf("%s/%s", 'https://raw.githubusercontent.com/dipterix/instrave/master/mask_img', img_list$src), alt = img_list$name),
+    #     br(),
+    #     span('- ', img_list$name)
+    #   )
+    # })
 
 
     #################################################################
@@ -349,6 +335,11 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
     })
 
 
+    observeEvent(input[['..keyboard_event..']], {
+      global_reactives$keyboard_event = input[['..keyboard_event..']]
+    })
+
+
 
     ##################################################################
     # Module to load data
@@ -357,7 +348,14 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
 
     ##################################################################
     # load modules
-    shinirized_modules = lapply(unlist(modules), rave:::shinirize, test.mode = test.mode)
+    # progress bar won't show title here, this is because shiny render detail information first and then
+    # message
+    .progress = progress(title = '', max = length(unlist(modules)))
+    shinirized_modules = lapply(unlist(modules), function(m){
+      .progress$inc(sprintf('Loading - %s', m$label_name))
+      shinirize(m, test.mode = test.mode)
+    })
+    .progress$close()
 
     observe({
       if(global_reactives$has_data){
@@ -381,7 +379,8 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
 
     #################################################################
     # some navigations
-    output$curr_subj_code <- renderText({
+
+    observe({
       refresh = global_reactives$force_refresh_all
       if(global_reactives$has_data && check_data_repo('subject')){
         data_repo = getDefaultDataRepository()
@@ -390,33 +389,15 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
         reference_name = data_repo$preload_info$reference_name
 
         rm(data_repo)
-        return(sprintf('[%s] - [%s] - [%s]', subject_id, epoch_name, reference_name))
+        sub_label = (sprintf('[%s] - [%s] - [%s]', subject_id, epoch_name, reference_name))
+        suma_label = 'Launch SUMA'
       }else{
-        return("")
+        suma_label = sub_label = ("")
       }
+      updateActionButton(session, 'curr_subj_details_btn', label = sub_label)
+      updateActionButton(session, 'curr_subj_launch_suma', label = suma_label)
     })
 
-    output$curr_subj_electrodes <- renderTable({
-      refresh = global_reactives$force_refresh_all
-      has_data = global_reactives$has_data
-      if(global_reactives$has_data && check_data_repo(c('subject', 'electrodes'))){
-        data_repo = getDefaultDataRepository()
-        subject = data_repo[['subject']]
-        electrodes = data_repo$preload_info$electrodes
-        tbl = subject$electrodes
-        tbl = tbl[tbl$Electrode %in% electrodes, c('Electrode', 'Label')]
-        rownames(tbl) = NULL
-        if(nrow(tbl) > 10){
-          tbl = tbl[1:10,]
-          tbl[10,1] = ''
-          tbl[10,2] = '...'
-        }
-        rm(data_repo)
-        return(tbl)
-      }else{
-        return(NULL)
-      }
-    })
 
     subject_modal = function(subject, current_electrodes = NULL){
       modalDialog(
@@ -466,7 +447,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
 
     observe({
       input$control_panel_refresh
-      local_data$mem_usage = rave:::get_mem_usage(modules)
+      local_data$mem_usage = get_mem_usage(modules)
     })
 
     output$mem_usage <- renderUI({
@@ -477,16 +458,14 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
 
       name = c(
         'Total Usage',
-        'Data Usage',
-        sapply(mem_usage$module_usage, '[[', 'Name'),
-        'Misc & Others Sessions'
+        'Shared Data Usage',
+        sapply(mem_usage$module_usage, '[[', 'Name')
       )
 
       usage = c(
         mem_usage$total_mem,
-        mem_usage$data_usage,
-        sapply(mem_usage$module_usage, '[[', 'usage'),
-        mem_usage$other_usage
+        mem_usage$data_usage + mem_usage$other_usage,
+        sapply(mem_usage$module_usage, '[[', 'usage')
       )
 
       perc = usage / max(usage)
@@ -509,7 +488,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
                                  ind = (pc_total < 0.75) + (pc_total < 0.9) + 1
                                  c('danger', 'warning', 'success')[ind]
                                },
-                               'Data Usage' = 'primary',
+                               'Shared Data Usage' = 'primary',
                                'Misc & Others Sessions' = 'primary',
                                {
                                  ind = (pc < 0.5) + 1
@@ -551,8 +530,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
         lapply(unlist(modules), function(x){
           x$clean(session_id = session_id)
         })
-        logger('Clean up data repository.')
-        data_repository[[session_id]]$.clean()
+        gc()
       })
     }
 

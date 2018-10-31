@@ -1,4 +1,6 @@
-# epoch
+#' Preprocess module - epoch
+#' @param module_id used internally "EPOCH_M"
+#' @param sidebar_width 1 to 12 width for sidebar
 pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2){
   ns = shiny::NS(module_id)
   default_epoch = data.frame(
@@ -370,7 +372,7 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2){
         }
         max_lag = max(max_lag , 1L)
         sel = which(sel)
-        sel = rave:::deparse_selections(sel, max_lag = max_lag, concatenate = F)
+        sel = deparse_selections(sel, max_lag = max_lag, concatenate = F)
         ind = as.integer(str_extract(sel, '^[0-9]+'))
         ind = ind[!is.na(ind)]
         selected_time = ind / srate

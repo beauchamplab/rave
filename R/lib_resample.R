@@ -1,6 +1,6 @@
 
 
-#' @description Decimate signal via FIR1 filter
+#' Decimate signal via FIR1 filter
 #' @param x signal (vector)
 #' @param q Compress rate or downsample rate
 #' @param n nth order of FIR kernel will be used, default 30

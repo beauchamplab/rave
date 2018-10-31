@@ -1,5 +1,8 @@
 # functions to create module,data,rawdata dirs
 
+#' Initialize data repository
+#' @param first_time will create data repositories for you
+#' @param reset reset to default data directory
 #' @export
 arrange_data_dir <- function(first_time = F, reset = F){
   if(first_time || reset){
@@ -31,8 +34,8 @@ arrange_data_dir <- function(first_time = F, reset = F){
     logger('Check existence of these folders, or reset default data repository by typing arrange_data_dir(reset = T)', level = 'ERROR')
     return(F)
   }else{
-    rave_options(data_dir = tools::file_path_as_absolute(data_dir))
-    rave_options(raw_data_dir = tools::file_path_as_absolute(raw_dir))
+    rave_options(data_dir = base::normalizePath(data_dir))
+    rave_options(raw_data_dir = base::normalizePath(raw_dir))
 
     # Test speed
     if(!isTRUE(rave_options('disable_startup_speed_check'))){
@@ -45,9 +48,13 @@ arrange_data_dir <- function(first_time = F, reset = F){
 
 }
 
+#' Update (optional), and check validity of modules
+#' @param first_time check updates
+#' @param reset same as first_time, check module updates, ignored
+#' @param quiet no overwrite messages
 #' @export
 arrange_modules <- function(
-  first_time = FALSE, reset = F
+  first_time = FALSE, reset = F, quiet = F
 ){
 
   look_up_file = rave::rave_options('module_lookup_file')
@@ -79,89 +86,89 @@ arrange_modules <- function(
       if(file.exists(look_up_file)){
         old_modules = read.csv(look_up_file, stringsAsFactors = F)
       }
-      old_modules$Order %?<-% seq_len(nrow(old_modules)) -1
-      old_modules$Order = as.numeric(old_modules$Order)
-      old_modules$Order[is.na(old_modules$Order)] = n_new + nrow(old_modules) + seq_along(old_modules$Order[is.na(old_modules$Order)])
+      if(nrow(old_modules)){
+        old_modules$Order %?<-% seq_len(nrow(old_modules)) -1
+        old_modules$Order = as.numeric(old_modules$Order)
+        old_modules$Order[is.na(old_modules$Order)] = n_new + nrow(old_modules) + seq_along(old_modules$Order[is.na(old_modules$Order)])
 
-      new = merge(new_modules, old_modules, by = 'ModuleID', all = T, sort = F, suffixes = c('', '_old'))
+        new = merge(new_modules, old_modules, by = 'ModuleID', all = T, sort = F, suffixes = c('', '_old'))
 
-      # check ModuleID
-      new = new[!is.na(new$ModuleID),]
+        # check ModuleID
+        new = new[!is.na(new$ModuleID),]
 
-      lapply(seq_len(nrow(new)), function(ii){
-        row = new[ii,]
+        lapply(seq_len(nrow(new)), function(ii){
+          row = new[ii,]
 
-        for(col in columns){
-          if(is.na(row[[col]])){
-            row[[col]] = row[[paste0(col, '_old')]]
+          for(col in columns){
+            if(is.na(row[[col]])){
+              row[[col]] = row[[paste0(col, '_old')]]
+            }
           }
-        }
-        if(is.na(row$Active_old)){ row$Active = TRUE }else{
-          row$Active = row$Active & row$Active_old
-        }
-        if(is_invalid(row$ScriptPath, .invalids = c('null', 'na', 'blank')) || !file.exists(row$ScriptPath)){
-          row$Active = F
-        }
-        if(is.na(row$Version) || !is.character(row$Version)){
-          row$Version = '0'
-        }
-        if(is.na(row$Order)){
-          row$Order = row$Order_old
-        }
-
-        if(!reset){
-          if(length(row$Version_old) == 1 &&
-             !is.na(row$Version_old) &&
-             is.character(row$Version_old) &&
-             utils::compareVersion(row$Version, row$Version_old) < 0
-          ){
-            # New packages are not new! DO not change module file, this guy is a developer!
-            row$Version = row$Version_old
-            row$PackageID = row$PackageID_old
-            row$GroupName = row$GroupName_old
-            row$Name = row$Name_old
-            row$ScriptPath = row$ScriptPath_old
-            row$Author = row$Author_old
-            row$Packages = row$Packages_old
+          if(is.na(row$Active_old)){ row$Active = TRUE }else{
+            row$Active = row$Active & row$Active_old
           }
-        }
-        row[, columns]
-      }) ->
-        modules
-
-      new = do.call(rbind, modules)
-
-      lapply(modules, function(m){
-        sel = m$ModuleID == new$ModuleID
-        if(sum(sel) > 1){
-          vers = as.numeric_version(new$Version[sel])
-          m_ver = as.numeric_version(m$Version)
-          if(m_ver != max(vers)){
-            return(NULL)
+          if(is_invalid(row$ScriptPath, .invalids = c('null', 'na', 'blank')) || !file.exists(row$ScriptPath)){
+            row$Active = F
           }
-        }
-        return(m)
-      }) ->
-        modules
+          if(is.na(row$Version) || !is.character(row$Version)){
+            row$Version = '0'
+          }
+          if(is.na(row$Order)){
+            row$Order = row$Order_old
+          }
 
-      modules = rave:::dropNulls(modules)
+          if(!reset){
+            if(length(row$Version_old) == 1 &&
+               !is.na(row$Version_old) &&
+               is.character(row$Version_old) &&
+               utils::compareVersion(row$Version, row$Version_old) < 0
+            ){
+              # New packages are not new! DO not change module file, this guy is a developer!
+              row$Version = row$Version_old
+              row$PackageID = row$PackageID_old
+              row$GroupName = row$GroupName_old
+              row$Name = row$Name_old
+              row$ScriptPath = row$ScriptPath_old
+              row$Author = row$Author_old
+              row$Packages = row$Packages_old
+            }
+          }
+          row[, columns]
+        }) ->
+          modules
 
-      modules = do.call(rbind, modules)
-      new_modules = modules[!duplicated(modules[,c('ModuleID', 'Version')]), ]
+        new = do.call(rbind, modules)
 
-      new_modules = new_modules[order(new_modules$Order), ]
-      new_modules$Order = seq_len(nrow(new_modules))
+        lapply(modules, function(m){
+          sel = m$ModuleID == new$ModuleID
+          if(sum(sel) > 1){
+            vers = as.numeric_version(new$Version[sel])
+            m_ver = as.numeric_version(m$Version)
+            if(m_ver != max(vers)){
+              return(NULL)
+            }
+          }
+          return(m)
+        }) ->
+          modules
+
+        modules = dropNulls(modules)
+
+        modules = do.call(rbind, modules)
+        new_modules = modules[!duplicated(modules[,c('ModuleID', 'Version')]), ]
+
+        new_modules = new_modules[order(new_modules$Order), ]
+        new_modules$Order = seq_len(nrow(new_modules))
+      }
+
 
     }, silent = T)
 
-    safe_write_csv(new_modules, look_up_file)
-
-
-
+    safe_write_csv(new_modules, look_up_file, quiet = quiet)
   }
 
-  rave_options(module_root_dir = tools::file_path_as_absolute(target_dir))
-  rave_options(module_lookup_file = tools::file_path_as_absolute(look_up_file))
+  rave_options(module_root_dir = base::normalizePath(target_dir))
+  rave_options(module_lookup_file = base::normalizePath(look_up_file))
 
   logger('\nActive modules: \n', paste0(' - ', new_modules$Name[new_modules$Active], '(', new_modules$ModuleID[new_modules$Active], ')', collapse = '\n'),
           '\nAccording to [', look_up_file, ']', level = 'INFO')

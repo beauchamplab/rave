@@ -159,10 +159,10 @@ viewer = function(){
     col_sym %?<-% T
 
     marker = apply(subject$electrodes, 1, function(x){
-      as.character(div(
-        h5('Electrode - ', x['Electrode'], ' ', tags$small(sprintf(
-          '%s [%s, %s]', x['Label'], x['Group'], x['Type']
-        )))
+      as.character(p(
+        tags$small(sprintf(
+          '%s, %s', x['Group'], x['Type']
+        ))
       ))
     })
 
@@ -171,12 +171,12 @@ viewer = function(){
               return(
                 module_tools$plot_3d_electrodes(
                   tbl = subject$electrodes,
-                  marker = marker,
-                  fps = 1,
-                  loop = F,
-                  control_gui = F,
-                  background_colors = c(bgcolor, '#000000'),
-                  control = mouse_control
+                  # marker = marker,
+                  # fps = 1,
+                  # loop = F,
+                  control_gui = T
+                  # background_colors = c(bgcolor, '#000000'),
+                  # control = mouse_control
                 )
               )
 
@@ -184,7 +184,7 @@ viewer = function(){
             'static' = {
               main_var = local_data$main_var
               thred_var = local_data$thred_var
-              thred_rg = local_data$thred_rg
+              # thred_rg = local_data$thred_rg
               thred_rg %?<-% c(-Inf, Inf)
               info_var = local_data$info_var
               body = mask$body[order(mask$electrodes), ]
@@ -235,16 +235,10 @@ viewer = function(){
 
               return(
                 module_tools$plot_3d_electrodes(
-                  tbl = subject$electrodes,
                   electrodes = electrodes,
-                  values = values,
-                  symmetric = col_sym,
+                  values = values,key_frame = 0,
                   marker = marker,
-                  fps = 1,
-                  loop = F,
-                  control_gui = F,
-                  background_colors = c(bgcolor, '#000000'),
-                  control = mouse_control
+                  control_gui = T
                 )
               )
 
@@ -252,17 +246,10 @@ viewer = function(){
             'animation' = {
               return(
                 module_tools$plot_3d_electrodes(
-                  tbl = subject$electrodes,
                   electrodes = mask$electrodes,
                   key_frame = mask$header,
                   values = t(mask$body),
-                  symmetric = col_sym,
-                  marker = marker,
-                  fps = 1,
-                  loop = T,
-                  control_gui = T,
-                  background_colors = c(bgcolor, '#000000'),
-                  control = mouse_control
+                  control_gui = T
                 )
               )
 

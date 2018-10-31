@@ -1,6 +1,15 @@
-#' @importFrom htmltools tags
+#' Re-write shint actionButton to enable styles
+#' @param inputId see shiny::actionButton
+#' @param label  see shiny::actionButton
+#' @param icon see shiny::actionButton
+#' @param width see shiny::actionButton
+#' @param type default, primary, info... see bootstrap
+#' @param btn_type html tag attribute "type"
+#' @param class additional classes
+#' @param ... other methods passed to actionButton
+#' @import htmltools
 #' @export
-actionButtonStyled <- function(inputId, label, icon = NULL, width = NULL, type = 'default', ...){
+actionButtonStyled <- function(inputId, label, icon = NULL, width = NULL, type = 'default', btn_type = 'button', class = '', ...){
   value <- shiny::restoreInput(id = inputId, default = NULL)
 
   args = list(...)
@@ -11,8 +20,8 @@ actionButtonStyled <- function(inputId, label, icon = NULL, width = NULL, type =
 
   args[['style']] = style
   args[['id']] = inputId
-  args[['type']] = 'button'
-  args[['class']] = sprintf("btn btn-%s action-button", type)
+  args[['type']] = btn_type
+  args[['class']] = sprintf("btn btn-%s action-button %s", type, class)
   args[['data-val']] = value
   args[['id']] = inputId
 
@@ -25,10 +34,17 @@ actionButtonStyled <- function(inputId, label, icon = NULL, width = NULL, type =
   )
 }
 
-
+#' Customized input just designed for RAVE to include multiple inputs and duplicate them
+#' @param inputId shiny input ID
+#' @param label Label prefix
+#' @param components expressions to include ordinary shiny inputs
+#' @param max_ncomp maximum components to show
+#' @param inital_ncomp initial counts
+#' @param prefix fieldset legend
+#' @param style additional css style
 #' @export
 compoundInput <- function(
-  inputId, label = '', components = NULL, max_ncomp = 10, inital_ncomp = 1
+  inputId, label = '', components = NULL, max_ncomp = 10, inital_ncomp = 1, prefix = 'Group', style = ''
 ){
   value <- deparse(substitute(components))
   dots = lazyeval::as.lazy(value)
@@ -53,8 +69,8 @@ compoundInput <- function(
             class = paste('rave-ui-compound-inner', ifelse(inital_ncomp < ind, 'hidden', '')),
             'data-value' = ind,
             tags$fieldset(
-              style = 'border: 1px solid #efefef; padding:.35em .625em .75em; margin-bottom: 15px;',
-              tags$legend('Group ' %&% ind, style = 'border:none; margin: 0; padding: 0 10px; font-size: 14px;'),
+              style = sprintf('border: 1px solid #efefef; padding:.35em .625em .75em; margin-bottom: 15px;%s', style),
+              tags$legend(prefix %&% ' ' %&% ind, style = 'border:none; margin: 0; padding: 0 10px; font-size: 14px;'),
               tagList(
                 lapply(dots, function(comp){
                   comp = comp$.change_param(
@@ -95,6 +111,8 @@ compoundInput <- function(
 
 }
 
+#' internally used to cheat RAVE
+#' @param rave_id internally used
 fake_session <- function(rave_id = '__fake_session__'){
   fakesession = new.env()
   fakesession$sendInputMessage = function(inputId, message){
@@ -105,7 +123,9 @@ fake_session <- function(rave_id = '__fake_session__'){
   fakesession
 }
 
-
+#' internally used for debugging functions (reactive)
+#' @param func function
+#' @param ... params for function
 with_fake_session <- function(func, ...){
   fakesession = new.env()
   fakesession$sendInputMessage = function(inputId, message){
@@ -116,6 +136,10 @@ with_fake_session <- function(func, ...){
   }, envir = fakesession)
 }
 
+#' internally used for debugging functions
+#' @param ... see with_fake_session
+#' @param .args same as ...
+#' @param .func function to pass to with_fake_session
 get_fake_updated_message <- function(..., .args = list(), .func = NULL){
   .args = c(
     list(...),
@@ -137,7 +161,11 @@ get_fake_updated_message <- function(..., .args = list(), .func = NULL){
   }
 }
 
-
+#' Function to update cmpoundInput (broken)
+#' @param session shiny session
+#' @param inputId shiny input ID
+#' @param to extend count
+#' @param ... other params
 #' @export
 updateCompoundInput <- function(session, inputId, to, ...){
   val = isolate(session$input[[inputId]])
@@ -154,7 +182,12 @@ updateCompoundInput <- function(session, inputId, to, ...){
 
 .ui_update_repo <- new.env()
 
-
+#' Internally register function to shiny (to be deprecated)
+#' @param key input function
+#' @param update_func update function
+#' @param value_field which is value
+#' @param update_value I forget what's this
+#' @param default_args default args when initializing
 ui_register_function <- function(key, update_func = NULL, value_field = 'value', update_value = F, default_args = list()){
   if(!is.null(update_func) && is.function(update_func)){
     update_func = list(
@@ -170,42 +203,6 @@ ui_register_function <- function(key, update_func = NULL, value_field = 'value',
   assertthat::assert_that(is.function(update_func$update_func), msg = 'Update function not found!')
   return(invisible(update_func))
 }
-
-
-
-
-
-# re = compoundInput(
-#   'asdid','label',
-#   shiny::textInput('textid', 'label1'),
-#   selectInput('groupid', 'Group', choices = ''),max_ncomp = 3
-# )
-#
-# js = readLines('./inst/assets/input_compound.js')
-#
-# shinyApp(
-#   ui = fluidPage(
-#     fluidRow(
-#       singleton(tags$head(tags$script(HTML(js)))),
-#       column(3,re$ui(), actionButton('a','click')),
-#       column(5,
-#              verbatimTextOutput('oo')
-#       ))
-#   ),
-#   server=function(input, output, session){
-#     output$oo <- renderPrint({
-#       print(input$asdid)
-#     })
-#
-#     observeEvent(input$a, {
-#       updateCompoundInput(session, 'asdid', value = list(
-#         groupid = list(
-#           choices = letters[1:10]
-#         )
-#       ))
-#     })
-#   }
-# )
 
 
 

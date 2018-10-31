@@ -1,5 +1,4 @@
-# subject class
-
+#' Subject class
 #' @export
 Subject <- R6::R6Class(
   classname = 'Subject',
@@ -13,9 +12,11 @@ Subject <- R6::R6Class(
     subject_code = NULL,
     project_name = NULL,
     dirs = NULL,
-    print = function(){
+    info = function(){
       cat('<Subject> [', self$subject_id, ']\n - Total electrodes: ', length(self$valid_electrodes), '\n', sep = '')
-
+    },
+    print = function(){
+      pryr::address(self)
     },
     finalize = function(){
       rm(list = ls(private$loaded), envir = private$loaded)
@@ -118,7 +119,9 @@ Subject <- R6::R6Class(
 )
 
 
-
+#' Conver subject to python object
+#' @param obj Subject class
+#' @param convert pass to reticulate::r_to_py
 #' @export
 r_to_py.Subject <- function(obj, convert = FALSE){
   reticulate::r_to_py(list(
@@ -129,4 +132,18 @@ r_to_py.Subject <- function(obj, convert = FALSE){
     valid_electrodes = obj$valid_electrodes,
     dirs = obj$dirs[c('rave_dir', 'meta_dir', 'cache_dir', 'suma_dir', 'suma_out_dir')]
   ), convert = convert)
+}
+
+#' Conver subject to JSON format
+#'
+#' @export
+asJSON.Subject <- function(obj){
+  list(
+    subject_id = obj$id,
+    electrodes = obj$electrodes,
+    frequencies = obj$frequencies,
+    sample_rate = obj$meta$sample_rate,
+    valid_electrodes = obj$valid_electrodes
+    # dirs = obj$dirs[c('rave_dir', 'meta_dir', 'cache_dir', 'suma_dir', 'suma_out_dir')]
+  )
 }

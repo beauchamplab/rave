@@ -21,6 +21,7 @@
 #' @param cex Label, title size. See \code{\link[graphics]{plot.default}}
 #' @param lwd Line size for the top plot. See \code{\link[graphics]{plot.default}}
 #' @examples
+#' \dontrun{
 #' time <- seq(0, 300, 1/2000)
 #' s2 <- sin(pi/30 * time + rcauchy(length(time)) / 1000) + rnorm(length(time))
 #' diagnose_signal(s2, srate = 2000, flim = c(-4,-1))
@@ -28,6 +29,7 @@
 #' # Apply notch filter
 #' s1 = notch_filter(s2, 2000, 58,62)
 #' diagnose_signal(s1, s2, srate = 2000, flim = c(-4,-1))
+#' }
 #'
 #' @export
 diagnose_signal <- function(
@@ -35,7 +37,7 @@ diagnose_signal <- function(
   max_freq = 300, window = ceiling(srate * 2), noverlap = window / 2, std = 3,
   cex = 1.5, lwd = 0.5, flim = NULL, nclass = 100,
   main = 'Channel Inspection', col = c('black', 'red'),
-  which = NULL, start_time = 0, boundary = NULL,
+  which = NULL, start_time = 0, boundary = NULL, mar = c(5.2, 5.1, 4.1, 2.1),
   ...){
 
   # is sc not specified, and srate is too high, compress s1
@@ -57,8 +59,9 @@ diagnose_signal <- function(
 
   # Grid layout
   if(length(which) == 0){
-    grid::grid.newpage()
+    # grid::grid.newpage()
     lay <- rbind(c(1,1,1), c(2,3,4))
+    par(mar = mar)
     graphics::layout(mat = lay)
     # mai = par('mai');
     # on.exit({par(mai = mai)}, add = T)
@@ -82,14 +85,14 @@ diagnose_signal <- function(
     if(!is.null(s2)){
       pwelch(s2, fs = srate, window = window,
              noverlap = noverlap, plot = 1, col = col[2], cex = cex, ylim = flim,
-             log = 'y', xlim = xlim, spec_func = rave:::spectrum.pgram, max_freq = max_freq)
+             log = 'y', xlim = xlim, spec_func = spectrum.pgram, max_freq = max_freq)
       pwelch(s1, fs = srate, window = window, noverlap = noverlap, cex = cex, ylim = flim,
              plot = 2, col = col[1], log = 'y', xlim = xlim, spec_func = spectrum.pgram, max_freq = max_freq)
       legend('topright', sprintf('%s %s', c('Before', 'After'), name), col = rev(col), lty = 1, cex = cex * 0.7)
     }else{
       pwelch(s1, fs = srate, window = window,
              noverlap = noverlap, plot = 1, col = col[1], cex = cex, ylim = flim,
-             log = 'y', xlim = xlim, spec_func = rave:::spectrum.pgram, max_freq = max_freq)
+             log = 'y', xlim = xlim, spec_func = spectrum.pgram, max_freq = max_freq)
     }
   }
 
@@ -99,14 +102,14 @@ diagnose_signal <- function(
     if(!is.null(s2)){
       pwelch(s2, fs = srate, window = window,
              noverlap = noverlap, plot = 1, col = col[2], cex = cex, ylim = flim,
-             log = 'xy', xlim = log_xlim, spec_func = rave:::spectrum.pgram, max_freq = max_freq)
+             log = 'xy', xlim = log_xlim, spec_func = spectrum.pgram, max_freq = max_freq)
       pwelch(s1, fs = srate, window = window, noverlap = noverlap, cex = cex, ylim = flim,
              plot = 2, col = col[1], log = 'xy', xlim = log_xlim, spec_func = spectrum.pgram, max_freq = max_freq)
       legend('topright', c('Before ', 'After ') %&% name, col = rev(col), lty = 1, cex = cex * 0.8)
     }else{
       pwelch(s1, fs = srate, window = window,
              noverlap = noverlap, plot = 1, col = col[1], cex = cex, ylim = flim,
-             log = 'xy', xlim = log_xlim, spec_func = rave:::spectrum.pgram, max_freq = max_freq)
+             log = 'xy', xlim = log_xlim, spec_func = spectrum.pgram, max_freq = max_freq)
     }
   }
 

@@ -741,7 +741,7 @@ local({
         })
         observeEvent(input$module_sync, {
           # local_data$refresh
-          rave:::safe_write_csv(envir$modules, rave_options('module_lookup_file'), row.names = F)
+          safe_write_csv(envir$modules, rave_options('module_lookup_file'), row.names = F)
           local_data$refresh = Sys.time()
         })
         output$modules <- DT::renderDT({
@@ -793,7 +793,7 @@ local({
             },
             'ScriptPath' = {
               tryCatch({
-                val = tools::file_path_as_absolute(val)
+                val = base::normalizePath(val)
                 assertthat::assert_that(file.exists(val), !file.info(val)$isdir)
                 val
               }, error = function(e){
@@ -864,7 +864,9 @@ local({
 
 # rave_options_gui()
 
-
+#' Function to test local disk speed
+#' @param file_size default 10MB, i.e. 1e7
+#' @param quiet show messages?
 test_hdspeed <- function(file_size = 1e7, quiet = F){
   data_dir = rave_options('data_dir')
 

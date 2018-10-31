@@ -8,7 +8,8 @@ input = getDefaultReactiveInput()
   miss_data = FALSE,
   miss_data_message = '',
   miss_data_comps = NULL,
-  miss_data_size = 0
+  miss_data_size = 0,
+  prevent_load = TRUE
 )
 
 # for debug
@@ -19,6 +20,9 @@ if(is.null(session)){
 
 #global_reactives$execute_module
 output[['.__rave_modal__.']] <- renderUI({
+  # Unlock data loading
+  `.__internal_reactives__.`[['prevent_load']] = FALSE
+
   miss_data = `.__internal_reactives__.`[['miss_data']]
   miss_data_message = `.__internal_reactives__.`[['miss_data_message']]
   total_size = `.__internal_reactives__.`[['miss_data_size']]
@@ -78,6 +82,12 @@ observeEvent(input[['.__switch_back__.']], {
 })
 
 observeEvent(input[['.__load_data__.']], {
+  # Check if lock is on, prevent multiple click
+  if(isolate(`.__internal_reactives__.`[['prevent_load']])){
+    return()
+  }
+  `.__internal_reactives__.`[['prevent_load']] = TRUE
+
   miss_data = `.__internal_reactives__.`[['miss_data']]
   quos = `.__internal_reactives__.`[['miss_data_comps']]
   msg = `.__internal_reactives__.`[['miss_data_message']]

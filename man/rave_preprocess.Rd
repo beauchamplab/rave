@@ -6,6 +6,21 @@
 \usage{
 rave_pre_process(sidebar_width = 3L, launch.browser = T, host = '127.0.0.1', ...)
 }
+\arguments{
+\item{sidebar_width}{sibar width from 1 to 12 recommended 3 or 4}
+
+\item{launch.browser}{launch browser default is on}
+
+\item{host}{default is localhost 127.0.0.1}
+
+\item{quiet}{soft deprecated}
+
+\item{test.mode}{passed to shinyApp}
+
+\item{ver}{internally used please don't change}
+
+\item{theme}{color theme}
+}
 \description{
 RAVE Preprocess Function
 }

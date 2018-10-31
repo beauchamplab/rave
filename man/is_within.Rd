@@ -13,10 +13,12 @@ x \%within\% ref
 Check if value is within a data range
 }
 \examples{
+\dontrun{
 a <- 1:10
 a[is_within(a, c(2,5))]
 a[is_within(a, c(2,5), strict=T)]
 a[is_within(a, 2:5)]
 
 a[a \%within\% 2:5]
+}
 }

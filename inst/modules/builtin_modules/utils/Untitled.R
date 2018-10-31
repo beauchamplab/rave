@@ -22,14 +22,14 @@ cl <- parallel::makeForkCluster(parallel::detectCores()); gc()
 system.time({
 bl_power <- cache(
     key = list(subject$subject_id, electrodes, has_trials, BASELINE),
-    val = baseline(BASELINE[1],  BASELINE[2], electrodes)
+    val = baseline(power$subset(Electrode = Electrode == electrode), from = BASELINE[1],  to = BASELINE[2], hybrid = F, unit = '%')#baseline(BASELINE[1],  BASELINE[2], electrodes)
 )
 })
 
 bl_power <- parallel::parLapply(cl, electrodes, function(ei) {
     cache(
         key=list(subject$subject_id, ei, has_trials, BASELINE),
-        val = baseline(BASELINE[1],  BASELINE[2], ei)
+        val = baseline(power$subset(Electrode = Electrode == ei), from = BASELINE[1],  to = BASELINE[2], hybrid = F, unit = '%')#baseline(BASELINE[1],  BASELINE[2], ei)
     )
 })
 parallel::stopCluster(cl)

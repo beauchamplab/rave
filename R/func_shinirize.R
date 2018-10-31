@@ -1,3 +1,7 @@
+#' Convert module to objects used in shiny
+#' @param module ModuleEnvir object
+#' @param session shiny session, default let shiny decide
+#' @param test.mode passed by init_app
 #' @import magrittr
 #' @import shiny
 shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = TRUE){
@@ -122,7 +126,10 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         suspended = TRUE,
 
         # A flag: sidebar == this module (active module?)
-        focused = FALSE
+        focused = FALSE,
+
+        # current input data
+        current_param = list()
       )
 
       local_static = new.env()
@@ -147,7 +154,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       reactive({
         re = local_data$run_script
         if(check_active()){
-          logger('Ready, executing scripts.')
+          logger('Ready, prepared to execute scripts.')
           return(re)
         }
         return(FALSE)
@@ -192,9 +199,9 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       }
 
       cache_all_inputs <- function(save = T){
-        params = isolate(reactiveValuesToList(input))
+        # params = isolate(reactiveValuesToList(input))
         lapply(execenv$input_ids, function(inputId){
-          val = params[[inputId]]
+          val = isolate(input[[inputId]])
           execenv$cache_input(inputId, val, read_only = !save)
         }) ->
           altered_params
@@ -314,14 +321,20 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       })
 
       ##### Scripts #####
-      exec_script <- function(async = FALSE){
+      exec_script <- function(async = FALSE, force = FALSE){
+        if(!execenv$auto_execute && !force){
+          # Do not execute
+          return()
+        }
         logger('Executing Script')
+        showNotification(p(MODULE_LABEL, 'is running. Please wait...'), id = '.rave_main', duration = NULL)
         tryCatch({
           # record time
           start_time = Sys.time()
-          execenv$execute(async = async)
+          execenv$execute(async = async, force = force)
           if(async){
             local_data$suspended = FALSE
+            showNotification(p('Running in the background. Results will be shown once finished.'), type = 'message', id = 'async_msg')
           }else{
             local_data$has_results = Sys.time()
             end_time = Sys.time()
@@ -333,10 +346,17 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
           cache_all_inputs()
           execenv$cache_input('..onced', TRUE, read_only = F, sig = 'special')
 
+          lapply(execenv$input_ids, function(inputId){
+            val = isolate(input[[inputId]])
+            local_data$current_param[[inputId]] = val
+          })
+
         }, error = function(e){
           sapply(capture.output(traceback(e)), logger, level = 'ERROR')
           local_data$last_executed = F
         })
+
+        removeNotification(id = '.rave_main')
       }
 
       ##### Async #####
@@ -356,10 +376,10 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         is_run = !is.null(local_data$run_async)
         if(is_run){
           logger('Running the script with async')
-          exec_script(async = TRUE)
-          showNotification(p('Running in the background. Results will be shown once finished.'), type = 'message', id = 'async_msg')
+          exec_script(async = TRUE, force = TRUE)
         }
       })
+
 
       observeEvent(global_reactives$check_results, {
         if(!isolate(local_data$suspended)){
@@ -381,7 +401,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
               # exec_script(async = F)
               local_data$run_script = Sys.time()
               local_data$run_async = NULL
-              showNotification(p('Async evaluation is finished - ', MODULE_LABEL), duration = 8, type = 'message')
+              showNotification(p('Async evaluation is finished - ', MODULE_LABEL), duration = NULL, type = 'message')
             }
           }else{
             local_data$suspended = TRUE
@@ -423,6 +443,10 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         export_func = export_func[is_export_func]
 
         if(length(export_func)){
+
+          # find all analysis names
+          analysis_names = module_analysis_names(module_id = MODULE_ID)
+
           showModal(
             modalDialog(
               title = '',
@@ -437,6 +461,18 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
                   selectInput(
                     execenv$ns('.export_func'), label = 'Which function to apply?',
                     choices = export_func
+                  ),
+                  selectInput(
+                    execenv$ns('.export_name'), 'Analysis Name',
+                    choices = c('[New..]', analysis_names)
+                  ),
+                  conditionalPanel(
+                    condition = 'input[".export_name"] == "[New..]"',
+                    textInput(
+                      execenv$ns('.export_name_txt'), 'Enter a New Analysis Name',
+                      placeholder = 'Alphabets or digits, or `_` only'
+                    ),
+                    ns = execenv$ns
                   )
                 )
               )
@@ -450,24 +486,33 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
       observeEvent(input$.export_ready, {
         fun_name = input$.export_func
+        analysis_name = input$.export_name
+        if(analysis_name == '[New..]'){
+          analysis_name = input$.export_name_txt
+          analysis_name = stringr::str_remove_all(analysis_name, '[^a-zA-Z0-9_]')
+        }
+        analysis_name = stringr::str_to_upper(analysis_name)
 
         tryCatch({
-          # write.niml(
-          #   res,
-          #   electrode_numbers = data_env$electrodes,
-          #   value_labels = NULL,
-          #   prefix = sprintf('%s', str_replace_all(MODULE_LABEL, '[^A-Za-z0-9_]', '_')),
-          #   add_electrodes_as_column = TRUE,
-          #   value_file = '__vals.dat',
-          #   index_file = '__ind.dat',
-          #   work_dir = data_env$subject$dirs$suma_out_dir) ->
-          #   cmd
-          res = execenv$static_env[[fun_name]]()
-          assign('..rave_exported', res, envir = globalenv())
-          if(!(length(res) == 1 && is.character(res))){
-            res = 'Exported!'
+          f = execenv$static_env[[fun_name]]
+          fm = formals(f)
+          if(is.null(fm[['...']])){
+            fm %?<-% list()
+            fm[['...']] = rlang::sym('')
+            formals(f) = fm
           }
-          showNotification(p(res), type = 'message')
+          con = subject_tmpfile(
+            module_id = MODULE_ID,
+            fun_name = stringr::str_remove(fun_name, '^export_'),
+            pattern = sprintf(
+            '[%s]_', strftime(Sys.time(), '%Y%m%d-%H%M%S')
+          ))
+
+          res = f(con, analysis_name, dirname(con))
+          # Save to group analysis
+          logger('Saving to group analysis tables...')
+          module_analysis_save(module_id = MODULE_ID, analysis_name = analysis_name, file = con, meta = res)
+          showNotification(p('Module ID: ', MODULE_ID, ' exported!'), type = 'message')
         }, error = function(e){
           showNotification(p('Export failed: (message)', br(), e$message, br(), 'Please check console for error messages.'), type = 'error')
         })
@@ -477,7 +522,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
       observeEvent(input$.gen_report, {
 
-        curr_e = rave:::deparse_selections(get('electrodes', envir = data_env, inherits = F))
+        curr_e = deparse_selections(get('electrodes', envir = data_env, inherits = F))
         output_labels = str_c(unlist(execenv$output_labels))
         input_labels = str_c(unlist(execenv$input_labels))
         # guess inputs
@@ -526,7 +571,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         },
         content = function(con) {
           tryCatch({
-            electrodes = rave:::parse_selections(input$.report_electrodes)
+            electrodes = parse_selections(input$.report_electrodes)
             electrodes = data_env$valid_electrodes(electrodes)
             inputId = execenv$input_ids[unlist(execenv$input_labels) == input$.report_inputid]
             outputId = execenv$output_ids[unlist(execenv$output_labels) %in% input$.report_outputid]
@@ -559,6 +604,64 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         }
       )
 
+      # Special output - if module is not auto updated
+      output[['..params_current']] <- renderUI({
+        input_changed = NULL
+        update_btn = NULL
+        if(!execenv$auto_execute){
+          # Check if any params changed
+          vapply(execenv$input_ids, function(inputId){
+            re = !isTRUE(all.equal(local_data$current_param[[inputId]], input[[inputId]], check.attributes = F))
+            re
+          }, FUN.VALUE = FALSE) ->
+            input_changed
+          if(length(input_changed) && any(input_changed)){
+            update_btn = actionButtonStyled(execenv$ns('..force_execute'), 'Update Output', type = 'warning', width = '100%')
+            showNotification(p('Input changed, click ', actionLink(execenv$ns('..force_execute_1'), 'here'), ' or press ', strong('Ctrl/Command+Enter'), ' to update output.'), duration = NULL, id = '..input_updated')
+          }else{
+            update_btn = actionButtonStyled(execenv$ns('..force_execute'), 'Update Output', type = 'default', disabled = TRUE, width = '100%')
+            removeNotification(id = '..input_updated')
+          }
+
+          shinydashboard::box(
+            width = 12L,
+            update_btn
+            # p(tagList(info))
+          )
+        }
+        # We need to generate snapshot for current inputs
+        # lapply(seq_along(execenv$input_ids), function(ii){
+        #   inputId = execenv$input_ids[[ii]]
+        #   if(length(input_changed) >= ii){
+        #     changed = input_changed[[ii]]
+        #   }else{
+        #     changed = FALSE
+        #   }
+        #   tagList(
+        #     span(style = ifelse(changed, 'color:red;', 'color:black;'), strong(inputId), ': ', beautify(last_params[[inputId]])),
+        #     br()
+        #   )
+        # }) ->
+        #   info
+
+      })
+
+      observeEvent(input[['..force_execute_1']], {
+        exec_script(async = FALSE, force = TRUE)
+      })
+      observeEvent(input[['..force_execute']], {
+        exec_script(async = FALSE, force = TRUE)
+      })
+
+      observeEvent(global_reactives$keyboard_event, {
+        if(local_data$focused){
+          e = global_reactives$keyboard_event
+          if(e$enter_hit && e$ctrl_hit){
+            exec_script(async = e$shift_hit, force = TRUE)
+          }
+        }
+      })
+
 
 
 
@@ -578,3 +681,72 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
     }
   )
 }
+
+
+#' Check a and b are same
+#' @param a first object to compare
+#' @param b second object
+are_same <- function(a, b){
+  isTRUE(digest::digest(a) == digest::digest(b))
+}
+
+#' I forget the usage but it's related to converting something to strings
+#' @param v object
+#' @param max_len lax character length
+#' @param is_vector is vector
+#' @param level iter level
+beautify <- function(v, max_len = 20, is_vector = TRUE, level = 0){
+  max_level = 3
+  if(level > max_level){
+    return('...')
+  }
+  re = ''
+
+  switch (typeof(v),
+    'list' = {
+      nms = names(v)
+      sapply(seq_along(v), function(ii){
+        if(length(nms) >= ii){
+          nm = nms[[ii]]
+          if(is.blank(nm)){ nm = sprintf('(%d)', ii) }
+        }else{
+          nm = sprintf('(%d)', ii)
+        }
+        paste0(nm, ': ', paste0(unlist(beautify(v[[ii]], max_len = max_len, level = level + 1)), collapse = ''))
+      }) ->
+        re
+    },
+    'NULL' = { return(NULL) },
+    {
+      if(length(v) && is_vector){
+        # First 3 elements
+        re = paste0(sapply(v[seq_len(min(3L, length(v)))], beautify, max_len = max_len, is_vector = FALSE), collapse = ', ')
+        if(stringr::str_length(re) > max_len){
+          re = paste(stringr::str_sub(re, end = max_len - 4), '...')
+        }else if(length(v) > 3L){
+          re = paste0(re, '...')
+        }
+        return(re)
+      }
+      if(is.integer(v)){
+        return(sprintf('%d', v))
+      }else if(is.numeric(v)){
+        return(sprintf('%.1f', v))
+      }else if(is.environment(v)){
+        re = paste('<environment>: ', paste(ls(v), collapse = ', '))
+        re = paste(stringr::str_sub(re, end = max_len - 4), '...')
+        return(re)
+      }
+      expr = rlang::quo_text(rlang::quo({!!v}))
+      return(stringr::str_replace_all(expr, '(\\{\\n)|(\\n\\})|([ ]{2})|(\\n)', ''))
+    }
+  )
+
+  pre = paste0(rep(' ', level), collapse = '')
+  re = paste0(pre, re, collapse = '\n')
+  if(level >= 1){
+    re = paste('\n', re)
+  }
+  return(re)
+}
+# cat(str_c(beautify(as.list(input)[execenv$input_ids]), collapse = '\n'))

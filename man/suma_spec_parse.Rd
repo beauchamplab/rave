@@ -8,6 +8,8 @@ suma_spec_parse(subject)
 }
 \arguments{
 \item{subject}{Either characters such as 'Project/Subject' or Subject object created by Subject$new(...)}
+
+\item{spec_file}{default decided by rave_options('suma_spec_file'), depending on subjects}
 }
 \description{
 Parse spec file

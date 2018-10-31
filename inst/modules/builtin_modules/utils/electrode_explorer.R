@@ -10,10 +10,11 @@
 
 BASELINE <- c(-1, -.2)
 
-# baseline 
+# baseline
 bl_power <- cache(
     key = list(subject$subject_id, electrodes, BASELINE, any_trials),
-    val = baseline(BASELINE[1],  BASELINE[2], electrodes)
+    val = baseline(power$subset(Electrode = Electrode == electrode), from = BASELINE[1],  to = BASELINE[2], hybrid = F, unit = '%')
+    #baseline(BASELINE[1],  BASELINE[2], electrodes)
 )
 
 
@@ -58,19 +59,19 @@ for(ii in 1:8) {
         lines(ri*cos(th), ri*sin(th), col='gray70', lwd=0.75)
     }
     text(rep(0,4), c(2,4,6), c(-1, +1, +3), font=1, cex=2., col='gray40')
-    
+
     aa <- matrix(1:nrow(zcond), nrow=17, byrow = TRUE)
     for(ii in 1:nrow(aa)) {
-        
+
         offset <- cbind(3*cos(th), 3*sin(th))
-        
+
         lines(offset[aa[ii,],1] + y[aa[ii,]]*cos(th[aa[ii,]]),
               offset[aa[ii,],2] + y[aa[ii,]]*sin(th[aa[ii,]]), col=get_color(ii))
     }
-    
+
     segments(1,0,lim[2],0, lwd=2)
-    
-    
+
+
 }
 plot.clean(1:10,1:10)
 legend('topleft', abbreviate(unique(trials), minlength = 7),

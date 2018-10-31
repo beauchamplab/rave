@@ -4,12 +4,13 @@
 \alias{\%?<-\%}
 \title{Assign if not exists, or NULL}
 \usage{
-lhs \%?<-\% rhs
+lhs \%?<-\% value
 }
 \description{
 Assign if not exists, or NULL
 }
 \examples{
+\dontrun{
 # Remove a if exists
 if(exists('a', envir = globalenv()))  rm(a, envir = globalenv())
 
@@ -25,5 +26,6 @@ print(a)
 a = list()
 a$e \%?<-\% 1; print(a$e)
 a$e \%?<-\% 2; print(a$e)
+}
 
 }

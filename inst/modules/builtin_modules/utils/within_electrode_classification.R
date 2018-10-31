@@ -76,7 +76,7 @@ rave_execute({
 
     bl_power <- cache(
         key = list(subject$subject_id, electrode, BASELINE, any_trials),
-        val = baseline(BASELINE[1],  BASELINE[2], electrode)
+        val = baseline(power$subset(Electrode = Electrode == electrode), from = BASELINE[1],  to = BASELINE[2], hybrid = F, unit = '%')#baseline(BASELINE[1],  BASELINE[2], electrode)
     )
 
     has_trials <- unlist(lapply(GROUPS, function(g) length(g$GROUP) > 0))

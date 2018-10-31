@@ -19,6 +19,7 @@ eval_within(FUN, env = parent.frame(), ..., .args = list(), .tidy = T)
 Evaluate function as if it's run within another environment
 }
 \examples{
+\dontrun{
 # Arbitrary function
 f <- function(a){b <- a*a; print(b); b}
 
@@ -38,5 +39,7 @@ cat('Result:', result, '\\nenv$a: ', env$a, '\\nenv$b:', env$b)
 # Case 3: evaluate f with side effect
 result <- eval_within(f, env = env, a = 20, .tidy = F)
 cat('Result:', result, '\\nenv$a: ', env$a, '\\nenv$b:', env$b)
+
+}
 
 }

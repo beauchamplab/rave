@@ -10,6 +10,8 @@ dropNulls(x, .invalids = c("null"))
 Drop nulls within lists/vectors
 }
 \examples{
+\dontrun{
 x <- list(NULL,NULL,1,2)
 dropNulls(x)
+}
 }

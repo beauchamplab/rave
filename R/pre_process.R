@@ -1,5 +1,12 @@
 #' RAVE Preprocess Function
 #' @usage rave_pre_process(sidebar_width = 3L, launch.browser = T, host = '127.0.0.1', ...)
+#' @param sidebar_width sibar width from 1 to 12 recommended 3 or 4
+#' @param launch.browser launch browser default is on
+#' @param host default is localhost 127.0.0.1
+#' @param quiet soft deprecated
+#' @param test.mode passed to shinyApp
+#' @param ver internally used please don't change
+#' @param theme color theme
 #' @import shiny
 #' @import stringr
 #' @importFrom magrittr %>%
@@ -73,7 +80,7 @@ rave_preprocess <- function(
   })
 
 
-  ui = rave:::dashboardPage(
+  ui = dashboardPage(
     skin = theme,
     control = div(),
     header = shinydashboard::dashboardHeader(
@@ -193,7 +200,7 @@ rave_preprocess <- function(
 
     # save_meta_electrodes = function(){
     #   Channel = env$subject$channels
-    #   rave:::save_meta(
+    #   save_meta(
     #     data = meta_elec,
     #     meta_type = 'electrodes',
     #     project_name = env$subject$project_name,

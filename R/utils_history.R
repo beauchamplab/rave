@@ -1,5 +1,6 @@
 # saving rave history
 
+#' R6 class for small object caching
 RAVEHistory <- R6::R6Class(
   classname = 'RAVEHistory',
   private = list(
@@ -76,5 +77,27 @@ RAVEHistory <- R6::R6Class(
 )
 
 
+#' Obtain last saved value - disk cache
+#' @param key key name
+#' @param default if not found, return default
+#' @param save replace cache
+#' @param group character, donnot use "main_app" and "main_app2" since they are reserved
+#' @export
+last_entry <- function(key, default, save = F, group = 'customized'){
+  assertthat::assert_that(is.character(key), msg = 'Key must be a string')
+  dict = rave_hist$get_or_save(key = group, val = list(), save = F)
+  val = dict[[key]]
+  val %?<-% default
 
-
+  str_v = paste(val, collapse = ' ')
+  str_v = str_sub(str_v, end = min(str_length(str_v), 20))
+  logger(sprintf('[ %s ] Last entry of %s: %s', group, paste(key, collapse = ''), str_v))
+  if(save){
+    dict[[key]] = default
+    arg = list(dict); names(arg) = group
+    do.call(rave_hist$save, arg)
+    return(invisible(val))
+  }else{
+    return(val)
+  }
+}

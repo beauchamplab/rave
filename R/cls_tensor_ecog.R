@@ -1,3 +1,4 @@
+#' ECoG Tensor class inherit from Tensor
 #' @export
 ECoGTensor <- R6::R6Class(
   classname = 'ECoGTensor',
@@ -5,7 +6,7 @@ ECoGTensor <- R6::R6Class(
   public = list(
     flatten = function(include_index = T, value_name = 'value'){
       nrow = prod(self$dim)
-      re = data.frame(V = as.vector(self$data))
+      re = data.frame(V = as.vector(self$get_data()))
       names(re) = value_name
       if(include_index){
         for(i in 1:length(self$varnames)){
@@ -26,30 +27,23 @@ ECoGTensor <- R6::R6Class(
       }
       re
     },
-    initialize = function(data, dim, dimnames, varnames){
+    initialize = function(data, dim, dimnames, varnames, hybrid = F, swap_file = tempfile()){
 
-      if(!missing(dim)){
-        self$dim = dim
-        # if(!assertthat::are_equal(dim(data), dim)){  # omit check to save time.
-        #   logger('Dimension does not match', level = 'WARNING')
-        # }
-      }else if(!is.null(base::dim(data))){
-        self$dim = base::dim(data)
-      }else{
-        self$dim = length(data)
-      }
+      # get attributes of data
+      dim %?<-% base::dim(data)
+      dim %?<-% length(data)
+      dimnames %?<-% base::dimnames(data)
+      dimnames %?<-% lapply(1:length(varnames), function(v){ seq_len(dim[v]) })
 
-      if(!missing(dimnames)){
-        self$dimnames = dimnames
-      }else if(!is.null(base::dimnames(data))){
-        self$dimnames = base::dimnames(data)
-      }else{
-        self$dimnames = lapply(1:length(varnames), function(v){
-          1:(self$dim[v])
-        })
-      }
+      names(dimnames) = varnames
 
-      names(self$dimnames) = varnames
+      self$last_used = Sys.time()
+      self$dimnames = dimnames
+      self$dim = dim
+      private$.data = data
+
+      rm(data)
+
       tryCatch({
         if('Frequency' %in% varnames){
           self$dimnames$Frequency = as.numeric(self$dimnames$Frequency)
@@ -67,61 +61,17 @@ ECoGTensor <- R6::R6Class(
       }, error = function(e){})
 
 
-      dimnames(data) = self$dimnames
+      self$hybrid = hybrid
+      self$use_index = T
 
-      self$data = data
+      self$swap_file = swap_file
+
+      # to_swap
+      if(hybrid){
+        self$to_swap_now(use_index = T)
+      }
     }
   )
 )
 
-#' @export
-dim.Tensor <- function(obj){
-  obj$dim
-}
 
-#' @export
-dimnames.Tensor <- function(obj){
-  obj$dimnames
-}
-
-#' @export
-`[.ECoGTensor` <- function(obj, i, j, k, l){
-  dim = obj$dim
-  if(missing(i)){
-    i = 1:dim[1]
-  }
-  if(missing(j)){
-    j = 1:dim[2]
-  }
-  if(missing(k)){
-    k = 1:dim[3]
-  }
-  if(missing(l)){
-    l = 1:dim[4]
-  }
-  nd <- obj$data[i,j,k,l, drop = FALSE]
-  dimnames = obj$dimnames
-  dimnames[['Trial']] = dimnames[['Trial']][i]
-  dimnames[['Frequency']] = dimnames[['Frequency']][j]
-  dimnames[['Time']] = dimnames[['Time']][k]
-  dimnames[['Electrode']] = dimnames[['Electrode']][l]
-  rave:::ECoGTensor$new(data = nd,
-                 dim = dim(nd),
-                 dimnames = dimnames,
-                 varnames = c('Trial', 'Frequency', 'Time', 'Electrode'))
-}
-
-#' @export
-content.Tensor <- function(obj){
-  obj$data
-}
-
-#' @export
-content <- function(x, ...){
-  UseMethod('content')
-}
-
-#' @export
-subset.Tensor <- function(obj, ..., .env = parent.frame()){
-  obj$subset(...,.env = .env)
-}

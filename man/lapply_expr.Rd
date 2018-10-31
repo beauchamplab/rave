@@ -16,6 +16,7 @@ evaluated. You can use the name of the lists directly. If the names are not
 provided, use \code{.x} as default variable. See examples.
 }
 \examples{
+\dontrun{
 # X is a list of named lists, with name of each elements be "a"
 X <- replicate(n = 3, list(a = rnorm(10)))
 lapply_expr(X, {mean(a)})
@@ -35,4 +36,5 @@ lapply_expr(X, {mean(.x)}, wrapper = unlist)
 lapply_expr(1:10, {
   htmltools::tags$li(sprintf('line: \%d', .x))
 }, wrapper = htmltools::tags$ul)
+}
 }

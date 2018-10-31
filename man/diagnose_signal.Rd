@@ -9,7 +9,7 @@ diagnose_signal(s1, s2 = NULL, sc = NULL, srate, name = "",
   noverlap = window/2, std = 3, cex = 1.5, lwd = 0.5,
   flim = NULL, nclass = 100, main = "Channel Inspection",
   col = c("black", "red"), which = NULL, start_time = 0,
-  boundary = NULL, ...)
+  boundary = NULL, mar = c(5.2, 5.1, 4.1, 2.1), ...)
 }
 \arguments{
 \item{s1}{Signal for inspection}
@@ -52,6 +52,7 @@ means 3 standard deviation}
 Signal Inspection Plots
 }
 \examples{
+\dontrun{
 time <- seq(0, 300, 1/2000)
 s2 <- sin(pi/30 * time + rcauchy(length(time)) / 1000) + rnorm(length(time))
 diagnose_signal(s2, srate = 2000, flim = c(-4,-1))
@@ -59,5 +60,6 @@ diagnose_signal(s2, srate = 2000, flim = c(-4,-1))
 # Apply notch filter
 s1 = notch_filter(s2, 2000, 58,62)
 diagnose_signal(s1, s2, srate = 2000, flim = c(-4,-1))
+}
 
 }

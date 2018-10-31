@@ -20,7 +20,7 @@ load_modules <- function(recompile = F){
   if(length(pkg_ids)){
 
     for(pkg_id in pkg_ids){
-      pkg = rave:::to_package_name(pkg_id)
+      pkg = to_package_name(pkg_id)
       compile = FALSE
       if(recompile){
         logger('Compiling package - [' %&% pkg_id %&% '] (Package: ' %&% pkg %&% ')', level = 'INFO')
@@ -50,7 +50,7 @@ load_modules <- function(recompile = F){
         externalpackage = F
       )
     }else{
-      pkg = rave:::to_package_name(m$PackageID)
+      pkg = to_package_name(m$PackageID)
       module = do.call('::', list(pkg, 'rave_module'))(module_id = m$ModuleID, launch = F)
     }
     return(module)
@@ -138,7 +138,7 @@ create_package <- function(
   dependencies = NULL, root_dir = NULL
 ){
   ## Define package name
-  pkgName = rave:::to_package_name(package_id)
+  pkgName = to_package_name(package_id)
 
   ## Prepare directory
   if(is.null(root_dir)){
@@ -213,7 +213,7 @@ create_package <- function(
   function_env$..get_runtime_env = function(session, module_id, wrapper = F, name = 'runtime_env'){}
   body(function_env$..get_runtime_env) = rlang::quo_squash(rlang::quo({
     if(missing(session) || is.null(session)){
-      session = rave:::getDefaultReactiveDomain()
+      session = getDefaultReactiveDomain()
     }
     rave_comp = ..rave_env[[module_id]]
 

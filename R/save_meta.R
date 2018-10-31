@@ -1,14 +1,25 @@
-# pre-process functions to save meta files
 
-safe_write_csv <- function(data, file, ...){
+#' Save data to csv, if file exists, rename old file
+#' @param data data frame
+#' @param file csv file to save
+#' @param quiet suppress overwrite message
+#' @param ... pass to write.csv
+safe_write_csv <- function(data, file, ..., quiet = F){
   if(file.exists(file)){
     oldfile = str_replace(file, '\\.[cC][sS][vV]$', strftime(Sys.time(), '_[%Y%m%d_%H%M%S].csv'))
-    logger('Renaming file ', file, ' >> ', oldfile)
+    if(!quiet){
+      logger('Renaming file ', file, ' >> ', oldfile)
+    }
     file.rename(file, oldfile)
   }
   write.csv(data, file, ...)
 }
 
+#' Function to save meta data to subject
+#' @param data data table
+#' @param meta_type see load meta
+#' @param project_name project name
+#' @param subject_code subject code
 #' @export
 save_meta <- function(data, meta_type, project_name, subject_code){
   data_dir = rave_options('data_dir')
@@ -48,6 +59,12 @@ save_meta <- function(data, meta_type, project_name, subject_code){
 
 }
 
+#' Load subject meta data
+#' @param meta_type electrodes, epochs, time_points, frequencies, references ...
+#' @param project_name project name
+#' @param subject_code subject code
+#' @param subject_id "project_name/subject_code"
+#' @param meta_name only used if meta_type is epochs or references
 #' @export
 load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_name){
   data_dir = rave_options('data_dir')
@@ -104,6 +121,9 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
     }
     else if(meta_type == 'epoch'){
       epoch_file = file.path(meta_dir, sprintf('epoch_%s.csv', meta_name))
+      if(!length(epoch_file) || !file.exists(epoch_file)){
+        return(NULL)
+      }
       default_cols = c('Block', 'Time', 'Trial', 'Condition', 'Duration', 'ExcludedElectrodes')
 
       epochs = read.csv(epoch_file, header = T, stringsAsFactors = F,
@@ -140,11 +160,11 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
     }
     else if(meta_type == 'references'){
       file = file.path(meta_dir, sprintf('reference_%s.csv', meta_name))
-      if(!file.exists(file)){
+      if(!length(file) || !file.exists(file)){
         return(NULL)
       }
       ref_tbl = read.csv(file, header = T, stringsAsFactors = F)
-      if(names(ref_tbl)[1] != 'Electrode'){
+      if(length(names(ref_tbl)) && names(ref_tbl)[1] != 'Electrode'){
         ref_tbl = ref_tbl[,-1]
       }
       return(ref_tbl)

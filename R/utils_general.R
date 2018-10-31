@@ -1,3 +1,16 @@
+#' Convert file to base64 format
+to_datauri <- function(file, mime = ''){
+  info = file.info(file)
+  ss = jsonlite::base64_enc(input = readBin(file, what = 'raw', n = info$size))
+  ss = sprintf('data:%s;base64,%s', mime, ss)
+  ss
+}
+# s = base64enc::dataURI(mime = 'image/*', file = '~/Desktop/Enlight1.jpg', encoding = 'base64')
+# stringr::str_sub(s, end = 500)
+#
+# stringr::str_sub(ss, end = 500)
+
+
 #' Format Print Strings
 #' @export
 fprintf <- function(..., collapse = '\n', lookup_env = parent.frame()){
@@ -51,13 +64,13 @@ to_ram_size <- function(s, kb_to_b = 1000){
 
 
 #' @export
-as.character.rave_bytes <- function(s, digit=1){
-  sprintf(sprintf('%%.%df %s', digit, attr(s, 'unit')), s)
+as.character.rave_bytes <- function(x, digit=1, ...){
+  sprintf(sprintf('%%.%df %s', digit, attr(x, 'unit')), as.character.default(x, ...))
 }
 
 #' @export
-print.rave_bytes <- function(s, digit=1){
-  re = as.character(s)
+print.rave_bytes <- function(x, digit=1, ...){
+  re = as.character(x, digit = digit, ...)
   cat(re)
   invisible(re)
 }
@@ -392,8 +405,8 @@ is.na <- function(x, ...){
 ############################################### Internal
 # utils, will be moved to rutabaga
 
-`set_if_null<-` <- function(x, values) {
-  if(is.null(x)) return(values)
+`set_if_null<-` <- function(x, value) {
+  if(is.null(x)) return(value)
   return (x)
 }
 
@@ -419,8 +432,11 @@ add_to_session <- function(
 #' Concatenate two strings
 #' @usage s1 \%&\% s2
 #' @examples
+#' \dontrun{
 #' you <- 'my friend.'
 #' print('Hello, ' %&% you)
+#' }
+#'
 #' @export
 `%&%` <- function(s1,s2) paste0(s1,s2)
 
@@ -431,12 +447,14 @@ add_to_session <- function(
 #' \code{eval_dirty} will cause changes to the environment. Therefore if \code{expr}
 #' contains assignment, environment will be changed in this case.
 #' @examples
+#' \dontrun{
 #' expr = quote(a <- 111)
 #' a = 1; env = globalenv()
 #' rlang::eval_tidy(expr, env)
 #' print(a)  # Will be 1
 #' eval_dirty(expr, env)
 #' print(a)  # a is changed
+#' }
 #' @importFrom rlang quo_squash
 #' @importFrom rlang is_quosure
 #' @export
@@ -455,6 +473,7 @@ eval_dirty <- function(expr, env = parent.frame(), data = NULL){
 
 #' Assign if not exists, or NULL
 #' @examples
+#' \dontrun{
 #' # Remove a if exists
 #' if(exists('a', envir = globalenv()))  rm(a, envir = globalenv())
 #'
@@ -470,11 +489,12 @@ eval_dirty <- function(expr, env = parent.frame(), data = NULL){
 #' a = list()
 #' a$e %?<-% 1; print(a$e)
 #' a$e %?<-% 2; print(a$e)
+#' }
 #'
 #' @importFrom rlang quo
 #' @importFrom rlang !!
 #' @export
-`%?<-%` <- function(lhs, rhs){
+`%?<-%` <- function(lhs, value){
   env = parent.frame()
   lhs = substitute(lhs)
 
@@ -486,7 +506,7 @@ eval_dirty <- function(expr, env = parent.frame(), data = NULL){
     isnull
 
   if(isnull){
-    quo <- quo(!!lhs <- !!rhs)
+    quo <- quo(!!lhs <- !!value)
     eval_dirty(quo, env = env)   # Need to assign values, no eval_tidy
   }
 }
@@ -495,12 +515,14 @@ eval_dirty <- function(expr, env = parent.frame(), data = NULL){
 #' @usage
 #' is_within(x, ref, strict = FALSE)
 #' @examples
+#' \dontrun{
 #' a <- 1:10
 #' a[is_within(a, c(2,5))]
 #' a[is_within(a, c(2,5), strict=T)]
 #' a[is_within(a, 2:5)]
 #'
 #' a[a %within% 2:5]
+#' }
 #' @export
 is_within <- function(x, ref, strict = FALSE){
   rg = range(ref)
@@ -524,6 +546,7 @@ is_within <- function(x, ref, strict = FALSE){
 #' evaluated. You can use the name of the lists directly. If the names are not
 #' provided, use \code{.x} as default variable. See examples.
 #' @examples
+#' \dontrun{
 #' # X is a list of named lists, with name of each elements be "a"
 #' X <- replicate(n = 3, list(a = rnorm(10)))
 #' lapply_expr(X, {mean(a)})
@@ -543,6 +566,7 @@ is_within <- function(x, ref, strict = FALSE){
 #' lapply_expr(1:10, {
 #'   htmltools::tags$li(sprintf('line: %d', .x))
 #' }, wrapper = htmltools::tags$ul)
+#' }
 #' @importFrom rlang !!
 #' @importFrom rlang as_quosure
 #' @importFrom rlang eval_tidy
@@ -572,6 +596,7 @@ lapply_expr <- function(X, expr, wrapper = NULL, env = parent.frame()){
 #' @param ...,.args Parameters needed within function
 #' @param .tidy Evaluate with side effect? see example
 #' @examples
+#' \dontrun{
 #' # Arbitrary function
 #' f <- function(a){b <- a*a; print(b); b}
 #'
@@ -591,6 +616,8 @@ lapply_expr <- function(X, expr, wrapper = NULL, env = parent.frame()){
 #' # Case 3: evaluate f with side effect
 #' result <- eval_within(f, env = env, a = 20, .tidy = F)
 #' cat('Result:', result, '\nenv$a: ', env$a, '\nenv$b:', env$b)
+#'
+#' }
 #'
 #' @importFrom rlang fn_body
 #' @importFrom rlang quo
@@ -619,12 +646,14 @@ eval_within <- function(FUN, env = parent.frame(), ..., .args = list(), .tidy = 
 #' Function to clear all elements within environment
 #' @usage clear_env(env, all.names = T)
 #' @examples
+#' \dontrun{
 #' env = new.env()
 #' env$a = 1
 #' print(as.list(env))
 #'
 #' clear_env(env)
 #' print(as.list(env))
+#' }
 #' @export
 clear_env <- function(env, all.names = T){
   if(is.environment(env)){
@@ -646,6 +675,7 @@ is.blank <- function(s){
 #' otherwise, it will check if all element of x is invalid
 #' @param .invalids Possible choices: 'null', 'na', 'blank'
 #' @examples
+#' \dontrun{
 #' is_invalid(NULL)
 #'
 #' is_invalid(c(NA, 1))
@@ -653,6 +683,7 @@ is.blank <- function(s){
 #' is_invalid(c(NA, 1), any = T)
 #'
 #' is_invalid('', .invalids = 'blank')
+#' }
 #' @export
 is_invalid <- function(x, any = F, .invalids = c('null', 'na')){
   if('null' %in% .invalids){
@@ -710,6 +741,7 @@ get_val <- function(x, key = NULL, ..., .invalids = c('null', 'na')){
 #' @param any Any element has zero-length? or all elements need to have zero-length
 #' @param na.rm Should NA be removed before evaluation?
 #' @examples
+#' \dontrun{
 #' # any = TRUE, any element with zero length will yield "TRUE" result
 #' # In this case, expressions c(1) and a==NULL are not evaluated
 #' zero_length(NULL, c(1), a=={Sys.sleep(10)})
@@ -720,6 +752,7 @@ get_val <- function(x, key = NULL, ..., .invalids = c('null', 'na')){
 #'
 #' # stop('') yields error, which will be counted as invalid/zero-length
 #' zero_length(stop(''))
+#' }
 #' @export
 zero_length <- function(..., any = T, na.rm = F){
   parent_env = parent.frame()
@@ -752,8 +785,10 @@ zero_length <- function(..., any = T, na.rm = F){
 
 #' Drop nulls within lists/vectors
 #' @examples
+#' \dontrun{
 #' x <- list(NULL,NULL,1,2)
 #' dropNulls(x)
+#' }
 #' @export
 dropNulls <- function (x, .invalids = c('null')) {
   x[!vapply(x, is_invalid, FUN.VALUE = logical(1), .invalids = .invalids)]
@@ -763,6 +798,7 @@ dropNulls <- function (x, .invalids = c('null')) {
 #' @usage safe_str_c(x, sep = '', collapse = NULL, .error = '')
 #' @param .error If x can't be converted to string, return this message
 #' @examples
+#' \dontrun{
 #' safe_str_c('Count - ', 3:1)
 #'
 #' safe_str_c('Count - ', 3:1, collapse = '..., ')
@@ -773,6 +809,7 @@ dropNulls <- function (x, .invalids = c('null')) {
 #' # aaa exists
 #' aaa <- 0
 #' safe_str_c('Count - ', aaa, .error = 'aaa not exists')
+#' }
 #' @export
 safe_str_c <- function(..., sep = '', collapse = NULL, .error = ''){
   tryCatch({
@@ -796,11 +833,13 @@ safe_str_c <- function(..., sep = '', collapse = NULL, .error = ''){
 #' does not exist. try_normalizePath will check parent directories and try to
 #' find absolute path for parent directories.
 #' @examples
+#' \dontrun{
 #' # "./" exist
 #' try_normalizePath('./')
 #'
 #' # Case when path not exist
 #' try_normalizePath("./this/path/does/not/exist/")
+#' }
 #' @importFrom stringr str_split
 #' @export
 try_normalizePath <- function(path, sep = c('/', '\\\\')){
@@ -878,6 +917,7 @@ cache <- function(key, val, global = FALSE, replace = FALSE, session = NULL, swa
   }else{
     session %?<-% getDefaultReactiveDomain()
   }
+
   cache_env = getDefaultCacheEnvironment(session = session)
 
   k = digest(key)
@@ -925,10 +965,14 @@ clear_cache <- function(all = FALSE, session = NULL){
 getDefaultCacheEnvironment <- function(
   session = getDefaultReactiveDomain()
 ){
-  data_env = getDefaultDataRepository(session = session, session_based = T)
-  data_env$.cache_env %?<-% new.env(parent = baseenv())
-  data_env$.cache_env$.keys = c()
-  return(data_env$.cache_env)
+  session_id = add_to_session(session)
+  session_id %?<-% '.TEMP'
+  global_env = globalenv()
+  if(!is.environment(global_env[['.cache_rave']])){
+    global_env[['.cache_rave']] = new.env(parent = emptyenv())
+  }
+  global_env[['.cache_rave']][[session_id]] %?<-% new.env(parent = emptyenv())
+  return(global_env[['.cache_rave']][[session_id]])
 }
 
 ################################################### High performance functions
@@ -947,12 +991,14 @@ getDefaultCacheEnvironment <- function(
 #' @param .globals Automatically detect variables. See ?future::future
 #' @param .gc Clean up environment after each iterations? Recommended for large datasets.
 #' @examples
+#' \dontrun{
 #' lapply_async(1:10, function(x){
 #'   Sys.sleep(2) # Run for 1 secs
 #'   Sys.getpid()
 #' }, .ncores = 3, .call_back = function(i){
 #'   cat('Running iteration -', i, '\n')
 #' })
+#' }
 #' @importFrom future plan
 #' @importFrom future future
 #' @importFrom future value
@@ -1045,5 +1091,5 @@ restart_rave <- function(reload = T, quiet = FALSE){
     cmd = 'base::library(rave)'
   }
 
-  rstudioapi::restartSession(cmd)
+  eval(parse(text = sprintf('rstudioapi::restartSession(%s)', cmd)))
 }
