@@ -39,8 +39,7 @@ before_install:
     fi
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)";
-    export PATH=$HOME/.linuxbrew/bin:$PATH;
-    brew install hdf5;
+    /home/linuxbrew/.linuxbrew/bin/brew install hdf5;
     fi
 
 
