@@ -1,5 +1,4 @@
-# subject class
-
+#' Subject class
 #' @export
 Subject <- R6::R6Class(
   classname = 'Subject',
@@ -120,7 +119,9 @@ Subject <- R6::R6Class(
 )
 
 
-
+#' Conver subject to python object
+#' @param obj Subject class
+#' @param convert pass to reticulate::r_to_py
 #' @export
 r_to_py.Subject <- function(obj, convert = FALSE){
   reticulate::r_to_py(list(
@@ -133,6 +134,8 @@ r_to_py.Subject <- function(obj, convert = FALSE){
   ), convert = convert)
 }
 
+#' Conver subject to JSON format
+#'
 #' @export
 asJSON.Subject <- function(obj){
   list(

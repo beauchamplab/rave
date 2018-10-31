@@ -1,3 +1,4 @@
+#' Module runtime environment (session based)
 #' @import magrittr
 #' @export
 ExecEnvir <- R6::R6Class(

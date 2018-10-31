@@ -1,4 +1,4 @@
-
+#' Wrapper class for tensor arrays
 #' @import R6
 #' @export
 Tensor <- R6::R6Class(
@@ -411,7 +411,7 @@ Tensor <- R6::R6Class(
   )
 )
 
-
+#' Convert tensor to python objects
 #' @export
 r_to_py.Tensor <- function(obj, convert = FALSE){
   reticulate::r_to_py(c(
@@ -423,13 +423,13 @@ r_to_py.Tensor <- function(obj, convert = FALSE){
 }
 
 #' @export
-dim.Tensor <- function(obj){
-  obj$dim
+dim.Tensor <- function(x){
+  x$dim
 }
 
 #' @export
-dimnames.Tensor <- function(obj){
-  obj$dimnames
+dimnames.Tensor <- function(x){
+  x$dimnames
 }
 
 #' @export
@@ -469,23 +469,23 @@ dimnames.Tensor <- function(obj){
 }
 
 #' @export
-content.Tensor <- function(obj){
+content.Tensor <- function(obj, ...){
   obj$get_data()
 }
 
 #' @export
-content <- function(x, ...){
+content <- function(obj, ...){
   UseMethod('content')
 }
 
 #' @export
-subset.Tensor <- function(obj, ..., .env = parent.frame()){
-  obj$subset(...,.env = .env)
+subset.Tensor <- function(x, ..., .env = parent.frame()){
+  x$subset(...,.env = .env)
 }
 
 #' @export
-as.vector.Tensor <- function(obj, ...){
-  d = obj$get_data()
+as.vector.Tensor <- function(x, ...){
+  d = x$get_data()
   base::as.vector(d, ...)
 }
 

@@ -96,6 +96,7 @@ opt <- list(
 # with -surf_label in order to attach
 # the dataset to a particular target surface.
 
+#' Internal R6 class for rave-options
 #' @import yaml
 #' @import utils
 Options <- R6::R6Class(
@@ -164,11 +165,16 @@ Options <- R6::R6Class(
 # export
 # rave_opts <- Options$new(conf_path = '~/.rave.yaml', save_default = T)
 
+#' Function to locally save options (deprecated)
 #' @export
 save_options <- function(){
   ..setup_env$rave_opts$save_settings()
 }
 
+#' Function to change rave-options
+#' @param ... Key-Value option pairs
+#' @param save save to disk? ignored most of the time
+#' @param launch_gui launch shiny app?
 #' @export
 rave_options <- function(..., .save = T, launch_gui = T){
   if(!exists('rave_opts', envir = ..setup_env, inherits = F)){
@@ -200,7 +206,8 @@ rave_options <- function(..., .save = T, launch_gui = T){
 
 
 
-
+#' Default setup for rave, mainly create forked sub-processes
+#' @param func NULL by default, function to be added to default (dangerous)
 #' @export
 rave_setup <- function(func = NULL){
   if(!is.function(func)){

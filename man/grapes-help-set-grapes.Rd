@@ -4,7 +4,7 @@
 \alias{\%?<-\%}
 \title{Assign if not exists, or NULL}
 \usage{
-lhs \%?<-\% rhs
+lhs \%?<-\% value
 }
 \description{
 Assign if not exists, or NULL

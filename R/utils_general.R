@@ -64,13 +64,13 @@ to_ram_size <- function(s, kb_to_b = 1000){
 
 
 #' @export
-as.character.rave_bytes <- function(s, digit=1){
-  sprintf(sprintf('%%.%df %s', digit, attr(s, 'unit')), s)
+as.character.rave_bytes <- function(x, digit=1, ...){
+  sprintf(sprintf('%%.%df %s', digit, attr(x, 'unit')), as.character.default(x, ...))
 }
 
 #' @export
-print.rave_bytes <- function(s, digit=1){
-  re = as.character(s)
+print.rave_bytes <- function(x, digit=1, ...){
+  re = as.character(x, digit = digit, ...)
   cat(re)
   invisible(re)
 }
@@ -405,8 +405,8 @@ is.na <- function(x, ...){
 ############################################### Internal
 # utils, will be moved to rutabaga
 
-`set_if_null<-` <- function(x, values) {
-  if(is.null(x)) return(values)
+`set_if_null<-` <- function(x, value) {
+  if(is.null(x)) return(value)
   return (x)
 }
 
@@ -494,7 +494,7 @@ eval_dirty <- function(expr, env = parent.frame(), data = NULL){
 #' @importFrom rlang quo
 #' @importFrom rlang !!
 #' @export
-`%?<-%` <- function(lhs, rhs){
+`%?<-%` <- function(lhs, value){
   env = parent.frame()
   lhs = substitute(lhs)
 
@@ -506,7 +506,7 @@ eval_dirty <- function(expr, env = parent.frame(), data = NULL){
     isnull
 
   if(isnull){
-    quo <- quo(!!lhs <- !!rhs)
+    quo <- quo(!!lhs <- !!value)
     eval_dirty(quo, env = env)   # Need to assign values, no eval_tidy
   }
 }

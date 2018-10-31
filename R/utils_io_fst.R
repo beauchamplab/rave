@@ -153,8 +153,8 @@ LazyFST <- R6::R6Class(
 }
 
 #' @export
-dim.LazyFST <- function(obj){
-  dim_info = obj$get_dims()
+dim.LazyFST <- function(x){
+  dim_info = x$get_dims()
   if(length(dim_info) == 1){
     dim_info = NULL
   }
@@ -162,30 +162,30 @@ dim.LazyFST <- function(obj){
 }
 
 #' @export
-length.LazyFST <- function(obj){
-  dim_info = obj$get_dims()
+length.LazyFST <- function(x){
+  dim_info = x$get_dims()
   prod(dim_info)
 }
 
 #' @export
-as.array.LazyFST <- function(obj, ...){
-  as.array(obj$subset(), ...)
+as.array.LazyFST <- function(x, ...){
+  as.array(x$subset(), ...)
 }
 
 #' @export
-Mod.LazyFST <- function(obj){
-  base::Mod(obj$subset())
+Mod.LazyFST <- function(z){
+  base::Mod(z$subset())
 }
 
 #' @export
-Arg.LazyFST <- function(obj){
-  base::Arg(obj$subset())
+Arg.LazyFST <- function(z){
+  base::Arg(z$subset())
 }
 
 
 #' @export
-exp.LazyFST <- function(obj){
-  base::exp(obj$subset())
+exp.LazyFST <- function(x){
+  base::exp(x$subset())
 }
 
 

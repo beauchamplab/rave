@@ -5,16 +5,20 @@
 # This will help create a clean environment for modules.
 NULL
 
-
+#' Wrapper for shiny::getDefaultReactiveDomain
 getDefaultReactiveDomain <- function(){
   session = shiny::getDefaultReactiveDomain()
   session %?<-% get0('session', envir = globalenv())
   return(session)
 }
 
+
 data_repository = new.env(parent = baseenv())
 
-
+#' Get environment where subject data is loaded
+#' @param session shiny session, default is NULL
+#' @param session_id internal use
+#' @param session_based internal use
 #' @export
 getDefaultDataRepository <- function(
   session = getDefaultReactiveDomain(),
@@ -32,46 +36,9 @@ getDefaultDataRepository <- function(
   }
   return(data_repository[[session_id]])
 }
-# getDefaultDataRepository <- function(
-#   session = getDefaultReactiveDomain(),
-#   session_id,
-#   session_based = NULL
-# ){
-#   if(is.null(session_based)){
-#     session_based = rave_options('session_based_datarepo')
-#   }
-#   if(missing(session_id)){
-#     if(!session_based){
-#       session_id = NULL
-#     }else{
-#       session_id = add_to_session(session)
-#     }
-#   }
-#   if(!is.character(session_id)){
-#     session_id = '.TEMP'
-#   }
-#   if(!exists(session_id, envir = data_repository)){
-#     e = new.env(parent = do.call('loadNamespace', list('rave')))
-#     e$.clean = function(){
-#       if(is.null(session)){
-#         return(invisible())
-#       }
-#       rm(list = ls(envir = e, all.names = T), envir = e, inherits = F)
-#       data_repository$.sessions[[session_id]] = NULL
-#     }
-#     assign(session_id, e, envir = data_repository)
-#
-#
-#     if(!is.null(session)){
-#       new_l = list(session); names(new_l) = session_id
-#       data_repository$.sessions = c(
-#         data_repository$.sessions, new_l
-#       )
-#     }
-#   }
-#   return(get(session_id, envir = data_repository))
-# }
 
+#' Attach subject data
+#' @param unload TRUE if you want to detach
 #' @export
 attachDefaultDataRepository <- function(unload = F){
   if(unload){
@@ -82,7 +49,7 @@ attachDefaultDataRepository <- function(unload = F){
   }
 }
 
-
+#' Module class
 #' @export
 ModuleEnvir <- R6::R6Class(
   classname = 'ModuleEnvir',
@@ -291,7 +258,9 @@ ModuleEnvir <- R6::R6Class(
 
 
 
-# functions for dev use
+#' Functions for dev use
+#' @aliases write_rave_modules
+#' @param ... Expressions
 #' @export
 rave_ignore <- function(...){
   dots <- lazyeval::lazy_dots(...)
@@ -303,6 +272,8 @@ rave_ignore <- function(...){
   }
 }
 
+
+#' @aliases write_rave_modules
 #' @export
 rave_inputs <- function(..., .input_panels = list(), .env = globalenv()){
   quos = rlang::quos(...)
@@ -323,6 +294,7 @@ rave_inputs <- function(..., .input_panels = list(), .env = globalenv()){
   invisible(vals)
 }
 
+#' @aliases write_rave_modules
 #' @export
 rave_outputs <- function(..., .output_tabsets = list()){
   # do nothing
@@ -330,6 +302,7 @@ rave_outputs <- function(..., .output_tabsets = list()){
 }
 
 
+#' @aliases write_rave_modules
 #' @export
 rave_updates <- function(..., .env = globalenv()){
 
@@ -359,6 +332,7 @@ rave_updates <- function(..., .env = globalenv()){
 }
 
 
+#' @aliases write_rave_modules
 #' @export
 rave_execute <- function(..., auto = TRUE, .env = globalenv()){
   assign('.is_async', TRUE, envir = .env)
@@ -372,12 +346,16 @@ rave_execute <- function(..., auto = TRUE, .env = globalenv()){
 
 
 
+#' Cache input values
+#' @aliases write_rave_modules
 #' @export
 cache_input <- function(key, val, read_only = T){
   return(val)
 }
 
 
+#' Get x or default
+#' @aliases write_rave_modules
 #' @export
 async_var <- function(x, default = NULL){
   tryCatch({
@@ -395,6 +373,7 @@ async_var <- function(x, default = NULL){
 }
 
 
+#' @aliases write_rave_modules
 #' @export
 export_report <- function(expr, inputId){
 

@@ -4,7 +4,7 @@
 \alias{print.rave_printable}
 \title{Override print method for printable environment}
 \usage{
-\method{print}{rave_printable}(env)
+\method{print}{rave_printable}(x, ...)
 }
 \description{
 Override print method for printable environment

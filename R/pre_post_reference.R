@@ -1,4 +1,6 @@
-# post reference
+#' Preprocess Module - post-reference (deprecated)
+#' @param module_id internally used
+#' @param sidebar_width sidebar width from 1 to 12
 rave_pre_postref3 <- function(module_id = 'POSTREF_M', sidebar_width = 2){
   ns = shiny::NS(module_id)
   CHANNEL_TYPES = c(

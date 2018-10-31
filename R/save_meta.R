@@ -1,5 +1,9 @@
-# pre-process functions to save meta files
 
+#' Save data to csv, if file exists, rename old file
+#' @param data data frame
+#' @param file csv file to save
+#' @param quiet suppress overwrite message
+#' @param ... pass to write.csv
 safe_write_csv <- function(data, file, ..., quiet = F){
   if(file.exists(file)){
     oldfile = str_replace(file, '\\.[cC][sS][vV]$', strftime(Sys.time(), '_[%Y%m%d_%H%M%S].csv'))
@@ -11,6 +15,11 @@ safe_write_csv <- function(data, file, ..., quiet = F){
   write.csv(data, file, ...)
 }
 
+#' Function to save meta data to subject
+#' @param data data table
+#' @param meta_type see load meta
+#' @param project_name project name
+#' @param subject_code subject code
 #' @export
 save_meta <- function(data, meta_type, project_name, subject_code){
   data_dir = rave_options('data_dir')
@@ -50,6 +59,12 @@ save_meta <- function(data, meta_type, project_name, subject_code){
 
 }
 
+#' Load subject meta data
+#' @param meta_type electrodes, epochs, time_points, frequencies, references ...
+#' @param project_name project name
+#' @param subject_code subject code
+#' @param subject_id "project_name/subject_code"
+#' @param meta_name only used if meta_type is epochs or references
 #' @export
 load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_name){
   data_dir = rave_options('data_dir')

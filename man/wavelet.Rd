@@ -6,6 +6,15 @@
 \usage{
 wavelet(data, freqs, srate, wave_num)
 }
+\arguments{
+\item{data}{- vector of time series to be decomposed}
+
+\item{freqs}{- vector of center frequencies for decomposition}
+
+\item{srate}{- sample rate (in Hz)}
+
+\item{wave_num}{- desired number of cycles in wavelet (typically 3-20 for frequencies 2-200).}
+}
 \description{
 Wavelet Transformation With Phase
 }

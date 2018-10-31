@@ -1,5 +1,8 @@
 # functions for group analysis
 
+#' Find module analysis names
+#' @param module id
+#' @param project name
 #' @export
 module_analysis_names <- function(module_id, project_name){
   # if missing project_name, get from current repository
@@ -31,6 +34,12 @@ module_analysis_names <- function(module_id, project_name){
 }
 
 
+#' Create temp file in subject module folder
+#' @param module_id module id
+#' @param fun_name function name (usually export_"function_name" in the module)
+#' @param project_name project name
+#' @param subject_code subject code
+#' @param pattern passed to tempfile
 #' @export
 subject_tmpfile <- function(module_id, fun_name = '', project_name, subject_code, pattern = 'file_'){
   if(missing(project_name)){
@@ -50,7 +59,11 @@ subject_tmpfile <- function(module_id, fun_name = '', project_name, subject_code
   tempfile(tmpdir = tmpdir, pattern = pattern)
 }
 
-
+#' Get subject exported analysis table
+#' @param project_name project name
+#' @param module_id module id
+#' @param analysis_name user-specified, use module_analysis_names to get all of'em
+#' @param check_valid check file existence
 #' @export
 module_analysis_table <- function(project_name, module_id, analysis_name, check_valid = FALSE){
   # if missing project_name, get from current repository
@@ -116,6 +129,13 @@ find_path <- function(path, root_dir){
   return(NULL)
 }
 
+#' Save analysis to look up tables
+#' @param project_name project name
+#' @param subject_code subject code
+#' @param module_id module id
+#' @param analysis_name user-specified, use module_analysis_names to get all of'em
+#' @param file which file saved to.
+#' @param meta one row of data.frame adding additional data (multiple ones will be ignored)
 #' @export
 module_analysis_save <- function(project_name, subject_code, module_id, analysis_name, file, meta = NULL){
   # if missing project_name, get from current repository

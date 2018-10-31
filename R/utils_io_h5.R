@@ -1,4 +1,4 @@
-# File IO
+#' File IO: HDF5 file wrapper
 #' @importFrom hdf5r is_hdf5
 #' @importFrom hdf5r H5File
 #' @export
@@ -287,8 +287,8 @@ LazyH5 <- R6::R6Class(
 }
 
 #' @export
-dim.LazyH5 <- function(obj){
-  dim_info = obj$get_dims(stay_open = F)
+dim.LazyH5 <- function(x){
+  dim_info = x$get_dims(stay_open = F)
   if(length(dim_info) == 1){
     dim_info = NULL
   }
@@ -296,30 +296,30 @@ dim.LazyH5 <- function(obj){
 }
 
 #' @export
-length.LazyH5 <- function(obj){
-  dim_info = obj$get_dims()
+length.LazyH5 <- function(x){
+  dim_info = x$get_dims()
   prod(dim_info)
 }
 
 #' @export
-as.array.LazyH5 <- function(obj, ...){
-  as.array(obj$subset(), ...)
+as.array.LazyH5 <- function(x, ...){
+  as.array(x$subset(), ...)
 }
 
 #' @export
-Mod.LazyH5 <- function(obj){
-  base::Mod(obj$subset())
+Mod.LazyH5 <- function(z){
+  base::Mod(z$subset())
 }
 
 #' @export
-Arg.LazyH5 <- function(obj){
-  base::Arg(obj$subset())
+Arg.LazyH5 <- function(z){
+  base::Arg(z$subset())
 }
 
 
 #' @export
-exp.LazyH5 <- function(obj){
-  base::exp(obj$subset())
+exp.LazyH5 <- function(x){
+  base::exp(x$subset())
 }
 
 

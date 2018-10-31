@@ -1,5 +1,8 @@
 # functions to create module,data,rawdata dirs
 
+#' Initialize data repository
+#' @param first_time will create data repositories for you
+#' @param reset reset to default data directory
 #' @export
 arrange_data_dir <- function(first_time = F, reset = F){
   if(first_time || reset){
@@ -45,6 +48,10 @@ arrange_data_dir <- function(first_time = F, reset = F){
 
 }
 
+#' Update (optional), and check validity of modules
+#' @param first_time check updates
+#' @param reset same as first_time, check module updates, ignored
+#' @param quiet no overwrite messages
 #' @export
 arrange_modules <- function(
   first_time = FALSE, reset = F, quiet = F

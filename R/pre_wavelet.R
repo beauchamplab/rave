@@ -1,3 +1,6 @@
+#' Preprocess Module - Wavelet
+#' @param module_id internally used
+#' @param sidebar_width sidebar width from 1 to 12
 #' @export
 rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
   ns = shiny::NS(module_id)
@@ -176,8 +179,24 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
 
 
 
-# Bulk wavelet
-
+#' Bulk run wavelet (deprecated)
+#' @param project_name project_name
+#' @param subject_code subject_code
+#' @param blocks blocks
+#' @param channels channels
+#' @param srate srate
+#' @param target_srate target_srate
+#' @param frequencies frequencies
+#' @param wave_num wave_num
+#' @param compress compress
+#' @param replace replace
+#' @param save_original save_original
+#' @param ncores ncores
+#' @param plan plan
+#' @param save_dir save_dir
+#' @param filename filename
+#' @param reference_name reference_name
+#' @param ... other args
 bulk_wavelet <- function(
   project_name, subject_code, blocks, channels, srate, target_srate = 100,
   frequencies = seq(4, 200, by = 4), wave_num = c(3,14), compress = 1, replace = F, save_original = F,

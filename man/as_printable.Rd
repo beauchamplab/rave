@@ -6,6 +6,9 @@
 \usage{
 as_printable(env)
 }
+\arguments{
+\item{env}{environment to be converted}
+}
 \description{
 Function to make an environment printable
 }

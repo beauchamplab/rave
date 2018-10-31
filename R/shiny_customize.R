@@ -1,3 +1,12 @@
+#' Re-write shint actionButton to enable styles
+#' @param inputId see shiny::actionButton
+#' @param label  see shiny::actionButton
+#' @param icon see shiny::actionButton
+#' @param width see shiny::actionButton
+#' @param type default, primary, info... see bootstrap
+#' @param btn_type html tag attribute "type"
+#' @param class additional classes
+#' @param ... other methods passed to actionButton
 #' @import htmltools
 #' @export
 actionButtonStyled <- function(inputId, label, icon = NULL, width = NULL, type = 'default', btn_type = 'button', class = '', ...){

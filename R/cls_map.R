@@ -1,3 +1,9 @@
+#' Internal use to fast-list all elements in an environment
+#' @param envir environment
+#' @param all.names include hidden objects
+#' @param pattern see ls
+#' @param sorted sort name? default FALSE
+#' @param ... pass to base::ls
 ls <- function(envir = parent.frame(), all.names = FALSE,
                pattern, sorted = FALSE, ...){
   if(missing(pattern) && !sorted){
@@ -9,6 +15,11 @@ ls <- function(envir = parent.frame(), all.names = FALSE,
   }
 }
 
+#' Check object has classes
+#' @param obj object
+#' @param class vector of classes
+#' @param all.match all classes needs to be included or only need one match?
+#' @param element.wise default FALSE
 has.class <- function(obj, class, all.match = T, element.wise = F){
   if(element.wise){
     unlist(lapply(obj, has.class, class = class, all.match = all.match, element.wise = F))
@@ -21,7 +32,7 @@ has.class <- function(obj, class, all.match = T, element.wise = F){
   }
 }
 
-#' @export
+#' R6 implementation of hashMap (internal use)
 Map <- R6::R6Class(
   'Map',
   portable = FALSE,
@@ -97,18 +108,17 @@ Map <- R6::R6Class(
 )
 
 #' @export
-as.list.Map <- function(map) {
-  map$values()
+as.list.Map <- function(x, ...) {
+  x$values(...)
 }
 
 #' @export
-length.Map <- function(map) {
-  map$size()
+length.Map <- function(x) {
+  x$size()
 }
 
 
-
-#' @export
+#' A special type of Map
 MVCAdapter <- R6::R6Class(
   classname = 'MVCAdapter',
   inherit = Map,

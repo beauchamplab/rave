@@ -10,7 +10,9 @@
 
 
 
-#### Master.m
+#' Deprecated this function was designed for version A,B,C
+#' @param subject_code subject_code
+#' @param setting_file setting_file
 pre_load_settings <- function(
   subject_code, setting_file = 'variables.txt'
 ){

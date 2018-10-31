@@ -1,3 +1,15 @@
+#' Baseline signals
+#' @param el Tensor or ECoGTensor object
+#' @param from baseline start time
+#' @param to baseline end time
+#' @param mean or median, default is mean
+#' @param unit "\%" percent signal change or "dB" decibel unit
+#' @param data_only return array or tensor object?
+#' @param hybrid if return tensor object, swap cache? useful for large dataset
+#' @param swap_file by default tempfile, or you can specify path
+#' @param mem_optimize optimize for large dataset? default is TRUE
+#' @param preop function before baselining
+#' @param op function for baselining
 #' @export
 baseline <- function(el, from, to, method = 'mean', unit = '%',
                     data_only = F, hybrid = T, swap_file = tempfile(), mem_optimize = T, preop = NULL, op){
@@ -48,7 +60,7 @@ baseline <- function(el, from, to, method = 'mean', unit = '%',
   }
 }
 
-
+#' R6 class for ECoG data Repository
 #' @import stringr
 #' @export
 ECoGRepository <- R6::R6Class(
@@ -482,192 +494,3 @@ ECoGRepository <- R6::R6Class(
 )
 
 
-# baseline = function(from, to, electrodes, print.time = FALSE){
-#   if(missing(electrodes)){
-#     electrodes = self$epochs$get('electrodes')
-#   }else{
-#     electrodes = self$subject$filter_valid_electrodes(electrodes)
-#   }
-#   if(length(electrodes) == 1){
-#     return(
-#       self$..baseline(from = from, to = to, electrode = electrodes, data_only = FALSE, print.time = print.time)
-#     )
-#   }
-#
-#   Sys.time() -> t
-#
-#
-#   sample = self$power$get('power')$subset(Electrode = Electrode == electrodes[1], data_only = T)
-#   .dimnames = dimnames(sample)[1:3]
-#   vapply(
-#     electrodes,
-#     function(e){
-#       self$..baseline(from = from, to = to, electrode = e, data_only = T, re_dim = F)
-#     },
-#     FUN.VALUE = sample[,,,1]
-#   ) ->
-#     d
-#   d = ECoGTensor$new(
-#     data = d,
-#     dimnames = c(.dimnames, list(Electrode = electrodes)),
-#     varnames = c(names(.dimnames), 'Electrode')
-#   )
-#
-#   if(print.time){
-#     total_time = Sys.time() - t
-#     logger(sprintf('Baseline Total time: %.3f (%s)', total_time, attr(total_time, 'units')))
-#   }
-#   return(d)
-#
-# },
-# ..baseline = function(from, to, electrode, e_power = NULL,
-#                       print.time = FALSE, data_only = F, re_dim = T){
-#   assertthat::assert_that(
-#     self$is_epoched(electrodes = electrode),
-#     msg = 'Electrode not loaded, run .$epoch() first.'
-#   )
-#   t = Sys.time()
-#   srate = self$subject$sample_rate
-#   from = round(from * srate)
-#   to = round(to * srate)
-#   epoch = self$epochs$get('epoch_data')
-#   epoch$start = round(epoch$Time * srate) + from
-#   # epoch$end = round(epoch$Time * srate) + to
-#   epoch$end = epoch$start + (to - from)
-#
-#   if(is.null(e_power)){
-#     e_raw = self$raw$get(str_c(electrode))
-#     e_power = self$power$get('power')$subset(Electrode = Electrode == electrode, data_only = T)
-#   }else{
-#     electrode = dimnames(e_power)$Electrode
-#     e_raw = self$raw$get(str_c(electrode))
-#     if(is(e_power, 'Tensor')){
-#       e_power = e_power$data
-#     }
-#   }
-#
-#   bls_dim = dim(e_power)
-#   bls_dimnames = dimnames(e_power)
-#   bls = array(0, dim = bls_dim[c(1,2)])
-#   for(b in unique(epoch$Block)){
-#     sel = epoch$Block == b
-#     sub = epoch[sel, ]
-#     n = sum(sel)
-#
-#     #NB: need to go one back in the cumsum vector
-#     #FIXME will it ever be the case sub$start-1 <= 0 ?
-#     slice = e_raw$get_data(block_num = b, time_point = c(sub$start-1, sub$end), name = 'cumsum')
-#
-#     # if we take time 10:50, there are 1 + (50 - 10) time points
-#     bls[sel, ] = t(slice[,-c(1:n)] - slice[,1:n])/(1 + to - from)
-#   }
-#
-#   bld = (e_power / as.vector(bls) - 1) * 100
-#
-#   if(re_dim){
-#     dim(bld) = bls_dim
-#     dimnames(bld) = bls_dimnames
-#   }
-#   if(!data_only){
-#     bld = ECoGTensor$new(
-#       data = bld,
-#       dimnames = bls_dimnames,
-#       varnames = names(bls_dimnames)
-#     )
-#   }
-#   if(print.time){
-#     total_time = Sys.time() - t
-#     logger(sprintf('Baseline - Electrode (%d) Total time: %.3f (%s)', electrode, total_time, attr(total_time, 'units')))
-#   }
-#   return(bld)
-# }
-
-
-
-
-
-#
-#
-#           gc()
-#           sample_spec = (results[[1]]$power[,,,1])$get_data()
-#           gc()
-#           base::print(pryr::mem_used())
-#           .dim = results[[1]]$power$dim[1:3]
-#           .dimnames = results[[1]]$power$dimnames[1:3]
-#           dim(sample_spec) = .dim
-#           dimnames(sample_spec) = NULL
-#           nm = ifelse(referenced, 'power', 'raw_power')
-#           gc()
-#           base::print(pryr::mem_used())
-#           data = vapply(seq_len(length(results)), function(i){
-#             data = env$results[[i]]$power$get_data()
-#             env$results[[i]]$power = NULL
-#             # dimnames(data) = NULL
-#             rm(env)
-#             return(as.vector(data))
-#           }, FUN.VALUE = sample_spec)
-#           force(data)
-#           gc()
-#           base::print(pryr::mem_used())
-#           self[[nm]] = ECoGTensor$new(
-#             data,
-#             dimnames = c(.dimnames, list(Electrode = electrodes)),
-#             varnames = c(names(.dimnames), 'Electrode'),
-#             hybrid = T
-#           )
-#           gc()
-#           base::print(pryr::mem_used())
-#           rm(sample_spec, data)
-#           gc()
-#           base::print(pryr::mem_used())
-#         }
-#
-#         if('phase' %in% data_type){
-#           sample_spec = (results[[1]]$phase[,,,1])$get_data() #results[[1]]$phase$data[,,,1]
-#           .dim = results[[1]]$phase$dim[1:3]
-#           .dimnames = results[[1]]$phase$dimnames[1:3]
-#           dim(sample_spec) = .dim
-#           dimnames(sample_spec) = NULL
-#
-#           nm = ifelse(referenced, 'phase', 'raw_phase')
-#           data = vapply(seq_len(length(results)), function(i){
-#             data = env$results[[i]]$phase$get_data()
-#             env$results[[i]]$phase = NULL
-#             # dimnames(data) = NULL
-#             rm(env)
-#             return(as.vector(data))
-#           }, FUN.VALUE = sample_spec)
-#           force(data)
-#           self[[nm]] = ECoGTensor$new(
-#             data,
-#             dimnames = c(.dimnames, list(Electrode = electrodes)),
-#             varnames = c(names(.dimnames), 'Electrode'),
-#             hybrid = T
-#           )
-#           rm(sample_spec, data)
-#         }
-#
-#         if('volt' %in% data_type){
-#           sample_volt = (results[[1]]$volt[,,1])$get_data() #results[[1]]$volt$data[,,1]
-#           .dim = results[[1]]$volt$dim[1:2]
-#           .dimnames = results[[1]]$volt$dimnames[1:2]
-#           dim(sample_volt) = .dim
-#           dimnames(sample_volt) = NULL
-#           nm = ifelse(referenced, 'volt', 'raw_volt')
-#           self[[nm]] = Tensor$new(
-#             data = vapply(seq_len(length(results)), function(i){
-#               data = env$results[[i]]$volt$get_data()
-#               env$results[[i]]$volt = NULL
-#               dimnames(data) = NULL
-#               rm(env)
-#               return(data)
-#             }, FUN.VALUE = sample_volt),
-#             dimnames = list(
-#               Trial = as.integer(.dimnames$Trial),
-#               Time = as.numeric(.dimnames$Time),
-#               Electrode = as.integer(electrodes)),
-#             varnames = c(names(.dimnames), 'Electrode')
-#           )
-#
-#           rm(sample_volt)
-#         }

@@ -1,5 +1,6 @@
 # module to load data
 
+#' Get people who uses this app
 get_people = function(){
   default_fn = function(e){
     return(list(
@@ -28,7 +29,9 @@ get_people = function(){
   }, error = default_fn, warning = default_fn)
 }
 
-
+#' Get RAM usage
+#' @param modules which module(s)
+#' @param data_envir default uses getDefaultDataRepository
 get_mem_usage <- function(modules, data_envir){
   if(missing(data_envir)){
     data_envir = getDefaultDataRepository()
@@ -91,7 +94,12 @@ get_mem_usage <- function(modules, data_envir){
   )
 }
 
-
+#' Initialize main application
+#' @param modules which modules to show. Default uses "modules.csv" (see load_modules)
+#' @param active_module which module to focus at start up (use module ID)
+#' @param launch.browser launch browsers, default is on
+#' @param theme color theme for GUI
+#' @param ... other params like test.mode for module debugging
 #' @import stringr
 #' @import shiny
 #' @import magrittr

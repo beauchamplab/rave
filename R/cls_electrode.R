@@ -5,6 +5,7 @@ NULL
 
 
 #' Function to make an environment printable
+#' @param env environment to be converted
 #' @export
 as_printable = function(env){
   assertthat::assert_that(is.environment(env), msg = 'env MUST be an environment.')
@@ -16,12 +17,12 @@ as_printable = function(env){
 
 #' Override print method for printable environment
 #' @export
-print.rave_printable = function(env){
-  assertthat::assert_that(is.environment(env), msg = 'env MUST be an environment.')
-  base::print(
-    paste0('<environment key=[', paste(ls(env), collapse = ', '), ']>')
+print.rave_printable = function(x, ...){
+  assertthat::assert_that(is.environment(x), msg = 'x MUST be an environment.')
+  print.default(
+    paste0('<environment key=[', paste(ls(x), collapse = ', '), ']>'), ...
   )
-  return(env)
+  return(x)
 }
 
 #' R6 class of electrode
@@ -529,31 +530,6 @@ Electrode <- R6::R6Class(
 
       re
     }
-    # get_data = function(block_num, time = NULL,
-    #                     frequencies = NULL, name = 'power',
-    #                     time_point = NULL,
-    #                     use_ff = F){
-    #   if(is.null(time_point) && !is.null(time)){
-    #     time_point = round(time_point * private$subject$sample_rate)
-    #   }
-    #   if(name %in% c('power', 'phase', 'coef')){
-    #     dat = private$coef[[block_num]][frequencies, time_point]
-    #     switch(
-    #       name,
-    #       coef = {
-    #         return(dat)
-    #       },
-    #       'power' = {
-    #         return((base::Mod(dat))^2)
-    #       },
-    #       'phase' = {
-    #         return(base::Arg(dat))
-    #       }
-    #     )
-    #   }
-    #
-    #   return(NULL)
-    # }
   ),
   active = list(
     blocks = function(){

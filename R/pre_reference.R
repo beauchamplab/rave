@@ -1,3 +1,6 @@
+#' Preprocess Module - Reference (Deprecated)
+#' @param module_id internally used
+#' @param sidebar_width sidebar width from 1 to 12
 #' @importFrom magrittr %>%
 #' @export
 rave_pre_ref3 <- function(module_id = 'REF_M', sidebar_width = 2){

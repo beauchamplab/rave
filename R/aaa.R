@@ -5,8 +5,9 @@ NULL
 NULL
 
 
-# Internally use to auto update RAVE package version
-# DO NOT use it, it's copied from websites and I'll probably remove this function in the future
+#' Internally use to auto update RAVE package version
+#' DO NOT use it, it's copied from websites and I'll probably remove this function in the future
+#' @param packageLocation To be documented
 updatePackageVersion <- function(packageLocation ="."){
   ## Read DESCRIPTION file
   desc <- readLines(file.path(packageLocation, "DESCRIPTION"))

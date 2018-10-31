@@ -612,14 +612,3 @@ RaveBrain <- R6::R6Class(
   )
 )
 
-
-
-# require(rave)
-# require(stringr)
-# ii=1
-# self = RaveBrain$new('congruency/YAB'); private = self$.__enclos_env__$private
-# self$import_spec( include_electrodes = F )
-# a = lapply(1:84, function(i) { self$set_electrode_value(i, seq_len(i), seq_len(i)) })
-# self$view(control_gui = T, center = 40)
-
-# pial = private$three_pial[[1]]

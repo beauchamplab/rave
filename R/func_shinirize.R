@@ -1,3 +1,7 @@
+#' Convert module to objects used in shiny
+#' @param module ModuleEnvir object
+#' @param session shiny session, default let shiny decide
+#' @param test.mode passed by init_app
 #' @import magrittr
 #' @import shiny
 shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = TRUE){
@@ -679,11 +683,18 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 }
 
 
-
+#' Check a and b are same
+#' @param a first object to compare
+#' @param b second object
 are_same <- function(a, b){
   isTRUE(digest::digest(a) == digest::digest(b))
 }
 
+#' I forget the usage but it's related to converting something to strings
+#' @param v object
+#' @param max_len lax character length
+#' @param is_vector is vector
+#' @param level iter level
 beautify <- function(v, max_len = 20, is_vector = TRUE, level = 0){
   max_level = 3
   if(level > max_level){

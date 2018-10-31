@@ -158,7 +158,7 @@ rave_version <- function(){
     rave::rave_setup()
 
     if(has_data){
-      rave::logger("RAVE - (Code: Ent) is loaded!", level = 'INFO')
+      rave::logger("RAVE - (Code: Fir) is loaded!", level = 'INFO')
 
       nms = list(
         'Module File:        \t' =  rave::rave_options('module_lookup_file'),
