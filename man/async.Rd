@@ -13,6 +13,8 @@ async(expr, name = NULL, envir = parent.frame(),
 \item{name}{see 'details'}
 
 \item{envir}{environment of code}
+
+\item{plan}{see future::plan}
 }
 \description{
 Async function to execute code (depricated)

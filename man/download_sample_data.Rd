@@ -6,6 +6,9 @@
 \usage{
 download_sample_data(subject = "sub1")
 }
+\arguments{
+\item{subject}{demo subject}
+}
 \description{
 Function to download demo data to data repository
 }

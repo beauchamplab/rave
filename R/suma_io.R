@@ -1,13 +1,8 @@
-# Parse fs_SurfVol_Alnd_Exp+orig.HEAD
 
-
-# subject_code = 'KC'
-# project_name = 'congruency1'
-# file_name = 'test.spec'
-#
-# subject = Subject$new(project_name = project_name, subject_code = subject_code)
-
-
+#' Make SUMA grid (I do not know what's this, John wrote it)
+#' @author J.Magnnotti
+#' @param con file
+#' @param raw raw file or processed I guess
 read_mgrid <- function(con, raw = F){
   # con = '/Volumes/data/iElVis_files/YBY/elec_recon/YBY.mgrid'
   s = readLines(con)
@@ -186,6 +181,7 @@ read_mgrid <- function(con, raw = F){
 #' Parse spec file
 #' @usage suma_spec_parse(subject)
 #' @param subject Either characters such as 'Project/Subject' or Subject object created by Subject$new(...)
+#' @param spec_file default decided by rave_options('suma_spec_file'), depending on subjects
 #' @examples
 #' \dontrun{
 #' subject = 'Demo/Subject'
@@ -237,6 +233,9 @@ suma_spec_parse <- function(subject, spec_file){
   return(surface)
 }
 
+
+#' Parse surface volumn file header
+#' @param file_path path to brik or head file
 #' @export
 suma_surface_volume_parse <- function(file_path){
   if(str_detect(str_to_lower(file_path), '\\.brik$')){
@@ -317,7 +316,11 @@ suma_surface_volume_parse <- function(file_path){
 
 
 
-
+#' Function to parse SUMA spec file and generate threejsr free mesh object
+#' @param subject Subject class or character
+#' @param spec_file default is subject_dir/rave/suma/test.spec
+#' @param state is pial
+#' @param center Geom center
 freesurfer_mesh <- function(subject, spec_file = NULL, state = 'pial', center = c(0,0,30)){
   if(is.character(subject)){
     subject = str_split_fixed(subject, '/', 2)

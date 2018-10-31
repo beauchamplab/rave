@@ -1,3 +1,6 @@
+#' check subject validity tools
+#' @param project_name project_name
+#' @param subject_code subject_code
 check_subjects2 <- function(
   project_name, subject_code
 ){
@@ -126,6 +129,13 @@ check_subjects2 <- function(
 
 
 
+#' check subject validity tools (use check_subjects2)
+#' @param project_name project_name
+#' @param subject_code subject_code
+#' @param check check is internally used
+#' @param folders folders to check
+#' @param preprocess preprocess to check
+#' @param Meta Meta to check
 check_subjects <- function(
   project_name, subject_code, check = T,
   folders = c('Subject Folder', 'RAVE Folder', 'Preprocessing Folder', 'Meta Folder', 'Channel Folder'),
@@ -189,6 +199,8 @@ check_subjects <- function(
 }
 
 
+#' Shiny modal to be used by init_app for data selection
+#' @param module_id any character containing 0-9 a-z A-Z
 shiny_data_selector <- function(module_id){
 
   fband = list(
@@ -1034,15 +1046,3 @@ shiny_data_selector <- function(module_id){
 }
 
 
-
-# Test
-if(FALSE){
-  re = shiny_data_selector('A')
-  shinyApp(
-    ui = shiny::basicPage(re$header()),
-    server = function(input, output, session){
-      global_reactives = reactiveValues()
-      callModule(re$server, id = 'A', session = session, global_reactives = global_reactives)
-    }
-  )
-}

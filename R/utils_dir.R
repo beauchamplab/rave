@@ -6,6 +6,7 @@ NULL
 # New dir hierachy
 # data_dir > projectdir > subjectdir > rave > {raw, preprocessing, rave, meta, suma}
 
+#' Find all available projects
 #' @export
 get_projects <- function(){
   data_dir = rave_options('data_dir')
@@ -13,6 +14,8 @@ get_projects <- function(){
   pj[str_detect(pj, '^[a-zA-Z0-9]') & pj != 'rave']
 }
 
+#' Get all subjects within project
+#' @param project_name project
 #' @export
 get_subjects <- function(project_name){
   data_dir = rave_options('data_dir')
@@ -20,7 +23,13 @@ get_subjects <- function(project_name){
   sub[str_detect(sub, '^[a-zA-Z0-9]') & sub!= 'rave']
 }
 
-
+#' Get all directories that rave uses
+#' @param subject_code subject_code
+#' @param project_name project_name
+#' @param block_num block_num (optional)
+#' @param mkdirs mkdirs ensure that some directory exists
+#' @param subject_id subject_id (project_name/subject_code)
+#' @param relative relative path or absolute to root data dir
 #' @export
 get_dir <- function(subject_code, project_name, block_num, mkdirs = NULL, subject_id, relative = F){
   re = list()

@@ -398,27 +398,6 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
       updateActionButton(session, 'curr_subj_launch_suma', label = suma_label)
     })
 
-    output$curr_subj_electrodes <- renderTable({
-      refresh = global_reactives$force_refresh_all
-      has_data = global_reactives$has_data
-      if(global_reactives$has_data && check_data_repo(c('subject', 'electrodes'))){
-        data_repo = getDefaultDataRepository()
-        subject = data_repo[['subject']]
-        electrodes = data_repo$preload_info$electrodes
-        tbl = subject$electrodes
-        tbl = tbl[tbl$Electrode %in% electrodes, c('Electrode', 'Label')]
-        rownames(tbl) = NULL
-        if(nrow(tbl) > 10){
-          tbl = tbl[1:10,]
-          tbl[10,1] = ''
-          tbl[10,2] = '...'
-        }
-        rm(data_repo)
-        return(tbl)
-      }else{
-        return(NULL)
-      }
-    })
 
     subject_modal = function(subject, current_electrodes = NULL){
       modalDialog(

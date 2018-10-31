@@ -235,9 +235,11 @@ output$three_viewer <- threejsr::renderThreejs({
   time = viewer_data$time
   keyframe_shift = min(time)
 
+  values = viewer_data$dat[[viewer_var]]
+
   module_tools$plot_3d_electrodes(
     electrodes = electrodes, key_frame = time - keyframe_shift,
-    values = viewer_data$dat[[viewer_var]], control_gui = T, keyframe_shift = keyframe_shift
+    values = values, control_gui = T, keyframe_shift = keyframe_shift
   )
 })
 

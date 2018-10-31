@@ -1,3 +1,6 @@
+#' Color console for RAVE
+#' @param ... things to print
+#' @param level logger level: DEBUG, INFO, WARNING, ERROR, FATAL
 #' @import crayon
 #' @export
 logger <- function(..., level = 'DEBUG'){

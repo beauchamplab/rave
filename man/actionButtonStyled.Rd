@@ -7,6 +7,23 @@
 actionButtonStyled(inputId, label, icon = NULL, width = NULL,
   type = "default", btn_type = "button", class = "", ...)
 }
+\arguments{
+\item{inputId}{see shiny::actionButton}
+
+\item{label}{see shiny::actionButton}
+
+\item{icon}{see shiny::actionButton}
+
+\item{width}{see shiny::actionButton}
+
+\item{type}{default, primary, info... see bootstrap}
+
+\item{btn_type}{html tag attribute "type"}
+
+\item{class}{additional classes}
+
+\item{...}{other methods passed to actionButton}
+}
 \description{
 Re-write shint actionButton to enable styles
 }

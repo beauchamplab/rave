@@ -1,4 +1,5 @@
 #' Function to download demo data to data repository
+#' @param subject demo subject
 #' @export
 download_sample_data <- function(subject = 'sub1'){
   project_name = 'demo'

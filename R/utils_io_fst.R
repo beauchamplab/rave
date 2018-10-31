@@ -1,6 +1,6 @@
 # fst IO
 
-
+#' R6 class to load fst files
 LazyFST <- R6::R6Class(
   classname = 'LazyFST',
   private = list(
@@ -190,7 +190,14 @@ exp.LazyFST <- function(x){
 
 
 
-
+#' Function try to load FST file cache, if not found, read HDF5 file
+#' @param fst_path fst cache path
+#' @param h5_path alternate hdf5 path
+#' @param h5_name hdf5 data name
+#' @param fst_need_transpose does fst data need transpose?
+#' @param fst_need_drop drop dimensions
+#' @param ram read to ram?
+#'
 load_fst_or_h5 <- function(
   fst_path, h5_path, h5_name, fst_need_transpose = F, fst_need_drop = F, ram = F
 ){

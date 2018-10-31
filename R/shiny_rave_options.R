@@ -864,7 +864,9 @@ local({
 
 # rave_options_gui()
 
-
+#' Function to test local disk speed
+#' @param file_size default 10MB, i.e. 1e7
+#' @param quiet show messages?
 test_hdspeed <- function(file_size = 1e7, quiet = F){
   data_dir = rave_options('data_dir')
 

@@ -1,6 +1,10 @@
-NULL
 
 #' Function for module writers to debug modules
+#' @param m module object see ModuleEnvir
+#' @param private_id session rave_id
+#' @details To use this function, you must use test.mode=TRUE, i.e. call init_app(m, test.mode=TRUE)
+#' otherwise objects will be removed. Once imported data, close rave session and run debug_module(m)
+#' to see variables within the module
 #' @export
 debug_module <- function(m, private_id){
   if(missing(private_id)){

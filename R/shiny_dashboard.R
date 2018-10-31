@@ -1,7 +1,8 @@
-# Shiny dashboard-adminLTE overrides
-
+#' Shiny dashboard-adminLTE overrides
+#' @param ... components to be added to control panel
+#' @param disable to show it or not
+#' @param collapsed initialize collapsed
 #' @import shiny
-#' @export
 dashboardControl = function (...,
                              disable = FALSE,
                              collapsed = FALSE)
@@ -27,6 +28,13 @@ dashboardControl = function (...,
   )
 }
 
+#' Shiny dashboard-adminLTE overrides - dashboardHeader
+#' @param ... additional navigation buttons
+#' @param title header title
+#' @param titleWidth not used
+#' @param disable hide header
+#' @param btn_text_right control panel button name
+#' @param .list see ...
 #' @import shiny
 #' @export
 dashboardHeader = function (..., title = NULL, titleWidth = NULL, disable = FALSE, btn_text_right = 'Controls',
@@ -87,7 +95,15 @@ dashboardHeader = function (..., title = NULL, titleWidth = NULL, disable = FALS
   )
 }
 
-
+#' Shiny dashboard-adminLTE overrides - dashboardPage
+#' @param header dashboardHeader object
+#' @param sidebar dashboardSidebar object
+#' @param control dashboardControl object
+#' @param body dashboardBody object
+#' @param title title name
+#' @param skin theme color
+#' @param controlbar_opened open control panel by default or not
+#' @param initial_mask internally used
 #' @importFrom htmltools htmlDependency
 #' @import shiny
 #' @export

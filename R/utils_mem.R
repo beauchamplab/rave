@@ -3,7 +3,9 @@
 
 
 
-
+#' Get environment size (deprecated)
+#' @param env environment
+#' @param sum_up sum up sizes
 safe_env_size <- function(env, sum_up = TRUE){
   if(exists('.keys', envir = env)){
     k = env$.keys
@@ -23,6 +25,11 @@ safe_env_size <- function(env, sum_up = TRUE){
   }
 }
 
+#' Remove large objects within environment
+#' @param env environment to trim
+#' @param large_size defines large file size
+#' @param recursive recursively
+#' @param remove_biggest_only only remove the biggest object
 trim_env <- function(
   env,
   large_size = -1,
@@ -51,6 +58,10 @@ trim_env <- function(
 }
 
 
+#' Copy objects from one environment to another
+#' @param from_env from
+#' @param to_env target
+#' @param deep change function environments?
 copy_env <- function(from_env, to_env, deep = FALSE){
   l = as.list(from_env, all.names = T)
   l = sapply(l, function(x){
