@@ -1,15 +1,64 @@
 language: r
-os:
-  - linux
-  - osx
+
+env:
+  _R_CHECK_FORCE_SUGGESTS_=false
+  R_REMOTES_NO_ERRORS_FROM_WARNINGS=true
+  global:
+    # BBPASS
+    - secure: "Aci6ax5j6CdDbWL84yqUY8BlsF4jKqYoFIIw+1yE/4w9Gm6aElurXnTkPtdAnKLlDAYmgs9L/YKdEThfMLEM617ue0tS3QvFFBpLH5k1LiGUYlTKY/oVfXirHYwE0Xd/1hE5P2HKjCokXlhCtYRPOjAKWQWXyYzzzL0dMU4mtzZ08H4aA16s3vS6N7oAQHdKx/CE9ThYj/6I+fQnWQJXTNJd92nf3A0IbRoUMEuZDscnhYJBWE8naZscCe8SnUEseqwTF1u/8viXy1PXf1fBKaPVck0ezMS4yPFpgXQzx8xd3Io5XIRM/GnkPB5IuwUiruO+yR9EHirTncxotE3/Eh72nLqo7He+K38JyfLWwFFErCAVivnFuWyD0xqlzeg9U6he5jzD314d4qLsDpzAOrQ0UyahBerAdoBdcHQXhjRRepLODEbVx8bnB6m1DqPUOQrbNDTCBi9IWudMGk0IqOGSlO96Ts/oTHxkMUmmP0X8TiP4ZriaGCswWdWr8cZ+jTU2Chg05N1Csvwh8AwWEyuWpu3qtwgMRXup/Ymkkg4wyW15BHEkxi0zkVfq5of8psZQ6SRYGGgWjXm5+3V0z/zM4gE7kCi090UZ692WvcordLH6+EW0FplhwswYmfvxxZhzXFcNJ1T71Xq2RAgOj/otMW0h1SQAa6rav82yaVM="
+
 cache: packages
+
+r:
+  - 3.4
+  -devel
+
 after_success:
   - Rscript -e 'library(rave)'
 after_failure:
   - ./travis-tool.sh dump_logs
 warnings_are_errors: true
-apt_packages:
-  - libfftw3-dev
-  - libv8-3.14-dev
-  - libhdf5-dev
-  - libxml2-dev
+
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-4.8-multilib
+      - linux-libc-dev
+      - libfftw3-dev
+      - libv8-3.14-dev
+      - libxml2-dev
+
+notifications:
+  email: false
+
+matrix:
+  include:
+    - os: linux
+      compiler: gcc-4.8
+      env:
+        - PLATFORM=64
+
+
+before_install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update; fi
+  - curl https://bitbucket.org/Swyter/bitbucket-curl-upload-to-repo-downloads/raw/default/upload-to-bitbucket.sh -O -J && chmod +x ./upload-to-bitbucket.sh
+
+install:
+  - git clone --depth 5 https://github.com/madler/zlib
+  - cd zlib
+  - if [[ "$PLATFORM" == "32" ]]; then CFLAGS="-w -msse2 -m32" LDFLAGS="-m32" ./configure --prefix=$TRAVIS_BUILD_DIR/zlib --eprefix=$TRAVIS_BUILD_DIR/zlib; fi
+  - if [[ "$PLATFORM" == "64" ]]; then ./configure --prefix=$TRAVIS_BUILD_DIR/zlib --eprefix=$TRAVIS_BUILD_DIR/zlib; fi
+  - make install
+  - cd $TRAVIS_BUILD_DIR
+
+script:
+  - git clone --depth 5 --branch hdf5_1_8_21 https://git.hdfgroup.org/scm/hdffv/hdf5.git hdf5_1_8_21
+  - cd hdf5_1_8_21
+  - if [[ "$PLATFORM" == "32" ]]; then ./configure --quiet --enable-shared --enable-production=yes --enable-debug=no --disable-deprecated-symbols --disable-hl --with-pic --with-default-api-version=v18 --with-zlib=$TRAVIS_BUILD_DIR/zlib --build=i686-pc-linux-gnu CFLAGS="-w -msse2 -m32" LDFLAGS="-m32"; fi
+  - if [[ "$PLATFORM" == "64" ]]; then ./configure --quiet --enable-shared --enable-production=yes --enable-debug=no --disable-deprecated-symbols --disable-hl --with-pic --with-default-api-version=v18 --with-zlib=$TRAVIS_BUILD_DIR/zlib CFLAGS="-w"; fi
+  - make install -C src
+  - tar cJf hdf5-1.8.21_linux$PLATFORM.tar.xz hdf5/include/* hdf5/lib/* src/H5lib_settings.c src/H5Tinit.c src/H5config.h
+  - sh ../upload-to-bitbucket.sh tbeu $BBPASS /tbeu/downloads/downloads hdf5-1.8.21_linux$PLATFORM.tar.xz
