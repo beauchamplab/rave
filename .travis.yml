@@ -34,10 +34,13 @@ notifications:
 
 
 before_install:
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
     brew update;
-  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+    fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
     sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)";
-    export PATH=$HOME/.linuxbrew/bin:$PATH;
-    brew install hdf5;
+    fi
 
+script:
+  - export PATH=$HOME/.linuxbrew/bin:$PATH
+  - brew install hdf5
