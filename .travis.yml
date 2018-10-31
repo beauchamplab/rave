@@ -10,3 +10,6 @@ after_failure:
 warnings_are_errors: true
 apt_packages:
   - libfftw3-dev
+  - libv8-3.14-dev
+  - libhdf5-dev
+  - libxml2-dev
