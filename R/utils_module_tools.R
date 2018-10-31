@@ -337,8 +337,14 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
       ms = which(length(size) == c(0, ne, n_total))[1]
       mm = which(length(marker) == c(0, ne, n_total))[1]
 
+      # Check if 'Electrode' is in tbl
+      if('Electrode' %in% names(tbl)){
+        es = tbl$Electrode
+      }else{
+        es = seq_len(nrow(tbl))
+      }
 
-      lapply(seq_len(nrow(tbl)), function(ii){
+      lapply(es, function(ii){
         if(ii %in% electrodes){
           brain$set_electrode_value(which = ii, value = values[, electrodes == ii], keyframe = key_frame)
         }
