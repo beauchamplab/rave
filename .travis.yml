@@ -1,8 +1,6 @@
 language: r
-
+os: linux
 env:
-  _R_CHECK_FORCE_SUGGESTS_=false
-  R_REMOTES_NO_ERRORS_FROM_WARNINGS=true
   global:
     # BBPASS
     - secure: "Aci6ax5j6CdDbWL84yqUY8BlsF4jKqYoFIIw+1yE/4w9Gm6aElurXnTkPtdAnKLlDAYmgs9L/YKdEThfMLEM617ue0tS3QvFFBpLH5k1LiGUYlTKY/oVfXirHYwE0Xd/1hE5P2HKjCokXlhCtYRPOjAKWQWXyYzzzL0dMU4mtzZ08H4aA16s3vS6N7oAQHdKx/CE9ThYj/6I+fQnWQJXTNJd92nf3A0IbRoUMEuZDscnhYJBWE8naZscCe8SnUEseqwTF1u/8viXy1PXf1fBKaPVck0ezMS4yPFpgXQzx8xd3Io5XIRM/GnkPB5IuwUiruO+yR9EHirTncxotE3/Eh72nLqo7He+K38JyfLWwFFErCAVivnFuWyD0xqlzeg9U6he5jzD314d4qLsDpzAOrQ0UyahBerAdoBdcHQXhjRRepLODEbVx8bnB6m1DqPUOQrbNDTCBi9IWudMGk0IqOGSlO96Ts/oTHxkMUmmP0X8TiP4ZriaGCswWdWr8cZ+jTU2Chg05N1Csvwh8AwWEyuWpu3qtwgMRXup/Ymkkg4wyW15BHEkxi0zkVfq5of8psZQ6SRYGGgWjXm5+3V0z/zM4gE7kCi090UZ692WvcordLH6+EW0FplhwswYmfvxxZhzXFcNJ1T71Xq2RAgOj/otMW0h1SQAa6rav82yaVM="
@@ -11,7 +9,7 @@ cache: packages
 
 r:
   - 3.4
-  -devel
+  - devel
 
 after_success:
   - Rscript -e 'library(rave)'
@@ -33,13 +31,6 @@ addons:
 
 notifications:
   email: false
-
-matrix:
-  include:
-    - os: linux
-      compiler: gcc-4.8
-      env:
-        - PLATFORM=64
 
 
 before_install:
