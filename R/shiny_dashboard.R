@@ -88,6 +88,7 @@ dashboardHeader = function (..., title = NULL, titleWidth = NULL, disable = FALS
 }
 
 
+#' @importFrom htmltools htmlDependency
 #' @import shiny
 #' @export
 dashboardPage <- function (
@@ -110,7 +111,25 @@ dashboardPage <- function (
   title <- ifelse(is.null(title), extractTitle(header), title)
   content <- div(class = "wrapper",
                  header, sidebar, body, control)
-  collapsed <- shinydashboard:::findAttribute(sidebar, "data-collapsed", "true")
+
+  findAttribute = function (x, attr, val)
+  {
+    if (is.atomic(x))
+      return(FALSE)
+    if (!is.null(x$attribs[[attr]])) {
+      if (identical(x$attribs[[attr]], val))
+        return(TRUE)
+      else return(FALSE)
+    }
+    if (length(x$children) > 0) {
+      return(any(unlist(lapply(x$children, findAttribute, attr,
+                               val))))
+    }
+    return(FALSE)
+  }
+
+
+  collapsed <- findAttribute(sidebar, "data-collapsed", "true")
 
 
 
@@ -129,24 +148,35 @@ dashboardPage <- function (
     }
     dashboardDeps <- list(
       # Load customized style and scripts
-      htmltools::htmlDependency(
+      htmlDependency(
         "Dipterix", "0.0.1",
         c(file = system.file('assets/', package = 'rave')),
         script = 'dipterix.js', stylesheet = 'dipterix.css'
       ),
 
       # load AdminLTE
-      htmltools::htmlDependency(
+      htmlDependency(
         "AdminLTE", "2.0.6",
         c(file = system.file("AdminLTE", package = "shinydashboard")),
         script = adminLTE_js, stylesheet = adminLTE_css),
-      htmltools::htmlDependency(
+      htmlDependency(
         "shinydashboard",
         as.character(utils::packageVersion("shinydashboard")),
         c(file = system.file(package = "shinydashboard")),
         script = shinydashboard_js,
         stylesheet = "shinydashboard.css"))
-    shinydashboard:::appendDependencies(x, dashboardDeps)
+
+    appendDependencies = function (x, value)
+    {
+      if (inherits(value, "html_dependency"))
+        value <- list(value)
+      old <- attr(x, "html_dependencies", TRUE)
+      htmlDependencies(x) <- c(old, value)
+      x
+    }
+
+    # shinydashboard:::
+    appendDependencies(x, dashboardDeps)
 
 
   }

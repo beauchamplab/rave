@@ -1,8 +1,8 @@
-#' Environment for ECoG data and modules
-#' As of rave-Ent, data_repository nolonger succeed from globalenv()
-#' Instead, its parent is now baseenv()
-#' All packages needed are imported via loadnamespace within modules
-#' This will help create a clean environment for modules.
+# Environment for ECoG data and modules
+# As of rave-Ent, data_repository nolonger succeed from globalenv()
+# Instead, its parent is now baseenv()
+# All packages needed are imported via loadnamespace within modules
+# This will help create a clean environment for modules.
 NULL
 
 
@@ -306,7 +306,7 @@ rave_ignore <- function(...){
 #' @export
 rave_inputs <- function(..., .input_panels = list(), .env = globalenv()){
   quos = rlang::quos(...)
-  parser = rave:::comp_parser()
+  parser = comp_parser()
   lapply(quos, function(quo){
     comp = parser$parse_quo(quo)
     value = eval(comp$initial_value, envir = .env)
@@ -344,7 +344,7 @@ rave_updates <- function(..., .env = globalenv()){
 
   nms = nms[nms != '']
 
-  parser = rave:::comp_parser()
+  parser = comp_parser()
   for(nm in names(nms)){
     val = rave::eval_dirty(res[[nm]], env = .env)
     try({

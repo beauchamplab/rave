@@ -73,7 +73,7 @@ ECoGRepository <- R6::R6Class(
         epoch_param = self$epochs$get('epoch_params');
 
         epoch_info = 'Epoch: ' %&% epoch_info %&% '\n' %&%
-          ' - Electrodes: ' %&% rave:::deparse_selections(self$epochs$get('electrodes')) %&% '\n' %&%
+          ' - Electrodes: ' %&% deparse_selections(self$epochs$get('electrodes')) %&% '\n' %&%
           sprintf(' - From %.2f to %.2f (sec)\n', -epoch_param[1], epoch_param[2])
       }else{
         epoch_info = '(Not epoched yet.)\n'
@@ -175,7 +175,7 @@ ECoGRepository <- R6::R6Class(
 
       self$epochs$set('epoch_name', epoch_name)
       self$epochs$set('epoch_params', c(pre, post))
-      self$epochs$set('epoch_data', rave:::load_meta(
+      self$epochs$set('epoch_data', load_meta(
         meta_type = 'epoch',
         subject_id = self$subject$subject_id,
         meta_name = epoch_name

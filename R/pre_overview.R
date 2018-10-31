@@ -102,7 +102,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
             }
 
             if(!utils$set_electrodes(input$channels, name = 'channels')){
-              channels = rave:::deparse_selections(utils$get_from_subject('channels', NULL))
+              channels = deparse_selections(utils$get_from_subject('channels', NULL))
               updateTextInput(session, inputId = 'channels', value = channels)
               n_changes = n_changes - 1
             }
@@ -179,10 +179,10 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
       srate = utils$get_from_subject('srate', default = 0)
       block_choices = utils$get_from_subject('available_blocks', '')
       block_selected = utils$get_from_subject('blocks', NULL)
-      channels = rave:::deparse_selections(utils$get_from_subject('channels', NULL))
-      # exclchan = rave:::deparse_selections(utils$get_from_subject('exclchan', NULL))
-      # badchan = rave:::deparse_selections(utils$get_from_subject('badchan', NULL))
-      # epichan = rave:::deparse_selections(utils$get_from_subject('epichan', NULL))
+      channels = deparse_selections(utils$get_from_subject('channels', NULL))
+      # exclchan = deparse_selections(utils$get_from_subject('exclchan', NULL))
+      # badchan = deparse_selections(utils$get_from_subject('badchan', NULL))
+      # epichan = deparse_selections(utils$get_from_subject('epichan', NULL))
       # logger('gen UI')
 
 
@@ -238,7 +238,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
         `Project Name` = utils$get_from_subject('project_name', NA),
         `Subject Code` = utils$get_from_subject('subject_code', NA),
         `Blocks` = paste(utils$get_from_subject('blocks', ''), collapse = ', '),
-        `Channels` = rave:::deparse_selections(utils$get_from_subject('channels', NULL))
+        `Channels` = deparse_selections(utils$get_from_subject('channels', NULL))
       ) ->
         tbl
       data.frame(

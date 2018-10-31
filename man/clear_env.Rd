@@ -10,10 +10,12 @@ clear_env(env, all.names = T)
 Function to clear all elements within environment
 }
 \examples{
+\dontrun{
 env = new.env()
 env$a = 1
 print(as.list(env))
 
 clear_env(env)
 print(as.list(env))
+}
 }

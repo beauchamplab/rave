@@ -741,7 +741,7 @@ local({
         })
         observeEvent(input$module_sync, {
           # local_data$refresh
-          rave:::safe_write_csv(envir$modules, rave_options('module_lookup_file'), row.names = F)
+          safe_write_csv(envir$modules, rave_options('module_lookup_file'), row.names = F)
           local_data$refresh = Sys.time()
         })
         output$modules <- DT::renderDT({

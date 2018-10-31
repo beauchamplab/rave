@@ -28,10 +28,12 @@ automatically. Otherwise you have to specify the packages that you want to load.
 lapply using future package (async)
 }
 \examples{
+\dontrun{
 lapply_async(1:10, function(x){
   Sys.sleep(2) # Run for 1 secs
   Sys.getpid()
 }, .ncores = 3, .call_back = function(i){
   cat('Running iteration -', i, '\\n')
 })
+}
 }

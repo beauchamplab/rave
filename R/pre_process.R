@@ -73,7 +73,7 @@ rave_preprocess <- function(
   })
 
 
-  ui = rave:::dashboardPage(
+  ui = dashboardPage(
     skin = theme,
     control = div(),
     header = shinydashboard::dashboardHeader(
@@ -193,7 +193,7 @@ rave_preprocess <- function(
 
     # save_meta_electrodes = function(){
     #   Channel = env$subject$channels
-    #   rave:::save_meta(
+    #   save_meta(
     #     data = meta_elec,
     #     meta_type = 'electrodes',
     #     project_name = env$subject$project_name,

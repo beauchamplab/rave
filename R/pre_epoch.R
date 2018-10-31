@@ -370,7 +370,7 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2){
         }
         max_lag = max(max_lag , 1L)
         sel = which(sel)
-        sel = rave:::deparse_selections(sel, max_lag = max_lag, concatenate = F)
+        sel = deparse_selections(sel, max_lag = max_lag, concatenate = F)
         ind = as.integer(str_extract(sel, '^[0-9]+'))
         ind = ind[!is.na(ind)]
         selected_time = ind / srate

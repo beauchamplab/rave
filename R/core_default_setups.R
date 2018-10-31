@@ -79,85 +79,85 @@ arrange_modules <- function(
       if(file.exists(look_up_file)){
         old_modules = read.csv(look_up_file, stringsAsFactors = F)
       }
-      old_modules$Order %?<-% seq_len(nrow(old_modules)) -1
-      old_modules$Order = as.numeric(old_modules$Order)
-      old_modules$Order[is.na(old_modules$Order)] = n_new + nrow(old_modules) + seq_along(old_modules$Order[is.na(old_modules$Order)])
+      if(nrow(old_modules)){
+        old_modules$Order %?<-% seq_len(nrow(old_modules)) -1
+        old_modules$Order = as.numeric(old_modules$Order)
+        old_modules$Order[is.na(old_modules$Order)] = n_new + nrow(old_modules) + seq_along(old_modules$Order[is.na(old_modules$Order)])
 
-      new = merge(new_modules, old_modules, by = 'ModuleID', all = T, sort = F, suffixes = c('', '_old'))
+        new = merge(new_modules, old_modules, by = 'ModuleID', all = T, sort = F, suffixes = c('', '_old'))
 
-      # check ModuleID
-      new = new[!is.na(new$ModuleID),]
+        # check ModuleID
+        new = new[!is.na(new$ModuleID),]
 
-      lapply(seq_len(nrow(new)), function(ii){
-        row = new[ii,]
+        lapply(seq_len(nrow(new)), function(ii){
+          row = new[ii,]
 
-        for(col in columns){
-          if(is.na(row[[col]])){
-            row[[col]] = row[[paste0(col, '_old')]]
+          for(col in columns){
+            if(is.na(row[[col]])){
+              row[[col]] = row[[paste0(col, '_old')]]
+            }
           }
-        }
-        if(is.na(row$Active_old)){ row$Active = TRUE }else{
-          row$Active = row$Active & row$Active_old
-        }
-        if(is_invalid(row$ScriptPath, .invalids = c('null', 'na', 'blank')) || !file.exists(row$ScriptPath)){
-          row$Active = F
-        }
-        if(is.na(row$Version) || !is.character(row$Version)){
-          row$Version = '0'
-        }
-        if(is.na(row$Order)){
-          row$Order = row$Order_old
-        }
-
-        if(!reset){
-          if(length(row$Version_old) == 1 &&
-             !is.na(row$Version_old) &&
-             is.character(row$Version_old) &&
-             utils::compareVersion(row$Version, row$Version_old) < 0
-          ){
-            # New packages are not new! DO not change module file, this guy is a developer!
-            row$Version = row$Version_old
-            row$PackageID = row$PackageID_old
-            row$GroupName = row$GroupName_old
-            row$Name = row$Name_old
-            row$ScriptPath = row$ScriptPath_old
-            row$Author = row$Author_old
-            row$Packages = row$Packages_old
+          if(is.na(row$Active_old)){ row$Active = TRUE }else{
+            row$Active = row$Active & row$Active_old
           }
-        }
-        row[, columns]
-      }) ->
-        modules
-
-      new = do.call(rbind, modules)
-
-      lapply(modules, function(m){
-        sel = m$ModuleID == new$ModuleID
-        if(sum(sel) > 1){
-          vers = as.numeric_version(new$Version[sel])
-          m_ver = as.numeric_version(m$Version)
-          if(m_ver != max(vers)){
-            return(NULL)
+          if(is_invalid(row$ScriptPath, .invalids = c('null', 'na', 'blank')) || !file.exists(row$ScriptPath)){
+            row$Active = F
           }
-        }
-        return(m)
-      }) ->
-        modules
+          if(is.na(row$Version) || !is.character(row$Version)){
+            row$Version = '0'
+          }
+          if(is.na(row$Order)){
+            row$Order = row$Order_old
+          }
 
-      modules = rave:::dropNulls(modules)
+          if(!reset){
+            if(length(row$Version_old) == 1 &&
+               !is.na(row$Version_old) &&
+               is.character(row$Version_old) &&
+               utils::compareVersion(row$Version, row$Version_old) < 0
+            ){
+              # New packages are not new! DO not change module file, this guy is a developer!
+              row$Version = row$Version_old
+              row$PackageID = row$PackageID_old
+              row$GroupName = row$GroupName_old
+              row$Name = row$Name_old
+              row$ScriptPath = row$ScriptPath_old
+              row$Author = row$Author_old
+              row$Packages = row$Packages_old
+            }
+          }
+          row[, columns]
+        }) ->
+          modules
 
-      modules = do.call(rbind, modules)
-      new_modules = modules[!duplicated(modules[,c('ModuleID', 'Version')]), ]
+        new = do.call(rbind, modules)
 
-      new_modules = new_modules[order(new_modules$Order), ]
-      new_modules$Order = seq_len(nrow(new_modules))
+        lapply(modules, function(m){
+          sel = m$ModuleID == new$ModuleID
+          if(sum(sel) > 1){
+            vers = as.numeric_version(new$Version[sel])
+            m_ver = as.numeric_version(m$Version)
+            if(m_ver != max(vers)){
+              return(NULL)
+            }
+          }
+          return(m)
+        }) ->
+          modules
+
+        modules = dropNulls(modules)
+
+        modules = do.call(rbind, modules)
+        new_modules = modules[!duplicated(modules[,c('ModuleID', 'Version')]), ]
+
+        new_modules = new_modules[order(new_modules$Order), ]
+        new_modules$Order = seq_len(nrow(new_modules))
+      }
+
 
     }, silent = T)
 
     safe_write_csv(new_modules, look_up_file, quiet = quiet)
-
-
-
   }
 
   rave_options(module_root_dir = base::normalizePath(target_dir))

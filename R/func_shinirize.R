@@ -518,7 +518,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
       observeEvent(input$.gen_report, {
 
-        curr_e = rave:::deparse_selections(get('electrodes', envir = data_env, inherits = F))
+        curr_e = deparse_selections(get('electrodes', envir = data_env, inherits = F))
         output_labels = str_c(unlist(execenv$output_labels))
         input_labels = str_c(unlist(execenv$input_labels))
         # guess inputs
@@ -567,7 +567,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         },
         content = function(con) {
           tryCatch({
-            electrodes = rave:::parse_selections(input$.report_electrodes)
+            electrodes = parse_selections(input$.report_electrodes)
             electrodes = data_env$valid_electrodes(electrodes)
             inputId = execenv$input_ids[unlist(execenv$input_labels) == input$.report_inputid]
             outputId = execenv$output_ids[unlist(execenv$output_labels) %in% input$.report_outputid]

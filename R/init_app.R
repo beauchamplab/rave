@@ -117,7 +117,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
     modules = list("______" = list(modules))
   }
 
-  data_selector = rave:::shiny_data_selector('DATA_SELECTOR')
+  data_selector = shiny_data_selector('DATA_SELECTOR')
   ui = rave::dashboardPage(
     skin = theme,
     title = 'R Analysis and Visualization of ECoG/iEEG Data',
@@ -345,7 +345,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
     .progress = progress(title = '', max = length(unlist(modules)))
     shinirized_modules = lapply(unlist(modules), function(m){
       .progress$inc(sprintf('Loading - %s', m$label_name))
-      rave:::shinirize(m, test.mode = test.mode)
+      shinirize(m, test.mode = test.mode)
     })
     .progress$close()
 
@@ -460,7 +460,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
 
     observe({
       input$control_panel_refresh
-      local_data$mem_usage = rave:::get_mem_usage(modules)
+      local_data$mem_usage = get_mem_usage(modules)
     })
 
     output$mem_usage <- renderUI({

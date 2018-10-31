@@ -97,7 +97,7 @@ iter_results <- function(
 
       if(length(funcs)){
         names(funcs) = outputs
-        base::cat(label, "-", rave:::safe_str_c(val, collapse = ', '))
+        base::cat(label, "-", safe_str_c(val, collapse = ', '))
         lapply(names(funcs), function(nm){
 
           tryCatch({
@@ -123,7 +123,7 @@ iter_results <- function(
         funcs = run(val)
         if(length(funcs)){
           names(funcs) = outputs
-          base::cat(label, "-", rave:::safe_str_c(val, collapse = ', '))
+          base::cat(label, "-", safe_str_c(val, collapse = ', '))
           lapply(names(funcs), function(nm){
 
             tryCatch({
@@ -214,7 +214,7 @@ rave_deparse <- function(obj){
 #       '',
 #       sep = '\n'
 #     )
-#     val = rave:::rave_deparse(val)
+#     val = rave_deparse(val)
 #     str_split(sprintf(s, val, val), '\\n')
 #
 #   }))

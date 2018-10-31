@@ -240,7 +240,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
           if(length(channels) > 1){
             channels = as.integer(channels)
           }else{
-            channels = rave:::parse_selections(channels)
+            channels = parse_selections(channels)
           }
         }
         # checks
@@ -257,7 +257,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
           }
           # set channels
           env$subject$set_channels(channels = channels, name = name)
-          env$subject$save(action = 'Set Electrodes (' %&% name %&%')', message = rave:::deparse_selections(channels))
+          env$subject$save(action = 'Set Electrodes (' %&% name %&%')', message = deparse_selections(channels))
           msg = 'Electrodes set (' %&% name %&% ')'
           type = 'message'
           return(TRUE)
@@ -414,7 +414,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
       blocks = utils$get_blocks()
       srate = utils$get_srate()
 
-      progress = rave:::progress('Notch filter in progress...', max = length(electrodes))
+      progress = progress('Notch filter in progress...', max = length(electrodes))
       on.exit({progress$close()})
 
       dirs = utils$get_from_subject('dirs', list(), customized = F)
@@ -474,7 +474,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
 
       ### Prepare for the wavelet file. Since users may specify different sample rate, we need to remove files if they exists
       # 1. reference file
-      # ref_file = file.path(dirs$channel_dir, 'reference', sprintf('ref_%s.h5', rave:::deparse_selections(electrodes)))
+      # ref_file = file.path(dirs$channel_dir, 'reference', sprintf('ref_%s.h5', deparse_selections(electrodes)))
       # unlink(ref_file)
       # Create dir
       for(block in blocks){

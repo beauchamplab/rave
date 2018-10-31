@@ -1,6 +1,8 @@
 #' @include utils_syscheck.R
 NULL
 
+#' @import shiny
+NULL
 
 
 # Internally use to auto update RAVE package version

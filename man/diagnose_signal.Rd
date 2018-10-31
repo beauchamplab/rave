@@ -52,6 +52,7 @@ means 3 standard deviation}
 Signal Inspection Plots
 }
 \examples{
+\dontrun{
 time <- seq(0, 300, 1/2000)
 s2 <- sin(pi/30 * time + rcauchy(length(time)) / 1000) + rnorm(length(time))
 diagnose_signal(s2, srate = 2000, flim = c(-4,-1))
@@ -59,5 +60,6 @@ diagnose_signal(s2, srate = 2000, flim = c(-4,-1))
 # Apply notch filter
 s1 = notch_filter(s2, 2000, 58,62)
 diagnose_signal(s1, s2, srate = 2000, flim = c(-4,-1))
+}
 
 }

@@ -4,5 +4,8 @@
 ^adhoc
 ^packrat/
 ^\.Rprofile$
-.travis.yml
-travis_setup.sh
+^\.travis.yml$
+^travis_setup.sh$
+\.md$
+^test/
+

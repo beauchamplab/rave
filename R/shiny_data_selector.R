@@ -847,7 +847,7 @@ shiny_data_selector <- function(module_id){
       spec_file = file.path(suma_dir, rave_options('suma_spec_file'))
       brain_size = 0
       if(file.exists(spec_file)){
-        spec_parsed = rave:::suma_spec_parse(subject = project %&% '/' %&% subject)
+        spec_parsed = suma_spec_parse(subject = project %&% '/' %&% subject)
         sv = unique(unlist(spec_parsed)['SurfaceVolume'])
         if(length(sv)){
           sv = paste0(sv[1], '.brik')

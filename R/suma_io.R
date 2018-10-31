@@ -334,7 +334,7 @@ freesurfer_mesh <- function(subject, spec_file = NULL, state = 'pial', center = 
     volume_file = unique(volume_file)
     # get file name only
     file_name = tail(unlist(str_split(volume_file, '/|\\\\')), 1)
-    volume_info = rave:::suma_surface_volume_parse(file.path(subject$dirs$suma_dir, file_name))
+    volume_info = suma_surface_volume_parse(file.path(subject$dirs$suma_dir, file_name))
 
 
     if(!is.null(volume_info[['VOLREG_MATVEC_000000']])){

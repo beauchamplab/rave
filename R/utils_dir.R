@@ -1,5 +1,5 @@
-#' util functions to get subject dir
-#' Internal use
+# util functions to get subject dir
+# Internal use
 NULL
 
 

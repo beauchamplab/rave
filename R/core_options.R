@@ -97,6 +97,7 @@ opt <- list(
 # the dataset to a particular target surface.
 
 #' @import yaml
+#' @import utils
 Options <- R6::R6Class(
   "Options",
   private = list(

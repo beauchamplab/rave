@@ -225,7 +225,7 @@ ExecEnvir <- R6::R6Class(
         }
 
         # Speed up
-        # rave:::copy_env(self$parse_env, self$static_env, deep = F)
+        # copy_env(self$parse_env, self$static_env, deep = F)
         list2env(as.list(self$runtime_env, all.names = T), envir = self$static_env)
 
 
@@ -350,7 +350,7 @@ ExecEnvir <- R6::R6Class(
       session_id = '__fake_runtime_env__', data_env = getDefaultDataRepository()
     ){
       # deep clone, but sharing the data, module environment
-      fakesession = rave:::fake_session(rave_id = session_id)
+      fakesession = fake_session(rave_id = session_id)
 
       m = private$module_env
       new_exec = m$get_or_new_exec_env(
@@ -408,7 +408,7 @@ ExecEnvir <- R6::R6Class(
 
       new = self$copy()
 
-      progress = rave:::progress('Exporting Report', max = length(electrodes))
+      progress = progress('Exporting Report', max = length(electrodes))
       on.exit({progress$close()}, add = T)
       rave_data = getDefaultDataRepository()
 
@@ -573,7 +573,7 @@ ExecEnvir <- R6::R6Class(
       .tabsets = .output_tabsets
       quos = rlang::quos(...)
       assertthat::assert_that(length(quos) > 0, msg = 'No output defined!')
-      parsers = rave:::comp_parser()
+      parsers = comp_parser()
       x = lapply(names(quos), function(nm){
         re = parsers$parse_quo(quos[[nm]])
         re$label = nm

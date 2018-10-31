@@ -13,6 +13,7 @@ safe_str_c(x, sep = '', collapse = NULL, .error = '')
 Convert to string and never goes wrong
 }
 \examples{
+\dontrun{
 safe_str_c('Count - ', 3:1)
 
 safe_str_c('Count - ', 3:1, collapse = '..., ')
@@ -23,4 +24,5 @@ safe_str_c('Count - ', aaa, .error = 'aaa not exists')
 # aaa exists
 aaa <- 0
 safe_str_c('Count - ', aaa, .error = 'aaa not exists')
+}
 }

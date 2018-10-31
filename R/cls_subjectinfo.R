@@ -58,7 +58,7 @@ SubjectInfo2 <- R6::R6Class(
         path = self$dirs$preprocess_dir,
         name = 'rave.yaml', use_yaml = T
       )
-      self$cacher = rave:::RAVEHistory$new(
+      self$cacher = RAVEHistory$new(
         path = self$dirs$preprocess_dir,
         name = 'rave.RData', use_yaml = F
       )

@@ -207,7 +207,7 @@ load_fst_or_h5 <- function(
       }
       return(re)
     }else{
-      re = rave:::LazyFST$new(file_path = fst_path, transpose = fst_need_transpose)
+      re = LazyFST$new(file_path = fst_path, transpose = fst_need_transpose)
       return(re)
     }
   }else{

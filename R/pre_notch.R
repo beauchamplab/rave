@@ -190,8 +190,8 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
 
     output$notch_bands <- renderText({
       notch_freq = input$notch_freq
-      notch_freq_x = rave:::parse_selections(input$notch_freq_x)
-      width = rave:::parse_selections(input$notch_freq_bw, unique = F)
+      notch_freq_x = parse_selections(input$notch_freq_x)
+      width = parse_selections(input$notch_freq_bw, unique = F)
 
       if(length(notch_freq_x) != length(width)){
         return('Frequency and band width should equal in length. Check your inputs.')
@@ -221,8 +221,8 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
       # textInput(ns('notch_freq_x'), 'X (Times)', value = '1,2,3'),
       # textInput(ns('notch_freq_bw'), '+- (Band Width, Hz)', value = '1,2,2'),
       notch_freq = input$notch_freq
-      notch_freq_x = rave:::parse_selections(input$notch_freq_x)
-      widths = rave:::parse_selections(input$notch_freq_bw, unique = F)
+      notch_freq_x = parse_selections(input$notch_freq_x)
+      widths = parse_selections(input$notch_freq_bw, unique = F)
       if(length(notch_freq_x) != length(widths)){
         utils$showNotification(msg = 'Frequency and band width should equal in length. Check your inputs.', type = 'error')
         return()
@@ -602,7 +602,7 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
                 p('You can not change the following variables once notch filter is applied:'),
                 tags$ul(
                   tags$li('Blocks: ' %&% paste(blocks, collapse = ', ')),
-                  tags$li('Channels: ' %&% rave:::deparse_selections(channels)),
+                  tags$li('Channels: ' %&% deparse_selections(channels)),
                   tags$li('Sample Rate: ' %&% srate)
                 ),
                 p('Notch filter will be applied to the following frequency bands:'),
@@ -630,7 +630,7 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
                 p('Check the following settings. One or more is incorrect'),
                 tags$ul(
                   tags$li('Blocks: ' %&% paste(blocks, collapse = ', ')),
-                  tags$li('Channels: ' %&% rave:::deparse_selections(channels)),
+                  tags$li('Channels: ' %&% deparse_selections(channels)),
                   tags$li('Sample Rate: ' %&% srate),
                   tags$li(ifelse(length(error), 'Notch Filter Frequencies: ' %&% error, '(Notch filter frequencies are correct.)'))
                 )
@@ -844,7 +844,7 @@ bulk_notch2 <- function(
       # If we calc ref after wavelet, I don't want to change wavelet code - too complicated
       # So instead, alloc space for CAR (Do CAR as if the refs are 0)
       name = sprintf('/REF/%s', block_num)
-      rave:::save_h5(filtered, file = save, name = name, chunk = 1024, replace = T)
+      save_h5(filtered, file = save, name = name, chunk = 1024, replace = T)
       H5close()
 
       # # save the compressed signal [2]
@@ -893,7 +893,7 @@ cache_raw_voltage <- function(project_name, subject_code, blocks, electrodes, ..
   # }
 
 
-  progress = rave:::progress('Reading raw voltage signals from MATLAB...', max = length(electrodes)+1 )
+  progress = progress('Reading raw voltage signals from MATLAB...', max = length(electrodes)+1 )
   on.exit({progress$close()})
 
   lapply_async(electrodes, function(e){

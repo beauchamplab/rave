@@ -260,7 +260,7 @@ rave_pre_ref3 <- function(module_id = 'REF_M', sidebar_width = 2){
           # reference matrix
           nchls = nrow(ref_table)
           ref_mat = t(sapply(1:nchls, function(i){
-            ref = rave:::parse_selections(ref_table$Reference[i])
+            ref = parse_selections(ref_table$Reference[i])
             re = rep(0, nchls)
             if(length(ref)){
               re[ref_table$Channel %in% ref] = -1
@@ -283,21 +283,21 @@ rave_pre_ref3 <- function(module_id = 'REF_M', sidebar_width = 2){
             tagList(
 
               selectInput(ns('g_type'), 'Reference Type (Display Only)', choices = gtype, selected = gtype),
-              textInput(ns('g_channels'), 'Channels in the Group', value = rave:::deparse_selections(th_chls), placeholder = 'e.g. 1-3,5'),
-              textInput(ns('epichan'), 'Epilepsey Channels', value = rave:::deparse_selections(th_chls[chl_type == 2])),
-              textInput(ns('badchan'), 'Bad Channels', value = rave:::deparse_selections(th_chls[chl_type == 3])),
-              textInput(ns('exclchan'), 'Excluded Channels', value = rave:::deparse_selections(th_chls[chl_type == 4])),
-              textInput(ns('g_channels_disp'), 'Channels to Display', value = rave:::deparse_selections(th_chls), placeholder = 'e.g. 1-3,5'),
+              textInput(ns('g_channels'), 'Channels in the Group', value = deparse_selections(th_chls), placeholder = 'e.g. 1-3,5'),
+              textInput(ns('epichan'), 'Epilepsey Channels', value = deparse_selections(th_chls[chl_type == 2])),
+              textInput(ns('badchan'), 'Bad Channels', value = deparse_selections(th_chls[chl_type == 3])),
+              textInput(ns('exclchan'), 'Excluded Channels', value = deparse_selections(th_chls[chl_type == 4])),
+              textInput(ns('g_channels_disp'), 'Channels to Display', value = deparse_selections(th_chls), placeholder = 'e.g. 1-3,5'),
               actionButton(ns('g_save_car'), 'Save CAR')
             )
           },
           'Bi-polar Reference' = {
             tagList(
               selectInput(ns('g_type'), 'Reference Type (Display Only)', choices = gtype, selected = gtype),
-              textInput(ns('g_channels'), 'Channels in the Group', value = rave:::deparse_selections(th_chls), placeholder = 'e.g. 1-3,5'),
+              textInput(ns('g_channels'), 'Channels in the Group', value = deparse_selections(th_chls), placeholder = 'e.g. 1-3,5'),
               selectInput(ns('bp_e1'), 'Current Channel', choices = th_chls, selected = isolate(local_data$last_e1)),
               selectInput(ns('bp_e2'), 'Reference Channel(s)', choices = c('', th_chls), multiple = F),
-              textInput(ns('g_channels_disp'), 'Channels to Display', value = rave:::deparse_selections(th_chls), placeholder = 'e.g. 1-3,5'),
+              textInput(ns('g_channels_disp'), 'Channels to Display', value = deparse_selections(th_chls), placeholder = 'e.g. 1-3,5'),
               actionButton(ns('g_save_bp'), 'Save Bipolar')
             )
           },
@@ -312,10 +312,10 @@ rave_pre_ref3 <- function(module_id = 'REF_M', sidebar_width = 2){
       saved = utils$set_reference_group(
         g_name = input$group,
         g_type = 'car',
-        g_channels = rave:::parse_selections(input$g_channels),
-        g_epi = rave:::parse_selections(input$epichan),
-        g_bad = rave:::parse_selections(input$badchan),
-        g_excl = rave:::parse_selections(input$exclchan)
+        g_channels = parse_selections(input$g_channels),
+        g_epi = parse_selections(input$epichan),
+        g_bad = parse_selections(input$badchan),
+        g_excl = parse_selections(input$exclchan)
       )
       if(saved){
         local_data$ref_table = utils$get_reference_table()
@@ -330,7 +330,7 @@ rave_pre_ref3 <- function(module_id = 'REF_M', sidebar_width = 2){
         e1 = as.numeric(e1)
         local_data$last_e1 = e1
         ref = ref_table[ref_table$Channel == e1, 'Reference']
-        e2 = rave:::parse_selections(ref)
+        e2 = parse_selections(ref)
         updateSelectInput(session, 'bp_e2', selected = e2)
       }else{
         updateSelectInput(session, 'bp_e2', selected = '')
@@ -345,7 +345,7 @@ rave_pre_ref3 <- function(module_id = 'REF_M', sidebar_width = 2){
       saved = utils$set_reference_group(
         g_name = input$group,
         g_type = 'bipolar',
-        g_channels = rave:::parse_selections(input$g_channels),
+        g_channels = parse_selections(input$g_channels),
         bp_e1 = input$bp_e1,
         bp_e2 = e2
       )
@@ -366,7 +366,7 @@ rave_pre_ref3 <- function(module_id = 'REF_M', sidebar_width = 2){
         new_group = list(gtype)
         names(new_group) = gname
         local_data$new_group = new_group
-        init_channels = rave:::parse_selections(input$g_init_channels)
+        init_channels = parse_selections(input$g_init_channels)
         if(length(init_channels)){
           # init group
           utils$set_reference_group(g_name = gname, g_type = gtype, init_channels, init = T)
@@ -444,7 +444,7 @@ rave_pre_ref3 <- function(module_id = 'REF_M', sidebar_width = 2){
       sel = local_data$current_group_sel
       channels = utils$get_channels()
 
-      disp_chls = rave:::parse_selections(input$g_channels_disp)
+      disp_chls = parse_selections(input$g_channels_disp)
 
       show_mean = gtype %in% c('Common Avg/White Matter Reference')
 

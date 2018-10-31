@@ -580,7 +580,7 @@ rave_pre_epoch <- function(module_id = 'EPOCH_M', sidebar_width = 2){
           sel = s <= thred
         }
         max_lag = max(1, min_trial_duration * sample_rate)
-        tp = rave:::deparse_selections(which(sel), concatenate = F, max_lag = max_lag)
+        tp = deparse_selections(which(sel), concatenate = F, max_lag = max_lag)
         tp = as.integer(str_extract(tp, '^[0-9]*'))
         tp = tp[!is.na(tp)]
         local_data$epoch_tmp = data.frame(

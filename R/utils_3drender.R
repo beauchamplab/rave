@@ -47,7 +47,7 @@ render_3d_electrodes <- function(
     g
   }) ->
     geoms
-  threejsr:::threejs_scene.default(elements = geoms, control_gui = F)
+  threejsr::threejs_scene.default(elements = geoms, control_gui = F)
 
 }
 

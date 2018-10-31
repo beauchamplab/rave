@@ -60,7 +60,7 @@ rave_pre_overview <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
             return(NULL)
           }
         }
-        user_data$subject = rave:::SubjectInfo2$new(
+        user_data$subject = SubjectInfo2$new(
           project_name = input$project_name,
           subject_code = input$subject_code
         )
@@ -78,7 +78,7 @@ rave_pre_overview <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
         `Project Name` = user_data$project_name,
         `Subject Code` = user_data$subject_code,
         `Blocks` = paste(user_data$blocks, collapse = ', '),
-        `Channels` = rave:::deparse_selections(user_data$channels)
+        `Channels` = deparse_selections(user_data$channels)
       ) ->
         tbl
       data.frame(
@@ -102,14 +102,14 @@ rave_pre_overview <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
       wave_car_plan = 'NA'
       wave_succeed = 'NA'
       if(length(last_wavelet) > 0){
-        wave_channels = rave:::deparse_selections(last_wavelet[['channels']])
+        wave_channels = deparse_selections(last_wavelet[['channels']])
         wave_car_plan = last_wavelet[['car_plan']]
         wave_succeed = c('Not Finished', 'Yes!')[last_wavelet[['succeed']] + 1]
       }
       list(
-        `Excluded Channels` = rave:::deparse_selections(user_data$exclchan),
-        `Bach Channels` = rave:::deparse_selections(user_data$badchan),
-        `Epilepsy Channel` = rave:::deparse_selections(user_data$epichan),
+        `Excluded Channels` = deparse_selections(user_data$exclchan),
+        `Bach Channels` = deparse_selections(user_data$badchan),
+        `Epilepsy Channel` = deparse_selections(user_data$epichan),
         `Current CAR Strategy` = last_car,
         `Last Wavelet Channels` = wave_channels,
         `Last Wavelet CAR Channels` = wave_car_plan,

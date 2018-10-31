@@ -199,7 +199,7 @@ Tensor <- R6::R6Class(
           return(sub)
         }
       }else{
-        sub = rave:::Tensor$new(sub, dim = dim(sub), dimnames = sub_dimnames, varnames = names(sub_dimnames))
+        sub = Tensor$new(sub, dim = dim(sub), dimnames = sub_dimnames, varnames = names(sub_dimnames))
         return(sub)
       }
 
@@ -462,7 +462,7 @@ dimnames.Tensor <- function(obj){
   #   dimnames[['Frequency']] = dimnames[['Frequency']][j]
   #   dimnames[['Time']] = dimnames[['Time']][k]
   #   dimnames[['Electrode']] = dimnames[['Electrode']][l]
-  #   rave:::ECoGTensor$new(data = nd,
+  #   ECoGTensor$new(data = nd,
   #                  dim = dim(nd),
   #                  dimnames = dimnames,
   #                  varnames = c('Trial', 'Frequency', 'Time', 'Electrode'))

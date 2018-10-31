@@ -106,8 +106,17 @@ rave_version <- function(){
     # get rave_version
     old_ver = rave_options('rave_ver')
     old_ver %?<-% rave::rave_hist$get_or_save('..rave_ver..', '0.0.0.0000')
-    new_ver = rave:::rave_version()
-    if(utils::compareVersion(old_ver, new_ver) < 0){
+    new_ver = rave_version()
+    is_newer = tryCatch({
+      is_newer = utils::compareVersion(old_ver, new_ver) < 0
+      if(!length(is_newer) || !is.logical(is_newer)){
+        is_newer = TRUE
+      }
+      is_newer
+    }, error = function(e){
+      return(TRUE)
+    })
+    if(is_newer){
       logger('RAVE Updated from ', old_ver, ' ==> ', new_ver)
       logger('Updating module information', level = 'INFO')
       # New RAVE installed! update

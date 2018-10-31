@@ -17,6 +17,7 @@ zero_length(..., any = T, na.rm = F)
 Calculate if length of input(s) is zero
 }
 \examples{
+\dontrun{
 # any = TRUE, any element with zero length will yield "TRUE" result
 # In this case, expressions c(1) and a==NULL are not evaluated
 zero_length(NULL, c(1), a=={Sys.sleep(10)})
@@ -27,4 +28,5 @@ zero_length(NULL, c(1), a=={Sys.sleep(10)}, any = F)
 
 # stop('') yields error, which will be counted as invalid/zero-length
 zero_length(stop(''))
+}
 }

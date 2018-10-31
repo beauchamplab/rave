@@ -69,7 +69,7 @@ rave_pre_notch <- function(module_id = 'NOTCH_M', sidebar_width = 2){
     observeEvent(input$save_plots, {
       showNotification(p('Plots are being saved to ', user_data$subject$dirs$preprocess_dir), type = 'message')
       logger('Plots are being saved to ', user_data$subject$dirs$preprocess_dir, level = 'INFO')
-      rave:::save_notch_plots(
+      save_notch_plots(
         project_name = user_data$project_name,
         subject_code = user_data$subject_code,
         blocks = user_data$blocks,
@@ -105,7 +105,7 @@ rave_pre_notch <- function(module_id = 'NOTCH_M', sidebar_width = 2){
         need(length(block) == 1 || length(channel) == 1, '')
       )
 
-      rave:::pre_plot_notch(
+      pre_plot_notch(
         project_name = user_data$project_name,
         subject_code = user_data$subject_code,
         block_num = block,
@@ -186,7 +186,7 @@ rave_pre_notch <- function(module_id = 'NOTCH_M', sidebar_width = 2){
             tags$label('sample rate'),
             ' will freeze and no longer editable unless you manually remove the preprocess folder.'),
           p(strong('Please confirm the channels:')),
-          tags$blockquote(rave:::deparse_selections(chls)),
+          tags$blockquote(deparse_selections(chls)),
           footer = tagList(
             actionButton(ns('cancel'), "Cancel"),
             actionButton(ns("ok"), "OK")
@@ -221,7 +221,7 @@ rave_pre_notch <- function(module_id = 'NOTCH_M', sidebar_width = 2){
 
       logger('Notch filter begins.')
       local_data$is_notch = T
-      rave:::bulk_notch2(
+      bulk_notch2(
         project_name = user_data$project_name,
         subject_code = user_data$subject_code,
         blocks = user_data$blocks,
@@ -236,7 +236,7 @@ rave_pre_notch <- function(module_id = 'NOTCH_M', sidebar_width = 2){
       user_data$has_notch = T
       local_data$is_notch = F
       user_data$valid_channels = user_data$channels
-      user_data$subject$logger$save(CAR_plan = sprintf('Exc[%s]Bad[]Epi[]', rave:::deparse_selections(user_data$channels)))
+      user_data$subject$logger$save(CAR_plan = sprintf('Exc[%s]Bad[]Epi[]', deparse_selections(user_data$channels)))
       # dismiss
       shiny::removeModal()
     })

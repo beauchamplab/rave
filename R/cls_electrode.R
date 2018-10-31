@@ -1,8 +1,10 @@
-#' Electrode class (atom)
-#' Contains electrode data (matrix: frequency by time)
-#' Provide util functions to epoch data
+# Electrode class (atom)
+# Contains electrode data (matrix: frequency by time)
+# Provide util functions to epoch data
 NULL
 
+
+#' Function to make an environment printable
 #' @export
 as_printable = function(env){
   assertthat::assert_that(is.environment(env), msg = 'env MUST be an environment.')
@@ -12,6 +14,7 @@ as_printable = function(env){
   return(env)
 }
 
+#' Override print method for printable environment
 #' @export
 print.rave_printable = function(env){
   assertthat::assert_that(is.environment(env), msg = 'env MUST be an environment.')
@@ -21,6 +24,7 @@ print.rave_printable = function(env){
   return(env)
 }
 
+#' R6 class of electrode
 #' @export
 Electrode <- R6::R6Class(
   classname = 'Electrode',
@@ -339,7 +343,7 @@ Electrode <- R6::R6Class(
             # File not exist, usually this happens to norefs or bipolar refs, therefore, extract first one
             es = str_extract_all(electrode, '[0-9,\\-]+')
             es = unlist(es)
-            es = rave:::parse_selections(es)
+            es = parse_selections(es)
             es = subject$filter_all_electrodes(es)
             if(length(es)){
               # Bipolar ref
@@ -468,7 +472,7 @@ Electrode <- R6::R6Class(
         })
 
         # assign dim names
-        re[['volt']] = rave:::Tensor$new(data = placehold, dimnames = list(
+        re[['volt']] = Tensor$new(data = placehold, dimnames = list(
           epochs$Trial[trial_order],
           time_points,
           electrode
@@ -511,7 +515,7 @@ Electrode <- R6::R6Class(
             NULL
           })
           # assign dim names
-          re[[name]] = rave:::ECoGTensor$new(data = placehold, dimnames = list(
+          re[[name]] = ECoGTensor$new(data = placehold, dimnames = list(
             epochs$Trial[trial_order],
             freqs$Frequency,
             time_points,

@@ -142,9 +142,9 @@ rave_pre_ref <- function(module_id = 'REF_M', sidebar_width = 2){
       tagList(
         tags$small(local_data$click_msg),
         hr(),
-        textInput(ns('car_epi'), 'Epilepsy Channels', value = rave:::deparse_selections(user_data$epichan)),
-        textInput(ns('car_bad'), 'Bad Channels', value = rave:::deparse_selections(user_data$badchan)),
-        textInput(ns('car_exc'), 'Excluded Channels', value = rave:::deparse_selections(user_data$exclchan)),
+        textInput(ns('car_epi'), 'Epilepsy Channels', value = deparse_selections(user_data$epichan)),
+        textInput(ns('car_bad'), 'Bad Channels', value = deparse_selections(user_data$badchan)),
+        textInput(ns('car_exc'), 'Excluded Channels', value = deparse_selections(user_data$exclchan)),
         div(
           actionButton(ns('update'), 'Update Plot'),
           actionButton(ns('calc'), 'Calculate Average')
@@ -192,9 +192,9 @@ rave_pre_ref <- function(module_id = 'REF_M', sidebar_width = 2){
           parsed = str_match(plan, '^Exc\\[([0-9,\\-]*)\\]Bad\\[([0-9,\\-]*)\\]Epi\\[([0-9,\\-]*)\\]$')
           parsed = as.vector(parsed)
           name = parsed[1]
-          exc = rave:::parse_selections(parsed[2])
-          bad = rave:::parse_selections(parsed[3])
-          epi = rave:::parse_selections(parsed[4])
+          exc = parse_selections(parsed[2])
+          bad = parse_selections(parsed[3])
+          epi = parse_selections(parsed[4])
           car = user_data$channels
           car = car[!car %in% c(bad, epi)]
           local_data$exc = exc
@@ -255,13 +255,13 @@ rave_pre_ref <- function(module_id = 'REF_M', sidebar_width = 2){
           }
           # save
           for(b in user_data$blocks){
-            rave:::save_h5(
+            save_h5(
               x = local_data$s_5[[b]],
               file = cache_file,
               name = sprintf('/notch/compress5/%s', b),
               chunk = c(1, 1024)
             )
-            rave:::save_h5(
+            save_h5(
               x = local_data$s_20[[b]],
               file = cache_file,
               name = sprintf('/notch/compress20/%s', b),
@@ -279,17 +279,17 @@ rave_pre_ref <- function(module_id = 'REF_M', sidebar_width = 2){
 
     update_pressed <- observeEvent(input$update, {
       save = FALSE
-      epi = rave:::parse_selections(input$car_epi)
+      epi = parse_selections(input$car_epi)
       if(!setequal(user_data$epichan, epi)){
         user_data$epichan = epi
         save = T
       }
-      bad = rave:::parse_selections(input$car_bad)
+      bad = parse_selections(input$car_bad)
       if(!setequal(user_data$badchan, bad)){
         user_data$badchan = bad
         save = T
       }
-      exc = rave:::parse_selections(input$car_exc)
+      exc = parse_selections(input$car_exc)
       if(!setequal(user_data$exclchan, exc)){
         user_data$exclchan = exc
         save = T
@@ -347,12 +347,12 @@ rave_pre_ref <- function(module_id = 'REF_M', sidebar_width = 2){
         channel_names = c('Avg', '', channel_names)
       }
       if(input$space == 0){
-        space = rave:::plot_signals(
+        space = plot_signals(
           signals, srate, start_time = start, space = 0.99999, col = col, channel_names = channel_names
         )
         local_data$space = space
       }else{
-        rave:::plot_signals(
+        plot_signals(
           signals, srate, start_time = start, space = input$space, col = col, channel_names = channel_names
         )
         local_data$space = input$space
@@ -379,17 +379,17 @@ rave_pre_ref <- function(module_id = 'REF_M', sidebar_width = 2){
     observeEvent(input$calc, {
       # copied from "observeEvent(input$update, {..."
       save = FALSE
-      epi = rave:::parse_selections(input$car_epi)
+      epi = parse_selections(input$car_epi)
       if(!setequal(user_data$epichan, epi)){
         user_data$epichan = epi
         save = T
       }
-      bad = rave:::parse_selections(input$car_bad)
+      bad = parse_selections(input$car_bad)
       if(!setequal(user_data$badchan, bad)){
         user_data$badchan = bad
         save = T
       }
-      exc = rave:::parse_selections(input$car_exc)
+      exc = parse_selections(input$car_exc)
       if(!setequal(user_data$exclchan, exc)){
         user_data$exclchan = exc
         save = T
@@ -400,9 +400,9 @@ rave_pre_ref <- function(module_id = 'REF_M', sidebar_width = 2){
       # calculate
       pre_dir = user_data$subject$dirs$preprocess_dir
       name = sprintf('Exc[%s]Bad[%s]Epi[%s]',
-                     rave:::deparse_selections(user_data$exclchan),
-                     rave:::deparse_selections(user_data$badchan),
-                     rave:::deparse_selections(user_data$epichan))
+                     deparse_selections(user_data$exclchan),
+                     deparse_selections(user_data$badchan),
+                     deparse_selections(user_data$epichan))
       invalidchans = c(user_data$badchan, user_data$exclchan, user_data$epichan)
       goodchan = user_data$channels[!user_data$channels %in% invalidchans]
       m_5 = list()
@@ -432,9 +432,9 @@ rave_pre_ref <- function(module_id = 'REF_M', sidebar_width = 2){
       parsed = str_match(plan, '^Exc\\[([0-9,\\-]*)\\]Bad\\[([0-9,\\-]*)\\]Epi\\[([0-9,\\-]*)\\]$')
       parsed = as.vector(parsed)
       name = parsed[1]
-      exc = rave:::parse_selections(parsed[2])
-      bad = rave:::parse_selections(parsed[3])
-      epi = rave:::parse_selections(parsed[4])
+      exc = parse_selections(parsed[2])
+      bad = parse_selections(parsed[3])
+      epi = parse_selections(parsed[4])
 
       validchans = user_data$channels
       validchans = validchans[!validchans %in% c(exc, bad, epi)]
@@ -442,7 +442,7 @@ rave_pre_ref <- function(module_id = 'REF_M', sidebar_width = 2){
       on.exit(progress$close())
       progress$set(message = 'Common Average Reference',
                    detail = 'This may take a while...')
-      rave:::pre_car2(
+      pre_car2(
         project_name = user_data$project_name,
         subject_code = user_data$subject_code,
         blocks = user_data$blocks,
@@ -494,9 +494,9 @@ rave_pre_ref <- function(module_id = 'REF_M', sidebar_width = 2){
           }else{
             parsed = as.vector(parsed)
             name = parsed[1]
-            exc = rave:::parse_selections(parsed[2])
-            bad = rave:::parse_selections(parsed[3])
-            epi = rave:::parse_selections(parsed[4])
+            exc = parse_selections(parsed[2])
+            bad = parse_selections(parsed[3])
+            epi = parse_selections(parsed[4])
             modal = shiny::modalDialog(
               title = 'Confirmation',
               p('Please confirm the following information: '),
@@ -567,7 +567,7 @@ rave_pre_ref <- function(module_id = 'REF_M', sidebar_width = 2){
       }else{
         col = 'black'
       }
-      rave:::pre_plot_car(
+      pre_plot_car(
         user_data$project_name, user_data$subject_code, c_b, c_c, cex = 2, col = col
       )
     })
@@ -576,7 +576,7 @@ rave_pre_ref <- function(module_id = 'REF_M', sidebar_width = 2){
       showNotification(p('Plots are being saved to ', user_data$subject$dirs$preprocess_dir), type = 'message')
       logger('Plots are being saved to ', user_data$subject$dirs$preprocess_dir, level = 'INFO')
 
-      rave:::save_car_plots(
+      save_car_plots(
         project_name = user_data$project_name,
         subject_code = user_data$subject_code,
         blocks = user_data$blocks,

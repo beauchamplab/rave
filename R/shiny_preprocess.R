@@ -211,7 +211,7 @@ init_preprocess = function(){
       if(!is.null(.s) && length(colname) == 1 && is.data.frame(.s$channel_info) && nrow(.s$channel_info) > 0){
         info = .s$channel_info
         chls = info$Channel[info[, colname]]
-        text = rave:::deparse_selections(as.numeric(chls))
+        text = deparse_selections(as.numeric(chls))
         updateTextInput(session, inputId, value = text)
       }
     }
@@ -238,7 +238,7 @@ init_preprocess = function(){
 
     observe({
       # load subject information
-      tmp_subject = rave:::SubjectInfo$new(project_name = input$project_name,
+      tmp_subject = SubjectInfo$new(project_name = input$project_name,
                                            subject_code = input$subject_code)
 
       if(tmp_subject$valid){
@@ -264,7 +264,7 @@ init_preprocess = function(){
 
         # update channel info if exists
         channels = tmp_subject$channels
-        channels = rave:::deparse_selections(channels)
+        channels = deparse_selections(channels)
         updateTextInput(session, inputId = 'channels', value = channels)
 
         # update sample rate if exists
@@ -276,22 +276,22 @@ init_preprocess = function(){
 
         # update bad, epi, excluded channel info if exists
         badchan = tmp_subject$badchan
-        badchan = rave:::deparse_selections(badchan)
+        badchan = deparse_selections(badchan)
         updateTextInput(session, inputId = 'badchan', value = badchan)
 
         epichan = tmp_subject$epichan
-        epichan = rave:::deparse_selections(epichan)
+        epichan = deparse_selections(epichan)
         updateTextInput(session, inputId = 'epichan', value = epichan)
 
         exclchan = tmp_subject$exclchan
-        exclchan = rave:::deparse_selections(exclchan)
+        exclchan = deparse_selections(exclchan)
         updateTextInput(session, inputId = 'exclchan', value = exclchan)
 
 
         # Notch - Which channels have been filtered?
-        notch_filtered = rave:::parse_selections(tmp_subject$conf$notch_filtered)
+        notch_filtered = parse_selections(tmp_subject$conf$notch_filtered)
         notch_tobe_filtered = tmp_subject$channels[!tmp_subject$channels %in% notch_filtered]
-        updateTextInput(session, 'notch_channels', value = rave:::deparse_selections(notch_tobe_filtered))
+        updateTextInput(session, 'notch_channels', value = deparse_selections(notch_tobe_filtered))
         user_data$refresh = isolate(user_data$refresh) + 1
 
         updateSelectInput(session, 'notch_current_channel', choices = notch_filtered)
@@ -309,19 +309,19 @@ init_preprocess = function(){
       user_data$project_name = input$project_name
       user_data$subject_code = input$subject_code
       user_data$blocks = input$blocks
-      user_data$channels = rave:::parse_selections(input$channels)
+      user_data$channels = parse_selections(input$channels)
       user_data$srate = input$srate
-      user_data$badchan = rave:::parse_selections(input$badchan)
-      user_data$epichan = rave:::parse_selections(input$epichan)
-      user_data$exclchan = rave:::parse_selections(input$exclchan)
+      user_data$badchan = parse_selections(input$badchan)
+      user_data$epichan = parse_selections(input$epichan)
+      user_data$exclchan = parse_selections(input$exclchan)
 
 
       if(!is.null(user_data$subject)){
-        user_data$subject$set_channels(rave:::parse_selections(input$epichan),
+        user_data$subject$set_channels(parse_selections(input$epichan),
                                        name = 'epichan')
-        user_data$subject$set_channels(rave:::parse_selections(input$badchan),
+        user_data$subject$set_channels(parse_selections(input$badchan),
                                        name = 'badchan')
-        user_data$subject$set_channels(rave:::parse_selections(input$exclchan),
+        user_data$subject$set_channels(parse_selections(input$exclchan),
                                        name = 'exclchan')
         user_data$subject$srate = input$srate
       }
@@ -342,7 +342,7 @@ init_preprocess = function(){
         }
         # save subject
         user_data$subject$set_blocks(user_data$blocks)
-        user_data$subject$set_channels(rave:::parse_selections(user_data$channels))
+        user_data$subject$set_channels(parse_selections(user_data$channels))
 
         user_data$subject$save()
 
@@ -370,7 +370,7 @@ init_preprocess = function(){
         channels = str_match(files, '[\\w]+_ch([0-9]+)\\.mat')[,2]
         channels = channels[!is.na(channels)]
         channels = as.integer(channels)
-        channels = rave:::deparse_selections(channels, concatenate = F)
+        channels = deparse_selections(channels, concatenate = F)
         if(length(channels) > 1){
           channels = channels[1]
         }
@@ -381,7 +381,7 @@ init_preprocess = function(){
 
 
     observeEvent(input$notch, {
-      channels = rave:::parse_selections(input$notch_channels)
+      channels = parse_selections(input$notch_channels)
       if(length(channels) == 0){
         logger('No channel selected for notch', level = 'WARNING')
       }else{
@@ -390,7 +390,7 @@ init_preprocess = function(){
         on.exit(progress$close())
         progress$set(message = "Notch Filter", value = 0, detail = 'Initializing...')
 
-        rave:::bulk_notch(project_name = user_data$project_name,
+        bulk_notch(project_name = user_data$project_name,
                    subject_code = user_data$subject_code,
                    blocks = user_data$blocks,
                    channels = channels, srate = user_data$srate,
@@ -398,7 +398,7 @@ init_preprocess = function(){
 
         notch_filtered = as.numeric(sort(unique(c(channels, user_data$subject$conf$notch_filtered))))
         user_data$subject$configure(notch_filtered = notch_filtered)
-        user_data$save = list(NotchFilter = rave:::deparse_selections(channels))
+        user_data$save = list(NotchFilter = deparse_selections(channels))
         user_data$refresh = isolate(user_data$refresh) + 1
         updateSelectInput(session, 'notch_current_channel', choices = notch_filtered)
         updateTextInput(session, 'notch_channels', value = '')
@@ -496,9 +496,9 @@ init_preprocess = function(){
       flag = user_data$refresh
 
       conf = user_data$subject$conf
-      notch_filtered = rave:::deparse_selections(conf[['notch_filtered']])
-      CAR_channels = rave:::deparse_selections(conf[['CAR_channels']])
-      wavelet_channels = rave:::deparse_selections(conf[['wavelet_channels']])
+      notch_filtered = deparse_selections(conf[['notch_filtered']])
+      CAR_channels = deparse_selections(conf[['CAR_channels']])
+      wavelet_channels = deparse_selections(conf[['wavelet_channels']])
 
       if(notch_filtered == ''){
         notch_filtered = '(Not Started)'
@@ -517,15 +517,15 @@ init_preprocess = function(){
             tags$dt('Project Name'),tags$dd(conf$project_name),
             tags$dt('Subject Code'),tags$dd(conf$subject_code),
             tags$dt('All Blocks'),tags$dd(str_c(conf$blocks, collapse = ', ')),
-            tags$dt('All Channels'),tags$dd(rave:::deparse_selections(conf$channels))
+            tags$dt('All Channels'),tags$dd(deparse_selections(conf$channels))
           )
         ),
         p(
           h3('Channel Settings'), hr(),
           tags$dl(
-            tags$dt('Excluded Channels'),tags$dd(rave:::deparse_selections(conf$exclchan)),
-            tags$dt('Bad Channels'),tags$dd(rave:::deparse_selections(conf$badchan)),
-            tags$dt('Epilepsy Channels'),tags$dd(rave:::deparse_selections(conf$epichan))
+            tags$dt('Excluded Channels'),tags$dd(deparse_selections(conf$exclchan)),
+            tags$dt('Bad Channels'),tags$dd(deparse_selections(conf$badchan)),
+            tags$dt('Epilepsy Channels'),tags$dd(deparse_selections(conf$epichan))
           )
         ),
         p(
@@ -543,10 +543,10 @@ init_preprocess = function(){
       # cat('Project Name\t\t', conf$project_name, '\n')
       # cat('Subject Code\t\t', conf$subject_code, '\n')
       # cat('All Blocks\t\t', conf$blocks, '\n')
-      # cat('All Channels\t\t', rave:::deparse_selections(conf$channels), '\n')
-      # cat('Excluded Channels\t', rave:::deparse_selections(conf$exclchan), '\n')
-      # cat('Bad Channels\t\t', rave:::deparse_selections(conf$badchan), '\n')
-      # cat('Epilepsy Channels\t', rave:::deparse_selections(conf$epichan), '\n')
+      # cat('All Channels\t\t', deparse_selections(conf$channels), '\n')
+      # cat('Excluded Channels\t', deparse_selections(conf$exclchan), '\n')
+      # cat('Bad Channels\t\t', deparse_selections(conf$badchan), '\n')
+      # cat('Epilepsy Channels\t', deparse_selections(conf$epichan), '\n')
 
       # cat('\nPreprocess:\n')
       # cat('Notch Filter:\t', notch_filtered, '\n')
@@ -695,7 +695,7 @@ init_preprocess = function(){
         need(length(car_plan) == 1 && car_plan!='', 'Generate a stratege to apply CAR.')
       )
       valid_channels = tmp_data$.car_params[[car_plan]]
-      text = rave:::deparse_selections(valid_channels)
+      text = deparse_selections(valid_channels)
       text = sprintf('Valid channels:\n%s', text)
       return(text)
     })
@@ -790,19 +790,19 @@ init_preprocess = function(){
       if(has_epi){
         old_epi_input = epi_input
         epichan = epichan[!epichan %in% channels]
-        epi_input = rave:::deparse_selections(epichan)
+        epi_input = deparse_selections(epichan)
         warns = c(warns, (sprintf('Epilepsy channels <label>%s</label> to <label>%s</label>', old_epi_input, epi_input)))
       }
       if(has_bad){
         old_bad_input = bad_input
         badchan = badchan[!badchan %in% channels]
-        bad_input = rave:::deparse_selections(badchan)
+        bad_input = deparse_selections(badchan)
         warns = c(warns, (sprintf('Bad channels: <label>%s</label> to <label>%s</label>', old_bad_input, bad_input)))
       }
       if(has_exc || not_exc){
         old_exc_input = exc_input
         exclchan = all_channels[!all_channels %in% c(channels, badchan, epichan)]
-        exc_input = rave:::deparse_selections(exclchan)
+        exc_input = deparse_selections(exclchan)
         warns = c(warns, (sprintf('Channels excluded from CAR: <label>%s</label> to <label>%s</label>', old_exc_input, exc_input)))
       }
 
@@ -823,7 +823,7 @@ init_preprocess = function(){
           progress = progress
         )
 
-        text = rave:::deparse_selections(channels)
+        text = deparse_selections(channels)
         user_data$subject$configure(CAR_channels = channels, Excluded_channels = exclchan)
         user_data$save = list(CAR_channels = text, Excluded_channels = exc_input)
       }
@@ -963,7 +963,7 @@ init_preprocess = function(){
     # actionButton('wavelet_run', 'Run')
     observeEvent(input$wavelet_run, {
       # check channels
-      wc = rave:::parse_selections(input$wavelet_channels)
+      wc = parse_selections(input$wavelet_channels)
       is_valid = wc %in% user_data$valid_chan
       vc = wc[is_valid]
 
@@ -974,14 +974,14 @@ init_preprocess = function(){
                      msg = 'Your input contains bad or epilepsey channels. Only the following channels will be transformed: ',
                      details = tags$ul(
                        tags$li(HTML('Your input: <label>', input$wavelet_channels, '</label>')),
-                       tags$li(HTML('Channels to be tranformed: <label>', rave:::deparse_selections(vc), '</label>'))
+                       tags$li(HTML('Channels to be tranformed: <label>', deparse_selections(vc), '</label>'))
                      ),
                      type = 'danger')
       }else{
         messageModal(inputId, 'Ready',
                      msg = 'Ready. The following channels are in the queue. Press "OK" to proceed.',
                      details = tags$ul(
-                       tags$li(HTML('Channels to be tranformed: <label>', rave:::deparse_selections(vc), '</label>'))
+                       tags$li(HTML('Channels to be tranformed: <label>', deparse_selections(vc), '</label>'))
                      ),
                      type = 'success')
       }
@@ -990,7 +990,7 @@ init_preprocess = function(){
         observeEvent(input[[inputId]], {
           removeModal()
           if(length(vc) > 0){
-            rave:::bulk_wavelet(
+            bulk_wavelet(
               user_data$subject$project_name,
               user_data$subject$subject_code,
               user_data$subject$blocks,

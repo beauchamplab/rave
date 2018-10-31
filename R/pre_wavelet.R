@@ -26,7 +26,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
         need(utils$notch_filtered(), 'Please finish previous steps first (Import subject, Notch filter).')
       )
       electrodes = utils$get_electrodes()
-      vc_txt = rave:::deparse_selections(electrodes)
+      vc_txt = deparse_selections(electrodes)
       max_core = max(1, rave_options('max_worker'))
       srate = utils$get_srate()
       target_srate = 100
@@ -61,7 +61,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
     # Modal
     observeEvent(input$do_wavelet, {
       # check
-      w_e = rave:::parse_selections(input$wave_electrodes)
+      w_e = parse_selections(input$wave_electrodes)
       es = utils$get_electrodes()
       w_e = w_e[w_e %in% es]
       frange = round(input$freq_range)
@@ -84,7 +84,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
               column(
                 width = 12,
                 p('Apply wavelet to the following electrodes:'),
-                tags$blockquote(rave:::deparse_selections(w_e)),
+                tags$blockquote(deparse_selections(w_e)),
                 p('This might take a while.'),
                 hr(),
                 p("* It's highly recommend that you perform wavelet to all channels first with **SAME** settings, otherwise reference module will work improperly.")
@@ -102,7 +102,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
                 width = 12,
                 p('Check your inputs, there might be some problem(s).'),
                 tags$ul(
-                  tags$li('Valid channels: ' %&% rave:::deparse_selections(w_e)),
+                  tags$li('Valid channels: ' %&% deparse_selections(w_e)),
                   tags$li('Frequency bands: ' %&% paste(frange, collapse = '-') %&% ' Hz with step of ' %&% fstep %&% ' Hz.')
                 )
               )
@@ -122,7 +122,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
         return()
       }
       local_data$prevent_rewavelet = TRUE
-      w_e = rave:::parse_selections(input$wave_electrodes)
+      w_e = parse_selections(input$wave_electrodes)
       es = utils$get_electrodes()
       w_e = w_e[w_e %in% es]
       frange = round(input$freq_range)
@@ -199,7 +199,7 @@ bulk_wavelet <- function(
     return(cfile)
   }
   # save meta info
-  rave:::save_meta(
+  save_meta(
     data = data.frame(Frequency = frequencies), meta_type = 'frequencies',
     project_name = project_name, subject_code = subject_code
   )
@@ -227,8 +227,8 @@ bulk_wavelet <- function(
   }
   logger('Time to grab a cup of coffee/go home.', level = 'INFO')
   lapply_async(channels, function(chl){
-    require(rave)
-    require(stringr)
+    do.call('require', list(package = 'rave', character.only = T))
+    do.call('require', list(package = 'stringr', character.only = T))
     cfile = file.path(dirs[[save_dir]], sprintf(filename, chl))
     for(block_num in blocks){
       logger('Performing wavelet - channel: ', chl)

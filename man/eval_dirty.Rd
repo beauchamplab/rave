@@ -16,10 +16,12 @@ Compare to \code{rlang::eval_tidy}, which won't affect original environment,
 contains assignment, environment will be changed in this case.
 }
 \examples{
+\dontrun{
 expr = quote(a <- 111)
 a = 1; env = globalenv()
 rlang::eval_tidy(expr, env)
 print(a)  # Will be 1
 eval_dirty(expr, env)
 print(a)  # a is changed
+}
 }

@@ -1,4 +1,4 @@
-#' @importFrom htmltools tags
+#' @import htmltools
 #' @export
 actionButtonStyled <- function(inputId, label, icon = NULL, width = NULL, type = 'default', btn_type = 'button', class = '', ...){
   value <- shiny::restoreInput(id = inputId, default = NULL)

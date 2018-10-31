@@ -89,7 +89,7 @@ rave_prepare <- function(
   data_env$.private$repo = repo
   data_env$.private$meta = meta
   data_env$.private$brain = brain
-  data_env$.private$preproc_tools = rave:::rave_preprocess_tools()
+  data_env$.private$preproc_tools = rave_preprocess_tools()
   data_env$data_check = data_env$.private$preproc_tools$check_load_subject(subject_code = subject$subject_code, project_name = subject$project_name)
   data_env$subject = subject
   data_env$preload_info = list(

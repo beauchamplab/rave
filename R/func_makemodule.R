@@ -32,7 +32,7 @@ make_module <- function(
 
   script = s[sort(unlist(chunks))]
 
-  require(rave)
+  do.call('require', list(package = 'rave', character.only = T))
   module = ModuleEnvir$new(module_id = module_id, label_name = name,
                            .script_content = script, rmd_path = script_path)
   if(launch){

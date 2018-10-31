@@ -22,7 +22,7 @@ async_start <- function(){
   })
 }
 
-#' @description Async function to execute code
+#' Async function to execute code (depricated)
 #' @param expr expression for async exe
 #' @param name see 'details'
 #' @param envir environment of code

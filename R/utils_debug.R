@@ -29,7 +29,7 @@ debug_module <- function(m, private_id){
   }
 
   # get param_env, runtime_env
-  rave:::copy_env(e$param_env, genv)
-  rave:::copy_env(e$runtime_env, genv)
+  copy_env(e$param_env, genv)
+  copy_env(e$runtime_env, genv)
 
 }

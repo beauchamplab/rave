@@ -1,6 +1,6 @@
-#' Original script: noiseFiltData.m
-#' This file provides functional (library) part of notch filter
-#' It is irrelevant to logical processing
+# Original script: noiseFiltData.m
+# This file provides functional (library) part of notch filter
+# It is irrelevant to logical processing
 NULL
 
 
@@ -64,8 +64,10 @@ notch_filter <- function(s, sample_rate, lb, ub, domain = 1){
 #' is 60Hz and width is 1Hz, then the notch filter lower bound is 60-1=59Hz and
 #' upper bound is 60+1=61Hz.
 #' @examples
+#' \dontrun{
 #' s <- rnorm(100000)
 #' notch_channel(s, 1000, c(60, 120, 180, c(1,2,2))
+#' }
 #' @export
 notch_channel <- function(s, sample_rate, bands = c(60, 120, 180), width = c(1,2,2)){
   s = as.vector(s)

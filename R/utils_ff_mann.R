@@ -83,5 +83,5 @@
 # # c = load_ff(name = 'b', directory = './tmp')
 # # bit::physical(b$a)$filename <- "/Users/beauchamplab/Dropbox/rave/data/subject_lij118_ChBr/ecog/cached/0"
 #
-# # d = rave:::load_ff('data_1', "/Users/beauchamplab/Dropbox/rave/data/subject_lij118_ChBr/ecog/cached/")
+# # d = load_ff('data_1', "/Users/beauchamplab/Dropbox/rave/data/subject_lij118_ChBr/ecog/cached/")
 #

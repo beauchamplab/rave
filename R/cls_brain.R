@@ -238,7 +238,7 @@ RaveBrain <- R6::R6Class(
 
         if(length(tmp)){
           # load surface volume
-          volume_info = rave:::suma_surface_volume_parse(tmp)
+          volume_info = suma_surface_volume_parse(tmp)
 
           # save mat volume_info[['VOLREG_MATVEC_000000']]
           mat = volume_info[['VOLREG_MATVEC_000000']]
@@ -296,7 +296,7 @@ RaveBrain <- R6::R6Class(
           }else if(stringr::str_detect(f, '[aA][sS][cC]$')){
             mesh_data = threejsr::read.freesurf.asc(f)
           }else{
-            require()
+            return()
           }
 
           if(which %in% c(1,2)){
@@ -567,7 +567,7 @@ RaveBrain <- R6::R6Class(
       if(!length(elements)){
         return('No elements detected!')
       }
-      threejsr:::threejs_scene.default(
+      threejsr::threejs_scene(
         elements = elements,
         width = width,
         height = height,
@@ -594,7 +594,7 @@ RaveBrain <- R6::R6Class(
           next
         }
         el$mesh_info = label
-        if(is.na(el$name)){
+        if(length(el$name) != 1 || is.na(el$name)){
           el$set_name(label)
         }
       }

@@ -18,6 +18,7 @@ otherwise, it will check if all element of x is invalid}
 Check if value(s) is invalid
 }
 \examples{
+\dontrun{
 is_invalid(NULL)
 
 is_invalid(c(NA, 1))
@@ -25,4 +26,5 @@ is_invalid(c(NA, 1))
 is_invalid(c(NA, 1), any = T)
 
 is_invalid('', .invalids = 'blank')
+}
 }

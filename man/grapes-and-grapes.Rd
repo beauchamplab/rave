@@ -10,6 +10,9 @@ s1 \%&\% s2
 Concatenate two strings
 }
 \examples{
+\dontrun{
 you <- 'my friend.'
 print('Hello, ' \%&\% you)
+}
+
 }
