@@ -34,7 +34,10 @@ notifications:
 
 
 before_install:
-  - sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"
-  - export PATH=$HOME/.linuxbrew/bin:$PATH
-  - brew install hdf5
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+    brew update;
+  - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)";
+    export PATH=$HOME/.linuxbrew/bin:$PATH;
+    brew install hdf5;
 
