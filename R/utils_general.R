@@ -65,7 +65,7 @@ to_ram_size <- function(s, kb_to_b = 1000){
 
 #' @export
 as.character.rave_bytes <- function(x, digit=1, ...){
-  sprintf(sprintf('%%.%df %s', digit, attr(x, 'unit')), as.character.default(x, ...))
+  sprintf(sprintf('%%.%df %s', digit, attr(x, 'unit')), x)
 }
 
 #' @export
