@@ -1,6 +1,6 @@
 # Package Versions
 # name, version, source, details
 
-threejsr, 0.1.20, github, dipterix/threejsr
+threejsr, 0.1.21, github, dipterix/threejsr
 rutabaga, 0.1.0, github, dipterix/rutabaga
 gifti, 0.7.5, cran, muschellij2/gifti
