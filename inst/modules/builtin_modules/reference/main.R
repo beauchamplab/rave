@@ -178,7 +178,7 @@ observeEvent(input$load_mesh, {
 elec_loc_ui = function(){
   tagList(
     actionLink(ns('load_mesh'), 'Show Mesh'),
-    threejsr::threejsOutput(ns('elec_loc'))
+    threejsr::threejsOutput(ns('elec_loc'), height = '300px')
   )
 
 }
@@ -1051,7 +1051,7 @@ observeEvent(input$ref_calc, {
 
 # Debug
 if(FALSE){
-  m = ModuleEnvir$new(module_id = 'mid', 'ref', script_path = './inst/modules/builtin_modules/reference/main.R'); init_app(m)
+  m = ModuleEnvir$new(module_id = 'mid', 'ref', script_path = './inst/modules/builtin_modules/reference/main.R'); init_app(m, test.mode = T)
   ns = shiny::NS('mid')
 
   self = execenv = RAVEbeauchamplab:::..module_env$condition_explorer$private$exec_env$voa3gkLDZwEMBPmbClqi

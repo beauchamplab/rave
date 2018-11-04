@@ -89,7 +89,8 @@ RaveBrain <- R6::R6Class(
         label = ''
       }
       assertthat::assert_that(length(position) == 3 && is.numeric(position), msg = 'invalid position')
-      assertthat::assert_that(length(which) == 1 && is.integer(which) && which >=1, msg = 'invalid which')
+      assertthat::assert_that(length(which) == 1 && is.numeric(which) && which >=1, msg = 'invalid which')
+      which = as.integer(which)
       private$electrodes[[which]] = list(
         idx = which,
         position = position,
