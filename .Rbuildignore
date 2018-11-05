@@ -1,4 +1,6 @@
 ^appveyor\.yml$
+^Meta$
+^doc$
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^demo
@@ -9,4 +11,5 @@
 ^travis_setup.sh$
 \.md$
 ^test/
+^cran-comments\.md$
 
