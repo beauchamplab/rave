@@ -154,14 +154,13 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
           tagList(
             lapply(names(modules)[!names(modules) %in% "______"], function(nm){
               m = modules[[nm]]
-              mid_up = str_to_upper(smd$module_id)
-
               if(nm != "______"){
                 do.call(shinydashboard::menuItem, args = list(
                   text = nm,
                   expandedName = nm,
                   startExpanded = F,
                   lapply(m, function(smd){
+                    mid_up = str_to_upper(smd$module_id)
                     shinydashboard::menuSubItem(
                       text = smd$label_name,
                       tabName = mid_up,
