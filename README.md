@@ -34,7 +34,7 @@ help(package = 'rave')
 
 ## Installation
 
-* If this is your first time using `R` or `RStudio`, please [click here for full-installation guide](./installation.md) (around *10-15 min*) and then proceed directly to the next section.
+* If this is your first time using `R` or `RStudio`, please [click here for full-installation guide](./Installation.md) (around *10-15 min*) and then proceed directly to the next section.
 
 * Read the rest of the section if you have `R` and `RStudio` installed.
 
@@ -149,7 +149,8 @@ We've made downloading sample subject data really simple. As of _oct 28, 2018_, 
 In the RStudio console, enter:
 
 ```r
-download_sample_data(subject = 'sub1')
+# A demo subject ~ 400MB
+download_subject_data('https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/data-large.zip')
 ```
 
 If you see messages as follows, then the subject is downloaded and you can proceed to the next part to view the subject details.
