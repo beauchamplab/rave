@@ -41,7 +41,7 @@ download_sample_data <- function(subject = 'sub1'){
 
 }
 
-#' Function to download
+#' Function to download rave subject data
 #' @param con an url or local file path
 #' @param replace_if_exists Automatically replace current subject if subject files exist (default FALSE)
 #' @param temp_dir temp directory to store downloaded zip files and extracted files
