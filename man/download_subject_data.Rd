@@ -2,11 +2,12 @@
 % Please edit documentation in R/utils_download_sample.R
 \name{download_subject_data}
 \alias{download_subject_data}
-\title{Function to download}
+\title{Function to download subjects from internet/local}
 \usage{
 download_subject_data(con, replace_if_exists = F,
-  override_project = NULL, temp_dir = tempdir(),
-  remove_zipfile = TRUE, subject_settings = NULL, ...)
+  override_project = NULL, override_subject = NULL,
+  temp_dir = tempdir(), remove_zipfile = TRUE,
+  subject_settings = NULL, ...)
 }
 \arguments{
 \item{con}{an url or local file path}
@@ -20,7 +21,7 @@ download_subject_data(con, replace_if_exists = F,
 \item{subject_settings}{override subject.yaml see details}
 }
 \description{
-Function to download
+Function to download subjects from internet/local
 }
 \details{
 Each downloaded zip file should have a subject.yaml file indicating default
