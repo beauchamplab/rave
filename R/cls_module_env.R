@@ -16,6 +16,7 @@ ExecEnvir <- R6::R6Class(
     tabsets = NULL
   ),
   public = list(
+    parent_env = NULL,
     wrapper_env = NULL,
     static_env = NULL,
     runtime_env = NULL,
@@ -61,12 +62,24 @@ ExecEnvir <- R6::R6Class(
       clear_env(private$cache_env)
     },
     initialize = function(session = getDefaultReactiveDomain(),
-                          parent_env = baseenv()){
+                          parent_env = NULL){
       private$session = session
 
-      # wrapper has active bindings to data repository which allow us
-      # the access to data loaded in data repo. It'll be sealed (locked)
+      # parent_env should be an unlocked environment that can be active binded
+      if(!is.environment(parent_env)){
+        parent_env = new.env(parent = globalenv(), hash = T)
+      }
+      self$parent_env = parent_env
+
+      # wrapper has all kind of util functions and it'll be sealed (locked)
+      # One thing to notice that non of the functions within wrapper_env are
+      # evaluated within itself. All are evaluated under "self", i.e. ExecEnvir
+      # The reason why we use wrapper_env is because we don't want anyone to
+      # change those functions as they are critical to modules.
       self$wrapper_env = new.env(parent = parent_env)
+
+      # active bindings to data repository which allow us
+      # the access to data loaded in data repo.
       rave::rave_module_tools(self$wrapper_env)
 
       # static_env contains user self-defined functions. once initialized, they can
@@ -74,7 +87,6 @@ ExecEnvir <- R6::R6Class(
       self$static_env = new.env(parent = self$wrapper_env)
       self$param_env = new.env(parent = self$static_env)
       self$param_env$..rave_future_env = new.env()
-
 
       # runtime_env, all variables will be stored within this environment, is the
       # one that real execute take place
@@ -88,6 +100,7 @@ ExecEnvir <- R6::R6Class(
       # Old scheme was to parse src in static env and change function environment to
       # runtime_env, this is dangerous. So I come up with this solution
       self$parse_env = new.env(parent = self$runtime_env)
+
 
       private$cache_env = new.env()
       private$cache_env$.keys = c()
@@ -181,6 +194,16 @@ ExecEnvir <- R6::R6Class(
         self$rave_execute(...)
         if(is.null(private$session)){
           rave::rave_execute(...)
+        }
+      }
+      self$wrapper_env$rave_checks = function(...){
+        if(is.null(private$session)){
+          rave::rave_checks(...)
+        }else{
+          f = self$static_env[['rave_checks']]
+          if(is.function(f)){
+            f(...)
+          }
         }
       }
       self$wrapper_env$cache = function(...){
@@ -358,20 +381,20 @@ ExecEnvir <- R6::R6Class(
         parent_env = data_env, session = fakesession, new = T
       )
 
-      if(m$externalpackage){
-        env = do.call("loadNamespace", list(package = "RAVEbeauchamplab"))
-        if (!environmentIsLocked(new_exec$static_env)) {
-          ..rdata_file = system.file("vars.RData", package = "RAVEbeauchamplab")
-          base::load(file = ..rdata_file, envir = new_exec$static_env)
-          lapply(names(as.list(env, all.names = T)), function(nm) {
-            fun = env[[nm]]
-            if (is.function(fun)) {
-              environment(fun) = new_exec$runtime_env
-            }
-            new_exec$static_env[[nm]] = fun
-          })
-        }
-      }
+      # if(m$externalpackage){
+      #   env = do.call("loadNamespace", list(package = "RAVEbeauchamplab"))
+      #   if (!environmentIsLocked(new_exec$static_env)) {
+      #     ..rdata_file = system.file("vars.RData", package = "RAVEbeauchamplab")
+      #     base::load(file = ..rdata_file, envir = new_exec$static_env)
+      #     lapply(names(as.list(env, all.names = T)), function(nm) {
+      #       fun = env[[nm]]
+      #       if (is.function(fun)) {
+      #         environment(fun) = new_exec$runtime_env
+      #       }
+      #       new_exec$static_env[[nm]] = fun
+      #     })
+      #   }
+      # }
 
 
 
@@ -697,9 +720,7 @@ ExecEnvir <- R6::R6Class(
         if('' %in% var_names){
           lapply(private$update[var_names == ''], function(quo){
             tryCatch({
-              eval_dirty(
-                quo, env = self$param_env
-              )
+              eval_dirty( quo, env = self$param_env )
             },error = function(e){
               logger('Error in updating input (initialization)', level = 'ERROR')
               s = capture.output(traceback(e))

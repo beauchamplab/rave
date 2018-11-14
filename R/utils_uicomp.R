@@ -131,7 +131,7 @@ comp_parser <- function(){
           logger('Nothing to update')
           return()
         }
-        fun_name = tail(unlist(str_split(expr[[1]], ':')), 1)
+        fun_name = tail(unlist(str_split(as.character(expr[[1]]), ':')), 1)
         fun_name = str_c('update', str_to_upper(str_sub(fun_name, end = 1L)), str_sub(fun_name, start = 2L))
 
         args[['inputId']] %?<-% inputId

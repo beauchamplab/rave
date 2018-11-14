@@ -68,7 +68,8 @@ ModuleEnvir <- R6::R6Class(
     version = NULL,
     packages = NULL,
     rmd_path = NULL,
-    externalpackage = FALSE,
+    parent_env = NULL,
+    from_package = FALSE,
     info = function(){
       cat('Module Name:', self$label_name, '\n')
       cat('Version:', self$version, '\n')
@@ -90,7 +91,7 @@ ModuleEnvir <- R6::R6Class(
       packages = NULL,
       .script_content = NULL,
       rmd_path = NULL,
-      externalpackage = FALSE
+      parent_env = globalenv()
     ){
       self$module_id = module_id
       self$label_name = label_name
@@ -99,7 +100,112 @@ ModuleEnvir <- R6::R6Class(
       self$packages = c('rave', packages)
       self$rmd_path = rmd_path
       private$cache_env = list()
-      self$externalpackage = externalpackage
+
+      # Note as of 11/11/2018:
+      # The structure of module is parent_env -> wrapper -> static -> param -> runtime -> (parser)
+      # Before today, all variables are stored in runtime environment. However if parent_env is
+      # a package environment, there is no way for functions within that package to access those
+      # variables within runtime environment.
+      #
+      # We can't set parent environment of package environment since `parent.env<-` is not recommended
+      # However, we can redirect some variables or to the package and evaluate some functions in
+      # different context
+      #
+      ### Solution: (here is mainly for package parent_env)
+      #
+      # Case 1:
+      # If parent_env is globalenv(), we replace with a new one under globalenv as parent_env
+      # In this case, we load module via scripts (not some packages). There is no scoping issue
+      # as scripts are loaded from runtime environment and then migrated to static environment.
+      # All functions are executed in runtime environment and thus this env is the root and all
+      # its parent envs are accessible
+      #
+      # Case 2:
+      # If parent_env is a some environment, we here need it to be either a package environment
+      # or some unlocked environment.
+      #
+      # Either scenarios will need
+      # 1. parent_env is unlocked.
+      #    If parent_env is locked package environment. RAVE will try to unload this environment
+      #    and load it with partial - loadNamespace(..., partial = T)
+      # 2. RAVE needs to be one of the parent envs (search path). If parent_env is created via
+      #    loadNamespace(..., partial = T), this is automatically true as the search path will be
+      #    package << base << globalenv << ... << rave. For non-package environment, easiest case
+      #    would be using new.env(parent = globalenv()). However, non-package environment is not
+      #    recommended unless you know what I'm doing. Best practice would be using rave built-in
+      #    function to create template R module and modify.
+      #
+      ### Scoping
+      # For package based modules, scoping issue is a big problem as package loaded via loadNamespace
+      # can't control their parents and therefore hard to access runtime env
+      #
+      # To solve this problem, I use the following method:
+      #
+      # 1. Active binding rave module toolbox to package environment (this needs the package env
+      #    unlocked)
+      # 2. Make environment inside of `__init__` visible within package environment. This requires
+      #    a dirty-eval (evaluation with side-effects) within package environment for rave_updates (TODO)
+      # 3. rave_execute will be evaluated within runtime env, and return a variable "result", which will
+      #    be use used as inputs of output functions.
+      #
+      # structure will be
+      #
+      # + parent_env: package environment or  (top environment)
+      # | <--- binded module toolbox
+      # | <--- active bind other util functions (redirect to wrappers)
+      # | <--- contains __init__ environment, or anonymous rave_updates variables
+      # | <--- cannot access to all other runtime environment
+      # |
+      # |---+ wrapper (locked)
+      #     | <--- provide util functions
+      #     | <--- rewrite default functions
+      #     |
+      #     |---+ static (locked, not very useful for package-based modules)
+      #         |
+      #         |---+ param environment
+      #             | <--- stores all the inputs parameters
+      #             | <--- stores all anonymous rave_updates variables (will be removed)
+      #             | <--- stores async futures
+      #             |
+      #             |---+ runtime environment
+      #                 | <--- rave_updates runs here
+      #
+      # Modified on Nov 12, 2018
+      # It turns out even if we active bind variables to package environment, functions within
+      # package cannot access those active bindings. Reasons are simple, when packages are loaded
+      # via loadNamespace, there seems to be a prototype environment created internally from inside
+      # of R. After that, all "loadNamespace" will just copy from that internal environment and all
+      # functions in the package are redirected to the locked environment and thus we can change
+      # nothing to that environment.
+      #
+      # package env (prototype, may be locked)
+      #    ^
+      #    |
+      # package namespaces via loadNamespace (reference env, with active binding)
+      #
+      # Package functions may not look at the namespace they stay in. Instead, they are referenced
+      # to prototype environment sometimes.
+      #
+      # This is sad. Because solution 1 seems not working if the namespace is loaded in other places
+      # and we cannot control users' action. Therefore, I change the implementation back and only make
+      # __init__ and __main__ special
+      #
+      # __init__ is evaluated at param_env
+      # __main__ is evaluated at runtime_env
+      #
+      # hence all variables in __init__ can be accessed by __main__
+      #
+      # These two functions can access all variables. However, other functions can only access
+      # "result" returned by __main__
+      #
+      # This is sad, but very robust as we don't need strict assumptions
+      #
+
+
+      if(!is.environment(parent_env) || identical(parent_env, globalenv())){
+        parent_env = new.env(parent = globalenv(), hash = T)
+      }
+      self$parent_env = parent_env
 
       # validate script_path
       if(missing(script_path)){
@@ -118,15 +224,9 @@ ModuleEnvir <- R6::R6Class(
       if(is.null(session_id)){
         session_id = '.TEMP'
       }
-      if(self$externalpackage){
-        parent_env = list(...)[['parent_env']]
-        parent_env %?<-% do.call(base::loadNamespace, args = list(self$packages))
-      }else{
-        parent_env = globalenv()
-      }
 
       if(new || is.null(private$exec_env[[session_id]])){
-        private$exec_env[[session_id]] = ExecEnvir$new(session = session, parent_env = parent_env)
+        private$exec_env[[session_id]] = ExecEnvir$new(session = session, parent_env = self$parent_env)
         private$exec_env[[session_id]]$register_module(self)
       }
       if(!session_id %in% names(private$cache)){
@@ -317,8 +417,8 @@ rave_updates <- function(..., .env = globalenv()){
 
   nms = nms[nms != '']
 
-  parser = comp_parser()
-  for(nm in names(nms)){
+  # parser = comp_parser()
+  for(nm in nms){
     val = rave::eval_dirty(res[[nm]], env = .env)
     try({
       re = val$value
@@ -349,7 +449,7 @@ rave_execute <- function(..., auto = TRUE, .env = globalenv()){
 #' Cache input values
 #' @aliases write_rave_modules
 #' @export
-cache_input <- function(key, val, read_only = T){
+cache_input <- function(inputId, val, read_only = T){
   return(val)
 }
 

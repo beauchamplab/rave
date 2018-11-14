@@ -5,7 +5,7 @@
 \alias{write_rave_modules}
 \title{Cache input values}
 \usage{
-cache_input(key, val, read_only = T)
+cache_input(inputId, val, read_only = T)
 }
 \description{
 Cache input values

@@ -331,7 +331,9 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         tryCatch({
           # record time
           start_time = Sys.time()
-          execenv$execute(async = async, force = force)
+          withLogErrors({
+            execenv$execute(async = async, force = force)
+          })
           if(async){
             local_data$suspended = FALSE
             showNotification(p('Running in the background. Results will be shown once finished.'), type = 'message', id = 'async_msg')
@@ -352,7 +354,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
           })
 
         }, error = function(e){
-          sapply(capture.output(traceback(e)), logger, level = 'ERROR')
+          logger(e, level = 'ERROR')
           local_data$last_executed = F
         })
 

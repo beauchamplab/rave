@@ -46,8 +46,7 @@ load_modules <- function(recompile = F){
         script_path = m$ScriptPath,
         version = m$Version,
         author = m$Author,
-        packages = m$Packages,
-        externalpackage = F
+        packages = m$Packages
       )
     }else{
       pkg = to_package_name(m$PackageID)
@@ -223,8 +222,7 @@ create_package <- function(
         module_id = module_id,
         label_name = rave_comp[['meta']][['Name']],
         script_path = system.file(sprintf('module_%s.R', module_id), package = !!pkgName),
-        packages = !!pkgName,
-        externalpackage = T
+        packages = !!pkgName
       )
       new_module = T
     }
