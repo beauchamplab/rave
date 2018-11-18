@@ -105,7 +105,7 @@ dev_f <- function(
     names(modules) = module_ids
   }else{
     modules = NULL
-    module_id = ''
+    module_ids = ''
   }
 
 
@@ -143,7 +143,7 @@ dev_f <- function(
   if(!missing(module_id)){
     dev_module(module_id)
   }else{
-    dev_module(module_id[1])
+    dev_module(module_ids[1])
   }
 
 
