@@ -429,6 +429,26 @@ add_to_session <- function(
 
 ################### Exported methods
 
+#' Pipe function to paste two characters
+#' @param x character
+#' @param y character
+#' @return paste0(x,y)
+paste_c <- function(x, y){
+  base::paste0(x, y)
+}
+
+#' @importFrom Matrix %&%
+NULL
+
+`%&%` = Matrix::`%&%`
+
+methods::setMethod("%&%",  methods::signature(x = "character", y = 'ANY'),
+                   definition = paste_c, where = -1)
+methods::setMethod("%&%",  methods::signature(x = "ANY", y = 'character'),
+                   definition = paste_c, where = -1)
+methods::setMethod("%&%",  methods::signature(x = "character", y = 'character'),
+                   definition = paste_c, where = -1)
+
 #' Concatenate two strings
 #' @usage s1 \%&\% s2
 #' @examples
@@ -437,8 +457,8 @@ add_to_session <- function(
 #' print('Hello, ' %&% you)
 #' }
 #'
-#' @export
-`%&%` <- function(s1,s2) paste0(s1,s2)
+#' @exportMethod %&%
+NULL
 
 #' Evaluate expressions
 #' @usage eval_dirty(expr, env = parent,frame(), data = NULL)
