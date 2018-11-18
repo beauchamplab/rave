@@ -1,0 +1,30 @@
+package_name: ${{PACKAGE}}
+dependencies:
+  cran:
+  - devtools
+  - shiny (>= 1.2.0)
+  - rlang (>= 0.3.0)
+  - stringr (>= 1.3.1)
+  - yaml (>= 2.2.0)
+  - stringr
+  github:
+  - dipterix/rutabaga (>= 0.1.1)
+  - dipterix/threejsr (>= 0.1.20)
+  - beauchamplab/rave@rave-fir
+dev_subject:
+  project_name: demo
+  subject_code: sub_large
+  electrodes: '14,15'
+  epoch: Auditory
+  time_range:
+    pre: 1.0
+    post: 2.0
+  reference: default
+  frequency_range: ~
+  data_types: ~
+  load_brain: yes
+  download_url: https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/data-large.zip
+modules:
+- module_id: ${{MODULEID}}
+  module_label: ${{MODULELABEL}}
+  config_name: module.yaml

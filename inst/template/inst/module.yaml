@@ -1,0 +1,90 @@
+data_checks:
+- power referenced
+init_function: init_module
+main_function: main_module
+inputs:
+  ELECTRODE:
+    type: selectInput
+    label: 'Electrode: '
+    init: init_electrode
+  BASELINE_RANGE:
+    type: sliderInput
+    label: 'Baseline: '
+    init: init_baseline
+    value:
+    - -1.0
+    - 0.0
+    min: -1.0
+    max: 1.0
+    step: 0.01
+  input_customized:
+    type: customizedInput
+  GROUP:
+    type: compoundInput
+    prefix: Group
+    inital_ncomp: 1.0
+    init: init_group
+    components:
+      GROUP_NAME:
+        type: textInput
+        label: 'Group Name: '
+      CONDITION:
+        type: selectInput
+        label: 'Condition: '
+        multiple: yes
+  MORE_TEXT:
+    type: textInput
+    label: 'Text Input: '
+  MORE_NUMBER:
+    type: numericInput
+    label: 'Number Input: '
+  BASELINE_TYPE:
+    type: radioButtons
+    label: 'Baseline Method: '
+    inline: yes
+    choices:
+    - Percentage
+    - Decibel
+    selected: Decibel
+    init: init_baseline_type
+  HIDDEN_PANEL_NUMBER:
+    type: numericInput
+    label: 'Number Input: '
+input_layouts:
+  Base Examples:
+  - ELECTRODE
+  - BASELINE_RANGE
+  - BASELINE_TYPE
+  Compound Example:
+  - GROUP
+  Customized Example:
+  - input_customized
+  '[#99ccff] More Examples':
+  - - MORE_TEXT
+    - MORE_NUMBER
+  '[-] Collapsed Example':
+  - HIDDEN_PANEL_NUMBER
+outputs:
+  output_text_function:
+    title: textOutput Title
+    type: textOutput
+    width: 4
+  output_plot_function:
+    title: plotOutput Title
+    type: plotOutput
+    width: 8
+  output_print_function:
+    title: verbatim Title
+    type: verbatimTextOutput
+    width: 12
+  output_table_function:
+    title: This is a data table
+    type: tableOutput
+    width: 12
+output_layouts:
+  Tabset One:
+    Multiple Output:
+    - output_plot_function
+    - output_text_function
+    Verbatim Output: output_print_function
+  width: 12
