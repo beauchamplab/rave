@@ -9,7 +9,8 @@ input = getDefaultReactiveInput()
   miss_data_message = '',
   miss_data_comps = NULL,
   miss_data_size = 0,
-  prevent_load = TRUE
+  prevent_load = TRUE,
+  incomplete_data = NULL
 )
 
 # for debug
@@ -40,6 +41,22 @@ output[['.__rave_modal__.']] <- renderUI({
     return(NULL)
   }
 
+  # Check if there's any missing data
+  broken_data = `.__internal_reactives__.`[['incomplete_data']]
+  if(length(broken_data)){
+    load_btn = NULL
+    data_msg = '*There is one or more data broken or missing. This module is diabled.'
+  }else{
+    load_btn = tags$button(
+      id = ns('.__load_data__.'),
+      type = "button",
+      class = "btn btn-primary action-button shiny-bound-input",
+      style = 'margin-left:15px;',
+      "Load Data"
+    )
+    data_msg = sprintf('Estimated size: %s, (%.1f seconds)', to_ram_size(total_size), total_size * 3 * speed / 1e6)
+  }
+
   div(
     style = "width: 100%;
     height: 100vh;
@@ -61,17 +78,11 @@ output[['.__rave_modal__.']] <- renderUI({
       div(
         style = 'float: right;',
         actionButton(ns('.__switch_back__.'), 'Go Back'),
-        tags$button(
-          id = ns('.__load_data__.'),
-          type = "button",
-          class = "btn btn-primary action-button shiny-bound-input",
-          style = 'margin-left:15px;',
-          "Load Data"
-        )
+        load_btn
         # actionButton(ns('.__load_data__.'), 'Load Data')
       ),
       p(
-        sprintf('Estimated size: %s, (%.1f seconds)', to_ram_size(total_size), total_size * 3 * speed / 1e6)
+        data_msg
       )
     )
   )
@@ -96,12 +107,18 @@ observeEvent(input[['.__load_data__.']], {
     n_data = length(msg)
     progress = progress('Loading data', max = n_data)
     on.exit({progress$close()})
-    for(i in seq_len(n_data)){
-      progress$inc(message = msg[[i]])
-      eval_dirty(quos[[i]], env = ..runtime_env)
-    }
-    `.__internal_reactives__.`[['miss_data']] = F
-    reload_module()
+
+    tryCatch({
+      for(i in seq_len(n_data)){
+        progress$inc(message = msg[[i]])
+        eval_dirty(quos[[i]], env = ..runtime_env)
+      }
+      `.__internal_reactives__.`[['miss_data']] = F
+      reload_module()
+    }, error = function(e){
+      showNotification(p('One or more error occur during loading. The data might be broken or missing.'), type = 'error')
+    })
+
   }
 })
 
@@ -130,6 +147,7 @@ rave_checks = function(..., data = NULL){
 
   quos = NULL
   msg = NULL
+  broken_data_type = NULL
   total_size = 0
   for(d in data){
     referenced = 'referenced' %in% d
@@ -148,7 +166,13 @@ rave_checks = function(..., data = NULL){
         total_size = total_size + size
         size = to_ram_size(size)
 
-        msg = c(msg, sprintf('Power (%s, %s)', ifelse(referenced, 'Referenced', 'Raw'), size))
+        # check if directory exists
+        if(!data_check$check$power_dir){
+          broken_data_type = c(broken_data_type, 'power')
+          msg = c(msg, 'Power (Broken)')
+        }else{
+          msg = c(msg, sprintf('Power (%s, %s)', ifelse(referenced, 'Referenced', 'Raw'), size))
+        }
       }
       rm(dat)
     }else if('phase' %in% d){
@@ -160,7 +184,16 @@ rave_checks = function(..., data = NULL){
         size = n1 * n2 * n3 * n4 * base_size
         total_size = total_size + size
         size = to_ram_size(size)
-        msg = c(msg, sprintf('Phase (%s, %s)', ifelse(referenced, 'Referenced', 'Raw'), size))
+
+        # check if directory exists
+        if(!data_check$check$phase_dir){
+          broken_data_type = c(broken_data_type, 'phase')
+          msg = c(msg, 'Phase (Broken)')
+        }else{
+          msg = c(msg, sprintf('Phase (%s, %s)', ifelse(referenced, 'Referenced', 'Raw'), size))
+        }
+
+
       }
       rm(dat)
     }else if('volt' %in% d || 'voltage' %in% d){
@@ -179,6 +212,7 @@ rave_checks = function(..., data = NULL){
           total_size = total_size + size
 
           size = to_ram_size(size)
+
           msg = c(msg, sprintf('Voltage (No epoch, %s)', size))
         }
       }else{
@@ -192,13 +226,21 @@ rave_checks = function(..., data = NULL){
           total_size = total_size + size
 
           size = to_ram_size(size)
-          msg = c(msg, sprintf('Voltage (%s, %s)', ifelse(referenced, 'Referenced', 'Raw'), size))
+
+          # check if directory exists
+          if(!data_check$check$phase_dir){
+            broken_data_type = c(broken_data_type, 'voltage')
+            msg = c(msg, 'Voltage (Broken)')
+          }else{
+            msg = c(msg, sprintf('Voltage (%s, %s)', ifelse(referenced, 'Referenced', 'Raw'), size))
+          }
         }
       }
       rm(dat)
     }
   }
 
+  broken_data_type = unique(broken_data_type)
   if(length(quos)){
     # we have data pending to be loaded
     order = order(msg)
@@ -210,6 +252,7 @@ rave_checks = function(..., data = NULL){
     `.__internal_reactives__.`[['miss_data_message']] = msg
     `.__internal_reactives__.`[['miss_data_comps']] = quos
     `.__internal_reactives__.`[['miss_data_size']] = total_size
+    `.__internal_reactives__.`[['incomplete_data']] = broken_data_type
     stop('Needs to load data')
   }else{
     `.__internal_reactives__.`[['miss_data']] = F

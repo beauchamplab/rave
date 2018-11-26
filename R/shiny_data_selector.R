@@ -2,8 +2,12 @@
 #' @param project_name project_name
 #' @param subject_code subject_code
 check_subjects2 <- function(
-  project_name, subject_code
+  project_name, subject_code, quiet = FALSE
 ){
+  if(quiet){
+    # do not print
+    logger = function(...){}
+  }
 
   logger('Checking: Project - ', project_name, ', Subject - ', subject_code)
   dirs = get_dir(subject_code = subject_code, project_name = project_name)
@@ -11,19 +15,47 @@ check_subjects2 <- function(
   # 1. Check folders
 
   # subject folder - 'project/subject'
-  re[['subject_dir']] = file.exists(dirs$subject_dir)
+  re[['subject_dir']] = dir.exists(dirs$subject_dir)
 
   # RAVE dir - 'project/subject/rave'
-  re[['rave_dir']] = file.exists(dirs$rave_dir)
+  re[['rave_dir']] = dir.exists(dirs$rave_dir)
 
   # Preprocessing dir - project/subject/rave/preprocess
-  re[['preprocess_dir']] = file.exists(dirs$preprocess_dir)
+  re[['preprocess_dir']] = dir.exists(dirs$preprocess_dir)
 
   # meta dir - project/subject/rave/meta
-  re[['meta_dir']] = file.exists(dirs$meta_dir)
+  re[['meta_dir']] = dir.exists(dirs$meta_dir)
 
   # chennel_dir - project/subject/rave/data
-  re[['channel_dir']] = file.exists(dirs$channel_dir)
+  re[['channel_dir']] = dir.exists(dirs$channel_dir)
+
+  # power_dir - project/subject/rave/data/power
+  re[['power_dir']] = (
+    dir.exists(file.path(dirs$cache_dir, 'power'))
+    || (
+      dir.exists(file.path(dirs$cache_dir, 'cache', 'power', 'raw'))
+      && dir.exists(file.path(dirs$cache_dir, 'cache', 'power', 'ref'))
+    )
+  )
+
+  # phase_dir - project/subject/rave/data/phase
+  re[['phase_dir']] = (
+    dir.exists(file.path(dirs$cache_dir, 'phase'))
+    || (
+      dir.exists(file.path(dirs$cache_dir, 'cache', 'phase', 'raw'))
+      && dir.exists(file.path(dirs$cache_dir, 'cache', 'phase', 'ref'))
+    )
+  )
+
+  # volt_dir - project/subject/rave/data/voltage
+  re[['volt_dir']] = (
+    dir.exists(file.path(dirs$cache_dir, 'voltage'))
+    || (
+      dir.exists(file.path(dirs$cache_dir, 'cache', 'voltage', 'raw'))
+      && dir.exists(file.path(dirs$cache_dir, 'cache', 'voltage', 'ref'))
+    )
+  )
+
 
   ## Preprocess information
   log_data = list()
@@ -122,6 +154,7 @@ check_subjects2 <- function(
   }else{
     epochs = ''
   }
+
 
 
   list(check = re, log = log_data, epochs = epochs, references = references)
@@ -919,7 +952,7 @@ shiny_data_selector <- function(module_id){
 
       brain = brain_env[[subject_id]]
       if(is.null(brain)){
-        s = Subject$new(project_name = project, subject_code = subject, reference = ref)
+        s = Subject$new(project_name = project, subject_code = subject, reference = ref, strict = FALSE)
         brain = RaveBrain$new(subject = s)
         brain_env[[subject_id]] = brain
       }
@@ -966,7 +999,7 @@ shiny_data_selector <- function(module_id){
       subject_id = project_name %&% '/' %&% subject_code
       electrodes = parse_selections(input$electrodes)
 
-      tmp_subject = Subject$new(project_name = project_name, subject_code = subject_code, reference = reference)
+      tmp_subject = Subject$new(project_name = project_name, subject_code = subject_code, reference = reference, strict = FALSE)
       electrodes = tmp_subject$filter_valid_electrodes(electrodes)
 
       if(length(electrodes) == 0){
