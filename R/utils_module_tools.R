@@ -84,6 +84,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
         print(sys.on.exit())
 
         progress = progress('Prepare preprocess voltage', max = length(electrodes) + 1)
+        on.exit({progress$close()})
 
         lapply_async(electrodes, function(e){
           sapply(blocks, function(b){
@@ -105,7 +106,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
           }, simplify = F, USE.NAMES = T)
 
         list2env(r, envir = data_env$.private[['volt_unblocked']])
-        progress$close()
+
         rm(list = ls(), envir = environment())
       }
 

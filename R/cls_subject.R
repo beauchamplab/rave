@@ -12,6 +12,7 @@ Subject <- R6::R6Class(
     subject_code = NULL,
     project_name = NULL,
     dirs = NULL,
+    is_strict = TRUE,
     info = function(){
       cat('<Subject> [', self$subject_id, ']\n - Total electrodes: ', length(self$valid_electrodes), '\n', sep = '')
     },
@@ -21,17 +22,18 @@ Subject <- R6::R6Class(
     finalize = function(){
       rm(list = ls(private$loaded), envir = private$loaded)
     },
-    initialize = function(project_name, subject_code, reference = NULL){
+    initialize = function(project_name, subject_code, reference = NULL, strict = TRUE){
       subject_id = sprintf('%s/%s', project_name, subject_code)
       self$project_name = project_name
       self$subject_code = subject_code
       self$subject_id = subject_id
+      self$is_strict = strict
 
       self$meta = list()
       private$loaded = new.env()
 
       # load meta data
-      self$dirs = get_dir(subject_id = subject_id)
+      self$dirs = get_dir(subject_code = subject_code, project_name = project_name)
 
       # meta_dir = self$dirs$meta_dir
       #
@@ -56,8 +58,8 @@ Subject <- R6::R6Class(
       self$meta[['time_excluded']] = load_meta('time_excluded', project_name = project_name, subject_code = subject_code)
 
       # load preprocess subject info
-      private$subjectinfo = SubjectInfo2$new(project_name = project_name, subject_code = subject_code)
-
+      private$subjectinfo = SubjectInfo2$new(project_name = project_name,
+                                             subject_code = subject_code, strict = strict)
     },
     preprocess_info = function(key, default = NULL, customized = F){
       if(customized){
@@ -146,4 +148,10 @@ asJSON.Subject <- function(obj){
     valid_electrodes = obj$valid_electrodes
     # dirs = obj$dirs[c('rave_dir', 'meta_dir', 'cache_dir', 'suma_dir', 'suma_out_dir')]
   )
+}
+
+#' Returns subject ID
+#' @export
+as.character.Subject <- function(x, ...){
+  x$id
 }

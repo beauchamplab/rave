@@ -169,7 +169,8 @@ ECoGRepository <- R6::R6Class(
           progress$inc(sprintf('Electrode - %s', e_str))
           # get reference
           ref = ref_table$Reference[ref_table$Electrode == e]
-          self$raw$set(key = e_str, value = Electrode$new(subject = self$subject, electrode = e, reference_by = self$reference$get(ref), is_reference = F))
+          e_obj = Electrode$new(subject = self$subject, electrode = e, reference_by = self$reference$get(ref), is_reference = F)
+          self$raw$set(key = e_str, value = e_obj)
         }
         logger('Loaded.')
         progress$close()

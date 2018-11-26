@@ -37,7 +37,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
     clear_subject = function(){
       env$subject = list()
     }
-    check_load_subject = function(subject_code, project_name, details = T){
+    check_load_subject = function(subject_code, project_name, details = T, strict = TRUE){
       checklist = list()
       ind = 1
       # Step 1: check if subject folders exists
@@ -70,7 +70,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
         'Referenced' = F
       )
       try({
-        utils$load_subject(subject_code = subject_code, project_name = project_name)
+        utils$load_subject(subject_code = subject_code, project_name = project_name, strict = strict)
         l[seq_len(utils$get_check_level())] = T
       })
 
@@ -93,11 +93,11 @@ rave_preprocess_tools <- function(env = new.env(), ...){
 
       checklist
     }
-    load_subject = function(subject_code, project_name){
+    load_subject = function(subject_code, project_name, strict = TRUE){
       logger('Loading Subject')
       dirs = get_dir(subject_code = subject_code, project_name = project_name)
       assert_that(dir.exists(dirs$preprocess_dir), msg = 'Subject ' %&% subject_code %&% ' has no project folder ' %&% project_name)
-      s = SubjectInfo2$new(project_name = project_name, subject_code = subject_code)
+      s = SubjectInfo2$new(project_name = project_name, subject_code = subject_code, strict = strict)
       env[['subject']] = s
 
       logger('Loaded Subject: [Project]/[Subject]' %&% utils$get_subject_id())

@@ -33,9 +33,9 @@ SubjectInfo2 <- R6::R6Class(
     available_blocks = NULL,
 
     # Init
-    initialize = function(project_name, subject_code){
+    initialize = function(project_name, subject_code, strict = TRUE){
       self$dirs = get_dir(subject_code = subject_code, project_name = project_name)
-      if(!dir.exists(self$dirs$pre_subject_dir)){
+      if(strict && !dir.exists(self$dirs$pre_subject_dir)){
         stop('Subject NOT Found!')
       }
       # make sure that preprocess_dir exists

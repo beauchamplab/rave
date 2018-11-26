@@ -18,7 +18,8 @@ rave_prepare <- function(
   data_types = c('power'),
   reference = 'default', attach = 'r',
   load_brain = TRUE,
-  data_env = rave::getDefaultDataRepository()
+  data_env = rave::getDefaultDataRepository(),
+  strict = FALSE
 ){
   # subject = 'congruency/YAB'; electrodes = 14:15; epoch = 'YABa'; time_range = c(1,2); data_types = NULL; reference = 'default'
   if(missing(subject)){
@@ -28,7 +29,7 @@ rave_prepare <- function(
     }
     return(invisible())
   }
-  logger('Preparing subject [', subject,']')
+  logger('Preparing subject [', as.character(subject), ']')
   logger('# of electrodes to be loaded: ', length(electrodes))
   logger('Data type(s): ', paste(data_types, collapse = ', '))
   logger('Epoch name: ', epoch)
@@ -38,6 +39,11 @@ rave_prepare <- function(
   }else{
     frequency_range = NULL
     logger('Frequencies: All')
+  }
+  if(is.character(subject)){
+    subject_split = unlist(strsplit(subject, '/|\\\\'))
+    subject = Subject$new(project_name = subject_split[[1]], subject_code = subject_split[[2]],
+                          reference = reference, strict = strict)
   }
 
   repo = ECoGRepository$new(subject = subject, autoload = F, reference = reference)
@@ -90,7 +96,9 @@ rave_prepare <- function(
   data_env$.private$meta = meta
   data_env$.private$brain = brain
   data_env$.private$preproc_tools = rave_preprocess_tools()
-  data_env$data_check = data_env$.private$preproc_tools$check_load_subject(subject_code = subject$subject_code, project_name = subject$project_name)
+  data_env$.private$preproc_tools$check_load_subject(subject_code = subject$subject_code, project_name = subject$project_name, strict = subject$is_strict)
+  data_env$data_check = rave:::check_subjects2(project_name = subject$project_name,
+                                               subject_code = subject$subject_code, quiet = TRUE)
   data_env$subject = subject
   data_env$preload_info = list(
     epoch_name = data_env$.private$meta$epoch_info$name,
