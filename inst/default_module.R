@@ -114,11 +114,11 @@ observeEvent(input[['.__load_data__.']], {
         eval_dirty(quos[[i]], env = ..runtime_env)
       }
       `.__internal_reactives__.`[['miss_data']] = F
-      reload_module()
     }, error = function(e){
       showNotification(p('One or more error occur during loading. The data might be broken or missing.'), type = 'error')
     })
 
+    reload_module()
   }
 })
 

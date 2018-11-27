@@ -13,9 +13,12 @@ Tensor <- R6::R6Class(
     swap_file = '',
     hybrid = F,
     last_used = NULL,
+    temporary = TRUE,
 
     finalize = function(){
-      unlink(self$swap_file)
+      if(self$temporary){
+        unlink(self$swap_file)
+      }
     },
 
     print = function(...){
@@ -37,7 +40,8 @@ Tensor <- R6::R6Class(
       invisible(self)
     },
 
-    initialize = function(data, dim, dimnames, varnames, hybrid = F, use_index = F, swap_file = tempfile()){
+    initialize = function(data, dim, dimnames, varnames, hybrid = F, use_index = F, swap_file = tempfile(), temporary = TRUE){
+      self$temporary = temporary
       # get attributes of data
       dim %?<-% base::dim(data)
       dim %?<-% length(data)

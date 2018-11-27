@@ -4,7 +4,7 @@
 \alias{check_subjects2}
 \title{check subject validity tools}
 \usage{
-check_subjects2(project_name, subject_code)
+check_subjects2(project_name, subject_code, quiet = FALSE)
 }
 \arguments{
 \item{project_name}{project_name}
