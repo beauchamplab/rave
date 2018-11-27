@@ -158,9 +158,9 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
   # generate yamls
 
   config = list(
-    project_name = 'congruency',
-    subject_code = 'YAB',
-    epoch = 'YABa',
+    project_name = subject$project_name,
+    subject_code = subject$subject_code,
+    epoch = epoch,
     srate_volt = subject$preprocess_info('srate'),
     srate_wave = subject$sample_rate,
     frequecies = subject$frequencies$Frequency,
@@ -191,9 +191,9 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
 load_local_cache <- function(project_name, subject_code, epoch, time_range,
                              frequency_range = NULL, electrodes,
                              referenced = FALSE, data_type = 'voltage'){
-  # project_name = 'congruency'
-  # subject_code = 'YAB'
-  # epoch = 'YABa'
+  # project_name = 'demo'
+  # subject_code = 'sub_large'
+  # epoch = 'Auditory'
   # time_range = c(1,2)
 
   # first, check if cache exists
