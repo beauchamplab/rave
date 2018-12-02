@@ -7,7 +7,8 @@ dev_f <- function(
   load_brain = TRUE, download_url = NULL){
 
   dev_call_expr = match.call()
-
+  # dev_call_expr = quote(dev_f(module_id = 'module_id', reactive = TRUE))
+  
   # Setups for debugs
   rave::`%?<-%`(root_path, '.')
   rave::`%?<-%`(reactive, TRUE)
@@ -51,6 +52,12 @@ dev_f <- function(
   path = get_path(path, mustWork = T)
   config = utils_pkg$load_rave_yaml(yaml_path = path)
 
+  startup_checks = rave::rave_options('disable_startup_speed_check')
+  on.exit({
+    rave::rave_options(disable_startup_speed_check = startup_checks)
+  })
+  rave::rave_options(disable_startup_speed_check = FALSE)
+  
   # sub 2: load dependencies
   if(is.list(config$dependencies)){
     utils_pkg$check_load_packages(cran = config$dependencies$cran, github = config$dependencies$github)
@@ -59,9 +66,9 @@ dev_f <- function(
 
   # sub 3: load subjects
   # check data repos
-  force_reload_subject = force_reload_subject || !rave:::any_subject_loaded()
-  if(force_reload_subject){
-    if(missing(project_name)){
+  missing_project_name = missing(project_name)
+  load_subject = function(){
+    if(missing_project_name){
       tryCatch({
         dev_subject = config$dev_subject
         dev_subject$electrodes = rave::parse_selections(dev_subject$electrodes)
@@ -86,64 +93,54 @@ dev_f <- function(
         print(traceback(e))
         rutabaga::cat2('Error occurred. Please check help("rave_prepare") for argument details', level = 'FATAL')
       })
-
+      
     }
+  }
+  force_reload_subject = force_reload_subject || !rave:::any_subject_loaded()
+  if(force_reload_subject){
+    load_subject()
   }
 
   rutabaga::cat2('------------------ Subject loaded ------------------', level = 'DEBUG')
 
-  # sub 4: load modules
-  if(length(config$modules)){
-    modules = lapply(config$modules, function(m){
-      path = file.path(root_path, 'inst', m$config_name)
-      path = get_path(path, mustWork = T)
-      cfg = utils_pkg$load_rave_yaml(yaml_path = path)
-      c(m, cfg)
-    })
-
-    module_ids = sapply(config$modules, function(m){ m$module_id })
-    names(modules) = module_ids
-  }else{
-    modules = NULL
-    module_ids = ''
-  }
-
-
-
   # ------------------ Step 2: Register input output tools ------------------
-  path = file.path(root_path, 'inst', 'utils', 'module_utils.R')
-  path = get_path(path, mustWork = T)
-  source(path, local = T)
-
-  dev_call_expr
-  dev_call_expr[[1]] = rlang::quo_squash(rlang::quo(`:::`(!!!package, dev_f)))
-  command = capture.output(print(dev_call_expr))
+  # dev_call_expr
+  # dev_call_expr[[1]] = rlang::quo_squash(rlang::quo(`:::`(!!rlang::sym(package), dev_f)))
+  # command = capture.output(print(dev_call_expr))
 
   dev_module = function(module_id){
 
     if(!rave::any_subject_loaded()){
+      load_subject()
+    }else if(!'rave_data' %in% search()){
       rave::attachDefaultDataRepository()
     }
 
-    config = modules[[module_id]]
-
-    utils_pkg = module_utils(
-      package = package,
-      root_path = root_path,
-      config = config,
-      restart_command = command
-    )
-
-    toolbox_env = utils_pkg$get_toolbox(reactive = reactive)
-
-    # toolbox_env$reactive
-    toolbox_env$attach_toolbox()
+    for(m in config$modules){
+      if(is.list(m) && is.character(m$module_id) && m$module_id == module_id){
+        
+        path = file.path(root_path, 'inst', 'utils', 'module_utils.R')
+        path = get_path(path, mustWork = T)
+        source(path, local = T)
+        
+        utils_pkg = module_utils(
+          module_id = module_id,
+          module_label = m$module_label,
+          config_file = m$config_name,
+          package = package,
+          root_path = root_path
+        )
+        utils_pkg$dev_module(reactive = reactive)
+        return(utils_pkg)
+      }
+    }
+    stop('[module not found] Invalid module ID: ', module_id)
   }
 
   if(!missing(module_id)){
     dev_module(module_id)
   }else{
-    dev_module(module_ids[1])
+    dev_module(config$modules[[1]]$module_id)
   }
 
 

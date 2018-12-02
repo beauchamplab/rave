@@ -2,8 +2,8 @@
 Package: rave
 Type: Package
 Title: R Analysis and Visualization of ECOG/iEEG Data
-Version: 0.1.5.0045
-Date: 2018-11-27
+Version: 0.1.5.0046
+Date: 2018-12-02
 Authors@R: c(
     person("Zhengjia", "Wang", email = "dipterix.wang@gmail.com", role = c("aut", "cre")),
     person("John", "Magnotti", role = c("aut")),

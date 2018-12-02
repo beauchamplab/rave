@@ -33,11 +33,9 @@ create_template <- function(path, ...){
   # migrate template
   template_dir = system.file('template', package = 'rave')
   # template_dir = './inst/template'
+  fs = list.files(template_dir, recursive = T, pattern = '^[a-zA-Z]', all.files = F, full.names = F)
 
-  fs = c(
-    'hello.R', '.Rbuildignore',
-    'DESCRIPTION', 'NAMESPACE', "R/comps.R","R/inputs.R","R/libs.R","R/main.R","R/outputs.R","R/reactives.R",
-         "inst/config.R","inst/module.yaml","inst/rave.yaml","inst/utils/module_utils.R","inst/utils/package_utils.R")
+  fs = c('.Rbuildignore', fs)
 
   for(f in fs){
     s = readLines(file.path(template_dir, f))

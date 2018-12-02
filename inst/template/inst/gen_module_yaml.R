@@ -1,62 +1,16 @@
-# Package overall config
-config = list(
-
-  package_name = '${{PACKAGE}}',
-
-  dependencies = list(
-    'cran' = c(
-      'devtools',
-      'shiny (>= 1.2.0)',
-      'rlang (>= 0.3.0)',
-      'stringr (>= 1.3.1)',
-      'yaml (>= 2.2.0)',
-      'stringr'
-    ),
-    'github' = c(
-      'dipterix/rutabaga (>= 0.1.1)',
-      'dipterix/threejsr (>= 0.1.20)',
-      'beauchamplab/rave@rave-fir'
-    )
-  ),
-
-  dev_subject = list(
-    project_name = 'demo',
-    subject_code = 'sub_large',
-    electrodes = '14,15',
-    epoch = 'Auditory',
-    time_range = list(
-      pre = 1,
-      post = 2
-    ),
-    reference = 'default',
-    frequency_range = NULL,
-    data_types = NULL,
-    load_brain = T,
-    download_url = 'https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/data-large.zip'
-  ),
-
-  modules = list(
-    list(
-      module_id = 'module_1',
-      module_label = 'Test Package',
-      config_name = 'module1.yaml'
-    )
-  )
-)
-
-yaml::write_yaml(config, './inst/rave.yaml', fileEncoding = 'utf-8')
-
-
-
+# Script to generate module.yaml
 # First module
 
 config = list(
+  
+  # power/phase/voltage + referenced/raw
   data_checks = list(
     'power referenced'
   ),
 
-  init_function = 'init_module1',
-  main_function = 'main_module1',
+  init_function = '__init__${{MODULEID}}',
+  main_function = '__main__${{MODULEID}}',
+  reactive_function = '__reactive__${{MODULEID}}',
 
   inputs = list(
     'ELECTRODE' = list(
@@ -182,4 +136,4 @@ config = list(
 )
 
 
-yaml::write_yaml(config, './inst/module1.yaml', fileEncoding = 'utf-8')
+yaml::write_yaml(config, './inst/module.yaml', fileEncoding = 'utf-8')

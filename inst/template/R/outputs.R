@@ -14,7 +14,8 @@ output_plot_function <- function(result){
     )
   )
 
-  image(x = result$time_points, y = 1:nrow(result$el_collapsed), z = t(result$el_collapsed))
+  image(x = result$time_points, y = 1:nrow(result$el_collapsed), z = t(result$el_collapsed),
+        xlab = 'Time (s)')
 }
 
 

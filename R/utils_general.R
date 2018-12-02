@@ -449,16 +449,9 @@ methods::setMethod("%&%",  methods::signature(x = "ANY", y = 'character'),
 methods::setMethod("%&%",  methods::signature(x = "character", y = 'character'),
                    definition = paste_c, where = -1)
 
-#' Concatenate two strings
-#' @usage s1 \%&\% s2
-#' @examples
-#' \dontrun{
-#' you <- 'my friend.'
-#' print('Hello, ' %&% you)
-#' }
-#'
 #' @exportMethod %&%
 NULL
+
 
 #' Evaluate expressions
 #' @usage eval_dirty(expr, env = parent,frame(), data = NULL)

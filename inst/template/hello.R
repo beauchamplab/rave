@@ -5,11 +5,17 @@
 # to build this package
 
 
-# To load module ${{MODULELABEL}} (${{MODULEID}})
-dev_env_${{PACKAGE}}("${{MODULEID}}")
+# To load module dev environment
+# 
+${{PACKAGE}}::dev_env_${{PACKAGE}}("${{MODULEID}}")
 
-# By default, the following call will load the first module
-dev_env_${{PACKAGE}}()
+
 
 # After loading a module, preview it in RAVE
 preview()
+
+# To disable file monitor (Manually restart)
+# uncomment and use the following line
+# 
+# preview(auto_reload = F)
+

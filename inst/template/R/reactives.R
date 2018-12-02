@@ -1,4 +1,4 @@
-`__reactive__` <- function(){
+`__reactive__${{MODULEID}}` <- function(){
 
   # This is a special function designed for shiny reactive functions or RAVE
   # customized inputs/outputs. Expressions within this function will be evaluated

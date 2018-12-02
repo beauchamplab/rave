@@ -1,7 +1,8 @@
 data_checks:
 - power referenced
-init_function: init_module
-main_function: main_module
+init_function: __init__${{MODULEID}}
+main_function: __main__${{MODULEID}}
+reactive_function: __reactive__${{MODULEID}}
 inputs:
   ELECTRODE:
     type: selectInput
@@ -51,13 +52,13 @@ inputs:
     type: numericInput
     label: 'Number Input: '
 input_layouts:
-  Base Examples:
+  Base Example Inputs:
   - ELECTRODE
   - BASELINE_RANGE
   - BASELINE_TYPE
   Compound Example:
   - GROUP
-  Customized Example:
+  '[#ccff99] Customized Example':
   - input_customized
   '[#99ccff] More Examples':
   - - MORE_TEXT

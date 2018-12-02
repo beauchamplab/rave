@@ -1,5 +1,5 @@
 #' Main body part for algorithms
-main_module <- function(ELECTRODE, BASELINE_RANGE, GROUP, ...){
+`__main__${{MODULEID}}` <- function(ELECTRODE, BASELINE_RANGE, GROUP, ...){
 
   result = list()
 
@@ -68,3 +68,16 @@ main_module <- function(ELECTRODE, BASELINE_RANGE, GROUP, ...){
 }
 
 
+
+
+
+#' @export
+${{MODULEID}} <- function(...){
+  # fixed usage, don't change
+  .args = list(...)
+  .env = environment()
+  .mid = match.call()[[1]]
+  eval(body(paste0('__init__', .mid)), envir = .env)
+  list2env(.args, .env)
+  eval(body(paste0('__main__', .mid)), envir = .env)
+}

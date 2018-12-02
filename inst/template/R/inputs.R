@@ -9,7 +9,7 @@
 #' For example, here we define a variable "power" that contains subject
 #' power data (wavelet coefficient^2). This variable can be used across the
 #' module (no scoping issue)
-init_module <- function(){
+`__init__${{MODULEID}}` <- function(){
 
   # load data
   power = module_tools$get_power(referenced = T)
