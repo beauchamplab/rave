@@ -45,7 +45,7 @@ output[['.__rave_modal__.']] <- renderUI({
   broken_data = `.__internal_reactives__.`[['incomplete_data']]
   if(length(broken_data)){
     load_btn = NULL
-    data_msg = '*There is one or more data broken or missing. This module is diabled.'
+    data_msg = '*There is one or more data missing. This module is diabled.'
   }else{
     load_btn = tags$button(
       id = ns('.__load_data__.'),
@@ -169,7 +169,7 @@ rave_checks = function(..., data = NULL){
         # check if directory exists
         if(!data_check$check$power_dir){
           broken_data_type = c(broken_data_type, 'power')
-          msg = c(msg, 'Power (Broken)')
+          msg = c(msg, 'Power (Missing)')
         }else{
           msg = c(msg, sprintf('Power (%s, %s)', ifelse(referenced, 'Referenced', 'Raw'), size))
         }
@@ -188,7 +188,7 @@ rave_checks = function(..., data = NULL){
         # check if directory exists
         if(!data_check$check$phase_dir){
           broken_data_type = c(broken_data_type, 'phase')
-          msg = c(msg, 'Phase (Broken)')
+          msg = c(msg, 'Phase (Missing)')
         }else{
           msg = c(msg, sprintf('Phase (%s, %s)', ifelse(referenced, 'Referenced', 'Raw'), size))
         }
@@ -230,7 +230,7 @@ rave_checks = function(..., data = NULL){
           # check if directory exists
           if(!data_check$check$phase_dir){
             broken_data_type = c(broken_data_type, 'voltage')
-            msg = c(msg, 'Voltage (Broken)')
+            msg = c(msg, 'Voltage (Missing)')
           }else{
             msg = c(msg, sprintf('Voltage (%s, %s)', ifelse(referenced, 'Referenced', 'Raw'), size))
           }
