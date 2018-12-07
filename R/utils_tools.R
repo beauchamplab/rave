@@ -405,7 +405,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
     ###### pre-Process ######
     apply_notch = function(bandwidths = list(
       'default' = list(
-        centers = c(60,120,240),
+        centers = c(60,120,180),
         widths = c(1,2,2)
       )
     )){

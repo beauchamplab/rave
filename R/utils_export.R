@@ -57,7 +57,7 @@ export_diagnose_voltage = function(
           col = c(fore_col, 'grey80')
           main = sprintf('Notch Filtered Signal - Block: %s, Electrode: %d', b, e)
         }else{
-          s1 = raw
+          s1 = raw_volt[[b]]
           s2 = NULL
           name = 'Raw'
           col = fore_col
