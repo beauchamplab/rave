@@ -1,4 +1,4 @@
-# library(rave)
+library(rave)
 
 # preprocessing with no gui
 
