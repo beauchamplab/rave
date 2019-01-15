@@ -1,17 +1,13 @@
-
+<img src="inst/assets/images/logo-md.jpg" width="20%" align="right" />
 
 # RAVE
+
+
 
 __R__ __A__*nalysis and* __V__*isualization of intracranial* __E__*lectroencephalography*
 
 *Author: Zhengjia Wang*
 
-*Last Updated: Oct 26, 2018*
-
-| Package Check Results  | Stable | Dev (RAVE-Fir) |
-|:------------------|:------:|:----:|
-| MacOS, Ubuntu     | [![Build Status](https://travis-ci.org/beauchamplab/rave.svg?branch=master)](https://travis-ci.org/beauchamplab/rave) | [![Build Status](https://travis-ci.org/beauchamplab/rave.svg?branch=rave-fir)](https://travis-ci.org/beauchamplab/rave) |
-| Windows           | [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/beauchamplab/rave?branch=master&svg=true)](https://ci.appveyor.com/project/beauchamplab/rave) | [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/beauchamplab/rave?branch=rave-fir&svg=true)](https://ci.appveyor.com/project/beauchamplab/rave) |
 
 
 <img src="https://raw.githubusercontent.com/dipterix/instrave/master/img/mainapp/mainapp_demo_small.png" width="60%" align="right" />
@@ -35,8 +31,15 @@ help(package = 'rave')
 ## Installation
 
 * If this is your first time using `R` or `RStudio`, please [click here for full-installation guide](./installation.md) (around *10-15 min*) and then proceed directly to the next section.
-
 * Read the rest of the section if you have `R` and `RStudio` installed.
+* Please check the following build status. `RAVE` is developed on Mac OS and tested on Ubuntu and Windows. Some features are limited on Windows.
+
+
+| Package Check Results  | Stable | Dev (RAVE-Fir) |
+|:------------------|:------:|:----:|
+| MacOS, Ubuntu     | [![Build Status](https://travis-ci.org/beauchamplab/rave.svg?branch=master)](https://travis-ci.org/beauchamplab/rave) | [![Build Status](https://travis-ci.org/beauchamplab/rave.svg?branch=rave-fir)](https://travis-ci.org/beauchamplab/rave) |
+| Windows           | [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/beauchamplab/rave?branch=master&svg=true)](https://ci.appveyor.com/project/beauchamplab/rave) | [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/beauchamplab/rave?branch=rave-fir&svg=true)](https://ci.appveyor.com/project/beauchamplab/rave) |
+
 
 ### 1. Dependencies
 
