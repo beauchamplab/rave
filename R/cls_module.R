@@ -70,6 +70,7 @@ ModuleEnvir <- R6::R6Class(
     rmd_path = NULL,
     parent_env = NULL,
     from_package = FALSE,
+    sidebar_width = 3L,
     info = function(){
       cat('Module Name:', self$label_name, '\n')
       cat('Version:', self$version, '\n')
@@ -310,8 +311,8 @@ ModuleEnvir <- R6::R6Class(
       e = self$get_or_new_exec_env(session = session)
       shiny::fluidRow(
         uiOutput(e$ns('.__rave_modal__.')),
-        e$generate_input_ui(),
-        e$generate_output_ui()
+        e$generate_input_ui(sidebar_width = self$sidebar_width),
+        e$generate_output_ui(sidebar_width = self$sidebar_width)
       )
 
     },

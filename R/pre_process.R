@@ -66,7 +66,7 @@ rave_preprocess <- function(
       instance = do.call(..func, list(
         module_id = ID %&% '_M',
         sidebar_width = sidebar_width
-      ), envir = loadNamespace('rave'))
+      ))#, envir = loadNamespace('rave'))
 
       list(
         ID = ID,

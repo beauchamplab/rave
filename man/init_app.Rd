@@ -5,7 +5,8 @@
 \title{Initialize main application}
 \usage{
 init_app(modules = NULL, active_module = NULL, launch.browser = T,
-  theme = "purple", ...)
+  theme = "purple", disable_sidebar = FALSE, simplify_header = FALSE,
+  ...)
 }
 \arguments{
 \item{modules}{which modules to show. Default uses "modules.csv" (see load_modules)}

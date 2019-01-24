@@ -104,7 +104,8 @@ get_mem_usage <- function(modules, data_envir){
 #' @import shiny
 #' @import magrittr
 #' @export
-init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, theme = "purple", ...){
+init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
+                     theme = "purple", disable_sidebar = FALSE, simplify_header = FALSE, ...){
   tryCatch({
     rave_prepare()
   }, error = function(e){})
@@ -136,18 +137,23 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
       }),
       btn_text_right = 'RAM Usage',
       data_selector$header(),
-      .list = tagList(
-        tags$li(
-          class = 'user user-menu',
-          actionLink('curr_subj_details_btn', '')
-        ),
-        tags$li(
-          class = 'user user-menu',
-          actionLink('curr_subj_launch_suma', '')
-        )
-      )
+      .list = local({
+        if(!simplify_header){
+          tagList(
+            tags$li(
+              class = 'user user-menu',
+              actionLink('curr_subj_details_btn', '')
+            ),
+            tags$li(
+              class = 'user user-menu',
+              actionLink('curr_subj_launch_suma', '')
+            )
+          )
+        }
+      })
     ),
     sidebar = shinydashboard::dashboardSidebar(
+      disable = disable_sidebar,
       shinydashboard::sidebarMenu(
         id = 'sidebar',
         .list =

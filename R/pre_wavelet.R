@@ -6,10 +6,11 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
   ns = shiny::NS(module_id)
 
   body = fluidRow(
-    shinydashboard::box(
+    shiny::column(
       width = sidebar_width,
-      title = 'Wavelet Parameters',
-      uiOutput(ns('wavelet_inputs1'))
+      uiOutput(ns('wavelet_inputs1')),
+      uiOutput(ns('wavelet_inputs2')),
+      uiOutput(ns('wavelet_inputs3'))
     ),
     shinydashboard::box(
       width = 12 - sidebar_width,
@@ -20,45 +21,258 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
 
   server = function(input, output, session, user_data, utils){
     local_data = reactiveValues(
-      prevent_rewavelet = TRUE
+      prevent_rewavelet = TRUE,
+      wave_param = NULL
     )
+
+    conf_dir = file.path(rave_options('module_root_dir'), 'cache', 'preprocess', 'wavelet')
+    dir.create(conf_dir, recursive = T, showWarnings = F)
 
     output$wavelet_inputs1 <- renderUI({
       user_data$reset
-      validate(
-        need(utils$notch_filtered(), 'Please finish previous steps first (Import subject, Notch filter).')
-      )
+      if(!utils$notch_filtered()){
+        return(shinydashboard::box(title = 'General Settings', width = 12L, tags$small('Please finish previous steps first (Import subject, Notch filter).')))
+      }
       electrodes = utils$get_electrodes()
       vc_txt = deparse_selections(electrodes)
       max_core = max(1, rave_options('max_worker'))
       srate = utils$get_srate()
       target_srate = 100
 
-      freq_range = c(2,200)
-      freq_step = 2
-      wave_num = c(3,20)
+      if(utils$waveleted()){
+        log = utils$get_from_subject('wavelet_log', customized = T)
+        log = log[[length(log)]]
+        target_srate = log$target_srate
+      }
+
+      shinydashboard::box(
+        title = 'General Settings', width = 12L,
+        textInput(ns('wave_electrodes'), 'Electrodes:', value = vc_txt, placeholder = 'Select at least one electrode.'),
+        numericInput(ns('target_srate'), 'Target Sample Rate', value = target_srate, min = 10L, max = srate, step = 1L),
+        numericInput(ns('ncores'), 'Parallel, Number of Cores:', value = min(4L, max_core), min = 1L, max = max_core, step = 1L)
+      )
+    })
+
+    output$wavelet_inputs2 <- renderUI({
+      user_data$reset
+      local_data$refresh_wavelet
+      validate(
+        need(utils$notch_filtered(), '')
+      )
+
+      # srate = utils$get_srate()
+      # freq_range = c(2,200)
+      # freq_step = 2
+      # wave_num = c(3,20)
+      #
+      # tagList(
+      #   hr(),
+      #   sliderInput(ns('freq_range'), 'Frequency Range (Hz):', value = freq_range, step = 1L, round = TRUE, min = 1L, max = srate / 2),
+      #   numericInput(ns('freq_step'), 'Frequency Step Size (Hz): ', value = freq_step, step = 1L, min = 1L),
+      #   sliderInput(ns('wave_num'), 'Number of Wavelet Cycles: ', value = wave_num, step = 1L, min = 1L, max = 40L, round = T)
+      # )
+
+      # check all wavelet settings
+      choices = list.files(conf_dir, pattern = '^[^_].*\\.csv', full.names = F, recursive = F)
+
+      dname = stringr::str_replace_all(utils$get_subject_id(), '[/]', '_')
+      dname = paste0('_', dname, '.csv')
+
+      choices = choices[choices != dname]
+      choices = c('[New setting]', choices)
+      selected = isolate(local_data$wavelet_selected)
 
       if(utils$waveleted()){
         log = utils$get_from_subject('wavelet_log', customized = T)
         log = log[[length(log)]]
         freqs = log$frequencies
-        freq_range = range(freqs)
-        if(length(freqs) >= 2){
-          freq_step = freqs[2] - freqs[1]
-        }
-        wave_num = log$wave_num
+        cycles = log$wave_num
         target_srate = log$target_srate
+
+        try({
+          # compatibility issue
+          if(length(cycles) == 2 && length(freqs) != length(cycles)){
+            # this is old scheme, try to be compatible
+            cycles = exp((log(cycles[2]) - log(cycles[1])) / (log(max(freqs)) - log(min(freqs))) * (log(freqs) - log(min(freqs)))) * cycles[1]
+          }
+
+          last = data.frame(Frequency = freqs, WaveCycle = cycles)
+          write.csv(last, file = file.path(conf_dir, dname), row.names = F)
+          selected %?<-% dname
+          choices = c(dname, choices)
+        })
       }
 
-      tagList(
-        textInput(ns('wave_electrodes'), 'Electrodes:', value = vc_txt, placeholder = 'Select at least one electrode.'),
-        sliderInput(ns('freq_range'), 'Frequency Range (Hz):', value = freq_range, step = 1L, round = TRUE, min = 1L, max = srate / 2),
-        numericInput(ns('freq_step'), 'Frequency Step Size (Hz): ', value = freq_step, step = 1L, min = 1L),
-        sliderInput(ns('wave_num'), 'Number of Wavelet Cycles: ', value = wave_num, step = 1L, min = 1L, max = 40L, round = T),
-        numericInput(ns('target_srate'), 'Target Sample Rate', value = target_srate, min = 10L, max = srate, step = 1L),
-        numericInput(ns('ncores'), 'Parallel, Number of Cores:', value = min(4L, max_core), min = 1L, max = max_core, step = 1L),
+
+      selected %?<-% choices[1]
+
+
+      shinydashboard::box(
+        title = 'Wavelet Settings', width = 12L,
+        div(
+          class = 'rave-grid-inputs',
+          div(
+            style = 'flex-basis:66%',
+            selectInput(ns('wave_conf_name'), 'Configuration', choices = choices, selected = selected)
+          ),
+          div(
+            style = 'flex-basis:33%',
+            fileInput(ns('wave_conf_load'), 'Upload Preset', multiple = F, accept = c(
+              "text/csv",
+              "text/comma-separated-values,text/plain",
+              ".csv")
+            )
+          )
+        ),
         actionButton(ns('do_wavelet'), 'Run Wavelet')
       )
+    })
+
+    output$wavelet_inputs3 <- renderUI({
+      fname = input$wave_conf_name
+      path = file.path(conf_dir, fname)
+      validate(need(length(path) == 1 && (
+        file.exists(path) || fname %in% c('[New setting]')
+      ), message = ''))
+
+      srate = utils$get_srate()
+      freq_range = c(2,200)
+      freq_step = 2
+      wave_num = c(3,20)
+      additional_ui = NULL
+      if(fname == '[New setting]'){
+        additional_ui = tagList(
+          sliderInput(ns('freq_range'), 'Frequency Range (Hz):', value = freq_range, step = 1L, round = TRUE, min = 1L, max = srate / 2),
+          numericInput(ns('freq_step'), 'Frequency Step Size (Hz): ', value = freq_step, step = 1L, min = 1L),
+          sliderInput(ns('wave_num'), 'Number of Wavelet Cycles: ', value = wave_num, step = 1L, min = 1L, max = 40L, round = T),
+          hr()
+        )
+      }else{
+        # read from config name
+        local_data$refresh_wavelet
+        tbl = read.csv(path, header = T)
+        set_wave_param(tbl$Frequency, tbl$WaveCycle)
+      }
+
+      shinydashboard::box(
+        title = 'Details', width = 12L,
+        additional_ui,
+        p(
+          downloadLink(ns('wave_conf_save'), label = 'Download Current Setting')
+        ),
+
+        DT::dataTableOutput(ns('wave_details'))
+      )
+    })
+
+    # observeEvent(input$wave_conf_save, {
+    #   name = input$wave_conf_new
+    #   name = stringr::str_remove_all(name, '[\\w]')
+    #   if(stringr::str_length(name) == 0){
+    #     name = 'no_name'
+    #   }
+    #   name = paste(name, '.csv')
+    #   tbl = local_data$wave_param
+    #
+    #   # write to rave_modules/cache
+    #   write.csv(tbl, file.path(conf_dir, name), row.names = F)
+    #
+    #   local_data$refresh_wavelet = Sys.time()
+    #   local_data$wavelet_selected = name
+    # })
+
+    output$wave_conf_save <- downloadHandler(
+      filename = function(){
+        name = isolate(input$wave_conf_name)
+        name = stringr::str_remove_all(name, '[^\\w\\.]')
+        name = stringr::str_remove(name, '^[_]+')
+        if(!stringr::str_detect(name, '\\.csv$')){
+          name = paste0(name, '.csv')
+        }
+        name
+      },
+      content = function(file){
+        try({
+          write.csv(local_data$wave_param, file, row.names = F)
+        })
+      }
+    )
+
+    observe({
+      fname = input$wave_conf_name
+      if(!is.null(fname) && fname == '[New setting]'){
+        freq_range = input$freq_range
+        freq_step = max(input$freq_step, 0.5)
+        wave_num = input$wave_num
+        if(length(freq_range) == 2 && length(freq_step) == 1 && length(wave_num) == 2){
+          freq = seq(freq_range[1], freq_range[2], by = freq_step)
+          set_wave_param(freq, wave_num)
+        }
+      }
+
+    })
+
+    set_wave_param = function(f, w){
+      if(length(w) == 2 && length(f) != 2){
+        w = sort(w)
+        w = exp((log(w[2]) - log(w[1])) / (log(max(f)) - log(min(f))) * (log(f) - log(min(f))) + log(w[1]))
+      }
+
+      d = duplicated(f)
+      f = f[!d]
+      w = w[!d]
+      o = order(f)
+      f = f[o]
+      w = w[o]
+      local_data$wave_param = data.frame(
+        Frequency = f,
+        WaveCycle = w
+      )
+    }
+
+
+    output$wave_details <- DT::renderDataTable({
+      local_data$wave_param
+    })
+
+
+    observeEvent(input$wave_conf_load, {
+      # Check data
+      print(input$wave_conf_load)
+      finfo = input$wave_conf_load
+      name = finfo$name
+      path = finfo$datapath
+      name = stringr::str_split(name, '\\.')[[1]]
+      name = name[[1]]
+      name = stringr::str_remove_all(name, '[\\W]')
+      name = paste0(name, '.csv')
+      # try to read csv from datapath
+      tryCatch({
+        dat = read.csv(path, header = T)
+        freq = as.numeric(dat[,1])
+        assertthat::assert_that(all(!is.na(freq)), msg = 'Non-numeric values found in frequencies.')
+        cycles = NULL
+        if(ncol(dat) >= 2){
+          cycles = as.numeric(dat[,2])
+          if(any(is.na(cycles))){
+            cycles = NULL
+          }
+        }
+        cycles %?<-% (exp((log(14/3)) / (log(40)) * (log(freq) - log(2))) * 3)
+        cycles[cycles < 1] = 1
+
+
+        # write to rave_modules/cache
+        write.csv(data.frame(
+          Frequency = freq,
+          WaveCycle = cycles
+        ), file.path(conf_dir, name), row.names = F)
+
+        local_data$refresh_wavelet = Sys.time()
+        local_data$wavelet_selected = name
+      }, error = function(e){
+        showNotification(p('Cannot read uploaded file. Make sure the first column contains frequencies and the second column (optional) contains wavelet cycles.'), type = 'error')
+      })
     })
 
     # Modal
@@ -67,14 +281,15 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
       w_e = parse_selections(input$wave_electrodes)
       es = utils$get_electrodes()
       w_e = w_e[w_e %in% es]
-      frange = round(input$freq_range)
-      fstep = max(1, round(input$freq_step))
-      w_freqs = seq(frange[1], frange[2], by = fstep)
+      tbl = local_data$wave_param
+
+      w_freqs = as.numeric(tbl$Frequency)
+      w_cycle = as.numeric(tbl$WaveCycle)
 
       local_data$prevent_rewavelet = FALSE
 
 
-      if(length(w_e) && length(w_freqs) > 1){
+      if(length(w_e) && length(w_freqs) > 1 && length(w_freqs) == length(w_cycle) && !any(is.na(w_freqs)) && !any(is.na(w_cycle))){
         showModal(
           modalDialog(
             title = 'Confirmation',
@@ -96,6 +311,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
           )
         )
       }else{
+
         showModal(
           modalDialog(
             title = 'Warning',
@@ -105,8 +321,9 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
                 width = 12,
                 p('Check your inputs, there might be some problem(s).'),
                 tags$ul(
-                  tags$li('Valid channels: ' %&% deparse_selections(w_e)),
-                  tags$li('Frequency bands: ' %&% paste(frange, collapse = '-') %&% ' Hz with step of ' %&% fstep %&% ' Hz.')
+                  tags$li('Valid Channels: ' %&% deparse_selections(w_e)),
+                  tags$li('Frequencies: ' %&% paste(range(w_freqs), collapse = '-') %&% ' Hz. Make sure they are positive numbers.'),
+                  tags$li('Wavelet Cycles: ' %&% paste(range(w_cycle), collapse = '-') %&% '. Make sure they are positive numbers..')
                 )
               )
             )
@@ -128,9 +345,13 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
       w_e = parse_selections(input$wave_electrodes)
       es = utils$get_electrodes()
       w_e = w_e[w_e %in% es]
-      frange = round(input$freq_range)
-      fstep = max(1, round(input$freq_step))
-      w_freqs = seq(frange[1], frange[2], by = fstep)
+      # frange = round(input$freq_range)
+      # fstep = max(1, round(input$freq_step))
+      # w_freqs = seq(frange[1], frange[2], by = fstep)
+      tbl = local_data$wave_param
+
+      w_freqs = as.numeric(tbl$Frequency)
+      w_cycle = as.numeric(tbl$WaveCycle)
 
       showNotification(p('Wavelet start!'), type = 'message')
 
@@ -140,7 +361,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
         electrodes = w_e,
         target_srate = round(input$target_srate),
         frequencies = w_freqs,
-        wave_num = round(input$wave_num),
+        wave_num = w_cycle,
         ncores = round(input$ncores)
       )
 
@@ -152,18 +373,20 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
 
     # Output plot
     output$wave_windows_plot <- renderPlot({
-      wave_num = input$wave_num
-      freq_range = input$freq_range
-      fstep = input$freq_step
+      tbl = local_data$wave_param
+      wave_num = tbl$WaveCycle
+      freqs = tbl$Frequency
+      # wave_num = input$wave_num
+      # freq_range = input$freq_range
+      # fstep = input$freq_step
       srate = utils$get_srate()
 
       validate(
-        need(length(wave_num) > 0, 'Specify number of wavelet cycles'),
-        need(length(freq_range) > 0 && freq_range[1] < freq_range[2], 'Specify valid frequency range'),
-        need(length(fstep) > 0 && fstep > 0, 'Specify valid frequency steps'),
+        need(length(wave_num) > 0 && all(wave_num > 0), 'Specify number of wavelet cycles'),
+        need(length(freqs) > 0 && all(freqs > 0), 'Specify valid frequency range'),
         need(length(srate) > 0 && srate > 0, 'Wait, have you loaded subject yet?')
       )
-      freqs = seq(freq_range[1], freq_range[2], by = fstep)
+      # freqs = seq(freq_range[1], freq_range[2], by = fstep)
       wavelet_kernels(freqs, srate, wave_num)
     })
 

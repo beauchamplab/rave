@@ -5,9 +5,13 @@
 wavelet_kernels <- function(freqs, srate, wave_num){
   srate = round(srate);
   # calculate wavelet cycles for each frequencies
-  ratio = (log(max(wave_num)) - log(min(wave_num))) / (log(max(freqs)) - log(min(freqs)))
-  wavelet_cycles = exp((log(freqs) - log(min(freqs))) * ratio + log(min(wave_num)))
-
+  if(length(wave_num) != length(freqs)){
+    # calculate wavelet cycles for each frequencies
+    ratio = (log(max(wave_num)) - log(min(wave_num))) / (log(max(freqs)) - log(min(freqs)))
+    wavelet_cycles = exp((log(freqs) - log(min(freqs))) * ratio + log(min(wave_num)))
+  }else{
+    wavelet_cycles = wave_num
+  }
   f_l = length(freqs)
 
 
@@ -105,15 +109,15 @@ wavelet_kernels <- function(freqs, srate, wave_num){
 
   # plot freq over wavelength and wave cycles
   wave_len = sapply(fft_waves, length) / srate
-  plot(wave_len, freqs, type = 'l', xlab = 'Wavelet Length (seconds)',
-       ylab = 'Frequency (Hz)', main = 'Frequency vs. Wavelet Length',
+  plot(freqs, wave_len, type = 'l', ylab = 'Wavelet Length (seconds)',
+       xlab = 'Frequency (Hz)', main = 'Wavelet Length | Frequency',
        las = 1, cex.lab = 1.4, cex.main = 1.6, cex.axis = 1.2, col = 'grey80')
-  points(wave_len, freqs, col = 'red', pch = '.')
+  points(freqs, wave_len, col = 'red', pch = 4)
 
-  plot(wavelet_cycles, freqs, type = 'l', xlab = 'Wavelet Cycle',
-       ylab = '', main = 'Frequency vs. Wavelet Cycle',
+  plot(freqs, wavelet_cycles, type = 'l', ylab = 'Wavelet Cycle',
+       xlab = 'Frequency (Hz)', main = 'Wavelet Cycle | Frequency',
        las = 1, cex.lab = 1.4, cex.main = 1.6, cex.axis = 1.2, col = 'grey80')
-  points(wavelet_cycles, freqs, col = 'red', pch = '.')
+  points(freqs, wavelet_cycles, col = 'red', pch = 4)
 
   invisible(fft_waves)
 }
@@ -149,9 +153,14 @@ wavelet_kernels <- function(freqs, srate, wave_num){
 #' @export
 wavelet <- function(data, freqs, srate, wave_num){
   srate = round(srate);
-  # calculate wavelet cycles for each frequencies
-  ratio = (log(max(wave_num)) - log(min(wave_num))) / (log(max(freqs)) - log(min(freqs)))
-  wavelet_cycles = exp((log(freqs) - log(min(freqs))) * ratio + log(min(wave_num)))
+  if(length(wave_num) != length(freqs)){
+    # calculate wavelet cycles for each frequencies
+    ratio = (log(max(wave_num)) - log(min(wave_num))) / (log(max(freqs)) - log(min(freqs)))
+    wavelet_cycles = exp((log(freqs) - log(min(freqs))) * ratio + log(min(wave_num)))
+  }else{
+    wavelet_cycles = wave_num
+  }
+
   # Instead of using fixed wave_cycles, use flex cycles
   # lower num_cycle is good for low freq, higher num_cycle is good for high freq.
   # wavelet_cycles = wave_num;
