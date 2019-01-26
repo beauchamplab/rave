@@ -134,7 +134,14 @@ rave_prepare <- function(
       base::detach('rave_data', character.only = T, force = T)
     }
 
-    base::attach(data_env, name = 'rave_data')
+    rave_idx = which(search() == "package:rave")
+
+    if(length(rave_idx)){
+      attach(data_env, name = 'rave_data', pos = rave_idx)
+    }else{
+      attach(data_env, name = 'rave_data')
+    }
+
 
 
     if(attach == TRUE || attach %in% c('R', 'r')){

@@ -113,8 +113,10 @@ Tensor <- R6::R6Class(
       # re = lazyeval::lazy_eval(expr, data = self$dimnames)
       quos = rlang::quos(...)
       re = sapply(quos, function(quo){
-        quo = rlang::quo_set_env(quo, ..wrapper)
-        eval_tidy(quo)
+        # Use eval_dirty!
+        # quo = rlang::quo_set_env(quo, ..wrapper)
+        # eval_tidy(quo)
+        eval_dirty(quo, env = ..wrapper)
       }, simplify = F, USE.NAMES = T)
 
       dims = self$dim

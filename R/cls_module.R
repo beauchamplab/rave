@@ -40,11 +40,18 @@ getDefaultDataRepository <- function(
 #' Attach subject data
 #' @param unload TRUE if you want to detach
 #' @export
-attachDefaultDataRepository <- function(unload = F){
+attachDefaultDataRepository <- function(unload = T){
   if(unload){
-    try({detach(rave_data)}, silent = T)
+    try({detach('rave_data')}, silent = T)
+  }
+
+  rave_data = getDefaultDataRepository()
+
+  rave_idx = which(search() == "package:rave")
+
+  if(length(rave_idx)){
+    attach(rave_data, pos = rave_idx)
   }else{
-    rave_data = getDefaultDataRepository()
     attach(rave_data)
   }
 }
