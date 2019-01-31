@@ -117,8 +117,8 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2){
 
         fpath = file.path(dirs$meta_dir, epoch_name)
         if(file.exists(fpath)){
-          logger('Load epoch from file.')
-          tbl = read.csv(fpath, colClasses = c('character', 'numeric'))
+          logger('Loading epoch from file.')
+          tbl = safe_read_csv(fpath, colClasses = c('character', 'numeric'))
           local_data$staged = sapply(utils$get_blocks(), function(b){
             sub = tbl[tbl$Block == b,]
             if(nrow(sub)){
@@ -298,7 +298,6 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2){
           ylim = c(-plot_range, plot_range)
         }
       }
-      print(ylim)
 
       if(use_abs){
         main = 'Absolute(Signal)'

@@ -2,6 +2,7 @@
 NULL
 
 #' @import shiny
+#' @importFrom shinydashboard box
 NULL
 
 
@@ -45,3 +46,9 @@ updatePackageVersion <- function(packageLocation ="."){
   ## Return the updated version number to screen
   return(vFinal)
 }
+
+
+
+
+### Some third party packages needed
+box <- shinydashboard::box

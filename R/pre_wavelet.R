@@ -13,6 +13,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
       uiOutput(ns('wavelet_inputs3'))
     ),
     shinydashboard::box(
+      collapsible = TRUE,
       width = 12 - sidebar_width,
       title = 'Wavelet Kernels',
       plotOutput(ns('wave_windows_plot'), height = '80vh')
@@ -31,7 +32,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
     output$wavelet_inputs1 <- renderUI({
       user_data$reset
       if(!utils$notch_filtered()){
-        return(shinydashboard::box(title = 'General Settings', width = 12L, tags$small('Please finish previous steps first (Import subject, Notch filter).')))
+        return(box(collapsible = TRUE, title = 'General Settings', width = 12L, tags$small('Please finish previous steps first (Import subject, Notch filter).')))
       }
       electrodes = utils$get_electrodes()
       vc_txt = deparse_selections(electrodes)
@@ -45,7 +46,8 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
         target_srate = log$target_srate
       }
 
-      shinydashboard::box(
+      box(
+        collapsible = TRUE,
         title = 'General Settings', width = 12L,
         textInput(ns('wave_electrodes'), 'Electrodes:', value = vc_txt, placeholder = 'Select at least one electrode.'),
         numericInput(ns('target_srate'), 'Target Sample Rate', value = target_srate, min = 10L, max = srate, step = 1L),
@@ -108,15 +110,16 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
 
 
       shinydashboard::box(
+        collapsible = TRUE,
         title = 'Wavelet Settings', width = 12L,
         div(
           class = 'rave-grid-inputs',
           div(
-            style = 'flex-basis:66%',
+            style = 'flex-basis:50%',
             selectInput(ns('wave_conf_name'), 'Configuration', choices = choices, selected = selected)
           ),
           div(
-            style = 'flex-basis:33%',
+            style = 'flex-basis:50%',
             fileInput(ns('wave_conf_load'), 'Upload Preset', multiple = F, accept = c(
               "text/csv",
               "text/comma-separated-values,text/plain",
@@ -151,10 +154,11 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
         # read from config name
         local_data$refresh_wavelet
         tbl = read.csv(path, header = T)
-        set_wave_param(tbl$Frequency, tbl$WaveCycle)
+        set_wave_param(tbl$Frequency, tbl$WaveCycle, as_is = TRUE)
       }
 
       shinydashboard::box(
+        collapsible = TRUE,
         title = 'Details', width = 12L,
         additional_ui,
         p(
@@ -202,7 +206,11 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
       fname = input$wave_conf_name
       if(!is.null(fname) && fname == '[New setting]'){
         freq_range = input$freq_range
-        freq_step = max(input$freq_step, 0.5)
+        freq_step = input$freq_step
+        if(is_invalid(freq_step)){
+          freq_step = 2
+        }
+        freq_step = max(freq_step, 0.5)
         wave_num = input$wave_num
         if(length(freq_range) == 2 && length(freq_step) == 1 && length(wave_num) == 2){
           freq = seq(freq_range[1], freq_range[2], by = freq_step)
@@ -212,7 +220,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
 
     })
 
-    set_wave_param = function(f, w){
+    set_wave_param = function(f, w, as_is = FALSE){
       if(length(w) == 2 && length(f) != 2){
         w = sort(w)
         w = exp((log(w[2]) - log(w[1])) / (log(max(f)) - log(min(f))) * (log(f) - log(min(f))) + log(w[1]))
@@ -223,7 +231,12 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
       w = w[!d]
       o = order(f)
       f = f[o]
-      w = w[o]
+      if(!as_is){
+        w = round(w[o])
+      }else{
+        w = w[o]
+      }
+
       local_data$wave_param = data.frame(
         Frequency = f,
         WaveCycle = w

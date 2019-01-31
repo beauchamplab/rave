@@ -15,6 +15,48 @@ safe_write_csv <- function(data, file, ..., quiet = F){
   write.csv(data, file, ...)
 }
 
+
+#' Read csv, with column classes specified
+safe_read_csv <- function(file, header = TRUE, sep = ',', colClasses = NA, skip = 0, quote = "\"", ...){
+
+  s = readLines(file, n = skip+1, ok = TRUE)
+
+  # Reach EOF
+  if(length(s) != skip+1){
+    return(data.frame())
+  }
+
+  # Parse headers
+  s = s[skip+1]
+  s = strsplit(s, sep)[[1]]
+  s = stringr::str_remove_all(s, quote)
+
+  # If length(s) == 1
+  if(length(s) == 1){
+    colClasses = colClasses[1]
+    return(read.csv(file = file, header = header, sep = sep, colClasses = colClasses, skip = skip, quote = quote, ...))
+  }
+
+
+  if(!header || s[1] != ''){
+    col_class =  rep(NA, length(s))
+    col_class[seq_along(colClasses)] = colClasses
+    return(read.csv(file = file, header = header, sep = sep, colClasses = col_class, skip = skip, quote = quote, ...))
+  }else{
+    # first blank header will be rownames
+    col_class =  rep(NA, length(s))
+    col_class[seq_along(colClasses) + 1] = colClasses
+    dat = read.csv(file = file, header = header, sep = sep, colClasses = col_class, skip = skip, quote = quote, ...)
+    row.names(dat) = dat[,1]
+    dat = dat[,-1]
+    return(dat)
+  }
+
+
+  read.csv(file = file, header = header, sep = sep, colClasses = colClasses, skip = skip, quote = quote, ...)
+}
+
+
 #' Function to save meta data to subject
 #' @param data data table
 #' @param meta_type see load meta
