@@ -46,6 +46,8 @@ rave_prepare <- function(
                           reference = reference, strict = strict)
   }
 
+  subject$is_strict = strict
+
   repo = ECoGRepository$new(subject = subject, autoload = F, reference = reference)
   repo$load_electrodes(electrodes = electrodes, reference = reference)
 

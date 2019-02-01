@@ -130,7 +130,7 @@ ECoGRepository <- R6::R6Class(
         assertthat::assert_that('character' %in% class(subject),
                                 msg = 'Param <subject> needs to be either subject ID or a Subject instance')
         subject = str_split_fixed(subject, '\\\\|/', 2)
-        self$subject = Subject$new(project_name = subject[1], subject_code = subject[2], reference = reference)
+        self$subject = Subject$new(project_name = subject[1], subject_code = subject[2], reference = reference, strict = FALSE)
       }
 
       # load electrodes

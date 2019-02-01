@@ -195,7 +195,7 @@ suma_spec_parse <- function(subject, spec_file){
   if(missing(spec_file)){
     if(is.character(subject)){
       subject = str_split_fixed(subject, '/', 2)
-      subject = Subject$new(project_name = subject[1], subject_code = subject[2])
+      subject = Subject$new(project_name = subject[1], subject_code = subject[2], strict = FALSE)
     }
     suma_dir = subject$dirs$suma_dir
     spec_file %?<-% file.path(suma_dir, fprintf('${{rave_options("suma_spec_file")}}'))
@@ -324,7 +324,7 @@ suma_surface_volume_parse <- function(file_path){
 freesurfer_mesh <- function(subject, spec_file = NULL, state = 'pial', center = c(0,0,30)){
   if(is.character(subject)){
     subject = str_split_fixed(subject, '/', 2)
-    subject = Subject$new(project_name = subject[1], subject_code = subject[2])
+    subject = Subject$new(project_name = subject[1], subject_code = subject[2], strict = FALSE)
   }
 
   spec_info = suma_spec_parse(subject, spec_file = spec_file)

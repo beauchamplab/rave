@@ -100,7 +100,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
       s = SubjectInfo2$new(project_name = project_name, subject_code = subject_code, strict = strict)
       env[['subject']] = s
 
-      logger('Loaded Subject: [Project]/[Subject]' %&% utils$get_subject_id())
+      logger('Loaded Subject: ' %&% utils$get_subject_id())
     }
     save_subject = function(subject_code, project_name){
       logger('Saving Subject')

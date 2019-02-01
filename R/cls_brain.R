@@ -75,7 +75,7 @@ RaveBrain <- R6::R6Class(
     load_subject = function(subject){
       if(!is(subject, 'Subject')){
         subject = stringr::str_split_fixed(subject, '/', 2)
-        subject = Subject$new(project_name = subject[1], subject_code = subject[2])
+        subject = Subject$new(project_name = subject[1], subject_code = subject[2], strict = FALSE)
       }
       # try to import electrodes from subject
       private$subject = subject
