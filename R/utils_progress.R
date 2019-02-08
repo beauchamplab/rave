@@ -32,7 +32,23 @@ progress <- function(
     title = ''
   }
 
-  if(is.null(session) || quiet || !is(session, c('ShinySession', 'session_proxy', 'R6'))){
+  is_shiny_session = local({
+    if(is.null(session)){
+      return(FALSE)
+    }else{
+      if(any(
+        is(session, 'ShinySession'),
+        is(session, 'session_proxy'),
+        is(session, 'R6')
+      )){
+        return(TRUE)
+      }else{
+        return(FALSE)
+      }
+    }
+  })
+
+  if(quiet || !is_shiny_session){
     progress = NULL
     inc = function(message){if(!quiet) logger(message)}
     close = function(){}

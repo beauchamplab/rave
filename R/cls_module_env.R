@@ -312,6 +312,18 @@ ExecEnvir <- R6::R6Class(
         if(!quoted){
           x = substitute(x)
         }
+
+        # Make sure shiny doesn't crash
+        x = rlang::quo_squash(rlang::quo(
+          tryCatch({
+            shiny::withLogErrors({!!x})
+          }, error = function(e){
+            showNotification(htmltools::p(htmltools::strong('An error occurred'), htmltools::br(), 'Details: ',
+                                          htmltools::span(as.character(e), style = 'font-style:italic;')), type = 'error')
+          })
+        ))
+
+
         if(!is.environment(env)){
           env = self$runtime_env
         }
@@ -349,6 +361,16 @@ ExecEnvir <- R6::R6Class(
         if(is.null(domain)){
           domain = self$wrapper_env$getDefaultReactiveDomain()
         }
+
+        # Make sure shiny doesn't crash
+        handlerExpr = rlang::quo_squash(rlang::quo(
+          tryCatch({
+            shiny::withLogErrors({!!handlerExpr})
+          }, error = function(e){
+            showNotification(htmltools::p(htmltools::strong('An error occurred'), htmltools::br(), 'Details: ',
+                                          htmltools::span(as.character(e), style = 'font-style:italic;')), type = 'error')
+          })
+        ))
 
         shiny::observeEvent(
           eventExpr = eventExpr, handlerExpr = handlerExpr, event.env = event.env,
