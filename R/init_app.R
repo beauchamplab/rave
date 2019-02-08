@@ -106,6 +106,9 @@ get_mem_usage <- function(modules, data_envir){
 #' @export
 init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
                      theme = "purple", disable_sidebar = FALSE, simplify_header = FALSE, ...){
+
+  register_compoundInput()
+
   tryCatch({
     rave_prepare()
   }, error = function(e){})

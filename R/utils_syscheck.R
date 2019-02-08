@@ -56,50 +56,10 @@ rave_version <- function(){
 }
 
 
-
-
 .onAttach <- function(libname, pkgname){
 
   try({
-    shiny::registerInputHandler("rave.compoundInput", function(data, shinysession, name) {
-      if (is.null(data)){
-        return(NULL)
-      }
-
-      # restoreInput(id = , NULL)
-      meta = as.list(data$meta)
-      timeStamp = as.character(data$timeStamp)
-      maxcomp = as.integer(data$maxcomp)
-      inputId = as.character(data$inputId)
-      value =  data$val
-
-      ids = names(meta)
-      ncomp = as.integer(data$ncomp)
-      if(length(ids) == 0 || is.null(ncomp) || ncomp <= 0){
-        return(NULL)
-      }
-
-      # nvalid = length(dropInvalid(value, deep = T))
-      # nvalid = max(1, nvalid)
-      # nvalid = min(nvalid, ncomp)
-
-      re = lapply(value, function(val){
-        sapply(val, function(v){
-          tryCatch({
-            jsonlite::fromJSON(v)
-          }, error = function(e){
-            NULL
-          })
-        }, simplify = F, USE.NAMES = T)
-      })
-
-      attr(re, 'ncomp') <- ncomp
-      attr(re, 'meta') <- meta
-      attr(re, 'timeStamp') <- timeStamp
-      attr(re, 'maxcomp') <- maxcomp
-      return(re)
-
-    }, force = TRUE)
+    register_compoundInput()
   }, silent = T)
 
   try({

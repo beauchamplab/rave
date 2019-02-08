@@ -52,3 +52,24 @@ updatePackageVersion <- function(packageLocation ="."){
 
 ### Some third party packages needed
 box <- shinydashboard::box
+
+
+
+### Stores internal settings (session-based)
+.conf_env <- new.env(parent = emptyenv())
+
+get_conf <- function(key, default = NULL){
+  if(exists(key, envir = .conf_env)){
+    return(.conf_env[[key]])
+  }else{
+    default
+  }
+}
+
+set_conf <- function(key, val, remove_if_null = TRUE){
+  if(remove_if_null && (missing(val) || is.null(val))){
+    rm(list = key, envir = .conf_env, inherits = FALSE)
+  }else{
+    .conf_env[[key]] = val
+  }
+}
