@@ -366,8 +366,10 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
       if(global_reactives$has_data){
         global_reactives$execute_module = input$sidebar
         shinyjs::hide(id = '__rave__mask__', anim = T, animType = 'slide')
+        shinyjs::removeClass(selector = 'body', class = "rave-noscroll")
       }else{
         shinyjs::show(id = '__rave__mask__', anim = T, animType = 'slide')
+        shinyjs::addClass(selector = 'body', class = "rave-noscroll")
       }
     })
 

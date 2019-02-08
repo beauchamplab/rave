@@ -271,6 +271,7 @@ shiny_data_selector <- function(module_id){
 
     ##### Show modal when 'data_select' is clicked
     observeEvent(input$data_select, {
+      shinyjs::addClass(selector = 'body', class = "rave-noscroll")
       shiny::showModal(
         shiny::modalDialog(
           title = 'Data Selection', size = 'l', easyClose = F, fade = F,
@@ -285,7 +286,10 @@ shiny_data_selector <- function(module_id){
       )
     })
 
-    observeEvent(input$dismiss, { removeModal() })
+    observeEvent(input$dismiss, {
+      shinyjs::removeClass(selector = 'body', class = "rave-noscroll");
+      removeModal()
+    })
 
     ##### Modal layout
     data_modal = function(){
@@ -1041,6 +1045,7 @@ shiny_data_selector <- function(module_id){
       global_reactives$force_refresh_all = Sys.time()
       global_reactives$has_data = Sys.time()
 
+      shinyjs::removeClass(selector = 'body', class = "rave-noscroll");
       removeModal()
       # Remove
       local_data$prevent_dblclick = TRUE

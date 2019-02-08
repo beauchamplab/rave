@@ -125,6 +125,10 @@ li.control-sidebar-items>a {
 }
 
 
+body.rave-noscroll {
+  overflow: hidden;
+}
+
 #__rave__mask__ {
     width: 100%;
     height: 100vh;
