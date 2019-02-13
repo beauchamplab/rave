@@ -438,6 +438,8 @@ ExecEnvir <- R6::R6Class(
       return(invisible(self$runtime_env))
     },
     export_report = function(expr, inputId = 'electrode', electrodes = NULL, async = F){
+      .Deprecated('This function is deprecated', msg = 'Please avoid using this function in your module.')
+
       # assign('aaa', environment(), envir = globalenv())
       expr = substitute(expr)
       params = as.list(self$param_env)
@@ -801,7 +803,7 @@ ExecEnvir <- R6::R6Class(
       }
       invisible()
     },
-    rave_execute = function(..., auto = TRUE, .env = NULL){
+    rave_execute = function(..., auto = TRUE, .env = NULL, async_vars = NULL){
       quos = rlang::quos_auto_name(rlang::quos(...))
 
       normal_quos = quos[!names(quos) %in% 'async']
@@ -819,13 +821,22 @@ ExecEnvir <- R6::R6Class(
         if(async){
           if(self$async_module){
             async_env = new.env(parent = self$runtime_env)
+            async_env[['..async_quo']] = async_quo
+            async_env[['..async_var']] = async_vars
+
             packages = str_match(search(), '^package:(.+)$')[,2]; packages = packages[!is.na(packages)]
             packages = unique(packages, private$module_env$packages)
+
             self$param_env$..rave_future_obj =
               future::future({
-                rave::eval_dirty(async_quo, env = async_env)
-                async_env
-              }, packages = packages, evaluator = future::multiprocess,
+                rave::eval_dirty(..async_quo)#, env = async_env)
+                if(is.null(..async_var)){
+                  return(environment())
+                }else{
+                  re = sapply(..async_var, get0, simplify = F, USE.NAMES = T)
+                  return(list2env(re))
+                }
+              }, packages = packages, evaluator = future::multiprocess, envir = async_env,
               gc = T, workers = rave_options('max_worker'))
           }
         }else{
