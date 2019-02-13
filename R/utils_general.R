@@ -536,7 +536,6 @@ eval_dirty <- function(expr, env = parent.frame(), data = NULL){
 #'
 #' a[a %within% 2:5]
 #' }
-#' @export
 is_within <- function(x, ref, strict = FALSE){
   rg = range(ref)
   if(strict){
@@ -547,7 +546,6 @@ is_within <- function(x, ref, strict = FALSE){
 }
 
 #' @rdname is_within
-#' @export
 `%within%` <- function(x,ref){
   is_within(x,ref)
 }
