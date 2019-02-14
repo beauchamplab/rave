@@ -109,14 +109,16 @@ ExecEnvir <- R6::R6Class(
       self$wrapper_env$async_var = function(x, default = NULL){
         x_name = deparse(substitute(x))
         val = NULL
-        if(is.environment(self$param_env[['..rave_future_env']])){
-          val = self$param_env[['..rave_future_env']][[x_name]]
+        future_env = self$param_env[['..rave_future_env']]
+        if(is.environment(future_env) || is.list(future_env)){
+          val = future_env[[x_name]]
+
+          if(!is.null(val)){
+            return(val)
+          }
         }
-        if(is.null(val)){
-          return(default)
-        }else{
-          return(val)
-        }
+
+        return(default)
       }
 
       self$wrapper_env$reloadUI = function(){
@@ -834,7 +836,7 @@ ExecEnvir <- R6::R6Class(
                   return(environment())
                 }else{
                   re = sapply(..async_var, get0, simplify = F, USE.NAMES = T)
-                  return(list2env(re))
+                  re
                 }
               }, packages = packages, evaluator = future::multiprocess, envir = async_env,
               gc = T, workers = rave_options('max_worker'))

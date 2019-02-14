@@ -21,6 +21,7 @@ any_subject_loaded <- function(){
 #' Function to find modules in packages
 #' @param package package name to search for modules
 #' @param module_id (optional) module ID if the package contains multiple modules
+#' @export
 get_module <- function(package, module_id){
   yml = system.file('rave.yaml', package = package)
   if(yml == ''){
