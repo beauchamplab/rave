@@ -22,7 +22,17 @@ any_subject_loaded <- function(){
 #' @param package package name to search for modules
 #' @param module_id (optional) module ID if the package contains multiple modules
 #' @export
-get_module <- function(package, module_id){
+get_module <- function(package, module_id, local = FALSE){
+
+  if(local){
+    if(missing(module_id)){
+      logger('You are running module locally. Please specify module ID.')
+      return(invisible())
+    }else{
+      return(debug_module(package = package, module_id = module_id))
+    }
+  }
+
   yml = system.file('rave.yaml', package = package)
   if(yml == ''){
     logger('Package ', package, ' contains no RAVE module.', level = 'ERROR')
@@ -40,22 +50,25 @@ get_module <- function(package, module_id){
   }
 
   # Load dev environment
-  .fs = list.files(system.file('tools', package = package), pattern = '\\.R$', full.names = T)
+  .fs = list.files(system.file('template/inst/tools', package = 'rave'), pattern = '\\.R$', full.names = T)
   env = new.env()
   with(env, {
     for(.f in .fs){
       source(.f, local = T)
     }
   })
+  env$.packageName = package
 
   if(length(module_id) == 1){
     module = env$to_module(module_id = module_id, sidebar_width = 3L)
+
     return(module)
   }else{
     modules = lapply(module_id, function(mid){
       tryCatch({
         env$to_module(module_id = mid, sidebar_width = 3L)
       }, error = function(e){
+        logger('An error occurred during parsing module ', mid, ' (', package, '). Please check source code if you are module developer. [Ignored]', level = 'WARNING')
         NULL
       })
 
@@ -68,6 +81,175 @@ get_module <- function(package, module_id){
       modules = modules[[1]]
     }
   }
+}
+
+
+debug_module <- function(package = package, module_id = module_id, reload = FALSE){
+  .fs = list.files(system.file('template/inst/tools', package = 'rave'), pattern = '\\.R$', full.names = T)
+  rave_dev_load <- function(){
+    # Get package name
+    env = new.env()
+    with(env, {
+      for(.f in .fs){
+        source(.f, local = T)
+      }
+    })
+    env$.packageName = package
+    return(env)
+  }
+  # Reload first
+  if(reload){
+    env = rave_dev_load()
+    env$reload_this_package(expose = FALSE, clear_env = FALSE)
+  }
+
+
+  env = rave_dev_load()
+
+  # Need to load subject first
+  has_subject = any_subject_loaded()
+
+  if(!has_subject){
+    logger('Error: No subject found! Please load subject first', level = 'ERROR')
+    return(invisible())
+  }
+
+  if(has_subject && !'rave_data' %in% search()){
+    attachDefaultDataRepository()
+  }
+
+  assign('aaa', env, envir = globalenv())
+  param_env = env$init_module(module_id = module_id)
+
+  runtime_env = new.env(parent = param_env)
+
+  envs = env$get_comp_env(module_id = module_id)
+  has_content = env$get_content(content = envs$content, env = envs$tmp_env)
+  inputs = lapply(envs$input_env, function(comp){
+    if(is(comp, 'comp_input')){
+      return(comp$inputId)
+    }else{
+      NULL
+    }
+  })
+  inputs = unlist(inputs); names(inputs) = NULL
+
+  args = as.list(param_env)[inputs]
+
+  main_quos = env$get_main_function(module_id)
+
+  outputIds = lapply(envs$output_env, function(comp){
+    if(is(comp, 'comp_output')){
+      return(comp$outputId)
+    }else{
+      NULL
+    }
+  })
+  outputIds = unlist(outputIds)
+
+
+  FUN = function(){}
+
+  environment(FUN) = runtime_env
+
+  sel = names(main_quos) %in% c('async')
+  normal_quos = main_quos[!sel]
+  async_quo = main_quos[sel]
+  async = length(async_quo)
+
+  body(FUN) = rlang::quo_squash(rlang::quo({
+    !!!normal_quos
+
+    results = environment()
+    ..env = list()
+
+    ..env$results = new.env()
+
+    ..tmp = new.env()
+
+    ..tmp[['..async']] = FALSE
+
+    if(!!async){
+      ..tmp[['..async']] = TRUE
+      ..tmp[['..async_quo']] = rlang::quo_squash(async_quo[[1]])
+      ..tmp[['..async_var']] = NULL
+      ..tmp[['..packages']] = str_match(search(), '^package:(.+)$')[,2]
+      ..tmp[['..packages']] = unique(..tmp[['..packages']][!is.na(..tmp[['..packages']])])
+      ..tmp[['..rave_future_obj']] = future::future({
+        rave::eval_dirty(..async_quo)#, env = async_env)
+        if(is.null(..async_var)){
+          return(environment())
+        }else{
+          re = sapply(..async_var, get0, simplify = F, USE.NAMES = T)
+          return(list2env(re))
+        }
+      }, packages = ..tmp[['..packages']], evaluator = future::multiprocess,
+      envir = ..tmp, gc = T)
+    }
+
+
+    ..env$results$get_value = function(key, ifNotFound = NULL){
+      get0(key, envir = results, ifnotfound = ifNotFound)
+    }
+    ..env$results$async_value = function(key){
+      if(!..tmp[['..async']]){
+        stop('This module has no async part.')
+      }else{
+        if(future::resolved(..tmp[['..rave_future_obj']])){
+          env = ..tmp[['..rave_future_env']]
+          if(!is.environment(env)){
+            env = ..tmp[['..rave_future_env']] = future::value(..tmp[['..rave_future_obj']])
+          }
+          get0(key, envir = env)
+        }
+      }
+
+    }
+
+    ..re = sapply(!!outputIds, function(nm){
+      ..f = get0(nm, envir = results, inherits = TRUE, ifnotfound = NULL)
+      if(!is.function(..f)){
+        return(function(...){
+          cat2('Function ', nm, ' is not available.', level = 'ERROR')
+        })
+      }else{
+        fm = formals(..f)
+
+        if(!length(fm)){
+          # Case 1: fm is NULL, meaning this is temp function or customized output
+          ..f
+        }else{
+          # Case 2: ..f is a package function
+          fm = fm[-1]
+          nms = names(fm)
+          has_dots = '...' %in% nms
+          nms = nms[!nms %in% c('', '...')]
+
+          f = function(){
+            args = sapply(nms, get0, inherits = FALSE, simplify = F, USE.NAMES = T)
+            if(has_dots){
+              args = c(list(..env$results), args, list(...))
+            }else{
+              args = c(list(..env$results), args)
+            }
+
+            do.call(..f, args)
+          }
+          formals(f) = fm
+          f
+        }
+      }
+
+      # eval(call("function", as.pairlist(fm), rhs), env, env)
+      # call("function", as.pairlist(fm), rhs)
+    }, simplify = F, USE.NAMES = T)
+
+    return(c(..env, ..re))
+  }))
+  formals(FUN) = args
+
+  return(FUN)
+
 }
 
 
@@ -138,7 +320,7 @@ detect_modules <- function(packages, as_module = TRUE){
       m = lapply(which(sel), function(ii){
         x = m_data[ii,]
         tryCatch({
-          find_module(package = x[4], module_id = x[1])
+          get_module(package = x[4], module_id = x[1])
         }, error = function(e){
           NULL
         })

@@ -87,7 +87,8 @@ ModuleEnvir <- R6::R6Class(
         cat(' -', a, '\n')
       }
     },
-    print = function(){
+    print = function(...){
+      self$info()
       pryr::address(self)
     },
     initialize = function(

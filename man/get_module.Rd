@@ -4,7 +4,7 @@
 \alias{get_module}
 \title{Function to find modules in packages}
 \usage{
-get_module(package, module_id)
+get_module(package, module_id, local = FALSE)
 }
 \arguments{
 \item{package}{package name to search for modules}

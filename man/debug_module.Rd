@@ -4,7 +4,8 @@
 \alias{debug_module}
 \title{Function for module writers to debug modules}
 \usage{
-debug_module(m, private_id)
+debug_module(package = package, module_id = module_id,
+  reload = FALSE)
 }
 \arguments{
 \item{m}{module object see ModuleEnvir}
