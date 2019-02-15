@@ -26,7 +26,7 @@ get_module <- function(package, module_id, local = FALSE){
 
   if(local){
     if(missing(module_id)){
-      logger('You are running module locally. Please specify module ID.')
+      logger('You are running module locally. Please specify module ID.', level = 'ERROR')
       return(invisible())
     }else{
       return(debug_module(package = package, module_id = module_id))

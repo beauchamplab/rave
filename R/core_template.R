@@ -7,13 +7,17 @@ create_template <- function(path, ...){
 
   rutabaga::cat2('Creating RAVE Module -', path)
 
-  # ensure path exists
-  dir.create(path, recursive = TRUE, showWarnings = FALSE)
-  dir.create(file.path(path, 'inst', 'utils'), recursive = TRUE, showWarnings = FALSE)
-  dir.create(file.path(path, 'R'), recursive = TRUE, showWarnings = FALSE)
-
   PACKAGE = tail(strsplit(path, '\\\\|/')[[1]],1)
   MODULEID = args[['module_id']]
+
+  # ensure path exists
+  dir.create(path, recursive = TRUE, showWarnings = FALSE)
+  dir.create(file.path(path, 'inst', 'tools'), recursive = TRUE, showWarnings = FALSE)
+  dir.create(file.path(path, 'inst', 'modules', MODULEID), recursive = TRUE, showWarnings = FALSE)
+  dir.create(file.path(path, 'R'), recursive = TRUE, showWarnings = FALSE)
+  dir.create(file.path(path, 'vignettes'), recursive = TRUE, showWarnings = FALSE)
+
+
 
   # check MODULEID, must starts with 'a-zA-z' and only contains 'a-zA-Z0-9_'
   MODULEID = gsub('[^a-zA-Z_]', '', MODULEID)
@@ -40,8 +44,10 @@ create_template <- function(path, ...){
   for(f in fs){
     s = readLines(file.path(template_dir, f))
     s = rave::fprintf(s)
+    f = stringr::str_replace(f, 'first_example', MODULEID)
     writeLines(s, con = file.path(path, f))
   }
+
 
 
 }

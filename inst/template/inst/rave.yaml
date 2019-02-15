@@ -1,16 +1,4 @@
 package_name: ${{PACKAGE}}
-dependencies:
-  cran:
-  - devtools
-  - shiny (>= 1.2.0)
-  - rlang (>= 0.3.0)
-  - stringr (>= 1.3.1)
-  - yaml (>= 2.2.0)
-  - stringr
-  github:
-  - dipterix/rutabaga (>= 0.1.1)
-  - dipterix/threejsr (>= 0.1.20)
-  - beauchamplab/rave@rave-fir
 dev_subject:
   project_name: demo
   subject_code: sub_large
@@ -27,4 +15,5 @@ dev_subject:
 modules:
 - module_id: ${{MODULEID}}
   module_label: ${{MODULELABEL}}
-  config_name: module.yaml
+  group_name: ~
+

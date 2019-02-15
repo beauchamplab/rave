@@ -1,12 +1,7 @@
+inst/doc
 .Rproj.user
 .Rhistory
 .RData
 .Ruserdata
-*.DS_Store
-temp/
-desktop.ini
-src/*.o
-src/*.so
-src/*.dll
-packrat/lib*/
-packrat/src/
+adhoc/
+\.DS_Store

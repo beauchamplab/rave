@@ -3,8 +3,6 @@ Package: ${{PACKAGE}}
 Type: Package
 Title: What the Package Does (Title Case)
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
 License: What license is it under?
@@ -12,7 +10,23 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
 Authors@R: 
-    person(given = "Zhengjia",
-           family = "Wang",
+    person(given = "First_name",
+           family = "Last_name",
            role = "cre",
-           email = "dipterix.wang@gmail.com")
+           email = "your_email@mail.edu")
+Imports:
+    devtools,
+    shiny (>= 1.2.0),
+    rlang (>= 0.3.0),
+    stringr (>= 1.3.1),
+    yaml (>= 2.2.0),
+    stringr (>= 1.3.0)
+Suggests:
+    rstudioapi (>= 0.9.0),
+    knitr,
+    rmarkdown
+Remotes:
+    github::dipterix/rutabaga,
+    github::dipterix/threejsr,
+    github::beauchamplab/rave
+VignetteBuilder: knitr
