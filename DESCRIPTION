@@ -62,11 +62,13 @@ Imports:
     fst (>= 0.8.8),
     data.table (>= 1.11.8)
 Suggests:
-    gifti
+    gifti,
+    knitr,
+    rmarkdown
 Remotes:
     github::dipterix/threejsr,
     github::dipterix/rutabaga
-Collate: 
+Collate:
     'utils_syscheck.R'
     'aaa.R'
     'cls_brain.R'
@@ -140,3 +142,4 @@ Collate:
     'vis_channel.R'
     'visual_signal.R'
     'zzz.R'
+VignetteBuilder: knitr
