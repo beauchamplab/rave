@@ -4,7 +4,7 @@ author: "Zhengjia Wang"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{2.1 Step-by-step, Build Your First RAVE Module}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -138,7 +138,7 @@ text_result <- function(result){
 3. Save the script to `firstPkg/R/results.R`
 4. Enter the code in console:
 
-```{r}
+```{r, eval=FALSE, collapse=FALSE}
 view_layout('firstPkg_first_example')
 ```
 
