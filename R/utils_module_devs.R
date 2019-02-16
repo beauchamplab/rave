@@ -156,6 +156,11 @@ debug_module <- function(package = package, module_id = module_id, reload = FALS
   normal_quos = main_quos[!sel]
   async_quo = main_quos[sel]
   async = length(async_quo)
+  if(async){
+    async_quo = async_quo[[1]]
+  }else{
+    async_quo = {}
+  }
 
   body(FUN) = rlang::quo_squash(rlang::quo({
     !!!normal_quos
@@ -171,7 +176,7 @@ debug_module <- function(package = package, module_id = module_id, reload = FALS
 
     if(!!async){
       ..tmp[['..async']] = TRUE
-      ..tmp[['..async_quo']] = rlang::quo_squash(async_quo[[1]])
+      ..tmp[['..async_quo']] = quote(!!!async_quo)
       ..tmp[['..async_var']] = NULL
       ..tmp[['..packages']] = str_match(search(), '^package:(.+)$')[,2]
       ..tmp[['..packages']] = unique(..tmp[['..packages']][!is.na(..tmp[['..packages']])])
@@ -225,8 +230,10 @@ debug_module <- function(package = package, module_id = module_id, reload = FALS
           has_dots = '...' %in% nms
           nms = nms[!nms %in% c('', '...')]
 
-          f = function(){
-            args = sapply(nms, get0, inherits = FALSE, simplify = F, USE.NAMES = T)
+          f = function(...){
+            args = sapply(nms, function(..nm..){
+              eval(rlang::sym(..nm..))
+            }, simplify = F, USE.NAMES = T)
             if(has_dots){
               args = c(list(..env$results), args, list(...))
             }else{
