@@ -85,9 +85,9 @@ dev_${{PACKAGE}} <- function(expose_functions = FALSE, reload = TRUE){
 
 
 # Function to run module
-get_module <- function(module_id, interactive = FALSE, check_dependencies = TRUE, force_update_remote = FALSE){
+debug_module <- function(module_id, interactive = FALSE, check_dependencies = TRUE, force_update_remote = FALSE){
 
-  env = dev_${{PACKAGE}}(expose_functions = F, reload = FALSE)
+  env = dev_${{PACKAGE}}(expose_functions = F, reload = TRUE)
 
   # env$mount_demo_subject()
 
@@ -95,8 +95,10 @@ get_module <- function(module_id, interactive = FALSE, check_dependencies = TRUE
   has_subject = rave::any_subject_loaded()
 
   if(!has_subject){
-    cat2('Error: No subject found! Please load subject first', level = 'ERROR')
+    cat2('Warning: No subject found! Loading demo subject', level = 'WARNING')
+    env$mount_demo_subject()
   }
+
 
   if(has_subject && !'rave_data' %in% search()){
     rave::attachDefaultDataRepository()

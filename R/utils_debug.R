@@ -5,7 +5,6 @@
 #' @details To use this function, you must use test.mode=TRUE, i.e. call init_app(m, test.mode=TRUE)
 #' otherwise objects will be removed. Once imported data, close rave session and run debug_module(m)
 #' to see variables within the module
-#' @export
 debug_module <- function(m, private_id){
   if(missing(private_id)){
     private_id = ls(m$private$exec_env)[1]

@@ -7,6 +7,8 @@ dev_${{PACKAGE}}(expose_functions = TRUE)
 
 mount_demo_subject()
 
+init_module('${{MODULEID}}', debug = TRUE)
+
 # >>>>>>>>>>>> Start ------------- [DO NOT EDIT THIS LINE] ---------------------
 ######' @auto=TRUE
 
