@@ -21,35 +21,25 @@ trial = module_tools$get_meta('trials')
 
 # <<<<<<<<<<<< End ----------------- [DO NOT EDIT THIS LINE] -------------------
 
-# Debug - Step 1: clear environment and reload
+# Debug
 
 ${{PACKAGE}}::dev_${{PACKAGE}}(expose_functions = TRUE)
 
+# Debug - offline:
+main = ${{PACKAGE}}:::debug_module('${{MODULEID}}')
+ret = main()
+result = ret$results
+
+result$get_value('preload_info')
+
+
+# Debug - online:
+${{PACKAGE}}::dev_${{PACKAGE}}(expose_functions = TRUE)
 mount_demo_subject()
-
-env = reload_this_package(expose = FALSE, clear_env = TRUE)
-
-# Step 2: make sure rave data is attached
-attachDefaultDataRepository()
-
-
-# Step 3: try to run from local session
-module = rave::get_module(package = '${{PACKAGE}}', module_id = '${{MODULEID}}', local = T)
-
-res = module()
-
-# Check results
-res$results$get_value(key = 'requested_electrodes')
-res$results$get_value(key = 'time_points')
-res$results$get_value(key = 'frequencies')
-res$results$get_value(key = 'trial')
-
-# Step 4: load module and preview
-
-# First method
-m = rave::get_module(package = '${{PACKAGE}}', module_id = '${{MODULEID}}', local = F)
-rave::init_app(m)
-
-# Second method
-${{PACKAGE}}::dev_${{PACKAGE}}(expose_functions = TRUE)
 view_layout('${{MODULEID}}')
+
+# Production - Deploy as RAVE module
+# Always Ctrl/cmd+shift+B first if you want to deploy it online
+rm(list = ls(all.names = TRUE)); rstudioapi::restartSession()
+module = rave::get_module(package = '${{PACKAGE}}', module_id = '${{MODULEID}}')
+rave::init_app(module)

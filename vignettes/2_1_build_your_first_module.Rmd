@@ -66,7 +66,7 @@ Open `Tools > Project Option`
 
 </div>
 
-Save all the settings, pressing `Command/Ctrl+Shift+Enter` to build the package. 
+Save all the settings, pressing `Command/Ctrl+Shift+B` to build the package. 
 An alternative way is to use `Build > Install and Restart` in RStudio.
 
 ![An alternative way to build your package](src/2_8_build_package.png)
