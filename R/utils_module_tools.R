@@ -110,6 +110,8 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
         time_range = data_env$.private$meta$epoch_info$time_range
         electrodes = data_env$preload_info$electrodes
 
+        ref_name = data_env$preload_info$reference_name
+
         # Try to load from cache
         re = load_local_cache(
           project_name = data_env$subject$project_name,
@@ -147,10 +149,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
         dirs = data_env$subject$dirs
         electrodes = data_env$subject$electrodes$Electrode
 
-        print(sys.on.exit())
-
         progress = progress('Prepare preprocess voltage', max = length(electrodes) + 1)
-        on.exit({progress$close()})
 
         lapply_async(electrodes, function(e){
           sapply(blocks, function(b){
@@ -173,6 +172,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
 
         list2env(r, envir = data_env$.private[['volt_unblocked']])
 
+        progress$close()
         rm(list = ls(), envir = environment())
       }
 
@@ -310,7 +310,10 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
     #   on.exit(rm(repo))
     #   data_env$.private$repo$baseline(from = from, to = to, electrodes = electrodes, ...)
     # }
-    baseline = rave::baseline
+
+    # TODO: Check if this works
+    # baseline = rave::baseline
+    baseline = baseline
 
     reload = function(epoch, epoch_range, reference, electrodes){
       has_change = F
@@ -336,7 +339,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
         has_change = T
       }
 
-      rave::rave_prepare(
+      rave_prepare(
         subject = data_env$subject$subject_id,
         electrodes = electrodes,
         epoch = epoch,
@@ -484,7 +487,6 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
 
 }
 
-#' @import stringr
 #' @export
 try_save_file <- function(data, ..., fpath, name, append = F) {
   postfix = tail(str_to_lower(as.vector(str_split(
@@ -499,7 +501,7 @@ try_save_file <- function(data, ..., fpath, name, append = F) {
       args = list(...)
       ctype = args[['ctype']]
       ctype %?<-% storage.mode(data)
-      rave::save_h5(
+      save_h5(
         data,
         fpath,
         'data',
@@ -544,7 +546,6 @@ try_save_file <- function(data, ..., fpath, name, append = F) {
   )
 }
 
-#' @import stringr
 #' @export
 try_load_file <- function(fpath, name, ..., env = new.env(parent = emptyenv()), simplify = T) {
   if (!file.exists(fpath)) {
@@ -570,7 +571,7 @@ try_load_file <- function(fpath, name, ..., env = new.env(parent = emptyenv()), 
       env$data = utils::read.csv(file = fpath, ...)
     },
     'h5' = {
-      env$data = rave::load_h5(file = fpath, name = 'data', ...)
+      env$data = load_h5(file = fpath, name = 'data', ...)
     },
     'rdata' = {
       base::load(file = fpath, envir = env, ...)
