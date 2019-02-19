@@ -56,7 +56,9 @@ download_sample_data <- function(subject = 'sub1'){
 #' download_subject_data(con = "~/rave_data/data-small.zip")
 #'
 #' # or the following
-#' # download_subject_data('https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/data-large.zip')
+#' # download_subject_data(
+#' # 'https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/data-large.zip'
+#' # )
 #'
 #' # rename project to demo_junk
 #' download_subject_data(con = "~/rave_data/data-small.zip",

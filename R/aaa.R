@@ -1,8 +1,67 @@
 #' @include utils_syscheck.R
 NULL
 
+#' @import utils
+#' @import stats
+#' @import R6
+#' @import htmltools
 #' @import shiny
-#' @importFrom shinydashboard box
+#' @import yaml
+#' @import stringr
+#' @import graphics
+#' @import grDevices
+#'
+#' @importFrom grid grid.newpage
+#'
+#' @importFrom crayon make_style
+#'
+#' @importFrom Matrix %&%
+#'
+#' @importFrom DT formatRound
+#' @importFrom DT datatable
+#'
+#' @importFrom rlang quo
+#' @importFrom rlang quos
+#' @importFrom rlang !!
+#' @importFrom rlang !!!
+#' @importFrom rlang quo_squash
+#' @importFrom rlang eval_tidy
+#' @importFrom rlang :=
+#' @importFrom rlang is_quosure
+#' @importFrom rlang as_quosure
+#' @importFrom rlang fn_body
+#' @importFrom digest digest
+#'
+#' @importFrom future plan
+#' @importFrom future future
+#' @importFrom future value
+#' @importFrom future values
+#' @importFrom future multisession
+#' @importFrom future multiprocess
+#' @importFrom future futureAssign
+#' @importFrom future availableCores
+#' @importFrom future cluster
+#' @importFrom future resolved
+#'
+#' @importFrom hdf5r is_hdf5
+#' @importFrom hdf5r H5File
+#'
+#' @importFrom shinydashboard dashboardPage
+#' @importFrom shinydashboard dashboardHeader
+#' @importFrom shinydashboard dashboardSidebar
+#' @importFrom shinydashboard dashboardBody
+#' @importFrom shinydashboard tabBox
+#' @importFrom shinydashboard sidebarMenu
+#' @importFrom shinydashboard menuItem
+#' @importFrom shinydashboard menuSubItem
+#' @importFrom shinydashboard tabItem
+#' @importFrom shinydashboard tabItems
+#'
+#' @importFrom methods is
+#' @importFrom methods setMethod
+#' @importFrom methods signature
+#'
+#' @importFrom assertthat assert_that
 NULL
 
 
@@ -46,12 +105,6 @@ updatePackageVersion <- function(packageLocation ="."){
   ## Return the updated version number to screen
   return(vFinal)
 }
-
-
-
-
-### Some third party packages needed
-box <- shinydashboard::box
 
 
 

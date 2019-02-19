@@ -100,9 +100,6 @@ get_mem_usage <- function(modules, data_envir){
 #' @param launch.browser launch browsers, default is on
 #' @param theme color theme for GUI
 #' @param ... other params like test.mode for module debugging
-#' @import stringr
-#' @import shiny
-#' @import magrittr
 #' @export
 init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
                      theme = "purple", disable_sidebar = FALSE, simplify_header = FALSE, ...){
@@ -130,7 +127,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
   }
 
   data_selector = shiny_data_selector('DATA_SELECTOR')
-  ui = rave::dashboardPage(
+  ui = dashboardPage(
     skin = theme,
     title = 'R Analysis and Visualization of ECoG/iEEG Data',
     header = dashboardHeader(
@@ -240,6 +237,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
       switch_module = NULL,
       timer_count = 0
     )
+
     local_data = reactiveValues(
       mem_usage = NULL
     )
@@ -299,7 +297,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
 
     ##############
     # Control panel
-    output[['__rave_3dviewer']] <- threejsr::renderThreejs({
+    output[['__rave_3dviewer']] <- renderThreejs({
       if(global_reactives$has_data){
         tbl = subject$electrodes
         es = subject$valid_electrodes
@@ -321,6 +319,9 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
         })
 
         # get data_env
+
+        module_tools = get('module_tools', envir = getDefaultDataRepository())
+
         module_tools$plot_3d_electrodes(
           tbl = tbl,
           electrodes = es,

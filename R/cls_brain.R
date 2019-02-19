@@ -84,6 +84,9 @@ RaveBrain <- R6::R6Class(
       self$load_electrodes(tbl)
     },
     set_electrode = function(which, position, label = sprintf('Electrode %d', which), show_warning = T){
+
+      GeomSphere = get_from_package('GeomSphere', pkg = 'threejsr', check = FALSE)
+
       if(show_warning && (length(label) != 1 || is_invalid(label, .invalids = c('null', 'na')))){
         logger('label is invalid', level = 'WARNING')
         label = ''
@@ -97,7 +100,7 @@ RaveBrain <- R6::R6Class(
         label = label
       )
 
-      private$three_electrodes[[which]] = threejsr::GeomSphere$new(
+      private$three_electrodes[[which]] = GeomSphere$new(
         position = position,
         mesh_name = label,
         radius = 2,
@@ -129,7 +132,10 @@ RaveBrain <- R6::R6Class(
       }else if(!which %in% c(1,2)){
         stop('Unsupported which argument, we only support "left"/1, or "right"/2')
       }
-      private$three_pial[[which]] = threejsr::GeomFreeMesh$new(
+
+      GeomFreeMesh = get_from_package('GeomFreeMesh', pkg = 'threejsr', check = FALSE)
+
+      private$three_pial[[which]] = GeomFreeMesh$new(
         position = position,
         mesh_name = c('Left Pial', 'Right Pial')[which],
         vertices = vertices,
@@ -200,11 +206,11 @@ RaveBrain <- R6::R6Class(
       }
 
       # This will be a long process (maybe?)
-      progress = rave::progress('Loading from suma spec file...', max = 5 + include_electrodes + nearest_face)
+      progress = progress('Loading from suma spec file...', max = 5 + include_electrodes + nearest_face)
       on.exit({progress$close()})
 
       progress$inc('Parsing spec file')
-      spec_info = rave::suma_spec_parse(spec_file = spec_file)
+      spec_info = suma_spec_parse(spec_file = spec_file)
 
       # Load volume
       progress$inc('Loading surface volume')
@@ -284,7 +290,7 @@ RaveBrain <- R6::R6Class(
           if(stringr::str_detect(f, '[gG][iI][iI]$')){
             # this is gifti file
             tryCatch({
-              mesh_data = threejsr::read.freesurf.gii(f)
+              mesh_data = read.freesurf.gii(f)
             }, error = function(e){
               # gifti package is not loaded
               logger('Please run `install.packages("gifti")` to enable reading from gii files.', level = 'WARNING')
@@ -295,7 +301,7 @@ RaveBrain <- R6::R6Class(
               return()
             }
           }else if(stringr::str_detect(f, '[aA][sS][cC]$')){
-            mesh_data = threejsr::read.freesurf.asc(f)
+            mesh_data = read.freesurf.asc(f)
           }else{
             return()
           }
@@ -433,7 +439,7 @@ RaveBrain <- R6::R6Class(
         if(md <= max_dist){
           d = f == wm - 1 # should be sum = 6
           dim(d) = c(3, length(d) / 3)
-          face_ind = which(rutabaga::collapse(d, 2) > 0)
+          face_ind = which(collapse(d, 2) > 0)
           # register
           if(length(nearest_face)){
             if(nearest_face$min_dist > md){
@@ -568,7 +574,7 @@ RaveBrain <- R6::R6Class(
       if(!length(elements)){
         return('No elements detected!')
       }
-      threejsr::threejs_scene(
+      threejs_scene(
         elements = elements,
         width = width,
         height = height,

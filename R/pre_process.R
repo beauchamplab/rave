@@ -7,10 +7,6 @@
 #' @param test.mode passed to shinyApp
 #' @param ver internally used please don't change
 #' @param theme color theme
-#' @import shiny
-#' @import stringr
-#' @importFrom magrittr %>%
-#' @importFrom assertthat assert_that
 #' @export
 rave_preprocess <- function(
   sidebar_width = 3,
@@ -28,7 +24,7 @@ rave_preprocess <- function(
   default_subject_code = ''
   model_instances = NULL
 
-  future::plan(future::multiprocess, workers = rave::rave_options('max_worker'))
+  future::plan(future::multiprocess, workers = rave_options('max_worker'))
 
 
   modules = list(

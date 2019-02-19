@@ -4,7 +4,6 @@ customizedUI <- function(inputId, width = 12L, ...){
 }
 
 
-#' @import htmltools
 #' @export
 div_elastic <- function(css_selector, any = T){
   div(
@@ -20,7 +19,6 @@ div_elastic <- function(css_selector, any = T){
 }
 
 
-#' @import htmltools
 expand_box <- function(
   ..., title = NULL, footer = NULL, status = NULL, solidHeader = FALSE,
   background = NULL, width = 12L, height = NULL, collapsible = T,
@@ -152,7 +150,7 @@ comp_parser <- function(){
     }else{
       # this is an output
       expr[['outputId']] = as.call(list(quote(ns), outputId))
-      updates = function(...){}
+      updates = function(session, ..., .args = list()){}
       observers = function(input, output, session, local_data, exec_env){
         if(length(outputId)){
           fun_name = tail(unlist(str_split(as.character(expr[[1]]), ':')), 1)
@@ -374,12 +372,12 @@ comp_parser <- function(){
       )
     },
     'compoundInput' = function(expr, env = environment()){
-      expr = match.call(rave::compoundInput, expr)
+      expr = match.call(compoundInput, expr)
       inputId = expr[['inputId']]
       expr[['inputId']] = as.call(list(quote(ns), inputId))
       args = as.list(expr)[-1]
       max_ncomp = eval(expr[['max_ncomp']])
-      max_ncomp %?<-% formals(rave::compoundInput)$max_ncomp
+      max_ncomp %?<-% formals(compoundInput)$max_ncomp
       # parse components
       components = expr[['components']]
       if(as.character(components[[1]])[[1]] == '{'){
@@ -474,7 +472,7 @@ comp_parser <- function(){
 #       outputId = re$outputId
 #
 #       re$observers = function(input, output, session, local_data, exec_env){
-#         output[[outputId]] = do.call(threejsr::renderThreejs, args = list(quote({
+#         output[[outputId]] = do.call(renderThreejs, args = list(quote({
 #           local_data$show_results
 #           if (isolate(local_data$has_data)) {
 #             func = get(outputId, envir = exec_env$param_env,

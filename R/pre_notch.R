@@ -1,8 +1,6 @@
 #' Preprocess Module - Notch filter
 #' @param module_id internally used
 #' @param sidebar_width sidebar width from 1 to 12
-#' @importFrom DT formatRound
-#' @importFrom DT datatable
 #' @export
 rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
   ns = shiny::NS(module_id)
@@ -14,7 +12,7 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
         uiOutput(ns('notch_inputs1'))
       )
     ),
-    shinydashboard::box(
+    box(
       width = 12 - sidebar_width,
       title = 'Notch - Inspect Signals',
       plotOutput(ns('plot_signal'), height = '75vh')
@@ -95,7 +93,7 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
       last = get_val(utils$last_inputs(), 'last_notch_freq', default = 60)
 
       tagList(
-        shinydashboard::box(
+        box(
           width = 12,
           title = 'Notch Filter',
           collapsible = T, collapsed = local_data$has_notch,
@@ -106,7 +104,7 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
           htmlOutput(ns('notch_bands')),
           actionButton(ns('do_notch'), 'Apply Notch Filters')
         ),
-        shinydashboard::box(
+        box(
           width = 12,
           title = 'Inspection',
           selectInput(ns('block'), 'Block', choices = local_data$blocks, selected = last_block),

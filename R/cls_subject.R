@@ -78,13 +78,14 @@ Subject <- R6::R6Class(
       electrodes[electrodes %in% self$valid_electrodes]
     },
     has_bad_time_point = function(block, electrode, start, end){
-      (self$meta[['time_excluded']]) %>%
+      nrow(
         subset(
+          self$meta[['time_excluded']],
           Block %in% block &
-          Electrode %in% electrode &
-          (start < End | end < Start)
-        ) %>%
-        nrow() ->
+            Electrode %in% electrode &
+            (start < End | end < Start)
+        )
+      ) ->
         res
       return(res > 0)
     }

@@ -85,7 +85,10 @@ get_module <- function(package, module_id, local = FALSE){
 
 
 debug_module <- function(package = package, module_id = module_id, reload = FALSE){
-  .fs = list.files(system.file('template/inst/tools', package = 'rave'), pattern = '\\.R$', full.names = T)
+  .fs = list.files(system.file('tools', package = package), pattern = '\\.R$', full.names = T)
+  if(length(.fs) == 0 || .fs == ''){
+    .fs = list.files(system.file('template/inst/tools', package = 'rave'), pattern = '\\.R$', full.names = T)
+  }
   rave_dev_load <- function(){
     # Get package name
     env = new.env()
@@ -118,7 +121,7 @@ debug_module <- function(package = package, module_id = module_id, reload = FALS
     attachDefaultDataRepository()
   }
 
-  assign('aaa', env, envir = globalenv())
+  # assign('aaa', env, envir = globalenv())
   param_env = env$init_module(module_id = module_id)
 
   runtime_env = new.env(parent = param_env)
@@ -162,6 +165,8 @@ debug_module <- function(package = package, module_id = module_id, reload = FALS
     async_quo = {}
   }
 
+  async_vars = main_quos$async_vars
+
   body(FUN) = rlang::quo_squash(rlang::quo({
     !!!normal_quos
 
@@ -176,19 +181,18 @@ debug_module <- function(package = package, module_id = module_id, reload = FALS
 
     if(!!async){
       ..tmp[['..async']] = TRUE
-      ..tmp[['..async_quo']] = quote(!!!async_quo)
-      ..tmp[['..async_var']] = NULL
-      ..tmp[['..packages']] = str_match(search(), '^package:(.+)$')[,2]
-      ..tmp[['..packages']] = unique(..tmp[['..packages']][!is.na(..tmp[['..packages']])])
+      pkgs = str_match(search(), '^package:(.+)$')[,2]
+      pkgs = unique(pkgs[!is.na(pkgs)])
       ..tmp[['..rave_future_obj']] = future::future({
-        rave::eval_dirty(..async_quo)#, env = async_env)
-        if(is.null(..async_var)){
-          return(environment())
+        eval_dirty(quote(!!!async_quo))#, env = async_env)
+        async_vars = !!async_vars
+        if(is.null(async_vars)){
+          return(as.list(environment()))
         }else{
-          re = sapply(..async_var, get0, simplify = F, USE.NAMES = T)
-          return(list2env(re))
+          re = sapply(async_vars, get0, simplify = F, USE.NAMES = T)
+          return(re)
         }
-      }, packages = ..tmp[['..packages']], evaluator = future::multiprocess,
+      }, packages = pkgs, evaluator = future::multiprocess,
       envir = ..tmp, gc = T)
     }
 

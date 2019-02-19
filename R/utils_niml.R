@@ -125,7 +125,14 @@ format_f <-  function(lm.mod, test_name='All') {
   with(summary(lm.mod), {
     c(r.squared, fstatistic[1],
       pf(fstatistic[1], fstatistic[2], fstatistic[3], lower.tail=FALSE))
-  }) %>% set_names(nms) %>% `class<-`('fres')
+  }) ->
+    re
+
+  names(re) = nms
+
+  class(re) = 'fres'
+
+  re
 }
 
 # relying on a generic here
@@ -146,8 +153,9 @@ pretty.fres <- function(fres) {
 get_t <- function(...) with(t.test(...), c(estimate, statistic, p.value)) %>% `class<-`('tres')
 
 pretty.tres <- function(tres) {
-  mapply(format, tres, digits=c(2,2,1)) %>%
-    set_names(c('m', 't', 'p'))
+  re = mapply(format, tres, digits=c(2,2,1))
+  names(re) = c('m', 't', 'p')
+  re
 }
 
 

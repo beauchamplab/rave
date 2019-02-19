@@ -18,17 +18,7 @@ check_updates <- function(file){
       src = info[3]
       details = info[4]
 
-      tbl = installed.packages()
-      which = tbl[,1] == pkg
-      needs_install = F
-      if(sum(which)){
-        row = as.list(tbl[which, ])
-        if(pkg != 'rave' && utils::compareVersion(row$Version, ver) < 0){
-          needs_install = T
-        }
-      }else{
-        needs_install = T
-      }
+      needs_install = !package_version_check(pkg, version = ver)
 
       if(needs_install){
         switch (src,
@@ -40,7 +30,7 @@ check_updates <- function(file){
           },
           'bioc' = {
             source("https://bioconductor.org/biocLite.R")
-            biocLite(pkg, suppressUpdates = T)
+            do.call('biocLite', list(pkg, suppressUpdates = T))
           }
         )
       }
@@ -50,9 +40,7 @@ check_updates <- function(file){
 
 #' @export
 rave_version <- function(){
-  tbl = installed.packages()
-  row = as.list(tbl[tbl[,1] == 'rave',])
-  return(row$Version)
+  as.character(utils::packageVersion('rave'))
 }
 
 

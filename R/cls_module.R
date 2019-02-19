@@ -50,9 +50,9 @@ attachDefaultDataRepository <- function(unload = T){
   rave_idx = which(search() == "package:rave")
 
   if(length(rave_idx)){
-    attach(rave_data, pos = rave_idx)
+    do.call('attach', list(rave_data, name = 'rave_data', pos = rave_idx))
   }else{
-    attach(rave_data)
+    do.call('attach', list(rave_data, name = 'rave_data'))
   }
 }
 
@@ -368,7 +368,6 @@ ModuleEnvir <- R6::R6Class(
 
 
 #' Functions for dev use
-#' @aliases write_rave_modules
 #' @param ... Expressions
 #' @export
 rave_ignore <- function(...){
@@ -383,7 +382,6 @@ rave_ignore <- function(...){
 
 
 #' @aliases write_rave_modules
-#' @export
 rave_inputs <- function(..., .input_panels = list(), .env = globalenv()){
   quos = rlang::quos(...)
   parser = comp_parser()
@@ -403,16 +401,12 @@ rave_inputs <- function(..., .input_panels = list(), .env = globalenv()){
   invisible(vals)
 }
 
-#' @aliases write_rave_modules
-#' @export
 rave_outputs <- function(..., .output_tabsets = list()){
   # do nothing
   return(invisible())
 }
 
 
-#' @aliases write_rave_modules
-#' @export
 rave_updates <- function(..., .env = globalenv()){
 
   res = rlang::quos(...)
@@ -421,14 +415,14 @@ rave_updates <- function(..., .env = globalenv()){
     return()
   }
   lapply(res[nms == ''], function(quo){
-    rave::eval_dirty(quo, env = .env)
+    eval_dirty(quo, env = .env)
   })
 
   nms = nms[nms != '']
 
   # parser = comp_parser()
   for(nm in nms){
-    val = rave::eval_dirty(res[[nm]], env = .env)
+    val = eval_dirty(res[[nm]], env = .env)
     try({
       re = val$value
       re %?<-% val$selected
@@ -441,8 +435,6 @@ rave_updates <- function(..., .env = globalenv()){
 }
 
 
-#' @aliases write_rave_modules
-#' @export
 rave_execute <- function(..., auto = TRUE, .env = globalenv()){
   assign('.is_async', TRUE, envir = .env)
   dots <- lazyeval::lazy_dots(...)
@@ -456,7 +448,6 @@ rave_execute <- function(..., auto = TRUE, .env = globalenv()){
 
 
 #' Cache input values
-#' @aliases write_rave_modules
 #' @export
 cache_input <- function(inputId, val, read_only = T){
   return(val)
@@ -464,8 +455,6 @@ cache_input <- function(inputId, val, read_only = T){
 
 
 #' Get x or default
-#' @aliases write_rave_modules
-#' @export
 async_var <- function(x, default = NULL){
   tryCatch({
     if(is.null(x)){
@@ -482,8 +471,6 @@ async_var <- function(x, default = NULL){
 }
 
 
-#' @aliases write_rave_modules
-#' @export
 export_report <- function(expr, inputId){
 
 }

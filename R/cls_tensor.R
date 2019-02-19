@@ -1,5 +1,4 @@
 #' Wrapper class for tensor arrays
-#' @import R6
 #' @export
 Tensor <- R6::R6Class(
   classname = 'Tensor',
@@ -333,13 +332,13 @@ Tensor <- R6::R6Class(
         switch (
           method,
           'mean' = {
-            d = rutabaga::collapse(d, keep = keep)
+            d = collapse(d, keep = keep)
             d = d / prod(self$dim[-keep])
           },
           'median' = {
             d = apply(d, keep, median)
           }, {
-            d = rutabaga::collapse(d, keep = keep)
+            d = collapse(d, keep = keep)
           }
         )
         d

@@ -1,7 +1,6 @@
 #' Color console for RAVE
 #' @param ... things to print
 #' @param level logger level: DEBUG, INFO, WARNING, ERROR, FATAL
-#' @import crayon
 #' @export
 logger <- function(..., level = 'DEBUG'){
   ld = !rave_options('logger_enabled')
@@ -21,7 +20,8 @@ logger <- function(..., level = 'DEBUG'){
     }
   }
 
-  if('crayon' %in% installed.packages()[,1] && ce){
+
+  if(package_installed('crayon') && ce){
 
     switch (
       level,

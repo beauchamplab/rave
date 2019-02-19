@@ -378,3 +378,5 @@ We get variables from `result` and generate summary table.
 ```{r}
 view_layout('firstPkg_first_example')
 ```
+
+![Project Preview](src/2_14_project_preview.png)

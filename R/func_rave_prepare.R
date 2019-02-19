@@ -18,7 +18,7 @@ rave_prepare <- function(
   data_types = c('power'),
   reference = 'default', attach = 'r',
   load_brain = TRUE,
-  data_env = rave::getDefaultDataRepository(),
+  data_env = getDefaultDataRepository(),
   strict = FALSE
 ){
   # subject = 'congruency/YAB'; electrodes = 14:15; epoch = 'YABa'; time_range = c(1,2); data_types = NULL; reference = 'default'
@@ -99,7 +99,7 @@ rave_prepare <- function(
   data_env$.private$brain = brain
   data_env$.private$preproc_tools = rave_preprocess_tools()
   data_env$.private$preproc_tools$check_load_subject(subject_code = subject$subject_code, project_name = subject$project_name, strict = subject$is_strict)
-  data_env$data_check = rave:::check_subjects2(project_name = subject$project_name,
+  data_env$data_check = check_subjects2(project_name = subject$project_name,
                                                subject_code = subject$subject_code, quiet = TRUE)
   data_env$subject = subject
   data_env$preload_info = list(
@@ -139,9 +139,9 @@ rave_prepare <- function(
     rave_idx = which(search() == "package:rave")
 
     if(length(rave_idx)){
-      attach(data_env, name = 'rave_data', pos = rave_idx)
+      do.call('attach', list(data_env, name = 'rave_data', pos = rave_idx))
     }else{
-      attach(data_env, name = 'rave_data')
+      do.call('attach', list(data_env, name = 'rave_data'))
     }
 
 

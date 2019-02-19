@@ -7,7 +7,6 @@
 #' @param btn_type html tag attribute "type"
 #' @param class additional classes
 #' @param ... other methods passed to actionButton
-#' @import htmltools
 #' @export
 actionButtonStyled <- function(inputId, label, icon = NULL, width = NULL, type = 'default', btn_type = 'button', class = '', ...){
   value <- shiny::restoreInput(id = inputId, default = NULL)

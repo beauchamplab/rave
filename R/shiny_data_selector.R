@@ -436,7 +436,7 @@ shiny_data_selector <- function(module_id){
 
       # Electrodes
       last_electrodes = last_entry('electrodes', '', group = group)
-      if(!equals(check_result$log$preprocess$subject_code, last_entry('subject_code', '', group = group))){
+      if(!isTRUE(check_result$log$preprocess$subject_code == last_entry('subject_code', '', group = group))){
         last_electrodes = deparse_selections(check_result$log$preprocess$channels)
       }
 
@@ -715,7 +715,7 @@ shiny_data_selector <- function(module_id){
         return()
       }
       res = as.integer(mask_table[,1])
-      txt = rave::deparse_selections(res)
+      txt = deparse_selections(res)
       try({
         sel = rep(TRUE, length(res))
         for(ii in 1:3){
@@ -761,7 +761,7 @@ shiny_data_selector <- function(module_id){
         }
 
         res = res[sel]
-        txt = rave::deparse_selections(res)
+        txt = deparse_selections(res)
         last_electrodes = last_entry('electrodes', txt, group = group, save = T)
       }, silent = T)
       updateTextInput(session = session, inputId = 'electrodes', value = txt)
@@ -848,7 +848,7 @@ shiny_data_selector <- function(module_id){
                   style = 'position: absolute; z-index:100; ',
                   checkboxInput(ns('load_mesh'), 'Load Mesh', value = isolate(local_data$load_mesh))
                 ),
-                threejsr::threejsOutput(ns('three_viewer'), height = '500px')
+                threejsOutput(ns('three_viewer'), height = '500px')
               )
             )
           )
@@ -944,7 +944,7 @@ shiny_data_selector <- function(module_id){
     # Local environment to store temporary SUMA brain
     brain_env = new.env()
 
-    output$three_viewer <- threejsr::renderThreejs({
+    output$three_viewer <- renderThreejs({
       validate(need(local_data$has_subject, message = ''))
       project = input$project_name
       subject = input$subject_code
@@ -1049,6 +1049,7 @@ shiny_data_selector <- function(module_id){
       removeModal()
       # Remove
       local_data$prevent_dblclick = TRUE
+      logger('Subject loaded, trigger module to refresh...')
     })
 
 

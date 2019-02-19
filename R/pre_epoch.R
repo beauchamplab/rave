@@ -12,7 +12,7 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2){
   )
 
   body = fluidRow(
-    shinydashboard::box(
+    box(
       width = sidebar_width,
       title = 'Trial Epoch',
       uiOutput(ns('inner_ui')), # need notch to be applied
@@ -404,12 +404,14 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2){
           displayStart = min(which(tbl$Time >= brush[1])) - 1
         }
 
-        DT::datatable(
-          tbl, rownames = F,options = list(
-            pageLength = 10,
-            displayStart = displayStart
-          )) %>%
-          DT::formatRound(c('Time'), 2)
+        DT::formatRound(
+          DT::datatable(
+            tbl, rownames = F,options = list(
+              pageLength = 10,
+              displayStart = displayStart
+            )),
+          c('Time'), 2
+        )
       }
 
     })
@@ -419,11 +421,13 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2){
       tbl = get_staged_epoch(block)
       if(nrow(tbl)){
         tbl$Order = seq_len(nrow(tbl))
-        DT::datatable(
-          tbl, rownames = F, selection = list(mode = 'single', target = 'row'),options = list(
-            pageLength = 10
-          )) %>%
-          DT::formatRound(c('Time'), 2)
+        DT::formatRound(
+          DT::datatable(
+            tbl, rownames = F, selection = list(mode = 'single', target = 'row'),
+            options = list(
+              pageLength = 10
+            )),
+          c('Time'), 2)
       }
     })
 

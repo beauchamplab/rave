@@ -1,5 +1,4 @@
 
-#' @import stringr
 #' @export
 parse_selections <- function(text, sep = ',', sort = F, unique = T){
   if(length(text) == 0 || str_trim(text) == ''){
@@ -41,7 +40,6 @@ parse_selections <- function(text, sep = ',', sort = F, unique = T){
 }
 
 
-#' @import stringr
 #' @export
 deparse_selections <- function(nums, link = '-', concatenate = T, max_lag = 1){
   if(length(nums) == 0){

@@ -10,7 +10,7 @@
 #' be "raw" (no reference), "referenced" (referenced by common average reference, white matter reference, or bipolar reference).
 #' For voltage data, there is one more special type "full" which loads voltage data for all electrodes.
 #' @export
-rave_checks = function(..., data = NULL){
+rave_checks <- function(..., data = NULL){
   data = unlist(c(data, list(...)))
   if(!length(data)){
     return()
@@ -20,6 +20,11 @@ rave_checks = function(..., data = NULL){
     `.__internal_reactives__.` = list()
     is_reactive = T
   }
+
+  rave_data = getDefaultDataRepository()
+  module_tools = rave_data$module_tools
+  preload_info = rave_data$preload_info
+  subject = rave_data$subject
 
 
   n1 = nrow(module_tools$get_meta(name = 'trials'))

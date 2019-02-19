@@ -1,6 +1,4 @@
 #' File IO: HDF5 file wrapper
-#' @importFrom hdf5r is_hdf5
-#' @importFrom hdf5r H5File
 #' @export
 LazyH5 <- R6::R6Class(
   classname = 'LazyH5',
@@ -324,7 +322,6 @@ exp.LazyH5 <- function(x){
 
 
 #' Lazy load HDF5 file via hdf5r package
-#' @usage load_h5(file, name, read_only = T)
 #' @details load_h5 is a wrapper for class LazyH5, which load data with "lazy" mode -
 #' only read part of dataset when needed.
 #' @seealso \code{\link{save_h5}}
@@ -368,7 +365,6 @@ load_h5 <- function(file, name, read_only = T, ram = F){
 #' y <- load_h5(file, '/group/dataset/1')
 #' y[]
 #' }
-#' @import stringr
 #' @export
 save_h5 <- function(x, file, name, chunk = 'auto', level = 4,replace = TRUE, new_file = FALSE, ctype = NULL, ...){
   f = LazyH5$new(file, name, read_only = F)

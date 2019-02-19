@@ -97,8 +97,6 @@ opt <- list(
 # the dataset to a particular target surface.
 
 #' Internal R6 class for rave-options
-#' @import yaml
-#' @import utils
 Options <- R6::R6Class(
   "Options",
   private = list(
@@ -152,7 +150,7 @@ Options <- R6::R6Class(
           dir.create(dname)
         }
         mw = self$get_options('max_worker')
-        if(length(mw) > 0 && mw == 3L && 'parallel' %in% installed.packages()[,1]){
+        if(length(mw) > 0 && mw == 3L && package_installed('future')){
           self$set_options(max_worker = future::availableCores() - 1)
         }
       }
@@ -230,16 +228,16 @@ rave_setup <- function(func = NULL){
       future::plan(future::multiprocess, workers = n_workers)
 
       # check crayon
-      if(rave::rave_options('crayon_enabled')){
-        if(exists('RStudio.Version') && is.function(RStudio.Version)){
-          rsver = as.character(RStudio.Version()$version)
-          if(utils::compareVersion('1.1', rsver)  > 0){
-            warning("Please install newest version of RStudio")
-            rave::rave_options(crayon_enabled = FALSE, .save = F)
-          }
-        }else{
-          rave::rave_options(crayon_enabled = FALSE, .save = F)
-        }
+      if(!rave_options('crayon_enabled')){
+        # if(exists('RStudio.Version') && is.function(RStudio.Version)){
+        #   rsver = as.character(RStudio.Version()$version)
+        #   if(utils::compareVersion('1.1', rsver)  > 0){
+        #     warning("Please install newest version of RStudio")
+        #     rave_options(crayon_enabled = FALSE, .save = F)
+        #   }
+        # }else{
+          rave_options(crayon_enabled = FALSE, .save = F)
+        # }
       }
     }
   }else{

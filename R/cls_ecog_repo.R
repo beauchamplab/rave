@@ -15,6 +15,8 @@ baseline <- function(el, from, to, method = 'mean', unit = '%',
                     data_only = F, hybrid = T, swap_file = tempfile(), mem_optimize = T, preop = NULL, op){
   if(missing(el)){
     logger('baseline(el...) is changed now. Please update.', level = 'WARNING')
+
+    module_tools = get('module_tools', envir = getDefaultDataRepository())
     el = module_tools$get_power()
   }
   assertthat::assert_that(is(el, 'Tensor'), msg = 'el must be an Tensor object.')
@@ -26,7 +28,7 @@ baseline <- function(el, from, to, method = 'mean', unit = '%',
   rest_dim = seq_along(el$dim)[-time_ind]
 
   if(unit == 'dB'){
-    bs = el$subset(Time = Time %within% c(from, to))
+    bs = el$subset({Time = Time %within% c(from, to)})
 
     # log 10 of data, collapse by mean
     bs$set_data(log10(bs$get_data()))
@@ -61,7 +63,6 @@ baseline <- function(el, from, to, method = 'mean', unit = '%',
 }
 
 #' R6 class for ECoG data Repository
-#' @import stringr
 #' @export
 ECoGRepository <- R6::R6Class(
   classname = 'ECoGRepository',
@@ -467,7 +468,7 @@ ECoGRepository <- R6::R6Class(
       ) ->
         bl
       ntimepts = dim(bl)[3]
-      bl = rutabaga::collapse(bl, keep = c(1,2,4)) / ntimepts
+      bl = collapse(bl, keep = c(1,2,4)) / ntimepts
 
 
       re = ECoGTensor$new(

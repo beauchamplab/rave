@@ -59,7 +59,6 @@ async_start <- function(){
 #' get_async_result('test')
 #' # END
 #' }
-#' @import future
 #' @export
 async <- function(expr, name = NULL, envir = parent.frame(), plan = future::multisession){
   if(!is.null(plan)){

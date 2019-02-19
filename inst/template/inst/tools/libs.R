@@ -38,7 +38,7 @@ get_root_dir <- function(){
   }else{
     d = NULL
   }
-  
+
   if(length(d) == 1 && grepl(paste0('/', .packageName, '$'), d)){
     # package developer
     return(d)
@@ -49,11 +49,11 @@ get_root_dir <- function(){
 }
 
 verify_rstudio_version <- function(version_needed = '1.2'){
-  
+
   if(!is.null(shiny::getDefaultReactiveDomain())){
     return(FALSE)
   }
-  
+
   tryCatch({
     rstudioapi::verifyAvailable(version_needed = version_needed)
     TRUE
@@ -77,7 +77,7 @@ select_path <- function(is_directory = TRUE){
 }
 
 #' Get yes or no answer
-ask_question <- function(title, message, ok = 'Yes', cancel = 'No', 
+ask_question <- function(title, message, ok = 'Yes', cancel = 'No',
                          use_console = FALSE, level = 'WARNING'){
   if(!verify_rstudio_version()){
     use_console = TRUE
@@ -100,7 +100,7 @@ ask_question <- function(title, message, ok = 'Yes', cancel = 'No',
       cancel = cancel
     )
   }
-  
+
 }
 
 `%?<-%` <- rave::`%?<-%`
@@ -108,4 +108,13 @@ ask_question <- function(title, message, ok = 'Yes', cancel = 'No',
 
 is_local_debug <- function(){
   is.null(shiny::getDefaultReactiveDomain())
+}
+
+
+save_all <- function(){
+  if(verify_rstudio_version()){
+    if (rstudioapi::hasFun("documentSaveAll")) {
+      rstudioapi::documentSaveAll()
+    }
+  }
 }

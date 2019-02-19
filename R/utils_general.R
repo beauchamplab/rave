@@ -437,9 +437,6 @@ paste_c <- function(x, y){
   base::paste0(x, y)
 }
 
-#' @importFrom Matrix %&%
-NULL
-
 `%&%` = Matrix::`%&%`
 
 methods::setMethod("%&%",  methods::signature(x = "character", y = 'ANY'),
@@ -454,7 +451,7 @@ NULL
 
 
 #' Evaluate expressions
-#' @usage eval_dirty(expr, env = parent,frame(), data = NULL)
+#' @usage eval_dirty(expr, env = parent.frame(), data = NULL)
 #' @details \code{eval_dirty} uses \code{base::eval()} function to evaluate expressions.
 #' Compare to \code{rlang::eval_tidy}, which won't affect original environment,
 #' \code{eval_dirty} will cause changes to the environment. Therefore if \code{expr}
@@ -468,8 +465,6 @@ NULL
 #' eval_dirty(expr, env)
 #' print(a)  # a is changed
 #' }
-#' @importFrom rlang quo_squash
-#' @importFrom rlang is_quosure
 #' @export
 eval_dirty <- function(expr, env = parent.frame(), data = NULL){
 
@@ -504,8 +499,6 @@ eval_dirty <- function(expr, env = parent.frame(), data = NULL){
 #' a$e %?<-% 2; print(a$e)
 #' }
 #'
-#' @importFrom rlang quo
-#' @importFrom rlang !!
 #' @export
 `%?<-%` <- function(lhs, value){
   env = parent.frame()
@@ -519,7 +512,8 @@ eval_dirty <- function(expr, env = parent.frame(), data = NULL){
     isnull
 
   if(isnull){
-    quo <- quo(!!lhs <- !!value)
+    # quo <- quo(!!lhs <- !!value)
+    quo <- quo(do.call('=', list(quote(!!lhs), !!value)))
     eval_dirty(quo, env = env)   # Need to assign values, no eval_tidy
   }
 }
@@ -578,9 +572,6 @@ is_within <- function(x, ref, strict = FALSE){
 #'   htmltools::tags$li(sprintf('line: %d', .x))
 #' }, wrapper = htmltools::tags$ul)
 #' }
-#' @importFrom rlang !!
-#' @importFrom rlang as_quosure
-#' @importFrom rlang eval_tidy
 #' @export
 lapply_expr <- function(X, expr, wrapper = NULL, env = parent.frame()){
   expr = substitute(expr, env = environment()) # prevent pre-eval of expr
@@ -601,7 +592,6 @@ lapply_expr <- function(X, expr, wrapper = NULL, env = parent.frame()){
 }
 
 #' Evaluate function as if it's run within another environment
-#' @usage eval_within(FUN, env = parent.frame(), ..., .args = list(), .tidy = T)
 #' @param FUN Function to be evaluated
 #' @param env Environment for evaluation
 #' @param ...,.args Parameters needed within function
@@ -630,9 +620,6 @@ lapply_expr <- function(X, expr, wrapper = NULL, env = parent.frame()){
 #'
 #' }
 #'
-#' @importFrom rlang fn_body
-#' @importFrom rlang quo
-#' @importFrom rlang eval_tidy
 #' @export
 eval_within <- function(FUN, env = parent.frame(), ..., .args = list(), .tidy = F){
   args = c(.args, list(...))
@@ -851,7 +838,6 @@ safe_str_c <- function(..., sep = '', collapse = NULL, .error = ''){
 #' # Case when path not exist
 #' try_normalizePath("./this/path/does/not/exist/")
 #' }
-#' @importFrom stringr str_split
 #' @export
 try_normalizePath <- function(path, sep = c('/', '\\\\')){
   if(file.exists(path)){
@@ -893,11 +879,12 @@ safe_object_size <- function(obj, env = NULL){
 
 
 #' Cache object
-#' @usage cache(key, val, global = FALSE, swap = FALSE, file = tempfile(), name = 'data')
 #' @param key Any R object, a named list would be the best.
 #' @param val Value to cache, if key exists, then value will not be evaluated nor saved
 #' @param global option for shiny app, where if global, then the the cache will ignore sessions.
-#' @param swap When object size is too large, do you want to save it to local disk?
+#' @param replace Force replace cache?
+#' @param session internally used
+#' @param swap Save to swap? usually when val is a large matrix or vector
 #' @param file,name If you use swap=T, see \code{\link{save_h5}}
 #' @seealso \code{\link{clear_cache}}
 #' @examples
@@ -920,7 +907,6 @@ safe_object_size <- function(obj, env = NULL){
 #' pryr::object_size(y)
 #' y[1:5]
 #' }
-#' @importFrom digest digest
 #' @export
 cache <- function(key, val, global = FALSE, replace = FALSE, session = NULL, swap = FALSE, file = tempfile(), name = 'data'){
   if(global){
@@ -957,8 +943,9 @@ cache <- function(key, val, global = FALSE, replace = FALSE, session = NULL, swa
 
 #' @title Clear cache
 #' @seealso \code{\link{cache}}
-#' @usage clear_cache(all = FALSE)
+#' @usage clear_cache(all = FALSE, session = NULL)
 #' @param all Clear all cache? Don't turn it on in shiny app. This is for debug use.
+#' @param session internally used
 #' @export
 clear_cache <- function(all = FALSE, session = NULL){
   session %?<-% getDefaultReactiveDomain()
@@ -989,10 +976,6 @@ getDefaultCacheEnvironment <- function(
 ################################################### High performance functions
 
 #' lapply using future package (async)
-#' @usage lapply_async(x, fun, ..., .ncores = 0,
-#'     .future_plan = future::multiprocess, .call_back = NULL,
-#'     .packages = NULL, .globals = TRUE,
-#'     .gc = TRUE)
 #' @param x,fun,... (See ?lapply)
 #' @param .ncores Number of cores to use. If the value is 0, the number of cores
 #' will be determined by rave_options('max_worker').
@@ -1010,10 +993,6 @@ getDefaultCacheEnvironment <- function(
 #'   cat('Running iteration -', i, '\n')
 #' })
 #' }
-#' @importFrom future plan
-#' @importFrom future future
-#' @importFrom future value
-#' @importFrom future values
 #' @export
 lapply_async <- function(x, fun, ..., .ncores = 0, .future_plan = future::multiprocess,
                          .call_back = NULL, .packages = NULL, .envir = environment(), .globals = TRUE, .gc = TRUE){

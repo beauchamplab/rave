@@ -2,11 +2,10 @@
 #' @param module ModuleEnvir object
 #' @param session shiny session, default let shiny decide
 #' @param test.mode passed by init_app
-#' @import magrittr
-#' @import shiny
 shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = TRUE){
   logger = function(...){
-    rave::logger('[', MODULE_ID, '] ', ..., strftime(Sys.time(), ' - %M:%S', usetz = F))
+    f = get_from_package('logger', 'rave', check = FALSE)
+    f('[', MODULE_ID, '] ', ..., strftime(Sys.time(), ' - %M:%S', usetz = F))
   }
 
   # assign variables
@@ -139,28 +138,29 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
       ###### 0. debounce inputs - rate policy ######
       # Note: One way to debug is to remove "debounce"
-      reactive({
-        re = local_data$last_input
-        if(check_active()){
-          logger('Input changed')
-          return(re)
-        }
-        return(FALSE)
-      }) %>%
-        debounce(20) ->
-        last_input
+      last_input <- debounce(
+        reactive({
+          re = local_data$last_input
+          if(check_active()){
+            logger('Input changed')
+            return(re)
+          }
+          return(FALSE)
+        }),
+        20
+      )
 
-
-      reactive({
-        re = local_data$run_script
-        if(check_active()){
-          logger('Ready, prepared to execute scripts.')
-          return(re)
-        }
-        return(FALSE)
-      }) %>%
-        debounce(50) ->
-        run_script
+      run_script <- debounce(
+        reactive({
+          re = local_data$run_script
+          if(check_active()){
+            logger('Ready, prepared to execute scripts.')
+            return(re)
+          }
+          return(FALSE)
+        }),
+        50
+      )
 
       reactive({
         re = local_data$has_results
@@ -752,3 +752,51 @@ beautify <- function(v, max_len = 20, is_vector = TRUE, level = 0){
   return(re)
 }
 # cat(str_c(beautify(as.list(input)[execenv$input_ids]), collapse = '\n'))
+
+#
+# observe <- function(x, env = parent.frame(), quoted = FALSE, label = NULL, ...){
+#   x = substitute(x)
+#
+#   y = deparse(x); y = y[1]
+#
+#   x = rlang::quo({
+#     cat('---------------------------- Observe\n')
+#     isolate(print(!!y))
+#     !!x
+#   })
+#
+#   x = rlang::quo_squash(x)
+#   label = paste(deparse(x), collapse = ' ')
+#
+#   shiny::observe(x, env, quoted = TRUE, label = label, ...)
+# }
+#
+# observeEvent <- function(
+#   eventExpr, handlerExpr, event.env = parent.frame(),
+#   event.quoted = TRUE, handler.env = parent.frame(),
+#   handler.quoted = TRUE, label = NULL, ...){
+#
+#   eventExpr = substitute(eventExpr)
+#   handlerExpr = substitute(handlerExpr)
+#
+#   y = deparse(handlerExpr); y = y[1]
+#
+#   handlerExpr = rlang::quo({
+#     cat('---------------------------- ObserveEvent\n')
+#     isolate(print(quote(!!eventExpr)))
+#     cat('-----\n')
+#     isolate(print(!!y))
+#     !!handlerExpr
+#   })
+#
+#   handlerExpr = rlang::quo_squash(handlerExpr)
+#
+#   label = paste(deparse(eventExpr), collapse = ' ')
+#
+#   shiny::observeEvent(eventExpr, handlerExpr, event.env = event.env,
+#                       event.quoted = TRUE, handler.env = handler.env,
+#                       handler.quoted = TRUE, label = label, ...)
+#
+#
+#
+# }

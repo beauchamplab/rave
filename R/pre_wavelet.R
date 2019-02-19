@@ -12,7 +12,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
       uiOutput(ns('wavelet_inputs2')),
       uiOutput(ns('wavelet_inputs3'))
     ),
-    shinydashboard::box(
+    box(
       collapsible = TRUE,
       width = 12 - sidebar_width,
       title = 'Wavelet Kernels',
@@ -109,7 +109,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
       selected %?<-% choices[1]
 
 
-      shinydashboard::box(
+      box(
         collapsible = TRUE,
         title = 'Wavelet Settings', width = 12L,
         div(
@@ -157,7 +157,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
         set_wave_param(tbl$Frequency, tbl$WaveCycle, as_is = TRUE)
       }
 
-      shinydashboard::box(
+      box(
         collapsible = TRUE,
         title = 'Details', width = 12L,
         additional_ui,
@@ -493,10 +493,10 @@ bulk_wavelet <- function(
       s = load_h5(save, name = sprintf('/%s/%s', reference_name, block_num), ram = T)
 
       if(compress > 1){
-        s = rave::decimate_fir(s, compress)
+        s = decimate_fir(s, compress)
       }
       gc()
-      re = rave::wavelet(s, freqs = frequencies, srate = srate / compress, wave_num = wave_num)
+      re = wavelet(s, freqs = frequencies, srate = srate / compress, wave_num = wave_num)
 
       cname_coef = sprintf('wavelet/coef/%s', block_num)
       cname_power = sprintf('wavelet/power/%s', block_num)
@@ -540,7 +540,7 @@ bulk_wavelet <- function(
 
       # save time_points info
       if(chl == channels[1]){
-        tp = rave::load_meta('time_points', project_name = project_name, subject_code = subject_code)
+        tp = load_meta('time_points', project_name = project_name, subject_code = subject_code)
         if(is.null(tp) || !block_num %in% tp$Block){
           tp = rbind(tp,
                      data.frame(
@@ -548,7 +548,7 @@ bulk_wavelet <- function(
                        Time = seq(1, ncol(power)) / target_srate,
                        stringsAsFactors = F
                      ))
-          rave::save_meta(tp, 'time_points', project_name = project_name, subject_code = subject_code)
+          save_meta(tp, 'time_points', project_name = project_name, subject_code = subject_code)
         }
       }
     }

@@ -1,5 +1,4 @@
 #' Module runtime environment (session based)
-#' @import magrittr
 #' @export
 ExecEnvir <- R6::R6Class(
   classname = 'ExecEnvir',
@@ -80,7 +79,7 @@ ExecEnvir <- R6::R6Class(
 
       # active bindings to data repository which allow us
       # the access to data loaded in data repo.
-      rave::rave_module_tools(self$wrapper_env)
+      rave_module_tools(self$wrapper_env)
 
       # static_env contains user self-defined functions. once initialized, they can
       # be read-only (in most of the cases).
@@ -173,21 +172,21 @@ ExecEnvir <- R6::R6Class(
 
       self$wrapper_env$rave_inputs = function(...){
         if(is.null(private$session)){
-          rave::rave_inputs(...)
+          rave_inputs(...)
         }else{
           self$rave_inputs(...)
         }
       }
       self$wrapper_env$rave_outputs = function(...){
         if(is.null(private$session)){
-          rave::rave_outputs(...)
+          rave_outputs(...)
         }else{
           self$rave_outputs(...)
         }
       }
       self$wrapper_env$rave_updates = function(...){
         if(is.null(private$session)){
-          rave::rave_updates(...)
+          rave_updates(...)
         }else{
           self$rave_updates(...)
         }
@@ -195,12 +194,12 @@ ExecEnvir <- R6::R6Class(
       self$wrapper_env$rave_execute = function(...){
         self$rave_execute(...)
         if(is.null(private$session)){
-          rave::rave_execute(...)
+          rave_execute(...)
         }
       }
       self$wrapper_env$rave_checks = function(...){
         if(is.null(private$session)){
-          rave::rave_checks(...)
+          rave_checks(...)
         }else{
           f = self$static_env[['rave_checks']]
           if(is.function(f)){
@@ -210,21 +209,21 @@ ExecEnvir <- R6::R6Class(
       }
       self$wrapper_env$cache = function(...){
         if(is.null(private$session)){
-          rave::cache(...)
+          cache(...)
         }else{
           self$cache(...)
         }
       }
       self$wrapper_env$cache_input = function(...){
         if(is.null(private$session)){
-          rave::cache_input(...)
+          cache_input(...)
         }else{
           self$cache_input(...)
         }
       }
       self$wrapper_env$rave_ignore = function(...){
         if(is.null(private$session)){
-          rave::rave_ignore(...)
+          rave_ignore(...)
         }
       }
       self$wrapper_env$export_report = self$export_report
@@ -259,7 +258,7 @@ ExecEnvir <- R6::R6Class(
 
       self$wrapper_env$require = function(package, ..., character.only = TRUE){
         p = as.character(substitute(package))
-        if(!p %in% installed.packages()[,1]){
+        if(!package_installed(p)){
           try({
             logger("Installing Package ", p, level = 'WARNING')
             install.packages(p, type = 'binary')
@@ -387,7 +386,7 @@ ExecEnvir <- R6::R6Class(
     },
     reset = function(inputs){
       if(shiny::is.reactivevalues(inputs)){
-        inputs = shiny::reactiveValuesToList(inputs)
+        inputs = shiny::isolate(shiny::reactiveValuesToList(inputs))
       }
       rm(list = ls(self$runtime_env), envir = self$runtime_env)
       for(nm in self$input_ids){
@@ -831,7 +830,7 @@ ExecEnvir <- R6::R6Class(
 
             self$param_env$..rave_future_obj =
               future::future({
-                rave::eval_dirty(..async_quo)#, env = async_env)
+                eval_dirty(..async_quo)#, env = async_env)
                 if(is.null(..async_var)){
                   return(environment())
                 }else{
@@ -843,7 +842,7 @@ ExecEnvir <- R6::R6Class(
           }
         }else{
           if(length(normal_quos)){
-            lapply(normal_quos, rave::eval_dirty, env = self$runtime_env)
+            lapply(normal_quos, eval_dirty, env = self$runtime_env)
           }
         }
 
@@ -949,7 +948,7 @@ ExecEnvir <- R6::R6Class(
         rlang::eval_tidy(private$inputs$quos, env = env),
         fluidRow(
           uiOutput(self$ns('..params_current')),
-          shinydashboard::box(
+          box(
             title = 'More...',
             collapsed = T,
             tags$ul(

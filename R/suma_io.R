@@ -352,6 +352,8 @@ freesurfer_mesh <- function(subject, spec_file = NULL, state = 'pial', center = 
   }
 
   # load mesh
+  GeomFreeMesh = get_from_package('GeomFreeMesh', pkg = 'threejsr', check = FALSE)
+
   lapply(spec_info, function(info){
     surf_name = info[['FreeSurferSurface']]
     surf_name %?<-% info[['SurfaceName']]
@@ -363,10 +365,10 @@ freesurfer_mesh <- function(subject, spec_file = NULL, state = 'pial', center = 
     if(length(surf_state) && surf_state %in% state && format == 'ascii'){
       f = file.path(subject$dirs$suma_dir, surf_name)
       if(length(f) && file.exists(f)){
-        mesh_data = threejsr::read.freesurf.asc(f)
+        mesh_data = read.freesurf.asc(f)
 
         # generate threejsr GEOM object
-        mesh = threejsr::GeomFreeMesh$new(
+        mesh = GeomFreeMesh$new(
           position = -center,
           mesh_name = surf_name,
           mesh_info = surf_name,
@@ -399,6 +401,8 @@ freesurfer_mesh <- function(subject, spec_file = NULL, state = 'pial', center = 
   # load electrodes
   # meshes = NULL
   n = nrow(subject$electrodes)
+
+  GeomSphere = get_from_package('GeomSphere', pkg = 'threejsr', check = FALSE)
   lapply(seq_len(n), function(ii){
     row = subject$electrodes[ii,]
     mat %?<-% diag(rep(1,4))
@@ -406,7 +410,7 @@ freesurfer_mesh <- function(subject, spec_file = NULL, state = 'pial', center = 
     pos = mat[1:3,] %*% pos
     pos = pos * c(-1,-1,1) - center
 
-    threejsr::GeomSphere$new(
+    GeomSphere$new(
       position = pos,
       mesh_name = fprintf('Electrode ${{row$Electrode}}'),
       radius = 2
