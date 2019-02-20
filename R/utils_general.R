@@ -1,4 +1,4 @@
-#' Convert file to base64 format
+# Convert file to base64 format
 to_datauri <- function(file, mime = ''){
   info = file.info(file)
   ss = jsonlite::base64_enc(input = readBin(file, what = 'raw', n = info$size))
@@ -12,6 +12,9 @@ to_datauri <- function(file, mime = ''){
 
 
 #' Format Print Strings
+#' @param ... characters
+#' @param collapse character to collapse characters
+#' @param lookup_env which environment to look for data?
 #' @export
 fprintf <- function(..., collapse = '\n', lookup_env = parent.frame()){
   s = list(...)
@@ -49,7 +52,9 @@ fprintf <- function(..., collapse = '\n', lookup_env = parent.frame()){
 
 
 #' Convert bytes to KB, MB, GB,...
-#' @usage to_ram_size(s, kb_to_b = 1000)
+#'
+#' @param s size
+#' @param kb_to_b 1KB=nB, n=1000 by default
 #' @export
 to_ram_size <- function(s, kb_to_b = 1000){
   base = floor(log(max(abs(s), 1), kb_to_b))
@@ -124,6 +129,8 @@ mem_limit <- function(){
 
 }
 
+#' Enable RAVE color console
+#' @param enable logical, enable or not
 #' @export
 color_console <- function(enable = T){
   re = rave_options(crayon_enabled = enable)
@@ -132,7 +139,6 @@ color_console <- function(enable = T){
   }
 }
 
-#' @export
 time_diff <- function(start, end){
   delta = unclass(end-start)
   list(
@@ -142,8 +148,10 @@ time_diff <- function(start, end){
 }
 
 #' For each element e1 ind1, find next element e2 in ind2 with e1<e2
+#' @param ind1,ind2 two index arrays
+#' @param max_lag if positive, e1 < e2 < e1+max_lag
 #' @export
-align_index = function(ind1, ind2, max_lag = 0){
+align_index <- function(ind1, ind2, max_lag = 0){
   if(zero_length(ind1, ind2)){
     return(NULL)
   }
@@ -169,8 +177,7 @@ align_index = function(ind1, ind2, max_lag = 0){
 }
 
 
-# to be tested
-#' @export
+# TODO: Test this function
 to_color <- function(x, default_length = 1, palette = NULL, shift = 2){
   if(length(x) == 1 && default_length > 1){
     x = rep(x, default_length)
@@ -256,7 +263,6 @@ test_colors <- function(cols){
 }
 
 
-#' @export
 rave_palette <- function(n=1000, one_sided = F, colors = c(
   '#1a237e', '#42b3d5', '#dcedc8', '#ffffff', '#ffecb3', '#e85285', '#6a1b9a'
 ), width = c(0.5,1,4), alpha = T
@@ -290,8 +296,8 @@ rave_palette <- function(n=1000, one_sided = F, colors = c(
 
 # test_colors(rave_palette(1001))
 
-#' @export
-image_plot = function(z, x, y, crop = NULL, symmetric = F, precision = 1, main = '', sub_titles = NULL, col = rave_palette(), nrow = 1,
+# TODO: Questioning
+image_plot <- function(z, x, y, crop = NULL, symmetric = F, precision = 1, main = '', sub_titles = NULL, col = rave_palette(), nrow = 1,
                       cex.main = 2, cex.lab = 1.6, cex.axis = 1.4, las = 1, panel.last = NULL, ...){
 
   miss_x = missing(x)
@@ -437,21 +443,26 @@ paste_c <- function(x, y){
   base::paste0(x, y)
 }
 
-`%&%` = Matrix::`%&%`
+# `%&%` = Matrix::`%&%`
+#
+# methods::setMethod("%&%",  methods::signature(x = "character", y = 'ANY'),
+#                    definition = paste_c, where = -1)
+# methods::setMethod("%&%",  methods::signature(x = "ANY", y = 'character'),
+#                    definition = paste_c, where = -1)
+# methods::setMethod("%&%",  methods::signature(x = "character", y = 'character'),
+#                    definition = paste_c, where = -1)
 
-methods::setMethod("%&%",  methods::signature(x = "character", y = 'ANY'),
-                   definition = paste_c, where = -1)
-methods::setMethod("%&%",  methods::signature(x = "ANY", y = 'character'),
-                   definition = paste_c, where = -1)
-methods::setMethod("%&%",  methods::signature(x = "character", y = 'character'),
-                   definition = paste_c, where = -1)
-
-#' @exportMethod %&%
+# @exportMethod %&%
 NULL
 
+`%&%` = paste_c
 
 #' Evaluate expressions
-#' @usage eval_dirty(expr, env = parent.frame(), data = NULL)
+#'
+#' @param expr R expression or rlang quo
+#' @param env environment to evaluate
+#' @param data dataframe or list
+#'
 #' @details \code{eval_dirty} uses \code{base::eval()} function to evaluate expressions.
 #' Compare to \code{rlang::eval_tidy}, which won't affect original environment,
 #' \code{eval_dirty} will cause changes to the environment. Therefore if \code{expr}
@@ -480,6 +491,10 @@ eval_dirty <- function(expr, env = parent.frame(), data = NULL){
 }
 
 #' Assign if not exists, or NULL
+#'
+#' @param lhs an object to check or assign
+#' @param value value to be assigned if lhs is NULL
+#'
 #' @examples
 #' \dontrun{
 #' # Remove a if exists
@@ -518,18 +533,6 @@ eval_dirty <- function(expr, env = parent.frame(), data = NULL){
   }
 }
 
-#' Check if value is within a data range
-#' @usage
-#' is_within(x, ref, strict = FALSE)
-#' @examples
-#' \dontrun{
-#' a <- 1:10
-#' a[is_within(a, c(2,5))]
-#' a[is_within(a, c(2,5), strict=T)]
-#' a[is_within(a, 2:5)]
-#'
-#' a[a %within% 2:5]
-#' }
 is_within <- function(x, ref, strict = FALSE){
   rg = range(ref)
   if(strict){
@@ -539,57 +542,10 @@ is_within <- function(x, ref, strict = FALSE){
   }
 }
 
-#' @rdname is_within
 `%within%` <- function(x,ref){
   is_within(x,ref)
 }
 
-#' Apply each element under "with" clause
-#' @usage lapply_expr <- function(X, expr, wrapper = NULL, env = environment())
-#' @details The goal of this function is to get rid of ugly "$" operator.
-#' X should be a list of lists, for each elements, \code{expr} will be
-#' evaluated. You can use the name of the lists directly. If the names are not
-#' provided, use \code{.x} as default variable. See examples.
-#' @examples
-#' \dontrun{
-#' # X is a list of named lists, with name of each elements be "a"
-#' X <- replicate(n = 3, list(a = rnorm(10)))
-#' lapply_expr(X, {mean(a)})
-#'
-#' # X is a list of unnamed lists, use ".x" as your vairable names
-#' X <- replicate(n = 3, list(rnorm(10)))
-#' lapply_expr(X, {mean(.x)})
-#'
-#' # wrapper needs to be a function. It will be applied to the results
-#' # before returning the values.
-#'
-#' # example 1: unlist the result to be a vector
-#' X <- replicate(n = 3, list(rnorm(10)))
-#' lapply_expr(X, {mean(.x)}, wrapper = unlist)
-#'
-#' # example 2: wrap up html components using htmltools::tags$ul
-#' lapply_expr(1:10, {
-#'   htmltools::tags$li(sprintf('line: %d', .x))
-#' }, wrapper = htmltools::tags$ul)
-#' }
-#' @export
-lapply_expr <- function(X, expr, wrapper = NULL, env = parent.frame()){
-  expr = substitute(expr, env = environment()) # prevent pre-eval of expr
-  ..nms = unique(names(X))
-  if(length(..nms) != 1 || ..nms == '') ..nms = '.x'
-  lapply(X, function(..x){
-    if(!is.list(..x)){
-      ..x = list(..x)
-      names(..x) = ..nms
-    }
-    eval_tidy(as_quosure(expr, env = env), data = ..x)
-  }) ->
-    re
-  if(is.function(wrapper)){
-    re = wrapper(re)
-  }
-  re
-}
 
 #' Evaluate function as if it's run within another environment
 #' @param FUN Function to be evaluated
@@ -642,7 +598,10 @@ eval_within <- function(FUN, env = parent.frame(), ..., .args = list(), .tidy = 
 }
 
 #' Function to clear all elements within environment
-#' @usage clear_env(env, all.names = T)
+#'
+#' @param env environment to clean
+#' @param all.names clear all variables?
+#'
 #' @examples
 #' \dontrun{
 #' env = new.env()
@@ -661,13 +620,13 @@ clear_env <- function(env, all.names = T){
 
 
 #' Check if an object is blank string ""
+#' @param x vector of characters
 #' @export
-is.blank <- function(s){
-  s == ''
+is.blank <- function(x){
+  x == ''
 }
 
 #' Check if value(s) is invalid
-#' @usage is_invalid(x, any = F, .invalids = c('null', 'na'))
 #' @param x Values to check
 #' @param any If TRUE, then it will check if any element in x is invalid,
 #' otherwise, it will check if all element of x is invalid
@@ -706,7 +665,6 @@ is_invalid <- function(x, any = F, .invalids = c('null', 'na')){
 }
 
 #' Get value, if value is invalid, then assign value
-#' @usage get_val(x, key = NULL, ..., .invalids = c('null', 'na'))
 #' @param x List or variable
 #' @param key If not NULL, \code{x[[key]]} will be evaluated
 #' @param ... Default value to be returned if x or x$key is invalid
@@ -734,7 +692,6 @@ get_val <- function(x, key = NULL, ..., .invalids = c('null', 'na')){
 }
 
 #' Calculate if length of input(s) is zero
-#' @usage zero_length(..., any = T, na.rm = F)
 #' @param ... Element(s) to be evaluated in length
 #' @param any Any element has zero-length? or all elements need to have zero-length
 #' @param na.rm Should NA be removed before evaluation?
@@ -782,6 +739,10 @@ zero_length <- function(..., any = T, na.rm = F){
 
 
 #' Drop nulls within lists/vectors
+#'
+#' @param x list
+#' @param .invalids 'null', 'na', 'blank' default is null
+#'
 #' @examples
 #' \dontrun{
 #' x <- list(NULL,NULL,1,2)
@@ -793,7 +754,8 @@ dropNulls <- function (x, .invalids = c('null')) {
 }
 
 #' Convert to string and never goes wrong
-#' @usage safe_str_c(x, sep = '', collapse = NULL, .error = '')
+#' @param ... characters to concatenate
+#' @param sep,collapse see stringr::str_c
 #' @param .error If x can't be converted to string, return this message
 #' @examples
 #' \dontrun{
@@ -823,22 +785,7 @@ safe_str_c <- function(..., sep = '', collapse = NULL, .error = ''){
 }
 
 
-#' Try to find absolute path without error
-#' @usage try_normalizePath(path, sep = c('/', '\\\\'))
-#' @details It's always good to use "/" to separate path. I haven't tested
-#' on windows, but this function should work. Basically this function uses
-#' base::normalizePath. However base::normalizePath returns error if file
-#' does not exist. try_normalizePath will check parent directories and try to
-#' find absolute path for parent directories.
-#' @examples
-#' \dontrun{
-#' # "./" exist
-#' try_normalizePath('./')
-#'
-#' # Case when path not exist
-#' try_normalizePath("./this/path/does/not/exist/")
-#' }
-#' @export
+# Try to find absolute path without error
 try_normalizePath <- function(path, sep = c('/', '\\\\')){
   if(file.exists(path)){
     path = base::normalizePath(path)
@@ -943,7 +890,6 @@ cache <- function(key, val, global = FALSE, replace = FALSE, session = NULL, swa
 
 #' @title Clear cache
 #' @seealso \code{\link{cache}}
-#' @usage clear_cache(all = FALSE, session = NULL)
 #' @param all Clear all cache? Don't turn it on in shiny app. This is for debug use.
 #' @param session internally used
 #' @export
@@ -958,7 +904,8 @@ clear_cache <- function(all = FALSE, session = NULL){
 }
 
 
-
+#' Get Cache Environment
+#' @param session internally used
 #' @export
 getDefaultCacheEnvironment <- function(
   session = getDefaultReactiveDomain()
@@ -984,6 +931,8 @@ getDefaultCacheEnvironment <- function(
 #' automatically. Otherwise you have to specify the packages that you want to load.
 #' @param .globals Automatically detect variables. See ?future::future
 #' @param .gc Clean up environment after each iterations? Recommended for large datasets.
+#' @param .future_plan which future plan to use
+#' @param .envir intrnally used
 #' @examples
 #' \dontrun{
 #' lapply_async(1:10, function(x){
@@ -1056,7 +1005,9 @@ lapply_async <- function(x, fun, ..., .ncores = 0, .future_plan = future::multip
 }
 
 
-
+#' Function to Restart RAVE
+#' @param reload reload RAVE after restarting R
+#' @param quiet logical
 #' @export
 restart_rave <- function(reload = T, quiet = FALSE){
   unloadns = function(ns_){
@@ -1081,5 +1032,6 @@ restart_rave <- function(reload = T, quiet = FALSE){
     cmd = 'base::library(rave)'
   }
 
+  eval(quote(rm(list = ls(all.names = T, envir = globalenv()), envir = globalenv())))
   eval(parse(text = sprintf('rstudioapi::restartSession(%s)', cmd)))
 }

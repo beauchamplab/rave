@@ -6,6 +6,15 @@
 \usage{
 create_local_cache(project_name, subject_code, epoch, time_range)
 }
+\arguments{
+\item{project_name}{project name}
+
+\item{subject_code}{subject code}
+
+\item{epoch}{epoch name}
+
+\item{time_range}{time range to cache}
+}
 \description{
 Create local cache for fast loadings
 }

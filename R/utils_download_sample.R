@@ -47,6 +47,9 @@ download_sample_data <- function(subject = 'sub1'){
 #' @param temp_dir temp directory to store downloaded zip files and extracted files
 #' @param remove_zipfile clear downloaded zip files? if con is local file, this will be forced to FALSE
 #' @param subject_settings override subject.yaml see details
+#' @param override_project if not null, project will be renamed to this value
+#' @param override_subject if not null, subject will be renamed to this value
+#' @param ... passed to download.file
 #' @examples
 #' \dontrun{
 #' # Normal example

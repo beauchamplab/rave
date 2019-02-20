@@ -7,6 +7,25 @@
 save_h5(x, file, name, chunk = "auto", level = 4, replace = TRUE,
   new_file = FALSE, ctype = NULL, ...)
 }
+\arguments{
+\item{x}{array, matrix, or vector}
+
+\item{file}{HDF5 file}
+
+\item{name}{group/data_name path to dataset}
+
+\item{chunk}{chunk size}
+
+\item{level}{compress level}
+
+\item{replace}{if dataset exists, replace?}
+
+\item{new_file}{remove old file if exists?}
+
+\item{ctype}{dataset type: numeric? character?}
+
+\item{...}{passed to other LazyH5$save}
+}
 \description{
 Save objects to H5 file without trivial checkings
 }

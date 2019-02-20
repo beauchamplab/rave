@@ -5,9 +5,9 @@
 \title{lapply using future package (async)}
 \usage{
 lapply_async(x, fun, ..., .ncores = 0,
-    .future_plan = future::multiprocess, .call_back = NULL,
-    .packages = NULL, .globals = TRUE,
-    .gc = TRUE)
+  .future_plan = future::multiprocess, .call_back = NULL,
+  .packages = NULL, .envir = environment(), .globals = TRUE,
+  .gc = TRUE)
 }
 \arguments{
 \item{x, fun, ...}{(See ?lapply)}
@@ -15,10 +15,14 @@ lapply_async(x, fun, ..., .ncores = 0,
 \item{.ncores}{Number of cores to use. If the value is 0, the number of cores
 will be determined by rave_options('max_worker').}
 
+\item{.future_plan}{which future plan to use}
+
 \item{.call_back}{A function takes current iteration number as argument, can be NULL.}
 
 \item{.packages}{NULL be default, then the function will detect attached packages
 automatically. Otherwise you have to specify the packages that you want to load.}
+
+\item{.envir}{intrnally used}
 
 \item{.globals}{Automatically detect variables. See ?future::future}
 

@@ -10,6 +10,7 @@ package_installed <- function(pkg){
 #' @param pkg package name
 #' @param internal use "::" or ":::"
 #' @param ifNotFound if package not found, return this value
+#' @param check check existence of package?
 get_from_package <- function(f, pkg, internal = FALSE, ifNotFound = NULL, check = TRUE){
   if(!check || package_installed(pkg)){
     export_f = ifelse(internal, ':::', '::')

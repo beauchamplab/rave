@@ -1,6 +1,6 @@
 #' mport raw voltage signals from matlab file
 #' @param subject_code subject code
-#' @param subject_code project name
+#' @param project_name project name
 #' @param block_num which block of signals will be looked into?
 #' @param chl integer, channel number
 #' @param name which matlab variable to look at, default is "analogTraces"

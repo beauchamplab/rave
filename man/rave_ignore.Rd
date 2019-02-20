@@ -2,7 +2,6 @@
 % Please edit documentation in R/cls_module.R
 \name{rave_ignore}
 \alias{rave_ignore}
-\alias{write_rave_modules}
 \title{Functions for dev use}
 \usage{
 rave_ignore(...)

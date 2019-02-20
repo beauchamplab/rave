@@ -18,6 +18,10 @@ export_diagnose_voltage(subject, electrodes, blocks,
 
 \item{save_dir}{which directory you want to export default will create a folder "exportr" in current path}
 
+\item{width, height, useDingbats}{passed to \code{\link{pdf}}}
+
+\item{onefile}{collect files within one file?}
+
 \item{winlen}{window length, default is 2*subject_sample_rate}
 
 \item{freq_lim}{default is half of voltage sample rate, however I woould recommend: 300 Hz}

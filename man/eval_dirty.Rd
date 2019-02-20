@@ -4,7 +4,14 @@
 \alias{eval_dirty}
 \title{Evaluate expressions}
 \usage{
-eval_dirty(expr, env = parent,frame(), data = NULL)
+eval_dirty(expr, env = parent.frame(), data = NULL)
+}
+\arguments{
+\item{expr}{R expression or rlang quo}
+
+\item{env}{environment to evaluate}
+
+\item{data}{dataframe or list}
 }
 \description{
 Evaluate expressions

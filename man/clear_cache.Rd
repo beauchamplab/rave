@@ -4,10 +4,12 @@
 \alias{clear_cache}
 \title{Clear cache}
 \usage{
-clear_cache(all = FALSE)
+clear_cache(all = FALSE, session = NULL)
 }
 \arguments{
 \item{all}{Clear all cache? Don't turn it on in shiny app. This is for debug use.}
+
+\item{session}{internally used}
 }
 \description{
 Clear cache

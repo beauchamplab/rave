@@ -4,7 +4,7 @@
 \alias{rave_checks}
 \title{Check if data is loaded for current module}
 \usage{
-rave_checks('power referenced', 'voltage raw', ...)
+rave_checks(..., data = NULL)
 }
 \arguments{
 \item{...}{see defails}

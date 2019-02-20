@@ -99,6 +99,8 @@ get_mem_usage <- function(modules, data_envir){
 #' @param active_module which module to focus at start up (use module ID)
 #' @param launch.browser launch browsers, default is on
 #' @param theme color theme for GUI
+#' @param disable_sidebar hide sidebar at startup?
+#' @param simplify_header hide header at startup?
 #' @param ... other params like test.mode for module debugging
 #' @export
 init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
@@ -550,6 +552,6 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
 }
 
 
-
+#' @rdname init_app
 #' @export
 rave_main <- init_app

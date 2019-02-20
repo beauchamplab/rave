@@ -1,8 +1,8 @@
 # functions for group analysis
 
 #' Find module analysis names
-#' @param module id
-#' @param project name
+#' @param module_id module id
+#' @param project_name project name
 #' @export
 module_analysis_names <- function(module_id, project_name){
   # if missing project_name, get from current repository
@@ -109,7 +109,7 @@ module_analysis_table <- function(project_name, module_id, analysis_name, check_
   return(tbl)
 }
 
-#' @export
+# Try to find path if not exists
 find_path <- function(path, root_dir){
   if(file.exists(path)){
     return(path)

@@ -4,6 +4,7 @@ to_package_name <- function(module_id){
   return(pkgName)
 }
 
+#' Load Modules (Questioning Lifecycle)
 #' @export
 load_modules <- function(){
   modules = read.csv(rave_options('module_lookup_file'), stringsAsFactors = F)

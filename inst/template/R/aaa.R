@@ -48,7 +48,12 @@ cat2 <- function(..., end = '\n', level = 'DEBUG', print_level = FALSE, pal = li
 #' @param reload logical, do you want to fast-reload the package before load the functions?
 #' @export
 dev_${{PACKAGE}} <- function(expose_functions = FALSE, reload = TRUE){
-  .fs = list.files(system.file('tools', package = '${{PACKAGE}}'), pattern = '\\.R$', full.names = T)
+
+  .fs = list.files(system.file('template/inst/tools', package = 'rave'), pattern = '\\.R$', full.names = T)
+  .fs = c(.fs, system.file('tools/input_widgets.R', package = '${{PACKAGE}}'))
+
+  .fs = .fs[.fs != '']
+
   rave_dev_load <- function(local = TRUE){
     # Get package name
     if(local){
@@ -58,12 +63,15 @@ dev_${{PACKAGE}} <- function(expose_functions = FALSE, reload = TRUE){
           source(.f, local = T)
         }
       })
+      env$.packageName = package
       return(env)
     }else{
       for(.f in .fs){
         source(.f, local = F)
       }
-      return(globalenv())
+      env = globalenv()
+      env$.packageName = package
+      return(env)
     }
 
     invisible()
@@ -147,6 +155,8 @@ debug_module <- function(module_id, interactive = FALSE, check_dependencies = TR
     async_quo = {}
   }
 
+  async_vars = main_quos$async_vars
+
   body(FUN) = rlang::quo_squash(rlang::quo({
     !!!normal_quos
 
@@ -161,19 +171,18 @@ debug_module <- function(module_id, interactive = FALSE, check_dependencies = TR
 
     if(!!async){
       ..tmp[['..async']] = TRUE
-      ..tmp[['..async_quo']] = quote(!!!async_quo)
-      ..tmp[['..async_var']] = NULL
-      ..tmp[['..packages']] = str_match(search(), '^package:(.+)$')[,2]
-      ..tmp[['..packages']] = unique(..tmp[['..packages']][!is.na(..tmp[['..packages']])])
+      pkgs = str_match(search(), '^package:(.+)$')[,2]
+      pkgs = unique(pkgs[!is.na(pkgs)])
       ..tmp[['..rave_future_obj']] = future::future({
-        rave::eval_dirty(..async_quo)#, env = async_env)
+        rave::eval_dirty(quote({!!async_quo}))#, env = async_env)
+        ..async_var = !!async_vars
         if(is.null(..async_var)){
           return(environment())
         }else{
           re = sapply(..async_var, get0, simplify = F, USE.NAMES = T)
           return(list2env(re))
         }
-      }, packages = ..tmp[['..packages']], evaluator = future::multiprocess,
+      }, packages = pkgs, evaluator = future::multiprocess,
       envir = ..tmp, gc = T)
     }
 

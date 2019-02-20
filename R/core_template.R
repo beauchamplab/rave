@@ -1,4 +1,4 @@
-#' Function to create a RAVE module template
+# Function to create a RAVE module template
 create_template <- function(path, ...){
   args = list(...)
 

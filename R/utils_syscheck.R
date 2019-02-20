@@ -1,4 +1,5 @@
 #' Check dependencies and update them at start up (Highly recommended)
+#' @param file file to check package update
 #' @export
 check_updates <- function(file){
   if(missing(file)){
@@ -38,6 +39,7 @@ check_updates <- function(file){
   })
 }
 
+#' Get RAVE version
 #' @export
 rave_version <- function(){
   as.character(utils::packageVersion('rave'))
@@ -53,7 +55,7 @@ rave_version <- function(){
   try({
     # get rave_version
     old_ver = rave_options('rave_ver')
-    old_ver %?<-% rave::rave_hist$get_or_save('..rave_ver..', '0.0.0.0000')
+    old_ver %?<-% rave_hist$get_or_save('..rave_ver..', '0.0.0.0000')
     new_ver = rave_version()
     is_newer = tryCatch({
       is_newer = utils::compareVersion(old_ver, new_ver) < 0
@@ -76,7 +78,7 @@ rave_version <- function(){
       has_data = rave::arrange_data_dir(T)
 
 
-      rave::rave_hist$save('..rave_ver..' = new_ver)
+      rave_hist$save('..rave_ver..' = new_ver)
 
       # 1. additional settings
       rave::rave_options(

@@ -10,6 +10,8 @@ get_module(package, module_id, local = FALSE)
 \item{package}{package name to search for modules}
 
 \item{module_id}{(optional) module ID if the package contains multiple modules}
+
+\item{local}{run module locally?}
 }
 \description{
 Function to find modules in packages

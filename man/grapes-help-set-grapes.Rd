@@ -6,6 +6,11 @@
 \usage{
 lhs \%?<-\% value
 }
+\arguments{
+\item{lhs}{an object to check or assign}
+
+\item{value}{value to be assigned if lhs is NULL}
+}
 \description{
 Assign if not exists, or NULL
 }

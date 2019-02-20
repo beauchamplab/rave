@@ -9,6 +9,8 @@
 #' @param nclass number of classes in histogram plot, default is 50
 #' @param fore_col Notch filtered color
 #' @param back_col Raw filtered color
+#' @param width,height,useDingbats passed to \code{\link{pdf}}
+#' @param onefile collect files within one file?
 #' @param ... All other params will be passed to \code{\link{pdf}} function
 #' @seealso \code{\link{pdf}}, \code{\link{diagnose_signal}}, \code{\link{pwelch}}
 #' @details Run "rave_preprocess()" first, import subject. If the subject is notch filtered, then it will compare

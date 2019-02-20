@@ -8,6 +8,8 @@
 #' @param reference, similar to epoch, For example, use "default" if exists reference file "reference_default.csv"
 #' @param attach, characters or NULL, NULL if you don't want to attach it, "r" if want to load data as R environment, "py" if python, "matlab" for matlab.
 #' @param data_env, environment to load data into.
+#' @param load_brain try to load freesurf files?
+#' @param strict check data completness? default is FALSE (suggested)
 #' @details Usually this function is for module writters and for debug use, or adhoc analysis.
 #' @export
 rave_prepare <- function(

@@ -16,7 +16,7 @@ safe_write_csv <- function(data, file, ..., quiet = F){
 }
 
 
-#' Read csv, with column classes specified
+# Read csv, with column classes specified
 safe_read_csv <- function(file, header = TRUE, sep = ',', colClasses = NA, skip = 0, quote = "\"", ...){
 
   s = readLines(file, n = skip+1, ok = TRUE)

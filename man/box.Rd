@@ -5,11 +5,33 @@
 \title{Wrapper for "box" in shinydashboard}
 \usage{
 box(..., title = NULL, footer = NULL, status = NULL,
-  solidHeader = FALSE, background = NULL, width = 6, height = NULL,
-  collapsible = FALSE, collapsed = FALSE, headerColor = "#f4f4f4")
+  solidHeader = FALSE, background = NULL, width = 12,
+  height = NULL, collapsible = FALSE, collapsed = FALSE,
+  headerColor = "#f4f4f4")
 }
 \arguments{
-\item{...}{passed to shinydashboard::box}
+\item{...}{Contents of the box.}
+
+\item{title}{title.}
+
+\item{footer}{footer text}
+
+\item{status}{The status of the item}
+
+\item{solidHeader}{Should the header have solid color background?}
+
+\item{background}{a color string}
+
+\item{width}{Integer from 1-12}
+
+\item{height}{The height of a box}
+
+\item{collapsible}{If TRUE, display a button in the upper right that allows
+the user to collapse the box.}
+
+\item{collapsed}{If TRUE, start collapsed.}
+
+\item{headerColor}{color of header}
 }
 \description{
 Wrapper for "box" in shinydashboard

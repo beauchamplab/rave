@@ -38,15 +38,21 @@ compressed signal}
 \item{std}{Error bar (red line) be draw at std * sd(s1), by default is 3, which
 means 3 standard deviation}
 
-\item{cex}{Label, title size. See \code{\link[graphics]{plot.default}}}
-
-\item{lwd}{Line size for the top plot. See \code{\link[graphics]{plot.default}}}
+\item{cex, lwd, mar, ...}{passed to \code{\link[graphics]{plot.default}}}
 
 \item{flim}{log10-Frequency range to plot (left bottom plot y range)}
+
+\item{nclass}{Number of classes for histogram}
 
 \item{main}{Plot title}
 
 \item{col}{Two elements: the first is for s1, second is for s2.}
+
+\item{which}{Which subplot to plot}
+
+\item{start_time}{When does signal starts}
+
+\item{boundary}{Boundary for signal plot, default is 1 standard dev}
 }
 \description{
 Signal Inspection Plots

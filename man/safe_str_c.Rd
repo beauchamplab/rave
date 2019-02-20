@@ -4,9 +4,13 @@
 \alias{safe_str_c}
 \title{Convert to string and never goes wrong}
 \usage{
-safe_str_c(x, sep = '', collapse = NULL, .error = '')
+safe_str_c(..., sep = "", collapse = NULL, .error = "")
 }
 \arguments{
+\item{...}{characters to concatenate}
+
+\item{sep, collapse}{see stringr::str_c}
+
 \item{.error}{If x can't be converted to string, return this message}
 }
 \description{

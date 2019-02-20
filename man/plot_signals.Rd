@@ -4,9 +4,11 @@
 \alias{plot_signals}
 \title{Plot signals line by line}
 \usage{
-plot_signals(signals, sample_rate = 1, col = 1, space = 0.999,
-space_mode = 'quantile',start_time = 0, time_range = NULL, compress = 1,
-channel_names = NULL, ylab = 'Channel')
+plot_signals(signals, sample_rate = 1, col = 1, space = 0.995,
+  space_mode = "quantile", start_time = 0, duration = NULL,
+  compress = TRUE, channel_names = NULL, ylab = "Channel",
+  time_shift = 0, lwd = 0.5, cex = 2, new_plot = T,
+  plot = "base", xlim = NULL, ...)
 }
 \arguments{
 \item{signals}{signals to plot, with each row one signal}
@@ -31,7 +33,7 @@ Default is NULL (Total time span)}
 
 \item{ylab}{Y axis label}
 
-\item{plot, xlim}{Depricated.}
+\item{plot, xlim, space_mode, time_shift, lwd, cex, new_plot}{Depricated.}
 
 \item{...}{pass to matplot}
 }

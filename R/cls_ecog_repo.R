@@ -2,7 +2,7 @@
 #' @param el Tensor or ECoGTensor object
 #' @param from baseline start time
 #' @param to baseline end time
-#' @param mean or median, default is mean
+#' @param method mean or median, default is mean
 #' @param unit "\%" percent signal change or "dB" decibel unit
 #' @param data_only return array or tensor object?
 #' @param hybrid if return tensor object, swap cache? useful for large dataset

@@ -1,4 +1,7 @@
 #' Tools for module writers
+#' @param env environtment to save tools in
+#' @param data_env rave data repository returned by rave_prepare, internally used
+#' @param quiet logical
 #' @export
 rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
   if(!is.environment(data_env)){
@@ -487,7 +490,6 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
 
 }
 
-#' @export
 try_save_file <- function(data, ..., fpath, name, append = F) {
   postfix = tail(str_to_lower(as.vector(str_split(
     fpath, '\\.', simplify = T
@@ -546,7 +548,6 @@ try_save_file <- function(data, ..., fpath, name, append = F) {
   )
 }
 
-#' @export
 try_load_file <- function(fpath, name, ..., env = new.env(parent = emptyenv()), simplify = T) {
   if (!file.exists(fpath)) {
     return(NULL)

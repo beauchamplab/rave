@@ -1,6 +1,7 @@
 #' check subject validity tools
 #' @param project_name project_name
 #' @param subject_code subject_code
+#' @param quiet logical
 check_subjects2 <- function(
   project_name, subject_code, quiet = FALSE
 ){

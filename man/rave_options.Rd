@@ -9,9 +9,9 @@ rave_options(..., .save = T, launch_gui = T)
 \arguments{
 \item{...}{Key-Value option pairs}
 
-\item{launch_gui}{launch shiny app?}
+\item{.save}{save to disk? ignored most of the time}
 
-\item{save}{save to disk? ignored most of the time}
+\item{launch_gui}{launch shiny app?}
 }
 \description{
 Function to change rave-options

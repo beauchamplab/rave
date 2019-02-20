@@ -322,6 +322,12 @@ exp.LazyH5 <- function(x){
 
 
 #' Lazy load HDF5 file via hdf5r package
+#'
+#' @param file HDF5 file
+#' @param name group/data_name path to dataset
+#' @param read_only default is TRUE, read dataset only
+#' @param ram load to RAM immediately
+#'
 #' @details load_h5 is a wrapper for class LazyH5, which load data with "lazy" mode -
 #' only read part of dataset when needed.
 #' @seealso \code{\link{save_h5}}
@@ -352,6 +358,17 @@ load_h5 <- function(file, name, read_only = T, ram = F){
 
 
 #' Save objects to H5 file without trivial checkings
+#'
+#' @param x array, matrix, or vector
+#' @param file HDF5 file
+#' @param name group/data_name path to dataset
+#' @param chunk chunk size
+#' @param level compress level
+#' @param replace if dataset exists, replace?
+#' @param new_file remove old file if exists?
+#' @param ctype dataset type: numeric? character?
+#' @param ... passed to other LazyH5$save
+#'
 #' @seealso \code{\link{load_h5}}
 #' @examples
 #' \dontrun{

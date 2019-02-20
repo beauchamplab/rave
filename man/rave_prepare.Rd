@@ -26,7 +26,11 @@ rave_prepare(subject, electrodes, epoch, time_range, frequency_range,
 
 \item{attach, }{characters or NULL, NULL if you don't want to attach it, "r" if want to load data as R environment, "py" if python, "matlab" for matlab.}
 
+\item{load_brain}{try to load freesurf files?}
+
 \item{data_env, }{environment to load data into.}
+
+\item{strict}{check data completness? default is FALSE (suggested)}
 }
 \description{
 Function to load subject and create ECoG data environment

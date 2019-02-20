@@ -4,7 +4,8 @@
 \alias{cache}
 \title{Cache object}
 \usage{
-cache(key, val, global = FALSE, swap = FALSE, file = tempfile(), name = 'data')
+cache(key, val, global = FALSE, replace = FALSE, session = NULL,
+  swap = FALSE, file = tempfile(), name = "data")
 }
 \arguments{
 \item{key}{Any R object, a named list would be the best.}
@@ -13,7 +14,11 @@ cache(key, val, global = FALSE, swap = FALSE, file = tempfile(), name = 'data')
 
 \item{global}{option for shiny app, where if global, then the the cache will ignore sessions.}
 
-\item{swap}{When object size is too large, do you want to save it to local disk?}
+\item{replace}{Force replace cache?}
+
+\item{session}{internally used}
+
+\item{swap}{Save to swap? usually when val is a large matrix or vector}
 
 \item{file, name}{If you use swap=T, see \code{\link{save_h5}}}
 }

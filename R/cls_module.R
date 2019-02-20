@@ -381,7 +381,6 @@ rave_ignore <- function(...){
 }
 
 
-#' @aliases write_rave_modules
 rave_inputs <- function(..., .input_panels = list(), .env = globalenv()){
   quos = rlang::quos(...)
   parser = comp_parser()
@@ -448,13 +447,16 @@ rave_execute <- function(..., auto = TRUE, .env = globalenv()){
 
 
 #' Cache input values
+#' @param inputId input ID
+#' @param val value if not cached
+#' @param read_only logical, if FALSE, replace cache
 #' @export
 cache_input <- function(inputId, val, read_only = T){
   return(val)
 }
 
 
-#' Get x or default
+# Get x or default
 async_var <- function(x, default = NULL){
   tryCatch({
     if(is.null(x)){

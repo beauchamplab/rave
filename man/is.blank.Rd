@@ -4,7 +4,10 @@
 \alias{is.blank}
 \title{Check if an object is blank string ""}
 \usage{
-is.blank(s)
+is.blank(x)
+}
+\arguments{
+\item{x}{vector of characters}
 }
 \description{
 Check if an object is blank string ""

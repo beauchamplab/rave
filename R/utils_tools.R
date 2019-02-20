@@ -1,3 +1,6 @@
+#' Function to create RAVE preprocess tools
+#' @param env environment to save tools to
+#' @param ... ignored
 #' @export
 rave_preprocess_tools <- function(env = new.env(), ...){
   assertthat::assert_that(is.environment(env), msg = 'env MUST be an environment')

@@ -417,12 +417,14 @@ Tensor <- R6::R6Class(
 )
 
 #' Convert tensor to python objects
+#' @param x Tensor instance
+#' @param convert TRUE to automatically convert Python objects to their R equivalent. Not implemented
 #' @export
-r_to_py.Tensor <- function(obj, convert = FALSE){
+r_to_py.Tensor <- function(x, convert = FALSE){
   reticulate::r_to_py(c(
-    obj$dimnames,
+    x$dimnames,
     list(
-      data = obj$get_data()
+      data = x$get_data()
     )),
     convert = convert)
 }
@@ -473,21 +475,27 @@ dimnames.Tensor <- function(x){
   #                  varnames = c('Trial', 'Frequency', 'Time', 'Electrode'))
 }
 
-#' @export
+
 content.Tensor <- function(obj, ...){
   obj$get_data()
 }
 
-#' @export
 content <- function(obj, ...){
   UseMethod('content')
 }
 
+#' Subset for Tensor Object
+#' @param x	object to be subsetted.
+#' @param ... further arguments to be passed to or from other methods.
+#' @param .env environtment to evaluate in
 #' @export
 subset.Tensor <- function(x, ..., .env = parent.frame()){
   x$subset(...,.env = .env)
 }
 
+#' Convert Tensors to Vector
+#' @param x an R object.
+#' @param ... passed from or to other methods.
 #' @export
 as.vector.Tensor <- function(x, ...){
   d = x$get_data()

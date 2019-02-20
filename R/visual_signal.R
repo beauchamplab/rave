@@ -16,10 +16,13 @@
 #' @param noverlap Number of data points that each adjacent windows overlap?
 #' @param std Error bar (red line) be draw at std * sd(s1), by default is 3, which
 #' means 3 standard deviation
+#' @param nclass Number of classes for histogram
+#' @param which Which subplot to plot
+#' @param start_time When does signal starts
+#' @param boundary Boundary for signal plot, default is 1 standard dev
 #' @param main Plot title
 #' @param col Two elements: the first is for s1, second is for s2.
-#' @param cex Label, title size. See \code{\link[graphics]{plot.default}}
-#' @param lwd Line size for the top plot. See \code{\link[graphics]{plot.default}}
+#' @param cex,lwd,mar,... passed to \code{\link[graphics]{plot.default}}
 #' @examples
 #' \dontrun{
 #' time <- seq(0, 300, 1/2000)
@@ -128,8 +131,7 @@ diagnose_signal <- function(
 }
 
 
-#' Hanning window
-#' @usage hanning(n)
+# Hanning window
 hanning <- function(n) {
   if(n == 1){
     return(1)
@@ -168,10 +170,12 @@ postpad <- function(x, n){
 #' @param x signal
 #' @param fs sample rate
 #' @param window window length, default 128
+#' @param nfft number of DFT points
 #' @param noverlap overlap between two adjacent windows, by default is 8
 #' @param log '', 'x', 'y', 'xy', indicates which axis should be log10 value.
 #' @param plot logical, plot the result or not
-#' @param ... will be passed to plot
+#' @param col,xlim,ylim,main,cex,... will be passed to plot
+#' @param spec_func deprecated
 #' @export
 pwelch <- function (
   x, fs, window = 64, noverlap = 8, nfft = 256,
@@ -280,9 +284,6 @@ pwelch <- function (
 
 
 #' Plot signals line by line
-#' @usage plot_signals(signals, sample_rate = 1, col = 1, space = 0.999,
-#' space_mode = 'quantile',start_time = 0, time_range = NULL, compress = 1,
-#' channel_names = NULL, ylab = 'Channel')
 #' @param signals signals to plot, with each row one signal
 #' @param sample_rate sample rate
 #' @param col Color, either length of 1 or number of signals. Can be numeric or color name
@@ -297,7 +298,7 @@ pwelch <- function (
 #' @param channel_names Names for each signals. Will be Y tick labels
 #' @param ylab Y axis label
 #' @param ... pass to matplot
-#' @param plot,xlim Depricated.
+#' @param plot,xlim,space_mode,time_shift,lwd,cex,new_plot Depricated.
 #' @export
 plot_signals <- function(
   signals, sample_rate = 1, col = 1, space = 0.995, space_mode = 'quantile',

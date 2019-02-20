@@ -68,7 +68,8 @@ Imports:
 Suggests:
     gifti,
     knitr,
-    rmarkdown
+    rmarkdown,
+    spelling
 Remotes:
     github::dipterix/threejsr,
     github::dipterix/rutabaga
@@ -151,3 +152,4 @@ Collate:
     'visual_signal.R'
     'zzz.R'
 VignetteBuilder: knitr
+Language: en-US

@@ -1,4 +1,3 @@
-#' Wrapper for
 collapse <- function(x, keep, average = FALSE){
   f = get_from_package('collapse', pkg = 'rutabaga', check = FALSE)
   if(is.function(f)){

@@ -6,6 +6,11 @@
 \usage{
 \method{print}{rave_printable}(x, ...)
 }
+\arguments{
+\item{x}{an rave_printable environment}
+
+\item{...}{passed from or to other methods}
+}
 \description{
 Override print method for printable environment
 }

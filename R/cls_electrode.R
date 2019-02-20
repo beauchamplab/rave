@@ -16,6 +16,8 @@ as_printable = function(env){
 }
 
 #' Override print method for printable environment
+#' @param x an rave_printable environment
+#' @param ... passed from or to other methods
 #' @export
 print.rave_printable = function(x, ...){
   assertthat::assert_that(is.environment(x), msg = 'x MUST be an environment.')

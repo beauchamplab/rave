@@ -171,7 +171,7 @@ save_options <- function(){
 
 #' Function to change rave-options
 #' @param ... Key-Value option pairs
-#' @param save save to disk? ignored most of the time
+#' @param .save save to disk? ignored most of the time
 #' @param launch_gui launch shiny app?
 #' @export
 rave_options <- function(..., .save = T, launch_gui = T){

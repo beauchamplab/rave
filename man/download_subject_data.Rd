@@ -14,11 +14,17 @@ download_subject_data(con, replace_if_exists = F,
 
 \item{replace_if_exists}{Automatically replace current subject if subject files exist (default FALSE)}
 
+\item{override_project}{if not null, project will be renamed to this value}
+
+\item{override_subject}{if not null, subject will be renamed to this value}
+
 \item{temp_dir}{temp directory to store downloaded zip files and extracted files}
 
 \item{remove_zipfile}{clear downloaded zip files? if con is local file, this will be forced to FALSE}
 
 \item{subject_settings}{override subject.yaml see details}
+
+\item{...}{passed to download.file}
 }
 \description{
 Function to download subjects from internet/local
@@ -41,7 +47,9 @@ download.file(
 download_subject_data(con = "~/rave_data/data-small.zip")
 
 # or the following
-# download_subject_data('https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/data-large.zip')
+# download_subject_data(
+# 'https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/data-large.zip'
+# )
 
 # rename project to demo_junk
 download_subject_data(con = "~/rave_data/data-small.zip",

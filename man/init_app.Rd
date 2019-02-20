@@ -2,9 +2,14 @@
 % Please edit documentation in R/init_app.R
 \name{init_app}
 \alias{init_app}
+\alias{rave_main}
 \title{Initialize main application}
 \usage{
 init_app(modules = NULL, active_module = NULL, launch.browser = T,
+  theme = "purple", disable_sidebar = FALSE, simplify_header = FALSE,
+  ...)
+
+rave_main(modules = NULL, active_module = NULL, launch.browser = T,
   theme = "purple", disable_sidebar = FALSE, simplify_header = FALSE,
   ...)
 }
@@ -16,6 +21,10 @@ init_app(modules = NULL, active_module = NULL, launch.browser = T,
 \item{launch.browser}{launch browsers, default is on}
 
 \item{theme}{color theme for GUI}
+
+\item{disable_sidebar}{hide sidebar at startup?}
+
+\item{simplify_header}{hide header at startup?}
 
 \item{...}{other params like test.mode for module debugging}
 }

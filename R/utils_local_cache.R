@@ -16,6 +16,10 @@
 NULL
 
 #' Create local cache for fast loadings
+#' @param project_name project name
+#' @param subject_code subject code
+#' @param epoch epoch name
+#' @param time_range time range to cache
 #' @export
 create_local_cache <- function(project_name, subject_code, epoch, time_range){
 
@@ -187,6 +191,14 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
 
 
 #' Load local cache for fast importing voltage, power, and phase
+#' @param project_name project name
+#' @param subject_code subject code
+#' @param epoch epoch name
+#' @param time_range time range to cache
+#' @param frequency_range frequency range to cache
+#' @param electrodes electrodes to cache
+#' @param referenced which reference to be used
+#' @param data_type which type(s) of data to cache
 #' @export
 load_local_cache <- function(project_name, subject_code, epoch, time_range,
                              frequency_range = NULL, electrodes,

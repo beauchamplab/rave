@@ -2,7 +2,7 @@
 % Please edit documentation in R/suma_io.R
 \name{suma_surface_volume_parse}
 \alias{suma_surface_volume_parse}
-\title{Parse surface volumn file header}
+\title{Parse surface volume file header}
 \usage{
 suma_surface_volume_parse(file_path)
 }
@@ -10,5 +10,5 @@ suma_surface_volume_parse(file_path)
 \item{file_path}{path to brik or head file}
 }
 \description{
-Parse surface volumn file header
+Parse surface volume file header
 }

@@ -4,7 +4,12 @@
 \alias{r_to_py.Tensor}
 \title{Convert tensor to python objects}
 \usage{
-r_to_py.Tensor(obj, convert = FALSE)
+r_to_py.Tensor(x, convert = FALSE)
+}
+\arguments{
+\item{x}{Tensor instance}
+
+\item{convert}{TRUE to automatically convert Python objects to their R equivalent. Not implemented}
 }
 \description{
 Convert tensor to python objects

@@ -302,14 +302,24 @@ init_module <- function(module_id, debug = FALSE){
   has_content = get_content(content = envs$content, env = envs$tmp_env)
 
   # Initialize env
-  param_env = new.env(parent = pkg_env)
-  param_env$rave_checks = function(...){}
+  wrapper_env = new.env(parent = pkg_env)
+
+  # TODO: need to test variable reference issue
+  # Load tools to parse reactive values
+  source(get_path('inst/tools/libs.R'), local = wrapper_env)
+  source(get_path('inst/tools/funcs_reactives.R'), local = wrapper_env)
+  wrapper_env$rave_checks = function(...){}
+
+
+  param_env = new.env(parent = wrapper_env)
+
+  if(debug){
+    # we want to expose functions to global environment if possible
+    source(get_path('inst/tools/funcs_reactives.R'), local = param_env)
+  }
 
   for(f in envs$script_env[['source']]){
-    param_env$..scr = f
-    with(param_env, {
-      source(file = ..scr, local = T)
-    })
+    source(file = f, local = param_env)
   }
 
   # initialize global variables

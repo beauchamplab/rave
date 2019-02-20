@@ -6,6 +6,13 @@
 \usage{
 fprintf(..., collapse = "\\n", lookup_env = parent.frame())
 }
+\arguments{
+\item{...}{characters}
+
+\item{collapse}{character to collapse characters}
+
+\item{lookup_env}{which environment to look for data?}
+}
 \description{
 Format Print Strings
 }

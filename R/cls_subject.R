@@ -137,9 +137,8 @@ r_to_py.Subject <- function(obj, convert = FALSE){
   ), convert = convert)
 }
 
-#' Conver subject to JSON format
-#'
-#' @export
+# Conver subject to JSON format
+# Preserved for jsonlite
 asJSON.Subject <- function(obj){
   list(
     subject_id = obj$id,
@@ -152,6 +151,8 @@ asJSON.Subject <- function(obj){
 }
 
 #' Returns subject ID
+#' @param x object to be coerced or tested.
+#' @param ... further arguments passed to or from other methods.
 #' @export
 as.character.Subject <- function(x, ...){
   x$id

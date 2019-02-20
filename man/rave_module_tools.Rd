@@ -6,6 +6,13 @@
 \usage{
 rave_module_tools(env = NULL, data_env = NULL, quiet = FALSE)
 }
+\arguments{
+\item{env}{environtment to save tools in}
+
+\item{data_env}{rave data repository returned by rave_prepare, internally used}
+
+\item{quiet}{logical}
+}
 \description{
 Tools for module writers
 }

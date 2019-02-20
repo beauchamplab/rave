@@ -15,6 +15,8 @@ get_from_package(f, pkg, internal = FALSE, ifNotFound = NULL,
 \item{internal}{use "::" or ":::"}
 
 \item{ifNotFound}{if package not found, return this value}
+
+\item{check}{check existence of package?}
 }
 \description{
 Get function from external packages

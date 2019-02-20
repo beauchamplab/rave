@@ -21,6 +21,7 @@ any_subject_loaded <- function(){
 #' Function to find modules in packages
 #' @param package package name to search for modules
 #' @param module_id (optional) module ID if the package contains multiple modules
+#' @param local run module locally?
 #' @export
 get_module <- function(package, module_id, local = FALSE){
 
@@ -85,10 +86,11 @@ get_module <- function(package, module_id, local = FALSE){
 
 
 debug_module <- function(package = package, module_id = module_id, reload = FALSE){
-  .fs = list.files(system.file('tools', package = package), pattern = '\\.R$', full.names = T)
-  if(length(.fs) == 0 || .fs == ''){
-    .fs = list.files(system.file('template/inst/tools', package = 'rave'), pattern = '\\.R$', full.names = T)
-  }
+  .fs = list.files(system.file('template/inst/tools', package = 'rave'), pattern = '\\.R$', full.names = T)
+  .fs = c(.fs, system.file('tools/input_widgets.R', package = package))
+
+  .fs = .fs[.fs != '']
+
   rave_dev_load <- function(){
     # Get package name
     env = new.env()
@@ -184,7 +186,7 @@ debug_module <- function(package = package, module_id = module_id, reload = FALS
       pkgs = str_match(search(), '^package:(.+)$')[,2]
       pkgs = unique(pkgs[!is.na(pkgs)])
       ..tmp[['..rave_future_obj']] = future::future({
-        eval_dirty(quote(!!!async_quo))#, env = async_env)
+        eval_dirty(quote({!!async_quo}))#, env = async_env)
         async_vars = !!async_vars
         if(is.null(async_vars)){
           return(as.list(environment()))
@@ -206,10 +208,10 @@ debug_module <- function(package = package, module_id = module_id, reload = FALS
       }else{
         if(future::resolved(..tmp[['..rave_future_obj']])){
           env = ..tmp[['..rave_future_env']]
-          if(!is.environment(env)){
+          if(!(is.environment(env) || is.list(env))){
             env = ..tmp[['..rave_future_env']] = future::value(..tmp[['..rave_future_obj']])
           }
-          get0(key, envir = env)
+          env[['key']]
         }
       }
 

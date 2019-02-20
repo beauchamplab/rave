@@ -10,6 +10,8 @@ check_subjects2(project_name, subject_code, quiet = FALSE)
 \item{project_name}{project_name}
 
 \item{subject_code}{subject_code}
+
+\item{quiet}{logical}
 }
 \description{
 check subject validity tools

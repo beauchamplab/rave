@@ -4,7 +4,7 @@
 \alias{get_val}
 \title{Get value, if value is invalid, then assign value}
 \usage{
-get_val(x, key = NULL, ..., .invalids = c('null', 'na'))
+get_val(x, key = NULL, ..., .invalids = c("null", "na"))
 }
 \arguments{
 \item{x}{List or variable}

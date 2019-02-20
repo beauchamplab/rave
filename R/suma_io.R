@@ -179,7 +179,6 @@ read_mgrid <- function(con, raw = F){
 
 
 #' Parse spec file
-#' @usage suma_spec_parse(subject)
 #' @param subject Either characters such as 'Project/Subject' or Subject object created by Subject$new(...)
 #' @param spec_file default decided by rave_options('suma_spec_file'), depending on subjects
 #' @examples
@@ -234,7 +233,7 @@ suma_spec_parse <- function(subject, spec_file){
 }
 
 
-#' Parse surface volumn file header
+#' Parse surface volume file header
 #' @param file_path path to brik or head file
 #' @export
 suma_surface_volume_parse <- function(file_path){
