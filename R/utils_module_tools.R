@@ -58,6 +58,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
           )
         }
       }
+
       return(repo[[nm]])
     }
 
@@ -101,6 +102,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
           )
         }
       }
+
       return(repo[[nm]])
     }
 
@@ -142,6 +144,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
           )
         }
       }
+
       return(repo[[nm]])
     }
 

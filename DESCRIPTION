@@ -96,6 +96,7 @@ Collate:
     'func_module_debug.R'
     'func_rave_prepare.R'
     'func_shinirize.R'
+    'imported_fst.R'
     'imported_overall.R'
     'imported_rutabaga.R'
     'imported_shinydashboard.R'

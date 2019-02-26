@@ -52,6 +52,8 @@ get_module <- function(package, module_id, local = FALSE){
 
   # Load dev environment
   .fs = list.files(system.file('template/inst/tools', package = 'rave'), pattern = '\\.R$', full.names = T)
+  .fs = c(.fs, system.file('tools/input_widgets.R', package = package))
+  .fs = .fs[.fs != '']
   env = new.env()
   with(env, {
     for(.f in .fs){

@@ -281,7 +281,7 @@ ECoGRepository <- R6::R6Class(
 
           # generate local cache for power
           file = tempfile()
-          fst::write_fst(results, file, compress = 20)
+          write_fst(results, file, compress = 20)
           rm(results)
           gc()
 
@@ -289,6 +289,9 @@ ECoGRepository <- R6::R6Class(
           power$swap_file = file
           power$hybrid = T
           power$use_index = TRUE
+
+          # set to be read-only
+          power$read_only = TRUE
 
           nm = ifelse(referenced, 'power', 'raw_power')
           self[[nm]] = power
@@ -331,7 +334,7 @@ ECoGRepository <- R6::R6Class(
 
           # generate local cache for phase
           file = tempfile()
-          fst::write_fst(results, file, compress = 20)
+          write_fst(results, file, compress = 20)
           rm(results)
           gc()
 
@@ -339,6 +342,9 @@ ECoGRepository <- R6::R6Class(
           phase$swap_file = file
           phase$hybrid = T
           phase$use_index = TRUE
+
+          # set to be read-only
+          phase$read_only = TRUE
 
           nm = ifelse(referenced, 'phase', 'raw_phase')
           self[[nm]] = phase
@@ -378,9 +384,9 @@ ECoGRepository <- R6::R6Class(
           volt$dim = vapply(dimnames_volt, length, FUN.VALUE = 0, USE.NAMES = F)
           volt$dimnames = dimnames_volt
 
-          # generate local cache for phase
+          # generate local cache for volt
           file = tempfile()
-          fst::write_fst(results, file, compress = 20)
+          write_fst(results, file, compress = 20)
           rm(results)
           gc()
 
@@ -388,6 +394,9 @@ ECoGRepository <- R6::R6Class(
           volt$swap_file = file
           volt$hybrid = T
           volt$use_index = TRUE
+
+          # set to be read-only
+          volt$read_only = TRUE
 
           nm = ifelse(referenced, 'volt', 'raw_volt')
           self[[nm]] = volt

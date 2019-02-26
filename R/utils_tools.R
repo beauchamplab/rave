@@ -564,7 +564,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
             # write
             cache_file = file.path(dirs$channel_dir, 'cache', 'power', 'raw', block, sprintf('%d.fst', e))
 
-            fst::write_fst(power, cache_file, compress = 100)
+            write_fst(power, cache_file, compress = 100)
           }
 
 
@@ -598,7 +598,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
             # write
             cache_file = file.path(dirs$channel_dir, 'cache', 'phase', 'raw', block, sprintf('%d.fst', e))
 
-            fst::write_fst(phase, cache_file, compress = 100)
+            write_fst(phase, cache_file, compress = 100)
           }
 
           # voltage
@@ -630,7 +630,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
             # write
             cache_file = file.path(dirs$channel_dir, 'cache', 'voltage', 'raw', block, sprintf('%d.fst', e))
 
-            fst::write_fst(s, cache_file, compress = 100)
+            write_fst(s, cache_file, compress = 100)
           }
 
           # # Raw complex coefficient

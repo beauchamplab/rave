@@ -4,7 +4,7 @@
 \alias{afni_tools}
 \title{Read from AFNIio.R, return an environment wrapper for all functions}
 \usage{
-afni_tools()
+afni_tools(debug)
 }
 \description{
 Read from AFNIio.R, return an environment wrapper for all functions

@@ -192,8 +192,6 @@ rave_checks = function(..., data = NULL){
         }else{
           msg = c(msg, sprintf('Phase (%s, %s)', ifelse(referenced, 'Referenced', 'Raw'), size))
         }
-
-
       }
       rm(dat)
     }else if('volt' %in% d || 'voltage' %in% d){

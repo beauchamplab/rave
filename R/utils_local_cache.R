@@ -94,7 +94,7 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
     )
 
     fst_file = file.path(subject_cache_dir, 'coef', sprintf('%d.fst', e))
-    fst::write_fst(coef, fst_file, compress = 100)
+    write_fst(coef, fst_file, compress = 100)
     rm(coef)
 
     # get voltage
@@ -107,7 +107,7 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
     })
     volt = data.frame(volt = as.vector(t(volt)))
     fst_file = file.path(subject_cache_dir, 'voltage', sprintf('%d.fst', e))
-    fst::write_fst(volt, fst_file, compress = 100)
+    write_fst(volt, fst_file, compress = 100)
     rm(volt)
 
   }, .call_back = function(ii){
@@ -133,7 +133,7 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
       })
       volt = data.frame(Volt = as.vector(t(volt)))
       fst_file = file.path(subject_cache_dir, 'ref', sprintf('%s.volt.fst', f))
-      fst::write_fst(volt, fst_file, compress = 100)
+      write_fst(volt, fst_file, compress = 100)
       rm(volt)
 
 
@@ -154,7 +154,7 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
       )
 
       fst_file = file.path(subject_cache_dir, 'ref', sprintf('%s.coef.fst', f))
-      fst::write_fst(coef, fst_file, compress = 100)
+      write_fst(coef, fst_file, compress = 100)
       rm(coef)
     }
   }
@@ -304,7 +304,7 @@ load_local_cache <- function(project_name, subject_code, epoch, time_range,
       el$hybrid = T
       volt$data = data.frame(volt$data)
       names(volt$data) = paste0('V', seq_len(ncol(volt$data)))
-      fst::write_fst(volt$data, el$swap_file)
+      write_fst(volt$data, el$swap_file)
 
       rm(volt)
 
@@ -351,18 +351,18 @@ load_local_cache <- function(project_name, subject_code, epoch, time_range,
         phase = Arg(coef$data)
         rm(coef)
 
-        fst::write_fst(as.data.frame(phase), el2$swap_file)
+        write_fst(as.data.frame(phase), el2$swap_file)
         rm(phase)
 
         re[['phase']] = el2
 
-        fst::write_fst(as.data.frame(power), el$swap_file)
+        write_fst(as.data.frame(power), el$swap_file)
         rm(power)
 
         re[['power']] = el
       }else{
 
-        fst::write_fst(as.data.frame(coef$data), el$swap_file)
+        write_fst(as.data.frame(coef$data), el$swap_file)
         if('power' %in% data_type){
           re[['power']] = el
         }else{

@@ -3,7 +3,8 @@
 Tensor <- R6::R6Class(
   classname = 'Tensor',
   private = list(
-    .data = NULL
+    .data = NULL,
+    fst_locked = FALSE
   ),
   public = list(
     dim = NULL,
@@ -64,10 +65,10 @@ Tensor <- R6::R6Class(
           data = apply(data, length(dim), as.vector)
           data = as.data.frame(data)
           names(data) = paste0('V', seq_len(ncol(data)))
-          fst::write_fst(data, swap_file, compress = 20)
+          write_fst(data, swap_file, compress = 20)
         }else{
           data = data.frame(V1 = as.vector(data))
-          fst::write_fst(data, swap_file, compress = 20)
+          write_fst(data, swap_file, compress = 20)
         }
       }else{
         private$.data = data
@@ -231,7 +232,7 @@ Tensor <- R6::R6Class(
       re
     },
 
-    # Serialize tensor to a file and store it via fst::write_fst
+    # Serialize tensor to a file and store it via write_fst
     to_swap = function(use_index = F, delay = 0){
       if(delay == 0){
         self$to_swap_now(use_index = use_index)
@@ -264,7 +265,7 @@ Tensor <- R6::R6Class(
       }
       d = as.data.frame(d)
 
-      fst::write_fst(d, path = swap_file, compress = 20)
+      write_fst(d, path = swap_file, compress = 20)
       self$use_index = use_index
       self$swap_file = swap_file
 
@@ -306,6 +307,9 @@ Tensor <- R6::R6Class(
       return(d)
     },
     set_data = function(v){
+      if(private$fst_locked){
+        stop('This tensor instance is locked for read-only purpose. Cannot set data!')
+      }
       self$last_used = Sys.time()
       private$.data = v
       if(self$hybrid && !is.null(v)){
@@ -411,6 +415,13 @@ Tensor <- R6::R6Class(
         self$get_data()
       }else{
         stop('Tensor$data is deprecated, use Tensor$set_data(data) instead!')
+      }
+    },
+    read_only = function(v){
+      if(missing(v)){
+        return(private$fst_locked)
+      }else{
+        private$fst_locked = isTRUE(v)
       }
     }
   )
