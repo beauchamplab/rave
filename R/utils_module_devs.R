@@ -337,7 +337,8 @@ detect_modules <- function(packages, as_module = TRUE){
         tryCatch({
           get_module(package = x[4], module_id = x[1])
         }, error = function(e){
-          NULL
+          logger(e, level = 'WARNING')
+          logger('Error found! Please check dependencies. Will not import module ', x[1], level = 'INFO')
         })
       })
 

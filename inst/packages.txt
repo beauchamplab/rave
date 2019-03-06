@@ -2,5 +2,5 @@
 # name, version, source, details
 
 threejsr, 0.1.22, github, dipterix/threejsr
-rutabaga, 0.1.1, github, dipterix/rutabaga
+rutabaga, 0.1.6, github, dipterix/rutabaga@Ddev
 gifti, 0.7.5, cran, muschellij2/gifti
