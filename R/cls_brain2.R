@@ -91,7 +91,7 @@ rave_brain2 <- function(multiple_subject = FALSE, prefix = 'std.141.'){
 
       brain$add_electrode(
         subject_name = subject$id,
-        name = sprintf('Electrode %s (%s)', row$Electrode, row$Label),
+        name = sprintf('Electrode %s (%s, %s)', row$Electrode, row$Label, subject$id),
         x = row$Coord_x,
         y = row$Coord_y,
         z = row$Coord_z,
@@ -172,7 +172,7 @@ rave_brain2 <- function(multiple_subject = FALSE, prefix = 'std.141.'){
 
     new_table = lapply(seq_len(nrow(electrode_table)), function(ii){
       row = electrode_table[ii, ]
-      name = sprintf('Electrode %s (%s)', row$Electrode, row$Label)
+      name = sprintf('Electrode %s (%s, %s)', row$Electrode, row$Label, subject$id)
 
       pos = tran_mat %*% c(row$Coord_x, row$Coord_y, row$Coord_z, 1)
       pos = pos[1:3]

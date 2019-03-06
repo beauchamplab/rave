@@ -1,7 +1,7 @@
 Order,PackageID,GroupName,ModuleID,Name,ScriptPath,Active,Author,Version,Packages
-0,,,viewer_3d,3D Viewer,~/rave_modules/modules/builtin_modules/3dviewer/main.R,TRUE,[Zhengjia Wang]<dipterix.wang@gmail.com>,0.0.5,rave;stringr;shiny;
-1,,,reference,Electrode Reference,~/rave_modules/modules/builtin_modules/reference/main.R,TRUE,[Zhengjia Wang]<dipterix.wang@gmail.com>,0.4.1,rave;magrittr;stringr;shiny;
-2,,,condition_explorer,Condition Explorer,~/rave_modules/modules/builtin_modules/condition_explorer/condition_explorer.R,TRUE,"[John Magnotti]<john.Magnotti@bcm.edu>, [Zhengjia Wang]<dipterix.wang@gmail.com>",0.1.20,rave;magrittr;stringr;shiny;MASS
-3,,,itpc_phase,Inter-Trial Phase Coherence,~/rave_modules/modules/builtin_modules/inter_trial_phase_coherence/phase_module.R,TRUE,"[Zhengjia Wang]<dipterix.wang@gmail.com>",0.0.1,rave;magrittr;
-4,,,onset_detection,Onset Detection,~/rave_modules/modules/builtin_modules/onset_detection/onset_detection.R,TRUE,[John Magnotti]<john.Magnotti@bcm.edu>,0.0.5,rave;magrittr;stringr;shiny;MASS
-5,,,across_el_cor,Across Electrode Correlation,~/rave_modules/modules/builtin_modules/correlation/across_electrode_correlations.R,FALSE,[John Magnotti]<john.Magnotti@bcm.edu>,0.0.4,rave;magrittr;stringr;shiny;MASS
+0,,,viewer_3d,3D Viewer,~/rave_modules/modules/builtin_modules/3dviewer/main.R,TRUE,[Zhengjia Wang]<dipterix.wang@gmail.com>,0.0.5,rave;stringr;shiny;rutabaga;
+1,,,reference,Electrode Reference,~/rave_modules/modules/builtin_modules/reference/main.R,TRUE,[Zhengjia Wang]<dipterix.wang@gmail.com>,0.4.1,rave;magrittr;stringr;shiny;rutabaga;
+2,,,condition_explorer,Condition Explorer,~/rave_modules/modules/builtin_modules/condition_explorer/condition_explorer.R,TRUE,"[John Magnotti]<john.Magnotti@bcm.edu>, [Zhengjia Wang]<dipterix.wang@gmail.com>",0.1.20,rave;magrittr;rutabaga;stringr;shiny;MASS
+3,,,itpc_phase,Inter-Trial Phase Coherence,~/rave_modules/modules/builtin_modules/inter_trial_phase_coherence/phase_module.R,TRUE,"[Zhengjia Wang]<dipterix.wang@gmail.com>",0.0.1,rave;magrittr;rutabaga
+4,,,onset_detection,Onset Detection,~/rave_modules/modules/builtin_modules/onset_detection/onset_detection.R,TRUE,[John Magnotti]<john.Magnotti@bcm.edu>,0.0.5,rave;magrittr;stringr;shiny;MASS;rutabaga
+5,,,across_el_cor,Across Electrode Correlation,~/rave_modules/modules/builtin_modules/correlation/across_electrode_correlations.R,FALSE,[John Magnotti]<john.Magnotti@bcm.edu>,0.0.4,rave;magrittr;stringr;shiny;MASS;rutabaga
