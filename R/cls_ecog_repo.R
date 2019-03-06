@@ -122,6 +122,9 @@ ECoGRepository <- R6::R6Class(
       invisible()
     },
     initialize = function(subject, reference = 'default', autoload = T){
+
+      logger('Initializing a Data Repository')
+
       self$raw = Map$new()
       self$reference = Map$new()
       self$epochs = Map$new()
@@ -164,7 +167,7 @@ ECoGRepository <- R6::R6Class(
       ref_table = self$reference$get('ref_table')
 
       if(length(electrodes) > 0){
-        progress = progress(title = 'Checking data...', max = length(electrodes))
+        progress = progress(title = 'Loading reference...', max = length(electrodes))
         for(e in electrodes){
           e_str = paste(e)
           progress$inc(sprintf('Electrode - %s', e_str))
@@ -455,9 +458,10 @@ ECoGRepository <- R6::R6Class(
       ref_env = self$reference$private$env
       unique_refs = unique(ref_table$Reference)
       lapply(unique_refs, function(ref){
-        delayedAssign(ref, {
-          Electrode$new(subject = self$subject, electrode = ref, is_reference = T)
-        }, assign.env = ref_env)
+        # delayedAssign(ref, {
+        #   Electrode$new(subject = self$subject, electrode = ref, is_reference = T)
+        # }, assign.env = ref_env)
+        ref_env[[ref]] = Electrode$new(subject = self$subject, electrode = ref, is_reference = T)
       })
 
     },
