@@ -1,0 +1,229 @@
+rave_brain2 <- function(multiple_subject = FALSE, prefix = 'std.141.'){
+  Brain = get_from_package(f = 'Brain', pkg = 'threeBrain', check = F)
+  brain = Brain$new(multiple_subject = multiple_subject)
+
+  afni_tool = afni_tools()
+
+  # Check if subject exists
+  has_subject = function(subject){
+    if(!is.character(subject)){
+      subject = subject$id
+    }
+    exists(subject, envir = brain$subjects, inherits = FALSE)
+  }
+
+
+  # Function to load subject
+  add_subject = function(subject, surfaces = NULL){
+    logger = function(..., sep = ''){
+      cat2('[', subject$id, '] ', ..., sep = sep)
+    }
+    subject = as_subject(subject)
+    pretty_id = stringr::str_remove_all(subject$id, '[^a-zA-Z0-9]')
+
+    if(!has_subject(subject$id)){
+      brain$add_subject(subject_name = subject$id)
+    }
+
+    # --------------------- Import subject ---------------------
+    viewer_dir = file.path(subject$dirs$rave_dir, 'viewer')
+
+    # --------------------- Import Surface ---------------------
+    suma_dir = subject$dirs$suma_dir
+    fs = list.files(suma_dir)
+    pattern = sprintf('%s[rl]h\\.([\\w]+)\\.asc', prefix)
+    fs = fs[stringr::str_detect(fs, pattern)]
+    fs = stringr::str_match(fs, pattern)
+
+    if(!isTRUE(surfaces)){
+      fs = fs[fs[,2] %in% surfaces, , drop = FALSE]
+    }
+
+    if(nrow(fs)){
+      v = sapply(fs[, 2], function(nm){
+        lh = paste0(prefix, 'lh.', nm, '.asc')
+        rh = paste0(prefix, 'rh.', nm, '.asc')
+        sum(lh %in% fs[,1], rh %in% fs[,1])
+      })
+      fs = fs[v >= 2, , drop = FALSE]
+
+
+    }
+
+    if(nrow(fs)){
+      # Add surfaces
+      lapply(unique(fs[,2]), function(nm){
+        lh = paste0(prefix, 'lh.', nm, '.asc')
+        rh = paste0(prefix, 'rh.', nm, '.asc')
+        lh_cache = paste0(pretty_id, '_lh_', nm, '.json')
+        rh_cache = paste0(pretty_id, '_rh_', nm, '.json')
+
+        brain$add_surface(
+          subject_name = subject$id, surface_name = nm,
+          lh_surface = file.path(suma_dir, lh),
+          rh_surface = file.path(suma_dir, rh),
+          lh_surface_cache = file.path(viewer_dir, lh_cache),
+          rh_surface_cache = file.path(viewer_dir, rh_cache)
+        )
+      })
+    }
+
+
+
+
+
+
+    # --------------------- Import Electrodes ---------------------
+    electrode_table = load_meta('electrodes', subject_id = subject$id)
+    assertthat::assert_that(is.data.frame(electrode_table), msg = 'Cannot read meta/electrodes.csv. Make sure it exists and not broken!')
+
+    # get x, y, x, subcortical, which surface attached, vertex node
+    # Optional columns:
+    #  Subcortical, Hemisphere, SurfaceType, VertexNumber, IsMini
+
+    for(ii in seq_len(nrow(electrode_table))){
+      row = electrode_table[ii, ]
+
+      row$Subcortical %?<-% FALSE
+      row$SurfaceType %?<-% 'pial'
+      row$VertexNumber %?<-% -1
+      row$IsMini %?<-% FALSE
+
+      brain$add_electrode(
+        subject_name = subject$id,
+        name = sprintf('Electrode %s (%s)', row$Electrode, row$Label),
+        x = row$Coord_x,
+        y = row$Coord_y,
+        z = row$Coord_z,
+        sub_cortical = row$Subcortical,
+        surface_type = row$SurfaceType,
+        hemisphere = row$Hemisphere,
+        vertex_number = row$VertexNumber,
+        radius = 2 - row$IsMini
+      )
+    }
+
+    # --------------------- Transform electrodes ---------------------
+    # Need to load transformation for T1 to freesurfer
+    trans_mat_file = file.path(suma_dir, 'T1_to_freesurf.txt')
+    afni_file = file.path(suma_dir, 'fs_SurfVol_Alnd_Exp+orig.HEAD')
+    trans_mat = NULL
+
+    if(file.exists(trans_mat_file)){
+      try({
+        mm = as.matrix(read.table(trans_mat_file))
+        if(is.numeric(mm) && length(mm) == 16 && nrow(mm) == 4){
+          trans_mat = mm
+          colnames(trans_mat) = rownames(trans_mat) = NULL
+        }
+      })
+    }
+
+    if(is.null(trans_mat)){
+      if(file.exists(afni_file)){
+
+        logger('suma/T1_to_freesurf.txt not exists or broken, try to load from AFNI file')
+        dat = afni_tool$read.AFNI(afni_file)
+
+        if('VOLREG_MATVEC_000000' %in% names(dat$header)){
+
+          mat = matrix(c(dat$header$VOLREG_MATVEC_000000, 0,0,0,1), nrow = 4, ncol = 4, byrow = T)
+          mm = diag(c(-1,-1,1, 0)) %*% mat; mm[,4] = -mm[,4]; mm[4,4] = 1; mm = solve(mm)
+          trans_mat = mm
+          write.table(mm, file = trans_mat_file, sep = '\t', col.names = FALSE, row.names = FALSE)
+
+        }else{
+
+          logger('Cannot find VOLREG_MATVEC_000000 in afni file. ',
+                 'Please make sure it contains transform matrix from T1 to Freesurfer orientation. ',
+                 'No transform will be made', level = 'WARNING')
+
+        }
+      }else{
+        trans_mat = diag(1, 4)
+        logger('No transformat matrix found, I assume that these electrodes have already been aligned to freesurfer orientation.', level = 'INFO')
+      }
+    }
+
+    brain$set_tranform(subject_name = subject$id, mat = trans_mat)
+
+  }
+
+
+  cache = function(subject){
+    subject = as_subject(subject)
+
+    electrode_table = load_meta('electrodes', subject_id = subject$id)
+    assertthat::assert_that(is.data.frame(electrode_table), msg = 'Cannot read meta/electrodes.csv. Make sure it exists and not broken!')
+
+    # Make sure all surfaces are loaded and all electrodes are loaded
+    add_subject(subject, surfaces = TRUE)
+
+    electrodes = brain$subjects[[subject$id]]$electrodes
+    tran_mat = electrodes[[1]]$group$trans_mat
+    surfaces = brain$subjects[[subject$id]]$surface
+
+    # --------------------- Mapping ------------------------
+    tbl_names = names(electrode_table)
+    new_cols = c("Subcortical", "SurfaceType", "Hemisphere", "VertexNumber")
+    tbl_names = c(tbl_names[!tbl_names %in% c(new_cols)], new_cols)
+    idx = which(tbl_names == 'Electrode')
+    tbl_names = tbl_names[idx:length(tbl_names)]
+
+    new_table = lapply(seq_len(nrow(electrode_table)), function(ii){
+      row = electrode_table[ii, ]
+      name = sprintf('Electrode %s (%s)', row$Electrode, row$Label)
+
+      pos = tran_mat %*% c(row$Coord_x, row$Coord_y, row$Coord_z, 1)
+      pos = pos[1:3]
+
+      row$Subcortical %?<-% FALSE
+
+      if(!row$Subcortical){
+
+        row$SurfaceType %?<-% 'pial'
+
+        # Match to SurfaceType
+        sf = surfaces[[row$SurfaceType]]
+
+        vert_left = sf$left$get_data(sprintf('free_vertices_lh - %s (%s)', row$SurfaceType, subject$id))
+        vert_right = sf$right$get_data(sprintf('free_vertices_rh - %s (%s)', row$SurfaceType, subject$id))
+
+        dist_left = colSums((t(vert_left) - pos)^2)
+        dist_right = colSums((t(vert_right) - pos)^2)
+
+        idx_left = which.min(dist_left)
+        idx_right = which.min(dist_right)
+
+
+        if(dist_left[idx_left] < dist_right[idx_right]){
+          # use lh
+          row$VertexNumber = idx_left
+          row$Hemisphere = 'left'
+        }else{
+          row$VertexNumber = idx_right
+          row$Hemisphere = 'right'
+        }
+
+      }else{
+        row$SurfaceType %?<-% 'pial'
+        row$VertexNumber = -1
+        row$Hemisphere = ''
+      }
+
+      row[, tbl_names]
+
+    })
+
+    new_table = do.call(rbind, new_table)
+
+    save_meta(new_table, 'electrodes', project_name = subject$project_name, subject_code = subject$subject_code)
+
+
+
+    #  Subcortical, Hemisphere, SurfaceType, VertexNumber, IsMini
+  }
+
+  environment()
+
+}

@@ -3,7 +3,7 @@
 
 #' Read from AFNIio.R, return an environment wrapper for all functions
 #' @export
-afni_tools <- function(debug){
+afni_tools <- function(debug = FALSE){
   wrapper_env = new.env(parent = baseenv())
   parse_tools = function(){
     `.__env` = new.env(parent = wrapper_env)

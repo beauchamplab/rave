@@ -157,3 +157,14 @@ asJSON.Subject <- function(obj){
 as.character.Subject <- function(x, ...){
   x$id
 }
+
+# Function that always returns a subject (if exists)
+as_subject <- function(subject, strict = FALSE, reference = 'default'){
+  if(is.character(subject)){
+    s = stringr::str_split_fixed(subject, '/', n = 2)
+    s = unlist(s)
+    subject = Subject$new(project_name = s[1], subject_code = s[2], strict = strict, reference = reference)
+  }
+
+  subject
+}

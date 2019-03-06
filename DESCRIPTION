@@ -12,10 +12,10 @@ Authors@R: c(
     )
 Maintainer@R: c(
     person("Zhengjia", "Wang", email = "dipterix.wang@gmail.com", role = c("aut", "cre")),
-    person("Beauchamp lab", email = "beauchamplab@gmail.com", role = c("cph", "fnd"))
+    person("Beauchamplab", email = "beauchamplab@gmail.com", role = c("cph", "fnd"))
     )
 Description: R Analysis and Visualization of ECOG Data 
-    (Internal code version: "Ent")
+    (Internal code version: "Fir")
     RAVE provides cross-platform analysis and visualizations for neuroscience 
     ECoG data by "Just click buttons". This package include: (a) pre-processing 
     of ECoG raw data into HDF5 format (a cross-platform data format that can be 
@@ -77,6 +77,7 @@ Collate:
     'utils_syscheck.R'
     'aaa.R'
     'cls_brain.R'
+    'cls_brain2.R'
     'cls_ecog_repo.R'
     'cls_electrode.R'
     'cls_map.R'
