@@ -63,14 +63,14 @@ dev_${{PACKAGE}} <- function(expose_functions = FALSE, reload = TRUE){
           source(.f, local = T)
         }
       })
-      env$.packageName = package
+      env$.packageName = '${{PACKAGE}}'
       return(env)
     }else{
       for(.f in .fs){
         source(.f, local = F)
       }
       env = globalenv()
-      env$.packageName = package
+      env$.packageName = '${{PACKAGE}}'
       return(env)
     }
 
