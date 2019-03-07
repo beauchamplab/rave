@@ -317,10 +317,15 @@ ModuleEnvir <- R6::R6Class(
     },
     render_ui = function(session = getDefaultReactiveDomain()){
       e = self$get_or_new_exec_env(session = session)
+      if(length(e$input_ids)){
+        sidebar_width = self$sidebar_width
+      }else{
+        sidebar_width = 0
+      }
       shiny::fluidRow(
         uiOutput(e$ns('.__rave_modal__.')),
-        e$generate_input_ui(sidebar_width = self$sidebar_width),
-        e$generate_output_ui(sidebar_width = self$sidebar_width)
+        e$generate_input_ui(sidebar_width = sidebar_width),
+        e$generate_output_ui(sidebar_width = sidebar_width)
       )
 
     },

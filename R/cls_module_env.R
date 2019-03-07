@@ -943,8 +943,13 @@ ExecEnvir <- R6::R6Class(
 
 
       names(more_btns) = NULL
+
+      if(sidebar_width == 0){
+        sidebar_width = '3 hidden';
+      }
+
       div(
-        class = sprintf('col-sm-%d rave-input-panel', sidebar_width),
+        class = sprintf('col-sm-%s rave-input-panel', sidebar_width),
         rlang::eval_tidy(private$inputs$quos, env = env),
         fluidRow(
           uiOutput(self$ns('..params_current')),
