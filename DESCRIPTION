@@ -2,7 +2,7 @@
 Package: rave
 Type: Package
 Title: R Analysis and Visualization of ECOG/iEEG Data
-Version: 0.1.5.0050
+Version: 0.1.5.0051
 Date: 2018-12-02
 Authors@R: c(
     person("Zhengjia", "Wang", email = "dipterix.wang@gmail.com", role = c("aut", "cre")),
@@ -15,14 +15,14 @@ Maintainer@R: c(
     person("Beauchamplab", email = "beauchamplab@gmail.com", role = c("cph", "fnd"))
     )
 Description: R Analysis and Visualization of ECOG Data 
-    (Internal code version: "Fir")
+    (Code version: "Fir")
     RAVE provides cross-platform analysis and visualizations for neuroscience 
-    ECoG data by "Just click buttons". This package include: (a) pre-processing 
+    ECoG data by "Just clicking buttons". This package include: (a) pre-processing 
     of ECoG raw data into HDF5 format (a cross-platform data format that can be 
-    used for R, Matlab, Python, Java and C); (b) ECoG epoch and visualizations
+    used for R, Matlab, Python, Java and C/C++); (b) ECoG epoch and visualizations
     in real time; (c) Users can write customized analysis in R and easily 
-    insert into RAVE for interactive visualizations. 
-    Also RAVE follows BIDS (http://bids.neuroimaging.io/) format.
+    insert into RAVE for interactive visualizations. (d) 3D viewers driven by 
+    WebGL.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

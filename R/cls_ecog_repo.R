@@ -442,6 +442,8 @@ ECoGRepository <- R6::R6Class(
         electrodes = self$subject$filter_valid_electrodes(electrodes)
       }
 
+
+
       # Set reference table
       ref_table = load_meta(
         meta_type = 'references',
@@ -457,12 +459,17 @@ ECoGRepository <- R6::R6Class(
       # Trick: use lazy assign to allocate reference, this is hack to R6 but avoiding evaluations
       ref_env = self$reference$private$env
       unique_refs = unique(ref_table$Reference)
+
+      progress = progress(title = 'Loading reference...', max = length(unique_refs))
+
       lapply(unique_refs, function(ref){
+        progress$inc(ref)
         # delayedAssign(ref, {
         #   Electrode$new(subject = self$subject, electrode = ref, is_reference = T)
         # }, assign.env = ref_env)
         ref_env[[ref]] = Electrode$new(subject = self$subject, electrode = ref, is_reference = T)
       })
+      progress$close()
 
     },
     baseline = function(from, to, electrodes = NULL, print.time = FALSE){

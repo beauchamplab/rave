@@ -246,6 +246,12 @@ body.rave-noscroll {
   background-color: aliceblue;
 }
 
+.rave-output-panel .box:hover .box-header {
+  background-color: aliceblue;
+}
+.rave-output-panel .box .box-body{
+  padding: 0;
+}
 
 .rave-border-box {
   border: 1px dashed #efefef;
@@ -272,7 +278,7 @@ body.rave-noscroll {
     top: 0 !important;
     bottom: 0 !important;
     left: 0 !important;
-    padding: 100px 50px 50px 50px !important;
+    padding: 60px 0 0 0 !important;
     overflow-y:  scroll !important;
 
     z-index: 1000 !important;
@@ -282,6 +288,11 @@ body.rave-noscroll {
     margin: unset !important;
     box-shadow: none !important;
     background: rgba(255,255,255);
+}
+
+/* If shiny output is directly child of elastic div  */
+.rave-elastic.rave-elastic-active>.shiny-bound-output {
+  min-height: 90vh;
 }
 
 .margin-top-20 {
