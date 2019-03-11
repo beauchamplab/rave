@@ -41,8 +41,8 @@ cache('a', {Sys.sleep(10); 1})
 # Use swap
 
 y = cache('aa', 1:1000000, swap = T)
-pryr::object_size(1:1000000)
-pryr::object_size(y)
+object.size(1:1000000)
+object.size(y)
 y[1:5]
 }
 }

@@ -234,7 +234,7 @@ comp_parser <- function(){
     parse_quo = function(quo){
       expr = rlang::quo_squash(quo)
       env = rlang::quo_get_env(quo)
-      assertthat::assert_that(is.call(expr), msg = sprintf(
+      assert_that(is.call(expr), msg = sprintf(
         'Need a function call but given: "%s"', deparse(expr)
       ))
 

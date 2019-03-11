@@ -263,7 +263,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
       tryCatch({
         dat = read.csv(path, header = T)
         freq = as.numeric(dat[,1])
-        assertthat::assert_that(all(!is.na(freq)), msg = 'Non-numeric values found in frequencies.')
+        assert_that(all(!is.na(freq)), msg = 'Non-numeric values found in frequencies.')
         cycles = NULL
         if(ncol(dat) >= 2){
           cycles = as.numeric(dat[,2])

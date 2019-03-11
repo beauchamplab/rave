@@ -3,7 +3,7 @@
 #' @param ... ignored
 #' @export
 rave_preprocess_tools <- function(env = new.env(), ...){
-  assertthat::assert_that(is.environment(env), msg = 'env MUST be an environment')
+  assert_that(is.environment(env), msg = 'env MUST be an environment')
 
   # initialize subject
   env$subject = list()
@@ -390,7 +390,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
     }
 
     load_wavelet = function(electrode, blocks, referenced = F){
-      assertthat::assert_that(utils$waveleted(), msg = 'Wavelet is needed. Run preprocess first.')
+      assert_that(utils$waveleted(), msg = 'Wavelet is needed. Run preprocess first.')
       # only load raw wavelet
       blocks %?<-% utils$get_blocks()
       dirs = utils$get_from_subject('dirs')

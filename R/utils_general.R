@@ -235,7 +235,7 @@ to_color <- function(x, default_length = 1, palette = NULL, shift = 2){
       palette = palette(ncols)
     }
 
-    assertthat::assert_that(ncols >= length(palette), msg = 'Palette does not have enough length.')
+    assert_that(ncols >= length(palette), msg = 'Palette does not have enough length.')
     env$colors = palette[x]
   }
 
@@ -249,7 +249,7 @@ to_color <- function(x, default_length = 1, palette = NULL, shift = 2){
 }
 
 crop_data <- function(x, range){
-  assertthat::assert_that(length(range) == 2, msg = 'Range must have length 2.')
+  assert_that(length(range) == 2, msg = 'Range must have length 2.')
   minr = min(range)
   maxr = max(range)
   x[x <= minr] = minr
@@ -435,25 +435,10 @@ add_to_session <- function(
 
 ################### Exported methods
 
-#' Pipe function to paste two characters
-#' @param x character
-#' @param y character
-#' @return paste0(x,y)
 paste_c <- function(x, y){
   base::paste0(x, y)
 }
 
-# `%&%` = Matrix::`%&%`
-#
-# methods::setMethod("%&%",  methods::signature(x = "character", y = 'ANY'),
-#                    definition = paste_c, where = -1)
-# methods::setMethod("%&%",  methods::signature(x = "ANY", y = 'character'),
-#                    definition = paste_c, where = -1)
-# methods::setMethod("%&%",  methods::signature(x = "character", y = 'character'),
-#                    definition = paste_c, where = -1)
-
-# @exportMethod %&%
-NULL
 
 `%&%` = paste_c
 
@@ -816,7 +801,7 @@ safe_object_size <- function(obj, env = NULL){
     obj = get(obj, envir = env, inherits = F)
   }
   tryCatch({
-    pryr::object_size(obj)},
+    object_size(obj)},
     error = function(e){
       return(0L)
     })->
@@ -850,8 +835,8 @@ safe_object_size <- function(obj, env = NULL){
 #' # Use swap
 #'
 #' y = cache('aa', 1:1000000, swap = T)
-#' pryr::object_size(1:1000000)
-#' pryr::object_size(y)
+#' object.size(1:1000000)
+#' object.size(y)
 #' y[1:5]
 #' }
 #' @export

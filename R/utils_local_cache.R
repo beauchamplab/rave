@@ -235,14 +235,14 @@ load_local_cache <- function(project_name, subject_code, epoch, time_range,
     })
 
     if(!is.null(subject)){
-      assertthat::assert_that(
+      assert_that(
         config$srate_volt == subject$preprocess_info('srate'),
         config$srate_wave == subject$sample_rate
       )
     }
 
     if(is.data.frame(epoch_tbl)){
-      assertthat::assert_that(
+      assert_that(
         nrow(epoch_tbl) == nrow(epoch_cached),
         all(epoch_tbl$Block == epoch_cached$Block),
         all(abs(epoch_tbl$Time - epoch_cached$Time) < 0.01),
@@ -252,7 +252,7 @@ load_local_cache <- function(project_name, subject_code, epoch, time_range,
 
 
     # check if cache contains all data
-    assertthat::assert_that(
+    assert_that(
       config$epoch == epoch,
       all(time_range <= config$time_range),
       all(electrodes %in% parse_selections(config$electrodes))
@@ -274,7 +274,7 @@ load_local_cache <- function(project_name, subject_code, epoch, time_range,
         ref_table = load_meta('references', project_name = project_name, subject_code = subject_code, meta_name = referenced)
       }
 
-      assertthat::assert_that(!is.null(ref_table))
+      assert_that(!is.null(ref_table))
     }
 
     re = list()

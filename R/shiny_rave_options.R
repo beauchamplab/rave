@@ -794,7 +794,7 @@ local({
             'ScriptPath' = {
               tryCatch({
                 val = base::normalizePath(val)
-                assertthat::assert_that(file.exists(val), !file.info(val)$isdir)
+                assert_that(file.exists(val), !file.info(val)$isdir)
                 val
               }, error = function(e){
                 showNotification('Module file does not exist or it is invalid. Please double check.', type = 'error')

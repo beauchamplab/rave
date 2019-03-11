@@ -6,6 +6,9 @@
 \usage{
 afni_tools(debug = FALSE)
 }
+\arguments{
+\item{debug}{internally used for debug purpose}
+}
 \description{
 Read from AFNIio.R, return an environment wrapper for all functions
 }

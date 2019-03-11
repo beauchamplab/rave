@@ -8,7 +8,7 @@ NULL
 #' @param env environment to be converted
 #' @export
 as_printable = function(env){
-  assertthat::assert_that(is.environment(env), msg = 'env MUST be an environment.')
+  assert_that(is.environment(env), msg = 'env MUST be an environment.')
   cls = c(class(env), 'rave_printable')
   cls = unique(cls[!cls %in% ''])
   class(env) = cls
@@ -20,7 +20,7 @@ as_printable = function(env){
 #' @param ... passed from or to other methods
 #' @export
 print.rave_printable = function(x, ...){
-  assertthat::assert_that(is.environment(x), msg = 'x MUST be an environment.')
+  assert_that(is.environment(x), msg = 'x MUST be an environment.')
   print.default(
     paste0('<environment key=[', paste(ls(x), collapse = ', '), ']>'), ...
   )
@@ -62,7 +62,7 @@ Electrode <- R6::R6Class(
     },
 
     switch_reference = function(new_reference){
-      assertthat::assert_that(is(new_reference, 'Electrode'), msg = 'new_reference MUST be a reference electrode instance.')
+      assert_that(is(new_reference, 'Electrode'), msg = 'new_reference MUST be a reference electrode instance.')
       self$reference = new_reference
       self$preload = NULL
       rm(list = ls(self$power, all.names = T), envir = self$power)
@@ -126,7 +126,7 @@ Electrode <- R6::R6Class(
 
     initialize = function(subject, electrode, reference_by = 'noref', preload = NULL, is_reference = FALSE){
       if(!(R6::is.R6(subject) && 'Subject' %in% class(subject))){
-        assertthat::assert_that('character' %in% class(subject),
+        assert_that('character' %in% class(subject),
                                 msg = 'Param <subject> needs to be either subject ID or a Subject instance')
         subject = str_split_fixed(subject, '\\\\|/', 2)
         subject = Subject$new(project_name = subject[1], subject_code = subject[2], strict = FALSE)
@@ -181,7 +181,7 @@ Electrode <- R6::R6Class(
           reference_by = Electrode$new(subject, electrode = reference_by, reference_by = NULL, is_reference = T)
         }
         if(methods::is(reference_by, 'Electrode')){
-          assertthat::assert_that(reference_by$reference_electrode, msg = 'This is not a reference signal.')
+          assert_that(reference_by$reference_electrode, msg = 'This is not a reference signal.')
           need_ref = (reference_by$electrode != ref)
         }
         if(need_ref){

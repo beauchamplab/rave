@@ -21,6 +21,7 @@ if(is.null(session)){
 
 #global_reactives$execute_module
 output[['.__rave_modal__.']] <- renderUI({
+  logger('Prepared to show data loading modal')
   # Unlock data loading
   `.__internal_reactives__.`[['prevent_load']] = FALSE
 
@@ -38,15 +39,18 @@ output[['.__rave_modal__.']] <- renderUI({
   }
   # miss_data_comps = `.__internal_reactives__.`[['miss_data_comps']]
   if(!miss_data || !length(miss_data_message)){
+    logger('No data is missing, proceed.')
     return(NULL)
   }
 
-  # Check if there's any missing data
+  # Check if there's any broken data
   broken_data = `.__internal_reactives__.`[['incomplete_data']]
   if(length(broken_data)){
     load_btn = NULL
     data_msg = '*There is one or more data missing. This module is diabled.'
   }else{
+
+
     load_btn = tags$button(
       id = ns('.__load_data__.'),
       type = "button",
@@ -123,6 +127,7 @@ observeEvent(input[['.__load_data__.']], {
 })
 
 rave_checks = function(..., data = NULL){
+
   data = unlist(c(data, list(...)))
   if(!length(data)){
     return()
@@ -251,14 +256,13 @@ rave_checks = function(..., data = NULL){
     `.__internal_reactives__.`[['miss_data_comps']] = quos
     `.__internal_reactives__.`[['miss_data_size']] = total_size
     `.__internal_reactives__.`[['incomplete_data']] = broken_data_type
-    stop('Needs to load data')
+
+    stop('Need to load data')
   }else{
     `.__internal_reactives__.`[['miss_data']] = F
   }
 
-  if(is_reactive){
-    print(`.__internal_reactives__.`)
-  }
+
 
   return()
 

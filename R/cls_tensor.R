@@ -364,7 +364,7 @@ Tensor <- R6::R6Class(
       if(missing(match_dim)){
         return(self$get_data() / by_vector)
       }
-      assertthat::assert_that(
+      assert_that(
         all(match_dim %in% seq_along(self$dim)),
         sum(abs(self$dim[match_dim] - dim(by))) == 0,
         msg = 'Dimension does not match: self$dim[match_dim] = dim(by) ?'

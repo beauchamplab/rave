@@ -84,7 +84,7 @@ RAVEHistory <- R6::R6Class(
 #' @param group character, donnot use "main_app" and "main_app2" since they are reserved
 #' @export
 last_entry <- function(key, default, save = F, group = 'customized'){
-  assertthat::assert_that(is.character(key), msg = 'Key must be a string')
+  assert_that(is.character(key), msg = 'Key must be a string')
   dict = rave_hist$get_or_save(key = group, val = list(), save = F)
   val = dict[[key]]
   val %?<-% default

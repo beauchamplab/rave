@@ -18,7 +18,7 @@ if(F){
   })
 
   rave_data = getDefaultDataRepository()
-  pryr::object_size(rave_data)
+  object_size(rave_data)
 
 }
 

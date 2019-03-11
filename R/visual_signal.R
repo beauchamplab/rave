@@ -145,7 +145,7 @@ detrend.naive <- function(x, y){
     y = x
     x = seq_along(y)
   }else{
-    assertthat::assert_that(length(x) == length(y), msg = 'x and y must have the same length.')
+    assert_that(length(x) == length(y), msg = 'x and y must have the same length.')
   }
   n = length(y)
   b = ( y[n] - y[1] ) / ( x[n] - x[1] )

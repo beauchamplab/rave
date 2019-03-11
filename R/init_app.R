@@ -46,18 +46,18 @@ get_mem_usage <- function(modules, data_envir){
 
 
   # get total memory used
-  total_mem = pryr::mem_used()
-  data_usage = pryr::object_size(data_envir)
+  total_mem = mem_used()
+  data_usage = object_size(data_envir)
   if(length(modules)){
     lapply(modules, function(m){
 
-      module_ram = pryr::object_size(m)
+      module_ram = object_size(m)
 
       exec_env = m$get_or_new_exec_env(session = session)
 
       elem_ram = sapply(as.list(exec_env$runtime_env), function(o){
         tryCatch({
-          pryr::object_size(o)
+          object_size(o)
         }, error = function(e){
           0
         })

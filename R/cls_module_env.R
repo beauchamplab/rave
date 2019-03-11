@@ -50,7 +50,7 @@ ExecEnvir <- R6::R6Class(
       cat(ls(self$runtime_env))
     },
     print = function(...){
-      pryr::address(self)
+      env_address(self)
     },
     clean = function(){
       # WARNING: this is not clean, but should be able to clear most of the large objects
@@ -621,7 +621,7 @@ ExecEnvir <- R6::R6Class(
     rave_outputs = function(..., .output_tabsets = list(), .tabsets = list(), .env = NULL){
       .tabsets = .output_tabsets
       quos = rlang::quos(...)
-      assertthat::assert_that(length(quos) > 0, msg = 'No output defined!')
+      assert_that(length(quos) > 0, msg = 'No output defined!')
       parsers = comp_parser()
       x = lapply(names(quos), function(nm){
         re = parsers$parse_quo(quos[[nm]])
@@ -742,43 +742,48 @@ ExecEnvir <- R6::R6Class(
         n_errors = c(0,0)
         envir = environment()
         errors = NULL
-        if('' %in% var_names){
-          lapply(private$update[var_names == ''], function(quo){
-            tryCatch({
-              eval_dirty( quo, env = self$param_env )
-            },error = function(e){
-              logger('Error in updating input (initialization)', level = 'ERROR')
-              s = capture.output(traceback(e))
-              lapply(s, logger, level = 'ERROR')
-              envir$n_errors[1] = envir$n_errors[1] + 1
-              envir$errors = c(envir$errors, as.character(e))
-            })
-            NULL
+        # passed = TRUE
+        for(quo in private$update[var_names == '']){
+          tryCatch({
+            eval_dirty( quo, env = self$param_env )
+          },error = function(e){
+            logger('Error in updating input (initialization)', level = 'ERROR')
+            s = capture.output(traceback(e))
+            lapply(s, logger, level = 'ERROR')
+            envir$n_errors[1] = envir$n_errors[1] + 1
+            envir$errors = c(envir$errors, as.character(e))
+            # envir$passed = FALSE
           })
+
+          # if(!passed){
+          #   break();
+          # }
         }
 
-        if(length(var_names[var_names != ''])){
-          lapply(var_names[var_names != ''], function(varname){
-            tryCatch({
-              comp = private$inputs$comp[[varname]]
-              if(is.null(comp)){
-                return()
-              }
-              new_args = eval_dirty(
-                private$update[[varname]], data = input, env = self$param_env
-              )
 
-              comp$updates(session = session, .args = new_args)
-            },error = function(e){
-              logger('Error in updating input ', varname, level = 'ERROR')
-              s = capture.output(traceback(e))
-              lapply(s, logger, level = 'ERROR')
-              envir$n_errors[2] = envir$n_errors[2] + 1
-            })
 
+        for(varname in var_names[var_names != '']){
+          # if(!passed){
+          #   break;
+          # }
+          tryCatch({
+            comp = private$inputs$comp[[varname]]
+            if(is.null(comp)){
+              return()
+            }
+            new_args = eval_dirty(
+              private$update[[varname]], data = input, env = self$param_env
+            )
+
+            comp$updates(session = session, .args = new_args)
+          },error = function(e){
+            logger('Error in updating input ', varname, level = 'ERROR')
+            s = capture.output(traceback(e))
+            lapply(s, logger, level = 'ERROR')
+            envir$n_errors[2] = envir$n_errors[2] + 1
+            envir$passed = FALSE
           })
         }
-
 
 
         end = Sys.time()
@@ -859,12 +864,11 @@ ExecEnvir <- R6::R6Class(
         env = private$cache_env
       }
       if(!replace){
-        if(key %in% env$.keys){
-          return(get(key, envir = env))
+        if(exists(key, envir = env, inherits = FALSE)){
+          return( env[[key]] )
         }
-        if(!global && key %in% private$cache_env$.keys){
-          # try to get from local
-          return(get(key, envir = private$cache_env))
+        if(exists(key, envir = private$cache_env, inherits = FALSE)){
+          return( private$cache_env[[key]] )
         }
       }
       if(missing(val)){
@@ -872,19 +876,8 @@ ExecEnvir <- R6::R6Class(
       }
 
       # save cache
-      expr = lazyeval::lazy(val)
-      expr$env = self$runtime_env
-      val = NULL
-      try({
-        val = lazyeval::lazy_eval(expr, data = list())
-      })
-      str_val = ''#safe_str_c(val, collapse = ', ')
-      # if(str_length(str_val) > 10){
-      #   str_val = str_sub(str_val, end = 10L)
-      # }
+      env[[key]] = val
 
-      # logger('Caching', ifelse(global, ' (global)', ''), ' - [', .key,'] - ', str_val)
-      assign(key, val, envir = env)
       env$.keys = unique(c(env$.keys, key))
       return(val)
     },

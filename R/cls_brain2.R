@@ -75,7 +75,7 @@ rave_brain2 <- function(multiple_subject = FALSE, prefix = 'std.141.'){
 
     # --------------------- Import Electrodes ---------------------
     electrode_table = load_meta('electrodes', subject_id = subject$id)
-    assertthat::assert_that(is.data.frame(electrode_table), msg = 'Cannot read meta/electrodes.csv. Make sure it exists and not broken!')
+    assert_that(is.data.frame(electrode_table), msg = 'Cannot read meta/electrodes.csv. Make sure it exists and not broken!')
 
     # get x, y, x, subcortical, which surface attached, vertex node
     # Optional columns:
@@ -154,7 +154,7 @@ rave_brain2 <- function(multiple_subject = FALSE, prefix = 'std.141.'){
     subject = as_subject(subject)
 
     electrode_table = load_meta('electrodes', subject_id = subject$id)
-    assertthat::assert_that(is.data.frame(electrode_table), msg = 'Cannot read meta/electrodes.csv. Make sure it exists and not broken!')
+    assert_that(is.data.frame(electrode_table), msg = 'Cannot read meta/electrodes.csv. Make sure it exists and not broken!')
 
     # Make sure all surfaces are loaded and all electrodes are loaded
     add_subject(subject, surfaces = TRUE)

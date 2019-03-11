@@ -15,8 +15,6 @@ NULL
 #'
 #' @importFrom crayon make_style
 #'
-#' @importFrom Matrix %&%
-#'
 #' @importFrom DT formatRound
 #' @importFrom DT datatable
 #'
@@ -61,7 +59,6 @@ NULL
 #' @importFrom methods setMethod
 #' @importFrom methods signature
 #'
-#' @importFrom assertthat assert_that
 NULL
 
 

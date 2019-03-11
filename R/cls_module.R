@@ -89,7 +89,7 @@ ModuleEnvir <- R6::R6Class(
     },
     print = function(...){
       self$info()
-      pryr::address(self)
+      env_address(self)
     },
     initialize = function(
       module_id,
@@ -218,12 +218,12 @@ ModuleEnvir <- R6::R6Class(
 
       # validate script_path
       if(missing(script_path)){
-        assertthat::assert_that(!is.null(.script_content), msg = 'Script Path not specified')
+        assert_that(!is.null(.script_content), msg = 'Script Path not specified')
         script_path = file.path(dirname(rmd_path), '.rave_tmp.R')
         writeLines(.script_content, script_path)
       }
 
-      assertthat::validate_that(file.exists(script_path), msg = sprintf('[File Not Found] %s', script_path))
+      assert_that(file.exists(script_path), msg = sprintf('[File Not Found] %s', script_path))
       script_path = base::normalizePath(script_path)
       self$script_path = script_path
 
@@ -376,12 +376,10 @@ ModuleEnvir <- R6::R6Class(
 #' @param ... Expressions
 #' @export
 rave_ignore <- function(...){
-  dots <- lazyeval::lazy_dots(...)
-  globalenv = globalenv()
-  for(i in 1:length(dots)){
-    dots[[i]]$env <- globalenv
-    logger('> ', dots[[i]]$expr, level = 'INFO')
-    lazyeval::lazy_eval(dots[[i]])
+  quos = rlang::quos(...)
+  for(i in 1:length(quos)){
+    logger('> ', rlang::quo_squash(quos[[i]]), level = 'INFO')
+    eval_dirty(quos[[i]], globalenv())
   }
 }
 
@@ -441,12 +439,13 @@ rave_updates <- function(..., .env = globalenv()){
 
 rave_execute <- function(..., auto = TRUE, .env = globalenv()){
   assign('.is_async', TRUE, envir = .env)
-  dots <- lazyeval::lazy_dots(...)
-  for(i in 1:length(dots)){
-    dots[[i]]$env <- .env
-    logger('> ', dots[[i]]$expr, level = 'INFO')
-    lazyeval::lazy_eval(dots[[i]])
+  quos = rlang::quos(...)
+
+  for( quo in quos ){
+    logger('> ', rlang::quo_squash(quo), level = 'INFO')
+    eval_dirty(quo, .env)
   }
+
 }
 
 

@@ -269,7 +269,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
                                  path = 'common',
                                  format = 'rds') {
       format = str_to_lower(format)
-      assertthat::assert_that(format %in% c('rds', 'h5', 'rdata', 'csv', 'mat'),
+      assert_that(format %in% c('rds', 'h5', 'rdata', 'csv', 'mat'),
                               msg = 'Unsupported format: MUST be rds, h5, rdata, csv, or mat')
       root_dir = data_env$subject$dirs[['rave_dir']]
       path = file.path(root_dir, 'module_data', path)
@@ -402,10 +402,10 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
       n_total = nrow(tbl)
 
 
-      assertthat::assert_that(ne == ncol(values), msg = 'values must have column count == length of electrodes')
-      assertthat::assert_that(nk == nrow(values), msg = 'values must have row count == length of key_frame')
-      assertthat::assert_that(length(marker) %in% c(ne, 0, n_total), msg = 'marker must be 0, # of electrodes, or # of total electrodes')
-      assertthat::assert_that(length(size) %in% c(ne, 0, n_total), msg = 'size must be 0, # of electrodes, or # of total electrodes')
+      assert_that(ne == ncol(values), msg = 'values must have column count == length of electrodes')
+      assert_that(nk == nrow(values), msg = 'values must have row count == length of key_frame')
+      assert_that(length(marker) %in% c(ne, 0, n_total), msg = 'marker must be 0, # of electrodes, or # of total electrodes')
+      assert_that(length(size) %in% c(ne, 0, n_total), msg = 'size must be 0, # of electrodes, or # of total electrodes')
 
 
 

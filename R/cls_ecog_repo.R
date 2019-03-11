@@ -19,10 +19,10 @@ baseline <- function(el, from, to, method = 'mean', unit = '%',
     module_tools = get('module_tools', envir = getDefaultDataRepository())
     el = module_tools$get_power()
   }
-  assertthat::assert_that(is(el, 'Tensor'), msg = 'el must be an Tensor object.')
-  assertthat::assert_that('Time' %in% el$varnames, msg = 'Need one dimname to be "Time".')
+  assert_that(is(el, 'Tensor'), msg = 'el must be an Tensor object.')
+  assert_that('Time' %in% el$varnames, msg = 'Need one dimname to be "Time".')
 
-  assertthat::assert_that(unit %in% c('dB', '%', 'C'), msg = 'unit must be %-percent signal change or dB-dB difference, or C to customize')
+  assert_that(unit %in% c('dB', '%', 'C'), msg = 'unit must be %-percent signal change or dB-dB difference, or C to customize')
 
   time_ind = which(el$varnames == 'Time')
   rest_dim = seq_along(el$dim)[-time_ind]
@@ -118,7 +118,7 @@ ECoGRepository <- R6::R6Class(
     },
     print = function(...){
       # To compatible with globals package
-      cat(pryr::address(self))
+      cat(env_address(self))
       invisible()
     },
     initialize = function(subject, reference = 'default', autoload = T){
@@ -131,7 +131,7 @@ ECoGRepository <- R6::R6Class(
       if(R6::is.R6(subject) && 'Subject' %in% class(subject)){
         self$subject = subject
       }else{
-        assertthat::assert_that('character' %in% class(subject),
+        assert_that('character' %in% class(subject),
                                 msg = 'Param <subject> needs to be either subject ID or a Subject instance')
         subject = str_split_fixed(subject, '\\\\|/', 2)
         self$subject = Subject$new(project_name = subject[1], subject_code = subject[2], reference = reference, strict = FALSE)
@@ -188,7 +188,7 @@ ECoGRepository <- R6::R6Class(
         electrodes = self$subject$filter_valid_electrodes(electrodes)
       }
       electrodes = electrodes[paste(electrodes) %in% self$raw$keys()]
-      assertthat::assert_that(length(electrodes) > 0, msg = 'No electrode loaded.')
+      assert_that(length(electrodes) > 0, msg = 'No electrode loaded.')
 
       self$epochs$set('epoch_name', epoch_name)
       self$epochs$set('epoch_params', c(pre, post))
@@ -473,7 +473,7 @@ ECoGRepository <- R6::R6Class(
 
     },
     baseline = function(from, to, electrodes = NULL, print.time = FALSE){
-      assertthat::assert_that(!is.null(self$power), msg = 'Please epoch power spectrum first.')
+      assert_that(!is.null(self$power), msg = 'Please epoch power spectrum first.')
 
       start = Sys.time()
 

@@ -91,8 +91,8 @@ RaveBrain <- R6::R6Class(
         logger('label is invalid', level = 'WARNING')
         label = ''
       }
-      assertthat::assert_that(length(position) == 3 && is.numeric(position), msg = 'invalid position')
-      assertthat::assert_that(length(which) == 1 && is.numeric(which) && which >=1, msg = 'invalid which')
+      assert_that(length(position) == 3 && is.numeric(position), msg = 'invalid position')
+      assert_that(length(which) == 1 && is.numeric(which) && which >=1, msg = 'invalid which')
       which = as.integer(which)
       private$electrodes[[which]] = list(
         idx = which,
@@ -156,7 +156,7 @@ RaveBrain <- R6::R6Class(
       if(!which %in% c(1, 2)){
         stop('which must be:\n\t1: Ignored\n\t2: Freesurfer to MRI Space')
       }
-      assertthat::assert_that(nrow(mat) == 4 && ncol(mat) == 4, msg = '4x4 matrix is needed')
+      assert_that(nrow(mat) == 4 && ncol(mat) == 4, msg = '4x4 matrix is needed')
       if(which == 2){
         private$tf_2 = mat
       }
@@ -607,7 +607,7 @@ RaveBrain <- R6::R6Class(
       }
     },
     set_electrode_size = function(which, radius = 2){
-      assertthat::assert_that(is.numeric(radius) && length(radius) == 1, msg = "invalid radius")
+      assert_that(is.numeric(radius) && length(radius) == 1, msg = "invalid radius")
       for(ii in which){
         el = private$three_electrodes[[ii]]
         if(!is(el, 'TGeom')){

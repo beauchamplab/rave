@@ -31,7 +31,7 @@ LazyH5 <- R6::R6Class(
       if(read_only){
         private$file = base::normalizePath(file_path)
 
-        assertthat::assert_that(
+        assert_that(
           hdf5r::is_hdf5(private$file),
           msg = 'File doesn\'t have H5 format'
         )
