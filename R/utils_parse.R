@@ -16,12 +16,12 @@ parse_selections <- function(text, sep = ',', sort = F, unique = T){
   s = str_trim(s)
   s = s[s!='']
 
-  s = s[str_detect(s, '^[0-9\\-\\ ]+$')]
+  s = s[str_detect(s, '^[0-9-:~]+$')]
 
   re = NULL
   for(ss in s){
-    if(str_detect(ss, '\\-')){
-      ss = as.vector(str_split(ss, '\\-', simplify = T))
+    if(str_detect(ss, '[-:~]')){
+      ss = as.vector(str_split(ss, '[-:~]', simplify = T))
       ss = ss[str_detect(ss, '^[0-9]+$')]
       ss = as.numeric(ss)
       if(length(ss) >= 2){

@@ -1,11 +1,24 @@
-load_scripts <- function(..., asis = FALSE){
+load_scripts <- function(...){
   src = c(...)
 
   for(s in src){
-    cat2('Loading source - ', s, '\n', level = 'INFO', sep = '')
-    source(get_path(s), local = F)
+    if(rlang::is_quosure(s)){
+      cat2('Executing a dynamic script...\n', level = 'INFO', sep = '')
+      eval(rlang::quo_squash(s), envir = globalenv())
+    }else{
+      cat2('Loading source - ', s, '\n', level = 'INFO', sep = '')
+      source(get_path(s), local = F)
+    }
   }
 }
+# load_scripts <- function(..., asis = FALSE){
+#   src = c(...)
+#
+#   for(s in src){
+#     cat2('Loading source - ', s, '\n', level = 'INFO', sep = '')
+#     source(get_path(s), local = F)
+#   }
+# }
 
 define_initialization <- function(expr){
   expr = substitute(expr)

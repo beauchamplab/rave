@@ -1,8 +1,18 @@
-rave_brain2 <- function(multiple_subject = FALSE, prefix = 'std.141.'){
+#' Tools to load and view brain in 3D viewer
+#' @param multiple_subject is this a template brain?
+#' @param prefix internally used, prefix to freesurfer asc files
+#' @export
+rave_brain2 <- function(surfaces = 'pial', multiple_subject = FALSE, prefix = 'std.141.'){
+  env = environment()
   Brain = get_from_package(f = 'Brain', pkg = 'threeBrain', check = F)
-  brain = Brain$new(multiple_subject = multiple_subject)
+  brain = Brain$new(multiple_subject = multiple_subject, default_surfaces = surfaces)
+  current_subject_id = ''
+  default_surfaces = surfaces
 
   afni_tool = afni_tools()
+  logger = function(..., sep = ''){
+    cat2('[', current_subject_id, '] ', ..., sep = sep)
+  }
 
   # Check if subject exists
   has_subject = function(subject){
@@ -12,66 +22,30 @@ rave_brain2 <- function(multiple_subject = FALSE, prefix = 'std.141.'){
     exists(subject, envir = brain$subjects, inherits = FALSE)
   }
 
-
-  # Function to load subject
-  add_subject = function(subject, surfaces = NULL){
-    logger = function(..., sep = ''){
-      cat2('[', subject$id, '] ', ..., sep = sep)
-    }
+  # Function to load subject, no data is loaded!
+  add_subject = function(subject){
     subject = as_subject(subject)
+    env$current_subject_id = subject$id
     pretty_id = stringr::str_remove_all(subject$id, '[^a-zA-Z0-9]')
-
     if(!has_subject(subject$id)){
       brain$add_subject(subject_name = subject$id)
     }
-
-    # --------------------- Import subject ---------------------
     viewer_dir = file.path(subject$dirs$rave_dir, 'viewer')
 
-    # --------------------- Import Surface ---------------------
-    suma_dir = subject$dirs$suma_dir
-    fs = list.files(suma_dir)
-    pattern = sprintf('%s[rl]h\\.([\\w]+)\\.asc', prefix)
-    fs = fs[stringr::str_detect(fs, pattern)]
-    fs = stringr::str_match(fs, pattern)
+    return(list(
+      subject = subject,
+      pretty_id = pretty_id,
+      viewer_dir = viewer_dir
+    ))
+  }
 
-    if(!isTRUE(surfaces)){
-      fs = fs[fs[,2] %in% surfaces, , drop = FALSE]
-    }
-
-    if(nrow(fs)){
-      v = sapply(fs[, 2], function(nm){
-        lh = paste0(prefix, 'lh.', nm, '.asc')
-        rh = paste0(prefix, 'rh.', nm, '.asc')
-        sum(lh %in% fs[,1], rh %in% fs[,1])
-      })
-      fs = fs[v >= 2, , drop = FALSE]
-
-
-    }
-
-    if(nrow(fs)){
-      # Add surfaces
-      lapply(unique(fs[,2]), function(nm){
-        lh = paste0(prefix, 'lh.', nm, '.asc')
-        rh = paste0(prefix, 'rh.', nm, '.asc')
-        lh_cache = paste0(pretty_id, '_lh_', nm, '.json')
-        rh_cache = paste0(pretty_id, '_rh_', nm, '.json')
-
-        brain$add_surface(
-          subject_name = subject$id, surface_name = nm,
-          lh_surface = file.path(suma_dir, lh),
-          rh_surface = file.path(suma_dir, rh),
-          lh_surface_cache = file.path(viewer_dir, lh_cache),
-          rh_surface_cache = file.path(viewer_dir, rh_cache)
-        )
-      })
-    }
-
-
-
-
-
+  # load electrodes
+  # We only assume electrodes.csv is provided
+  load_electrodes = function(subject){
+    re = add_subject(subject)
+    subject = re$subject
+    pretty_id = re$pretty_id
+    viewer_dir = re$viewer_dir
 
     # --------------------- Import Electrodes ---------------------
     electrode_table = load_meta('electrodes', subject_id = subject$id)
@@ -83,6 +57,10 @@ rave_brain2 <- function(multiple_subject = FALSE, prefix = 'std.141.'){
 
     for(ii in seq_len(nrow(electrode_table))){
       row = electrode_table[ii, ]
+
+      if(all(c(row$Coord_x, row$Coord_y, row$Coord_z) == 0)){
+        next();
+      }
 
       row$Subcortical %?<-% FALSE
       row$SurfaceType %?<-% 'pial'
@@ -102,7 +80,14 @@ rave_brain2 <- function(multiple_subject = FALSE, prefix = 'std.141.'){
         radius = 2 - row$IsMini
       )
     }
+  }
 
+  align_electrodes = function(subject){
+    re = add_subject(subject)
+    subject = re$subject
+    pretty_id = re$pretty_id
+    viewer_dir = re$viewer_dir
+    suma_dir = subject$dirs$suma_dir
     # --------------------- Transform electrodes ---------------------
     # Need to load transformation for T1 to freesurfer
     trans_mat_file = file.path(suma_dir, 'T1_to_freesurf.txt')
@@ -122,7 +107,7 @@ rave_brain2 <- function(multiple_subject = FALSE, prefix = 'std.141.'){
     if(is.null(trans_mat)){
       if(file.exists(afni_file)){
 
-        logger('suma/T1_to_freesurf.txt not exists or broken, try to load from AFNI file')
+        logger('suma/T1_to_freesurf.txt is missing, try to load from AFNI file')
         dat = afni_tool$read.AFNI(afni_file)
 
         if('VOLREG_MATVEC_000000' %in% names(dat$header)){
@@ -146,6 +131,76 @@ rave_brain2 <- function(multiple_subject = FALSE, prefix = 'std.141.'){
     }
 
     brain$set_tranform(subject_name = subject$id, mat = trans_mat)
+  }
+
+  load_surfaces = function(subject, surfaces, quiet = FALSE){
+    re = add_subject(subject)
+    subject = re$subject
+    pretty_id = re$pretty_id
+    viewer_dir = re$viewer_dir
+
+    if(missing(surfaces)){
+      surfaces = default_surfaces
+    }
+
+    progress = progress('Loading Surface', max = length(surfaces) * 2 + 1, quiet = quiet)
+    on.exit({progress$close()})
+
+    # --------------------- Import Surface ---------------------
+    suma_dir = subject$dirs$suma_dir
+    fs = list.files(suma_dir)
+    pattern = sprintf('^%s[rl]h\\.([\\w]+)\\.asc$', prefix)
+    fs = fs[stringr::str_detect(fs, pattern)]
+    fs = stringr::str_match(fs, pattern)
+
+    if(!isTRUE(surfaces)){
+      fs = fs[fs[,2] %in% surfaces, , drop = FALSE]
+    }
+
+    if(nrow(fs)){
+      v = sapply(fs[, 2], function(nm){
+        lh = paste0(prefix, 'lh.', nm, '.asc')
+        rh = paste0(prefix, 'rh.', nm, '.asc')
+        sum(lh %in% fs[,1], rh %in% fs[,1])
+      })
+      fs = fs[v >= 2, , drop = FALSE]
+
+
+    }
+
+    if(nrow(fs)){
+      # Add surfaces
+      lapply(unique(fs[,2]), function(nm){
+        lh = paste0(prefix, 'lh.', nm, '.asc')
+        lh = file.path(suma_dir, lh)
+
+        rh = paste0(prefix, 'rh.', nm, '.asc')
+        rh = file.path(suma_dir, rh)
+
+        lh_cache = paste0(pretty_id, '_lh_', nm, '.json')
+        lh_cache = file.path(viewer_dir, lh_cache)
+
+        rh_cache = paste0(pretty_id, '_rh_', nm, '.json')
+        rh_cache = file.path(viewer_dir, rh_cache)
+
+        if(!file.exists(rh_cache) && file.exists(rh)){
+          progress$inc(paste('Creating cache for', nm, '(This may take a while)'))
+        }else if(file.exists(rh_cache)){
+          progress$inc(paste('Loading ', nm))
+        }
+
+        brain$add_surface(
+          subject_name = subject$id, surface_name = nm,
+          lh_surface = lh,
+          rh_surface = rh,
+          lh_surface_cache = lh_cache,
+          rh_surface_cache = rh_cache
+        )
+      })
+    }
+
+    progress$inc('Transform electrodes from T1 to Freesurfer...')
+    align_electrodes(subject)
 
   }
 
@@ -157,7 +212,9 @@ rave_brain2 <- function(multiple_subject = FALSE, prefix = 'std.141.'){
     assert_that(is.data.frame(electrode_table), msg = 'Cannot read meta/electrodes.csv. Make sure it exists and not broken!')
 
     # Make sure all surfaces are loaded and all electrodes are loaded
-    add_subject(subject, surfaces = TRUE)
+    load_surfaces(subject, surfaces = TRUE)
+    # load all the electrodes
+    load_electrodes(subject)
 
     electrodes = brain$subjects[[subject$id]]$electrodes
     tran_mat = electrodes[[1]]$group$trans_mat
@@ -219,11 +276,72 @@ rave_brain2 <- function(multiple_subject = FALSE, prefix = 'std.141.'){
 
     save_meta(new_table, 'electrodes', project_name = subject$project_name, subject_code = subject$subject_code)
 
-
-
     #  Subcortical, Hemisphere, SurfaceType, VertexNumber, IsMini
   }
 
-  environment()
 
+  set_electrode_value = function(subject, electrode, value, time, message = ''){
+    time %?<-% 0
+    assert_that(is.numeric(value), msg = 'value must be numeric')
+    assert_that(length(time) == length(value), msg = 'value must be a single value, otherwise time value must have the same length.')
+
+    subject = as_subject(subject)
+
+    l = brain$subjects[[subject$id]]
+    if(is.list(l)){
+      if(length(l$electrodes) == 0){
+        load_electrodes(subject = subject$id)
+      }
+      tbl = subject$electrodes
+      sel = tbl$Electrode == electrode
+      if(any(sel)){
+        row = tbl[sel, ]
+        name = sprintf('Electrode %s (%s, %s)', row$Electrode, row$Label, subject$id)
+        if(name %in% names(l$electrodes)){
+          l$electrodes[[name]]$set_value(value = value, time_stamp = time)
+        }
+
+      }
+
+    }
+  }
+
+
+
+  re = list(
+    has_subject = has_subject,
+    add_subject = add_subject,
+    load_electrodes = load_electrodes,
+    align_electrodes = align_electrodes,
+    set_electrode_value = set_electrode_value,
+    load_surfaces = load_surfaces,
+    calculate_template_brain_location = cache,
+
+    set_multiple_subject = function(is_mult){
+      is_mult = isTRUE(is_mult)
+      brain$set_multiple_subject(is_mult)
+    },
+    view = function(...){
+      brain$view(...)
+    },
+
+    get_object = function(){
+      brain
+    }
+  )
+
+  .env = list2env(re, parent = baseenv())
+
+  class(.env) = c('rave_three_brain', 'environment')
+
+  .env
+}
+
+
+#' Show RAVE brain via package threeBrain
+#' @param x generated from rave_brain2
+#' @param ... passed to threeBrain::threejs_brain
+#' @export
+print.rave_three_brain <- function(x, ...){
+  print(x$view(...))
 }

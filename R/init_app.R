@@ -417,7 +417,18 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
         title = subject$id,
         easyClose = T,
         size = 'l',
-        dataTableOutput('curr_subj_elec_table')
+        shinydashboard::tabBox(
+          width = 12,
+          tabPanel(
+            title = '3D Viewer',
+            threejsBrainOutput('curr_subj_3d_viewer')
+          ),
+          tabPanel(
+            title = 'Electrode Table',
+            dataTableOutput('curr_subj_elec_table')
+          )
+        )
+
       )
     }
 
@@ -441,6 +452,21 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
         cols = names(tbl)
         cols = cols[!cols %in% c('Coord_x', 'Coord_y', 'Coord_z')]
         return(tbl[, cols])
+      }else{
+        return(NULL)
+      }
+    })
+
+    output$curr_subj_3d_viewer <- renderBrain({
+      btn = input$curr_subj_details_btn
+      if(global_reactives$has_data && check_data_repo('subject')){
+        data_repo = getDefaultDataRepository()
+        subject = data_repo[['subject']]
+        brain = rave_brain2(surfaces = c('pial', 'white', 'smoothwm'), multiple_subject = F)
+        brain$add_subject(subject = subject)
+        brain$load_electrodes(subject)
+        brain$load_surfaces(subject)
+        brain$view()
       }else{
         return(NULL)
       }

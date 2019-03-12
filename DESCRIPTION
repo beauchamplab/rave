@@ -101,6 +101,7 @@ Collate:
     'imported_pryr.R'
     'imported_rutabaga.R'
     'imported_shinydashboard.R'
+    'imported_threebrain.R'
     'imported_threejsr.R'
     'init_app.R'
     'io_raw_signal.R'

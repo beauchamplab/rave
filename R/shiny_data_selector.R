@@ -849,7 +849,8 @@ shiny_data_selector <- function(module_id){
                   style = 'position: absolute; z-index:100; ',
                   checkboxInput(ns('load_mesh'), 'Load Mesh', value = isolate(local_data$load_mesh))
                 ),
-                threejsOutput(ns('three_viewer'), height = '500px')
+                threejsBrainOutput(ns('three_viewer'), height = '500px')
+                # threejsOutput(ns('three_viewer'), height = '500px')
               )
             )
           )
@@ -945,44 +946,74 @@ shiny_data_selector <- function(module_id){
     # Local environment to store temporary SUMA brain
     brain_env = new.env()
 
-    output$three_viewer <- renderThreejs({
+    # output$three_viewer <- renderThreejs({
+    #   validate(need(local_data$has_subject, message = ''))
+    #   project = input$project_name
+    #   subject = input$subject_code
+    #   subject_id = sprintf('%s/%s', project, subject)
+    #   ref = input$reference
+    #   elec = input$electrodes
+    #   load_mesh = input$load_mesh
+    #
+    #
+    #   brain = brain_env[[subject_id]]
+    #   if(is.null(brain)){
+    #     s = Subject$new(project_name = project, subject_code = subject, reference = ref, strict = FALSE)
+    #     brain = RaveBrain$new(subject = s)
+    #     brain_env[[subject_id]] = brain
+    #   }
+    #
+    #   if(load_mesh && brain$mesh_count == 0){
+    #     brain$import_spec(nearest_face = F)
+    #   }
+    #
+    #
+    #   brain = brain$copy()
+    #   elec = parse_selections(elec)
+    #   s = brain$.__enclos_env__$private$subject
+    #   valid_e = s$filter_valid_electrodes(elec)
+    #   invalid_e = s$filter_all_electrodes(elec)
+    #   invalid_e = invalid_e[!invalid_e %in% valid_e]
+    #
+    #   lapply(s$electrodes$Electrode, function(ii){
+    #     if(ii %in% valid_e){
+    #       brain$set_electrode_value(which = ii, value = -1)
+    #     }else if (ii %in% invalid_e){
+    #       brain$set_electrode_value(which = ii, value = 1)
+    #     }
+    #   })
+    #
+    #   brain$view(control_gui = F, width = '100%', height = '500px', center = T, show_mesh = load_mesh)
+    # })
+
+    output$three_viewer <- renderBrain({
       validate(need(local_data$has_subject, message = ''))
       project = input$project_name
       subject = input$subject_code
       subject_id = sprintf('%s/%s', project, subject)
       ref = input$reference
-      elec = input$electrodes
+      elec = parse_selections(input$electrodes)
       load_mesh = input$load_mesh
 
+      subject = as_subject(subject_id, reference = ref)
 
-      brain = brain_env[[subject_id]]
-      if(is.null(brain)){
-        s = Subject$new(project_name = project, subject_code = subject, reference = ref, strict = FALSE)
-        brain = RaveBrain$new(subject = s)
-        brain_env[[subject_id]] = brain
+      brain = rave_brain2()
+      brain$load_electrodes(subject = subject)
+
+      if(load_mesh){
+        brain$load_surfaces(subject = subject)
       }
-
-      if(load_mesh && brain$mesh_count == 0){
-        brain$import_spec(nearest_face = F)
-      }
-
-
-      brain = brain$copy()
-      elec = parse_selections(elec)
-      s = brain$.__enclos_env__$private$subject
-      valid_e = s$filter_valid_electrodes(elec)
-      invalid_e = s$filter_all_electrodes(elec)
+      valid_e = subject$filter_valid_electrodes(elec)
+      invalid_e = subject$filter_all_electrodes(elec)
       invalid_e = invalid_e[!invalid_e %in% valid_e]
 
-      lapply(s$electrodes$Electrode, function(ii){
-        if(ii %in% valid_e){
-          brain$set_electrode_value(which = ii, value = -1)
-        }else if (ii %in% invalid_e){
-          brain$set_electrode_value(which = ii, value = 1)
-        }
-      })
-
-      brain$view(control_gui = F, width = '100%', height = '500px', center = T, show_mesh = load_mesh)
+      for(e in valid_e){
+        brain$set_electrode_value(subject = subject, electrode = e, value = -1, time = 0)
+      }
+      for(e in invalid_e){
+        brain$set_electrode_value(subject = subject, electrode = e, value = 1, time = 0)
+      }
+      brain$view(control_panel = F)
     })
 
 

@@ -169,10 +169,22 @@ get_comp_env <- function(module_id){
   scripts = new.env(parent = emptyenv())
   load_scripts = function(..., asis = FALSE){
     fs = unlist(list(...))
-    fs = sapply(fs, get_path)
+    fs = sapply(fs, function(x){
+      if(rlang::is_quosure(x)){
+        x
+      }else{
+        get_path(x)
+      }
+    })
     scripts[['source']] = fs
     scripts[['asis']] = asis
   }
+  # load_scripts = function(..., asis = FALSE){
+  #   fs = unlist(list(...))
+  #   fs = sapply(fs, get_path)
+  #   scripts[['source']] = fs
+  #   scripts[['asis']] = asis
+  # }
 
   tmp_env = new.env()
 

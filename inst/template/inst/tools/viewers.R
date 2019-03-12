@@ -10,7 +10,10 @@ to_module <- function(module_id, sidebar_width = 3){
 
   src = sapply(quos$script_env$source, function(f){
 
-    if(f != '' && file.exists(f)){
+    if(rlang::is_quosure(f)){
+      expr = paste(deparse(rlang::quo_squash(f)), collapse = '\n')
+      return(expr)
+    }else if(f != '' && file.exists(f)){
 
       if(!asis){
         # This file is valid R script,
