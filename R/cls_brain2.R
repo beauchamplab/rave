@@ -299,6 +299,7 @@ rave_brain2 <- function(surfaces = 'pial', multiple_subject = FALSE, prefix = 's
         name = sprintf('Electrode %s (%s, %s)', row$Electrode, row$Label, subject$id)
         if(name %in% names(l$electrodes)){
           l$electrodes[[name]]$set_value(value = value, time_stamp = time)
+          l$electrodes[[name]]$custom_info = message
         }
 
       }

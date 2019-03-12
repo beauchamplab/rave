@@ -264,6 +264,7 @@ shiny_data_selector <- function(module_id){
     local_data = reactiveValues(
       has_subject = FALSE,
       check_result = list(),
+      load_mesh = TRUE,
       # Prevent mis-clicking
       # If "import" button is clicked multiple times, data will be reloaded multiple times.
       # prevent will be set to false only when modal expanded
@@ -1003,15 +1004,21 @@ shiny_data_selector <- function(module_id){
       if(load_mesh){
         brain$load_surfaces(subject = subject)
       }
+
       valid_e = subject$filter_valid_electrodes(elec)
       invalid_e = subject$filter_all_electrodes(elec)
       invalid_e = invalid_e[!invalid_e %in% valid_e]
 
+      tbl = subject$electrodes
+
+
       for(e in valid_e){
-        brain$set_electrode_value(subject = subject, electrode = e, value = -1, time = 0)
+        brain$set_electrode_value(subject = subject, electrode = e, value = -1, time = 0,
+                                  message = paste('Reference Group:', tbl$Group[tbl$Electrode == e]))
       }
       for(e in invalid_e){
-        brain$set_electrode_value(subject = subject, electrode = e, value = 1, time = 0)
+        brain$set_electrode_value(subject = subject, electrode = e, value = 1, time = 0,
+                                  message = paste('Reference Group:', tbl$Group[tbl$Electrode == e], '(electrode not used)'))
       }
       brain$view(control_panel = F)
     })
