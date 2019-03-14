@@ -5,7 +5,7 @@ define_output_3d_viewer <- function(
 ){
 
   # Generate reactives
-  output_widget_id = paste0(outputId, '_widget')
+  output_call = paste0(outputId, '_widget')
   output_btn = paste0(outputId, '_btn')
   output_fun = paste0(outputId, '_fun')
 
@@ -13,7 +13,7 @@ define_output_3d_viewer <- function(
 
 
   quo = rlang::quo({
-    assign(!!outputId, function(){
+    assign(!!output_call, function(){
       clicked = shiny::isolate(input[[!!output_btn]])
 
       htmltools::tagList(
@@ -27,7 +27,7 @@ define_output_3d_viewer <- function(
           ),
           eval(!!additional_ui)
         ),
-        threeBrain::threejsBrainOutput(ns(!!output_widget_id), height = !!height)
+        threeBrain::threejsBrainOutput(ns(!!outputId), height = !!height)
       )
     }, envir = environment())
     local({
@@ -39,34 +39,38 @@ define_output_3d_viewer <- function(
 
       )
 
-      output[[!!output_widget_id]] <- threeBrain::renderBrain({
+      output[[!!outputId]] <- threeBrain::renderBrain({
         brain = rave::rave_brain2(surfaces = !!surfaces, multiple_subject = !!multiple_subject)
         brain$load_electrodes(subject)
         brain$load_surfaces(subject)
 
-        set_val = function(electrode, value, time, message = ''){
-          if(missing(time)){
-            if(length(value) == length(preload_info$time_points)){
-              time = preload_info$time_points
-            }else{
-              time = seq_along(value) - 1
-            }
-          }
-          brain$set_electrode_value(subject = subject, electrode, value, time, message)
-        }
-
+        re = brain
         # Render function
         if(input[[!!output_btn]] > 0){
-          f = get0(!!output_fun, ifnotfound = function(...){})
+          f = get0(!!output_fun, envir = ..runtime_env, ifnotfound = function(...){
+            rutabaga::cat2('3D Viewer', !!outputId,  'cannot find function', !!output_fun, level = 'INFO')
+          })
+
           tryCatch({
-            f(set_val)
+            re = f(brain)
           }, error = function(e){
             rave::logger(e, level = 'ERROR')
           })
 
         }
 
-        brain$view()
+        if('htmlwidget' %in% class(re)){
+          # User called $view() with additional params, directly call the widget
+          re
+        }else if('rave_three_brain' %in% class(re)){
+          # User just returned brain object
+          re$view()
+        }else{
+          # User returned nothing
+          brain$view()
+        }
+
+
       })
     })
   })
@@ -74,7 +78,7 @@ define_output_3d_viewer <- function(
   # generate output
   df = rlang::quo({
     define_output(
-      definition = customizedUI(!!outputId),
+      definition = customizedUI(!!output_call),
       title = !!title,
       width = !!width,
       order = !!order

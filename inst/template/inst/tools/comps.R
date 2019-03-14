@@ -176,8 +176,12 @@ get_comp_env <- function(module_id){
         get_path(x)
       }
     })
-    scripts[['source']] = fs
-    scripts[['asis']] = asis
+    scripts[['source']] = c(scripts[['source']], fs)
+
+    if(is.null(scripts[['asis']])){
+      scripts[['asis']] = asis
+    }
+
   }
   # load_scripts = function(..., asis = FALSE){
   #   fs = unlist(list(...))
