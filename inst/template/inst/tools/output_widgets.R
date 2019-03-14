@@ -1,13 +1,15 @@
 define_output_3d_viewer <- function(
   outputId, title, surfaces = 'pial', multiple_subject = F,
   message = 'Click here to Generate 3D viewer',
-  height = '500px', width = 12, order = 0
+  height = '500px', width = 12, order = 0, additional_ui = NULL
 ){
 
   # Generate reactives
   output_widget_id = paste0(outputId, '_widget')
   output_btn = paste0(outputId, '_btn')
   output_fun = paste0(outputId, '_fun')
+
+  additional_ui = substitute(additional_ui)
 
 
   quo = rlang::quo({
@@ -22,7 +24,8 @@ define_output_3d_viewer <- function(
             href = '#',
             class = "action-button",
             !!message
-          )
+          ),
+          eval(!!additional_ui)
         ),
         threeBrain::threejsBrainOutput(ns(!!output_widget_id), height = !!height)
       )
@@ -82,6 +85,7 @@ define_output_3d_viewer <- function(
   eval(rlang::quo_squash(df), envir = parent.frame())
   # evaluate
 
+  invisible(quo)
 
 }
 

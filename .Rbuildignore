@@ -12,4 +12,5 @@
 \.md$
 ^test/
 ^cran-comments\.md$
+^updates\.md$
 

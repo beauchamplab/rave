@@ -69,7 +69,7 @@ Suggests:
     globals (>= 0.12.4),
     roxygen2 (>= 6.0.0)
 Remotes:
-    github::dipterix/threejsr,
+    github::dipterix/threeBrain,
     github::dipterix/rutabaga
 Collate:
     'utils_syscheck.R'

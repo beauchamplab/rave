@@ -6,7 +6,7 @@
 \usage{
 rave_prepare(subject, electrodes, epoch, time_range, frequency_range,
   data_types = c("power"), reference = "default", attach = "r",
-  load_brain = TRUE, data_env = getDefaultDataRepository(),
+  load_brain = FALSE, data_env = getDefaultDataRepository(),
   strict = FALSE)
 }
 \arguments{

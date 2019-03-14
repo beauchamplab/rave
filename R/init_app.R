@@ -299,47 +299,47 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
 
     ##############
     # Control panel
-    output[['__rave_3dviewer']] <- renderThreejs({
-      if(global_reactives$has_data){
-        tbl = subject$electrodes
-        es = subject$valid_electrodes
-        sel = tbl$Electrode %in% es
-
-
-        # Set2 and Paired from RColorBrewer, hard coded
-        pal = c(
-          "#66C2A5",  "#FC8D62",  "#8DA0CB",  "#E78AC3",  "#A6D854",  "#FFD92F",  "#E5C494",  "#B3B3B3",
-          "#A6CEE3",  "#1F78B4",  "#B2DF8A",  "#33A02C",  "#FB9A99",  "#E31A1C",  "#FDBF6F",  "#FF7F00",  "#CAB2D6",  "#6A3D9A",  "#FFFF99",  "#B15928"
-        )
-
-        tbl$marker = with(tbl, {
-          Label[is.na(Label)] = ''
-          sprintf('Group - %s [%s]<br/>Electrode - %d %s<br/>Position - %.1f,%.1f,%.1f<br/>', Group, Type, Electrode, Label, Coord_x, Coord_y, Coord_z)
-        })
-        value = with(tbl[sel, ], {
-          pal[as.numeric(as.factor(Group))]
-        })
-
-        # get data_env
-
-        module_tools = get('module_tools', envir = getDefaultDataRepository())
-
-        module_tools$plot_3d_electrodes(
-          tbl = tbl,
-          electrodes = es,
-          values = value,
-          marker = tbl$marker,
-          palette = pal,
-          symmetric = F,
-          fps = 2,
-          control_gui = F,
-          loop = F,
-          sidebar = tagList(
-            fileInput('__rave_3dviewer_data', label = 'Upload')
-          )
-        )
-      }
-    })
+    # output[['__rave_3dviewer']] <- renderThreejs({
+    #   if(global_reactives$has_data){
+    #     tbl = subject$electrodes
+    #     es = subject$valid_electrodes
+    #     sel = tbl$Electrode %in% es
+    #
+    #
+    #     # Set2 and Paired from RColorBrewer, hard coded
+    #     pal = c(
+    #       "#66C2A5",  "#FC8D62",  "#8DA0CB",  "#E78AC3",  "#A6D854",  "#FFD92F",  "#E5C494",  "#B3B3B3",
+    #       "#A6CEE3",  "#1F78B4",  "#B2DF8A",  "#33A02C",  "#FB9A99",  "#E31A1C",  "#FDBF6F",  "#FF7F00",  "#CAB2D6",  "#6A3D9A",  "#FFFF99",  "#B15928"
+    #     )
+    #
+    #     tbl$marker = with(tbl, {
+    #       Label[is.na(Label)] = ''
+    #       sprintf('Group - %s [%s]<br/>Electrode - %d %s<br/>Position - %.1f,%.1f,%.1f<br/>', Group, Type, Electrode, Label, Coord_x, Coord_y, Coord_z)
+    #     })
+    #     value = with(tbl[sel, ], {
+    #       pal[as.numeric(as.factor(Group))]
+    #     })
+    #
+    #     # get data_env
+    #
+    #     module_tools = get('module_tools', envir = getDefaultDataRepository())
+    #
+    #     module_tools$plot_3d_electrodes(
+    #       tbl = tbl,
+    #       electrodes = es,
+    #       values = value,
+    #       marker = tbl$marker,
+    #       palette = pal,
+    #       symmetric = F,
+    #       fps = 2,
+    #       control_gui = F,
+    #       loop = F,
+    #       sidebar = tagList(
+    #         fileInput('__rave_3dviewer_data', label = 'Upload')
+    #       )
+    #     )
+    #   }
+    # })
 
     observeEvent(input[['__rave_3dviewer_data']], {
       print(input[['__rave_3dviewer_data']])

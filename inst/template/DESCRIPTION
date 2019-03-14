@@ -27,6 +27,6 @@ Suggests:
     rmarkdown
 Remotes:
     github::dipterix/rutabaga,
-    github::dipterix/threejsr,
+    github::dipterix/threeBrain,
     github::beauchamplab/rave
 VignetteBuilder: knitr

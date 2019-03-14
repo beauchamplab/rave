@@ -894,27 +894,27 @@ shiny_data_selector <- function(module_id){
       s_volt = prod(n_trials, n_time_volt, n_electrodes) * 8.25 * 3
       s_power = prod(n_trials, n_freqs, n_time_wave, n_electrodes) * 8.25 * 3
 
-      # SUMA brain?
-      suma_dir = get_dir(subject_code = subject, project_name = project)$suma_dir
-      spec_file = file.path(suma_dir, rave_options('suma_spec_file'))
-      brain_size = 0
-      if(file.exists(spec_file)){
-        spec_parsed = suma_spec_parse(subject = project %&% '/' %&% subject)
-        sv = unique(unlist(spec_parsed)['SurfaceVolume'])
-        if(length(sv)){
-          sv = paste0(sv[1], '.brik')
-        }
-        if(!is.null(find_path(sv))){
-          sv = find_path(sv)
-        }else{
-          sv = unlist(stringr::str_split(sv, '/'))
-          sv = file.path(suma_dir, sv[length(sv)])
-        }
-
-        if(!is.null(sv) && file.exists(sv)){
-          brain_size = file.info(sv)$size
-        }
-      }
+      # # SUMA brain?
+      # suma_dir = get_dir(subject_code = subject, project_name = project)$suma_dir
+      # spec_file = file.path(suma_dir, rave_options('suma_spec_file'))
+      # brain_size = 0
+      # if(file.exists(spec_file)){
+      #   spec_parsed = suma_spec_parse(subject = project %&% '/' %&% subject)
+      #   sv = unique(unlist(spec_parsed)['SurfaceVolume'])
+      #   if(length(sv)){
+      #     sv = paste0(sv[1], '.brik')
+      #   }
+      #   if(!is.null(find_path(sv))){
+      #     sv = find_path(sv)
+      #   }else{
+      #     sv = unlist(stringr::str_split(sv, '/'))
+      #     sv = file.path(suma_dir, sv[length(sv)])
+      #   }
+      #
+      #   if(!is.null(sv) && file.exists(sv)){
+      #     brain_size = file.info(sv)$size
+      #   }
+      # }
 
       drive_speed = rave_options('drive_speed')
       if(length(drive_speed) >= 2){
@@ -930,11 +930,11 @@ shiny_data_selector <- function(module_id){
                                      n_trials, n_time_volt, n_electrodes, to_ram_size(s_volt)), br(),
         strong('Power/Phase: '), sprintf('%d Trials x %d Frequencies x %d Timepoints x %d Electrodes (%s each)',
                                          n_trials, n_freqs, n_time_wave, n_electrodes, to_ram_size(s_power)), br(),
-        strong('Brain: '), ifelse(brain_size > 0,
-                                  sprintf('surface volume, %s', to_ram_size(brain_size)),
-                                  'no surface volume file found'), br(),
+        # strong('Brain: '), ifelse(brain_size > 0,
+        #                           sprintf('surface volume, %s', to_ram_size(brain_size)),
+        #                           'no surface volume file found'), br(),
         strong('Estimated Resource Required: '), sprintf('%s (memory)',
-                                                         to_ram_size(brain_size + max(s_volt, s_power))), br(),
+                                                         to_ram_size(max(s_volt, s_power))), br(),
         strong('Estimated Loading time: '), sprintf(
           'Power (%.0f sec), Phase (%.0f sec), Voltage(%.0f sec)',
           s_power * drive_speed / 1000^2 * 2,
@@ -945,7 +945,7 @@ shiny_data_selector <- function(module_id){
     })
 
     # Local environment to store temporary SUMA brain
-    brain_env = new.env()
+    # brain_env = new.env()
 
     # output$three_viewer <- renderThreejs({
     #   validate(need(local_data$has_subject, message = ''))
