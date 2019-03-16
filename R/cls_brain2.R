@@ -126,7 +126,7 @@ rave_brain2 <- function(surfaces = 'pial', multiple_subject = FALSE, prefix = 's
         }
       }else{
         trans_mat = diag(1, 4)
-        logger('No transformat matrix found, I assume that these electrodes have already been aligned to freesurfer orientation.', level = 'INFO')
+        logger('No transform matrix found, I assume that these electrodes have already been aligned to freesurfer orientation.', level = 'INFO')
       }
     }
 
@@ -323,7 +323,19 @@ rave_brain2 <- function(surfaces = 'pial', multiple_subject = FALSE, prefix = 's
       brain$set_multiple_subject(is_mult)
     },
     view = function(...){
+      env$last_viewer_args = list(...)
       brain$view(...)
+    },
+
+    save_brain = function(directory, filename = 'index.html', title = '3D Viewer', as_zip = FALSE, ...){
+      args = list(...)
+      if(!length(args)){
+        args = as.list(env$last_viewer_args)
+      }
+      wd = do.call(brain$view, args)
+      re = save_threebrain(widget = wd, directory = directory,
+                             filename = filename, title = title, as_zip = as_zip)
+      invisible(re)
     },
 
     get_object = function(){
