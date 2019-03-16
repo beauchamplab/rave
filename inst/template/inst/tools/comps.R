@@ -335,7 +335,11 @@ init_module <- function(module_id, debug = FALSE){
   }
 
   for(f in envs$script_env[['source']]){
-    source(file = f, local = param_env)
+    if(rlang::is_quosure(f)){
+      eval(rlang::quo_squash(f), envir = param_env)
+    }else{
+      source(file = f, local = param_env)
+    }
   }
 
   # initialize global variables
