@@ -76,7 +76,7 @@ daemon_app <- function(rave_id = 'test', idx = '1', launch.browser = FALSE, host
           }
           return(NULL)
         }, error = function(e){
-          print(e)
+          # print(e)
           NULL
         })
 
@@ -100,7 +100,7 @@ daemon_app <- function(rave_id = 'test', idx = '1', launch.browser = FALSE, host
     observe({
       params = reactiveValuesToList(input)
       nms = names(params)
-      print(nms)
+      # print(nms)
       callback_prefix = isolate(local_data$output_type)
       output_id = isolate(local_data$outputId)
       if(length(callback_prefix)!=1 || length(output_id) != 1){
@@ -121,7 +121,7 @@ daemon_app <- function(rave_id = 'test', idx = '1', launch.browser = FALSE, host
     observeEvent(local_data$callback, {
       if(!is.null(local_data$callback)){
 
-        print('sending to parent session')
+        # print('sending to parent session')
 
         dat = local_data$callback
         saveRDS(dat, file = file_to_parent)
@@ -219,7 +219,7 @@ create_daemon <- function(session, idx = '1'){
       dat = c2s_reader()
 
       if(is.list(dat) && length(dat$callbackId)==1 && is.character(dat$callbackId)){
-        print(dat)
+        # print(dat)
         impl = .subset2( session$input, 'impl' )
         impl$set(dat$callbackId, dat$message)
       }
@@ -276,7 +276,7 @@ send_to_daemon <- function(expr, outputId, type = 'threeBrain', save = NULL){
 
   ip = stringr::str_trim(ip)
 
-  shinyjs::runjs(sprintf('window.open("http://%s")', ip))
+  shinyjs::runjs(sprintf('if(!window.rave_daemon || window.rave_daemon.closed ) { window.rave_daemon = window.open("http://%s") }; window.rave_daemon.focus(); ', ip))
 
 
 

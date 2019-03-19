@@ -251,19 +251,19 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
     })
 
 
-    observeEvent(input[['__local_storage_message__']], {
-      message = input[['__local_storage_message__']]
-      if(length(message$token) && message$token == add_to_session(session)){
-        # This instance needs to handle the event
-
-        # check message type
-        # if(message$message_type == 'threeBrain')
-
-        # manually set value
-        impl = .subset2( session$input, 'impl' )
-        impl$set(message$callback_id, message$content)
-      }
-    })
+    # observeEvent(input[['__local_storage_message__']], {
+    #   message = input[['__local_storage_message__']]
+    #   if(length(message$token) && message$token == add_to_session(session)){
+    #     # This instance needs to handle the event
+    #
+    #     # check message type
+    #     # if(message$message_type == 'threeBrain')
+    #
+    #     # manually set value
+    #     impl = .subset2( session$input, 'impl' )
+    #     impl$set(message$callback_id, message$content)
+    #   }
+    # })
 
 
     # unlist(modules) will flatten modules but it's still a list
@@ -360,9 +360,9 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
     #   }
     # })
 
-    observeEvent(input[['__rave_3dviewer_data']], {
-      print(input[['__rave_3dviewer_data']])
-    })
+    # observeEvent(input[['__rave_3dviewer_data']], {
+    #   print(input[['__rave_3dviewer_data']])
+    # })
 
 
     observeEvent(input[['..keyboard_event..']], {
@@ -586,14 +586,15 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
       session$onSessionEnded(function() {
         logger('Clean up environment.')
 
-        if(dir.exists(session_dir)){
-          unlink(session_dir, recursive = T, force = T)
-        }
-
         lapply(unlist(modules), function(x){
           x$clean(session_id = session_id)
         })
         gc()
+        unlink(session_dir, recursive = T, force = T)
+      })
+    }else{
+      session$onSessionEnded(function() {
+        unlink(session_dir, recursive = T, force = T)
       })
     }
 
