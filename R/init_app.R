@@ -225,6 +225,9 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
     #   )
     # })
 
+    # Add daemon process
+    session_dir = create_daemon(session)
+
 
     #################################################################
 
@@ -246,6 +249,22 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
     observeEvent(async_timer(), {
       global_reactives$check_results = Sys.time()
     })
+
+
+    observeEvent(input[['__local_storage_message__']], {
+      message = input[['__local_storage_message__']]
+      if(length(message$token) && message$token == add_to_session(session)){
+        # This instance needs to handle the event
+
+        # check message type
+        # if(message$message_type == 'threeBrain')
+
+        # manually set value
+        impl = .subset2( session$input, 'impl' )
+        impl$set(message$callback_id, message$content)
+      }
+    })
+
 
     # unlist(modules) will flatten modules but it's still a list
     module_ids = str_to_upper(sapply(unlist(modules), function(m){m$module_id}))
@@ -566,6 +585,11 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
     if(!test.mode){
       session$onSessionEnded(function() {
         logger('Clean up environment.')
+
+        if(dir.exists(session_dir)){
+          unlink(session_dir, recursive = T, force = T)
+        }
+
         lapply(unlist(modules), function(x){
           x$clean(session_id = session_id)
         })

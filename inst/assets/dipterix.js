@@ -82,6 +82,25 @@ $(document).ready(function(){
      });
 	   return true;
   });
+
+
+  //Shiny.onInputChange(callback_id, re);
+  // Listen to localStorage for messages from other sessions
+  window.addEventListener("storage", function(evt){
+    // key: "mytime", oldValue: "1552802489049", newValue: "1552802495278", url: "about:blank"
+    if( evt && evt.key === 'rave-messages' ){
+      let msg = evt.newValue;
+      // MUST be json string
+      //try {
+        // console.log(msg);
+        msg = JSON.parse( msg );
+        Shiny.onInputChange('__local_storage_message__', msg);
+      //} catch (e) {}
+
+    }
+
+
+  });
 });
 
 
