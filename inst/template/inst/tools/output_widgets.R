@@ -14,6 +14,9 @@ define_output_3d_viewer <- function(
 
 
   quo = rlang::quo({
+
+    ...local_env = new.env()
+
     assign(!!output_call, function(){
       clicked = shiny::isolate(input[[!!output_btn]])
 
@@ -26,12 +29,12 @@ define_output_3d_viewer <- function(
             class = "action-button",
             !!message
           ),
-          '   ',
+          ' | ',
           htmltools::a(
             id = ns(!!output_new),
             href = '#',
             class = "action-button",
-            'open viewer in a new window.'
+            'Open viewer in a new window.'
           ),
           eval(!!additional_ui)
         ),
@@ -43,14 +46,16 @@ define_output_3d_viewer <- function(
       input = getDefaultReactiveInput()
       output = getDefaultReactiveOutput()
       session = getDefaultReactiveDomain()
-      local_data %?<-% reactiveValues()
-      local_env = new.env()
 
-      observeEvent(input$output_new, {
-        if(!is.null(local_env$widget)){
+
+      observeEvent(input[[!!output_new]], {
+
+        cat2('Opening a side window...')
+
+        if(!is.null(...local_env$widget)){
 
           tryCatch({
-            widget = local_env$widget
+            widget = ...local_env$widget
 
             rave::send_to_daemon({
               widget
@@ -87,15 +92,15 @@ define_output_3d_viewer <- function(
 
         if('htmlwidget' %in% class(re)){
           # User called $view() with additional params, directly call the widget
-          local_env$widget = re
+          ...local_env$widget = re
           re
         }else if('rave_three_brain' %in% class(re)){
           # User just returned brain object
-          local_env$widget = re$view()
+          ...local_env$widget = re$view()
           re$view()
         }else{
           # User returned nothing
-          local_env$widget = brain$view()
+          ...local_env$widget = brain$view()
           brain$view()
         }
 
@@ -121,6 +126,8 @@ define_output_3d_viewer <- function(
   invisible(quo)
 
 }
+
+
 
 
 
