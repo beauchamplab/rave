@@ -6,6 +6,9 @@
 \usage{
 load_modules(legacy = FALSE)
 }
+\arguments{
+\item{legacy}{load old RAVE scripts? WARNING: they are not supported anymore.}
+}
 \description{
 Load Modules (Questioning Lifecycle)
 }
