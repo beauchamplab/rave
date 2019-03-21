@@ -4,7 +4,7 @@
 \alias{load_modules}
 \title{Load Modules (Questioning Lifecycle)}
 \usage{
-load_modules()
+load_modules(legacy = FALSE)
 }
 \description{
 Load Modules (Questioning Lifecycle)

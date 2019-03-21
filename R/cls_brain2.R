@@ -1,4 +1,5 @@
 #' Tools to load and view brain in 3D viewer
+#' @param surfaces one or more from "pial, white, smoothwm", brain surface types
 #' @param multiple_subject is this a template brain?
 #' @param prefix internally used, prefix to freesurfer asc files
 #' @export

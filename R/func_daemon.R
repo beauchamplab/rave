@@ -234,6 +234,16 @@ create_daemon <- function(session, idx = '1'){
 }
 
 
+#' Send expressions to execute in daemon process (for side viewers)
+#' @param expr expression to run
+#' @param outputId shiny outputId
+#' @param type currently only support 'threeBrain',
+#' @param save names of objects to be save for daemon process
+#' @details This is for module writers only. If you want to show outputs in an
+#' additional window, use this function. RAVE will initialize another process
+#' in the background to communicate with the main process. The daemon process
+#' doesn't share with the original process, hence you need to save whatever
+#' data to be used via `save` argument.
 #' @export
 send_to_daemon <- function(expr, outputId, type = 'threeBrain', save = NULL){
   .env = parent.frame()
