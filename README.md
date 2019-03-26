@@ -14,9 +14,8 @@ __R__ __A__*nalysis and* __V__*isualization of intracranial* __E__*lectroencepha
 
 ```r
 # Install rave
-install.packages('devtools')
-library(devtools)
-install_github('beauchamplab/rave')
+install.packages('pak')
+pak::pkg_install('beauchamplab/rave')
 
 # Launch main app
 rave::init_app()

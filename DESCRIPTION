@@ -57,7 +57,8 @@ Imports:
     DT (>= 0.4),
     reticulate (>= 1.6),
     fst (>= 0.8.8),
-    data.table (>= 1.11.8)
+    data.table (>= 1.11.8),
+    servr (>= 0.13)
 Suggests:
     gifti,
     knitr,
