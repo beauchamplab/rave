@@ -30,7 +30,7 @@ get_module <- function(package, module_id, local = FALSE){
       logger('You are running module locally. Please specify module ID.', level = 'ERROR')
       return(invisible())
     }else{
-      return(debug_module(package = package, module_id = module_id))
+      return(debug_module(package = package, module_id = module_id, local = local))
     }
   }
 
@@ -87,7 +87,7 @@ get_module <- function(package, module_id, local = FALSE){
 }
 
 
-debug_module <- function(package = package, module_id = module_id, reload = FALSE){
+debug_module <- function(package = package, module_id = module_id, reload = FALSE, local=FALSE){
   .fs = list.files(system.file('template/inst/tools', package = 'rave'), pattern = '\\.R$', full.names = T)
   .fs = c(.fs, system.file('tools/input_widgets.R', package = package))
 
@@ -102,6 +102,9 @@ debug_module <- function(package = package, module_id = module_id, reload = FALS
       }
     })
     env$.packageName = package
+    if(local){
+      env$is_local_debug = function(){TRUE}
+    }
     return(env)
   }
   # Reload first
