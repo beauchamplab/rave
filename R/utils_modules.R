@@ -5,8 +5,20 @@ to_package_name <- function(module_id){
 }
 
 #' Load Modules (Questioning Lifecycle)
+#' @param legacy load old RAVE scripts? WARNING: they are not supported anymore.
 #' @export
-load_modules <- function(){
+load_modules <- function(legacy = FALSE){
+
+  if(!legacy){
+    if(!rave:::package_installed('ravebuiltins')){
+      f = rave:::get_from_package('install_github', pkg = 'remotes')
+      f('beauchamplab/ravebuiltins', dependencies = FALSE, upgrade = 'never', force = F)
+    }
+
+    m = detect_modules('ravebuiltins')
+    return(m)
+  }
+
   modules = read.csv(rave_options('module_lookup_file'), stringsAsFactors = F)
 
   #1. filter out all deactived packages
