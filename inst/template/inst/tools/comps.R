@@ -290,7 +290,7 @@ parse_components <- function(module_id){
 }
 
 # parse_components and wrap them in an environment
-init_module <- function(module_id, debug = FALSE){
+init_module <- function(module_id, debug = FALSE, force_local=FALSE){
   # Make sure subject is loaded
   has_subject = rave::any_subject_loaded()
 
@@ -315,6 +315,15 @@ init_module <- function(module_id, debug = FALSE){
 
   # get components
   envs = get_comp_env(module_id = module_id)
+
+  if(force_local){
+    envs$tmp_env$is_local_debug = function(){TRUE}
+    envs$tmp_env$observe = function(...){}
+    envs$tmp_env$observeEvent = function(...){}
+    envs$tmp_env$reactiveValues = function(...){list(...)}
+    envs$tmp_env$cache = function(key, val, ...){return(val)}
+  }
+
   has_content = get_content(content = envs$content, env = envs$tmp_env)
 
   # Initialize env
@@ -325,6 +334,14 @@ init_module <- function(module_id, debug = FALSE){
   source(get_path('inst/tools/libs.R'), local = wrapper_env)
   source(get_path('inst/tools/funcs_reactives.R'), local = wrapper_env)
   wrapper_env$rave_checks = function(...){}
+
+  if(force_local){
+    wrapper_env$is_local_debug = function(){TRUE}
+    wrapper_env$observe = function(...){}
+    wrapper_env$observeEvent = function(...){}
+    wrapper_env$reactiveValues = function(...){list(...)}
+    wrapper_env$cache = function(key, val, ...){return(val)}
+  }
 
 
   param_env = new.env(parent = wrapper_env)

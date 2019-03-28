@@ -104,6 +104,10 @@ debug_module <- function(package = package, module_id = module_id, reload = FALS
     env$.packageName = package
     if(local){
       env$is_local_debug = function(){TRUE}
+      env$observe = function(...){}
+      env$observeEvent = function(...){}
+      env$reactiveValues = function(...){list(...)}
+      env$cache = function(key, val, ...){return(val)}
     }
     return(env)
   }
@@ -129,7 +133,8 @@ debug_module <- function(package = package, module_id = module_id, reload = FALS
   }
 
   # assign('aaa', env, envir = globalenv())
-  param_env = env$init_module(module_id = module_id)
+  param_env = env$init_module(module_id = module_id, force_local = local)
+
 
   runtime_env = new.env(parent = param_env)
 
