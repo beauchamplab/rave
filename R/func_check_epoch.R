@@ -39,14 +39,27 @@ check_epoch <- function(subject, epoch_name){
     return(err)
   }
 
+  # Trial must be numerical
+  tl = as.integer(tbl$Trial)
+
+  if(any(is.na(tl)) || any(duplicated(tl))){
+    err = err_cnd(message = sprintf(
+      'Epoch [%s] has invalid trial number. Make sure they are integers and no duplicates!',
+      epoch_name
+    ))
+    return(err)
+  }
+
+  trial_number = as.integer(tbl$Trial)
+
   # 2. check time points
   tm = tbl$Time
   time = as.numeric(tm)
   if(any(is.na(time))){
     err = err_cnd(message = sprintf(
-      'Epoch [%s] has invalid timestamp (%s, ...), check it out.',
+      'Epoch [%s] has invalid timestamp (trial %s), check it out.',
       epoch_name,
-      tm[is.na(time)][1]
+      deparse_selections(trial_number[is.na(time)])
     ))
     return(err)
   }
@@ -56,33 +69,26 @@ check_epoch <- function(subject, epoch_name){
 
   proc_range = lapply(split(tp$Time, tp$Block), range)
   sp = split(tbl, tbl$Block)
-  wrong_range = vapply(sp, function(x){
+  wrong_range = lapply(sp, function(x){
     b = unique(x$Block)
     rg = proc_range[[b]]
-    any(x$Time < rg[1] | x$Time > rg[2])
-  }, FALSE)
-
-  if(any(wrong_range)){
-    wb = names(sp)[wrong_range]
+    w = x$Time < rg[1] | x$Time > rg[2]
+    x$Trial[w]
+  })
+  wrong_range = unlist(wrong_range)
+  if(length(wrong_range)){
+    wb = deparse_selections(as.integer(wrong_range))
     err = err_cnd(message = sprintf(
-      'Epoch [%s] has invalid timestamp. Make sure they are block-wise and in **seconds**! (Check block "%s")',
+      'Epoch [%s] has invalid timestamp. Make sure they are block-wise and in **seconds**! (Check trial%s %s)',
       epoch_name,
-      paste(wb, collapse = '", "')
+      ifelse(length(wrong_range)>1, 's', ''),
+      wb
     ))
     return(err)
   }
 
 
-  # Trial must be numerical
-  tl = as.numeric(tbl$Trial)
 
-  if(any(is.na(tl)) || any(duplicated(tl))){
-    err = err_cnd(message = sprintf(
-      'Epoch [%s] has invalid trial number. Make sure they are integers and no duplicates!',
-      epoch_name
-    ))
-    return(err)
-  }
 
   return(TRUE)
 
