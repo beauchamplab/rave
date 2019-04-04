@@ -310,6 +310,31 @@ rave_brain2 <- function(surfaces = 'pial', multiple_subject = FALSE, prefix = 's
 
 
 
+  set_multiple_subject = function(is_mult){
+    is_mult = isTRUE(is_mult)
+    # if is_mult
+
+    if(is_mult){
+      ## Remove gui elements
+      # brain$groups[["Left Hemisphere"]]$group_data$.gui_params = brain$groups[["Left Hemisphere"]]$group_data$.gui_params['N27']
+      # brain$groups[["Right Hemisphere"]]$group_data$.gui_params = brain$groups[["Right Hemisphere"]]$group_data$.gui_params['N27']
+
+      ## remove surfaces
+      sf = names(brain$groups[["Left Hemisphere"]]$group_data)
+      nm = sf[!stringr::str_detect(sf, '^free_(vertices|faces)_[lr]h - .+ \\((?!Template N27).*\\)$')]
+      brain$groups[["Left Hemisphere"]]$group_data = brain$groups[["Left Hemisphere"]]$group_data[nm]
+
+      sf = names(brain$groups[["Right Hemisphere"]]$group_data)
+      nm = sf[!stringr::str_detect(sf, '^free_(vertices|faces)_[lr]h - .+ \\((?!Template N27).*\\)$')]
+      brain$groups[["Right Hemisphere"]]$group_data = brain$groups[["Right Hemisphere"]]$group_data[nm]
+    }
+
+    brain$set_multiple_subject(is_mult)
+
+  }
+
+
+
   re = list(
     has_subject = has_subject,
     add_subject = add_subject,
@@ -319,11 +344,11 @@ rave_brain2 <- function(surfaces = 'pial', multiple_subject = FALSE, prefix = 's
     load_surfaces = load_surfaces,
     calculate_template_brain_location = cache,
 
-    set_multiple_subject = function(is_mult){
-      is_mult = isTRUE(is_mult)
-      brain$set_multiple_subject(is_mult)
-    },
+    set_multiple_subject = set_multiple_subject,
     view = function(...){
+      if(brain$multiple_subject){
+        set_multiple_subject(brain$multiple_subject)
+      }
       env$last_viewer_args = list(...)
       brain$view(...)
     },
