@@ -108,7 +108,7 @@ diagnose_signal <- function(
              log = 'xy', xlim = log_xlim, spec_func = spectrum.pgram, max_freq = max_freq)
       pwelch(s1, fs = srate, window = window, noverlap = noverlap, cex = cex, ylim = flim,
              plot = 2, col = col[1], log = 'xy', xlim = log_xlim, spec_func = spectrum.pgram, max_freq = max_freq)
-      legend('topright', c('Before ', 'After ') %&% name, col = rev(col), lty = 1, cex = cex * 0.8)
+      legend('topright', paste0(c('Before ', 'After '), name), col = rev(col), lty = 1, cex = cex * 0.8)
     }else{
       pwelch(s1, fs = srate, window = window,
              noverlap = noverlap, plot = 1, col = col[1], cex = cex, ylim = flim,
@@ -120,7 +120,7 @@ diagnose_signal <- function(
   if(length(which) == 0 || 4 %in% which){
     # Plot 4:
     hist(s1, nclass = nclass,
-         xlab = 'Signal Voltage Histogram', main = 'Histogram ' %&% name,
+         xlab = 'Signal Voltage Histogram', main = paste0('Histogram ', name),
          cex.axis = cex * 0.7, cex.lab = cex*0.8, cex.main = cex, cex.sub = cex)
   }
 

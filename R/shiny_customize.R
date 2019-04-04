@@ -67,7 +67,7 @@ compoundInput <- function(
             'data-value' = ind,
             tags$fieldset(
               style = sprintf('border: 1px solid #efefef; padding:.35em .625em .75em; margin-bottom: 15px;%s', style),
-              tags$legend(prefix %&% ' ' %&% ind, style = 'border:none; margin: 0; padding: 0 10px; font-size: 14px;'),
+              tags$legend(paste(prefix, ind), style = 'border:none; margin: 0; padding: 0 10px; font-size: 14px;'),
               tagList(
                 lapply(quos, function(quo){
                   quo = quo$.change_param(

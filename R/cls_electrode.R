@@ -85,7 +85,7 @@ Electrode <- R6::R6Class(
 
       # otherwise we need to reference itself
 
-      raw_type = 'raw_' %&% type
+      raw_type = paste0('raw_', type)
       switch (type,
         'volt' = {
           lapply(self$blocks, function(b){
@@ -365,11 +365,11 @@ Electrode <- R6::R6Class(
               self$raw_power[[b]] = t(as.matrix(fst::read_fst(fst_coef)))^2
               self$raw_phase[[b]] = t(as.matrix(fst::read_fst(fst_phase)))
               # test, result should be 0 0
-              # coef = load_h5(file, name = '/wavelet/coef/' %&% b, ram = T)
+              # coef = load_h5(file, name = paste0('/wavelet/coef/', b), ram = T)
               # range(self$raw_power[[b]] - (coef[,,1])^2)
               # range(self$raw_phase[[b]] - (coef[,,2]))
             }else{
-              coef = load_h5(file, name = '/wavelet/coef/' %&% b, ram = T)
+              coef = load_h5(file, name = paste0('/wavelet/coef/', b), ram = T)
               self$raw_power[[b]] = (coef[,,1])^2
               self$raw_phase[[b]] = (coef[,,2])
             }
@@ -378,7 +378,7 @@ Electrode <- R6::R6Class(
             self$raw_volt[[b]] = load_fst_or_h5(
               fst_path = file.path(cache_dir, 'cache', 'reference', 'voltage', b, sprintf("%s.fst", electrode)),
               h5_path = file,
-              h5_name = '/voltage/' %&% b,
+              h5_name = paste0('/voltage/', b),
               fst_need_transpose = F,
               fst_need_drop = T,
               ram = T
@@ -399,7 +399,7 @@ Electrode <- R6::R6Class(
               self$raw_power[[b]] = load_fst_or_h5(
                 fst_path = file.path(cache_dir, 'cache', 'power', 'raw', b, fst_path),
                 h5_path = file.path(cache_dir, 'power', h5_path),
-                h5_name = '/raw/power/' %&% b,
+                h5_name = paste0('/raw/power/', b),
                 fst_need_transpose = T,
                 fst_need_drop = F,
                 ram = T
@@ -414,7 +414,7 @@ Electrode <- R6::R6Class(
               self$raw_phase[[b]] = load_fst_or_h5(
                 fst_path = file.path(cache_dir, 'cache', 'phase', 'raw', b, fst_path),
                 h5_path = file.path(cache_dir, 'phase', h5_path),
-                h5_name = '/raw/phase/' %&% b,
+                h5_name = paste0('/raw/phase/', b),
                 fst_need_transpose = T,
                 fst_need_drop = F,
                 ram = T
@@ -429,7 +429,7 @@ Electrode <- R6::R6Class(
               self$raw_volt[[b]] = load_fst_or_h5(
                 fst_path = file.path(cache_dir, 'cache', 'voltage', 'raw', b, fst_path),
                 h5_path = file.path(cache_dir, 'voltage', h5_path),
-                h5_name = '/raw/voltage/' %&% b,
+                h5_name = paste0('/raw/voltage/', b),
                 fst_need_transpose = F,
                 fst_need_drop = T,
                 ram = T
@@ -528,7 +528,7 @@ Electrode <- R6::R6Class(
       types = types[types != 'volt']
       if(any(c('power', 'phase') %in% types)){
         for(name in types){
-          dname = ifelse(raw, 'raw_' %&% name, name)
+          dname = ifelse(raw, paste0('raw_', name), name)
           srate = private$subject$sample_rate
           pre = round(params$pre * srate)
           post = round(params$post * srate)

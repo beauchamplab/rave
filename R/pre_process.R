@@ -61,7 +61,7 @@ rave_preprocess <- function(
     with(x, {
       ..func %?<-% str_c('rave_pre_', str_to_lower(ID), ver)
       instance = do.call(..func, list(
-        module_id = ID %&% '_M',
+        module_id = paste0(ID , '_M'),
         sidebar_width = sidebar_width
       ))#, envir = loadNamespace('rave'))
 
@@ -143,9 +143,11 @@ rave_preprocess <- function(
     utils$load_subject = function(subject_code, project_name){
       logger('Loading Subject')
       dirs = get_dir(subject_code = subject_code, project_name = project_name)
-      assert_that(dir.exists(dirs$preprocess_dir), msg = 'Subject ' %&% subject_code %&% ' has no project folder ' %&% project_name)
+      assert_that(dir.exists(dirs$preprocess_dir), msg = paste0(
+        'Subject ' , subject_code , ' has no project folder ' , project_name
+      ))
       s = SubjectInfo2$new(project_name = project_name, subject_code = subject_code)
-      id = s$project_name %&% '/' %&% s$subject_code
+      id = paste0(s$project_name , '/' , s$subject_code)
 
       rave_hist$save(
         .rave_pre_project_name = project_name,
@@ -206,7 +208,7 @@ rave_preprocess <- function(
     # },
 
     lapply(model_instances, function(x){
-      callModule(x$server, id = x$ID %&% '_M', user_data = user_data, utils = utils)
+      callModule(x$server, id = paste0(x$ID , '_M'), user_data = user_data, utils = utils)
     })
 
   }

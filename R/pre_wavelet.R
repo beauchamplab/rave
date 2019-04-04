@@ -334,9 +334,9 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
                 width = 12,
                 p('Check your inputs, there might be some problem(s).'),
                 tags$ul(
-                  tags$li('Valid Channels: ' %&% deparse_selections(w_e)),
-                  tags$li('Frequencies: ' %&% paste(range(w_freqs), collapse = '-') %&% ' Hz. Make sure they are positive numbers.'),
-                  tags$li('Wavelet Cycles: ' %&% paste(range(w_cycle), collapse = '-') %&% '. Make sure they are positive numbers..')
+                  tags$li('Valid Channels: ', deparse_selections(w_e)),
+                  tags$li('Frequencies: ', paste(range(w_freqs), collapse = '-'), ' Hz. Make sure they are positive numbers.'),
+                  tags$li('Wavelet Cycles: ', paste(range(w_cycle), collapse = '-'), '. Make sure they are positive numbers..')
                 )
               )
             )

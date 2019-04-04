@@ -14,7 +14,7 @@ define_input_multiple_electrodes <- function(inputId, label = 'Electrodes'){
           e = electrodes[1]
         }
         value = rave::deparse_selections(e)
-        label = 'Electrodes (' %&% rave::deparse_selections(electrodes) %&% ')'
+        label = paste0('Electrodes (' , rave::deparse_selections(electrodes) , ')')
       }
     )
   })

@@ -160,7 +160,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
         lapply_async(electrodes, function(e){
           sapply(blocks, function(b){
             f = file.path(dirs$channel_dir, 'voltage', sprintf('%d.h5', e))
-            load_h5(f, '/raw/voltage/' %&% b, ram = T)
+            load_h5(f, paste0('/raw/voltage/', b), ram = T)
           }, simplify = F, USE.NAMES = T)
         }, .call_back = function(i){
           progress$inc(sprintf('Loading voltage data - %d', electrodes[i]))

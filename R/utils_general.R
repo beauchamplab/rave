@@ -357,9 +357,9 @@ image_plot <- function(z, x, y, crop = NULL, symmetric = F, precision = 1, main 
     axis(4, at = c(zlim, 0), labels = sprintf(numeric_format, c(zlim, 0)), las = las, cex.axis = cex.axis)
   })
 
-  title(main = '\n' %&% main, outer = T, cex.main = cex.main, adj = 0)
-  sub = "Value Range: [" %&% paste(sprintf(numeric_format, zlim_actual), collapse = ', ') %&% ']'
-  title(main = '\n\n' %&% sub, adj = 1, outer = T, cex.main = cex.main * 0.8)
+  title(main = paste0('\n', main), outer = T, cex.main = cex.main, adj = 0)
+  sub = paste0("Value Range: [", paste(sprintf(numeric_format, zlim_actual), collapse = ', '), ']')
+  title(main = paste0('\n\n', sub), adj = 1, outer = T, cex.main = cex.main * 0.8)
 
   parent_env = parent.frame()
 

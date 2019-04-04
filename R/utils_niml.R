@@ -21,15 +21,15 @@ write.niml <- function(values_matrix, electrode_numbers=NULL, value_labels=NULL,
   AFNI_PATH = try_normalizePath(rave_options('suma_path'))
   faces_per_electrode = rave_options('suma_nodes_per_electrodes')
 
-  fname = prefix %&% '_' %&% str_replace_all(Sys.time(), '\\ |:|/', '_')
-  niml_fname <- fname %&% '.niml.dset'
-  csv_fname = fname %&% '.csv'
+  fname = paste0(prefix, '_', str_replace_all(Sys.time(), '\\ |:|/', '_'))
+  niml_fname <- paste0(fname, '.niml.dset')
+  csv_fname = paste0(fname, '.csv')
 
   # get useful defaults
   # if value_labels weren't passed in, maybe there are column names?
   value_labels %?<-% colnames(values_matrix)
   # if these are still null, then just set an increasing number
-  value_labels %?<-% ('Val_' %&% (1:ncol(values_matrix)))
+  value_labels %?<-% paste0('Val_',  (1:ncol(values_matrix)))
 
   # if electrode_numbers weren't passed in, maybe there are row.names?
   if(length(electrode_numbers) != nrow(values_matrix)){
@@ -79,7 +79,7 @@ write.niml <- function(values_matrix, electrode_numbers=NULL, value_labels=NULL,
 
   attr(cmd, which = 'path') <- niml_fname
 
-  logger('For full cleanup, AFTER running the ConvertDset command, delete: ' %&% value_file %&% ' and ' %&% index_file)
+  logger('For full cleanup, AFTER running the ConvertDset command, delete: ', value_file, ' and ', index_file)
 
   print(list(
     args = c(

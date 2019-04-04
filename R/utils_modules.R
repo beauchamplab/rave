@@ -24,7 +24,9 @@ load_modules <- function(legacy = FALSE){
   #1. filter out all deactived packages
   modules = modules[modules$Active, ]
 
-  assert_that(nrow(modules) > 0, msg = 'Is there any module specified in ' %&% rave_options('module_lookup_file') %&% ' ?')
+  assert_that(nrow(modules) > 0, msg = paste0(
+    'Is there any module specified in ', rave_options('module_lookup_file'), ' ?'
+  ))
 
   #2. check if all compiled packages exists
   pkg_ids = unique(modules$PackageID)

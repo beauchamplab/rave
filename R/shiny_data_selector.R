@@ -192,7 +192,7 @@ check_subjects <- function(
     }
     sapply(sc, function(subject_code){
       if(!check){
-        return(project_name %&% '/' %&% subject_code)
+        return(paste0(project_name, '/', subject_code))
       }
 
       # Need to check if preprocess folder exists
@@ -585,7 +585,7 @@ shiny_data_selector <- function(module_id){
     })
 
     lapply(1:7, function(ii){
-      observeEvent(input[['freq_preset_' %&% ii]], {
+      observeEvent(input[[paste0('freq_preset_', ii)]], {
         updateSliderInput(session = session, inputId = 'frequencies', value = fband[[ii]])
       })
     })
@@ -684,7 +684,7 @@ shiny_data_selector <- function(module_id){
                 style="flex-basis: 25%;",
                 local({
                   if(ii > 1){
-                    selectInput(ns('filter_lgt_' %&% ii), 'Filter ' %&% ii, choices = c('AND', 'OR'), selected = 'OR')
+                    selectInput(ns(paste0('filter_lgt_' , ii)), paste0('Filter ', ii), choices = c('AND', 'OR'), selected = 'OR')
                   }else{
                     tags$label('Filter 1')
                   }
@@ -692,17 +692,17 @@ shiny_data_selector <- function(module_id){
               ),
               div(
                 style="flex-basis: 25%;",
-                selectInput(ns('filter_col_' %&% ii), 'Key', choices = vars, selected = vars[1])
+                selectInput(ns(paste0('filter_col_', ii)), 'Key', choices = vars, selected = vars[1])
               ),
               div(
                 style="flex-basis: 25%;",
-                selectInput(ns('filter_op_' %&% ii), 'Operator',
+                selectInput(ns(paste0('filter_op_', ii)), 'Operator',
                             choices = c('=', '>', '<', '>=', '<=', 'IN', 'NOT IN', 'BETWEEN'),
                             selected = 'NOT IN')
               ),
               div(
                 style="flex-basis: 25%;",
-                textInput(ns('filter_val_' %&% ii), 'Value', value = '')
+                textInput(ns(paste0('filter_val_', ii)), 'Value', value = '')
               )
             )
           }))
@@ -721,10 +721,10 @@ shiny_data_selector <- function(module_id){
       try({
         sel = rep(TRUE, length(res))
         for(ii in 1:3){
-          lgt = input[['filter_lgt_' %&% ii]]
-          var = input[['filter_col_' %&% ii]]
-          op = input[['filter_op_' %&% ii]]
-          val = input[['filter_val_' %&% ii]]
+          lgt = input[[paste0('filter_lgt_', ii)]]
+          var = input[[paste0('filter_col_' , ii)]]
+          op = input[[paste0('filter_op_' , ii)]]
+          val = input[[paste0('filter_val_' , ii)]]
 
           if(var %in% names(mask_table)){
             x = mask_table[[var]]
@@ -1039,7 +1039,7 @@ shiny_data_selector <- function(module_id){
       epoch = input$epoch
       epoch_range = c(input$epoch_pre, input$epoch_post)
       reference = input$reference
-      subject_id = project_name %&% '/' %&% subject_code
+      subject_id = paste0(project_name , '/' , subject_code)
       electrodes = parse_selections(input$electrodes)
 
       tmp_subject = Subject$new(project_name = project_name, subject_code = subject_code, reference = reference, strict = FALSE)
