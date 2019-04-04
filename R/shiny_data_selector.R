@@ -869,7 +869,34 @@ shiny_data_selector <- function(module_id){
 
       # Trial
       epoch = input$epoch
+      # Check epoch file
+      msg = check_epoch(sprintf('%s/%s', project, subject), epoch_name = epoch)
+      if(!isTRUE(msg)){
+        msg = msg$message
+
+        sub = as_subject(sprintf('%s/%s', project, subject), strict = FALSE)
+        blocks = sub$preprocess_info('blocks')
+        blocks = c(rep(blocks[1], 4), blocks[-1])
+        examp = data.frame(
+          Block = blocks,
+          Time = c('5.12', '10.4', '...', rep('', length(blocks) - 3)),
+          Trial = seq_along(blocks),
+          Condition = c('cond1', 'cond2', '...', rep('', length(blocks) - 3))
+        )
+        examp = capture.output({print(examp)})
+
+        return(p(
+          'An error found in the epoch file. Message: ', br(),
+          msg, br(), 'Here is an example of epoch file:', br(),
+          tags$pre(
+            paste(examp, collapse = '\n')
+          )
+        ))
+      }
+
+
       epoch_table = load_meta(meta_type = 'epoch', meta_name = epoch, project_name = project, subject_code = subject)
+
       n_trials = nrow(epoch_table)
 
       # Frequency

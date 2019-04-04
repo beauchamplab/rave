@@ -92,6 +92,7 @@ Collate:
     'core_singletons.R'
     'core_template.R'
     'func_bind_wrapper.R'
+    'func_check_epoch.R'
     'func_daemon.R'
     'func_group_analysis.R'
     'func_iter_results.R'
