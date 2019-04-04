@@ -65,7 +65,7 @@ check_epoch <- function(subject, epoch_name){
   if(any(wrong_range)){
     wb = names(sp)[wrong_range]
     err = err_cnd(message = sprintf(
-      'Epoch [%s] has invalid timestamp. Make sure they are time in **seconds**! (Check block "%s")',
+      'Epoch [%s] has invalid timestamp. Make sure they are block-wise and in **seconds**! (Check block "%s")',
       epoch_name,
       paste(wb, collapse = '", "')
     ))

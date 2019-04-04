@@ -887,7 +887,7 @@ shiny_data_selector <- function(module_id){
 
         return(p(
           'An error found in the epoch file. Message: ', br(),
-          msg, br(), 'Here is an example of epoch file:', br(),
+          strong(msg), br(), 'Here is an example of epoch file:', br(),
           tags$pre(
             paste(examp, collapse = '\n')
           )
