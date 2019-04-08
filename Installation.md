@@ -1,8 +1,4 @@
-# A Brief Full Installation Guide for RAVE
-
-*Author: Zhengjia Wang*
-
-*Date: Oct 28, 2018*
+# Full Installation Guide for RAVE for Mac, Windows and Linux
 
 # 1. System Requirement for `RAVE`
 
