@@ -7,13 +7,11 @@ __R__ __A__*nalysis and* __V__*isualization of intracranial* __E__*lectroencepha
 ## Installation
 
 * RAVE requires the installation of the language "R" and other miscellaneous programming tools, including "RStudio".
-Please [click here for the full installation guide](./Installation.md) to install these tools. 
+Please [click here for the prerequisite installation guide](./Installation.md) to install all needed tools for your operating system. 
 
 * RAVE runs best on modern computers with multicore CPUs, [click here for suggested system configurations](./Config.md).
 
-
-* Read the rest of the section if you have `R` and `RStudio` installed.
-
+* After the prerequisites are installed, open R-Studio (for instance, in Mac OSX, click on the R-studio icon in your Applications folder). Then, install and start RAVE as follows:
 
 ```r
 # Install rave
@@ -32,18 +30,6 @@ help(package = 'rave')
 
 
 
-
-### 1. Dependencies
-
-There might be some dependencies to be installed. 
-
-On **MacOS**, open terminal (you can find it using "spotlight" and searching "terminal"), and enter
-
-```
-xcode-select --install
-```
-
-or check [this](https://www.moncefbelyamani.com/how-to-install-xcode-homebrew-git-rvm-ruby-on-mac/) on how to install `xcode` to your macos.
 
 On **Windows**, install [Rtools](https://cran.r-project.org/bin/windows/Rtools/). Make sure to install the right version. For example, your `R` version is `3.5.1`, install `RTools` version `3.5`.
 
