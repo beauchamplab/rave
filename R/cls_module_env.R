@@ -918,7 +918,7 @@ ExecEnvir <- R6::R6Class(
       # env = environment()
 
       more_btns = list(
-        vignette = tags$li(actionLink(self$ns('..vignette'), 'Show Module Description')),
+        # vignette = tags$li(actionLink(self$ns('..vignette'), 'Show Module Description')),
         async = tags$li(actionLink(self$ns('..async_run'), 'Run Algorithm (Async)')),
         export = tags$li(actionLink(self$ns('..incubator'), 'Exports'))
       )
@@ -938,7 +938,22 @@ ExecEnvir <- R6::R6Class(
       }
 
 
-      names(more_btns) = NULL
+      if(length(more_btns)){
+        names(more_btns) = NULL
+        more_ui = box(
+          title = 'More...',
+          collapsed = T,
+          tags$ul(
+            class = 'rave-grid-inputs',
+            tagList(more_btns)
+          ),
+          width = 12,
+          collapsible = T
+        )
+      }else{
+        more_ui = NULL
+      }
+
 
       if(sidebar_width == 0){
         sidebar_width = '3 hidden';
@@ -949,16 +964,7 @@ ExecEnvir <- R6::R6Class(
         rlang::eval_tidy(private$inputs$quos, data = self$parent_env),
         fluidRow(
           uiOutput(self$ns('..params_current')),
-          box(
-            title = 'More...',
-            collapsed = T,
-            tags$ul(
-              class = 'rave-grid-inputs',
-              tagList(more_btns)
-            ),
-            width = 12,
-            collapsible = T
-          )
+          more_ui
         )
       )
     },
