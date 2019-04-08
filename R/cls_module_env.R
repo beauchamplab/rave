@@ -583,19 +583,19 @@ ExecEnvir <- R6::R6Class(
                   flex_basis[length(flex_basis) - c(0:1)] = 'flex-basis: 50%;'
                 }
 
-                return(rlang::quo_squash(rlang::quo(
+                return(rlang::quo(
                   do.call(div, args = c(
                     list(class = 'rave-grid-inputs'),
                     !!lapply(seq_len(n), function(jj){
                       inputId = inputIds[[jj]]
-                      rlang::quo_squash(rlang::quo(
+                      rlang::quo(
                         do.call(div, args = c(
                           list(style = !!flex_basis[[jj]], !!x[[inputId]]$expr)
                         ))
-                      ))
+                      )
                     })
                   ))
-                )))
+                ))
               }
             })
           ))
@@ -914,7 +914,8 @@ ExecEnvir <- R6::R6Class(
     },
     generate_input_ui = function(sidebar_width = 3L){
       ns = self$ns
-      env = environment()
+      # TODO change it to package environment, otherwise customized package code won't work like `get_palette`
+      # env = environment()
 
       more_btns = list(
         vignette = tags$li(actionLink(self$ns('..vignette'), 'Show Module Description')),
@@ -922,9 +923,7 @@ ExecEnvir <- R6::R6Class(
         export = tags$li(actionLink(self$ns('..incubator'), 'Exports'))
       )
 
-      # TODO Vignette
-
-      # NIML
+      # exports
       export_func = names(as.list(self$static_env))
       is_export_func = vapply(export_func, function(x){
         is.function(self$static_env[[x]]) && str_detect(x, 'export_')
@@ -947,7 +946,7 @@ ExecEnvir <- R6::R6Class(
 
       div(
         class = sprintf('col-sm-%s rave-input-panel', sidebar_width),
-        rlang::eval_tidy(private$inputs$quos, env = env),
+        rlang::eval_tidy(private$inputs$quos, data = self$parent_env),
         fluidRow(
           uiOutput(self$ns('..params_current')),
           box(
@@ -965,10 +964,10 @@ ExecEnvir <- R6::R6Class(
     },
     generate_output_ui = function(sidebar_width = 3L){
       ns = self$ns
-      env = environment()
+      # env = environment()
       div(
         class = sprintf('col-sm-%d rave-output-panel', 12L - sidebar_width),
-        rlang::eval_tidy(private$outputs$quos, env = env)
+        rlang::eval_tidy(private$outputs$quos, data = self$parent_env)
       )
 
     },
