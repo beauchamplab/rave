@@ -680,7 +680,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       observeEvent(global_reactives$keyboard_event, {
         if(local_data$focused){
           e = global_reactives$keyboard_event
-          if(e$enter_hit && e$ctrl_hit){
+          if(length(e) && length(e$enter_hit) && length(e$ctrl_hit) && e$enter_hit && e$ctrl_hit){
             exec_script(async = e$shift_hit, force = TRUE)
           }
         }
@@ -858,3 +858,4 @@ observeEvent = function(
     event.quoted = T, handler.env = handler.env, handler.quoted = T,
     priority = priority - 1L, domain = domain, ...
   )
+}
