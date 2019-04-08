@@ -4,17 +4,14 @@
 
 __R__ __A__*nalysis and* __V__*isualization of intracranial* __E__*lectroencephalography*
 
-*Author: Zhengjia Wang*
+## Installation
 
-*Last Updated: Oct 26, 2018*
-
-| Package Check Results  | Stable | Dev (RAVE-Fir) |
-|:------------------|:------:|:----:|
-| MacOS, Ubuntu     | [![Build Status](https://travis-ci.org/beauchamplab/rave.svg?branch=master)](https://travis-ci.org/beauchamplab/rave) | [![Build Status](https://travis-ci.org/beauchamplab/rave.svg?branch=rave-fir)](https://travis-ci.org/beauchamplab/rave) |
-| Windows           | [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/beauchamplab/rave?branch=master&svg=true)](https://ci.appveyor.com/project/beauchamplab/rave) | [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/beauchamplab/rave?branch=rave-fir&svg=true)](https://ci.appveyor.com/project/beauchamplab/rave) |
+* RAVE requires the installation of the language "R" and other miscellaneous programming tools, including "RStudio".
+Please [click here for full-installation guide](./Installation.md) to install these tools.
 
 
-<img src="https://raw.githubusercontent.com/dipterix/instrave/master/img/mainapp/mainapp_demo_small.png" width="60%" align="right" />
+* Read the rest of the section if you have `R` and `RStudio` installed.
+
 
 ```r
 # Install rave
@@ -32,11 +29,7 @@ help(package = 'rave')
 ```
 
 
-## Installation
 
-* If this is your first time using `R` or `RStudio`, please [click here for full-installation guide](./Installation.md) (around *10-15 min*) and then proceed directly to the next section.
-
-* Read the rest of the section if you have `R` and `RStudio` installed.
 
 ### 1. Dependencies
 
