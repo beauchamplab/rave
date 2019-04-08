@@ -10,7 +10,7 @@ Click on your operating system.
 
 ## MacOS
 
-1. First, go to Cran-R official website and download install the latest R:
+1. First, go to Cran-R official website and download install the latest version of R:
 
 [https://cran.r-project.org/bin/macosx/](https://cran.r-project.org/bin/macosx/)
 
@@ -34,53 +34,19 @@ Click **yes** to proceed installing command-line tools.
 
 [https://www.rstudio.com/products/rstudio/download/](https://www.rstudio.com/products/rstudio/download/)
 
-4. Install `devtools` and `RAVE`
-
-Open RStudio, enter the following command in RStudio **console**
-
-```
-install.packages('devtools')
-```
-
-5. Install `RAVE`
-
-```
-devtools::install_github('beauchamplab/rave')
-```
-
-6. Restart RStudio
-
 ## Windows
 
-1. Install R **latest** version
+1. Install the latest version of R
 
 [https://cran.r-project.org/bin/windows/base/](https://cran.r-project.org/bin/windows/base/)
 
-2. Install *Rtools*. Please install the **latest** version. Please make sure your RTools version matches with your R version. For example, your R version is `3.5.1`, then download RTools version of `3.5`. 
+2. Install the latest version of RTools. The version of RTools must match your version of R. 
 
 [https://cran.r-project.org/bin/windows/Rtools/](https://cran.r-project.org/bin/windows/Rtools/)
 
 3. Download and install RStudio for Windows. Desktop
 
 [https://www.rstudio.com/products/rstudio/download/](https://www.rstudio.com/products/rstudio/download/)
-
-4. Install `devtools` and `RAVE`
-
-Open RStudio, enter the following command in RStudio **console**
-
-```
-install.packages('devtools')
-```
-
-5. Install `RAVE`
-
-In RStudio, 
-
-```
-devtools::install_github('beauchamplab/rave')
-```
-
-6. Restart RStudio.
 
 ## Ubuntu
 
@@ -154,18 +120,4 @@ sudo dpkg -i ./rstudio.deb
 ```
 
 and `RStudio` should be in your application list. Again, if you don't know where it is, look at your sidebar in ubuntu, click **search your computer** and enter "RStudio".
-
-6. Install `RAVE`
-
-Open RStudio,
-
-In your RStudio **console**, run:
-
-```
-install.packages('devtools')
-devtools::install_github('beauchamplab/rave')
-```
-
-7. Restart RStudio
-
 
