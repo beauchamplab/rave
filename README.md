@@ -11,8 +11,7 @@ Please [click here for the prerequisite installation guide](./Installation.md) t
 
 * RAVE runs best on modern computers with multicore CPUs, [click here for suggested system configurations](./Config.md).
 
-* After the prerequisites are installed, open R-Studio (in Mac OSX, R-studio icon is installed in your Applications folder). Copy and paste the following commands into the RStudio console:
-
+* After the prerequisites are installed, open R-Studio (in Mac OSX, R-studio icon is installed in your Applications folder). Copy and paste the following commands into the RStudio console. The commands must be typed one at a time. If packages need to be installed, you may accept the defaults by typing "Yes" to any questions that appear. 
 ```r
 # Install rave
 install.packages('devtools')
