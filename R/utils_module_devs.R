@@ -54,12 +54,11 @@ get_module <- function(package, module_id, local = FALSE){
   .fs = list.files(system.file('template/inst/tools', package = 'rave'), pattern = '\\.R$', full.names = T)
   .fs = c(.fs, system.file('tools/input_widgets.R', package = package))
   .fs = .fs[.fs != '']
-  env = new.env()
-  with(env, {
-    for(.f in .fs){
-      source(.f, local = T)
-    }
-  })
+  # env = new.env()
+  env = new.env(parent = do.call('loadNamespace', list(package = package)))
+  for(.f in .fs){
+    source(.f, local = env)
+  }
   env$.packageName = package
 
   if(length(module_id) == 1){
@@ -95,12 +94,11 @@ debug_module <- function(package = package, module_id = module_id, reload = FALS
 
   rave_dev_load <- function(){
     # Get package name
-    env = new.env()
-    with(env, {
-      for(.f in .fs){
-        source(.f, local = T)
-      }
-    })
+    # env = new.env()
+    env = new.env(parent = do.call('loadNamespace', list(package = package)))
+    for(.f in .fs){
+      source(.f, local = env)
+    }
     env$.packageName = package
     if(local){
       env$is_local_debug = function(){TRUE}
