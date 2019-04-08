@@ -30,7 +30,7 @@ Click **yes** to proceed installing command-line tools.
 // xcode-select: error: command line tools are already installed, use "Software Update" to install updates
 ```
 
-3. Install RStudio here:
+3. Install the free version of RStudio Desktop here:
 
 [https://www.rstudio.com/products/rstudio/download/](https://www.rstudio.com/products/rstudio/download/)
 
@@ -44,7 +44,7 @@ Click **yes** to proceed installing command-line tools.
 
 [https://cran.r-project.org/bin/windows/Rtools/](https://cran.r-project.org/bin/windows/Rtools/)
 
-3. Download and install RStudio for Windows. Desktop
+3. Download and install the free version of RStudio Desktop for Windows. 
 
 [https://www.rstudio.com/products/rstudio/download/](https://www.rstudio.com/products/rstudio/download/)
 
@@ -102,7 +102,7 @@ The first three packages `libssl-dev` `libcurl4-openssl-dev` `libssh2-1-dev` are
 `V8` package to enable JavaScript. `libxml2-dev` is for `xml2`. `libfftw3-dev` `libtiff5-dev` are necessary for fast-fourier transformations and 
 `libhdf5-dev` is for reading and writing data in open data format `HDF5`.
 
-5. Install RStudio
+5. Install the free version of RStudio Desktop here:
 
 Go to https://www.rstudio.com/products/rstudio/download/#download and download one with keywords "Ubuntu 16.04+/Debian 9+ (64-bit)", move the downloaded file to your **desktop**, rename it "rstudio.deb".
 
