@@ -121,3 +121,5 @@ sudo dpkg -i ./rstudio.deb
 
 and `RStudio` should be in your application list. Again, if you don't know where it is, look at your sidebar in ubuntu, click **search your computer** and enter "RStudio".
 
+Other linux systems might need to check [recommended system packages](./inst/markdowns/Installation_questions.md#recommended-settings)
+
