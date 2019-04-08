@@ -11,61 +11,67 @@ Please [click here for the prerequisite installation guide](./Installation.md) t
 
 * RAVE runs best on modern computers with multicore CPUs, [click here for suggested system configurations](./Config.md).
 
-* After the prerequisites are installed, open R-Studio (for instance, in Mac OSX, click on the R-studio icon in your Applications folder). Then, install and start RAVE as follows:
+* After the prerequisites are installed, open R-Studio (in Mac OSX, R-studio icon is installed in your Applications folder). Copy and paste the following commands into the RStudio console:
 
 ```r
 # Install rave
 install.packages('devtools')
 library(devtools)
 install_github('beauchamplab/rave')
-
-# Launch main app
-rave::init_app()
-# Preprocess
-rave::rave_preprocess()
-
-# Show documents
-help(package = 'rave')
 ```
-
-
-
-
-On **Windows**, install [Rtools](https://cran.r-project.org/bin/windows/Rtools/). Make sure to install the right version. For example, your `R` version is `3.5.1`, install `RTools` version `3.5`.
-
-On **Ubuntu**, open terminal, install packages:
-
-```
-sudo apt-get install libssl-dev libcurl4-openssl-dev libssh2-1-dev libv8-3.14-dev libxml2-dev libfftw3-dev libtiff5-dev libhdf5-dev
-```
-
-Other linux systems might need to check [recommended system packages](./inst/markdowns/Installation_questions.md#recommended-settings)
-
-
-### 2. Install RAVE
-
-Launch RStudio, run the following commands in RStudio console:
-
+* If you ever need to update RAVE, follow the following steps
 ```r
-# Step 1. install devtools
-install.packages('devtools')
-
-# Step 2. install RAVE
-devtools::install_github('beauchamplab/rave')
-
-# Step 3. (optional) check additional dependencies just in case.
-#         Should be installed automatically. 
 rave:::check_updates()
-
-# Step 4. (optional) check modules updates
 arrange_modules(T)
 ```
 
-Please **restart RStudio**.
+* After installing or updating RAVE, quit and restart RStudio before continuing.
 
-## Quick Guide
+## Using RAVE
 
-In this section, you will know how to
+If you do not have any data in RAVE format, we recommend you download some sample data. Copy and paste the following commands into the RStudio console:
+
+```r
+# load RAVE functions 
+library(rave)
+# download a demo subject ~ 400MB of data
+download_subject_data('https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/data-large.zip')
+```
+
+Once you see the folowing message, the subject is downloaded. The directory (XXX) will vary depending on the machine.
+
+```
+[ INFO ]: Expanding zip file
+[ INFO ]: Copy from tempdir to data repository
+[ INFO ]: Clean up
+[ INFO ]: Done. Subject [sub1] is now at 
+[Raw Data]: /XXX/rave_data/raw_dir/sub1
+[RAVE Data]: /XXX/rave_data/raw_dir/demo
+```
+
+
+* To start RAVE, copy and paste the following commands into the RStudio console:
+```r
+# Launch main app
+rave::init_app()
+```
+
+* To preprocess data, copy and paste the following commands into the RStudio console:
+```r
+# Preprocess
+rave::rave_preprocess()
+```
+
+## Quick Start Guide to Using RAVE
+
+### 2. Download demo data
+
+We've made downloading sample subject data really simple. As of _oct 28, 2018_, we only have one demo subject available. This number will increase in the future.
+
+In the RStudio console, enter:
+
+
+In this section, you will learn how to
 
 1. Change RAVE general settings
 2. Download demo data
@@ -122,28 +128,6 @@ If you have `SUMA` installed, you can also specify SUMA path on the right panel.
 *_See more topics on:_
 
 RAVE options, Directory Structure, RAVE-SUMA, 3D Viewer
-
-### 2. Download demo data
-
-We've made downloading sample subject data really simple. As of _oct 28, 2018_, we only have one demo subject available. This number will increase in the future.
-
-In the RStudio console, enter:
-
-```r
-# A demo subject ~ 400MB
-download_subject_data('https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/data-large.zip')
-```
-
-If you see messages as follows, then the subject is downloaded and you can proceed to the next part to view the subject details.
-
-```
-[ INFO ]: Expanding zip file
-[ INFO ]: Copy from tempdir to data repository
-[ INFO ]: Clean up
-[ INFO ]: Done. Subject [sub1] is now at 
-[Raw Data]: /Users/beauchamplab/rave_data/raw_dir/sub1
-[RAVE Data]: /Users/beauchamplab/rave_data/raw_dir/demo
-```
 
 
 
