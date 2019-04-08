@@ -4,8 +4,8 @@ Click on your operating system.
 
 + [Mac OS](#macos)
 + [Windows (Windows 10, with Bash enabled)](#windows)
-+ [Ubuntu 16.04+ (To be added)](#ubuntu)
-+ Linux (Others)
++ [Ubuntu 16.04+ ](#ubuntu)
+
 
 
 ## MacOS
