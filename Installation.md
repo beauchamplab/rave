@@ -39,9 +39,9 @@ Please jump according to your operating system.
 
 [https://cran.r-project.org/bin/macosx/](https://cran.r-project.org/bin/macosx/)
 
-2. After installing R, make sure that you install Xcode from the Mac App Store: ( [here](https://www.moncefbelyamani.com/how-to-install-xcode-homebrew-git-rvm-ruby-on-mac/) is an article in case of errors)
+2. After installing R, make sure that you install Xcode from the Mac App Store: ( [here](https://www.moncefbelyamani.com/how-to-install-xcode-homebrew-git-rvm-ruby-on-mac/) is a helpful article in case of errors)
 
-Open terminal (from Application), enter
+Open Terminal (in the Applications folder), enter
 
 ```
 xcode-select --install
@@ -49,7 +49,7 @@ xcode-select --install
 
 Click **yes** to proceed installing command-line tools.
 
-*Don't worry if the following error occurs. It just means you have already installed xcode cammand line tools.*
+*Don't worry if the following error occurs. It just means you have already installed xcode command line tools.*
 
 ```javascript
 // xcode-select: error: command line tools are already installed, use "Software Update" to install updates
