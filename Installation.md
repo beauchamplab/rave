@@ -1,4 +1,4 @@
-# Full Installation Guide for RAVE for Mac, Windows and Linux
+# Prerequisite Installation Guide for RAVE for Mac, Windows and Linux
 
 Click on your operating system.
 
