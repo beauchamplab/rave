@@ -26,9 +26,9 @@ arrange_modules(T)
 
 * After installing or updating RAVE, quit and restart RStudio before continuing.
 
-## Using RAVE
+## Download Demo Data 
 
-### If you do not have any data in RAVE format, we recommend you download some sample data. Copy and paste the following commands into the RStudio console:
+* If you do not have any data in RAVE format, we recommend you download some sample data. Copy and paste the following commands into the RStudio console:
 
 ```r
 # load RAVE functions 
@@ -48,11 +48,17 @@ Once you see the folowing message, the subject is downloaded. The directory (XXX
 [RAVE Data]: /XXX/rave_data/raw_dir/demo
 ```
 
-### To start RAVE, copy and paste the following commands into the RStudio console:
+## Start RAVE 
+
+* To start RAVE, copy and paste the following commands into the RStudio console:
 ```r
 # Launch main app
 rave::init_app()
 ```
+
+## Using Rave
+
+* For tutorials on how to use RAVE, [click here](https://openwetware.org/wiki/Beauchamp:RAVE#Tutorials)
 
 * To preprocess data, copy and paste the following commands into the RStudio console:
 ```r
