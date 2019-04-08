@@ -28,7 +28,7 @@ arrange_modules(T)
 
 ## Using RAVE
 
-If you do not have any data in RAVE format, we recommend you download some sample data. Copy and paste the following commands into the RStudio console:
+### If you do not have any data in RAVE format, we recommend you download some sample data. Copy and paste the following commands into the RStudio console:
 
 ```r
 # load RAVE functions 
@@ -48,8 +48,7 @@ Once you see the folowing message, the subject is downloaded. The directory (XXX
 [RAVE Data]: /XXX/rave_data/raw_dir/demo
 ```
 
-
-* To start RAVE, copy and paste the following commands into the RStudio console:
+### To start RAVE, copy and paste the following commands into the RStudio console:
 ```r
 # Launch main app
 rave::init_app()
@@ -63,9 +62,6 @@ rave::rave_preprocess()
 
 ## Quick Start Guide to Using RAVE
 
-### 2. Download demo data
-
-We've made downloading sample subject data really simple. As of _oct 28, 2018_, we only have one demo subject available. This number will increase in the future.
 
 In the RStudio console, enter:
 
