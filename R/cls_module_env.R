@@ -245,7 +245,7 @@ ExecEnvir <- R6::R6Class(
           self$runtime_env$.__tmp_file = tmp_file
           eval(quote(base::source(.__tmp_file, local = T)), self$runtime_env)
         }else if(file.exists(file)){
-          logger('File [', tmp_file, '] does not exists, try to look for it.', level = 'INFO')
+          # logger('File [', tmp_file, '] does not exists, try to look for it.', level = 'INFO')
           self$runtime_env$.__tmp_file = file
           eval(quote(base::source(.__tmp_file, local = T)), self$runtime_env)
         }else{
