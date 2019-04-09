@@ -825,20 +825,6 @@ shiny_data_selector <- function(module_id){
             12,
             div(
               class = 'rave-grid-inputs margin-top-20',
-              div(
-                class = 'rave-grid-inputs-legend',
-                'Load Estimation'
-              ),
-              div(
-                style="flex-basis: 100%;",
-                uiOutput(ns('ui_summary'))
-              )
-            )
-          ),
-          column(
-            12,
-            div(
-              class = 'rave-grid-inputs margin-top-20',
               style = 'padding: 5px 0px 5px 5px;',
               div(
                 class = 'rave-grid-inputs-legend',
@@ -852,6 +838,20 @@ shiny_data_selector <- function(module_id){
                 ),
                 threejsBrainOutput(ns('three_viewer'), height = '500px')
                 # threejsOutput(ns('three_viewer'), height = '500px')
+              )
+            )
+          ),
+          column(
+            12,
+            div(
+              class = 'rave-grid-inputs margin-top-20',
+              div(
+                class = 'rave-grid-inputs-legend',
+                'Load Estimation'
+              ),
+              div(
+                style="flex-basis: 100%;",
+                uiOutput(ns('ui_summary'))
               )
             )
           )
