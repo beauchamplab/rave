@@ -12,5 +12,7 @@
 \.md$
 ^test/
 ^cran-comments\.md$
-^updates\.md$
+^Updates\.md$
+^Requirements\.md$
+^README\.md$
 

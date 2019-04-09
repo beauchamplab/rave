@@ -1,47 +1,22 @@
-# A Brief Full Installation Guide for RAVE
+# Prerequisite Installation Guide for RAVE for Mac, Windows and Linux
 
-*Author: Zhengjia Wang*
-
-*Date: Oct 28, 2018*
-
-# 1. System Requirement for `RAVE`
-
-Minimum system requirement:
-
-- Multicore CPU
-- 16GB RAM
-- 128 GB Free Hard Disk Space
-- 512 MB Shared Video Memory
-- WebGL-enabled Web Browser (such as Chrome)
-
-Suggested system requirement:
-
-- 4 Core CPU (e.g. core i5)
-- 64GB RAM
-- 1T Hard Disk Space
-- 1 GB Video Memory
-- WebGL-enabled Web Browser (such as Chrome)
-
-
-# 2. Environment Setup
-
-Please jump according to your operating system.
+Click on your operating system.
 
 + [Mac OS](#macos)
 + [Windows (Windows 10, with Bash enabled)](#windows)
-+ [Ubuntu 16.04+ (To be added)](#ubuntu)
-+ Linux (Others)
++ [Ubuntu 16.04+ ](#ubuntu)
+
 
 
 ## MacOS
 
-1. First, go to Cran-R official website and download install the latest R:
+1. First, go to Cran-R official website and download install the latest version of R:
 
 [https://cran.r-project.org/bin/macosx/](https://cran.r-project.org/bin/macosx/)
 
-2. After installing R, make sure that you install Xcode from the Mac App Store: ( [here](https://www.moncefbelyamani.com/how-to-install-xcode-homebrew-git-rvm-ruby-on-mac/) is an article in case of errors)
+2. After installing R, make sure that you install Xcode from the Mac App Store: ( [here](https://www.moncefbelyamani.com/how-to-install-xcode-homebrew-git-rvm-ruby-on-mac/) is a helpful article in case of errors)
 
-Open terminal (from Application), enter
+Open Terminal (in the Applications folder), enter
 
 ```
 xcode-select --install
@@ -49,63 +24,29 @@ xcode-select --install
 
 Click **yes** to proceed installing command-line tools.
 
-*Don't worry if the following error occurs. It just means you have already installed xcode cammand line tools.*
+*Don't worry if the following error occurs. It just means you have already installed xcode command line tools.*
 
 ```javascript
 // xcode-select: error: command line tools are already installed, use "Software Update" to install updates
 ```
 
-3. Install RStudio here:
+3. Install the free version of RStudio Desktop here:
 
 [https://www.rstudio.com/products/rstudio/download/](https://www.rstudio.com/products/rstudio/download/)
-
-4. Install `devtools` and `RAVE`
-
-Open RStudio, enter the following command in RStudio **console**
-
-```
-install.packages('devtools')
-```
-
-5. Install `RAVE`
-
-```
-devtools::install_github('beauchamplab/rave')
-```
-
-6. Restart RStudio
 
 ## Windows
 
-1. Install R **latest** version
+1. Install the latest version of R
 
 [https://cran.r-project.org/bin/windows/base/](https://cran.r-project.org/bin/windows/base/)
 
-2. Install *Rtools*. Please install the **latest** version. Please make sure your RTools version matches with your R version. For example, your R version is `3.5.1`, then download RTools version of `3.5`. 
+2. Install the latest version of RTools. The version of RTools must match your version of R. 
 
 [https://cran.r-project.org/bin/windows/Rtools/](https://cran.r-project.org/bin/windows/Rtools/)
 
-3. Download and install RStudio for Windows. Desktop
+3. Download and install the free version of RStudio Desktop for Windows. 
 
 [https://www.rstudio.com/products/rstudio/download/](https://www.rstudio.com/products/rstudio/download/)
-
-4. Install `devtools` and `RAVE`
-
-Open RStudio, enter the following command in RStudio **console**
-
-```
-install.packages('devtools')
-```
-
-5. Install `RAVE`
-
-In RStudio, 
-
-```
-devtools::install_github('beauchamplab/rave')
-```
-
-6. Restart RStudio.
 
 ## Ubuntu
 
@@ -161,7 +102,7 @@ The first three packages `libssl-dev` `libcurl4-openssl-dev` `libssh2-1-dev` are
 `V8` package to enable JavaScript. `libxml2-dev` is for `xml2`. `libfftw3-dev` `libtiff5-dev` are necessary for fast-fourier transformations and 
 `libhdf5-dev` is for reading and writing data in open data format `HDF5`.
 
-5. Install RStudio
+5. Install the free version of RStudio Desktop here:
 
 Go to https://www.rstudio.com/products/rstudio/download/#download and download one with keywords "Ubuntu 16.04+/Debian 9+ (64-bit)", move the downloaded file to your **desktop**, rename it "rstudio.deb".
 
@@ -180,17 +121,5 @@ sudo dpkg -i ./rstudio.deb
 
 and `RStudio` should be in your application list. Again, if you don't know where it is, look at your sidebar in ubuntu, click **search your computer** and enter "RStudio".
 
-6. Install `RAVE`
-
-Open RStudio,
-
-In your RStudio **console**, run:
-
-```
-install.packages('devtools')
-devtools::install_github('beauchamplab/rave')
-```
-
-7. Restart RStudio
-
+Other linux systems might need to check [recommended system packages](./inst/markdowns/Installation_questions.md#recommended-settings)
 
