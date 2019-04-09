@@ -1,8 +1,9 @@
-
+<img src="inst/assets/images/logo-md.jpg" width="20%" align="right" />
 
 # RAVE
 
-__R__ __A__*nalysis and* __V__*isualization of intracranial* __E__*lectroencephalography*
+__R__ __A__*nalysis and* __V__*isualization of intracranial* __E__*lectroencephalography* (<a href="http://34.214.213.191" target="_blank">demo</a>)
+
 
 ## Installation
 
@@ -14,11 +15,6 @@ Please [click here for the prerequisite installation guide](./Installation.md) t
 * After the prerequisites are installed, open R-Studio (in Mac OSX, Rstudio icon is installed in your Applications folder). Copy and paste the following commands into the RStudio console to download the current version of RAVE. The commands must be typed one at a time. If packages need to be installed, you may accept the defaults by typing "Yes" to any questions that appear. In the case of errors, relaunch RStudio and repeat the commands.
 ```r
 # Install RAVE
-install.packages('remotes')
-remotes::install_github('beauchamplab/rave')
-```
-* Alternative installation (if previous method fails)
-```r
 install.packages('devtools')
 devtools::install_github('beauchamplab/rave')
 ```
