@@ -990,10 +990,8 @@ lapply_async <- function(x, fun, ..., .ncores = 0, .future_plan = future::multip
 }
 
 
-#' Function to Restart RAVE
-#' @param reload reload RAVE after restarting R
-#' @param quiet logical
-#' @export
+# to be removed
+
 restart_rave <- function(reload = T, quiet = FALSE){
   unloadns = function(ns_){
     ns = ns_
