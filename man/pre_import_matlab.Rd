@@ -10,13 +10,13 @@ pre_import_matlab(subject_code, project_name, block_num, chl,
 \arguments{
 \item{subject_code}{subject code}
 
+\item{project_name}{project name}
+
 \item{block_num}{which block of signals will be looked into?}
 
 \item{chl}{integer, channel number}
 
 \item{name}{which matlab variable to look at, default is "analogTraces"}
-
-\item{subject_code}{project name}
 }
 \value{
 raw signal

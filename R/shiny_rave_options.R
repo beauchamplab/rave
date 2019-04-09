@@ -65,7 +65,7 @@ local({
           }
           # Make sure it exists, otherwise error notification
           if(dir.exists(dir)){
-            dir = rave::try_normalizePath(path = dir)
+            dir = try_normalizePath(path = dir)
             arg = list(dir)
             names(arg) = opt_id
             do.call(set_opt, arg)
@@ -126,7 +126,7 @@ local({
           }
           # Make sure it exists, otherwise error notification
           if(dir.exists(dir)){
-            dir = rave::try_normalizePath(path = dir)
+            dir = try_normalizePath(path = dir)
             arg = list(dir)
             names(arg) = opt_id
             do.call(set_opt, arg)
@@ -571,7 +571,7 @@ local({
             column(
               width = 6,
               fluidRow(
-                shinydashboard::box(
+                box(
                   title = 'Core Settings',
                   width = 12L,
                   fluidRow(
@@ -579,7 +579,7 @@ local({
                     column(
                       width = 12L,
                       tagList(
-                        rave::dropNulls(
+                        dropNulls(
                           lapply(comps, function(comp){
                             if(comp$type == 'Core Settings'){
                               id = comp$opt_name
@@ -598,7 +598,7 @@ local({
                   )
                 ),
 
-                shinydashboard::box(
+                box(
                   title = 'System',
                   width = 12L,
                   fluidRow(
@@ -606,7 +606,7 @@ local({
                     column(
                       width = 12L,
                       tagList(
-                        rave::dropNulls(
+                        dropNulls(
                           lapply(comps, function(comp){
                             if(comp$type == 'System'){
                               id = comp$opt_name
@@ -630,7 +630,7 @@ local({
             column(
               width = 6,
               fluidRow(
-                shinydashboard::box(
+                box(
                   title = 'SUMA',
                   width = 12L,
                   fluidRow(
@@ -638,7 +638,7 @@ local({
                     column(
                       width = 12L,
                       tagList(
-                        rave::dropNulls(
+                        dropNulls(
                           lapply(comps, function(comp){
                             if(comp$type == 'SUMA'){
                               id = comp$opt_name
@@ -662,7 +662,7 @@ local({
             ),
 
             # Modules
-            shinydashboard::box(
+            box(
               title = 'Modules',
               width = 12L,
               div(DT::DTOutput('modules'), style = 'overflow-x:scroll;'),
@@ -794,7 +794,7 @@ local({
             'ScriptPath' = {
               tryCatch({
                 val = base::normalizePath(val)
-                assertthat::assert_that(file.exists(val), !file.info(val)$isdir)
+                assert_that(file.exists(val), !file.info(val)$isdir)
                 val
               }, error = function(e){
                 showNotification('Module file does not exist or it is invalid. Please double check.', type = 'error')
@@ -836,7 +836,8 @@ local({
               val = unlist(stringr::str_split(val, '[;,\\ ]+'))
               val = stringr::str_trim(val)
               val = val[val != '']
-              pkgs = val[!val %in% installed.packages(noCache = F)[,1]]
+
+              pkgs = val[!sapply(val, package_installed)]
               if(length(pkgs)){
                 showNotification(p(
                   'The following packages need to be installed:', br(),

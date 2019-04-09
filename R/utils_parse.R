@@ -1,5 +1,8 @@
-
-#' @import stringr
+#' Convert text to numeric vector
+#' @param text character like "1-10,13"
+#' @param sep default is ','
+#' @param sort sort result
+#' @param unique remove duplicated value from result?
 #' @export
 parse_selections <- function(text, sep = ',', sort = F, unique = T){
   if(length(text) == 0 || str_trim(text) == ''){
@@ -13,12 +16,12 @@ parse_selections <- function(text, sep = ',', sort = F, unique = T){
   s = str_trim(s)
   s = s[s!='']
 
-  s = s[str_detect(s, '^[0-9\\-\\ ]+$')]
+  s = s[str_detect(s, '^[0-9-:~]+$')]
 
   re = NULL
   for(ss in s){
-    if(str_detect(ss, '\\-')){
-      ss = as.vector(str_split(ss, '\\-', simplify = T))
+    if(str_detect(ss, '[-:~]')){
+      ss = as.vector(str_split(ss, '[-:~]', simplify = T))
       ss = ss[str_detect(ss, '^[0-9]+$')]
       ss = as.numeric(ss)
       if(length(ss) >= 2){
@@ -40,8 +43,11 @@ parse_selections <- function(text, sep = ',', sort = F, unique = T){
   return(re)
 }
 
-
-#' @import stringr
+#' Convert integer vector to text
+#' @param nums integer vector
+#' @param link character to concatenate
+#' @param concatenate strings
+#' @param max_lag how to define consecutive
 #' @export
 deparse_selections <- function(nums, link = '-', concatenate = T, max_lag = 1){
   if(length(nums) == 0){

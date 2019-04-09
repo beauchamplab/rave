@@ -20,7 +20,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
         )
       )
     ),
-    shinydashboard::box(
+    box(
       width = 12 - sidebar_width,
       title = 'Overview',
       fluidRow(

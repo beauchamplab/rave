@@ -1,4 +1,5 @@
 #' Check dependencies and update them at start up (Highly recommended)
+#' @param file file to check package update
 #' @export
 check_updates <- function(file){
   if(missing(file)){
@@ -18,17 +19,7 @@ check_updates <- function(file){
       src = info[3]
       details = info[4]
 
-      tbl = installed.packages()
-      which = tbl[,1] == pkg
-      needs_install = F
-      if(sum(which)){
-        row = as.list(tbl[which, ])
-        if(pkg != 'rave' && utils::compareVersion(row$Version, ver) < 0){
-          needs_install = T
-        }
-      }else{
-        needs_install = T
-      }
+      needs_install = !package_version_check(pkg, version = ver)
 
       if(needs_install){
         switch (src,
@@ -40,7 +31,7 @@ check_updates <- function(file){
           },
           'bioc' = {
             source("https://bioconductor.org/biocLite.R")
-            biocLite(pkg, suppressUpdates = T)
+            do.call('biocLite', list(pkg, suppressUpdates = T))
           }
         )
       }
@@ -48,64 +39,23 @@ check_updates <- function(file){
   })
 }
 
+#' Get RAVE version
 #' @export
 rave_version <- function(){
-  tbl = installed.packages()
-  row = as.list(tbl[tbl[,1] == 'rave',])
-  return(row$Version)
+  as.character(utils::packageVersion('rave'))
 }
-
-
 
 
 .onAttach <- function(libname, pkgname){
 
   try({
-    shiny::registerInputHandler("rave.compoundInput", function(data, shinysession, name) {
-      if (is.null(data)){
-        return(NULL)
-      }
-
-      # restoreInput(id = , NULL)
-      meta = as.list(data$meta)
-      timeStamp = as.character(data$timeStamp)
-      maxcomp = as.integer(data$maxcomp)
-      inputId = as.character(data$inputId)
-      value =  data$val
-
-      ids = names(meta)
-      ncomp = as.integer(data$ncomp)
-      if(length(ids) == 0 || is.null(ncomp) || ncomp <= 0){
-        return(NULL)
-      }
-
-      # nvalid = length(dropInvalid(value, deep = T))
-      # nvalid = max(1, nvalid)
-      # nvalid = min(nvalid, ncomp)
-
-      re = lapply(value, function(val){
-        sapply(val, function(v){
-          tryCatch({
-            jsonlite::fromJSON(v)
-          }, error = function(e){
-            NULL
-          })
-        }, simplify = F, USE.NAMES = T)
-      })
-
-      attr(re, 'ncomp') <- ncomp
-      attr(re, 'meta') <- meta
-      attr(re, 'timeStamp') <- timeStamp
-      attr(re, 'maxcomp') <- maxcomp
-      return(re)
-
-    }, force = TRUE)
+    register_compoundInput()
   }, silent = T)
 
   try({
     # get rave_version
     old_ver = rave_options('rave_ver')
-    old_ver %?<-% rave::rave_hist$get_or_save('..rave_ver..', '0.0.0.0000')
+    old_ver %?<-% rave_hist$get_or_save('..rave_ver..', '0.0.0.0000')
     new_ver = rave_version()
     is_newer = tryCatch({
       is_newer = utils::compareVersion(old_ver, new_ver) < 0
@@ -128,7 +78,7 @@ rave_version <- function(){
       has_data = rave::arrange_data_dir(T)
 
 
-      rave::rave_hist$save('..rave_ver..' = new_ver)
+      rave_hist$save('..rave_ver..' = new_ver)
 
       # 1. additional settings
       rave::rave_options(

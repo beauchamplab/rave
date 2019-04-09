@@ -1,9 +1,14 @@
 #' check subject validity tools
 #' @param project_name project_name
 #' @param subject_code subject_code
+#' @param quiet logical
 check_subjects2 <- function(
-  project_name, subject_code
+  project_name, subject_code, quiet = FALSE
 ){
+  if(quiet){
+    # do not print
+    logger = function(...){}
+  }
 
   logger('Checking: Project - ', project_name, ', Subject - ', subject_code)
   dirs = get_dir(subject_code = subject_code, project_name = project_name)
@@ -11,19 +16,47 @@ check_subjects2 <- function(
   # 1. Check folders
 
   # subject folder - 'project/subject'
-  re[['subject_dir']] = file.exists(dirs$subject_dir)
+  re[['subject_dir']] = dir.exists(dirs$subject_dir)
 
   # RAVE dir - 'project/subject/rave'
-  re[['rave_dir']] = file.exists(dirs$rave_dir)
+  re[['rave_dir']] = dir.exists(dirs$rave_dir)
 
   # Preprocessing dir - project/subject/rave/preprocess
-  re[['preprocess_dir']] = file.exists(dirs$preprocess_dir)
+  re[['preprocess_dir']] = dir.exists(dirs$preprocess_dir)
 
   # meta dir - project/subject/rave/meta
-  re[['meta_dir']] = file.exists(dirs$meta_dir)
+  re[['meta_dir']] = dir.exists(dirs$meta_dir)
 
   # chennel_dir - project/subject/rave/data
-  re[['channel_dir']] = file.exists(dirs$channel_dir)
+  re[['channel_dir']] = dir.exists(dirs$channel_dir)
+
+  # power_dir - project/subject/rave/data/power
+  re[['power_dir']] = (
+    dir.exists(file.path(dirs$cache_dir, 'power'))
+    || (
+      dir.exists(file.path(dirs$cache_dir, 'cache', 'power', 'raw'))
+      && dir.exists(file.path(dirs$cache_dir, 'cache', 'power', 'ref'))
+    )
+  )
+
+  # phase_dir - project/subject/rave/data/phase
+  re[['phase_dir']] = (
+    dir.exists(file.path(dirs$cache_dir, 'phase'))
+    || (
+      dir.exists(file.path(dirs$cache_dir, 'cache', 'phase', 'raw'))
+      && dir.exists(file.path(dirs$cache_dir, 'cache', 'phase', 'ref'))
+    )
+  )
+
+  # volt_dir - project/subject/rave/data/voltage
+  re[['volt_dir']] = (
+    dir.exists(file.path(dirs$cache_dir, 'voltage'))
+    || (
+      dir.exists(file.path(dirs$cache_dir, 'cache', 'voltage', 'raw'))
+      && dir.exists(file.path(dirs$cache_dir, 'cache', 'voltage', 'ref'))
+    )
+  )
+
 
   ## Preprocess information
   log_data = list()
@@ -124,6 +157,7 @@ check_subjects2 <- function(
   }
 
 
+
   list(check = re, log = log_data, epochs = epochs, references = references)
 }
 
@@ -158,7 +192,7 @@ check_subjects <- function(
     }
     sapply(sc, function(subject_code){
       if(!check){
-        return(project_name %&% '/' %&% subject_code)
+        return(paste0(project_name, '/', subject_code))
       }
 
       # Need to check if preprocess folder exists
@@ -230,6 +264,7 @@ shiny_data_selector <- function(module_id){
     local_data = reactiveValues(
       has_subject = FALSE,
       check_result = list(),
+      load_mesh = TRUE,
       # Prevent mis-clicking
       # If "import" button is clicked multiple times, data will be reloaded multiple times.
       # prevent will be set to false only when modal expanded
@@ -238,6 +273,7 @@ shiny_data_selector <- function(module_id){
 
     ##### Show modal when 'data_select' is clicked
     observeEvent(input$data_select, {
+      shinyjs::addClass(selector = 'body', class = "rave-noscroll")
       shiny::showModal(
         shiny::modalDialog(
           title = 'Data Selection', size = 'l', easyClose = F, fade = F,
@@ -252,7 +288,10 @@ shiny_data_selector <- function(module_id){
       )
     })
 
-    observeEvent(input$dismiss, { removeModal() })
+    observeEvent(input$dismiss, {
+      shinyjs::removeClass(selector = 'body', class = "rave-noscroll");
+      removeModal()
+    })
 
     ##### Modal layout
     data_modal = function(){
@@ -399,7 +438,7 @@ shiny_data_selector <- function(module_id){
 
       # Electrodes
       last_electrodes = last_entry('electrodes', '', group = group)
-      if(!equals(check_result$log$preprocess$subject_code, last_entry('subject_code', '', group = group))){
+      if(!isTRUE(check_result$log$preprocess$subject_code == last_entry('subject_code', '', group = group))){
         last_electrodes = deparse_selections(check_result$log$preprocess$channels)
       }
 
@@ -546,7 +585,7 @@ shiny_data_selector <- function(module_id){
     })
 
     lapply(1:7, function(ii){
-      observeEvent(input[['freq_preset_' %&% ii]], {
+      observeEvent(input[[paste0('freq_preset_', ii)]], {
         updateSliderInput(session = session, inputId = 'frequencies', value = fband[[ii]])
       })
     })
@@ -645,7 +684,7 @@ shiny_data_selector <- function(module_id){
                 style="flex-basis: 25%;",
                 local({
                   if(ii > 1){
-                    selectInput(ns('filter_lgt_' %&% ii), 'Filter ' %&% ii, choices = c('AND', 'OR'), selected = 'OR')
+                    selectInput(ns(paste0('filter_lgt_' , ii)), paste0('Filter ', ii), choices = c('AND', 'OR'), selected = 'OR')
                   }else{
                     tags$label('Filter 1')
                   }
@@ -653,17 +692,17 @@ shiny_data_selector <- function(module_id){
               ),
               div(
                 style="flex-basis: 25%;",
-                selectInput(ns('filter_col_' %&% ii), 'Key', choices = vars, selected = vars[1])
+                selectInput(ns(paste0('filter_col_', ii)), 'Key', choices = vars, selected = vars[1])
               ),
               div(
                 style="flex-basis: 25%;",
-                selectInput(ns('filter_op_' %&% ii), 'Operator',
+                selectInput(ns(paste0('filter_op_', ii)), 'Operator',
                             choices = c('=', '>', '<', '>=', '<=', 'IN', 'NOT IN', 'BETWEEN'),
                             selected = 'NOT IN')
               ),
               div(
                 style="flex-basis: 25%;",
-                textInput(ns('filter_val_' %&% ii), 'Value', value = '')
+                textInput(ns(paste0('filter_val_', ii)), 'Value', value = '')
               )
             )
           }))
@@ -678,14 +717,14 @@ shiny_data_selector <- function(module_id){
         return()
       }
       res = as.integer(mask_table[,1])
-      txt = rave::deparse_selections(res)
+      txt = deparse_selections(res)
       try({
         sel = rep(TRUE, length(res))
         for(ii in 1:3){
-          lgt = input[['filter_lgt_' %&% ii]]
-          var = input[['filter_col_' %&% ii]]
-          op = input[['filter_op_' %&% ii]]
-          val = input[['filter_val_' %&% ii]]
+          lgt = input[[paste0('filter_lgt_', ii)]]
+          var = input[[paste0('filter_col_' , ii)]]
+          op = input[[paste0('filter_op_' , ii)]]
+          val = input[[paste0('filter_val_' , ii)]]
 
           if(var %in% names(mask_table)){
             x = mask_table[[var]]
@@ -724,7 +763,7 @@ shiny_data_selector <- function(module_id){
         }
 
         res = res[sel]
-        txt = rave::deparse_selections(res)
+        txt = deparse_selections(res)
         last_electrodes = last_entry('electrodes', txt, group = group, save = T)
       }, silent = T)
       updateTextInput(session = session, inputId = 'electrodes', value = txt)
@@ -786,20 +825,6 @@ shiny_data_selector <- function(module_id){
             12,
             div(
               class = 'rave-grid-inputs margin-top-20',
-              div(
-                class = 'rave-grid-inputs-legend',
-                'Load Estimation'
-              ),
-              div(
-                style="flex-basis: 100%;",
-                uiOutput(ns('ui_summary'))
-              )
-            )
-          ),
-          column(
-            12,
-            div(
-              class = 'rave-grid-inputs margin-top-20',
               style = 'padding: 5px 0px 5px 5px;',
               div(
                 class = 'rave-grid-inputs-legend',
@@ -811,7 +836,22 @@ shiny_data_selector <- function(module_id){
                   style = 'position: absolute; z-index:100; ',
                   checkboxInput(ns('load_mesh'), 'Load Mesh', value = isolate(local_data$load_mesh))
                 ),
-                threejsr::threejsOutput(ns('three_viewer'), height = '500px')
+                threejsBrainOutput(ns('three_viewer'), height = '500px')
+                # threejsOutput(ns('three_viewer'), height = '500px')
+              )
+            )
+          ),
+          column(
+            12,
+            div(
+              class = 'rave-grid-inputs margin-top-20',
+              div(
+                class = 'rave-grid-inputs-legend',
+                'Load Estimation'
+              ),
+              div(
+                style="flex-basis: 100%;",
+                uiOutput(ns('ui_summary'))
               )
             )
           )
@@ -829,7 +869,50 @@ shiny_data_selector <- function(module_id){
 
       # Trial
       epoch = input$epoch
+      # Check epoch file
+      msg = check_epoch(sprintf('%s/%s', project, subject), epoch_name = epoch)
+      if(!isTRUE(msg)){
+        msg = msg$message
+
+        sub = as_subject(sprintf('%s/%s', project, subject), strict = FALSE)
+        blocks = sub$preprocess_info('blocks')
+        blocks = c(rep(blocks[1], 4), blocks[-1])
+        examp = data.frame(
+          Block = blocks,
+          Time = c('5.12', '10.4', '...', rep('', length(blocks) - 3)),
+          Trial = seq_along(blocks),
+          Condition = c('cond1', 'cond2', '...', rep('', length(blocks) - 3))
+        )
+        examp = capture.output({print(examp)})
+
+        time_range = ''
+        time_points = load_meta('time_points', project, subject)
+        if(is.data.frame(time_points)){
+          time_range = lapply(split(time_points, time_points$Block), function(s){
+            rg = range(s$Time)
+
+            tags$li(
+              sprintf('Block %s, Time range: %.2f ~ %.2f seconds', unique(s$Block), rg[1], rg[2])
+            )
+          })
+          time_range = tags$ul(tagList(time_range))
+        }
+
+        return(p(
+          'An error found in the epoch file. Message: ', br(),
+          strong(msg), br(), 'Here is an example of epoch file:', br(),
+          tags$pre(
+            paste(examp, collapse = '\n')
+          ),br(),
+          '* Note: Time is relative to the start of the block. Trial is sequential across Blocks. Non-sequential trial numbers are OK, but they must be unique.',
+          time_range
+
+        ))
+      }
+
+
       epoch_table = load_meta(meta_type = 'epoch', meta_name = epoch, project_name = project, subject_code = subject)
+
       n_trials = nrow(epoch_table)
 
       # Frequency
@@ -854,27 +937,27 @@ shiny_data_selector <- function(module_id){
       s_volt = prod(n_trials, n_time_volt, n_electrodes) * 8.25 * 3
       s_power = prod(n_trials, n_freqs, n_time_wave, n_electrodes) * 8.25 * 3
 
-      # SUMA brain?
-      suma_dir = get_dir(subject_code = subject, project_name = project)$suma_dir
-      spec_file = file.path(suma_dir, rave_options('suma_spec_file'))
-      brain_size = 0
-      if(file.exists(spec_file)){
-        spec_parsed = suma_spec_parse(subject = project %&% '/' %&% subject)
-        sv = unique(unlist(spec_parsed)['SurfaceVolume'])
-        if(length(sv)){
-          sv = paste0(sv[1], '.brik')
-        }
-        if(!is.null(find_path(sv))){
-          sv = find_path(sv)
-        }else{
-          sv = unlist(stringr::str_split(sv, '/'))
-          sv = file.path(suma_dir, sv[length(sv)])
-        }
-
-        if(!is.null(sv) && file.exists(sv)){
-          brain_size = file.info(sv)$size
-        }
-      }
+      # # SUMA brain?
+      # suma_dir = get_dir(subject_code = subject, project_name = project)$suma_dir
+      # spec_file = file.path(suma_dir, rave_options('suma_spec_file'))
+      # brain_size = 0
+      # if(file.exists(spec_file)){
+      #   spec_parsed = suma_spec_parse(subject = project %&% '/' %&% subject)
+      #   sv = unique(unlist(spec_parsed)['SurfaceVolume'])
+      #   if(length(sv)){
+      #     sv = paste0(sv[1], '.brik')
+      #   }
+      #   if(!is.null(find_path(sv))){
+      #     sv = find_path(sv)
+      #   }else{
+      #     sv = unlist(stringr::str_split(sv, '/'))
+      #     sv = file.path(suma_dir, sv[length(sv)])
+      #   }
+      #
+      #   if(!is.null(sv) && file.exists(sv)){
+      #     brain_size = file.info(sv)$size
+      #   }
+      # }
 
       drive_speed = rave_options('drive_speed')
       if(length(drive_speed) >= 2){
@@ -890,11 +973,11 @@ shiny_data_selector <- function(module_id){
                                      n_trials, n_time_volt, n_electrodes, to_ram_size(s_volt)), br(),
         strong('Power/Phase: '), sprintf('%d Trials x %d Frequencies x %d Timepoints x %d Electrodes (%s each)',
                                          n_trials, n_freqs, n_time_wave, n_electrodes, to_ram_size(s_power)), br(),
-        strong('Brain: '), ifelse(brain_size > 0,
-                                  sprintf('surface volume, %s', to_ram_size(brain_size)),
-                                  'no surface volume file found'), br(),
+        # strong('Brain: '), ifelse(brain_size > 0,
+        #                           sprintf('surface volume, %s', to_ram_size(brain_size)),
+        #                           'no surface volume file found'), br(),
         strong('Estimated Resource Required: '), sprintf('%s (memory)',
-                                                         to_ram_size(brain_size + max(s_volt, s_power))), br(),
+                                                         to_ram_size(max(s_volt, s_power))), br(),
         strong('Estimated Loading time: '), sprintf(
           'Power (%.0f sec), Phase (%.0f sec), Voltage(%.0f sec)',
           s_power * drive_speed / 1000^2 * 2,
@@ -905,46 +988,82 @@ shiny_data_selector <- function(module_id){
     })
 
     # Local environment to store temporary SUMA brain
-    brain_env = new.env()
+    # brain_env = new.env()
 
-    output$three_viewer <- threejsr::renderThreejs({
+    # output$three_viewer <- renderThreejs({
+    #   validate(need(local_data$has_subject, message = ''))
+    #   project = input$project_name
+    #   subject = input$subject_code
+    #   subject_id = sprintf('%s/%s', project, subject)
+    #   ref = input$reference
+    #   elec = input$electrodes
+    #   load_mesh = input$load_mesh
+    #
+    #
+    #   brain = brain_env[[subject_id]]
+    #   if(is.null(brain)){
+    #     s = Subject$new(project_name = project, subject_code = subject, reference = ref, strict = FALSE)
+    #     brain = RaveBrain$new(subject = s)
+    #     brain_env[[subject_id]] = brain
+    #   }
+    #
+    #   if(load_mesh && brain$mesh_count == 0){
+    #     brain$import_spec(nearest_face = F)
+    #   }
+    #
+    #
+    #   brain = brain$copy()
+    #   elec = parse_selections(elec)
+    #   s = brain$.__enclos_env__$private$subject
+    #   valid_e = s$filter_valid_electrodes(elec)
+    #   invalid_e = s$filter_all_electrodes(elec)
+    #   invalid_e = invalid_e[!invalid_e %in% valid_e]
+    #
+    #   lapply(s$electrodes$Electrode, function(ii){
+    #     if(ii %in% valid_e){
+    #       brain$set_electrode_value(which = ii, value = -1)
+    #     }else if (ii %in% invalid_e){
+    #       brain$set_electrode_value(which = ii, value = 1)
+    #     }
+    #   })
+    #
+    #   brain$view(control_gui = F, width = '100%', height = '500px', center = T, show_mesh = load_mesh)
+    # })
+
+    output$three_viewer <- renderBrain({
       validate(need(local_data$has_subject, message = ''))
       project = input$project_name
       subject = input$subject_code
       subject_id = sprintf('%s/%s', project, subject)
       ref = input$reference
-      elec = input$electrodes
+      elec = parse_selections(input$electrodes)
       load_mesh = input$load_mesh
 
+      subject = as_subject(subject_id, reference = ref)
 
-      brain = brain_env[[subject_id]]
-      if(is.null(brain)){
-        s = Subject$new(project_name = project, subject_code = subject, reference = ref)
-        brain = RaveBrain$new(subject = s)
-        brain_env[[subject_id]] = brain
+      brain = rave_brain2()
+      brain$load_electrodes(subject = subject)
+
+      if(load_mesh){
+        brain$load_surfaces(subject = subject)
       }
 
-      if(load_mesh && brain$mesh_count == 0){
-        brain$import_spec(nearest_face = F)
-      }
-
-
-      brain = brain$copy()
-      elec = parse_selections(elec)
-      s = brain$.__enclos_env__$private$subject
-      valid_e = s$filter_valid_electrodes(elec)
-      invalid_e = s$filter_all_electrodes(elec)
+      valid_e = subject$filter_valid_electrodes(elec)
+      invalid_e = subject$filter_all_electrodes(elec)
       invalid_e = invalid_e[!invalid_e %in% valid_e]
 
-      lapply(s$electrodes$Electrode, function(ii){
-        if(ii %in% valid_e){
-          brain$set_electrode_value(which = ii, value = -1)
-        }else if (ii %in% invalid_e){
-          brain$set_electrode_value(which = ii, value = 1)
-        }
-      })
+      tbl = subject$electrodes
 
-      brain$view(control_gui = F, width = '100%', height = '500px', center = T, show_mesh = load_mesh)
+
+      for(e in valid_e){
+        brain$set_electrode_value(subject = subject, electrode = e, value = -1, time = 0,
+                                  message = paste('Reference Group:', tbl$Group[tbl$Electrode == e]))
+      }
+      for(e in invalid_e){
+        brain$set_electrode_value(subject = subject, electrode = e, value = 1, time = 0,
+                                  message = paste('Reference Group:', tbl$Group[tbl$Electrode == e], '(electrode not used)'))
+      }
+      brain$view(control_panel = F)
     })
 
 
@@ -963,10 +1082,10 @@ shiny_data_selector <- function(module_id){
       epoch = input$epoch
       epoch_range = c(input$epoch_pre, input$epoch_post)
       reference = input$reference
-      subject_id = project_name %&% '/' %&% subject_code
+      subject_id = paste0(project_name , '/' , subject_code)
       electrodes = parse_selections(input$electrodes)
 
-      tmp_subject = Subject$new(project_name = project_name, subject_code = subject_code, reference = reference)
+      tmp_subject = Subject$new(project_name = project_name, subject_code = subject_code, reference = reference, strict = FALSE)
       electrodes = tmp_subject$filter_valid_electrodes(electrodes)
 
       if(length(electrodes) == 0){
@@ -1008,9 +1127,11 @@ shiny_data_selector <- function(module_id){
       global_reactives$force_refresh_all = Sys.time()
       global_reactives$has_data = Sys.time()
 
+      shinyjs::removeClass(selector = 'body', class = "rave-noscroll");
       removeModal()
       # Remove
       local_data$prevent_dblclick = TRUE
+      logger('Subject loaded, trigger module to refresh...')
     })
 
 

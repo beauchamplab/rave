@@ -1,3 +1,5 @@
+Meta
+doc
 .Rproj.user
 .Rhistory
 .RData
@@ -14,3 +16,4 @@ src/*.dll
 adhoc/
 packrat/lib*/
 packrat/src/
+inst/doc

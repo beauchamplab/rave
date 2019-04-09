@@ -1,8 +1,8 @@
 # functions for group analysis
 
 #' Find module analysis names
-#' @param module id
-#' @param project name
+#' @param module_id module id
+#' @param project_name project name
 #' @export
 module_analysis_names <- function(module_id, project_name){
   # if missing project_name, get from current repository
@@ -49,7 +49,7 @@ subject_tmpfile <- function(module_id, fun_name = '', project_name, subject_code
     subject_code = data_env$subject$subject_code
   }
 
-  assertthat::assert_that(!is.blank(project_name) && !is.blank(subject_code), msg = 'subject_code or project_name is blank while creating subject tmpfile.')
+  assert_that(!is.blank(project_name) && !is.blank(subject_code), msg = 'subject_code or project_name is blank while creating subject tmpfile.')
 
   tmpdir = get_dir(subject_code = subject_code, project_name = project_name)$module_data_dir
   tmpdir = file.path(tmpdir, module_id, fun_name)
@@ -109,7 +109,7 @@ module_analysis_table <- function(project_name, module_id, analysis_name, check_
   return(tbl)
 }
 
-#' @export
+# Try to find path if not exists
 find_path <- function(path, root_dir){
   if(file.exists(path)){
     return(path)

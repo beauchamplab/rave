@@ -46,18 +46,18 @@ get_mem_usage <- function(modules, data_envir){
 
 
   # get total memory used
-  total_mem = pryr::mem_used()
-  data_usage = pryr::object_size(data_envir)
+  total_mem = mem_used()
+  data_usage = object_size(data_envir)
   if(length(modules)){
     lapply(modules, function(m){
 
-      module_ram = pryr::object_size(m)
+      module_ram = object_size(m)
 
       exec_env = m$get_or_new_exec_env(session = session)
 
       elem_ram = sapply(as.list(exec_env$runtime_env), function(o){
         tryCatch({
-          pryr::object_size(o)
+          object_size(o)
         }, error = function(e){
           0
         })
@@ -99,12 +99,15 @@ get_mem_usage <- function(modules, data_envir){
 #' @param active_module which module to focus at start up (use module ID)
 #' @param launch.browser launch browsers, default is on
 #' @param theme color theme for GUI
+#' @param disable_sidebar hide sidebar at startup?
+#' @param simplify_header hide header at startup?
 #' @param ... other params like test.mode for module debugging
-#' @import stringr
-#' @import shiny
-#' @import magrittr
 #' @export
-init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, theme = "purple", ...){
+init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
+                     theme = "purple", disable_sidebar = FALSE, simplify_header = FALSE, ...){
+
+  register_compoundInput()
+
   tryCatch({
     rave_prepare()
   }, error = function(e){})
@@ -126,7 +129,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
   }
 
   data_selector = shiny_data_selector('DATA_SELECTOR')
-  ui = rave::dashboardPage(
+  ui = dashboardPage(
     skin = theme,
     title = 'R Analysis and Visualization of ECoG/iEEG Data',
     header = dashboardHeader(
@@ -136,18 +139,23 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
       }),
       btn_text_right = 'RAM Usage',
       data_selector$header(),
-      .list = tagList(
-        tags$li(
-          class = 'user user-menu',
-          actionLink('curr_subj_details_btn', '')
-        ),
-        tags$li(
-          class = 'user user-menu',
-          actionLink('curr_subj_launch_suma', '')
-        )
-      )
+      .list = local({
+        if(!simplify_header){
+          tagList(
+            tags$li(
+              class = 'user user-menu',
+              actionLink('curr_subj_details_btn', '')
+            ),
+            tags$li(
+              class = 'user user-menu',
+              actionLink('curr_subj_launch_suma', '')
+            )
+          )
+        }
+      })
     ),
     sidebar = shinydashboard::dashboardSidebar(
+      disable = disable_sidebar,
       shinydashboard::sidebarMenu(
         id = 'sidebar',
         .list =
@@ -217,6 +225,9 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
     #   )
     # })
 
+    # Add daemon process
+    session_dir = create_daemon(session)
+
 
     #################################################################
 
@@ -231,12 +242,29 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
       switch_module = NULL,
       timer_count = 0
     )
+
     local_data = reactiveValues(
       mem_usage = NULL
     )
     observeEvent(async_timer(), {
       global_reactives$check_results = Sys.time()
     })
+
+
+    # observeEvent(input[['__local_storage_message__']], {
+    #   message = input[['__local_storage_message__']]
+    #   if(length(message$token) && message$token == add_to_session(session)){
+    #     # This instance needs to handle the event
+    #
+    #     # check message type
+    #     # if(message$message_type == 'threeBrain')
+    #
+    #     # manually set value
+    #     impl = .subset2( session$input, 'impl' )
+    #     impl$set(message$callback_id, message$content)
+    #   }
+    # })
+
 
     # unlist(modules) will flatten modules but it's still a list
     module_ids = str_to_upper(sapply(unlist(modules), function(m){m$module_id}))
@@ -290,48 +318,51 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
 
     ##############
     # Control panel
-    output[['__rave_3dviewer']] <- threejsr::renderThreejs({
-      if(global_reactives$has_data){
-        tbl = subject$electrodes
-        es = subject$valid_electrodes
-        sel = tbl$Electrode %in% es
+    # output[['__rave_3dviewer']] <- renderThreejs({
+    #   if(global_reactives$has_data){
+    #     tbl = subject$electrodes
+    #     es = subject$valid_electrodes
+    #     sel = tbl$Electrode %in% es
+    #
+    #
+    #     # Set2 and Paired from RColorBrewer, hard coded
+    #     pal = c(
+    #       "#66C2A5",  "#FC8D62",  "#8DA0CB",  "#E78AC3",  "#A6D854",  "#FFD92F",  "#E5C494",  "#B3B3B3",
+    #       "#A6CEE3",  "#1F78B4",  "#B2DF8A",  "#33A02C",  "#FB9A99",  "#E31A1C",  "#FDBF6F",  "#FF7F00",  "#CAB2D6",  "#6A3D9A",  "#FFFF99",  "#B15928"
+    #     )
+    #
+    #     tbl$marker = with(tbl, {
+    #       Label[is.na(Label)] = ''
+    #       sprintf('Group - %s [%s]<br/>Electrode - %d %s<br/>Position - %.1f,%.1f,%.1f<br/>', Group, Type, Electrode, Label, Coord_x, Coord_y, Coord_z)
+    #     })
+    #     value = with(tbl[sel, ], {
+    #       pal[as.numeric(as.factor(Group))]
+    #     })
+    #
+    #     # get data_env
+    #
+    #     module_tools = get('module_tools', envir = getDefaultDataRepository())
+    #
+    #     module_tools$plot_3d_electrodes(
+    #       tbl = tbl,
+    #       electrodes = es,
+    #       values = value,
+    #       marker = tbl$marker,
+    #       palette = pal,
+    #       symmetric = F,
+    #       fps = 2,
+    #       control_gui = F,
+    #       loop = F,
+    #       sidebar = tagList(
+    #         fileInput('__rave_3dviewer_data', label = 'Upload')
+    #       )
+    #     )
+    #   }
+    # })
 
-
-        # Set2 and Paired from RColorBrewer, hard coded
-        pal = c(
-          "#66C2A5",  "#FC8D62",  "#8DA0CB",  "#E78AC3",  "#A6D854",  "#FFD92F",  "#E5C494",  "#B3B3B3",
-          "#A6CEE3",  "#1F78B4",  "#B2DF8A",  "#33A02C",  "#FB9A99",  "#E31A1C",  "#FDBF6F",  "#FF7F00",  "#CAB2D6",  "#6A3D9A",  "#FFFF99",  "#B15928"
-        )
-
-        tbl$marker = with(tbl, {
-          Label[is.na(Label)] = ''
-          sprintf('Group - %s [%s]<br/>Electrode - %d %s<br/>Position - %.1f,%.1f,%.1f<br/>', Group, Type, Electrode, Label, Coord_x, Coord_y, Coord_z)
-        })
-        value = with(tbl[sel, ], {
-          pal[as.numeric(as.factor(Group))]
-        })
-
-        # get data_env
-        module_tools$plot_3d_electrodes(
-          tbl = tbl,
-          electrodes = es,
-          values = value,
-          marker = tbl$marker,
-          palette = pal,
-          symmetric = F,
-          fps = 2,
-          control_gui = F,
-          loop = F,
-          sidebar = tagList(
-            fileInput('__rave_3dviewer_data', label = 'Upload')
-          )
-        )
-      }
-    })
-
-    observeEvent(input[['__rave_3dviewer_data']], {
-      print(input[['__rave_3dviewer_data']])
-    })
+    # observeEvent(input[['__rave_3dviewer_data']], {
+    #   print(input[['__rave_3dviewer_data']])
+    # })
 
 
     observeEvent(input[['..keyboard_event..']], {
@@ -360,8 +391,10 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
       if(global_reactives$has_data){
         global_reactives$execute_module = input$sidebar
         shinyjs::hide(id = '__rave__mask__', anim = T, animType = 'slide')
+        shinyjs::removeClass(selector = 'body', class = "rave-noscroll")
       }else{
         shinyjs::show(id = '__rave__mask__', anim = T, animType = 'slide')
+        shinyjs::addClass(selector = 'body', class = "rave-noscroll")
       }
     })
 
@@ -403,7 +436,18 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
         title = subject$id,
         easyClose = T,
         size = 'l',
-        dataTableOutput('curr_subj_elec_table')
+        shinydashboard::tabBox(
+          width = 12,
+          tabPanel(
+            title = '3D Viewer',
+            threejsBrainOutput('curr_subj_3d_viewer')
+          ),
+          tabPanel(
+            title = 'Electrode Table',
+            dataTableOutput('curr_subj_elec_table')
+          )
+        )
+
       )
     }
 
@@ -427,6 +471,21 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
         cols = names(tbl)
         cols = cols[!cols %in% c('Coord_x', 'Coord_y', 'Coord_z')]
         return(tbl[, cols])
+      }else{
+        return(NULL)
+      }
+    })
+
+    output$curr_subj_3d_viewer <- renderBrain({
+      btn = input$curr_subj_details_btn
+      if(global_reactives$has_data && check_data_repo('subject')){
+        data_repo = getDefaultDataRepository()
+        subject = data_repo[['subject']]
+        brain = rave_brain2(surfaces = c('pial', 'white', 'smoothwm'), multiple_subject = F)
+        brain$add_subject(subject = subject)
+        brain$load_electrodes(subject)
+        brain$load_surfaces(subject)
+        brain$view()
       }else{
         return(NULL)
       }
@@ -526,10 +585,16 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
     if(!test.mode){
       session$onSessionEnded(function() {
         logger('Clean up environment.')
+
         lapply(unlist(modules), function(x){
           x$clean(session_id = session_id)
         })
         gc()
+        unlink(session_dir, recursive = T, force = T)
+      })
+    }else{
+      session$onSessionEnded(function() {
+        unlink(session_dir, recursive = T, force = T)
       })
     }
 
@@ -538,6 +603,11 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T, t
 }
 
 
-
+#' @rdname init_app
 #' @export
 rave_main <- init_app
+
+
+#' @rdname init_app
+#' @export
+start_rave <- init_app

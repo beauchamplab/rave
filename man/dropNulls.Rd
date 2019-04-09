@@ -6,6 +6,11 @@
 \usage{
 dropNulls(x, .invalids = c("null"))
 }
+\arguments{
+\item{x}{list}
+
+\item{.invalids}{'null', 'na', 'blank' default is null}
+}
 \description{
 Drop nulls within lists/vectors
 }

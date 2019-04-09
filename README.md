@@ -1,27 +1,22 @@
-
+<img src="inst/assets/images/logo-md.jpg" width="20%" align="right" />
 
 # RAVE
 
-__R__ __A__*nalysis and* __V__*isualization of intracranial* __E__*lectroencephalography*
+__R__ __A__*nalysis and* __V__*isualization of intracranial* __E__*lectroencephalography* (<a href="http://34.214.213.191" target="_blank">demo</a>)
+
 
 ## Installation
 
 * RAVE requires the installation of the language "R" and other miscellaneous programming tools, including "RStudio".
 Please [click here for the prerequisite installation guide](./Installation.md) to install all needed tools for your operating system. 
 
-* RAVE runs best on modern computers with multicore CPUs, [click here for suggested system configurations](./Config.md).
+* RAVE runs best on modern computers with multicore CPUs, [click here for suggested system configurations](./Requirements.md).
 
 * After the prerequisites are installed, open R-Studio (in Mac OSX, Rstudio icon is installed in your Applications folder). Copy and paste the following commands into the RStudio console to download the current version of RAVE. The commands must be typed one at a time. If packages need to be installed, you may accept the defaults by typing "Yes" to any questions that appear. In the case of errors, relaunch RStudio and repeat the commands.
 ```r
-# Install rave
+# Install RAVE
 install.packages('devtools')
-library(devtools)
-install_github('beauchamplab/rave')
-```
-* If you ever need to update RAVE, follow the following steps
-```r
-rave:::check_updates()
-arrange_modules(T)
+devtools::install_github('beauchamplab/rave')
 ```
 
 * After installing or updating RAVE, quit and restart RStudio before continuing.
@@ -53,7 +48,7 @@ Once you see the folowing message, the subject is downloaded. The directory (XXX
 * To start RAVE, copy and paste the following commands into the RStudio console:
 ```r
 # Launch main app
-rave::init_app()
+rave::start_rave()
 ```
 
 ## Using Rave

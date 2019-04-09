@@ -1,6 +1,4 @@
 #' File IO: HDF5 file wrapper
-#' @importFrom hdf5r is_hdf5
-#' @importFrom hdf5r H5File
 #' @export
 LazyH5 <- R6::R6Class(
   classname = 'LazyH5',
@@ -33,7 +31,7 @@ LazyH5 <- R6::R6Class(
       if(read_only){
         private$file = base::normalizePath(file_path)
 
-        assertthat::assert_that(
+        assert_that(
           hdf5r::is_hdf5(private$file),
           msg = 'File doesn\'t have H5 format'
         )
@@ -324,7 +322,12 @@ exp.LazyH5 <- function(x){
 
 
 #' Lazy load HDF5 file via hdf5r package
-#' @usage load_h5(file, name, read_only = T)
+#'
+#' @param file HDF5 file
+#' @param name group/data_name path to dataset
+#' @param read_only default is TRUE, read dataset only
+#' @param ram load to RAM immediately
+#'
 #' @details load_h5 is a wrapper for class LazyH5, which load data with "lazy" mode -
 #' only read part of dataset when needed.
 #' @seealso \code{\link{save_h5}}
@@ -355,6 +358,17 @@ load_h5 <- function(file, name, read_only = T, ram = F){
 
 
 #' Save objects to H5 file without trivial checkings
+#'
+#' @param x array, matrix, or vector
+#' @param file HDF5 file
+#' @param name group/data_name path to dataset
+#' @param chunk chunk size
+#' @param level compress level
+#' @param replace if dataset exists, replace?
+#' @param new_file remove old file if exists?
+#' @param ctype dataset type: numeric? character?
+#' @param ... passed to other LazyH5$save
+#'
 #' @seealso \code{\link{load_h5}}
 #' @examples
 #' \dontrun{
@@ -368,7 +382,6 @@ load_h5 <- function(file, name, read_only = T, ram = F){
 #' y <- load_h5(file, '/group/dataset/1')
 #' y[]
 #' }
-#' @import stringr
 #' @export
 save_h5 <- function(x, file, name, chunk = 'auto', level = 4,replace = TRUE, new_file = FALSE, ctype = NULL, ...){
   f = LazyH5$new(file, name, read_only = F)

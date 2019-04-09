@@ -6,6 +6,11 @@
 \usage{
 clear_env(env, all.names = T)
 }
+\arguments{
+\item{env}{environment to clean}
+
+\item{all.names}{clear all variables?}
+}
 \description{
 Function to clear all elements within environment
 }

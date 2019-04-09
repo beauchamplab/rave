@@ -2,11 +2,10 @@
 #' @param module ModuleEnvir object
 #' @param session shiny session, default let shiny decide
 #' @param test.mode passed by init_app
-#' @import magrittr
-#' @import shiny
 shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = TRUE){
   logger = function(...){
-    rave::logger('[', MODULE_ID, '] ', ..., strftime(Sys.time(), ' - %M:%S', usetz = F))
+    f = get_from_package('logger', 'rave', check = FALSE)
+    f('[', MODULE_ID, '] ', ..., strftime(Sys.time(), ' - %M:%S', usetz = F))
   }
 
   # assign variables
@@ -139,28 +138,47 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
       ###### 0. debounce inputs - rate policy ######
       # Note: One way to debug is to remove "debounce"
-      reactive({
-        re = local_data$last_input
-        if(check_active()){
-          logger('Input changed')
-          return(re)
-        }
-        return(FALSE)
-      }) %>%
-        debounce(20) ->
-        last_input
+      last_input <- debounce(
+        reactive({
+          re = local_data$last_input
+          if(check_active()){
+            logger('Input changed')
+            return(re)
+          }
+          return(FALSE)
+        }),
+        20
+      )
 
+      # last_input <- reactive({
+      #   re = local_data$last_input
+      #   if(check_active()){
+      #     logger('Input changed')
+      #     return(re)
+      #   }
+      #   return(FALSE)
+      # })
 
-      reactive({
-        re = local_data$run_script
-        if(check_active()){
-          logger('Ready, prepared to execute scripts.')
-          return(re)
-        }
-        return(FALSE)
-      }) %>%
-        debounce(50) ->
-        run_script
+      run_script <- debounce(
+        reactive({
+          re = local_data$run_script
+          if(check_active()){
+            logger('Ready, prepared to execute scripts.')
+            return(re)
+          }
+          return(FALSE)
+        }),
+        50
+      )
+
+      # run_script <- reactive({
+      #   re = local_data$run_script
+      #   if(check_active()){
+      #     logger('Ready, prepared to execute scripts.')
+      #     return(re)
+      #   }
+      #   return(FALSE)
+      # })
 
       reactive({
         re = local_data$has_results
@@ -182,10 +200,13 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         }
         # Has data
         has_data = get_val(I(local_data$has_data), default = FALSE)
+        has_data = length(has_data) && !isFALSE(has_data)
         # initialized
         initialized = get_val(I(local_data$initialized), default = FALSE)
+        initialized = isTRUE(initialized)
         # is current module focused
         focused = get_val(I(local_data$focused), default = FALSE)
+        focused = isTRUE(focused)
 
         if(has_data && focused && initialized){
           # logger('Pass active check', level = 'INFO')
@@ -305,7 +326,8 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       #  Initialized, has data, module activated
       # since Initialized = T, rave_inputs and updates are done, we only need to run script (rave_execute)
       observe({
-        if(last_input() != FALSE){
+        last_input_updated = last_input()
+        if(!isFALSE(last_input_updated)){
           local_data$run_script = Sys.time()
         }
       })
@@ -331,7 +353,9 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         tryCatch({
           # record time
           start_time = Sys.time()
-          execenv$execute(async = async, force = force)
+          withLogErrors({
+            execenv$execute(async = async, force = force)
+          })
           if(async){
             local_data$suspended = FALSE
             showNotification(p('Running in the background. Results will be shown once finished.'), type = 'message', id = 'async_msg')
@@ -352,7 +376,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
           })
 
         }, error = function(e){
-          sapply(capture.output(traceback(e)), logger, level = 'ERROR')
+          logger(e, level = 'ERROR')
           local_data$last_executed = F
         })
 
@@ -656,7 +680,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       observeEvent(global_reactives$keyboard_event, {
         if(local_data$focused){
           e = global_reactives$keyboard_event
-          if(e$enter_hit && e$ctrl_hit){
+          if(length(e) && length(e$enter_hit) && length(e$ctrl_hit) && e$enter_hit && e$ctrl_hit){
             exec_script(async = e$shift_hit, force = TRUE)
           }
         }
@@ -750,3 +774,88 @@ beautify <- function(v, max_len = 20, is_vector = TRUE, level = 0){
   return(re)
 }
 # cat(str_c(beautify(as.list(input)[execenv$input_ids]), collapse = '\n'))
+
+observe <- function(x, env = NULL, quoted = FALSE, priority = 0, domain = NULL, ...){
+  if(!quoted){
+    x = substitute(x)
+  }
+
+  # Make sure shiny doesn't crash
+  x = rlang::quo_squash(rlang::quo(
+    tryCatch({
+      shiny::withLogErrors({!!x})
+    }, error = function(e){
+      showNotification(htmltools::p(htmltools::strong('An error occurred'), htmltools::br(), 'Details: ',
+                                    htmltools::span(as.character(e), style = 'font-style:italic;')), type = 'error')
+      print(quote({!!x}))
+    })
+  ))
+
+
+  if(!is.environment(env)){
+    env = parent.frame()
+  }
+  if(is.null(domain)){
+    domain = getDefaultReactiveDomain()
+  }
+  shiny::observe(
+    x = x,
+    env = env,
+    quoted = T,
+    priority = priority - 1L,
+    domain = domain,
+    ...
+  )
+}
+
+
+observeEvent = function(
+  eventExpr, handlerExpr, event.env = NULL,
+  event.quoted = FALSE, handler.env = NULL, handler.quoted = FALSE,
+  priority = 0, domain = NULL, ...
+){
+  if(!event.quoted){
+    eventExpr = substitute(eventExpr)
+  }
+  if(!is.environment(event.env)){
+    event.env = parent.frame()
+  }
+
+  if(!handler.quoted){
+    handlerExpr = substitute(handlerExpr)
+  }
+  if(!is.environment(handler.env)){
+    handler.env = parent.frame()
+  }
+  if(is.null(domain)){
+    domain = getDefaultReactiveDomain()
+  }
+
+  # Make sure shiny doesn't crash
+  eventExpr = rlang::quo_squash(rlang::quo(
+    tryCatch({
+      shiny::withLogErrors({!!eventExpr})
+    }, error = function(e){
+      showNotification(htmltools::p(htmltools::strong('An error occurred'), htmltools::br(), 'Details: ',
+                                    htmltools::span(as.character(e), style = 'font-style:italic;')), type = 'error')
+      print(quote({!!eventExpr}))
+    })
+  ))
+
+
+  handlerExpr = rlang::quo_squash(rlang::quo(
+    tryCatch({
+      shiny::withLogErrors({!!handlerExpr})
+    }, error = function(e){
+      showNotification(htmltools::p(htmltools::strong('An error occurred'), htmltools::br(), 'Details: ',
+                                    htmltools::span(as.character(e), style = 'font-style:italic;')), type = 'error')
+      print(quote({!!handlerExpr}))
+    })
+  ))
+
+  shiny::observeEvent(
+    eventExpr = eventExpr, handlerExpr = handlerExpr, event.env = event.env,
+    event.quoted = T, handler.env = handler.env, handler.quoted = T,
+    priority = priority - 1L, domain = domain, ...
+  )
+}

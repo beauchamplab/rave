@@ -179,7 +179,6 @@ read_mgrid <- function(con, raw = F){
 
 
 #' Parse spec file
-#' @usage suma_spec_parse(subject)
 #' @param subject Either characters such as 'Project/Subject' or Subject object created by Subject$new(...)
 #' @param spec_file default decided by rave_options('suma_spec_file'), depending on subjects
 #' @examples
@@ -195,7 +194,7 @@ suma_spec_parse <- function(subject, spec_file){
   if(missing(spec_file)){
     if(is.character(subject)){
       subject = str_split_fixed(subject, '/', 2)
-      subject = Subject$new(project_name = subject[1], subject_code = subject[2])
+      subject = Subject$new(project_name = subject[1], subject_code = subject[2], strict = FALSE)
     }
     suma_dir = subject$dirs$suma_dir
     spec_file %?<-% file.path(suma_dir, fprintf('${{rave_options("suma_spec_file")}}'))
@@ -234,7 +233,7 @@ suma_spec_parse <- function(subject, spec_file){
 }
 
 
-#' Parse surface volumn file header
+#' Parse surface volume file header
 #' @param file_path path to brik or head file
 #' @export
 suma_surface_volume_parse <- function(file_path){
@@ -324,7 +323,7 @@ suma_surface_volume_parse <- function(file_path){
 freesurfer_mesh <- function(subject, spec_file = NULL, state = 'pial', center = c(0,0,30)){
   if(is.character(subject)){
     subject = str_split_fixed(subject, '/', 2)
-    subject = Subject$new(project_name = subject[1], subject_code = subject[2])
+    subject = Subject$new(project_name = subject[1], subject_code = subject[2], strict = FALSE)
   }
 
   spec_info = suma_spec_parse(subject, spec_file = spec_file)
@@ -352,6 +351,8 @@ freesurfer_mesh <- function(subject, spec_file = NULL, state = 'pial', center = 
   }
 
   # load mesh
+  GeomFreeMesh = get_from_package('GeomFreeMesh', pkg = 'threejsr', check = FALSE)
+
   lapply(spec_info, function(info){
     surf_name = info[['FreeSurferSurface']]
     surf_name %?<-% info[['SurfaceName']]
@@ -363,10 +364,10 @@ freesurfer_mesh <- function(subject, spec_file = NULL, state = 'pial', center = 
     if(length(surf_state) && surf_state %in% state && format == 'ascii'){
       f = file.path(subject$dirs$suma_dir, surf_name)
       if(length(f) && file.exists(f)){
-        mesh_data = threejsr::read.freesurf.asc(f)
+        mesh_data = read.freesurf.asc(f)
 
         # generate threejsr GEOM object
-        mesh = threejsr::GeomFreeMesh$new(
+        mesh = GeomFreeMesh$new(
           position = -center,
           mesh_name = surf_name,
           mesh_info = surf_name,
@@ -399,6 +400,8 @@ freesurfer_mesh <- function(subject, spec_file = NULL, state = 'pial', center = 
   # load electrodes
   # meshes = NULL
   n = nrow(subject$electrodes)
+
+  GeomSphere = get_from_package('GeomSphere', pkg = 'threejsr', check = FALSE)
   lapply(seq_len(n), function(ii){
     row = subject$electrodes[ii,]
     mat %?<-% diag(rep(1,4))
@@ -406,7 +409,7 @@ freesurfer_mesh <- function(subject, spec_file = NULL, state = 'pial', center = 
     pos = mat[1:3,] %*% pos
     pos = pos * c(-1,-1,1) - center
 
-    threejsr::GeomSphere$new(
+    GeomSphere$new(
       position = pos,
       mesh_name = fprintf('Electrode ${{row$Electrode}}'),
       radius = 2

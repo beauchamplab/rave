@@ -18,7 +18,7 @@ rave_pre_postref3 <- function(module_id = 'POSTREF_M', sidebar_width = 2){
   palette = colorRampPalette(c('navy', 'white', 'red'))(1001)
 
   body = fluidRow(
-    shinydashboard::box(
+    box(
       title = 'Post Reference',
       width = sidebar_width,
       uiOutput(ns('inputui1')),

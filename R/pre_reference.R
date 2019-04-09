@@ -1,7 +1,6 @@
 #' Preprocess Module - Reference (Deprecated)
 #' @param module_id internally used
 #' @param sidebar_width sidebar width from 1 to 12
-#' @importFrom magrittr %>%
 #' @export
 rave_pre_ref3 <- function(module_id = 'REF_M', sidebar_width = 2){
   ns = shiny::NS(module_id)
@@ -13,7 +12,7 @@ rave_pre_ref3 <- function(module_id = 'REF_M', sidebar_width = 2){
   )
 
   body = fluidRow(
-    shinydashboard::box(
+    box(
       title = 'Reference',
       width = sidebar_width,
       uiOutput(ns('ref_inputs1')),
@@ -124,12 +123,13 @@ rave_pre_ref3 <- function(module_id = 'REF_M', sidebar_width = 2){
         tbl = tbl[tbl$Block %in% input$block,]
         gct_env$tbl = tbl
         return(
-          DT::datatable(tbl, selection = list(mode = 'single', target = 'row'),
-                        rownames = F, editable = T,
-                        options = list(
-                          pageLength = 20
-                        )) %>%
-            DT::formatRound(c('Start', 'End', 'Duration'), 2)
+            DT::formatRound(
+              DT::datatable(tbl, selection = list(mode = 'single', target = 'row'),
+                            rownames = F, editable = T,
+                            options = list(
+                              pageLength = 20
+                            )),
+              c('Start', 'End', 'Duration'), 2)
         )
       }else{
         gct_env$tbl = NULL

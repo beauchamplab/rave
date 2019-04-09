@@ -27,8 +27,9 @@ ECoGTensor <- R6::R6Class(
       }
       re
     },
-    initialize = function(data, dim, dimnames, varnames, hybrid = F, swap_file = tempfile()){
+    initialize = function(data, dim, dimnames, varnames, hybrid = F, swap_file = tempfile(), temporary = TRUE){
 
+      self$temporary = temporary
       # get attributes of data
       dim %?<-% base::dim(data)
       dim %?<-% length(data)

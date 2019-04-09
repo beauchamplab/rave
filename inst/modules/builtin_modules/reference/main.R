@@ -18,7 +18,7 @@ if(F){
   })
 
   rave_data = getDefaultDataRepository()
-  pryr::object_size(rave_data)
+  object_size(rave_data)
 
 }
 
@@ -28,6 +28,7 @@ rave_prepare(subject = 'congruency1/YAB', electrodes = 64:65, epoch = 'YABa', ti
 library(shiny)
 library(stringr)
 library(magrittr)
+library(rutabaga)
 
 # Shiny session used to update inputs in advanced ways
 session = getDefaultReactiveDomain()

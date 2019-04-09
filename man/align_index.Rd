@@ -6,6 +6,11 @@
 \usage{
 align_index(ind1, ind2, max_lag = 0)
 }
+\arguments{
+\item{ind1, ind2}{two index arrays}
+
+\item{max_lag}{if positive, e1 < e2 < e1+max_lag}
+}
 \description{
 For each element e1 ind1, find next element e2 in ind2 with e1<e2
 }

@@ -1,5 +1,9 @@
 # IO
 
+`%&%` <- function(a,b){
+  paste0(a,b)
+}
+
 rave_inputs(
   # Overall settings
   selectInput('ref_name_alt', 'Import From', choices = 'new..', selected = 'new..'),

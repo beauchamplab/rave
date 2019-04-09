@@ -1,0 +1,23 @@
+# This file provides the metadata necessary for RStudio to
+# use the 'create_template()' function when initializing a project. See
+# the documentation online at:
+#
+#   https://rstudio.github.io/rstudio-extensions/rstudio_project_templates.html
+#
+# for more details.
+
+Binding: create_template
+Title: RAVE Module
+Subtitle: Create a new RAVE Module
+Caption: Create RAVE Module
+OpenFiles: vignettes/A_Quick_Start.Rmd, DESCRIPTION, inst/rave.yaml
+
+Parameter: module_id
+Widget: TextInput
+Label: First Module ID (Letters or "_" only)
+Default: module_id
+
+Parameter: module_label
+Widget: TextInput
+Label: Module Label
+Default: Demo Label

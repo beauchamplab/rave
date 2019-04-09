@@ -6,6 +6,9 @@
 \usage{
 check_updates(file)
 }
+\arguments{
+\item{file}{file to check package update}
+}
 \description{
 Check dependencies and update them at start up (Highly recommended)
 }

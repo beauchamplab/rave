@@ -1,13 +1,12 @@
-#' Definition of subject information
-#'
-#' @param project_name Subject project
-#' @param subject_code Subject code (folder)
-#' @param blocks All possible blocks
-#' @param channels All possible channels (including bad, epi channels)
-#' @param badchan Bad channels (will be ignored)
-#' @param epichan Epilepsy channels (will be ignored)
-#' @param exclchan Channels counted as valid but excluded from CAR
-#' @export
+# Definition of subject information
+#
+# @param project_name Subject project
+# @param subject_code Subject code (folder)
+# @param blocks All possible blocks
+# @param channels All possible channels (including bad, epi channels)
+# @param badchan Bad channels (will be ignored)
+# @param epichan Epilepsy channels (will be ignored)
+# @param exclchan Channels counted as valid but excluded from CAR
 SubjectInfo2 <- R6::R6Class(
   classname = 'SubjectInfo2',
   private = list(
@@ -33,9 +32,9 @@ SubjectInfo2 <- R6::R6Class(
     available_blocks = NULL,
 
     # Init
-    initialize = function(project_name, subject_code){
+    initialize = function(project_name, subject_code, strict = TRUE){
       self$dirs = get_dir(subject_code = subject_code, project_name = project_name)
-      if(!dir.exists(self$dirs$pre_subject_dir)){
+      if(strict && !dir.exists(self$dirs$pre_subject_dir)){
         stop('Subject NOT Found!')
       }
       # make sure that preprocess_dir exists

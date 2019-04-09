@@ -1,11 +1,13 @@
+#' Customized UI Element
+#' @param inputId character, input id
+#' @param width integer from 1-12
+#' @param ... passed to shiny::uiOutput
 #' @export
 customizedUI <- function(inputId, width = 12L, ...){
   shiny::uiOutput(inputId, ...)
 }
 
 
-#' @import htmltools
-#' @export
 div_elastic <- function(css_selector, any = T){
   div(
     class = 'btn btn-box-tool rave-elastic-btn force-recalculate',
@@ -20,7 +22,6 @@ div_elastic <- function(css_selector, any = T){
 }
 
 
-#' @import htmltools
 expand_box <- function(
   ..., title = NULL, footer = NULL, status = NULL, solidHeader = FALSE,
   background = NULL, width = 12L, height = NULL, collapsible = T,
@@ -131,7 +132,7 @@ comp_parser <- function(){
           logger('Nothing to update')
           return()
         }
-        fun_name = tail(unlist(str_split(expr[[1]], ':')), 1)
+        fun_name = tail(unlist(str_split(as.character(expr[[1]]), ':')), 1)
         fun_name = str_c('update', str_to_upper(str_sub(fun_name, end = 1L)), str_sub(fun_name, start = 2L))
 
         args[['inputId']] %?<-% inputId
@@ -152,7 +153,7 @@ comp_parser <- function(){
     }else{
       # this is an output
       expr[['outputId']] = as.call(list(quote(ns), outputId))
-      updates = function(...){}
+      updates = function(session, ..., .args = list()){}
       observers = function(input, output, session, local_data, exec_env){
         if(length(outputId)){
           fun_name = tail(unlist(str_split(as.character(expr[[1]]), ':')), 1)
@@ -233,7 +234,7 @@ comp_parser <- function(){
     parse_quo = function(quo){
       expr = rlang::quo_squash(quo)
       env = rlang::quo_get_env(quo)
-      assertthat::assert_that(is.call(expr), msg = sprintf(
+      assert_that(is.call(expr), msg = sprintf(
         'Need a function call but given: "%s"', deparse(expr)
       ))
 
@@ -374,12 +375,12 @@ comp_parser <- function(){
       )
     },
     'compoundInput' = function(expr, env = environment()){
-      expr = match.call(rave::compoundInput, expr)
+      expr = match.call(compoundInput, expr)
       inputId = expr[['inputId']]
       expr[['inputId']] = as.call(list(quote(ns), inputId))
       args = as.list(expr)[-1]
       max_ncomp = eval(expr[['max_ncomp']])
-      max_ncomp %?<-% formals(rave::compoundInput)$max_ncomp
+      max_ncomp %?<-% formals(compoundInput)$max_ncomp
       # parse components
       components = expr[['components']]
       if(as.character(components[[1]])[[1]] == '{'){
@@ -474,7 +475,7 @@ comp_parser <- function(){
 #       outputId = re$outputId
 #
 #       re$observers = function(input, output, session, local_data, exec_env){
-#         output[[outputId]] = do.call(threejsr::renderThreejs, args = list(quote({
+#         output[[outputId]] = do.call(renderThreejs, args = list(quote({
 #           local_data$show_results
 #           if (isolate(local_data$has_data)) {
 #             func = get(outputId, envir = exec_env$param_env,
@@ -505,51 +506,4 @@ comp_parser <- function(){
 
 
 
-
-
-
-box = function (..., title = NULL, footer = NULL, status = NULL, solidHeader = FALSE,
-                background = NULL, width = 6, height = NULL, collapsible = FALSE,
-                collapsed = FALSE, headerColor = '#f4f4f4')
-{
-  boxClass <- "box"
-  if (solidHeader || !is.null(background)) {
-    boxClass <- paste(boxClass, "box-solid")
-  }
-  if (!is.null(status)) {
-    boxClass <- paste0(boxClass, " box-", status)
-  }
-  if (collapsible && collapsed) {
-    boxClass <- paste(boxClass, "collapsed-box")
-  }
-  if (!is.null(background)) {
-    boxClass <- paste0(boxClass, " bg-", background)
-  }
-  style <- sprintf('border-top-color: %s; ', headerColor)
-  if (!is.null(height)) {
-    style <- paste0("height: ", validateCssUnit(height))
-  }
-  titleTag <- NULL
-  if (!is.null(title)) {
-    titleTag <- h3(class = "box-title", title)
-  }
-  collapseTag <- NULL
-  if (collapsible) {
-    buttonStatus <- status
-    buttonStatus %?<-% "default"
-    collapseIcon <- if (collapsed)
-      "plus"
-    else "minus"
-    collapseTag <- div(class = "box-tools pull-right", tags$button(class = paste0("btn btn-box-tool"),
-                                                                   `data-widget` = "collapse", shiny::icon(collapseIcon)))
-  }
-  headerTag <- NULL
-  if (!is.null(titleTag) || !is.null(collapseTag)) {
-    headerTag <- div(class = "box-header", titleTag, collapseTag, style = sprintf('background-color: %s; ', headerColor))
-  }
-  div(class = if (!is.null(width))
-    paste0("col-sm-", width), div(class = boxClass, style = if (!is.null(style))
-      style, headerTag, div(class = "box-body", ...), if (!is.null(footer))
-        div(class = "box-footer", footer)))
-}
 

@@ -16,7 +16,7 @@ if(FALSE){
   local_data = isolate(reactiveValuesToList(execenv$static_env$local_data))
   v = execenv$static_env$env$volt
   env = execenv$static_env$env
-  pryr::object_size(v)
+  object_size(v)
 
   execenv$static_env$channel_plot()
   # max(v$`008`[[1]])

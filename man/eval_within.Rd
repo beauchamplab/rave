@@ -4,7 +4,8 @@
 \alias{eval_within}
 \title{Evaluate function as if it's run within another environment}
 \usage{
-eval_within(FUN, env = parent.frame(), ..., .args = list(), .tidy = T)
+eval_within(FUN, env = parent.frame(), ..., .args = list(),
+  .tidy = F)
 }
 \arguments{
 \item{FUN}{Function to be evaluated}

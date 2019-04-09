@@ -4,7 +4,7 @@
 \alias{attachDefaultDataRepository}
 \title{Attach subject data}
 \usage{
-attachDefaultDataRepository(unload = F)
+attachDefaultDataRepository(unload = T)
 }
 \arguments{
 \item{unload}{TRUE if you want to detach}

@@ -6,47 +6,50 @@ download_sample_data <- function(subject = 'sub1'){
   raw_dir = rave_options('raw_data_dir')
   tmp_dir = tempdir()
   switch (subject,
-    'sub1' = {
-      # sub1 is at github
-      # link addr: https://github.com/dipterix/rave_example_data/archive/master.zip
-      url = 'https://github.com/dipterix/rave_example_data/archive/master.zip'
-      tmp_zip = file.path(tmp_dir, 'downloaded_sub1.zip')
-      extract_dir = file.path(tmp_dir, 'extract_dir')
+          'sub1' = {
+            # sub1 is at github
+            # link addr: https://github.com/dipterix/rave_example_data/archive/master.zip
+            url = 'https://github.com/dipterix/rave_example_data/archive/master.zip'
+            tmp_zip = file.path(tmp_dir, 'downloaded_sub1.zip')
+            extract_dir = file.path(tmp_dir, 'extract_dir')
 
-      download.file(url = url, destfile = tmp_zip)
-      logger('Expanding zip file', level = 'INFO')
+            download.file(url = url, destfile = tmp_zip)
+            logger('Expanding zip file', level = 'INFO')
 
-      unzip(tmp_zip, overwrite = T, exdir = extract_dir)
-      sub_data_dir = file.path(extract_dir, 'rave_example_data-master', 'data', 'data_dir', 'demo')
-      sub_raw_dir = file.path(extract_dir, 'rave_example_data-master', 'data', 'raw_dir', 'sub1')
+            unzip(tmp_zip, overwrite = T, exdir = extract_dir)
+            sub_data_dir = file.path(extract_dir, 'rave_example_data-master', 'data', 'data_dir', 'demo')
+            sub_raw_dir = file.path(extract_dir, 'rave_example_data-master', 'data', 'raw_dir', 'sub1')
 
-      # copy files
-      logger('Copy from tempdir to data repository', level = 'INFO')
-      file.copy(sub_data_dir, data_dir, overwrite = T, recursive = T)
-      file.copy(sub_raw_dir, raw_dir, overwrite = T, recursive = T)
+            # copy files
+            logger('Copy from tempdir to data repository', level = 'INFO')
+            file.copy(sub_data_dir, data_dir, overwrite = T, recursive = T)
+            file.copy(sub_raw_dir, raw_dir, overwrite = T, recursive = T)
 
-      # clean up
-      logger('Clean up', level = 'INFO')
-      unlink(extract_dir, recursive = T)
-      unlink(tmp_zip)
-      logger('Done. Subject [sub1] is now at \n', '[Raw Data]: ',
-             file.path(raw_dir, 'sub1'), '\n[RAVE Data]: ',
-             file.path(raw_dir, 'demo'), level = 'INFO')
-    },
-    {
-      stop('There is only one sample subject [sub1] right now.')
-    }
+            # clean up
+            logger('Clean up', level = 'INFO')
+            unlink(extract_dir, recursive = T)
+            unlink(tmp_zip)
+            logger('Done. Subject [sub1] is now at \n', '[Raw Data]: ',
+                   file.path(raw_dir, 'sub1'), '\n[RAVE Data]: ',
+                   file.path(raw_dir, 'demo'), level = 'INFO')
+          },
+          {
+            stop('There is only one sample subject [sub1] right now.')
+          }
   )
 
 
 }
 
-#' Function to download
+#' Function to download subjects from internet/local
 #' @param con an url or local file path
 #' @param replace_if_exists Automatically replace current subject if subject files exist (default FALSE)
 #' @param temp_dir temp directory to store downloaded zip files and extracted files
 #' @param remove_zipfile clear downloaded zip files? if con is local file, this will be forced to FALSE
 #' @param subject_settings override subject.yaml see details
+#' @param override_project if not null, project will be renamed to this value
+#' @param override_subject if not null, subject will be renamed to this value
+#' @param ... passed to download.file
 #' @examples
 #' \dontrun{
 #' # Normal example
@@ -56,7 +59,9 @@ download_sample_data <- function(subject = 'sub1'){
 #' download_subject_data(con = "~/rave_data/data-small.zip")
 #'
 #' # or the following
-#' # download_subject_data('https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/data-large.zip')
+#' # download_subject_data(
+#' # 'https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/data-large.zip'
+#' # )
 #'
 #' # rename project to demo_junk
 #' download_subject_data(con = "~/rave_data/data-small.zip",
@@ -84,7 +89,7 @@ download_sample_data <- function(subject = 'sub1'){
 #' \code{subject_settings}. See examples.
 #' @export
 download_subject_data <- function(
-  con, replace_if_exists = F, override_project = NULL,
+  con, replace_if_exists = F, override_project = NULL, override_subject = NULL,
   temp_dir = tempdir(), remove_zipfile = TRUE, subject_settings = NULL,
   ...){
   url = con
@@ -161,7 +166,11 @@ download_subject_data <- function(
       project_name = override_project
     }
 
-    subject_code = s[2]
+    if(is.null(override_subject)){
+      subject_code = s[2]
+    }else{
+      subject_code = override_subject
+    }
     logger('Project Name: [', project_name, ']; Subject Code: [', subject_code, '] (checking)', level = 'INFO')
 
 

@@ -4,13 +4,12 @@
 #' Check if data is loaded for current module
 #' @param ... see defails
 #' @param data same as ..., but can be a vector
-#' @usage rave_checks('power referenced', 'voltage raw', ...)
 #' @details This function checks whether ECoG data is loaded. The format is: DATA+(blankspace)+TYPE. DATA can be
 #' "power" (Wavelet transform amplitude), "phase" (Complex angle), or "volt"/"voltage" (Before wavelet). TYPE can
 #' be "raw" (no reference), "referenced" (referenced by common average reference, white matter reference, or bipolar reference).
 #' For voltage data, there is one more special type "full" which loads voltage data for all electrodes.
 #' @export
-rave_checks = function(..., data = NULL){
+rave_checks <- function(..., data = NULL){
   data = unlist(c(data, list(...)))
   if(!length(data)){
     return()
@@ -20,6 +19,11 @@ rave_checks = function(..., data = NULL){
     `.__internal_reactives__.` = list()
     is_reactive = T
   }
+
+  rave_data = getDefaultDataRepository()
+  module_tools = rave_data$module_tools
+  preload_info = rave_data$preload_info
+  subject = rave_data$subject
 
 
   n1 = nrow(module_tools$get_meta(name = 'trials'))

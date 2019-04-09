@@ -1,0 +1,26 @@
+---
+title: "Vignette Title"
+author: "Vignette Author"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+### Step 1
+
+Build your module first by entering `Command/Ctrl+Shift+Enter`. 
+
+### Step 2
+
+Check `help(package="${{PACKAGE}}")` for vignettes.
+

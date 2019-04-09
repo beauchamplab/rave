@@ -2,26 +2,26 @@
 .queue = new.env()
 .queue_result = new.env()
 
-#' Start async process (deprecated)
-async_start <- function(){
-  future::plan(future::multisession)
-
-
-
-
-  future::future({
-    reults = list()
-    for(nm in names(.queue)){
-      results[[nm]] = lazyeval::f_eval(.queue[[nm]])
-    }
-    return(results)
-  }) ->
-    .f
-
-  future::future({
-    results = future::value(.f)
-  })
-}
+# # Start async process (deprecated)
+# async_start <- function(){
+#   future::plan(future::multisession)
+#
+#
+#
+#
+#   future::future({
+#     reults = list()
+#     for(nm in names(.queue)){
+#       results[[nm]] = lazyeval::f_eval(.queue[[nm]])
+#     }
+#     return(results)
+#   }) ->
+#     .f
+#
+#   future::future({
+#     results = future::value(.f)
+#   })
+# }
 
 #' Async function to execute code (depricated)
 #' @param expr expression for async exe
@@ -59,7 +59,6 @@ async_start <- function(){
 #' get_async_result('test')
 #' # END
 #' }
-#' @import future
 #' @export
 async <- function(expr, name = NULL, envir = parent.frame(), plan = future::multisession){
   if(!is.null(plan)){

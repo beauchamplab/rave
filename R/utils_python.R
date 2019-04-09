@@ -1,6 +1,5 @@
 # function to call python using rave, reticulate
 
-#' @export
 py_source <- function(con, ..., workdir = tempdir(), file_only = FALSE,
                       py3 = TRUE, virtualenv = rave_options('py_virtualenv'),
                       convert = T){
@@ -19,15 +18,14 @@ py_source <- function(con, ..., workdir = tempdir(), file_only = FALSE,
     reticulate::use_virtualenv(virtualenv)
   }
 
+  source_python = get_from_package('source_python', 'reticulate')
   source_python(..file_path, convert = convert, envir = environment())
 
   return(environment())
 }
 
 
-#' Launch python console within R
-#'
-#' @export
+
 py_console <- function(compiler_path = '', virtualenv = rave_options('py_virtualenv'), py3 = TRUE, ...){
   if(!missing(compiler_path)){
     version = system2(compiler_path, "--version", stdout = TRUE, stderr = TRUE)
@@ -62,7 +60,6 @@ py_console <- function(compiler_path = '', virtualenv = rave_options('py_virtual
   reticulate::repl_python(...)
 }
 
-#' @export
 py_save <- function(..., file){
   names = as.character(substitute(list(...)))[-1L]
   args = list(...)

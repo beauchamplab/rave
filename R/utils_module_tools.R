@@ -1,4 +1,7 @@
 #' Tools for module writers
+#' @param env environtment to save tools in
+#' @param data_env rave data repository returned by rave_prepare, internally used
+#' @param quiet logical
 #' @export
 rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
   if(!is.environment(data_env)){
@@ -22,16 +25,40 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
       if(force && is.null(repo[[nm]])){
         epoch_name = data_env$.private$meta$epoch_info$name
         time_range = data_env$.private$meta$epoch_info$time_range
-        repo$epoch(
-          epoch_name = epoch_name,
-          pre = time_range[1],
-          post = time_range[2],
-          electrodes = data_env$preload_info$electrodes,
-          frequency_range = data_env$preload_info$frequencies,
-          data_type = 'power',
-          referenced = referenced
+        electrodes = data_env$preload_info$electrodes
+        frequency_range = data_env$preload_info$frequencies
+        ref_name = data_env$preload_info$reference_name
+
+        # Try to load from cache
+        re = load_local_cache(
+          project_name = data_env$subject$project_name, subject_code = data_env$subject$subject_code,
+          epoch = epoch_name, time_range = time_range,
+          frequency_range = frequency_range, electrodes = electrodes,
+          referenced = ifelse(referenced, ref_name, FALSE), data_type = c('power', 'phase')
         )
+
+        if(!is.null(re)){
+          if(isTRUE(referenced)){
+            repo$power = re$power
+            repo$phase = re$phase
+          }else{
+            repo$raw_power = re$power
+            repo$raw_phase = re$phase
+          }
+          rm(re)
+        }else{
+          repo$epoch(
+            epoch_name = epoch_name,
+            pre = time_range[1],
+            post = time_range[2],
+            electrodes = electrodes,
+            frequency_range = frequency_range,
+            data_type = 'power',
+            referenced = referenced
+          )
+        }
       }
+
       return(repo[[nm]])
     }
 
@@ -42,16 +69,40 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
       if(force && is.null(repo[[nm]])){
         epoch_name = data_env$.private$meta$epoch_info$name
         time_range = data_env$.private$meta$epoch_info$time_range
-        repo$epoch(
-          epoch_name = epoch_name,
-          pre = time_range[1],
-          post = time_range[2],
-          electrodes = data_env$preload_info$electrodes,
-          frequency_range = data_env$preload_info$frequencies,
-          data_type = 'phase',
-          referenced = referenced
+        electrodes = data_env$preload_info$electrodes
+        frequency_range = data_env$preload_info$frequencies
+        ref_name = data_env$preload_info$reference_name
+
+        # Try to load from cache
+        re = load_local_cache(
+          project_name = data_env$subject$project_name, subject_code = data_env$subject$subject_code,
+          epoch = epoch_name, time_range = time_range,
+          frequency_range = frequency_range, electrodes = electrodes,
+          referenced = ifelse(referenced, ref_name, FALSE), data_type = c('power', 'phase')
         )
+
+        if(!is.null(re)){
+          if(isTRUE(referenced)){
+            repo$power = re$power
+            repo$phase = re$phase
+          }else{
+            repo$raw_power = re$power
+            repo$raw_phase = re$phase
+          }
+          rm(re)
+        }else{
+          repo$epoch(
+            epoch_name = epoch_name,
+            pre = time_range[1],
+            post = time_range[2],
+            electrodes = electrodes,
+            frequency_range = frequency_range,
+            data_type = 'phase',
+            referenced = referenced
+          )
+        }
       }
+
       return(repo[[nm]])
     }
 
@@ -62,15 +113,38 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
       if(force && is.null(repo[[nm]])){
         epoch_name = data_env$.private$meta$epoch_info$name
         time_range = data_env$.private$meta$epoch_info$time_range
-        repo$epoch(
-          epoch_name = epoch_name,
-          pre = time_range[1],
-          post = time_range[2],
-          electrodes = data_env$preload_info$electrodes,
-          data_type = 'volt',
-          referenced = referenced
+        electrodes = data_env$preload_info$electrodes
+
+        ref_name = data_env$preload_info$reference_name
+
+        # Try to load from cache
+        re = load_local_cache(
+          project_name = data_env$subject$project_name,
+          subject_code = data_env$subject$subject_code,
+          epoch = epoch_name, time_range = time_range,
+          frequency_range = NULL, electrodes = electrodes,
+          referenced = ifelse(referenced, ref_name, FALSE),
+          data_type = 'voltage'
         )
+
+        if(!is.null(re)){
+          if(isTRUE(referenced)){
+            repo$volt = re$volt
+          }else{
+            repo$raw_volt = re$volt
+          }
+        }else{
+          repo$epoch(
+            epoch_name = epoch_name,
+            pre = time_range[1],
+            post = time_range[2],
+            electrodes = electrodes,
+            data_type = 'volt',
+            referenced = referenced
+          )
+        }
       }
+
       return(repo[[nm]])
     }
 
@@ -81,14 +155,12 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
         dirs = data_env$subject$dirs
         electrodes = data_env$subject$electrodes$Electrode
 
-        print(sys.on.exit())
-
         progress = progress('Prepare preprocess voltage', max = length(electrodes) + 1)
 
         lapply_async(electrodes, function(e){
           sapply(blocks, function(b){
             f = file.path(dirs$channel_dir, 'voltage', sprintf('%d.h5', e))
-            load_h5(f, '/raw/voltage/' %&% b, ram = T)
+            load_h5(f, paste0('/raw/voltage/', b), ram = T)
           }, simplify = F, USE.NAMES = T)
         }, .call_back = function(i){
           progress$inc(sprintf('Loading voltage data - %d', electrodes[i]))
@@ -105,6 +177,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
           }, simplify = F, USE.NAMES = T)
 
         list2env(r, envir = data_env$.private[['volt_unblocked']])
+
         progress$close()
         rm(list = ls(), envir = environment())
       }
@@ -196,7 +269,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
                                  path = 'common',
                                  format = 'rds') {
       format = str_to_lower(format)
-      assertthat::assert_that(format %in% c('rds', 'h5', 'rdata', 'csv', 'mat'),
+      assert_that(format %in% c('rds', 'h5', 'rdata', 'csv', 'mat'),
                               msg = 'Unsupported format: MUST be rds, h5, rdata, csv, or mat')
       root_dir = data_env$subject$dirs[['rave_dir']]
       path = file.path(root_dir, 'module_data', path)
@@ -243,7 +316,10 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
     #   on.exit(rm(repo))
     #   data_env$.private$repo$baseline(from = from, to = to, electrodes = electrodes, ...)
     # }
-    baseline = rave::baseline
+
+    # TODO: Check if this works
+    # baseline = rave::baseline
+    baseline = baseline
 
     reload = function(epoch, epoch_range, reference, electrodes){
       has_change = F
@@ -269,7 +345,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
         has_change = T
       }
 
-      rave::rave_prepare(
+      rave_prepare(
         subject = data_env$subject$subject_id,
         electrodes = electrodes,
         epoch = epoch,
@@ -289,104 +365,104 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
       # global_reactives$has_data = Sys.time()
     }
 
-    ###### Part 3: Visualization ######
-    plot_3d_electrodes = function(
-      tbl = NULL,
-      electrodes,
-      key_frame = NULL,   # = # of rows of values
-      values = NULL,      # Each column is an electrode (# of key_frame x # of electrodes)
-      marker = NULL,      # = # of electrodes
-      size = NULL,
-      # link_module = NULL, # Not used I guess...
-      # variable_name = 'electrode',
-      # link_text = 'View Electrode',
-      ...
-    ){
-
-      if(missing(electrodes) || !length(values)){
-        return(data_env$.private$brain$view(...))
-      }
-
-      # Validata
-      ne = length(electrodes)
-
-      if(!is.matrix(values)){
-        values = matrix(values, ncol = ne, byrow = T)
-      }
-
-      key_frame %?<-% seq_len(nrow(values))
-      nk = length(key_frame)
-
-      brain = data_env$.private$brain$copy()
-      if(is.null(tbl)){
-        tbl = data_env$.private$repo$subject$electrodes
-      }else{
-        brain$load_electrodes(tbl = tbl)
-      }
-      n_total = nrow(tbl)
-
-
-      assertthat::assert_that(ne == ncol(values), msg = 'values must have column count == length of electrodes')
-      assertthat::assert_that(nk == nrow(values), msg = 'values must have row count == length of key_frame')
-      assertthat::assert_that(length(marker) %in% c(ne, 0, n_total), msg = 'marker must be 0, # of electrodes, or # of total electrodes')
-      assertthat::assert_that(length(size) %in% c(ne, 0, n_total), msg = 'size must be 0, # of electrodes, or # of total electrodes')
-
-
-
-      # set value
-      ms = which(length(size) == c(0, ne, n_total))[1]
-      mm = which(length(marker) == c(0, ne, n_total))[1]
-
-      # Check if 'Electrode' is in tbl
-      if('Electrode' %in% names(tbl)){
-        es = tbl$Electrode
-      }else{
-        es = seq_len(nrow(tbl))
-      }
-
-      lapply(es, function(ii){
-        if(ii %in% electrodes){
-          brain$set_electrode_value(which = ii, value = values[, electrodes == ii], keyframe = key_frame)
-        }
-
-        # set size
-        switch (
-          as.character(ms),
-          '2' = {
-            if(ii %in% electrodes){
-              brain$set_electrode_size(which = ii, radius = size[electrodes == ii])
-            }
-          },
-          '3' = {
-            brain$set_electrode_size(which = ii, radius = size[ii])
-          }
-        )
-
-        # set mesh_info
-        switch (
-          as.character(mm),
-          '2' = {
-            if(ii %in% electrodes){
-              brain$set_electrode_label(
-                which = ii,
-                label = sprintf('Electrode %d - %s<br />%s', ii,
-                                tbl$Label[tbl$Electrode == ii],
-                                marker[electrodes == ii])
-              )
-            }
-          },
-          '3' = {
-            brain$set_electrode_label(
-              which = ii,
-              label = sprintf('Electrode %d - %s<br />%s', ii, tbl$Label[tbl$Electrode == ii], marker[ii])
-            )
-          }
-        )
-      })
-
-      brain$view(...)
-
-    }
+    # ###### Part 3: Visualization ######
+    # plot_3d_electrodes = function(
+    #   tbl = NULL,
+    #   electrodes,
+    #   key_frame = NULL,   # = # of rows of values
+    #   values = NULL,      # Each column is an electrode (# of key_frame x # of electrodes)
+    #   marker = NULL,      # = # of electrodes
+    #   size = NULL,
+    #   # link_module = NULL, # Not used I guess...
+    #   # variable_name = 'electrode',
+    #   # link_text = 'View Electrode',
+    #   ...
+    # ){
+    #
+    #   if(missing(electrodes) || !length(values)){
+    #     return(data_env$.private$brain$view(...))
+    #   }
+    #
+    #   # Validata
+    #   ne = length(electrodes)
+    #
+    #   if(!is.matrix(values)){
+    #     values = matrix(values, ncol = ne, byrow = T)
+    #   }
+    #
+    #   key_frame %?<-% seq_len(nrow(values))
+    #   nk = length(key_frame)
+    #
+    #   brain = data_env$.private$brain$copy()
+    #   if(is.null(tbl)){
+    #     tbl = data_env$.private$repo$subject$electrodes
+    #   }else{
+    #     brain$load_electrodes(tbl = tbl)
+    #   }
+    #   n_total = nrow(tbl)
+    #
+    #
+    #   assert_that(ne == ncol(values), msg = 'values must have column count == length of electrodes')
+    #   assert_that(nk == nrow(values), msg = 'values must have row count == length of key_frame')
+    #   assert_that(length(marker) %in% c(ne, 0, n_total), msg = 'marker must be 0, # of electrodes, or # of total electrodes')
+    #   assert_that(length(size) %in% c(ne, 0, n_total), msg = 'size must be 0, # of electrodes, or # of total electrodes')
+    #
+    #
+    #
+    #   # set value
+    #   ms = which(length(size) == c(0, ne, n_total))[1]
+    #   mm = which(length(marker) == c(0, ne, n_total))[1]
+    #
+    #   # Check if 'Electrode' is in tbl
+    #   if('Electrode' %in% names(tbl)){
+    #     es = tbl$Electrode
+    #   }else{
+    #     es = seq_len(nrow(tbl))
+    #   }
+    #
+    #   lapply(es, function(ii){
+    #     if(ii %in% electrodes){
+    #       brain$set_electrode_value(which = ii, value = values[, electrodes == ii], keyframe = key_frame)
+    #     }
+    #
+    #     # set size
+    #     switch (
+    #       as.character(ms),
+    #       '2' = {
+    #         if(ii %in% electrodes){
+    #           brain$set_electrode_size(which = ii, radius = size[electrodes == ii])
+    #         }
+    #       },
+    #       '3' = {
+    #         brain$set_electrode_size(which = ii, radius = size[ii])
+    #       }
+    #     )
+    #
+    #     # set mesh_info
+    #     switch (
+    #       as.character(mm),
+    #       '2' = {
+    #         if(ii %in% electrodes){
+    #           brain$set_electrode_label(
+    #             which = ii,
+    #             label = sprintf('Electrode %d - %s<br />%s', ii,
+    #                             tbl$Label[tbl$Electrode == ii],
+    #                             marker[electrodes == ii])
+    #           )
+    #         }
+    #       },
+    #       '3' = {
+    #         brain$set_electrode_label(
+    #           which = ii,
+    #           label = sprintf('Electrode %d - %s<br />%s', ii, tbl$Label[tbl$Electrode == ii], marker[ii])
+    #         )
+    #       }
+    #     )
+    #   })
+    #
+    #   brain$view(...)
+    #
+    # }
 
   }, envir = tools)
 
@@ -417,8 +493,6 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
 
 }
 
-#' @import stringr
-#' @export
 try_save_file <- function(data, ..., fpath, name, append = F) {
   postfix = tail(str_to_lower(as.vector(str_split(
     fpath, '\\.', simplify = T
@@ -432,7 +506,7 @@ try_save_file <- function(data, ..., fpath, name, append = F) {
       args = list(...)
       ctype = args[['ctype']]
       ctype %?<-% storage.mode(data)
-      rave::save_h5(
+      save_h5(
         data,
         fpath,
         'data',
@@ -477,8 +551,6 @@ try_save_file <- function(data, ..., fpath, name, append = F) {
   )
 }
 
-#' @import stringr
-#' @export
 try_load_file <- function(fpath, name, ..., env = new.env(parent = emptyenv()), simplify = T) {
   if (!file.exists(fpath)) {
     return(NULL)
@@ -503,7 +575,7 @@ try_load_file <- function(fpath, name, ..., env = new.env(parent = emptyenv()), 
       env$data = utils::read.csv(file = fpath, ...)
     },
     'h5' = {
-      env$data = rave::load_h5(file = fpath, name = 'data', ...)
+      env$data = load_h5(file = fpath, name = 'data', ...)
     },
     'rdata' = {
       base::load(file = fpath, envir = env, ...)

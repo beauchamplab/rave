@@ -1,10 +1,10 @@
 #' Wrapper class for tensor arrays
-#' @import R6
 #' @export
 Tensor <- R6::R6Class(
   classname = 'Tensor',
   private = list(
-    .data = NULL
+    .data = NULL,
+    fst_locked = FALSE
   ),
   public = list(
     dim = NULL,
@@ -13,9 +13,12 @@ Tensor <- R6::R6Class(
     swap_file = '',
     hybrid = F,
     last_used = NULL,
+    temporary = TRUE,
 
     finalize = function(){
-      unlink(self$swap_file)
+      if(self$temporary){
+        unlink(self$swap_file)
+      }
     },
 
     print = function(...){
@@ -37,7 +40,8 @@ Tensor <- R6::R6Class(
       invisible(self)
     },
 
-    initialize = function(data, dim, dimnames, varnames, hybrid = F, use_index = F, swap_file = tempfile()){
+    initialize = function(data, dim, dimnames, varnames, hybrid = F, use_index = F, swap_file = tempfile(), temporary = TRUE){
+      self$temporary = temporary
       # get attributes of data
       dim %?<-% base::dim(data)
       dim %?<-% length(data)
@@ -61,10 +65,10 @@ Tensor <- R6::R6Class(
           data = apply(data, length(dim), as.vector)
           data = as.data.frame(data)
           names(data) = paste0('V', seq_len(ncol(data)))
-          fst::write_fst(data, swap_file, compress = 20)
+          write_fst(data, swap_file, compress = 20)
         }else{
           data = data.frame(V1 = as.vector(data))
-          fst::write_fst(data, swap_file, compress = 20)
+          write_fst(data, swap_file, compress = 20)
         }
       }else{
         private$.data = data
@@ -109,8 +113,10 @@ Tensor <- R6::R6Class(
       # re = lazyeval::lazy_eval(expr, data = self$dimnames)
       quos = rlang::quos(...)
       re = sapply(quos, function(quo){
-        quo = rlang::quo_set_env(quo, ..wrapper)
-        eval_tidy(quo)
+        # Use eval_dirty!
+        # quo = rlang::quo_set_env(quo, ..wrapper)
+        # eval_tidy(quo)
+        eval_dirty(quo, env = ..wrapper)
       }, simplify = F, USE.NAMES = T)
 
       dims = self$dim
@@ -226,7 +232,7 @@ Tensor <- R6::R6Class(
       re
     },
 
-    # Serialize tensor to a file and store it via fst::write_fst
+    # Serialize tensor to a file and store it via write_fst
     to_swap = function(use_index = F, delay = 0){
       if(delay == 0){
         self$to_swap_now(use_index = use_index)
@@ -259,7 +265,7 @@ Tensor <- R6::R6Class(
       }
       d = as.data.frame(d)
 
-      fst::write_fst(d, path = swap_file, compress = 20)
+      write_fst(d, path = swap_file, compress = 20)
       self$use_index = use_index
       self$swap_file = swap_file
 
@@ -301,6 +307,9 @@ Tensor <- R6::R6Class(
       return(d)
     },
     set_data = function(v){
+      if(private$fst_locked){
+        stop('This tensor instance is locked for read-only purpose. Cannot set data!')
+      }
       self$last_used = Sys.time()
       private$.data = v
       if(self$hybrid && !is.null(v)){
@@ -327,13 +336,13 @@ Tensor <- R6::R6Class(
         switch (
           method,
           'mean' = {
-            d = rutabaga::collapse(d, keep = keep)
+            d = collapse(d, keep = keep)
             d = d / prod(self$dim[-keep])
           },
           'median' = {
             d = apply(d, keep, median)
           }, {
-            d = rutabaga::collapse(d, keep = keep)
+            d = collapse(d, keep = keep)
           }
         )
         d
@@ -355,7 +364,7 @@ Tensor <- R6::R6Class(
       if(missing(match_dim)){
         return(self$get_data() / by_vector)
       }
-      assertthat::assert_that(
+      assert_that(
         all(match_dim %in% seq_along(self$dim)),
         sum(abs(self$dim[match_dim] - dim(by))) == 0,
         msg = 'Dimension does not match: self$dim[match_dim] = dim(by) ?'
@@ -407,17 +416,26 @@ Tensor <- R6::R6Class(
       }else{
         stop('Tensor$data is deprecated, use Tensor$set_data(data) instead!')
       }
+    },
+    read_only = function(v){
+      if(missing(v)){
+        return(private$fst_locked)
+      }else{
+        private$fst_locked = isTRUE(v)
+      }
     }
   )
 )
 
 #' Convert tensor to python objects
+#' @param x Tensor instance
+#' @param convert TRUE to automatically convert Python objects to their R equivalent. Not implemented
 #' @export
-r_to_py.Tensor <- function(obj, convert = FALSE){
+r_to_py.Tensor <- function(x, convert = FALSE){
   reticulate::r_to_py(c(
-    obj$dimnames,
+    x$dimnames,
     list(
-      data = obj$get_data()
+      data = x$get_data()
     )),
     convert = convert)
 }
@@ -468,21 +486,27 @@ dimnames.Tensor <- function(x){
   #                  varnames = c('Trial', 'Frequency', 'Time', 'Electrode'))
 }
 
-#' @export
+
 content.Tensor <- function(obj, ...){
   obj$get_data()
 }
 
-#' @export
 content <- function(obj, ...){
   UseMethod('content')
 }
 
+#' Subset for Tensor Object
+#' @param x	object to be subsetted.
+#' @param ... further arguments to be passed to or from other methods.
+#' @param .env environtment to evaluate in
 #' @export
 subset.Tensor <- function(x, ..., .env = parent.frame()){
   x$subset(...,.env = .env)
 }
 
+#' Convert Tensors to Vector
+#' @param x an R object.
+#' @param ... passed from or to other methods.
 #' @export
 as.vector.Tensor <- function(x, ...){
   d = x$get_data()

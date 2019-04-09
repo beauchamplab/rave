@@ -15,6 +15,8 @@ baseline(el, from, to, method = "mean", unit = "\%", data_only = F,
 
 \item{to}{baseline end time}
 
+\item{method}{mean or median, default is mean}
+
 \item{unit}{"\%" percent signal change or "dB" decibel unit}
 
 \item{data_only}{return array or tensor object?}
@@ -28,8 +30,6 @@ baseline(el, from, to, method = "mean", unit = "\%", data_only = F,
 \item{preop}{function before baselining}
 
 \item{op}{function for baselining}
-
-\item{mean}{or median, default is mean}
 }
 \description{
 Baseline signals

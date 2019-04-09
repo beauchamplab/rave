@@ -1,6 +1,9 @@
+#' Function to create RAVE preprocess tools
+#' @param env environment to save tools to
+#' @param ... ignored
 #' @export
 rave_preprocess_tools <- function(env = new.env(), ...){
-  assertthat::assert_that(is.environment(env), msg = 'env MUST be an environment')
+  assert_that(is.environment(env), msg = 'env MUST be an environment')
 
   # initialize subject
   env$subject = list()
@@ -37,7 +40,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
     clear_subject = function(){
       env$subject = list()
     }
-    check_load_subject = function(subject_code, project_name, details = T){
+    check_load_subject = function(subject_code, project_name, details = T, strict = TRUE){
       checklist = list()
       ind = 1
       # Step 1: check if subject folders exists
@@ -70,7 +73,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
         'Referenced' = F
       )
       try({
-        utils$load_subject(subject_code = subject_code, project_name = project_name)
+        utils$load_subject(subject_code = subject_code, project_name = project_name, strict = strict)
         l[seq_len(utils$get_check_level())] = T
       })
 
@@ -93,14 +96,14 @@ rave_preprocess_tools <- function(env = new.env(), ...){
 
       checklist
     }
-    load_subject = function(subject_code, project_name){
+    load_subject = function(subject_code, project_name, strict = TRUE){
       logger('Loading Subject')
       dirs = get_dir(subject_code = subject_code, project_name = project_name)
-      assert_that(dir.exists(dirs$preprocess_dir), msg = 'Subject ' %&% subject_code %&% ' has no project folder ' %&% project_name)
-      s = SubjectInfo2$new(project_name = project_name, subject_code = subject_code)
+      assert_that(dir.exists(dirs$preprocess_dir), msg = paste0('Subject ' , subject_code , ' has no project folder ' , project_name))
+      s = SubjectInfo2$new(project_name = project_name, subject_code = subject_code, strict = strict)
       env[['subject']] = s
 
-      logger('Loaded Subject: [Project]/[Subject]' %&% utils$get_subject_id())
+      logger('Loaded Subject: ', utils$get_subject_id())
     }
     save_subject = function(subject_code, project_name){
       logger('Saving Subject')
@@ -156,7 +159,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
     get_subject_id = function(){
       subject_code = get_val(env$subject, 'subject_code', default = '')
       project_name = get_val(env$subject, 'project_name', default = '')
-      return(project_name %&% '/' %&% subject_code)
+      return(paste0(project_name , '/' , subject_code))
     }
     # Basic and low level function to get from subject (pre-set or customized data)
     get_from_subject = function(key, default, customized = F){
@@ -257,8 +260,8 @@ rave_preprocess_tools <- function(env = new.env(), ...){
           }
           # set channels
           env$subject$set_channels(channels = channels, name = name)
-          env$subject$save(action = 'Set Electrodes (' %&% name %&%')', message = deparse_selections(channels))
-          msg = 'Electrodes set (' %&% name %&% ')'
+          env$subject$save(action = paste0('Set Electrodes (' , name ,')'), message = deparse_selections(channels))
+          msg = paste0('Electrodes set (' , name , ')')
           type = 'message'
           return(TRUE)
         }
@@ -372,7 +375,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
 
       sapply(blocks, function(block){
         t(sapply(cfile, function(file){
-          d = load_h5(file, name = group %&% block)
+          d = load_h5(file, name = paste0(group , block))
           if(length(time) != 2){
             return(d[])
           }else{
@@ -387,7 +390,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
     }
 
     load_wavelet = function(electrode, blocks, referenced = F){
-      assertthat::assert_that(utils$waveleted(), msg = 'Wavelet is needed. Run preprocess first.')
+      assert_that(utils$waveleted(), msg = 'Wavelet is needed. Run preprocess first.')
       # only load raw wavelet
       blocks %?<-% utils$get_blocks()
       dirs = utils$get_from_subject('dirs')
@@ -405,7 +408,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
     ###### pre-Process ######
     apply_notch = function(bandwidths = list(
       'default' = list(
-        centers = c(60,120,240),
+        centers = c(60,120,180),
         widths = c(1,2,2)
       )
     )){
@@ -435,7 +438,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
           s = load_h5(cfile, name = sprintf('/raw/%s', block), read_only = T, ram = T)
           v = notch_channel(s, sample_rate = srate, bands = bands, width = width)
           # Save filtered
-          save_h5(as.vector(v), file = cfile, name = '/notch/' %&% block, chunk = c(1024))
+          save_h5(as.vector(v), file = cfile, name = paste0('/notch/' , block), chunk = c(1024))
         }
 
       }, .packages = 'rave', .call_back = function(i){
@@ -503,7 +506,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
       # load signals
       lapply(blocks, function(block){
         progress2$reset(detail = 'Initializing...')
-        progress1$inc('Block - ' %&% block)
+        progress1$inc(paste0('Block - ' , block))
         # v = utils$load_voltage(electrodes = electrodes, blocks = block, raw = F)[[1]]
 
         lapply_async(seq_along(electrodes), function(ii){
@@ -561,7 +564,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
             # write
             cache_file = file.path(dirs$channel_dir, 'cache', 'power', 'raw', block, sprintf('%d.fst', e))
 
-            fst::write_fst(power, cache_file, compress = 100)
+            write_fst(power, cache_file, compress = 100)
           }
 
 
@@ -595,7 +598,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
             # write
             cache_file = file.path(dirs$channel_dir, 'cache', 'phase', 'raw', block, sprintf('%d.fst', e))
 
-            fst::write_fst(phase, cache_file, compress = 100)
+            write_fst(phase, cache_file, compress = 100)
           }
 
           # voltage
@@ -627,7 +630,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
             # write
             cache_file = file.path(dirs$channel_dir, 'cache', 'voltage', 'raw', block, sprintf('%d.fst', e))
 
-            fst::write_fst(s, cache_file, compress = 100)
+            write_fst(s, cache_file, compress = 100)
           }
 
           # # Raw complex coefficient
@@ -644,7 +647,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
           return(NULL)
 
         }, .ncores = ncores, .call_back = function(i){
-          progress2$inc(message = 'Electrode - ' %&% electrodes[i])
+          progress2$inc(message = paste0('Electrode - ' , electrodes[i]))
         })
         # write a reference table to cache
         # safe_write_csv(data.frame(

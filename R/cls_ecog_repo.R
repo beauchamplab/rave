@@ -2,7 +2,7 @@
 #' @param el Tensor or ECoGTensor object
 #' @param from baseline start time
 #' @param to baseline end time
-#' @param mean or median, default is mean
+#' @param method mean or median, default is mean
 #' @param unit "\%" percent signal change or "dB" decibel unit
 #' @param data_only return array or tensor object?
 #' @param hybrid if return tensor object, swap cache? useful for large dataset
@@ -15,18 +15,20 @@ baseline <- function(el, from, to, method = 'mean', unit = '%',
                     data_only = F, hybrid = T, swap_file = tempfile(), mem_optimize = T, preop = NULL, op){
   if(missing(el)){
     logger('baseline(el...) is changed now. Please update.', level = 'WARNING')
+
+    module_tools = get('module_tools', envir = getDefaultDataRepository())
     el = module_tools$get_power()
   }
-  assertthat::assert_that(is(el, 'Tensor'), msg = 'el must be an Tensor object.')
-  assertthat::assert_that('Time' %in% el$varnames, msg = 'Need one dimname to be "Time".')
+  assert_that(is(el, 'Tensor'), msg = 'el must be an Tensor object.')
+  assert_that('Time' %in% el$varnames, msg = 'Need one dimname to be "Time".')
 
-  assertthat::assert_that(unit %in% c('dB', '%', 'C'), msg = 'unit must be %-percent signal change or dB-dB difference, or C to customize')
+  assert_that(unit %in% c('dB', '%', 'C'), msg = 'unit must be %-percent signal change or dB-dB difference, or C to customize')
 
   time_ind = which(el$varnames == 'Time')
   rest_dim = seq_along(el$dim)[-time_ind]
 
   if(unit == 'dB'){
-    bs = el$subset(Time = Time %within% c(from, to))
+    bs = el$subset({Time = Time %within% c(from, to)})
 
     # log 10 of data, collapse by mean
     bs$set_data(log10(bs$get_data()))
@@ -61,7 +63,6 @@ baseline <- function(el, from, to, method = 'mean', unit = '%',
 }
 
 #' R6 class for ECoG data Repository
-#' @import stringr
 #' @export
 ECoGRepository <- R6::R6Class(
   classname = 'ECoGRepository',
@@ -84,16 +85,18 @@ ECoGRepository <- R6::R6Class(
       if(length(epoch_info)){
         epoch_param = self$epochs$get('epoch_params');
 
-        epoch_info = 'Epoch: ' %&% epoch_info %&% '\n' %&%
-          ' - Electrodes: ' %&% deparse_selections(self$epochs$get('electrodes')) %&% '\n' %&%
+        epoch_info = paste0(
+          'Epoch: ' , epoch_info , '\n' ,
+          ' - Electrodes: ' , deparse_selections(self$epochs$get('electrodes')) , '\n' ,
           sprintf(' - From %.2f to %.2f (sec)\n', -epoch_param[1], epoch_param[2])
+        )
       }else{
         epoch_info = '(Not epoched yet.)\n'
       }
 
       ref_name = self$reference$get('.reference_name')
       ref_name %?<-% '(No reference table)'
-      ref_name = 'Reference table: ' %&% ref_name
+      ref_name = paste0('Reference table: ' , ref_name)
 
       refed = self$reference$get('.is_referenced')
       if(!is.null(self$coef)){
@@ -117,20 +120,23 @@ ECoGRepository <- R6::R6Class(
     },
     print = function(...){
       # To compatible with globals package
-      cat(pryr::address(self))
+      cat(env_address(self))
       invisible()
     },
     initialize = function(subject, reference = 'default', autoload = T){
+
+      logger('Initializing a Data Repository')
+
       self$raw = Map$new()
       self$reference = Map$new()
       self$epochs = Map$new()
       if(R6::is.R6(subject) && 'Subject' %in% class(subject)){
         self$subject = subject
       }else{
-        assertthat::assert_that('character' %in% class(subject),
+        assert_that('character' %in% class(subject),
                                 msg = 'Param <subject> needs to be either subject ID or a Subject instance')
         subject = str_split_fixed(subject, '\\\\|/', 2)
-        self$subject = Subject$new(project_name = subject[1], subject_code = subject[2], reference = reference)
+        self$subject = Subject$new(project_name = subject[1], subject_code = subject[2], reference = reference, strict = FALSE)
       }
 
       # load electrodes
@@ -163,13 +169,14 @@ ECoGRepository <- R6::R6Class(
       ref_table = self$reference$get('ref_table')
 
       if(length(electrodes) > 0){
-        progress = progress(title = 'Checking data...', max = length(electrodes))
+        progress = progress(title = 'Loading reference...', max = length(electrodes))
         for(e in electrodes){
           e_str = paste(e)
           progress$inc(sprintf('Electrode - %s', e_str))
           # get reference
           ref = ref_table$Reference[ref_table$Electrode == e]
-          self$raw$set(key = e_str, value = Electrode$new(subject = self$subject, electrode = e, reference_by = self$reference$get(ref), is_reference = F))
+          e_obj = Electrode$new(subject = self$subject, electrode = e, reference_by = self$reference$get(ref), is_reference = F)
+          self$raw$set(key = e_str, value = e_obj)
         }
         logger('Loaded.')
         progress$close()
@@ -183,7 +190,7 @@ ECoGRepository <- R6::R6Class(
         electrodes = self$subject$filter_valid_electrodes(electrodes)
       }
       electrodes = electrodes[paste(electrodes) %in% self$raw$keys()]
-      assertthat::assert_that(length(electrodes) > 0, msg = 'No electrode loaded.')
+      assert_that(length(electrodes) > 0, msg = 'No electrode loaded.')
 
       self$epochs$set('epoch_name', epoch_name)
       self$epochs$set('epoch_params', c(pre, post))
@@ -279,7 +286,7 @@ ECoGRepository <- R6::R6Class(
 
           # generate local cache for power
           file = tempfile()
-          fst::write_fst(results, file, compress = 20)
+          write_fst(results, file, compress = 20)
           rm(results)
           gc()
 
@@ -287,6 +294,9 @@ ECoGRepository <- R6::R6Class(
           power$swap_file = file
           power$hybrid = T
           power$use_index = TRUE
+
+          # set to be read-only
+          power$read_only = TRUE
 
           nm = ifelse(referenced, 'power', 'raw_power')
           self[[nm]] = power
@@ -329,7 +339,7 @@ ECoGRepository <- R6::R6Class(
 
           # generate local cache for phase
           file = tempfile()
-          fst::write_fst(results, file, compress = 20)
+          write_fst(results, file, compress = 20)
           rm(results)
           gc()
 
@@ -337,6 +347,9 @@ ECoGRepository <- R6::R6Class(
           phase$swap_file = file
           phase$hybrid = T
           phase$use_index = TRUE
+
+          # set to be read-only
+          phase$read_only = TRUE
 
           nm = ifelse(referenced, 'phase', 'raw_phase')
           self[[nm]] = phase
@@ -376,9 +389,9 @@ ECoGRepository <- R6::R6Class(
           volt$dim = vapply(dimnames_volt, length, FUN.VALUE = 0, USE.NAMES = F)
           volt$dimnames = dimnames_volt
 
-          # generate local cache for phase
+          # generate local cache for volt
           file = tempfile()
-          fst::write_fst(results, file, compress = 20)
+          write_fst(results, file, compress = 20)
           rm(results)
           gc()
 
@@ -386,6 +399,9 @@ ECoGRepository <- R6::R6Class(
           volt$swap_file = file
           volt$hybrid = T
           volt$use_index = TRUE
+
+          # set to be read-only
+          volt$read_only = TRUE
 
           nm = ifelse(referenced, 'volt', 'raw_volt')
           self[[nm]] = volt
@@ -428,6 +444,8 @@ ECoGRepository <- R6::R6Class(
         electrodes = self$subject$filter_valid_electrodes(electrodes)
       }
 
+
+
       # Set reference table
       ref_table = load_meta(
         meta_type = 'references',
@@ -443,15 +461,21 @@ ECoGRepository <- R6::R6Class(
       # Trick: use lazy assign to allocate reference, this is hack to R6 but avoiding evaluations
       ref_env = self$reference$private$env
       unique_refs = unique(ref_table$Reference)
+
+      progress = progress(title = 'Loading reference...', max = length(unique_refs))
+
       lapply(unique_refs, function(ref){
-        delayedAssign(ref, {
-          Electrode$new(subject = self$subject, electrode = ref, is_reference = T)
-        }, assign.env = ref_env)
+        progress$inc(ref)
+        # delayedAssign(ref, {
+        #   Electrode$new(subject = self$subject, electrode = ref, is_reference = T)
+        # }, assign.env = ref_env)
+        ref_env[[ref]] = Electrode$new(subject = self$subject, electrode = ref, is_reference = T)
       })
+      progress$close()
 
     },
     baseline = function(from, to, electrodes = NULL, print.time = FALSE){
-      assertthat::assert_that(!is.null(self$power), msg = 'Please epoch power spectrum first.')
+      assert_that(!is.null(self$power), msg = 'Please epoch power spectrum first.')
 
       start = Sys.time()
 
@@ -466,7 +490,7 @@ ECoGRepository <- R6::R6Class(
       ) ->
         bl
       ntimepts = dim(bl)[3]
-      bl = rutabaga::collapse(bl, keep = c(1,2,4)) / ntimepts
+      bl = collapse(bl, keep = c(1,2,4)) / ntimepts
 
 
       re = ECoGTensor$new(

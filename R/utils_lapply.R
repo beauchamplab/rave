@@ -5,7 +5,7 @@
 #' @param .get_values return future objects or future values
 rave_lapply <- function(X, FUN, ..., .get_values = TRUE){
   lapply(X, function(x){
-    rave::async({
+    async({
       FUN(x, ...)
     }, plan = NULL)
   }) ->

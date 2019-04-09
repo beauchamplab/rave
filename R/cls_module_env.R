@@ -1,5 +1,4 @@
 #' Module runtime environment (session based)
-#' @import magrittr
 #' @export
 ExecEnvir <- R6::R6Class(
   classname = 'ExecEnvir',
@@ -16,6 +15,7 @@ ExecEnvir <- R6::R6Class(
     tabsets = NULL
   ),
   public = list(
+    parent_env = NULL,
     wrapper_env = NULL,
     static_env = NULL,
     runtime_env = NULL,
@@ -50,7 +50,7 @@ ExecEnvir <- R6::R6Class(
       cat(ls(self$runtime_env))
     },
     print = function(...){
-      pryr::address(self)
+      env_address(self)
     },
     clean = function(){
       # WARNING: this is not clean, but should be able to clear most of the large objects
@@ -61,20 +61,31 @@ ExecEnvir <- R6::R6Class(
       clear_env(private$cache_env)
     },
     initialize = function(session = getDefaultReactiveDomain(),
-                          parent_env = baseenv()){
+                          parent_env = NULL){
       private$session = session
 
-      # wrapper has active bindings to data repository which allow us
-      # the access to data loaded in data repo. It'll be sealed (locked)
+      # parent_env should be an unlocked environment that can be active binded
+      if(!is.environment(parent_env)){
+        parent_env = new.env(parent = globalenv(), hash = T)
+      }
+      self$parent_env = parent_env
+
+      # wrapper has all kind of util functions and it'll be sealed (locked)
+      # One thing to notice that non of the functions within wrapper_env are
+      # evaluated within itself. All are evaluated under "self", i.e. ExecEnvir
+      # The reason why we use wrapper_env is because we don't want anyone to
+      # change those functions as they are critical to modules.
       self$wrapper_env = new.env(parent = parent_env)
-      rave::rave_module_tools(self$wrapper_env)
+
+      # active bindings to data repository which allow us
+      # the access to data loaded in data repo.
+      rave_module_tools(self$wrapper_env)
 
       # static_env contains user self-defined functions. once initialized, they can
       # be read-only (in most of the cases).
       self$static_env = new.env(parent = self$wrapper_env)
       self$param_env = new.env(parent = self$static_env)
       self$param_env$..rave_future_env = new.env()
-
 
       # runtime_env, all variables will be stored within this environment, is the
       # one that real execute take place
@@ -89,121 +100,138 @@ ExecEnvir <- R6::R6Class(
       # runtime_env, this is dangerous. So I come up with this solution
       self$parse_env = new.env(parent = self$runtime_env)
 
+
       private$cache_env = new.env()
       private$cache_env$.keys = c()
       self$ns = base::I
 
-      self$wrapper_env$async_var = function(x, default = NULL){
-        x_name = deparse(substitute(x))
-        val = NULL
-        if(is.environment(self$param_env[['..rave_future_env']])){
-          val = self$param_env[['..rave_future_env']][[x_name]]
-        }
-        if(is.null(val)){
-          return(default)
-        }else{
-          return(val)
-        }
-      }
+      bind_wrapper_env(self, self$wrapper_env)
 
-      self$wrapper_env$reloadUI = function(){
-        self$reload()
-      }
-
-      self$wrapper_env$switch_to = function(module_id, varriable_name = NULL, value = NULL, quiet = F, ...){
-        if(is.reactivevalues(self$global_reactives)){
-          # if missing module_id, jump to last activated module
-          # This is a hidden feature if not specifying module_id
-          # 1. in the dev mode, I'll raise error if module_id is not string
-          # 2. Be careful when using this hidden feature since it might cause infinite loop
-          if(missing(module_id)){
-            module_id = NULL
-            hist = isolate(global_reactives$view_history)
-            if(length(hist) > 1){
-              ind = which(vapply(hist, '[[', logical(1L), 'activated'))
-              if(length(ind)){
-                ind = ind[length(ind)]
-                module_id = hist[[ind]]$module_id
-              }
-            }
-          }
-          if(length(module_id)){
-            self$global_reactives$switch_module = c(
-              list(
-                module_id = module_id,
-                varriable_name = varriable_name,
-                value = value,
-                timestamp = Sys.time()
-              ),
-              list(...)
-            )
-          }else{
-            showNotification(p('Cannot switch back. You have not opened any modules yet.'), type = 'warning')
-          }
-
-
-        }
-      }
-
-      self$wrapper_env$reload_module = function(){
-        self$input_update(list(), init = TRUE)
-      }
-
-      self$wrapper_env$current_module = function(){
-        if(is.reactivevalues(self$global_reactives)){
-          return(isolate(get_val(self$global_reactives, 'execute_module', default = '')))
-        }
-        return('')
-      }
-
-      self$wrapper_env$rave_inputs = function(...){
-        if(is.null(private$session)){
-          rave::rave_inputs(...)
-        }else{
-          self$rave_inputs(...)
-        }
-      }
-      self$wrapper_env$rave_outputs = function(...){
-        if(is.null(private$session)){
-          rave::rave_outputs(...)
-        }else{
-          self$rave_outputs(...)
-        }
-      }
-      self$wrapper_env$rave_updates = function(...){
-        if(is.null(private$session)){
-          rave::rave_updates(...)
-        }else{
-          self$rave_updates(...)
-        }
-      }
-      self$wrapper_env$rave_execute = function(...){
-        self$rave_execute(...)
-        if(is.null(private$session)){
-          rave::rave_execute(...)
-        }
-      }
-      self$wrapper_env$cache = function(...){
-        if(is.null(private$session)){
-          rave::cache(...)
-        }else{
-          self$cache(...)
-        }
-      }
-      self$wrapper_env$cache_input = function(...){
-        if(is.null(private$session)){
-          rave::cache_input(...)
-        }else{
-          self$cache_input(...)
-        }
-      }
-      self$wrapper_env$rave_ignore = function(...){
-        if(is.null(private$session)){
-          rave::rave_ignore(...)
-        }
-      }
-      self$wrapper_env$export_report = self$export_report
-      self$wrapper_env$rave_prepare = self$wrapper_env$rave_ignore # do nothing
+      # self$wrapper_env$async_var = function(x, default = NULL){
+      #   x_name = deparse(substitute(x))
+      #   val = NULL
+      #   future_env = self$param_env[['..rave_future_env']]
+      #   if(is.environment(future_env) || is.list(future_env)){
+      #     val = future_env[[x_name]]
+      #
+      #     if(!is.null(val)){
+      #       return(val)
+      #     }
+      #   }
+      #
+      #   return(default)
+      # }
+      # self$wrapper_env$reloadUI = function(){
+      #   self$reload()
+      # }
+      # self$wrapper_env$switch_to = function(module_id, varriable_name = NULL, value = NULL, quiet = F, ...){
+      #   if(is.reactivevalues(self$global_reactives)){
+      #     # if missing module_id, jump to last activated module
+      #     # This is a hidden feature if not specifying module_id
+      #     # 1. in the dev mode, I'll raise error if module_id is not string
+      #     # 2. Be careful when using this hidden feature since it might cause infinite loop
+      #     if(missing(module_id)){
+      #       module_id = NULL
+      #       hist = isolate(global_reactives$view_history)
+      #       if(length(hist) > 1){
+      #         ind = which(vapply(hist, '[[', logical(1L), 'activated'))
+      #         if(length(ind)){
+      #           ind = ind[length(ind)]
+      #           module_id = hist[[ind]]$module_id
+      #         }
+      #       }
+      #     }
+      #     if(length(module_id)){
+      #       self$global_reactives$switch_module = c(
+      #         list(
+      #           module_id = module_id,
+      #           varriable_name = varriable_name,
+      #           value = value,
+      #           timestamp = Sys.time()
+      #         ),
+      #         list(...)
+      #       )
+      #     }else{
+      #       showNotification(p('Cannot switch back. You have not opened any modules yet.'), type = 'warning')
+      #     }
+      #
+      #
+      #   }
+      # }
+      # self$wrapper_env$reload_module = function(){
+      #   self$input_update(list(), init = TRUE)
+      # }
+      # self$wrapper_env$current_module = function(){
+      #   if(is.reactivevalues(self$global_reactives)){
+      #     return(isolate(get_val(self$global_reactives, 'execute_module', default = '')))
+      #   }
+      #   return('')
+      # }
+      # self$wrapper_env$rave_inputs = function(...){
+      #   if(is.null(private$session)){
+      #     rave_inputs(...)
+      #   }else{
+      #     self$rave_inputs(...)
+      #   }
+      # }
+      # self$wrapper_env$rave_outputs = function(...){
+      #   if(is.null(private$session)){
+      #     rave_outputs(...)
+      #   }else{
+      #     self$rave_outputs(...)
+      #   }
+      # }
+      # self$wrapper_env$rave_updates = function(...){
+      #   if(is.null(private$session)){
+      #     rave_updates(...)
+      #   }else{
+      #     self$rave_updates(...)
+      #   }
+      # }
+      # self$wrapper_env$rave_execute = function(...){
+      #   self$rave_execute(...)
+      #   if(is.null(private$session)){
+      #     rave_execute(...)
+      #   }
+      # }
+      # self$wrapper_env$rave_checks = function(...){
+      #   if(is.null(private$session)){
+      #     rave_checks(...)
+      #   }else{
+      #     f = self$static_env[['rave_checks']]
+      #     if(is.function(f)){
+      #       f(...)
+      #     }
+      #   }
+      # }
+      # self$wrapper_env$cache = function(...){
+      #   if(is.null(private$session)){
+      #     cache(...)
+      #   }else{
+      #     self$cache(...)
+      #   }
+      # }
+      # self$wrapper_env$cache_input = function(...){
+      #   if(is.null(private$session)){
+      #     cache_input(...)
+      #   }else{
+      #     self$cache_input(...)
+      #   }
+      # }
+      # self$wrapper_env$rave_ignore = function(...){
+      #   if(is.null(private$session)){
+      #     rave_ignore(...)
+      #   }
+      # }
+      # self$wrapper_env$get_brain = function(surfaces = 'pial', multiple_subject = FALSE){
+      #   subject = get('subject', envir = rave::getDefaultDataRepository())
+      #   brain = rave::rave_brain2(surfaces = surfaces, multiple_subject = multiple_subject)
+      #   brain$load_electrodes(subject)
+      #   brain$load_surfaces(subject)
+      #   brain
+      # }
+      # self$wrapper_env$export_report = self$export_report
+      # self$wrapper_env$rave_prepare = self$wrapper_env$rave_ignore # do nothing
       self$wrapper_env$source = function(file, local = T, ...){
         if(environmentIsLocked(self$static_env)){
           return()
@@ -217,7 +245,7 @@ ExecEnvir <- R6::R6Class(
           self$runtime_env$.__tmp_file = tmp_file
           eval(quote(base::source(.__tmp_file, local = T)), self$runtime_env)
         }else if(file.exists(file)){
-          logger('File [', tmp_file, '] does not exists, try to look for it.', level = 'INFO')
+          # logger('File [', tmp_file, '] does not exists, try to look for it.', level = 'INFO')
           self$runtime_env$.__tmp_file = file
           eval(quote(base::source(.__tmp_file, local = T)), self$runtime_env)
         }else{
@@ -232,26 +260,26 @@ ExecEnvir <- R6::R6Class(
 
       }
 
-      self$wrapper_env$require = function(package, ..., character.only = TRUE){
-        p = as.character(substitute(package))
-        if(!p %in% installed.packages()[,1]){
-          try({
-            logger("Installing Package ", p, level = 'WARNING')
-            install.packages(p, type = 'binary')
-          })
-        }
-        do.call('require', args = c(list(
-          package = p,
-          character.only = TRUE
-        ),
-        list(...)))
-      }
+      # self$wrapper_env$require = function(package, ..., character.only = TRUE){
+      #   p = as.character(substitute(package))
+      #   if(!package_installed(p)){
+      #     try({
+      #       logger("Installing Package ", p, level = 'WARNING')
+      #       install.packages(p, type = 'binary')
+      #     })
+      #   }
+      #   do.call('require', args = c(list(
+      #     package = p,
+      #     character.only = TRUE
+      #   ),
+      #   list(...)))
+      # }
 
-      self$wrapper_env$library = self$wrapper_env$require
+      # self$wrapper_env$library = self$wrapper_env$require
 
-      self$wrapper_env$ns = function(id){
-        self$ns(id)
-      }
+      # self$wrapper_env$ns = function(id){
+      #   self$ns(id)
+      # }
 
       # advanced usage
       self$wrapper_env$getDefaultReactiveDomain = function(){
@@ -285,54 +313,76 @@ ExecEnvir <- R6::R6Class(
       }
 
       # Override observe, observeEvent
-      self$wrapper_env$observe = function(x, env = NULL, quoted = FALSE, priority = 0, domain = NULL, ...){
-        if(!quoted){
-          x = substitute(x)
-        }
-        if(!is.environment(env)){
-          env = self$runtime_env
-        }
-        if(is.null(domain)){
-          domain = self$wrapper_env$getDefaultReactiveDomain()
-        }
-        shiny::observe(
-          x = x,
-          env = env,
-          quoted = T,
-          priority = priority - 1L,
-          domain = domain,
-          ...
-        )
-      }
+      # self$wrapper_env$observe = function(x, env = NULL, quoted = FALSE, priority = 0, domain = NULL, ...){
+      #   if(!quoted){
+      #     x = substitute(x)
+      #   }
+      #
+      #   # Make sure shiny doesn't crash
+      #   x = rlang::quo_squash(rlang::quo(
+      #     tryCatch({
+      #       shiny::withLogErrors({!!x})
+      #     }, error = function(e){
+      #       showNotification(htmltools::p(htmltools::strong('An error occurred'), htmltools::br(), 'Details: ',
+      #                                     htmltools::span(as.character(e), style = 'font-style:italic;')), type = 'error')
+      #     })
+      #   ))
+      #
+      #
+      #   if(!is.environment(env)){
+      #     env = self$runtime_env
+      #   }
+      #   if(is.null(domain)){
+      #     domain = self$wrapper_env$getDefaultReactiveDomain()
+      #   }
+      #   shiny::observe(
+      #     x = x,
+      #     env = env,
+      #     quoted = T,
+      #     priority = priority - 1L,
+      #     domain = domain,
+      #     ...
+      #   )
+      # }
 
-      self$wrapper_env$observeEvent = function(
-        eventExpr, handlerExpr, event.env = NULL,
-        event.quoted = FALSE, handler.env = NULL, handler.quoted = FALSE,
-        priority = 0, domain = NULL, ...
-      ){
-        if(!event.quoted){
-          eventExpr = substitute(eventExpr)
-        }
-        if(!is.environment(event.env)){
-          event.env = self$runtime_env
-        }
-
-        if(!handler.quoted){
-          handlerExpr = substitute(handlerExpr)
-        }
-        if(!is.environment(handler.env)){
-          handler.env = self$runtime_env
-        }
-        if(is.null(domain)){
-          domain = self$wrapper_env$getDefaultReactiveDomain()
-        }
-
-        shiny::observeEvent(
-          eventExpr = eventExpr, handlerExpr = handlerExpr, event.env = event.env,
-          event.quoted = T, handler.env = handler.env, handler.quoted = T,
-          priority = priority - 1L, domain = domain, ...
-        )
-      }
+      # self$wrapper_env$observeEvent = function(
+      #   eventExpr, handlerExpr, event.env = NULL,
+      #   event.quoted = FALSE, handler.env = NULL, handler.quoted = FALSE,
+      #   priority = 0, domain = NULL, ...
+      # ){
+      #   if(!event.quoted){
+      #     eventExpr = substitute(eventExpr)
+      #   }
+      #   if(!is.environment(event.env)){
+      #     event.env = self$runtime_env
+      #   }
+      #
+      #   if(!handler.quoted){
+      #     handlerExpr = substitute(handlerExpr)
+      #   }
+      #   if(!is.environment(handler.env)){
+      #     handler.env = self$runtime_env
+      #   }
+      #   if(is.null(domain)){
+      #     domain = self$wrapper_env$getDefaultReactiveDomain()
+      #   }
+      #
+      #   # Make sure shiny doesn't crash
+      #   handlerExpr = rlang::quo_squash(rlang::quo(
+      #     tryCatch({
+      #       shiny::withLogErrors({!!handlerExpr})
+      #     }, error = function(e){
+      #       showNotification(htmltools::p(htmltools::strong('An error occurred'), htmltools::br(), 'Details: ',
+      #                                     htmltools::span(as.character(e), style = 'font-style:italic;')), type = 'error')
+      #     })
+      #   ))
+      #
+      #   shiny::observeEvent(
+      #     eventExpr = eventExpr, handlerExpr = handlerExpr, event.env = event.env,
+      #     event.quoted = T, handler.env = handler.env, handler.quoted = T,
+      #     priority = priority - 1L, domain = domain, ...
+      #   )
+      # }
 
 
       lockEnvironment(self$wrapper_env)
@@ -340,7 +390,7 @@ ExecEnvir <- R6::R6Class(
     },
     reset = function(inputs){
       if(shiny::is.reactivevalues(inputs)){
-        inputs = shiny::reactiveValuesToList(inputs)
+        inputs = shiny::isolate(shiny::reactiveValuesToList(inputs))
       }
       rm(list = ls(self$runtime_env), envir = self$runtime_env)
       for(nm in self$input_ids){
@@ -358,20 +408,20 @@ ExecEnvir <- R6::R6Class(
         parent_env = data_env, session = fakesession, new = T
       )
 
-      if(m$externalpackage){
-        env = do.call("loadNamespace", list(package = "RAVEbeauchamplab"))
-        if (!environmentIsLocked(new_exec$static_env)) {
-          ..rdata_file = system.file("vars.RData", package = "RAVEbeauchamplab")
-          base::load(file = ..rdata_file, envir = new_exec$static_env)
-          lapply(names(as.list(env, all.names = T)), function(nm) {
-            fun = env[[nm]]
-            if (is.function(fun)) {
-              environment(fun) = new_exec$runtime_env
-            }
-            new_exec$static_env[[nm]] = fun
-          })
-        }
-      }
+      # if(m$externalpackage){
+      #   env = do.call("loadNamespace", list(package = "RAVEbeauchamplab"))
+      #   if (!environmentIsLocked(new_exec$static_env)) {
+      #     ..rdata_file = system.file("vars.RData", package = "RAVEbeauchamplab")
+      #     base::load(file = ..rdata_file, envir = new_exec$static_env)
+      #     lapply(names(as.list(env, all.names = T)), function(nm) {
+      #       fun = env[[nm]]
+      #       if (is.function(fun)) {
+      #         environment(fun) = new_exec$runtime_env
+      #       }
+      #       new_exec$static_env[[nm]] = fun
+      #     })
+      #   }
+      # }
 
 
 
@@ -393,6 +443,8 @@ ExecEnvir <- R6::R6Class(
       return(invisible(self$runtime_env))
     },
     export_report = function(expr, inputId = 'electrode', electrodes = NULL, async = F){
+      .Deprecated('This function is deprecated', msg = 'Please avoid using this function in your module.')
+
       # assign('aaa', environment(), envir = globalenv())
       expr = substitute(expr)
       params = as.list(self$param_env)
@@ -531,19 +583,19 @@ ExecEnvir <- R6::R6Class(
                   flex_basis[length(flex_basis) - c(0:1)] = 'flex-basis: 50%;'
                 }
 
-                return(rlang::quo_squash(rlang::quo(
+                return(rlang::quo(
                   do.call(div, args = c(
                     list(class = 'rave-grid-inputs'),
                     !!lapply(seq_len(n), function(jj){
                       inputId = inputIds[[jj]]
-                      rlang::quo_squash(rlang::quo(
+                      rlang::quo(
                         do.call(div, args = c(
                           list(style = !!flex_basis[[jj]], !!x[[inputId]]$expr)
                         ))
-                      ))
+                      )
                     })
                   ))
-                )))
+                ))
               }
             })
           ))
@@ -573,7 +625,7 @@ ExecEnvir <- R6::R6Class(
     rave_outputs = function(..., .output_tabsets = list(), .tabsets = list(), .env = NULL){
       .tabsets = .output_tabsets
       quos = rlang::quos(...)
-      assertthat::assert_that(length(quos) > 0, msg = 'No output defined!')
+      assert_that(length(quos) > 0, msg = 'No output defined!')
       parsers = comp_parser()
       x = lapply(names(quos), function(nm){
         re = parsers$parse_quo(quos[[nm]])
@@ -694,45 +746,48 @@ ExecEnvir <- R6::R6Class(
         n_errors = c(0,0)
         envir = environment()
         errors = NULL
-        if('' %in% var_names){
-          lapply(private$update[var_names == ''], function(quo){
-            tryCatch({
-              eval_dirty(
-                quo, env = self$param_env
-              )
-            },error = function(e){
-              logger('Error in updating input (initialization)', level = 'ERROR')
-              s = capture.output(traceback(e))
-              lapply(s, logger, level = 'ERROR')
-              envir$n_errors[1] = envir$n_errors[1] + 1
-              envir$errors = c(envir$errors, as.character(e))
-            })
-            NULL
+        # passed = TRUE
+        for(quo in private$update[var_names == '']){
+          tryCatch({
+            eval_dirty( quo, env = self$param_env )
+          },error = function(e){
+            logger('Error in updating input (initialization)', level = 'ERROR')
+            s = capture.output(traceback(e))
+            lapply(s, logger, level = 'ERROR')
+            envir$n_errors[1] = envir$n_errors[1] + 1
+            envir$errors = c(envir$errors, as.character(e))
+            # envir$passed = FALSE
           })
+
+          # if(!passed){
+          #   break();
+          # }
         }
 
-        if(length(var_names[var_names != ''])){
-          lapply(var_names[var_names != ''], function(varname){
-            tryCatch({
-              comp = private$inputs$comp[[varname]]
-              if(is.null(comp)){
-                return()
-              }
-              new_args = eval_dirty(
-                private$update[[varname]], data = input, env = self$param_env
-              )
 
-              comp$updates(session = session, .args = new_args)
-            },error = function(e){
-              logger('Error in updating input ', varname, level = 'ERROR')
-              s = capture.output(traceback(e))
-              lapply(s, logger, level = 'ERROR')
-              envir$n_errors[2] = envir$n_errors[2] + 1
-            })
 
+        for(varname in var_names[var_names != '']){
+          # if(!passed){
+          #   break;
+          # }
+          tryCatch({
+            comp = private$inputs$comp[[varname]]
+            if(is.null(comp)){
+              return()
+            }
+            new_args = eval_dirty(
+              private$update[[varname]], data = input, env = self$param_env
+            )
+
+            comp$updates(session = session, .args = new_args)
+          },error = function(e){
+            logger('Error in updating input ', varname, level = 'ERROR')
+            s = capture.output(traceback(e))
+            lapply(s, logger, level = 'ERROR')
+            envir$n_errors[2] = envir$n_errors[2] + 1
+            envir$passed = FALSE
           })
         }
-
 
 
         end = Sys.time()
@@ -758,7 +813,7 @@ ExecEnvir <- R6::R6Class(
       }
       invisible()
     },
-    rave_execute = function(..., auto = TRUE, .env = NULL){
+    rave_execute = function(..., auto = TRUE, .env = NULL, async_vars = NULL){
       quos = rlang::quos_auto_name(rlang::quos(...))
 
       normal_quos = quos[!names(quos) %in% 'async']
@@ -776,18 +831,27 @@ ExecEnvir <- R6::R6Class(
         if(async){
           if(self$async_module){
             async_env = new.env(parent = self$runtime_env)
+            async_env[['..async_quo']] = async_quo
+            async_env[['..async_var']] = async_vars
+
             packages = str_match(search(), '^package:(.+)$')[,2]; packages = packages[!is.na(packages)]
             packages = unique(packages, private$module_env$packages)
+
             self$param_env$..rave_future_obj =
               future::future({
-                rave::eval_dirty(async_quo, env = async_env)
-                async_env
-              }, packages = packages, evaluator = future::multiprocess,
+                eval_dirty(..async_quo)#, env = async_env)
+                if(is.null(..async_var)){
+                  return(environment())
+                }else{
+                  re = sapply(..async_var, get0, simplify = F, USE.NAMES = T)
+                  re
+                }
+              }, packages = packages, evaluator = future::multiprocess, envir = async_env,
               gc = T, workers = rave_options('max_worker'))
           }
         }else{
           if(length(normal_quos)){
-            lapply(normal_quos, rave::eval_dirty, env = self$runtime_env)
+            lapply(normal_quos, eval_dirty, env = self$runtime_env)
           }
         }
 
@@ -804,12 +868,11 @@ ExecEnvir <- R6::R6Class(
         env = private$cache_env
       }
       if(!replace){
-        if(key %in% env$.keys){
-          return(get(key, envir = env))
+        if(exists(key, envir = env, inherits = FALSE)){
+          return( env[[key]] )
         }
-        if(!global && key %in% private$cache_env$.keys){
-          # try to get from local
-          return(get(key, envir = private$cache_env))
+        if(exists(key, envir = private$cache_env, inherits = FALSE)){
+          return( private$cache_env[[key]] )
         }
       }
       if(missing(val)){
@@ -817,19 +880,8 @@ ExecEnvir <- R6::R6Class(
       }
 
       # save cache
-      expr = lazyeval::lazy(val)
-      expr$env = self$runtime_env
-      val = NULL
-      try({
-        val = lazyeval::lazy_eval(expr, data = list())
-      })
-      str_val = ''#safe_str_c(val, collapse = ', ')
-      # if(str_length(str_val) > 10){
-      #   str_val = str_sub(str_val, end = 10L)
-      # }
+      env[[key]] = val
 
-      # logger('Caching', ifelse(global, ' (global)', ''), ' - [', .key,'] - ', str_val)
-      assign(key, val, envir = env)
       env$.keys = unique(c(env$.keys, key))
       return(val)
     },
@@ -862,17 +914,16 @@ ExecEnvir <- R6::R6Class(
     },
     generate_input_ui = function(sidebar_width = 3L){
       ns = self$ns
-      env = environment()
+      # TODO change it to package environment, otherwise customized package code won't work like `get_palette`
+      # env = environment()
 
       more_btns = list(
-        vignette = tags$li(actionLink(self$ns('..vignette'), 'Show Module Description')),
+        # vignette = tags$li(actionLink(self$ns('..vignette'), 'Show Module Description')),
         async = tags$li(actionLink(self$ns('..async_run'), 'Run Algorithm (Async)')),
         export = tags$li(actionLink(self$ns('..incubator'), 'Exports'))
       )
 
-      # TODO Vignette
-
-      # NIML
+      # exports
       export_func = names(as.list(self$static_env))
       is_export_func = vapply(export_func, function(x){
         is.function(self$static_env[[x]]) && str_detect(x, 'export_')
@@ -887,31 +938,42 @@ ExecEnvir <- R6::R6Class(
       }
 
 
-      names(more_btns) = NULL
+      if(length(more_btns)){
+        names(more_btns) = NULL
+        more_ui = box(
+          title = 'More...',
+          collapsed = T,
+          tags$ul(
+            class = 'rave-grid-inputs',
+            tagList(more_btns)
+          ),
+          width = 12,
+          collapsible = T
+        )
+      }else{
+        more_ui = NULL
+      }
+
+
+      if(sidebar_width == 0){
+        sidebar_width = '3 hidden';
+      }
+
       div(
-        class = sprintf('col-sm-%d rave-input-panel', sidebar_width),
-        rlang::eval_tidy(private$inputs$quos, env = env),
+        class = sprintf('col-sm-%s rave-input-panel', sidebar_width),
+        rlang::eval_tidy(private$inputs$quos, data = self$parent_env),
         fluidRow(
           uiOutput(self$ns('..params_current')),
-          shinydashboard::box(
-            title = 'More...',
-            collapsed = T,
-            tags$ul(
-              class = 'rave-grid-inputs',
-              tagList(more_btns)
-            ),
-            width = 12,
-            collapsible = T
-          )
+          more_ui
         )
       )
     },
     generate_output_ui = function(sidebar_width = 3L){
       ns = self$ns
-      env = environment()
+      # env = environment()
       div(
         class = sprintf('col-sm-%d rave-output-panel', 12L - sidebar_width),
-        rlang::eval_tidy(private$outputs$quos, env = env)
+        rlang::eval_tidy(private$outputs$quos, data = self$parent_env)
       )
 
     },

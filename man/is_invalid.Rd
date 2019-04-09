@@ -4,7 +4,7 @@
 \alias{is_invalid}
 \title{Check if value(s) is invalid}
 \usage{
-is_invalid(x, any = F, .invalids = c('null', 'na'))
+is_invalid(x, any = F, .invalids = c("null", "na"))
 }
 \arguments{
 \item{x}{Values to check}

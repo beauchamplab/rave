@@ -7,7 +7,6 @@
 #' @param btn_type html tag attribute "type"
 #' @param class additional classes
 #' @param ... other methods passed to actionButton
-#' @import htmltools
 #' @export
 actionButtonStyled <- function(inputId, label, icon = NULL, width = NULL, type = 'default', btn_type = 'button', class = '', ...){
   value <- shiny::restoreInput(id = inputId, default = NULL)
@@ -46,12 +45,10 @@ actionButtonStyled <- function(inputId, label, icon = NULL, width = NULL, type =
 compoundInput <- function(
   inputId, label = '', components = NULL, max_ncomp = 10, inital_ncomp = 1, prefix = 'Group', style = ''
 ){
-  value <- deparse(substitute(components))
-  dots = lazyeval::as.lazy(value)
-  dots = lazyeval::as.lazy_dots(as.list(dots$expr[-1]))
-  lapply(dots, parse_call, env = parent.frame()) ->
-    dots
-  class(dots) <- 'lazy_dots'
+  components = substitute(components)
+  quos = rlang::quos(!!!as.list(components)[-1])
+
+  quos = lapply(quos, parse_call, env = parent.frame())
 
   inital_ncomp = max(inital_ncomp, 1)
 
@@ -64,20 +61,20 @@ compoundInput <- function(
     div(
       class = 'rave-ui-compound-wrapper',
       tagList(
-        lapply(seq(1, max_ncomp), function(ind){
+        lapply(seq_len(max_ncomp), function(ind){
           div(
             class = paste('rave-ui-compound-inner', ifelse(inital_ncomp < ind, 'hidden', '')),
             'data-value' = ind,
             tags$fieldset(
               style = sprintf('border: 1px solid #efefef; padding:.35em .625em .75em; margin-bottom: 15px;%s', style),
-              tags$legend(prefix %&% ' ' %&% ind, style = 'border:none; margin: 0; padding: 0 10px; font-size: 14px;'),
+              tags$legend(paste(prefix, ind), style = 'border:none; margin: 0; padding: 0 10px; font-size: 14px;'),
               tagList(
-                lapply(dots, function(comp){
-                  comp = comp$.change_param(
-                    inputId = paste0(inputId, '_', comp$.args$inputId, '_', ind),
-                    label = comp$.args$label
+                lapply(quos, function(quo){
+                  quo = quo$.change_param(
+                    inputId = paste0(inputId, '_', quo$.args$inputId, '_', ind),
+                    label = quo$.args$label
                   )
-                  lazyeval::lazy_eval(comp)
+                  rlang::eval_tidy(quo)
                 })
               )
             )
@@ -95,11 +92,11 @@ compoundInput <- function(
       paste(
         '{',
         paste(
-          sapply(dots, function(comp){
+          sapply(quos, function(quo){
             sprintf('"%s":"%s::%s"',
-                    comp$.args$inputId,
-                    comp$.func$func_ns,
-                    comp$.func$func_name)
+                    eval(quo$.args$inputId, quo$env),
+                    quo$.func$func_ns,
+                    quo$.func$func_name)
           }),
           collapse = ','
         ),
@@ -200,9 +197,62 @@ ui_register_function <- function(key, update_func = NULL, value_field = 'value',
   }else{
     update_func = get(key, envir = .ui_update_repo)
   }
-  assertthat::assert_that(is.function(update_func$update_func), msg = 'Update function not found!')
+  assert_that(is.function(update_func$update_func), msg = 'Update function not found!')
   return(invisible(update_func))
 }
 
 
 
+
+#' Function to register compound inputs to shiny
+register_compoundInput <- function(){
+
+  # Check if function has already been registered
+  .registered = get_conf('rave_shiny_compoundInput', default = FALSE)
+  if(.registered){
+    return(invisible())
+  }
+
+
+  shiny::registerInputHandler("rave.compoundInput", function(data, shinysession, name) {
+    if (is.null(data)){
+      return(NULL)
+    }
+
+    # restoreInput(id = , NULL)
+    meta = as.list(data$meta)
+    timeStamp = as.character(data$timeStamp)
+    maxcomp = as.integer(data$maxcomp)
+    inputId = as.character(data$inputId)
+    value =  data$val
+
+    ids = names(meta)
+    ncomp = as.integer(data$ncomp)
+    if(length(ids) == 0 || is.null(ncomp) || ncomp <= 0){
+      return(NULL)
+    }
+
+    # nvalid = length(dropInvalid(value, deep = T))
+    # nvalid = max(1, nvalid)
+    # nvalid = min(nvalid, ncomp)
+
+    re = lapply(value, function(val){
+      sapply(val, function(v){
+        tryCatch({
+          jsonlite::fromJSON(v)
+        }, error = function(e){
+          NULL
+        })
+      }, simplify = F, USE.NAMES = T)
+    })
+
+    attr(re, 'ncomp') <- ncomp
+    attr(re, 'meta') <- meta
+    attr(re, 'timeStamp') <- timeStamp
+    attr(re, 'maxcomp') <- maxcomp
+    return(re)
+
+  }, force = TRUE)
+
+  set_conf('rave_shiny_compoundInput', TRUE)
+}

@@ -10,6 +10,9 @@ decimate_fir <- function(x, q, n = 30){
   if (q != round(q))
     stop("decimate only works with integer q.")
 
+  fftfilt = get_from_package('fftfilt', pkg = 'signal')
+  fir1 = get_from_package('fir1', pkg = 'signal')
+
   b <- fir1(n, 1/q)
   # y <- fftfilt(b, x)
 

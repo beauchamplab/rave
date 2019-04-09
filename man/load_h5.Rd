@@ -4,7 +4,16 @@
 \alias{load_h5}
 \title{Lazy load HDF5 file via hdf5r package}
 \usage{
-load_h5(file, name, read_only = T)
+load_h5(file, name, read_only = T, ram = F)
+}
+\arguments{
+\item{file}{HDF5 file}
+
+\item{name}{group/data_name path to dataset}
+
+\item{read_only}{default is TRUE, read dataset only}
+
+\item{ram}{load to RAM immediately}
 }
 \description{
 Lazy load HDF5 file via hdf5r package

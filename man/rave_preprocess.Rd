@@ -2,9 +2,16 @@
 % Please edit documentation in R/pre_process.R
 \name{rave_preprocess}
 \alias{rave_preprocess}
+\alias{rave_pre_process}
 \title{RAVE Preprocess Function}
 \usage{
-rave_pre_process(sidebar_width = 3L, launch.browser = T, host = '127.0.0.1', ...)
+rave_preprocess(sidebar_width = 3, launch.browser = T,
+  host = "127.0.0.1", quiet = T, test.mode = F, modules, ver = "3",
+  theme = "purple", ...)
+
+rave_pre_process(sidebar_width = 3, launch.browser = T,
+  host = "127.0.0.1", quiet = T, test.mode = F, modules, ver = "3",
+  theme = "purple", ...)
 }
 \arguments{
 \item{sidebar_width}{sibar width from 1 to 12 recommended 3 or 4}
@@ -17,9 +24,13 @@ rave_pre_process(sidebar_width = 3L, launch.browser = T, host = '127.0.0.1', ...
 
 \item{test.mode}{passed to shinyApp}
 
+\item{modules}{preprocess modules to load, reserved for future use}
+
 \item{ver}{internally used please don't change}
 
 \item{theme}{color theme}
+
+\item{...}{not used}
 }
 \description{
 RAVE Preprocess Function

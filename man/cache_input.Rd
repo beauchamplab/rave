@@ -2,10 +2,16 @@
 % Please edit documentation in R/cls_module.R
 \name{cache_input}
 \alias{cache_input}
-\alias{write_rave_modules}
 \title{Cache input values}
 \usage{
-cache_input(key, val, read_only = T)
+cache_input(inputId, val, read_only = T)
+}
+\arguments{
+\item{inputId}{input ID}
+
+\item{val}{value if not cached}
+
+\item{read_only}{logical, if FALSE, replace cache}
 }
 \description{
 Cache input values

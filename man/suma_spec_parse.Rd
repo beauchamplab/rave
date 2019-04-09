@@ -4,7 +4,7 @@
 \alias{suma_spec_parse}
 \title{Parse spec file}
 \usage{
-suma_spec_parse(subject)
+suma_spec_parse(subject, spec_file)
 }
 \arguments{
 \item{subject}{Either characters such as 'Project/Subject' or Subject object created by Subject$new(...)}

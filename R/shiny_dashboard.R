@@ -2,7 +2,6 @@
 #' @param ... components to be added to control panel
 #' @param disable to show it or not
 #' @param collapsed initialize collapsed
-#' @import shiny
 dashboardControl = function (...,
                              disable = FALSE,
                              collapsed = FALSE)
@@ -35,7 +34,6 @@ dashboardControl = function (...,
 #' @param disable hide header
 #' @param btn_text_right control panel button name
 #' @param .list see ...
-#' @import shiny
 #' @export
 dashboardHeader = function (..., title = NULL, titleWidth = NULL, disable = FALSE, btn_text_right = 'Controls',
                             .list = NULL)
@@ -104,8 +102,6 @@ dashboardHeader = function (..., title = NULL, titleWidth = NULL, disable = FALS
 #' @param skin theme color
 #' @param controlbar_opened open control panel by default or not
 #' @param initial_mask internally used
-#' @importFrom htmltools htmlDependency
-#' @import shiny
 #' @export
 dashboardPage <- function (
   header, sidebar, control, body, title = NULL,
@@ -167,7 +163,9 @@ dashboardPage <- function (
       htmlDependency(
         "Dipterix", "0.0.1",
         c(file = system.file('assets/', package = 'rave')),
-        script = 'dipterix.js', stylesheet = 'dipterix.css'
+        script = c(
+          'dipterix.js'
+        ), stylesheet = 'dipterix.css'
       ),
 
       # load AdminLTE
@@ -209,6 +207,7 @@ dashboardPage <- function (
     tags$body(
       class = paste0("skin-", skin, cls), # if you want control-sidebar to be opened, add " control-sidebar-open"
       style = "min-height: 611px;",
+      tags$head(tags$link(rel = "icon", type = "image/x-icon", href = to_datauri(system.file('assets/images/favicon.ico', package = 'rave')))),
       shiny::bootstrapPage(
         shinyjs::useShinyjs(),
         div(

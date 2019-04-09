@@ -6,6 +6,5 @@
 ..setup_env$setup_func = list()
 ..setup_env$workers = NULL
 
-#' @export
 rave_hist = RAVEHistory$new()
 

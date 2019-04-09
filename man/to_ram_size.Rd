@@ -6,6 +6,11 @@
 \usage{
 to_ram_size(s, kb_to_b = 1000)
 }
+\arguments{
+\item{s}{size}
+
+\item{kb_to_b}{1KB=nB, n=1000 by default}
+}
 \description{
 Convert bytes to KB, MB, GB,...
 }

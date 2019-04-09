@@ -7,9 +7,9 @@
 module_analysis_names(module_id, project_name)
 }
 \arguments{
-\item{module}{id}
+\item{module_id}{module id}
 
-\item{project}{name}
+\item{project_name}{project name}
 }
 \description{
 Find module analysis names

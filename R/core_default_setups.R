@@ -18,14 +18,14 @@ arrange_data_dir <- function(first_time = F, reset = F){
   }
 
   if(reset){
-    rave::rave_options(
+    rave_options(
       data_dir = data_dir,
       raw_data_dir = raw_dir
     )
   }
 
-  data_dir = rave::rave_options('data_dir')
-  raw_dir = rave::rave_options('raw_data_dir')
+  data_dir = rave_options('data_dir')
+  raw_dir = rave_options('raw_data_dir')
 
   if(!dir.exists(data_dir) || !dir.exists(raw_dir)){
     logger('Cannot find data directory for RAVE. Please make sure that these folder exists', level = 'ERROR')
@@ -57,8 +57,8 @@ arrange_modules <- function(
   first_time = FALSE, reset = F, quiet = F
 ){
 
-  look_up_file = rave::rave_options('module_lookup_file')
-  target_dir = rave::rave_options('module_root_dir')
+  look_up_file = rave_options('module_lookup_file')
+  target_dir = rave_options('module_root_dir')
 
   dir.create(target_dir, recursive = T, showWarnings = F)
   new_modules = read.csv(system.file('modules.csv', package = 'rave'), stringsAsFactors = F)

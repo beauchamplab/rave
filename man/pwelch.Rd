@@ -17,11 +17,15 @@ pwelch(x, fs, window = 64, noverlap = 8, nfft = 256, col = "black",
 
 \item{noverlap}{overlap between two adjacent windows, by default is 8}
 
+\item{nfft}{number of DFT points}
+
+\item{col, xlim, ylim, main, cex, ...}{will be passed to plot}
+
 \item{plot}{logical, plot the result or not}
 
 \item{log}{'', 'x', 'y', 'xy', indicates which axis should be log10 value.}
 
-\item{...}{will be passed to plot}
+\item{spec_func}{deprecated}
 }
 \description{
 Welch Periodogram
