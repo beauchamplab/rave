@@ -10,8 +10,8 @@ to_package_name <- function(module_id){
 load_modules <- function(legacy = FALSE){
 
   if(!legacy){
-    if(!rave:::package_installed('ravebuiltins')){
-      f = rave:::get_from_package('install_github', pkg = 'remotes')
+    if(!package_installed('ravebuiltins')){
+      f = get_from_package('install_github', pkg = 'remotes')
       f('beauchamplab/ravebuiltins', dependencies = FALSE, upgrade = 'never', force = F)
     }
 

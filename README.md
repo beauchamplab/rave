@@ -2,7 +2,7 @@
 
 # RAVE
 
-__R__ __A__*nalysis and* __V__*isualization of intracranial* __E__*lectroencephalography* (<a href="http://34.214.213.191" target="_blank">demo</a>)
+__R__ __A__*nalysis and* __V__*isualization of intracranial* __E__*lectroencephalography*
 
 
 ## Installation
@@ -12,11 +12,21 @@ Please [click here for the prerequisite installation guide](./Installation.md) t
 
 * RAVE runs best on modern computers with multicore CPUs, [click here for suggested system configurations](./Requirements.md).
 
-* After the prerequisites are installed, open R-Studio (in Mac OSX, Rstudio icon is installed in your Applications folder). Copy and paste the following commands into the RStudio console to download the current version of RAVE. The commands must be typed one at a time. If packages need to be installed, you may accept the defaults by typing "Yes" to any questions that appear. In the case of errors, relaunch RStudio and repeat the commands.
+* After the prerequisites are installed, open R-Studio (in Mac OSX, Rstudio icon is installed in your Applications folder). Copy and paste the following commands into the RStudio console to download the current version of RAVE. The commands must be typed one at a time. If packages need to be installed, you may accept the defaults by typing "Yes" to any questions that appear. In the case of errors, relaunch RStudio and repeat the commands or try the alternative installation command.
+
 ```r
-# Install RAVE
+# Install RAVE and builtin modules
 install.packages('devtools')
 devtools::install_github('beauchamplab/rave')
+devtools::install_github('beauchamplab/ravebuiltins')
+```
+
+Alternative installation command:
+
+```r
+install.packages('pak')
+pak::pkg_install('beauchamplab/rave')
+pak::pkg_install('beauchamplab/ravebuiltins', upgrade = FALSE, ask = FALSE)
 ```
 
 * After installing or updating RAVE, quit and restart RStudio before continuing.

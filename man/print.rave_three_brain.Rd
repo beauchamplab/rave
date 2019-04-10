@@ -2,15 +2,15 @@
 % Please edit documentation in R/cls_brain2.R
 \name{print.rave_three_brain}
 \alias{print.rave_three_brain}
-\title{Show RAVE brain via package threeBrain}
+\title{Show RAVE brain via package `threeBrain`}
 \usage{
 \method{print}{rave_three_brain}(x, ...)
 }
 \arguments{
 \item{x}{generated from rave_brain2}
 
-\item{...}{passed to threeBrain::threejs_brain}
+\item{...}{passed to \code{threeBrain::threejs_brain}}
 }
 \description{
-Show RAVE brain via package threeBrain
+Show RAVE brain via package `threeBrain`
 }
