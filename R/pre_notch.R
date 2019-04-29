@@ -92,14 +92,17 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
 
       last = get_val(utils$last_inputs(), 'last_notch_freq', default = 60)
 
+      notch_freq_bw = get_val(isolate(local_data$notch_freq_bw), default = '1,2,2')
+      notch_freq_x = get_val(isolate(local_data$notch_freq_x), default = '1,2,3')
+
       tagList(
         box(
           width = 12,
           title = 'Notch Filter',
           collapsible = T, collapsed = local_data$has_notch,
           numericInput(ns('notch_freq'), 'Base Frequency, (Hz)', value = last),
-          textInput(ns('notch_freq_x'), 'X (Times)', value = '1,2,3'),
-          textInput(ns('notch_freq_bw'), '+- (Band Width, Hz)', value = '1,2,2'),
+          textInput(ns('notch_freq_x'), 'X (Times)', value = notch_freq_x),
+          textInput(ns('notch_freq_bw'), '+- (Band Width, Hz)', value = notch_freq_bw),
           hr(),
           htmlOutput(ns('notch_bands')),
           actionButton(ns('do_notch'), 'Apply Notch Filters')
@@ -239,6 +242,9 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
           widths = widths
         )
       ))
+
+      local_data$notch_freq_bw = input$notch_freq_bw
+      local_data$notch_freq_x = input$notch_freq_x
       showNotification(p('Notch filter finished'), type='message')
 
       utils$reset()
