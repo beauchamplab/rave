@@ -111,6 +111,8 @@ rave_brain2 <- function(surfaces = 'pial', multiple_subject = FALSE, prefix = 's
         logger('suma/T1_to_freesurf.txt is missing, try to load from AFNI file')
         dat = afni_tool$read.AFNI(afni_file)
 
+
+
         if('VOLREG_MATVEC_000000' %in% names(dat$header)){
 
           mat = matrix(c(dat$header$VOLREG_MATVEC_000000, 0,0,0,1), nrow = 4, ncol = 4, byrow = T)
@@ -118,6 +120,11 @@ rave_brain2 <- function(surfaces = 'pial', multiple_subject = FALSE, prefix = 's
           trans_mat = mm
           write.table(mm, file = trans_mat_file, sep = '\t', col.names = FALSE, row.names = FALSE)
 
+        }else if('ALLINEATE_MATVEC_B2S_000000' %in% names(dat$header)){
+          mat = matrix(c(dat$header$ALLINEATE_MATVEC_B2S_000000, 0,0,0,1), nrow = 4, ncol = 4, byrow = T)
+          mm = diag(c(-1,-1,1, 0)) %*% mat; mm[,4] = -mm[,4]; mm[4,4] = 1; mm = solve(mm)
+          trans_mat = mm
+          write.table(mm, file = trans_mat_file, sep = '\t', col.names = FALSE, row.names = FALSE)
         }else{
 
           logger('Cannot find VOLREG_MATVEC_000000 in afni file. ',
