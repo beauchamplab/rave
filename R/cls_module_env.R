@@ -858,10 +858,18 @@ ExecEnvir <- R6::R6Class(
         return(self$param_env[['..rave_future_obj']])
       }
     },
+    clear_cache = function(){
+      env = private$cache_env
+      nms = names(env)
+      nms = nms[! nms %in% c('.keys', env[['.keys']])]
+      if(length(nms)){
+        rm(list = nms, envir = env)
+      }
+    },
     cache = function(key, val, global = FALSE, replace = FALSE,
-                     session = getDefaultReactiveDomain()){
+                     session = getDefaultReactiveDomain(), persist = FALSE){
       # .key = str_c(unlist(key, recursive = T, use.names = F), collapse = ', ')
-      key = as.character(digest::digest(key))
+      key = as.character(digest::digest(key))  # 84e3c9457c258f2b6ce3606221f3381c
       if(global){
         env = getDefaultCacheEnvironment(session = session)
       }else{
@@ -871,6 +879,9 @@ ExecEnvir <- R6::R6Class(
         if(exists(key, envir = env, inherits = FALSE)){
           return( env[[key]] )
         }
+        # else{
+        #   cat('register keeey ', key)
+        # }
         if(exists(key, envir = private$cache_env, inherits = FALSE)){
           return( private$cache_env[[key]] )
         }
@@ -882,7 +893,10 @@ ExecEnvir <- R6::R6Class(
       # save cache
       env[[key]] = val
 
-      env$.keys = unique(c(env$.keys, key))
+      if(persist){
+        env$.keys = unique(c(env$.keys, key))
+      }
+
       return(val)
     },
     cache_input = function(inputId, val = NULL, read_only = T, sig = NULL){
@@ -895,7 +909,8 @@ ExecEnvir <- R6::R6Class(
             sig = sig
           ),
           global = is_global,
-          replace = F)
+          replace = F,
+          persist = TRUE)
         if(is.null(v)){
           return(val)
         }
@@ -908,7 +923,8 @@ ExecEnvir <- R6::R6Class(
             sig = sig
           ), val,
           global = is_global,
-          replace = !read_only)
+          replace = !read_only,
+          persist = TRUE)
       }
       return(v)
     },
