@@ -53,6 +53,7 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
   }
 
   w$reload_module = function(){
+    self$clear_cache()
     self$input_update(list(), init = TRUE)
   }
 

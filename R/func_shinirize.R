@@ -249,6 +249,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         local_static$activated = FALSE
 
         params = isolate(reactiveValuesToList(input))
+        execenv$clear_cache()
         execenv$reset(params)
       }, priority = 999L)
 

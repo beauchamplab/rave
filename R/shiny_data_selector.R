@@ -1123,6 +1123,7 @@ shiny_data_selector <- function(module_id){
       last_entry('time_range', epoch_range, save = T, group = group)
       last_entry('reference_name', reference, save = T, group = group)
 
+
       # refresh UIs
       global_reactives$force_refresh_all = Sys.time()
       global_reactives$has_data = Sys.time()

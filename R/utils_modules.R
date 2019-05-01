@@ -12,7 +12,12 @@ load_modules <- function(legacy = FALSE){
   if(!legacy){
     if(!package_installed('ravebuiltins')){
       f = get_from_package('install_github', pkg = 'remotes')
-      f('beauchamplab/ravebuiltins', dependencies = FALSE, upgrade = 'never', force = F)
+      tryCatch({
+        f('beauchamplab/ravebuiltins', dependencies = FALSE, upgrade = 'never', force = F)
+      }, error = function(e){
+        stop('Fail to install RAVE builtin modules. Please install it manually via the following command!\n\tremotes::install_github("beauchamplab/ravebuiltins")')
+      })
+
     }
 
     m = detect_modules('ravebuiltins')
