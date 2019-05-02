@@ -1,3 +1,105 @@
+get_os <- function(){
+  os = R.version$os
+  if(stringr::str_detect(os, '^darwin')){
+    return('darwin')
+  }
+  if(stringr::str_detect(os, '^linux')){
+    return('linux')
+  }
+  if(stringr::str_detect(os, '^solaris')){
+    return('solaris')
+  }
+  if(stringr::str_detect(os, '^win')){
+    return('windows')
+  }
+  return('unknown')
+}
+
+
+get_ram <- function(){
+  os = get_os()
+  ram = 128*1024^3
+  safe_ram = function(e){
+    suppressWarnings({
+      min(memory.limit(), 128*1024^3)
+    })
+  }
+
+  ram = tryCatch({
+    switch (
+      os,
+      'darwin' = {
+        ram = substring(system("sysctl hw.memsize", intern = TRUE), 13)
+      },
+      'linux' = {
+        ram = system("awk '/MemTotal/ {print $2}' /proc/meminfo", intern = TRUE)
+        ram = as.numeric(ram) * 1024
+      },
+      'solaris' = {
+        ram = system("prtconf | grep Memory", intern = TRUE)
+        ram = stringr::str_trim(ram)
+        ram = stringr::str_split(ram, '[ ]+')[[1]][3:4]
+
+        power = match(ram[2], c("kB", "MB", "GB", "TB", "Kilobytes", "Megabytes", "Gigabytes", "Terabytes"))
+        ram = as.numeric(ram[1]) * 1024^(1 + (power-1) %% 4)
+      },
+      'windows' = {
+        ram = system("wmic MemoryChip get Capacity", intern = TRUE)[-1]
+        ram = stringr::str_trim(ram)
+        ram = ram[nchar(ram) > 0]
+        ram = sum(as.numeric(ram))
+      }, {
+        ram = min(memory.limit(), 128*1024^3)
+      }
+    )
+    ram
+  }, error = safe_ram, warning = safe_ram)
+  ram = as.numeric(ram)
+  ram
+}
+
+
+get_ncores <- function(){
+  as.numeric(future::availableCores())
+}
+
+get_cpu <- function(){
+  os = get_os()
+
+  safe_cpu = function(...){
+    list(
+      vendor_id = NA,
+      model_name = NA
+    )
+  }
+  cpu = tryCatch({
+    switch (
+      os,
+      'darwin' = list(
+        vendor_id = system("sysctl -n machdep.cpu.vendor", intern = TRUE),
+        model_name = system("sysctl -n machdep.cpu.brand_string", intern = TRUE)
+      ),
+      'linux' = list(
+        vendor_id = gsub("vendor_id\t: ", "", unique(system("awk '/vendor_id/' /proc/cpuinfo", intern = TRUE))),
+        model_name = gsub("model name\t: ", "", unique(system("awk '/model name/' /proc/cpuinfo", intern = TRUE)))
+      ),
+      'windows' = list(
+        model_name = system("wmic cpu get name", intern = TRUE)[2],
+        vendor_id = system("wmic cpu get manufacturer", intern = TRUE)[2]
+      ),
+      list(
+        vendor_id = NA,
+        model_name = NA
+      )
+    )
+  }, error = safe_cpu, warning = safe_cpu)
+  cpu
+}
+
+
+
+
+
 # Convert file to base64 format
 to_datauri <- function(file, mime = ''){
   info = file.info(file)
@@ -83,49 +185,19 @@ print.rave_bytes <- function(x, digit=1, ...){
 #' Get max RAM size (experimental)
 #' @export
 mem_limit <- function(){
-  sys_info = Sys.info()
-  sys_name = str_to_lower(sys_info['sysname'])
-  default_return = list(
-    total = NA,
-    free = NA
+
+  total = get_ram()
+
+
+  bit = 8 * .Machine$sizeof.pointer
+  bit = bit - (bit > 32) * 4 - 4
+  free = sum(gc()[,1] * c(bit, 8))
+
+  list(
+    total = total,
+    free = total - free
   )
-  if(str_detect(sys_name, '^win')){
-    # windows
-  }
-  if(str_detect(sys_name, '^darwin')){
-    tryCatch({
-      ram_info = system2('sysctl', '-a', wait = T, stdout = T)
-      ram_info = ram_info[str_detect(ram_info, 'mem')]
-      ram_info = as.numeric(str_extract(ram_info, '[0-9]+$'))
 
-      ram = list(
-        total = max(ram_info),
-        free = NA
-      )
-    }, error = function(e){
-      default_return
-    }) ->
-      ram
-    return(ram)
-  }
-
-  # linux
-  tryCatch({
-    units = str_to_lower(c('B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'))
-    ram_info = system2('cat', '/proc/meminfo', stdout = T)
-    ram_info = str_to_lower(ram_info)
-    memtotal = ram_info[str_detect(ram_info, '(memtotal)|(memfree):')]
-    ram_size = str_match(memtotal, '([0-9]+) ([\\w]b)$')
-    ram = as.numeric(ram_size[,2]) * 1024^(-1 + sapply(ram_size[,3], function(x){which(units == x)}))
-    list(
-      total = max(ram),
-      free = min(ram)
-    )
-  }, error = function(e){
-    default_return
-  }) ->
-    ram
-  return(ram)
 
 }
 
