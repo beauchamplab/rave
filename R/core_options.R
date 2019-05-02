@@ -144,15 +144,17 @@ Options <- R6::R6Class(
       self$set_options(conf_path = conf_path)
     },
     save_settings = function(path = '~/.rave.yaml'){
+      dname = dirname(path)
+      if(!dir.exists(dname)){
+        dir.create(dname, showWarnings = FALSE, recursive = TRUE)
+      }
+
       if(!file.exists(path)){
-        dname = dirname(path)
-        if(!file.exists(dname)){
-          dir.create(dname)
-        }
-        mw = self$get_options('max_worker')
-        if(length(mw) > 0 && mw == 3L && package_installed('future')){
-          self$set_options(max_worker = future::availableCores() - 1)
-        }
+        self$set_options(max_worker = future::availableCores() - 1)
+        try({
+          ram = mem_limit()$total / 1024^3
+          self$set_options(max_mem = ram)
+        })
       }
       opt = private$opts
       yaml::write_yaml(opt, file = path, fileEncoding = 'UTF-8')
