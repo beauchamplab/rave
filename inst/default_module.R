@@ -269,4 +269,9 @@ rave_checks = function(..., data = NULL){
 }
 
 
-rave_execute({})
+rave_execute({
+  missing_data = isolate(`.__internal_reactives__.`[['miss_data']])
+  if( missing_data ){
+    stop('Need to load data. Waiting for an action.')
+  }
+})

@@ -12,7 +12,8 @@ ExecEnvir <- R6::R6Class(
     inputs = NULL,
     outputs = NULL,
     update = NULL,
-    tabsets = NULL
+    tabsets = NULL,
+    executes = NULL
   ),
   public = list(
     parent_env = NULL,
@@ -817,6 +818,7 @@ ExecEnvir <- R6::R6Class(
       quos = rlang::quos_auto_name(rlang::quos(...))
 
       normal_quos = quos[!names(quos) %in% 'async']
+      private$executes = c(private$executes, normal_quos)
       async_quo = quos[['async']]
       self$async_module = !is.null(async_quo)
       self$auto_execute = auto
@@ -850,8 +852,8 @@ ExecEnvir <- R6::R6Class(
               gc = T, workers = rave_options('max_worker'))
           }
         }else{
-          if(length(normal_quos)){
-            lapply(normal_quos, eval_dirty, env = self$runtime_env)
+          if(length(private$executes)){
+            lapply(private$executes, eval_dirty, env = self$runtime_env)
           }
         }
 
@@ -868,22 +870,21 @@ ExecEnvir <- R6::R6Class(
     },
     cache = function(key, val, global = FALSE, replace = FALSE,
                      session = getDefaultReactiveDomain(), persist = FALSE){
-      # .key = str_c(unlist(key, recursive = T, use.names = F), collapse = ', ')
-      key = as.character(digest::digest(key))  # 84e3c9457c258f2b6ce3606221f3381c
+      digest = as.character(digest::digest(key))
       if(global){
         env = getDefaultCacheEnvironment(session = session)
       }else{
         env = private$cache_env
       }
       if(!replace){
-        if(exists(key, envir = env, inherits = FALSE)){
-          return( env[[key]] )
+        if(exists(digest, envir = env, inherits = FALSE)){
+          return( env[[digest]] )
         }
         # else{
         #   cat('register keeey ', key)
         # }
-        if(exists(key, envir = private$cache_env, inherits = FALSE)){
-          return( private$cache_env[[key]] )
+        if(exists(digest, envir = private$cache_env, inherits = FALSE)){
+          return( private$cache_env[[digest]] )
         }
       }
       if(missing(val)){
@@ -891,10 +892,10 @@ ExecEnvir <- R6::R6Class(
       }
 
       # save cache
-      env[[key]] = val
+      env[[digest]] = shiny::isolate(val)
 
       if(persist){
-        env$.keys = unique(c(env$.keys, key))
+        env$.keys = unique(c(env$.keys, digest))
       }
 
       return(val)
@@ -915,7 +916,6 @@ ExecEnvir <- R6::R6Class(
           return(val)
         }
       }else{
-        logger('Caching ', inputId)
         v = self$cache(
           key = list(
             type = '.rave-inputs-Dipterix',
