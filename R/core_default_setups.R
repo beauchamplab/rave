@@ -49,131 +49,85 @@ arrange_data_dir <- function(first_time = F, reset = F){
 }
 
 #' Update (optional), and check validity of modules
-#' @param first_time check updates
+#' @param refresh check and updates file
 #' @param reset same as first_time, check module updates, ignored
 #' @param quiet no overwrite messages
 #' @export
-arrange_modules <- function(
-  first_time = FALSE, reset = F, quiet = F
-){
+arrange_modules <- function(refresh = FALSE, reset = FALSE, quiet = FALSE){
 
-  look_up_file = rave_options('module_lookup_file')
-  target_dir = rave_options('module_root_dir')
-
-  dir.create(target_dir, recursive = T, showWarnings = F)
-  new_modules = read.csv(system.file('modules.csv', package = 'rave'), stringsAsFactors = F)
-
-  if(first_time || reset || !dir.exists(target_dir) || !file.exists(look_up_file)){
-    # unlike data dir, we need to update this every time!
-    # Move modules to module_root_dir
-    # migrate new modules and overwrite
-    # IMPORTANT: migrate before module_lookup_file. since new packages need to have valid path
-    file.copy(system.file('modules', package = 'rave'), target_dir, overwrite = T, recursive = T)
-    file.copy(system.file('packages.txt', package = 'rave'), target_dir, overwrite = T)
-
-    # Tricky part: update module lookup file
-    # Rule is:
-    # if new module, and valid (active and script path exists), activate
-    # if update module, newer version will be kept. also if old module is deactivated, then deactivate
-    # if script path invalid, module will be deactivate anyway
-    #
-    # as for order, new modules will always on the top
-
-    try({
-      columns = names(new_modules)
-      n_new = nrow(new_modules)
-
-      if(file.exists(look_up_file)){
-        old_modules = read.csv(look_up_file, stringsAsFactors = F)
-      }
-      if(nrow(old_modules)){
-        old_modules$Order %?<-% seq_len(nrow(old_modules)) -1
-        old_modules$Order = as.numeric(old_modules$Order)
-        old_modules$Order[is.na(old_modules$Order)] = n_new + nrow(old_modules) + seq_along(old_modules$Order[is.na(old_modules$Order)])
-
-        new = merge(new_modules, old_modules, by = 'ModuleID', all = T, sort = F, suffixes = c('', '_old'))
-
-        # check ModuleID
-        new = new[!is.na(new$ModuleID),]
-
-        lapply(seq_len(nrow(new)), function(ii){
-          row = new[ii,]
-
-          for(col in columns){
-            if(is.na(row[[col]])){
-              row[[col]] = row[[paste0(col, '_old')]]
-            }
-          }
-          if(is.na(row$Active_old)){ row$Active = TRUE }else{
-            row$Active = row$Active & row$Active_old
-          }
-          if(is_invalid(row$ScriptPath, .invalids = c('null', 'na', 'blank')) || !file.exists(row$ScriptPath)){
-            row$Active = F
-          }
-          if(is.na(row$Version) || !is.character(row$Version)){
-            row$Version = '0'
-          }
-          if(is.na(row$Order)){
-            row$Order = row$Order_old
-          }
-
-          if(!reset){
-            if(length(row$Version_old) == 1 &&
-               !is.na(row$Version_old) &&
-               is.character(row$Version_old) &&
-               utils::compareVersion(row$Version, row$Version_old) < 0
-            ){
-              # New packages are not new! DO not change module file, this guy is a developer!
-              row$Version = row$Version_old
-              row$PackageID = row$PackageID_old
-              row$GroupName = row$GroupName_old
-              row$Name = row$Name_old
-              row$ScriptPath = row$ScriptPath_old
-              row$Author = row$Author_old
-              row$Packages = row$Packages_old
-            }
-          }
-          row[, columns]
-        }) ->
-          modules
-
-        new = do.call(rbind, modules)
-
-        lapply(modules, function(m){
-          sel = m$ModuleID == new$ModuleID
-          if(sum(sel) > 1){
-            vers = as.numeric_version(new$Version[sel])
-            m_ver = as.numeric_version(m$Version)
-            if(m_ver != max(vers)){
-              return(NULL)
-            }
-          }
-          return(m)
-        }) ->
-          modules
-
-        modules = dropNulls(modules)
-
-        modules = do.call(rbind, modules)
-        new_modules = modules[!duplicated(modules[,c('ModuleID', 'Version')]), ]
-
-        new_modules = new_modules[order(new_modules$Order), ]
-        new_modules$Order = seq_len(nrow(new_modules))
-      }
-
-
-    }, silent = T)
-
-    safe_write_csv(new_modules, look_up_file, quiet = quiet)
+  col_names = c('ID', 'Name', 'Group', 'Package', 'Active', 'Notes')
+  fpath = rave_options('module_lookup_file')
+  dirname = dirname(fpath)
+  if(!dir.exists(dirname)){
+    dir.create(dirname, showWarnings = FALSE, recursive = TRUE)
+  }
+  if(!file.exists(fpath)){
+    logger('First time? looking for modules', quiet = quiet)
   }
 
-  rave_options(module_root_dir = base::normalizePath(target_dir))
-  rave_options(module_lookup_file = base::normalizePath(look_up_file))
+  old_table = NULL
 
-  logger('\nActive modules: \n', paste0(' - ', new_modules$Name[new_modules$Active], '(', new_modules$ModuleID[new_modules$Active], ')', collapse = '\n'),
-          '\nAccording to [', look_up_file, ']', level = 'INFO')
 
-  return(first_time || reset)
+  if(!reset && file.exists(fpath)){
+    tbl = read.csv(fpath, stringsAsFactors = F)
+    nms = names(tbl)
+    if(!all(col_names %in% nms)){
+      refresh = TRUE
+    }else{
+      tbl = tbl[, col_names]
+      old_table = tbl
+    }
+  }
+
+  if(refresh || reset){
+    logger('Trying to locate all possible modules...', quiet = quiet)
+
+    # detect all modules
+    tbl = detect_modules(as_module = FALSE)
+    tbl = as.data.frame(tbl, stringsAsFactors = F)
+    names(tbl) = col_names[1:4]
+
+    if(!nrow(tbl)){
+      logger('No modules can be found. Installing builtin modules using \n\tremotes::install_github("beauchamplab/ravebuiltins")', level = 'ERROR')
+      devtools::install_github("beauchamplab/ravebuiltins", upgrade = 'never')
+      return(invisible())
+    }
+
+
+
+    # join
+    if(is.data.frame(old_table) && !reset){
+      tbl = merge(tbl, old_table, by = names(tbl), all.x = TRUE, no.dups = T)
+      tbl$Active[is.na(tbl$Active)] = TRUE
+      tbl$Notes[is.na(tbl$Notes)] = ''
+    }else{
+      tbl$Active = TRUE
+      tbl$Notes = ''
+    }
+
+    # try for each module, validate
+    for(ii in seq_len(nrow(tbl))){
+      row = tbl[ii, ]
+      if(row$Active){
+        module_id = row$ID
+        package_name = row$Package
+        logger('Validating [', module_id, '] (Package - ', package_name, ')', level = 'INFO', quiet = quiet)
+        m = get_module(package_name, module_id)
+
+        if(!any(c('ModuleEnvir', 'R6') %in% class(m))){
+          tbl[ii, 'Active'] = FALSE
+          tbl[ii, 'Notes'] = 'Cannot initialize'
+        }
+      }
+    }
+
+    # write to fpath
+    write.csv(tbl, fpath, row.names = FALSE)
+  }
+
+  tbl$Notes[is.na(tbl$Notes)] = ''
+
+  tbl
 }
 
 

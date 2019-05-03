@@ -2,7 +2,10 @@
 #' @param ... things to print
 #' @param level logger level: DEBUG, INFO, WARNING, ERROR, FATAL
 #' @export
-logger <- function(..., level = 'DEBUG'){
+logger <- function(..., level = 'DEBUG', quiet = FALSE){
+  if(quiet){
+    return(invisible())
+  }
   ld = !rave_options('logger_enabled')
   lv = rave_options('logger_level')
   ce = rave_options('crayon_enabled')
