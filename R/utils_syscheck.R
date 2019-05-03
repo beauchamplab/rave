@@ -71,9 +71,6 @@ rave_version <- function(){
       logger('Updating module information', level = 'INFO')
       # New RAVE installed! update
 
-      # 2. Module Files
-      rave::arrange_modules(T)
-
       # 3. Data files
       has_data = rave::arrange_data_dir(T)
 
@@ -89,7 +86,6 @@ rave_version <- function(){
       )
 
     }else{
-      rave::arrange_modules(F)
       has_data = rave::arrange_data_dir(F)
     }
 

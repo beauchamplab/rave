@@ -544,15 +544,8 @@ local({
 
   ######## Module file
   load_module_table = function(){
-    .module_lookup_file = rave_options('module_lookup_file')
-    if(!file.exists(.module_lookup_file)){
-      logger('Cannot find module file from ', .module_lookup_file, '. Reset repository to ~/rave_modules', level = 'WARNING')
-      arrange_modules(first_time = T, reset = T)
-    }
-    modules = read.csv(.module_lookup_file, header = T, stringsAsFactors = F)
-    modules = modules[, c("Order","PackageID","GroupName","ModuleID","Name","ScriptPath",
-                          "Active","Author","Version","Packages")]
-    modules = modules[order(as.integer(modules$Order)), ]
+    modules = arrange_modules(FALSE, FALSE, FALSE)
+    modules = modules[, c("ID", "Name", "Group", "Package", "Active", "Notes")]
     modules
   }
 
@@ -567,7 +560,18 @@ local({
           disable = T
         ),
         body = shinydashboard::dashboardBody(
+
           fluidRow(
+
+            # Modules
+            box(
+              title = 'Modules',
+              width = 12L,
+              actionLink('module_update', 'Check for new modules'),
+              div(DT::DTOutput('modules'), style = 'overflow-x:scroll;'),
+              collapsible = TRUE
+            ),
+
             column(
               width = 6,
               fluidRow(
@@ -659,15 +663,9 @@ local({
                   )
                 )
               )
-            ),
-
-            # Modules
-            box(
-              title = 'Modules',
-              width = 12L,
-              div(DT::DTOutput('modules'), style = 'overflow-x:scroll;'),
-              uiOutput('modules_ui')
             )
+
+
 
           )
         ),
@@ -676,6 +674,7 @@ local({
       ),
       server = function(input, output, session){
         modules = load_module_table()
+        has_copy = FALSE
 
         local_data = reactiveValues(refresh = NULL, modules = modules)
         envir = environment()
@@ -731,20 +730,13 @@ local({
         })
 
 
-        # modules
-        output$modules_ui <- renderUI({
-          modules = load_module_table()
-          local_data$refresh
-          if(!identical(envir$modules, modules) && is.data.frame(envir$modules) && nrow(envir$modules) > 0){
-            actionButton('module_sync', 'Save Module Table')
-          }
+        observeEvent(input$module_update, {
+          envir$modules = arrange_modules(refresh = TRUE, reset = FALSE, quiet = FALSE)
+          local_data$table_updated = Sys.time()
         })
-        observeEvent(input$module_sync, {
-          # local_data$refresh
-          safe_write_csv(envir$modules, rave_options('module_lookup_file'), row.names = F)
-          local_data$refresh = Sys.time()
-        })
+
         output$modules <- DT::renderDT({
+          local_data$table_updated
           DT::datatable(
             class = 'compact nowrap',
             envir$modules,
@@ -768,39 +760,17 @@ local({
           val = info$value
           switch (
             var,
-            'Order' = {
-              val = as.integer(val)
-              if(is.na(val)){
-                val = envir$modules[row, col]
-              }
-              val
+            'ID' = {
+              showNotification(
+                p('Cannot change module ID, otherwise RAVE cannot find modules. The change will be ignored'),
+                type = 'error', id = 'module_table')
+              NULL
             },
-            'PackageID' = {
-              val = stringr::str_remove_all(val, '\\W')
-              val
-            },
-            'GroupName' = {
-              val = stringr::str_remove_all(val, '[^\\w\\ _\\-&\\(\\)\\.]')
-              val
-            },
-            'ModuleID' = {
-              val = stringr::str_remove_all(val, '[^\\w\\_]')
-              val
-            },
-            'Name' = {
-              val = stringr::str_remove_all(val, '[^\\w\\ _\\-&\\(\\)\\.]')
-              val
-            },
-            'ScriptPath' = {
-              tryCatch({
-                val = base::normalizePath(val)
-                assert_that(file.exists(val), !file.info(val)$isdir)
-                val
-              }, error = function(e){
-                showNotification('Module file does not exist or it is invalid. Please double check.', type = 'error')
-                val = envir$modules[row, col]
-                val
-              })
+            'Package' = {
+              showNotification(
+                p('Cannot change Package name, otherwise RAVE cannot find modules. The change will be ignored'),
+                type = 'error', id = 'module_table')
+              NULL
             },
             'Active' = {
               tryCatch({
@@ -816,44 +786,31 @@ local({
                 FALSE
               })
             },
-            'Author' = {
-              val = stringr::str_match_all(val, '\\[([\\w\\.\\ ]+)\\][\\ ]{0,}\\<([^\\>]+)\\>')[[1]]
-              if(nrow(val)){
-                val = paste0('[', val[, 2], ']<', val[, 3], '>', collapse = ', ')
-              }else{
-                val = ''
-              }
-              val
-            },
-            'Version' = {
-              val = stringr::str_extract(val, '[0-9][0-9\\.\\-]+')
-              if(is.na(val)){
-                val = envir$modules[row, col]
-              }
-              val
-            },
-            'Packages' = {
-              val = unlist(stringr::str_split(val, '[;,\\ ]+'))
-              val = stringr::str_trim(val)
-              val = val[val != '']
-
-              pkgs = val[!sapply(val, package_installed)]
-              if(length(pkgs)){
-                showNotification(p(
-                  'The following packages need to be installed:', br(),
-                  paste(pkgs, collapse = ', ')
-                ), type = 'warning')
-              }
-              val = paste(val, collapse = ';')
+            {
               val
             }
           ) ->
             val
 
-          logger(tbl[row, col], ' >> ', val)
-          envir$modules[row, col] <- val
-          DT::replaceData(proxy, envir$modules, resetPaging = FALSE, rownames = F)
+
+
+          if(!is.null(val)){
+            logger(tbl[row, col], ' >> ', val)
+            envir$modules[row, col] <- val
+            DT::replaceData(proxy, envir$modules, resetPaging = FALSE, rownames = F)
+
+            if(has_copy){
+              write.csv(envir$modules, rave_options('module_lookup_file'), row.names = F)
+            }else{
+              safe_write_csv(envir$modules, rave_options('module_lookup_file'), row.names = F)
+              envir$has_copy = TRUE
+            }
+
+            local_data$table_updated = Sys.time()
+          }
+
           local_data$refresh = Sys.time()
+
         })
 
       }
