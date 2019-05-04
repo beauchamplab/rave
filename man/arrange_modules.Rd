@@ -4,10 +4,10 @@
 \alias{arrange_modules}
 \title{Update (optional), and check validity of modules}
 \usage{
-arrange_modules(first_time = FALSE, reset = F, quiet = F)
+arrange_modules(refresh = FALSE, reset = FALSE, quiet = FALSE)
 }
 \arguments{
-\item{first_time}{check updates}
+\item{refresh}{check and updates file}
 
 \item{reset}{same as first_time, check module updates, ignored}
 

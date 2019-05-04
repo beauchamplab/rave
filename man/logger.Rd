@@ -4,12 +4,14 @@
 \alias{logger}
 \title{Color console for RAVE}
 \usage{
-logger(..., level = "DEBUG")
+logger(..., level = "DEBUG", quiet = FALSE)
 }
 \arguments{
 \item{...}{things to print}
 
 \item{level}{logger level: DEBUG, INFO, WARNING, ERROR, FATAL}
+
+\item{quiet}{suppress logger info}
 }
 \description{
 Color console for RAVE

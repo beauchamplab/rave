@@ -317,7 +317,9 @@ detect_modules <- function(packages, as_module = TRUE){
         label_name %?<-% sprintf('No Label (%s)', module_id)
         group_name = m$group_name
         group_name %?<-% '______'
-        c(module_id, label_name, group_name, pname)
+        order = m$order
+        order %?<-% Inf
+        c(module_id, label_name, group_name, pname, order)
       }))
 
     }, error = function(e){
@@ -332,6 +334,7 @@ detect_modules <- function(packages, as_module = TRUE){
   }
 
   m_data = do.call('rbind', m_data)
+  m_data = m_data[order(as.numeric(m_data[, 5])), 1:4]
 
   if(as_module){
     gnames = unique(m_data[,3])
