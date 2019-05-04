@@ -6,5 +6,5 @@
 ..setup_env$setup_func = list()
 ..setup_env$workers = NULL
 
-rave_hist = RAVEHistory$new()
+rave_hist = RAVEHistory$new(use_yaml = TRUE)
 
