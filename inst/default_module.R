@@ -62,13 +62,7 @@ output[['.__rave_modal__.']] <- renderUI({
   }
 
   div(
-    style = "width: 100%;
-    height: 100vh;
-    margin-bottom: -100vh;
-    background: rgba(0,0,0,0.8);
-    margin-top:  -35px;
-    z-index: 1000;
-    position: relative;",
+    class = 'rave-content-modal',
     div(
       class = 'centered',
       h3('Load Data...', style = 'color: cadetblue;'),

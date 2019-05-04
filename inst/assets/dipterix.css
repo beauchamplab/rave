@@ -156,6 +156,27 @@ body.rave-noscroll {
   max-height: 400px;
 }
 
+.rave-content-modal {
+  width: auto;
+  height: 100vh;
+  background: rgba(0,0,0,0.8);
+  z-index: 1000;
+  left: 230px;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  position: fixed;
+  -webkit-transition: left 0.3s ease-in-out;
+  -moz-transition: left 0.3s ease-in-out;
+  -o-transition: left 0.3s ease-in-out;
+  transition: left 0.3s ease-in-out;
+}
+
+.sidebar-collapse .rave-content-modal {
+  left: 0;
+}
+
+
 /*
 #loading_img img{
 	min-width: 100% !important;

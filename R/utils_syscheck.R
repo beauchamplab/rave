@@ -89,15 +89,15 @@ rave_version <- function(){
       has_data = rave::arrange_data_dir(F)
     }
 
-    try({
-      check_updates_onstartup = rave_options('check_updates_onstartup')
-      check_updates_onstartup %?<-% T
-      if(check_updates_onstartup){
-        suppressMessages({
-          check_updates()
-        })
-      }
-    }, silent = T)
+    # try({
+    #   check_updates_onstartup = rave_options('check_updates_onstartup')
+    #   check_updates_onstartup %?<-% T
+    #   if(check_updates_onstartup){
+    #     suppressMessages({
+    #       check_updates()
+    #     })
+    #   }
+    # }, silent = T)
 
     rave::save_options()
 
