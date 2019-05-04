@@ -10,7 +10,7 @@ RAVEHistory <- R6::R6Class(
   ),
   public = list(
 
-    initialize = function(path = '~/', name = '.rave.object.history', use_yaml = F){
+    initialize = function(path = '~/', name = '.rave.history.yaml', use_yaml = F){
       private$save_path = file.path(path, name)
       private$use_yaml = use_yaml
       if(!file.exists(private$save_path)){
