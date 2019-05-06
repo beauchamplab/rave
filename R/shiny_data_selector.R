@@ -867,6 +867,14 @@ shiny_data_selector <- function(module_id){
       project = input$project_name
       subject = input$subject_code
 
+      # check if subject exists
+      sub_dir = file.path(rave_options('data_dir'), project, subject, 'rave')
+      if(!dir.exists(sub_dir)){
+        return(p(
+          'File path not found:', br(), sub_dir
+        ))
+      }
+
       # Trial
       epoch = input$epoch
       # Check epoch file
