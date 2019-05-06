@@ -166,14 +166,12 @@ body.rave-noscroll {
   top: 0;
   bottom: 0;
   position: fixed;
-  -webkit-transition: left 0.3s ease-in-out;
-  -moz-transition: left 0.3s ease-in-out;
-  -o-transition: left 0.3s ease-in-out;
-  transition: left 0.3s ease-in-out;
+  transition-delay: 0.3s;
 }
 
 .sidebar-collapse .rave-content-modal {
   left: 0;
+  transition-delay: 0s;
 }
 
 

@@ -209,12 +209,15 @@ app_controller <- function(
 
         for(m in ms){
           if(is.data.frame(m)){
-            quo = rlang::quo(shinydashboard::menuItem(
-              text = !!m$Name,
-              href = !!sprintf('?module_id=%s&nomodal=true', m$ID),
-              newtab = FALSE
-            ))
-          }else{
+            m$label_name = m$Name
+            m$module_id = m$ID
+          #   quo = rlang::quo(shinydashboard::menuItem(
+          #     text = !!m$Name,
+          #     href = !!sprintf('?module_id=%s&nomodal=true', m$ID),
+          #     newtab = FALSE
+          #   ))
+          # }else{
+          }
             quo = rlang::quo({
               shinydashboard::menuItem(
                 text = !!m$label_name,
@@ -222,7 +225,7 @@ app_controller <- function(
                 selected = !!(m$module_id==active_id)
               )
             })
-          }
+          # }
           quos[[length(quos) + 1]] = quo
         }
 
@@ -230,18 +233,23 @@ app_controller <- function(
 
         quo_items = lapply(ms, function(m){
           if(is.data.frame(m)){
-            rlang::quo(shinydashboard::menuSubItem(
-              text = !!m$Name,
-              href = !!sprintf('?module_id=%s&nomodal=true', m$ID),
-              newtab = FALSE
-            ))
-          }else{
+
+            m$label_name = m$Name
+            m$module_id = m$ID
+
+          #   rlang::quo(shinydashboard::menuSubItem(
+          #     text = !!m$Name,
+          #     href = !!sprintf('?module_id=%s&nomodal=true', m$ID),
+          #     newtab = FALSE
+          #   ))
+          # }else{
+          }
             rlang::quo(shinydashboard::menuSubItem(
               text = !!m$label_name,
               tabName = !!str_to_upper(m$module_id),
               selected = !!(m$module_id==active_id)
             ))
-          }
+          # }
         })
         quos[[length(quos) + 1]] = rlang::quo(shinydashboard::menuItem(
           text = !!group,
@@ -256,6 +264,15 @@ app_controller <- function(
   }
   adapter$all_modules = function(){
     unlist(as.list(module_list), use.names = FALSE, recursive = TRUE)
+  }
+  adapter$module_ids = function(loaded_only = FALSE){
+    if(loaded_only){
+      sapply(unlist(as.list(module_list), use.names = FALSE, recursive = TRUE), function(m){
+        m$module_id
+      })
+    }else{
+      module_table$ID[module_table$Active]
+    }
   }
   adapter$load_module = load_module
 
@@ -313,9 +330,8 @@ app_ui = function(adapter){
         do.call(
           shinydashboard::tabItems,
           args = local({
-            re = lapply(adapter$all_modules(), function(m) {
-              shinydashboard::tabItem(tabName = str_to_upper(m$module_id),
-                                      uiOutput(str_c(m$module_id, '_UI')))
+            re = lapply(adapter$module_ids(), function(module_id) {
+              shinydashboard::tabItem(tabName = str_to_upper(module_id), uiOutput(str_c(module_id, '_UI')))
             })
             names(re) = NULL
             re
@@ -370,9 +386,19 @@ app_server = function(adapter){
 
   test.mode = adapter$get_option('test.mode', FALSE)
 
+  session_list = list()
+
+  storage_keys = NULL
+
 
   #################################################################
   function(input, output, session){
+    session_id = add_to_session(session)
+
+    session$sendCustomMessage('rave_set_id', session_id);
+
+    this_env$rave_ids = c(this_env$rave_ids, session_id)
+
     # Global variable, timer etc.
     async_timer = reactiveTimer(5000)
     # input_timer = reactiveTimer(rave_options('delay_input') / 2)
@@ -389,13 +415,12 @@ app_server = function(adapter){
       mem_usage = NULL
     )
     local_env = environment()
-    modules = as.list(adapter$all_modules())
+    modules = list()
     if(length(modules)){
       module_ids = str_to_upper(sapply(modules, function(m){m$module_id}))
       names(modules) = module_ids
     }
 
-    assign('aaa', local_env, envir = globalenv())
     observeEvent(async_timer(), {
       global_reactives$check_results = Sys.time()
     })
@@ -407,6 +432,9 @@ app_server = function(adapter){
       shinirize(m, test.mode = test.mode)
     }, simplify = F, USE.NAMES = T)
     .progress$close()
+
+    module_ui_functions = list()
+
 
 
     update_variable = function(module_id, variable_name = NULL, value = NULL, flush = T, ...){
@@ -431,6 +459,7 @@ app_server = function(adapter){
     load_module = function(module_id){
       showNotification(p('Loading module [', module_id, ']'), type = 'message', closeButton = FALSE, id = '..load_module', duration = NULL)
 
+      loaded = FALSE
       mid = stringr::str_to_upper(module_id)
       if(!mid %in% names(local_env$modules)){
         loaded = adapter$load_module(module_id)
@@ -442,14 +471,16 @@ app_server = function(adapter){
 
           quo = rlang::quo({
             m = shinirize(modules[[!!mid]], test.mode = test.mode)
-            shinirized_modules[[mid]] = m
+            shinirized_modules[[!!mid]] = m
             callModule(m$server, id = m$id, session = session, global_reactives = global_reactives)
 
-            output[[str_c(m$id, '_UI')]] <- renderUI(m$ui())
+            local_env$module_ui_functions[[m$id]] = m$ui
+            # output[[str_c(m$id, '_UI')]] <- renderUI(m$ui())
           })
 
           eval_dirty(quo, env = local_env)
 
+          loaded = TRUE
         }
 
 
@@ -457,6 +488,7 @@ app_server = function(adapter){
 
       removeNotification(session = session, id = '..load_module')
 
+      return(loaded)
     }
 
     # Switch to module
@@ -507,7 +539,18 @@ app_server = function(adapter){
       callModule(m$server, id = m$id, session = session, global_reactives = global_reactives)
     })
     lapply(shinirized_modules, function(m){
-      output[[str_c(m$id, '_UI')]] <- renderUI(m$ui())
+      local_env$module_ui_functions[[m$id]] = m$ui
+      # output[[str_c(m$id, '_UI')]] <- renderUI(m$ui())
+    })
+
+    lapply(adapter$module_ids(), function(module_id){
+      output[[paste0(module_id, '_UI')]] <- renderUI({
+
+        if(!is.function(module_ui_functions[[module_id]])){
+          load_module(module_id)
+        }
+        module_ui_functions[[module_id]]()
+      })
     })
 
 
@@ -678,22 +721,94 @@ app_server = function(adapter){
     })
 
 
+    #################################################################
+    # Browser information
+
+
+
+    observeEvent(input[['__local_storage_inputs__']], {
+      all_inputs = input[['__local_storage_inputs__']]
+
+      if(!is.list(all_inputs)){
+        return()
+      }
+
+      module_ids = names(all_inputs)
+      module_ids = module_ids[stringr::str_to_upper(module_ids) %in% names(modules)]
+
+      sig = add_to_session(session)
+
+      sapply(module_ids, function(mid){
+        changed = FALSE
+        m = modules[[ stringr::str_to_upper(mid) ]]
+        execenv = m$get_or_new_exec_env(session = session)
+        try({
+          inputs = eval(parse(text = all_inputs[[mid]]))
+          print(inputs)
+
+          for(inputId in names(inputs)){
+
+            key = list( type = '.rave-inputs-Dipterix', inputId = inputId, sig = session_id )
+            logger('Updating ', inputId, ' - ', session_id)
+
+            global = execenv$is_global(inputId)
+            new_v = inputs[[inputId]]
+            old_v = execenv$cache( key, new_v, global = global, replace = FALSE, persist = FALSE)
+            execenv$cache( key, new_v, global = global, replace = TRUE, persist = TRUE)
+
+            if(!identical(new_v, old_v)){
+              changed = TRUE
+            }
+
+          }
+        }, silent = TRUE)
+
+        changed
+      }) ->
+        changed
+
+      if(isTRUE(all_inputs[['__changed_by']] == sig)){
+        return()
+      }
+
+      if(length(changed) && any(changed)){
+        logger('Sync sessions...')
+        # execenv$reload
+        global_reactives$force_refresh_all = Sys.time()
+        global_reactives$has_data = Sys.time()
+      }
+
+    })
+
 
 
 
     #################################################################
     # on session ended, clean memory
-    session_id = add_to_session(session)
+
+
+    # test
+    if(length(this_env$rave_ids) == 2){
+      add_to_session(session, 'rave_linked_by', this_env$rave_ids)
+    }
 
     if(!test.mode){
       session$onSessionEnded(function() {
         logger('Clean up environment.')
 
+        this_env$rave_ids = this_env$rave_ids[!this_env$rave_ids == session_id]
         lapply(unlist(modules), function(x){
           x$clean(session_id = session_id)
         })
         gc()
       })
+    }else{
+      session$onSessionEnded(function() {
+
+        this_env$rave_ids = this_env$rave_ids[!this_env$rave_ids == session_id]
+        gc()
+      })
+
     }
 
 
