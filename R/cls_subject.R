@@ -159,8 +159,14 @@ as.character.Subject <- function(x, ...){
 }
 
 # Function that always returns a subject (if exists)
-as_subject <- function(subject, strict = FALSE, reference = 'default'){
+as_subject <- function(subject, strict = TRUE, reference = 'default'){
   if(is.character(subject)){
+
+    sub_dir = file.path(rave_options('data_dir'), subject, 'rave')
+    if(!dir.exists(sub_dir)){
+      stop('Subject ', subject, ' not found')
+    }
+
     s = stringr::str_split_fixed(subject, '/', n = 2)
     s = unlist(s)
     subject = Subject$new(project_name = s[1], subject_code = s[2], strict = strict, reference = reference)

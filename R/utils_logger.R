@@ -41,7 +41,6 @@ logger <- function(..., level = 'DEBUG', quiet = FALSE){
 
     tryCatch({
       args = unlist(list(...))
-      cat('[', level, ']: ')
       cat(col(args), '\n', sep = '')
     }, error = function(e){
       print(list(...))

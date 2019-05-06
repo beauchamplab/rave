@@ -11,7 +11,15 @@ err_cnd <- function(
 #' @param epoch_name epoch name to check
 #' @export
 check_epoch <- function(subject, epoch_name){
-  subject = as_subject(subject, strict = FALSE)
+  if(is.character(subject)){
+    sub_dir = file.path(rave_options('data_dir'), subject, 'rave')
+    if(!dir.exists(sub_dir)){
+      return(err_cnd(message = sprintf('No subject [%s] found', subject)))
+    }
+
+    subject = as_subject(subject, strict = FALSE)
+  }
+
   file_path = sprintf('%s/epoch_%s.csv', subject$dirs$meta_dir, epoch_name)
 
   if(!file.exists(file_path)){
