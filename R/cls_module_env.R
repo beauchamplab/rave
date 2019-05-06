@@ -901,6 +901,8 @@ ExecEnvir <- R6::R6Class(
       return(val)
     },
     cache_input = function(inputId, val = NULL, read_only = T, sig = NULL){
+
+      sig %?<-% add_to_session(private$session)
       is_global = self$is_global(inputId)
       if(read_only){
         v = self$cache(
@@ -923,10 +925,39 @@ ExecEnvir <- R6::R6Class(
             sig = sig
           ), val,
           global = is_global,
-          replace = !read_only,
+          replace = FALSE,
           persist = TRUE)
+
+        # # Try to save cache to browser in case other modules/session want to use it
+        # if(sync){
+        #   self$set_browser(
+        #     inputId = inputId,
+        #     value = v
+        #   )
+        # }
       }
+
       return(v)
+    },
+    set_browser = function(expr){
+
+      current_key = add_to_session(private$session)
+
+      children_keys = add_to_session(session, 'rave_linked_by', NULL)
+      children_keys = children_keys[!children_keys %in% current_key]
+      # children_keys = unique(c(current_key, children_keys))
+
+      module_id = private$module_env$module_id
+
+      lapply(children_keys, function(storage_key){
+        private$session$sendCustomMessage('rave_set_storage', list(
+          module_id = module_id,
+          expr = expr,
+          storage_key = storage_key,
+          current_key = current_key
+        ))
+      })
+
     },
     generate_input_ui = function(sidebar_width = 3L){
       ns = self$ns

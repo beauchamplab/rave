@@ -223,11 +223,18 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         # params = isolate(reactiveValuesToList(input))
         lapply(execenv$input_ids, function(inputId){
           val = isolate(input[[inputId]])
-          execenv$cache_input(inputId, val, read_only = !save)
+          execenv$cache_input(inputId, val, read_only = !save, sig = add_to_session(session))
         }) ->
           altered_params
+
         names(altered_params) = execenv$input_ids
         altered_params = dropNulls(altered_params)
+
+        if(save){
+          param_str = shiny::isolate(shiny::reactiveValuesToList(input, all.names = TRUE))
+          param_str = paste(deparse(param_str), collapse = '')
+          execenv$set_browser(param_str)
+        }
         return(altered_params)
       }
 

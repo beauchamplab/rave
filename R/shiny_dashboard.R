@@ -164,7 +164,8 @@ dashboardPage <- function (
         "Dipterix", "0.0.1",
         c(file = system.file('assets/', package = 'rave')),
         script = c(
-          'dipterix.js'
+          'dipterix.js',
+          'dipterix_inputs.js'
         ), stylesheet = 'dipterix.css'
       ),
 
