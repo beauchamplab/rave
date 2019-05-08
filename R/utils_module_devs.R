@@ -24,6 +24,7 @@ any_subject_loaded <- function(){
 #' @param local run module locally?
 #' @export
 get_module <- function(package, module_id, local = FALSE){
+  require(rave)
 
   if(local){
     if(missing(module_id)){
