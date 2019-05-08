@@ -72,13 +72,13 @@ rave_version <- function(){
       # New RAVE installed! update
 
       # 3. Data files
-      has_data = rave::arrange_data_dir(T)
+      has_data = arrange_data_dir(T)
 
 
       rave_hist$save('..rave_ver..' = new_ver)
 
       # 1. additional settings
-      rave::rave_options(
+      rave_options(
         delay_input = 20,
         max_worker = future::availableCores() - 1,
         crayon_enabled = TRUE,
@@ -86,7 +86,7 @@ rave_version <- function(){
       )
 
     }else{
-      has_data = rave::arrange_data_dir(F)
+      has_data = arrange_data_dir(F)
     }
 
     # try({
@@ -99,26 +99,18 @@ rave_version <- function(){
     #   }
     # }, silent = T)
 
-    rave::save_options()
+    save_options()
 
-    rave::rave_setup()
+    rave_setup()
 
     if(has_data){
-      rave::logger("RAVE - (Code: Fir) is loaded!", level = 'INFO')
-
-      nms = list(
-        'Module File:        \t' =  rave::rave_options('module_lookup_file'),
-        'Data Repository:    \t' = rave::rave_options('data_dir'),
-        'Raw-data Repository:\t' = rave::rave_options('raw_data_dir')
-      )
-
-      for(nm in names(nms)){
-        rave::logger(nm, nms[[nm]], level = 'INFO')
-      }
-
-      rave::logger("Type 'rave_options(launch_gui = T)' or '?rave_options' for details", level = 'INFO')
+      logger("RAVE - (Code: Fir) is loaded!", level = 'INFO')
+      logger('Data Repository:    \t', rave_options('data_dir'), level = 'INFO')
+      logger('Raw-data Repository:    \t', rave_options('raw_data_dir'), level = 'INFO')
+      logger("Type 'rave_options(launch_gui = T)' or '?rave_options' for details", level = 'INFO')
     }else{
-      logger('An error or more occur during loading process', level = 'ERROR')
+      logger('Cannot find RAVE repository! Please run the following command set them.', level = 'ERROR')
+      logger('\trave::rave_options()', level = 'ERROR')
     }
 
   })

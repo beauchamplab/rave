@@ -175,7 +175,7 @@ ECoGRepository <- R6::R6Class(
           progress$inc(sprintf('Electrode - %s', e_str))
           # get reference
           ref = ref_table$Reference[ref_table$Electrode == e]
-          e_obj = Electrode$new(subject = self$subject, electrode = e, reference_by = self$reference$get(ref), is_reference = F)
+          e_obj = Electrode$new(subject = self$subject, electrode = e, reference_by = self$reference$get(ref, ref), is_reference = F)
           self$raw$set(key = e_str, value = e_obj)
         }
         logger('Loaded.')
@@ -458,12 +458,25 @@ ECoGRepository <- R6::R6Class(
       # load partial references, also avoid invalid electrodes
       ref_table = ref_table[ref_table$Electrode %in% electrodes, ]
 
+      # load current cached references
+      cached_ref = file.path(self$subject$dirs$channel_dir, 'cache', 'cached_reference.csv')
+      if(file.exists(cached_ref)){
+        cached_ref = read.csv(cached_ref, stringsAsFactors = F)
+        cached_ref = merge(ref_table, cached_ref, by = 'Electrode', all.x = TRUE)
+        sel = cached_ref$Reference.x != cached_ref$Reference.y
+        ref_table = ref_table[sel, ]
+        if(!sum(sel)){
+          return(invisible())
+        }
+      }
+
+
       # Trick: use lazy assign to allocate reference, this is hack to R6 but avoiding evaluations
       ref_env = self$reference$private$env
       unique_refs = unique(ref_table$Reference)
 
-      progress = progress(title = 'Loading reference...', max = length(unique_refs))
-
+      progress = progress(title = 'Loading reference...', max = length(unique_refs) + 1)
+      progress$inc('Initializing')
       lapply(unique_refs, function(ref){
         progress$inc(ref)
         # delayedAssign(ref, {

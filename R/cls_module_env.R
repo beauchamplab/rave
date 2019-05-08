@@ -900,42 +900,23 @@ ExecEnvir <- R6::R6Class(
 
       return(val)
     },
-    cache_input = function(inputId, val = NULL, read_only = T, sig = NULL){
+    cache_input = function(inputId, val = NULL, read_only = TRUE, sig = NULL){
 
       sig %?<-% add_to_session(private$session)
       is_global = self$is_global(inputId)
-      if(read_only){
-        v = self$cache(
-          key = list(
-            type = '.rave-inputs-Dipterix',
-            inputId = inputId,
-            sig = sig
-          ),
-          global = is_global,
-          replace = F,
-          persist = TRUE)
-        if(is.null(v)){
-          return(val)
-        }
-      }else{
-        v = self$cache(
-          key = list(
-            type = '.rave-inputs-Dipterix',
-            inputId = inputId,
-            sig = sig
-          ), val,
-          global = is_global,
-          replace = FALSE,
-          persist = TRUE)
 
-        # # Try to save cache to browser in case other modules/session want to use it
-        # if(sync){
-        #   self$set_browser(
-        #     inputId = inputId,
-        #     value = v
-        #   )
-        # }
+      key = list(
+        type = '.rave-inputs-Dipterix',
+        inputId = inputId,
+        sig = sig
+      )
+      if(read_only){
+        v = self$cache(key, global = is_global, replace = FALSE, persist = TRUE)
+        v %?<-% val
+      }else{
+        v = self$cache(key, val, global = is_global, replace = TRUE, persist = TRUE)
       }
+      # logger(inputId, ' - ', paste(deparse(v), collapse = ''))
 
       return(v)
     },
