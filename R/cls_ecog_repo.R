@@ -170,14 +170,26 @@ ECoGRepository <- R6::R6Class(
 
       if(length(electrodes) > 0){
         progress = progress(title = 'Loading reference...', max = length(electrodes))
-        for(e in electrodes){
+
+        subject_obj = self$subject
+
+        lapply(electrodes, function(e){
           e_str = paste(e)
           progress$inc(sprintf('Electrode - %s', e_str))
           # get reference
           ref = ref_table$Reference[ref_table$Electrode == e]
-          e_obj = Electrode$new(subject = self$subject, electrode = e, reference_by = self$reference$get(ref, ref), is_reference = F)
-          self$raw$set(key = e_str, value = e_obj)
-        }
+          ref = self$reference$get(ref, ref)
+
+          delayedAssign(
+            x = e_str,
+            value = {
+              Electrode$new(subject = subject_obj, electrode = e, reference_by = ref, is_reference = F)
+            },
+            assign.env = self$raw$private$env
+          )
+          # e_obj = Electrode$new(subject = self$subject, electrode = e, reference_by = ref, is_reference = F)
+          # self$raw$set(key = e_str, value = e_obj)
+        })
         logger('Loaded.')
         progress$close()
       }
