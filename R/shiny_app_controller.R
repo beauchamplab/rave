@@ -108,7 +108,10 @@ app_controller <- function(
         )
         controller_env$module_table = arrange_modules(T,F,F)
       }
-      ids = module_table$ID[module_table$Package == 'ravebuiltins']
+      # check all installed packages
+      installed = vapply(module_table$Package, package_installed, FALSE)
+      is_active = module_table$Active
+      ids = module_table$ID[installed & is_active]
       ids = ids[!ids %in% loaded_ids]
       for(mid in ids){
         if(module_table$Active[module_table$ID == mid]){
@@ -171,7 +174,7 @@ app_controller <- function(
   }
   adapter$get_module_ui = function(active_id = NULL){
 
-    module_ids = module_table$ID[module_table$Package == 'ravebuiltins' & module_table$Active]
+    module_ids = module_table$ID[module_table$Active]
     active_id %?<-% module_ids[1]
 
     load_module(active_id)

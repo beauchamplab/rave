@@ -56,8 +56,12 @@ Map <- R6::R6Class(
       private$env[[key]] <- value
       value
     },
-    get = function(key) {
-      private$env[[key]]
+    get = function(key, default = NULL) {
+      if(exists(key, envir = private$env)){
+        private$env[[key]]
+      }else{
+        default
+      }
     },
     set = function(key, value) {
       private$env[[key]] <- value
