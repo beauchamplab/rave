@@ -1,4 +1,5 @@
 library(pryr)
+library(rave)
 
 # Register functions
 source(system.file('third_party/NWB/nwb_cls.R', package = 'rave'))
