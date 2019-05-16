@@ -1,6 +1,9 @@
 library(pryr)
 library(rave)
 
+# Please install rave@dev-0.1.6.1
+# You might want to use devtools::install_github('beauchamplab/rave@dev-0.1.6.1')
+
 # Register functions
 source(system.file('third_party/NWB/nwb_cls.R', package = 'rave'))
 source(system.file('third_party/NWB/nwb_parser.R', package = 'rave'))
