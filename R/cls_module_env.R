@@ -485,7 +485,7 @@ ExecEnvir <- R6::R6Class(
           pm[[inputId]] = e
           new$execute_with(pm, async = async)
           eval(expr, envir = new$runtime_env)
-        }, .ncores = rave_options('max_worker'), .call_back = function(i){
+        }, .call_back = function(i){
           progress$inc(sprintf('Calculating %d (%d of %d)', electrodes[i], i, length(electrodes)))
         }) ->
           fs
@@ -849,7 +849,7 @@ ExecEnvir <- R6::R6Class(
                   re
                 }
               }, packages = packages, evaluator = future::multiprocess, envir = async_env,
-              gc = T, workers = rave_options('max_worker'))
+              gc = FALSE)
           }
         }else{
           if(length(private$executes)){

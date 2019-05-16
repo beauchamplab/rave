@@ -25,7 +25,7 @@ rave_preprocess <- function(
   default_subject_code = ''
   model_instances = NULL
 
-  future::plan(future::multiprocess, workers = rave_options('max_worker'))
+  rave_setup_workers()
 
 
   modules = list(
