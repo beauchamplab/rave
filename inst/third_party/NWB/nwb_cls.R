@@ -191,8 +191,10 @@ NWB_dataset_def <- function(name, neurodata_type_def = NULL, namespace = 'core')
   return(NULL)
 }
 
-NWB_add_namespace("~/rave_data/raw_dir/NWBDEMO/pynwb-dev/src/pynwb/data/nwb.namespace.yaml")
-NWB_add_namespace("~/rave_data/raw_dir/NWBDEMO/nwbext_ecog-master/spec/ecog.namespace.yaml")
+
+
+NWB_add_namespace(system.file('third_party/NWB/core/nwb.namespace.yaml', package='rave'))
+NWB_add_namespace(system.file('third_party/NWB/ecog/ecog.namespace.yaml', package='rave'))
 
 
 # ns = NWB_namespace('ecog')

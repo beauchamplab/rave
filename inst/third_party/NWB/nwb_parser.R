@@ -1,5 +1,5 @@
 # Support of NWB format
-nwb_file = normalizePath('~/rave_data/raw_dir/NWBDEMO/EC125_B22.nwb'); nwb_file
+# nwb_file = normalizePath('~/rave_data/raw_dir/NWBDEMO/EC125_B22.nwb'); nwb_file
 
 
 NWB_parser <- function(nwb_file, verbose = FALSE, progress = NULL){
@@ -238,7 +238,7 @@ nwb_post_process <- function(container, name){
 # list_nwb(x, level = Inf, concat = FALSE)
 
 
-nwbfile = NWB_parser(nwb_file)
+# nwbfile = NWB_parser(nwb_file)
 # ns = NWB_namespace('ecog')
 #
 # def = NWB_dataset_def('subject', neurodata_type_def = NULL, namespace = 'ecog'); def
