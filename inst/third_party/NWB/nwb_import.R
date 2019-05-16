@@ -1,3 +1,13 @@
+library(pryr)
+
+# Register functions
+source(system.file('third_party/NWB/nwb_cls.R', package = 'rave'))
+source(system.file('third_party/NWB/nwb_parser.R', package = 'rave'))
+
+# Load files
+nwb_file = '~/rave_data/raw_dir/NWBDEMO/EC125_B22.nwb'
+nwbfile = NWB_parser(nwb_file)
+
 # -------------------------------- Overview --------------------------------
 
 project_name = 'NWB_DEMO'
