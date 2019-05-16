@@ -73,16 +73,15 @@ app_controller <- function(
   local({
     tb = module_table[module_table$Active & !module_table$ID %in% cached_ids, ]
     nmodules = nrow(tb)
+    rave_setup_workers()
     if(nmodules){
-      future::plan(future::multiprocess, workers = min(nmodules + 1, 20))
       lapply(seq_len(nmodules), function(ii){
         row = tb[ii, ]
         future::futureAssign(row$ID, {
           get_module(package = row$Package, module_id = row$ID, local = FALSE)
-        }, globals = c('row'), assign.env = module_list2)
+        }, globals = c('row'), assign.env = module_list2, packages = c('rave'))
       })
 
-      future::plan(future::multiprocess, workers = rave_options('max_worker'))
 
     }
   });

@@ -19,7 +19,7 @@ baseline <- function(el, from, to, method = 'mean', unit = '%',
     module_tools = get('module_tools', envir = getDefaultDataRepository())
     el = module_tools$get_power()
   }
-  assert_that(is(el, 'Tensor'), msg = 'el must be an Tensor object.')
+  assert_that(any(c('Tensor', 'HybridArray') %in% class(el)), msg = 'el must be an Tensor object.')
   assert_that('Time' %in% el$varnames, msg = 'Need one dimname to be "Time".')
 
   assert_that(unit %in% c('dB', '%', 'C'), msg = 'unit must be %-percent signal change or dB-dB difference, or C to customize')
@@ -180,16 +180,23 @@ ECoGRepository <- R6::R6Class(
           ref = ref_table$Reference[ref_table$Electrode == e]
           ref = self$reference$get(ref, ref)
 
-          delayedAssign(
-            x = e_str,
-            value = {
-              Electrode$new(subject = subject_obj, electrode = e, reference_by = ref, is_reference = F)
-            },
-            assign.env = self$raw$private$env
-          )
-          # e_obj = Electrode$new(subject = self$subject, electrode = e, reference_by = ref, is_reference = F)
-          # self$raw$set(key = e_str, value = e_obj)
+          e_obj = Electrode$new(subject = self$subject, electrode = e, reference_by = ref, is_reference = F)
+          self$raw$set(key = e_str, value = e_obj)
         })
+        # self_ref = self$reference
+        # self_sub = self$subject
+        # rave:::future_assign_lapply(
+        #   x = electrodes,
+        #   varnames = as.character(electrodes),
+        #   expr = {
+        #     ref = ref_table$Reference[ref_table$Electrode == e]
+        #     ref = self_ref$get(ref, ref)
+        #     e_obj = Electrode$new(subject = self_sub, electrode = e, reference_by = ref, is_reference = F)
+        #     e_obj
+        #   }, elname = 'e',
+        #   nworkers = rave_options('max_worker'),
+        #   assign.env = self$raw$private$env
+        # )
         logger('Loaded.')
         progress$close()
       }
@@ -221,7 +228,7 @@ ECoGRepository <- R6::R6Class(
         freq_subset[which.min(abs(freqs$Frequency - frequency_range[1]))] = T
       }
 
-      progress = progress(title = 'Loading data...', max = (length(electrodes) + 1) * length(data_type), quiet = quiet)
+      progress = progress(title = 'Loading data...', max = (length(electrodes) + 1) * length(data_type) + 1, quiet = quiet)
       on.exit({progress$close()})
 
       epoch_data = self$epochs$get('epoch_data')
@@ -231,7 +238,7 @@ ECoGRepository <- R6::R6Class(
 
       raws = self$raw
 
-      # progress$inc('Finalizing...')
+      progress$inc('Starting...')
       # Get dimension names
       # 1. Trial
       epochs = load_meta(
@@ -261,8 +268,57 @@ ECoGRepository <- R6::R6Class(
       # collapse results
       if(!is.function(func)){
 
+
         if('power' %in% data_type){
-          lapply_async(electrodes, function(e){
+          # path = tempfile('hybrid')
+          # power = HybridArray$new(path)
+          #
+          # # get dimensions
+          # # dimnames_wave = list(A=1,B=2,C=3,D=4)
+          # power$set_dim(vapply(dimnames_wave, length, 0))
+          # power$set_partition_index(4L)
+          # power$set_dimnames(dimnames_wave)
+          # power$save_meta()
+          #
+          # lapply(electrodes, function(e){
+          #   progress$inc(sprintf('Step %d (of %d) electrode %d (power)', count, n_dt, e))
+          #   current_electrode = raws$get(as.character(e))
+          #   power$swap_out(meta = FALSE)
+          #   future::future({
+          #     current_electrode$epoch(
+          #       epoch_name = epoch_name,
+          #       pre = pre,
+          #       post = post,
+          #       types = 'power',
+          #       raw = !referenced
+          #     ) ->
+          #       elc
+          #     d = elc$power$subset(Frequency = freq_subset, drop = T, data_only = T)
+          #
+          #     idx = which(electrodes == e)
+          #
+          #     if(power$initialized){
+          #       power$alter_data(d, NULL, NULL, NULL, idx)
+          #     }else{
+          #       power$init_data(d, vapply(dimnames_wave, length, 0),
+          #                       dimnames_wave, NULL, NULL, NULL, idx, partial = TRUE)
+          #     }
+          #     if(idx == 1){
+          #       power$swap_out(meta = TRUE)
+          #     }else{
+          #       power$swap_out(meta = FALSE)
+          #     }
+          #
+          #     NULL
+          #   })
+          #
+          # })
+          # power = HybridArray$new(path)
+
+
+          # Old scripts
+          lapply(electrodes, function(e){
+            progress$inc(sprintf('Step %d (of %d) electrode %d (power)', count, n_dt, e))
             electrode = raws$get(as.character(e))
             electrode$epoch(
               epoch_name = epoch_name,
@@ -277,8 +333,6 @@ ECoGRepository <- R6::R6Class(
             rm(elc)
             power = as.vector(power)
             return(power)
-          }, .call_back = function(i){
-            progress$inc(sprintf('Step %d (of %d) electrode %d (power)', count, n_dt, electrodes[i]))
           }) ->
             results
           count = count + 1

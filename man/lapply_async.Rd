@@ -4,8 +4,7 @@
 \alias{lapply_async}
 \title{lapply using future package (async)}
 \usage{
-lapply_async(x, fun, ..., .ncores = 0,
-  .future_plan = future::multiprocess, .call_back = NULL,
+lapply_async(x, fun, ..., .ncores = 0, .call_back = NULL,
   .packages = NULL, .envir = environment(), .globals = TRUE,
   .gc = TRUE)
 }
@@ -14,8 +13,6 @@ lapply_async(x, fun, ..., .ncores = 0,
 
 \item{.ncores}{Number of cores to use. If the value is 0, the number of cores
 will be determined by rave_options('max_worker').}
-
-\item{.future_plan}{which future plan to use}
 
 \item{.call_back}{A function takes current iteration number as argument, can be NULL.}
 

@@ -975,6 +975,10 @@ shiny_data_selector <- function(module_id){
       }
 
 
+      n_trials = as.integer(n_trials)
+      n_time_volt = as.integer(n_time_volt)
+      n_electrodes = as.integer(n_electrodes)
+      n_time_wave = as.integer(n_time_wave)
 
       p(
         strong('Voltage: '), sprintf('%d Trials x %d Timepoints x %d Electrodes (%s)',

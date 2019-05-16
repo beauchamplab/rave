@@ -1,0 +1,12 @@
+namespaces:
+- author: Ben Dichter
+  contact: ben.dichter@gmail.com
+  doc: ecog extensions
+  name: ecog
+  schema:
+  - namespace: core
+    neurodata_types:
+    - NWBDataInterface
+    - Subject
+  - source: ecog.extensions.yaml
+  version: 1.2.1

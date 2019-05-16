@@ -27,7 +27,6 @@
 #' @param expr expression for async exe
 #' @param name see 'details'
 #' @param envir environment of code
-#' @param plan see future::plan
 #' @details If \code{name} is NULL, expression will be evaluated and nothing will be
 #'  returned. However, if name is specified, you can call function
 #'  \code{get_async_result(name)} later to get the results if once evaluated.
@@ -60,10 +59,8 @@
 #' # END
 #' }
 #' @export
-async <- function(expr, name = NULL, envir = parent.frame(), plan = future::multisession){
-  if(!is.null(plan)){
-    future::plan(plan, workers = rave_options('max_worker'))
-  }
+async <- function(expr, name = NULL, envir = parent.frame()){
+  rave_setup_workers()
   if(is.null(name)){
     future::future(substitute(expr), envir = envir, substitute = F) ->
       f

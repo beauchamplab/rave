@@ -988,7 +988,6 @@ getDefaultCacheEnvironment <- function(
 #' automatically. Otherwise you have to specify the packages that you want to load.
 #' @param .globals Automatically detect variables. See ?future::future
 #' @param .gc Clean up environment after each iterations? Recommended for large datasets.
-#' @param .future_plan which future plan to use
 #' @param .envir intrnally used
 #' @examples
 #' \dontrun{
@@ -1000,7 +999,7 @@ getDefaultCacheEnvironment <- function(
 #' })
 #' }
 #' @export
-lapply_async <- function(x, fun, ..., .ncores = 0, .future_plan = future::multiprocess,
+lapply_async <- function(x, fun, ..., .ncores = 0,
                          .call_back = NULL, .packages = NULL, .envir = environment(), .globals = TRUE, .gc = TRUE){
   # compatible with windows
   if(stringr::str_detect(Sys.info()['sysname'], '^[wW]in')){
@@ -1028,7 +1027,15 @@ lapply_async <- function(x, fun, ..., .ncores = 0, .future_plan = future::multip
     .packages = rev(.packages[!is.na(.packages)])
   }
   .niter = length(x)
-  .ncores = min(.ncores, .niter)
+
+
+  rave_setup_workers(.ncores)
+  if(.ncores != rave_options('max_worker')){
+    on.exit({
+      rave_setup_workers()
+    })
+  }
+
 
   .future_list = list()
   .future_values = list()
@@ -1046,8 +1053,7 @@ lapply_async <- function(x, fun, ..., .ncores = 0, .future_plan = future::multip
 
     .future_list[[length(.future_list) + 1]] = future::future({
       fun(.x)
-    }, envir = .envir, substitute = T, lazy = F, globals = .globals, .packages = .packages, gc = .gc,
-    evaluator = .future_plan, workers = .ncores)
+    }, envir = .envir, substitute = T, lazy = F, globals = .globals, .packages = .packages, gc = .gc)
 
 
     if(length(.future_list) >= .ncores){
