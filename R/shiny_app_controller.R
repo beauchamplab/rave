@@ -78,11 +78,11 @@ app_controller <- function(
       lapply(seq_len(nmodules), function(ii){
         row = tb[ii, ]
         future::futureAssign(row$ID, {
-          get_module(package = row$Package, module_id = row$ID, local = FALSE)
-        }, globals = c('row'), assign.env = module_list2, packages = c('rave'))
-      })
+          rave::get_module(package = row$Package, module_id = row$ID, local = FALSE)
+        }, globals = c('row'), assign.env = module_list2)
+      }) -> f
 
-
+      future::resolve(f)
     }
   });
 

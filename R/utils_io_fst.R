@@ -93,7 +93,9 @@ LazyFST <- R6::R6Class(
         re[real_i, real_j] = dat
       }
       rm(dat)
-      gc()
+
+      # Profiling shows gc() here will take lots of time
+      # gc()
 
       dimnames(re) = NULL
 
