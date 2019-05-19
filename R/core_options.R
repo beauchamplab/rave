@@ -213,103 +213,16 @@ ugly_sample <- function(x, size = length(x), replace = FALSE, ...){
 #' @param n_workers NULL by default, maximum number of clusters for parallel
 #' @param ignore_error whether ignore the errors
 #' @export
-rave_setup_workers <- function(n_workers = NULL, ignore_error = TRUE){
-  logger('Setting up workers')
-  if(!length(n_workers)){
-    n_workers = max(rave_options('max_worker'), 1)
-  }else{
-    n_workers = as.integer(n_workers)
-    if(n_workers <= 0){
-      if(ignore_error){
-        n_workers = max(rave_options('max_worker'), 1)
-      }else{
-        stop('n_workers must be positive')
-      }
-    }
+rave_setup_workers <- function(n_workers = NULL, use_fork = FALSE, ignore_error = TRUE){
 
-  }
+  # Force n_workers to be rave_option
+  n_workers = max(rave_options('max_worker'), 1)
 
-  # as states in issue
-  # https://github.com/HenrikBengtsson/future/issues/309
-  # we decide to preserve our own clusters
-  if(!exists('clusters', ..setup_env)){
-    ..setup_env$clusters = future::makeClusterPSOCK(n_workers, autoStop = FALSE)
-    future::plan(future::cluster, workers = ..setup_env$clusters)
-
-  }else{
-
-    nclusters = future::nbrOfWorkers(future::plan())
-
-    # If need more clusters
-    if(nclusters < n_workers){
-
-      ranks = sapply(..setup_env$clusters, function(cl){
-        tryCatch({
-          # Never use print(cl). Because when cluster is runningm this will block the main session
-          if(summary.connection(cl$con)$opened == 'opened'){
-            cl$rank
-          }
-        }, error = function(e){
-          0
-        })
-      })
-
-      more_ranks = seq_len(n_workers)
-      more_ranks = more_ranks[!more_ranks %in% ranks]
-
-      cl = lapply(more_ranks, function(rank){
-        port0 <- Sys.getenv("R_PARALLEL_PORT", "random")
-        if (identical(port0, "random")) {
-          port <- 11000:11999
-        }
-        else {
-          port <- suppressWarnings(as.integer(port0))
-          if (is.na(port)) {
-            warning("Non-numeric value of environment variable 'R_PARALLEL_PORT' coerced to NA_integer_: ",
-                    sQuote(port0))
-            port <- 11000:11999
-          }
-        }
-        if (length(port) > 1L) {
-          port <- ugly_sample(port, size = 1L)
-        }
-        if (is.na(port) || port < 0L || port > 65535L) {
-          stop("Invalid port: ", port)
-        }
-        future::makeNodePSOCK(port = port, rank = as.integer(rank))
-      })
-
-      cl = c(
-        ..setup_env$clusters, cl
-        # future::makeClusterPSOCK(n_workers - nclusters, autoStop = FALSE)
-      )
-
-      ..setup_env$clusters = future::as.cluster(cl)
-      try({
-        future::plan(future::cluster, workers = ..setup_env$clusters)
-      }, silent = TRUE)
-    }else if(nclusters > n_workers){
-      future::autoStopCluster(..setup_env$clusters[(n_workers + 1) : nclusters])
-    }
-  }
-
-  nclusters = future::nbrOfWorkers(future::plan())
-
-  # check crayon
-  if(!rave_options('crayon_enabled')){
-    # if(exists('RStudio.Version') && is.function(RStudio.Version)){
-    #   rsver = as.character(RStudio.Version()$version)
-    #   if(utils::compareVersion('1.1', rsver)  > 0){
-    #     warning("Please install newest version of RStudio")
-    #     rave_options(crayon_enabled = FALSE, .save = F)
-    #   }
-    # }else{
-    rave_options(crayon_enabled = FALSE, .save = F)
-    # }
-  }
+  options("future.fork.enable" = TRUE)
+  future::plan(future::multicore, workers = n_workers)
 
 
-  logger('Number of workers switched to - ', nclusters)
+  logger('Number of workers switched to - ', future::nbrOfWorkers())
 
 }
 

@@ -1002,17 +1002,14 @@ getDefaultCacheEnvironment <- function(
 lapply_async <- function(x, fun, ..., .ncores = 0,
                          .call_back = NULL, .packages = NULL, .envir = environment(), .globals = TRUE, .gc = TRUE){
   # compatible with windows
+  args = list(...)
   if(stringr::str_detect(Sys.info()['sysname'], '^[wW]in')){
-    args = list(...)
     return(lapply(seq_along(x), function(ii){
       if(is.function(.call_back)){
         try({
           .call_back(ii)
         })
-        do.call(fun, c(
-          list(x[ii]),
-          args
-        ), envir = .envir)
+        do.call(fun, c( list(quote(x[ii])), args), envir = .envir)
       }
     }))
   }
@@ -1029,7 +1026,7 @@ lapply_async <- function(x, fun, ..., .ncores = 0,
   .niter = length(x)
 
 
-  rave_setup_workers(.ncores)
+  rave_setup_workers(.ncores, use_fork = TRUE)
   if(.ncores != rave_options('max_worker')){
     on.exit({
       rave_setup_workers()
@@ -1040,29 +1037,32 @@ lapply_async <- function(x, fun, ..., .ncores = 0,
   .future_list = list()
   .future_values = list()
 
-  .i = 0
-  while(.i < .niter){
-    .i = .i+1
-    .x = x[[.i]]
 
+  if(.niter == 0){
+    return(list())
+  }
+
+  .this_env = environment()
+
+
+  lapply(seq_along(x), function(.i){
     if(is.function(.call_back)){
       try({
         .call_back(.i)
       })
     }
 
-    .future_list[[length(.future_list) + 1]] = future::future({
-      fun(.x)
-    }, envir = .envir, substitute = T, lazy = F, globals = .globals, .packages = .packages, gc = .gc)
+    expr = rlang::quo_squash(rlang::quo({ do.call(fun, c(list(quote(x[[!!.i]])), args)) }))
+
+    .this_env$.future_list[[length(.future_list) + 1]] = future::future(expr, envir = .envir, substitute = FALSE, lazy = FALSE, globals = .globals, .packages = .packages, gc = .gc)
 
 
     if(length(.future_list) >= .ncores){
       # wait for one of futures resolved
-      .future_values[[1 + length(.future_values)]] = future::value(.future_list[[1]])
-      .future_list[[1]] = NULL
+      .this_env$.future_values[[1 + length(.future_values)]] = future::value(.future_list[[1]])
+      .this_env$.future_list[[1]] = NULL
     }
-
-  }
+  })
 
   return(c(.future_values, future::values(.future_list)))
 }

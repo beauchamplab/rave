@@ -9,7 +9,7 @@ NULL
 #' @export
 as_printable = function(env){
   assert_that(is.environment(env), msg = 'env MUST be an environment.')
-  cls = c(class(env), 'rave_printable')
+  cls = c('rave_printable', class(env))
   cls = unique(cls[!cls %in% ''])
   class(env) = cls
   return(env)
@@ -86,6 +86,24 @@ Electrode <- R6::R6Class(
       # otherwise we need to reference itself
 
       raw_type = paste0('raw_', type)
+      if('Electrode' %in% class(self$reference) && self$reference$electrode == 'noref'){
+        # not very usual, basically cached as referenced but need to load noref version
+        env = self[[type]]
+
+        lapply(self$blocks, function(b){
+          self[[type]][[b]] = self[[raw_type]][[b]]
+          NULL
+        })
+
+        if(ram){
+          sapply(self$blocks, function(b){
+            env[[b]][]
+          }, simplify = F, USE.NAMES = T) ->
+            env
+        }
+
+        return(env)
+      }
       switch (type,
         'volt' = {
           lapply(self$blocks, function(b){
@@ -454,6 +472,7 @@ Electrode <- R6::R6Class(
     },
 
     epoch = function(epoch_name, pre, post, types = c('volt', 'power', 'phase'), raw = F){
+      # epoch_name='YABa';pre=1;post=2;name=types='power';raw=FALSE;private=self$private
       # prepare data
       epochs = load_meta(meta_type = 'epoch', meta_name = epoch_name, project_name = private$subject$project_name, subject_code = private$subject$subject_code)
       freqs = private$subject$frequencies

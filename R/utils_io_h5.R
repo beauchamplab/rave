@@ -13,7 +13,7 @@ LazyH5 <- R6::R6Class(
   ),
   public = list(
     finalize = function(){
-      self$close()
+      self$close(all = TRUE)
     },
     print = function(){
       if(!is.null(private$data_ptr)){
@@ -54,7 +54,7 @@ LazyH5 <- R6::R6Class(
           stop('File is read-only. Use "force=TRUE"')
         }else{
           # Close current pointer
-          self$close()
+          self$close(all = TRUE)
           private$read_only = F
 
           on.exit({
@@ -64,13 +64,13 @@ LazyH5 <- R6::R6Class(
       }
 
       if(new_file && file.exists(private$file)){
-        self$close()
+        self$close(all = TRUE)
         file.remove(private$file)
       }
 
       self$open(new_dataset = replace, robj = x, chunk = chunk, gzip_level = level, ...)
 
-      self$close()
+      self$close(all = TRUE)
 
     },
 
@@ -142,14 +142,14 @@ LazyH5 <- R6::R6Class(
 
     },
 
-    close = function(){
+    close = function(all = FALSE){
       # check if data link is valid
       if(!is.null(private$data_ptr) && private$data_ptr$is_valid){
         private$data_ptr$close()
       }
 
       # if file link is valid, get_obj_ids() should return a vector of 1
-      if(!is.null(private$file_ptr) && private$file_ptr$is_valid){
+      if(all && !is.null(private$file_ptr) && private$file_ptr$is_valid){
         private$file_ptr$close_all()
       }
     },
@@ -233,8 +233,8 @@ LazyH5 <- R6::R6Class(
         )))
       }
 
+      self$close(all = !private$read_only)
 
-      self$close()
 
       if(drop){
         return(drop(re))
@@ -247,7 +247,7 @@ LazyH5 <- R6::R6Class(
       self$open()
       re = private$data_ptr$dims
       if(!stay_open){
-        self$close()
+        self$close(all = !private$read_only)
       }
       re
     }

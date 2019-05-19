@@ -82,7 +82,6 @@ Collate:
     'cls_brain2.R'
     'cls_ecog_repo.R'
     'cls_electrode.R'
-    'cls_hybridarray.R'
     'cls_map.R'
     'cls_module.R'
     'cls_module_env.R'
