@@ -287,7 +287,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
           type = 'error'
           return(FALSE)
         }
-        srate = max(1, floor(srate))
+        # srate = max(1, floor(srate))
         if(is.null(env$subject$srate) || env$subject$srate != srate){
           if(utils$notch_filtered()){
             msg = 'Notch filter already applied. Cannot change sample rate.'
@@ -649,17 +649,6 @@ rave_preprocess_tools <- function(env = new.env(), ...){
         }, .ncores = ncores, .call_back = function(i){
           progress2$inc(message = paste0('Electrode - ' , electrodes[i]))
         })
-        # write a reference table to cache
-        # safe_write_csv(data.frame(
-        #   Electrode = rep(electrodes, length(blocks)),
-        #   Block = rep(blocks, each = length(electrodes)),
-        #   Reference = 'noref'
-        # ), file.path(dirs$channel_dir, 'cache', 'cached_reference.csv'), row.names = F)
-        safe_write_csv(data.frame(
-          Electrode = electrodes,
-          Reference = 'noref'
-        ), file.path(dirs$channel_dir, 'cache', 'cached_reference.csv'), row.names = F)
-
         invisible()
       })
 
@@ -677,6 +666,91 @@ rave_preprocess_tools <- function(env = new.env(), ...){
       env$subject$logger$save(checklevel = WAVELETED)
 
       utils$gen_meta()
+
+
+      # write a reference table to cache
+      # safe_write_csv(data.frame(
+      #   Electrode = rep(electrodes, length(blocks)),
+      #   Block = rep(blocks, each = length(electrodes)),
+      #   Reference = 'noref'
+      # ), file.path(dirs$channel_dir, 'cache', 'cached_reference.csv'), row.names = F)
+      safe_write_csv(data.frame(
+        Electrode = electrodes,
+        Reference = 'noref'
+      ), file.path(dirs$channel_dir, 'cache', 'cached_reference.csv'), row.names = F)
+
+      # write fast caches
+      # if(isTRUE(fast_cache)){
+      #   progress1$inc('Generating fast cache')
+      #   progress2$reset(detail = 'Initializing...')
+      #   utils$gen_cache(progress = progress2)
+      # }
+    }
+
+    gen_cache = function(type = c('power', 'phase', 'voltage'), progress = NULL){
+      if(!(utils$has_subject() && utils$waveleted())){
+        return(FALSE)
+      }
+
+      inc = function(m){
+        if(!is.null(progress)){
+          progress$inc(m, amount = 0.5 / length(type))
+        }else{
+          logger(m)
+        }
+      }
+
+      electrodes = utils$get_electrodes()
+      blocks = utils$get_blocks()
+      subject_id = utils$get_subject_id()
+      dirs = utils$get_from_subject('dirs')
+
+      this_env = environment()
+      future_list = list()
+      save_to_file = function(await = FALSE){
+        if(isTRUE(await) && length(future_list)){
+          future::resolve(future_list)
+        }else if(await && length(future_list)){
+          await = min(await, length(future_list))
+          future::resolve(future_list[seq_len(await)])
+        }
+        while (length(future_list) && future::resolved(future_list[[1]])) {
+          v = future::value(future_list[[1]])
+          e = v$e
+          inc(sprintf('Caching electrode %d %s', e, this_env$data_type))
+          v = do.call('rbind', v$v)
+          write_fst(v, sprintf(this_env$target_file, e), compress = 100)
+          this_env$future_list[[1]] = NULL
+        }
+        NULL
+      }
+
+      for(data_type in type){
+        target_file = file.path(dirs$channel_dir, 'cache', data_type, 'raw', '%d.fst')
+        path_format = file.path(dirs$channel_dir, data_type, '%d.h5')
+        lapply(electrodes, function(e){
+          inc(sprintf('Loading electrode %d (%s)', e, data_type))
+          f = future::future({
+            list(
+              e = e,
+              v = lapply(blocks, function(block){
+                h5path = sprintf('/raw/%s/%s', data_type, block)
+                orig = load_h5(sprintf(path_format, e), h5path)
+                if(data_type == 'voltage'){
+                  orig = as.data.frame(matrix(orig[], ncol = 1))
+                }else{
+                  orig = as.data.frame(t(orig[]), row.names = FALSE)
+                }
+              })
+            )
+          })
+          this_env$future_list[[length(future_list) + 1]] = f
+          save_to_file(FALSE)
+
+        })
+        save_to_file(await = TRUE)
+      }
+
     }
 
     gen_meta = function(){
