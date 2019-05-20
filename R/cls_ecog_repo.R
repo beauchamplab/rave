@@ -407,7 +407,7 @@ ECoGRepository <- R6::R6Class(
           results = do.call('data.frame', results)
 
           # Generate tensor for voltage
-          volt = ECoGTensor$new(0, dim = c(1,1,1), varnames = names(dimnames_volt), hybrid = F)
+          volt = Tensor$new(0, dim = c(1,1,1), varnames = names(dimnames_volt), hybrid = F)
 
           # erase data
           volt$set_data(NULL)
