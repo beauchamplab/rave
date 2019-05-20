@@ -408,15 +408,15 @@ Tensor <- R6::R6Class(
     varnames = function(){
       return(names(self$dimnames))
     },
-    data = function(v){
-      if(missing(v)){
-        logger('Tensor$data is deprecated, use Tensor$get_data() instead!', level = 'WARNING')
-        # stop('Tensor$data is deprecated, use Tensor$set_data(data) instead!')
-        self$get_data()
-      }else{
-        stop('Tensor$data is deprecated, use Tensor$set_data(data) instead!')
-      }
-    },
+    # data = function(v){
+    #   if(missing(v)){
+    #     logger('Tensor$data is deprecated, use Tensor$get_data() instead!', level = 'WARNING')
+    #     stop('Tensor$data is deprecated, use Tensor$set_data(data) instead!')
+    #     # self$get_data()
+    #   }else{
+    #     stop('Tensor$data is deprecated, use Tensor$set_data(data) instead!')
+    #   }
+    # },
     read_only = function(v){
       if(missing(v)){
         return(private$fst_locked)
