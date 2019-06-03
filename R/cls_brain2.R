@@ -1,7 +1,7 @@
 #' Tools to load and view brain in 3D viewer
 #' @param surfaces one or more from `pial`, `white`, `smoothwm`, brain surface types
 #' @param multiple_subject is this a template brain?
-#' @param prefix internally used, prefix to `FreeSurfer` asc files
+#' @param prefix internally used, prefix to 'FreeSurfer' asc files
 #' @export
 rave_brain2 <- function(surfaces = 'pial', multiple_subject = FALSE, prefix = 'std.141.'){
   env = environment()

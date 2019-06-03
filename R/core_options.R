@@ -175,8 +175,10 @@ save_options <- function(){
 #' @param ... Key-Value option pairs
 #' @param .save save to disk? ignored most of the time
 #' @param launch_gui launch shiny app?
+#' @param host IP address of host
+#' @param port Port number
 #' @export
-rave_options <- function(..., .save = T, launch_gui = T){
+rave_options <- function(..., .save = T, launch_gui = T, host = '127.0.0.1', port = NULL){
   if(!exists('rave_opts', envir = ..setup_env, inherits = F)){
     ..setup_env$rave_opts <- Options$new(conf_path = '~/.rave.yaml', save_default = T)
   }
@@ -193,7 +195,7 @@ rave_options <- function(..., .save = T, launch_gui = T){
     re = ..setup_env$rave_opts$get_options(...)
     if(length(args) == 0 && launch_gui){
       # make a small shiny app to set options
-      return(rave_options_gui())
+      return(rave_options_gui(host = host, port = port))
     }
   }
 
@@ -212,6 +214,7 @@ ugly_sample <- function(x, size = length(x), replace = FALSE, ...){
 #' Default setup for rave, mainly create forked sub-processes
 #' @param n_workers NULL by default, maximum number of clusters for parallel
 #' @param ignore_error whether ignore the errors
+#' @param use_fork not used
 #' @export
 rave_setup_workers <- function(n_workers = NULL, use_fork = FALSE, ignore_error = TRUE){
 

@@ -4,10 +4,13 @@
 \alias{rave_setup_workers}
 \title{Default setup for rave, mainly create forked sub-processes}
 \usage{
-rave_setup_workers(n_workers = NULL, ignore_error = TRUE)
+rave_setup_workers(n_workers = NULL, use_fork = FALSE,
+  ignore_error = TRUE)
 }
 \arguments{
 \item{n_workers}{NULL by default, maximum number of clusters for parallel}
+
+\item{use_fork}{not used}
 
 \item{ignore_error}{whether ignore the errors}
 }

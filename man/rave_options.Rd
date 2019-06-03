@@ -4,7 +4,8 @@
 \alias{rave_options}
 \title{Function to change rave-options}
 \usage{
-rave_options(..., .save = T, launch_gui = T)
+rave_options(..., .save = T, launch_gui = T, host = "127.0.0.1",
+  port = NULL)
 }
 \arguments{
 \item{...}{Key-Value option pairs}
@@ -12,6 +13,10 @@ rave_options(..., .save = T, launch_gui = T)
 \item{.save}{save to disk? ignored most of the time}
 
 \item{launch_gui}{launch shiny app?}
+
+\item{host}{IP address of host}
+
+\item{port}{Port number}
 }
 \description{
 Function to change rave-options
