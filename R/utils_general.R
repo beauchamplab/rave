@@ -1009,7 +1009,7 @@ lapply_async <- function(x, fun, ..., .ncores = 0,
         try({
           .call_back(ii)
         })
-        do.call(fun, c( list(quote(x[ii])), args), envir = .envir)
+        do.call(fun, c( list(quote(x[ii])), args), envir = environment())
       }
     }))
   }
