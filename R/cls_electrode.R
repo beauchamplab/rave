@@ -556,7 +556,7 @@ Electrode <- R6::R6Class(
           dim_1 = length(ep)
           dim_2 = nrow(freqs)   # Freq
           dim_3 = post + pre + 1     # Time
-          sample = matrix(rep(0, dim_2 * dim_3), c(dim_2, dim_3))
+          # sample = matrix(rep(0, dim_2 * dim_3), c(dim_2, dim_3))
           lapply(ep, function(row){
             block = row[['Block']]
             i = round(row[['Time']] * srate)
@@ -567,18 +567,34 @@ Electrode <- R6::R6Class(
           }) ->
             indices
 
-          env = environment()
+          # env = environment()
           bvec = sapply(indices,'[[', 'block')
-          placehold = array(NA, dim = c(dim_1, dim_2, dim_3, 1))
+          # placehold = array(NA, dim = c(dim_1, dim_2, dim_3, 1))
 
-          lapply(unique(bvec), function(b){
+          # lapply(unique(bvec), function(b){
+          #   sel = bvec == b
+          #   subinds = as.vector(sapply(indices[sel], '[[', 'ind'))
+          #   a = self[[dname]][[b]][,subinds]
+          #   dim(a) = c(nrow(a), dim_3, sum(sel))
+          #   env$placehold[trial_order[sel],,, 1] = aperm(a, c(3, 1, 2))
+          #   NULL
+          # })
+
+          placehold = do.call(cbind, lapply(unique(bvec), function(b){
             sel = bvec == b
             subinds = as.vector(sapply(indices[sel], '[[', 'ind'))
-            a = self[[dname]][[b]][,subinds]
-            dim(a) = c(nrow(a), dim_3, sum(sel))
-            env$placehold[trial_order[sel],,, 1] = aperm(a, c(3, 1, 2))
-            NULL
-          })
+            a = self[[dname]][[b]][,subinds, drop = FALSE]
+            a
+          }))
+          dim(placehold) = c(dim(placehold)[1], dim_3, dim(placehold)[2] / dim_3, 1)
+
+          placehold = aperm(placehold, c(3, 1, 2, 4))
+          # reorder
+          order = do.call(c, lapply(unique(bvec), function(b){ which(bvec == b) }))
+          if(is.unsorted(order)){
+            placehold = placehold[order,,,,drop = F]
+          }
+
           # assign dim names
           re[[name]] = ECoGTensor$new(data = placehold, dimnames = list(
             epochs$Trial[trial_order],

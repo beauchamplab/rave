@@ -999,11 +999,22 @@ getDefaultCacheEnvironment <- function(
 #' })
 #' }
 #' @export
-lapply_async <- function(x, fun, ..., .ncores = 0,
-                         .call_back = NULL, .packages = NULL, .envir = environment(), .globals = TRUE, .gc = TRUE){
+lapply_async <- function(
+  x, fun, ..., .ncores = 0, .call_back = NULL, .packages = NULL,
+  .envir = environment(), .globals = TRUE, .gc = TRUE, .as_datatable = FALSE,
+  .nrows = 0
+){
+  if(!length(x)){
+    return(list())
+  }
+  .colnames = paste0('V', seq_along(x))
+  .ncores = as.integer(.ncores)
+  if(.ncores <= 0){
+    .ncores = rave_options('max_worker')
+  }
   # compatible with windows
   args = list(...)
-  if(stringr::str_detect(Sys.info()['sysname'], '^[wW]in')){
+  if(stringr::str_detect(Sys.info()['sysname'], '^[wW]in') || .ncores == 1){
     return(lapply(seq_along(x), function(ii){
       if(is.function(.call_back)){
         try({
@@ -1014,10 +1025,7 @@ lapply_async <- function(x, fun, ..., .ncores = 0,
     }))
   }
 
-  .ncores = as.integer(.ncores)
-  if(.ncores <= 0){
-    .ncores = rave_options('max_worker')
-  }
+
   if(is.null(.packages)){
     .packages = stringr::str_match(search(), 'package:(.*)')
     .packages = .packages[,2]
@@ -1035,7 +1043,17 @@ lapply_async <- function(x, fun, ..., .ncores = 0,
 
 
   .future_list = list()
-  .future_values = list()
+
+  if(.as_datatable){
+    .future_values = data.table::data.table(
+      V1 = rep(NA, .nrows),
+      keep.rownames = F, stringsAsFactors = F
+    )
+  }else{
+    .future_values = list()
+  }
+
+
 
 
   if(.niter == 0){
@@ -1043,6 +1061,7 @@ lapply_async <- function(x, fun, ..., .ncores = 0,
   }
 
   .this_env = environment()
+  ..started = FALSE
 
 
   lapply(seq_along(x), function(.i){
@@ -1059,12 +1078,26 @@ lapply_async <- function(x, fun, ..., .ncores = 0,
 
     if(length(.future_list) >= .ncores){
       # wait for one of futures resolved
-      .this_env$.future_values[[1 + length(.future_values)]] = future::value(.future_list[[1]])
+      if(!..started && .as_datatable){
+        ..started = TRUE
+        .this_env$.future_values[[1]] = future::value(.future_list[[1]])
+      }else{
+        .this_env$.future_values[[1 + length(.future_values)]] = future::value(.future_list[[1]])
+      }
+
       .this_env$.future_list[[1]] = NULL
     }
   })
 
-  return(c(.future_values, future::values(.future_list)))
+  if(length(.future_values)){
+    future::resolve(.future_values)
+    while(length(.future_list)){
+      .future_values[[1 + length(.future_values)]] = future::value(.future_list[[1]])
+      .future_list[[1]] = NULL
+    }
+  }
+
+  return(.future_values)
 }
 
 

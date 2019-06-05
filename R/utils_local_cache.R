@@ -451,12 +451,11 @@ load_cached_wave = function(cache_dir, electrodes, time_range,
 
 
 
-  data = sapply(electrodes, function(e){
-    progress$inc(message = sprintf('Loading electrode %d', e))
+  data = lapply_async(electrodes, function(e){
     fst_file = file.path(coef_dir, sprintf('%d.fst', e))
 
-    d = fst::read_fst(fst_file, from = idx_range[1], to = idx_range[2])
-    d = d[idx, ]
+    d = fst::read_fst(fst_file, from = idx_range[1], to = idx_range[2])[idx, ]
+    # d = d[idx, ]
 
     # trial x freq x time
 
@@ -478,7 +477,9 @@ load_cached_wave = function(cache_dir, electrodes, time_range,
       }
     }
     return(d)
-  })
+  }, .call_back = function(ii){
+    progress$inc(message = sprintf('Loading electrode %d', electrodes[[ii]]))
+  }, .as_datatable = TRUE, .nrows = length(idx))
 
   list(
     data = data,
