@@ -19,6 +19,10 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
     self$reload()
   }
 
+  w$launch_selector = function(){
+    self$global_reactives$launch_selector = Sys.time()
+  }
+
   w$switch_to = function(module_id, varriable_name = NULL, value = NULL, quiet = F, ...){
     if(is.reactivevalues(self$global_reactives)){
       # if missing module_id, jump to last activated module
@@ -47,7 +51,8 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
           list(...)
         )
       }else{
-        showNotification(p('Cannot switch back. You have not opened any modules yet.'), type = 'warning')
+        # showNotification(p('Cannot switch back. You have not opened any modules yet.'), type = 'warning')
+        w$launch_selector()
       }
     }
   }

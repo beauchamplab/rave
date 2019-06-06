@@ -119,9 +119,9 @@ join_tensors <- function(tensors, temporary = TRUE){
                dimnames = sapply(varnames, function(nm){1}, simplify = F, USE.NAMES = T),
                varnames = varnames, hybrid = FALSE)
   re$swap_file = swap_files
-  re$.__enclos_env__$private$multi_files = TRUE
+  re$.use_multi_files(TRUE)
   re$hybrid = TRUE
-  re$.__enclos_env__$private$.data = NULL
+  re$set_data(NULL)
   re$dim = dim
   re$dimnames = dimnames
   re$temporary = temporary

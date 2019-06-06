@@ -41,6 +41,10 @@ Tensor <- R6::R6Class(
       invisible(self)
     },
 
+    .use_multi_files = function(mult){
+      private$multi_files = isTRUE(mult)
+    },
+
     initialize = function(data, dim, dimnames, varnames, hybrid = F, use_index = F,
                           swap_file = tempfile(), temporary = TRUE, multi_files = FALSE){
 
