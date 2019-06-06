@@ -6,3 +6,8 @@ write_fst <- function(x, path, ...){
   }
   fst::write_fst(x = x, path = path, ...)
 }
+
+
+read_fst <- function(path, ..., as.data.table = TRUE){
+  fst::read_fst(path, ..., as.data.table = as.data.table)
+}

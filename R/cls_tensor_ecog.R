@@ -27,8 +27,9 @@ ECoGTensor <- R6::R6Class(
       }
       re
     },
-    initialize = function(data, dim, dimnames, varnames, hybrid = F, swap_file = tempfile(), temporary = TRUE){
-
+    initialize = function(data, dim, dimnames, varnames, hybrid = F,
+                          swap_file = tempfile(), temporary = TRUE,
+                          multi_files = FALSE, use_index = TRUE, ...){
       self$temporary = temporary
       # get attributes of data
       dim %?<-% base::dim(data)
@@ -41,9 +42,9 @@ ECoGTensor <- R6::R6Class(
       self$last_used = Sys.time()
       self$dimnames = dimnames
       self$dim = dim
-      private$.data = data
 
-      rm(data)
+
+
 
       tryCatch({
         if('Frequency' %in% varnames){
@@ -61,11 +62,19 @@ ECoGTensor <- R6::R6Class(
         }
       }, error = function(e){})
 
+      super$initialize(
+        data = data, dim = dim, dimnames = dimnames, varnames = varnames, hybrid = hybrid,
+        swap_file = swap_file, temporary = temporary,
+        multi_files = multi_files, use_index = use_index, ...
+      )
+      rm(data)
 
-      self$hybrid = hybrid
-      self$use_index = T
-
-      self$swap_file = swap_file
+      # private$.data = data
+      #
+      # self$hybrid = hybrid
+      # self$use_index = T
+      #
+      # self$swap_file = swap_file
 
       # to_swap
       if(hybrid){
@@ -76,3 +85,45 @@ ECoGTensor <- R6::R6Class(
 )
 
 
+join_tensors <- function(tensors, temporary = TRUE){
+  # Join tensors by the last dim. This is a quick and dirty way - doesn't do any checks
+  if(!length(tensors)){
+    return(NULL)
+  }
+
+  dim = dim(tensors[[1]])
+  n_dims = length(dim)
+  dimnames = dimnames(tensors[[1]])
+  last_dnames = unlist(lapply(tensors, function(tensor){
+    tensor$dimnames[[n_dims]]
+  }))
+  dimnames[[n_dims]] = last_dnames
+  dim[n_dims] = length(last_dnames)
+
+  swap_files = unlist(lapply(tensors, function(tensor){
+    # swap!
+    tensor$to_swap_now(use_index = F)
+
+    tensor$swap_file
+  }))
+
+
+
+  cls = Tensor
+  if('ECoGTensor' %in% class(tensors[[1]])){
+    cls = ECoGTensor
+  }
+
+  varnames = names(dimnames)
+  re = cls$new(data = 1, dim = rep(1, n_dims),
+               dimnames = sapply(varnames, function(nm){1}, simplify = F, USE.NAMES = T),
+               varnames = varnames, hybrid = FALSE)
+  re$swap_file = swap_files
+  re$.__enclos_env__$private$multi_files = TRUE
+  re$hybrid = TRUE
+  re$.__enclos_env__$private$.data = NULL
+  re$dim = dim
+  re$dimnames = dimnames
+  re$temporary = temporary
+  re
+}

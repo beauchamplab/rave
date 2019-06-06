@@ -1079,7 +1079,7 @@ lapply_async <- function(
     if(length(.future_list) >= .ncores){
       # wait for one of futures resolved
       if(!..started && .as_datatable){
-        ..started = TRUE
+        .this_env$..started = TRUE
         .this_env$.future_values[[1]] = future::value(.future_list[[1]])
       }else{
         .this_env$.future_values[[1 + length(.future_values)]] = future::value(.future_list[[1]])
@@ -1089,8 +1089,8 @@ lapply_async <- function(
     }
   })
 
-  if(length(.future_values)){
-    future::resolve(.future_values)
+  if(length(.future_list)){
+    future::resolve(.future_list)
     while(length(.future_list)){
       .future_values[[1 + length(.future_values)]] = future::value(.future_list[[1]])
       .future_list[[1]] = NULL
