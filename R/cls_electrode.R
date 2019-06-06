@@ -380,8 +380,8 @@ Electrode <- R6::R6Class(
             fst_phase = file.path(cache_dir, 'cache', 'reference', 'phase', b, sprintf("%s.fst", electrode))
             if(file.exists(fst_coef) && file.exists(fst_phase)){
               # load from cached reference
-              self$raw_power[[b]] = t(as.matrix(fst::read_fst(fst_coef)))^2
-              self$raw_phase[[b]] = t(as.matrix(fst::read_fst(fst_phase)))
+              self$raw_power[[b]] = t(as.matrix(read_fst(fst_coef)))^2
+              self$raw_phase[[b]] = t(as.matrix(read_fst(fst_phase)))
               # test, result should be 0 0
               # coef = load_h5(file, name = paste0('/wavelet/coef/', b), ram = T)
               # range(self$raw_power[[b]] - (coef[,,1])^2)
@@ -471,7 +471,7 @@ Electrode <- R6::R6Class(
 
     },
 
-    epoch = function(epoch_name, pre, post, types = c('volt', 'power', 'phase'), raw = F){
+    epoch = function(epoch_name, pre, post, types = c('volt', 'power', 'phase'), raw = F, rave_id = 'TEMP'){
       # epoch_name='YABa';pre=1;post=2;name=types='power';raw=FALSE;private=self$private
       # prepare data
       epochs = load_meta(meta_type = 'epoch', meta_name = epoch_name, project_name = private$subject$project_name, subject_code = private$subject$subject_code)
@@ -596,12 +596,43 @@ Electrode <- R6::R6Class(
           }
 
           # assign dim names
-          re[[name]] = ECoGTensor$new(data = placehold, dimnames = list(
+          dimnames = list(
             epochs$Trial[trial_order],
             freqs$Frequency,
             time_points,
             electrode
-          ), varnames = c('Trial', 'Frequency', 'Time', 'Electrode'))
+          )
+
+
+
+          if(self$reference_electrode){
+
+            swap_path = file.path(
+              '~/rave_data/cache_dir', self$subject_id, self$electrode, epoch_name, name
+            )
+          }else{
+            if(!length(self$reference) || is.character(self$reference)){
+              refname = self$reference
+            }else{
+              refname = self$reference$electrode
+            }
+            if(refname == ''){ refname = 'noref' }
+
+            swap_path = file.path(
+              '~/rave_data/cache_dir', self$subject_id, self$electrode, epoch_name, refname, name
+            )
+          }
+
+          swap_path = file.path(swap_path, rave_id)
+
+          dir.create(swap_path, recursive = FALSE, showWarnings = FALSE)
+
+          re[[name]] = ECoGTensor$new(
+            data = placehold, dimnames = dimnames,
+            dim = sapply(dimnames, length),
+            varnames = c('Trial', 'Frequency', 'Time', 'Electrode'),
+            hybrid = TRUE, use_index = FALSE, multi_files = FALSE,
+            temporary = FALSE, swap_file = tempfile(tmpdir = swap_path, pattern = paste0(rave_id, '_')))
 
         }
         rm(placehold)

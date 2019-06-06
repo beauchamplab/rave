@@ -4,7 +4,8 @@ Tensor <- R6::R6Class(
   classname = 'Tensor',
   private = list(
     .data = NULL,
-    fst_locked = FALSE
+    fst_locked = FALSE,
+    multi_files = FALSE
   ),
   public = list(
     dim = NULL,
@@ -17,7 +18,7 @@ Tensor <- R6::R6Class(
 
     finalize = function(){
       if(self$temporary){
-        unlink(self$swap_file)
+        lapply(self$swap_file, unlink)
       }
     },
 
@@ -40,7 +41,9 @@ Tensor <- R6::R6Class(
       invisible(self)
     },
 
-    initialize = function(data, dim, dimnames, varnames, hybrid = F, use_index = F, swap_file = tempfile(), temporary = TRUE){
+    initialize = function(data, dim, dimnames, varnames, hybrid = F, use_index = F,
+                          swap_file = tempfile(), temporary = TRUE, multi_files = FALSE){
+
       self$temporary = temporary
       # get attributes of data
       dim %?<-% base::dim(data)
@@ -48,6 +51,20 @@ Tensor <- R6::R6Class(
       if(length(dim) < 2){
         dim = c(dim, 1)
         dim(data) = dim
+      }else if(length(dim(data)) != length(dim)){
+        dim(data) = dim
+      }
+
+      if(multi_files){
+        n_partition = max(dim[length(dim)], 1)
+        if(n_partition > 1){
+          use_index = TRUE
+          if(n_partition != length(swap_file)){
+            swap_file = paste0(swap_file[1], '_part', seq_len(n_partition))
+          }
+        }else{
+          multi_files = FALSE
+        }
       }
 
 
@@ -62,10 +79,22 @@ Tensor <- R6::R6Class(
 
       if(hybrid){
         if(use_index){
-          data = apply(data, length(dim), as.vector)
-          data = as.data.frame(data)
-          names(data) = paste0('V', seq_len(ncol(data)))
-          write_fst(data, swap_file, compress = 20)
+          if(multi_files){
+            n_partition = max(dim[length(dim)], 1)
+            part = 1; env = environment()
+            apply(data, length(dim), function(x){
+              x = data.frame(V1 = as.vector(x))
+              write_fst(x, swap_file[env$part], compress = 20)
+              env$part = env$part + 1
+              NA
+            })
+          }else{
+            data = apply(data, length(dim), as.vector)
+            data = as.data.frame(data)
+            names(data) = paste0('V', seq_len(ncol(data)))
+            write_fst(data, swap_file, compress = 20)
+          }
+
         }else{
           data = data.frame(V1 = as.vector(data))
           write_fst(data, swap_file, compress = 20)
@@ -76,6 +105,7 @@ Tensor <- R6::R6Class(
       self$hybrid = hybrid
       self$use_index = use_index
       self$swap_file = swap_file
+      private$multi_files = multi_files
 
       rm(data)
 
@@ -163,7 +193,15 @@ Tensor <- R6::R6Class(
             tmp[[max_dim]] = which(tmp[[max_dim]])
           }
           load_dim = self$dim; load_dim[max_dim] = length(tmp[[max_dim]])
-          sub = as.matrix(fst::read_fst(self$swap_file, columns = paste0('V', tmp[[max_dim]])))
+          if(private$multi_files){
+            sub = do.call(cbind, lapply(tmp[[max_dim]], function(part){
+              read_fst(self$swap_file[[part]], columns = 'V1')[[1]]
+            }))
+
+          }else{
+            sub = as.matrix(read_fst(self$swap_file, columns = paste0('V', tmp[[max_dim]])))
+          }
+
           dim(sub) = load_dim
           tmp[[max_dim]] = seq_along(tmp[[max_dim]])
           sub = do.call(`[`, args = c(alist(sub), tmp, list(drop = drop)))
@@ -247,6 +285,7 @@ Tensor <- R6::R6Class(
     to_swap_now = function(use_index = F){
       if(!file.exists(self$swap_file)){
         self$swap_file = tempfile()
+        private$multi_files = FALSE
       }
       swap_file = self$swap_file
 
@@ -256,7 +295,7 @@ Tensor <- R6::R6Class(
         return()
       }
       private$.data = NULL
-      if(use_index){
+      if(use_index || private$multi_files){
         # use the last dim as index
         index = length(self$dim)
         dim(d) = c(prod(self$dim) / self$dim[index], self$dim[index])
@@ -265,9 +304,19 @@ Tensor <- R6::R6Class(
       }
       d = as.data.frame(d)
 
-      write_fst(d, path = swap_file, compress = 20)
-      self$use_index = use_index
-      self$swap_file = swap_file
+      if(private$multi_files && length(d) == length(swap_file)){
+        for(ii in seq_len(length(d))){
+          write_fst(d[ii], path = swap_file, compress = 20)
+        }
+        self$use_index = TRUE
+        self$swap_file = swap_file
+      }else{
+        swap_file = swap_file[1]
+        write_fst(d, path = swap_file, compress = 20)
+        self$use_index = use_index
+        self$swap_file = swap_file
+        private$multi_files = FALSE
+      }
 
     },
     get_data = function(drop = F, gc_delay = 3){
@@ -275,14 +324,25 @@ Tensor <- R6::R6Class(
       d = NULL
       if(!is.null(private$.data)){
         d = private$.data
-      }else if(file.exists(self$swap_file)){
+      }else if(all(file.exists(self$swap_file))){
         # load data
-        d = as.matrix(fst::read_fst(self$swap_file, as.data.table = F))
-        dim(d) = self$dim
+        if(private$multi_files){
+          dim = self$dim[-length(self$dim)]
+          sa = array(read_fst(self$swap_file[[1]], from=1, to=1)[[1]], dim)
+          d = vapply(seq_len(self$dim[length(self$dim)]), function(part){
+            read_fst(self$swap_file[[part]], as.data.table = F)[[1]]
+          }, FUN.VALUE = sa)
+        }else{
+          d = as.matrix(read_fst(self$swap_file, as.data.table = F))
+          dim(d) = self$dim
+        }
+
         dimnames(d) = self$dimnames
         if(gc_delay > 0){
           private$.data = d
         }
+      }else{
+        stop('Cannot find data from swap file(s).')
       }
       if(drop && !is.null(d)){
         d = d[drop=T]
@@ -296,7 +356,7 @@ Tensor <- R6::R6Class(
           later::later(function(){
             delta = difftime(Sys.time(), self$last_used, units = 'secs')
 
-            if(self$hybrid && file.exists(self$swap_file) && (as.numeric(delta) - gc_delay >= - 0.001)){
+            if(self$hybrid && all(file.exists(self$swap_file)) && (as.numeric(delta) - gc_delay >= - 0.001)){
               # remove RAM data
               private$.data = NULL
             }
@@ -376,7 +436,12 @@ Tensor <- R6::R6Class(
         # This is a special case where we can avoid using too much memories
         rest_dims = rest_dims[rest_dims != max_dim]
         vapply(seq_len(self$dim[[max_dim]]), function(ii){
-          sub = fst::read_fst(self$swap_file, as.data.table = F, columns = paste0('V', ii))[[1]]
+          if(private$multi_files){
+            sub = read_fst(self$swap_file[[ii]], as.data.table = F, columns = 'V1')[[1]]
+          }else{
+            sub = read_fst(self$swap_file, as.data.table = F, columns = paste0('V', ii))[[1]]
+          }
+
           dim(sub) = self$dim[-max_dim]
           if(length(rest_dims)){
             perm = c(match_dim, rest_dims)

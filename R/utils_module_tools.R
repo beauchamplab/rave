@@ -55,7 +55,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
     }
 
 
-    get_power = function(force = T, referenced = T) {
+    get_power = function(force = TRUE, referenced = TRUE, use_cache = TRUE) {
       repo = data_env$.private$repo
       on.exit(rm(repo))
       nm = ifelse(referenced, 'power', 'raw_power')
@@ -66,13 +66,17 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
         frequency_range = data_env$preload_info$frequencies
         ref_name = data_env$preload_info$reference_name
 
-        # Try to load from cache
-        re = load_local_cache(
-          project_name = data_env$subject$project_name, subject_code = data_env$subject$subject_code,
-          epoch = epoch_name, time_range = time_range,
-          frequency_range = frequency_range, electrodes = electrodes,
-          referenced = ifelse(referenced, ref_name, FALSE), data_type = c('power', 'phase')
-        )
+        re = NULL
+        if(use_cache){
+          # Try to load from cache
+          re = load_local_cache(
+            project_name = data_env$subject$project_name, subject_code = data_env$subject$subject_code,
+            epoch = epoch_name, time_range = time_range,
+            frequency_range = frequency_range, electrodes = electrodes,
+            referenced = ifelse(referenced, ref_name, FALSE), data_type = c('power', 'phase')
+          )
+        }
+
 
         if(!is.null(re)){
           if(isTRUE(referenced)){

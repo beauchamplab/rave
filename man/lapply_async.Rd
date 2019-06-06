@@ -6,7 +6,7 @@
 \usage{
 lapply_async(x, fun, ..., .ncores = 0, .call_back = NULL,
   .packages = NULL, .envir = environment(), .globals = TRUE,
-  .gc = TRUE)
+  .gc = TRUE, .as_datatable = FALSE, .nrows = 0)
 }
 \arguments{
 \item{x, fun, ...}{(See ?lapply)}
