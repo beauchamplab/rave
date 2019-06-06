@@ -471,8 +471,13 @@ Electrode <- R6::R6Class(
 
     },
 
-    epoch = function(epoch_name, pre, post, types = c('volt', 'power', 'phase'), raw = F, rave_id = 'TEMP'){
-      # epoch_name='YABa';pre=1;post=2;name=types='power';raw=FALSE;private=self$private
+    epoch = function(epoch_name, pre, post, types = c('volt', 'power', 'phase'), raw = F){
+
+      # epoch_name='YABa';pre=1;post=2;name=types='power';raw=FALSE;private=self$private;rave_id = 'TEMP'
+
+      instance_id = add_to_session(getDefaultReactiveDomain(), key = 'rave_instance', val = 'TEMP', override = FALSE)
+      instance_id %?<-% 'TEMP'
+      cache_root_dir = file.path('~/rave_data/cache_dir/', instance_id)
       # prepare data
       epochs = load_meta(meta_type = 'epoch', meta_name = epoch_name, project_name = private$subject$project_name, subject_code = private$subject$subject_code)
       freqs = private$subject$frequencies
@@ -523,25 +528,63 @@ Electrode <- R6::R6Class(
         }) ->
           indices
 
-        env = environment()
+        # env = environment()
         bvec = sapply(indices,'[[', 'block')
 
-        placehold = array(NA, dim = c(dim_1, dim_3, 1))
-        lapply(unique(bvec), function(b){
+        # placehold = array(NA, dim = c(dim_1, dim_3, 1))
+        # lapply(unique(bvec), function(b){
+        #   sel = bvec == b
+        #   subinds = as.vector(sapply(indices[sel], '[[', 'ind'))
+        #   a = self[[name]][[b]][subinds]
+        #   dim(a) = c(dim_3, sum(sel))
+        #   env$placehold[trial_order[sel],, 1] = aperm(a, c(2, 1))
+        #   NULL
+        # })
+
+        placehold = do.call(cbind, lapply(unique(bvec), function(b){
           sel = bvec == b
           subinds = as.vector(sapply(indices[sel], '[[', 'ind'))
           a = self[[name]][[b]][subinds]
-          dim(a) = c(dim_3, sum(sel))
-          env$placehold[trial_order[sel],, 1] = aperm(a, c(2, 1))
-          NULL
-        })
+          as.vector(a)
+        }))
+        dim(placehold) = c(dim_3, length(placehold) / dim_3)
+
+        placehold = t(placehold)
+        # reorder
+        order = do.call(c, lapply(unique(bvec), function(b){ which(bvec == b) }))
+        if(is.unsorted(order)){
+          placehold = placehold[order,,drop = F]
+        }
+
+        if(self$reference_electrode){
+
+          swap_path = file.path(cache_root_dir, self$subject_id, self$electrode, epoch_name)
+        }else{
+          if(!length(self$reference) || is.character(self$reference)){
+            refname = self$reference
+          }else{
+            refname = self$reference$electrode
+          }
+          if(refname == ''){ refname = 'noref' }
+
+          swap_path = file.path(cache_root_dir, self$subject_id, self$electrode, epoch_name, refname)
+        }
+
+        dir.create(swap_path, recursive = FALSE, showWarnings = FALSE)
 
         # assign dim names
-        re[['volt']] = Tensor$new(data = placehold, dimnames = list(
-          epochs$Trial[trial_order],
-          time_points,
-          electrode
-        ), varnames = c('Trial', 'Time', 'Electrode'))
+        re[['volt']] = Tensor$new(
+          data = placehold,
+          dim = c(dim(placehold), 1),
+          dimnames = list(
+            epochs$Trial[trial_order],
+            time_points,
+            electrode
+          ),
+          varnames = c('Trial', 'Time', 'Electrode'),
+          hybrid = TRUE, use_index = FALSE, multi_files = FALSE,
+          temporary = FALSE, swap_file = file.path(swap_path, name))
+
         rm(placehold)
       }
       types = types[types != 'volt']
@@ -608,7 +651,8 @@ Electrode <- R6::R6Class(
           if(self$reference_electrode){
 
             swap_path = file.path(
-              '~/rave_data/cache_dir', self$subject_id, self$electrode, epoch_name, name
+              cache_root_dir, self$subject_id,
+              self$electrode, epoch_name
             )
           }else{
             if(!length(self$reference) || is.character(self$reference)){
@@ -619,11 +663,10 @@ Electrode <- R6::R6Class(
             if(refname == ''){ refname = 'noref' }
 
             swap_path = file.path(
-              '~/rave_data/cache_dir', self$subject_id, self$electrode, epoch_name, refname, name
+              cache_root_dir, self$subject_id,
+              self$electrode, epoch_name, refname
             )
           }
-
-          swap_path = file.path(swap_path, rave_id)
 
           dir.create(swap_path, recursive = FALSE, showWarnings = FALSE)
 
@@ -632,7 +675,7 @@ Electrode <- R6::R6Class(
             dim = sapply(dimnames, length),
             varnames = c('Trial', 'Frequency', 'Time', 'Electrode'),
             hybrid = TRUE, use_index = FALSE, multi_files = FALSE,
-            temporary = FALSE, swap_file = tempfile(tmpdir = swap_path, pattern = paste0(rave_id, '_')))
+            temporary = FALSE, swap_file = file.path(swap_path, dname))
 
         }
         rm(placehold)

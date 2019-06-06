@@ -78,7 +78,7 @@ ECoGTensor <- R6::R6Class(
 
       # to_swap
       if(hybrid){
-        self$to_swap_now(use_index = T)
+        self$to_swap_now(use_index = use_index)
       }
     }
   )
