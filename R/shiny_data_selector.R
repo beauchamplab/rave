@@ -258,6 +258,9 @@ shiny_data_selector <- function(module_id){
   control = function(){
     NULL
   }
+
+
+
   server = function(input, output, session, global_reactives){
     # Vars
     group = 'main_app2'
@@ -1171,11 +1174,16 @@ shiny_data_selector <- function(module_id){
 
   }
 
+  launch = function(){
+    shinyjs::click(ns('data_select'))
+  }
+
 
   return(list(
     header = header,
     control = control,
-    server = server
+    server = server,
+    launch = launch
   ))
 }
 

@@ -287,6 +287,10 @@ detect_modules <- function(packages, as_module = TRUE){
   }, simplify = F))
   all_packages = unique(all_packages)
 
+  if(!missing(packages)){
+    all_packages = all_packages[all_packages %in% packages]
+  }
+
   yaml_path = sapply(all_packages, function(p){
     system.file('rave.yaml', package = p)
   })
@@ -335,7 +339,7 @@ detect_modules <- function(packages, as_module = TRUE){
   }
 
   m_data = do.call('rbind', m_data)
-  m_data = m_data[order(as.numeric(m_data[, 5])), 1:4]
+  m_data = m_data[order(as.numeric(m_data[, 5])), 1:4, drop = FALSE]
 
   if(as_module){
     gnames = unique(m_data[,3])
