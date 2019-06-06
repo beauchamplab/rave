@@ -153,7 +153,7 @@ app_controller <- function(
 
   ui_func = app_ui(adapter, token = token)
 
-  server_func = app_server(adapter)
+  server_func = app_server(adapter, instance_id = paste(sample(c(letters, LETTERS, 0:9), 22), collapse = ''))
 
   shinyApp(ui = ui_func, server = server_func, options = list(launch.browser = launch.browser, ...))
   # shinyApp(ui = ui_func, server = server_func, options = list(launch.browser = T))
@@ -266,7 +266,7 @@ app_ui = function(adapter, token = NULL){
 }
 
 
-app_server = function(adapter){
+app_server = function(adapter, instance_id){
 
   this_env = environment()
 
@@ -280,6 +280,7 @@ app_server = function(adapter){
   #################################################################
   function(input, output, session){
     session_id = add_to_session(session)
+    add_to_session(session, key = 'rave_instance', val = instance_id, override = TRUE)
 
     session$sendCustomMessage('rave_set_id', session_id);
 
