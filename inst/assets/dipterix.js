@@ -109,6 +109,14 @@ Shiny.addCustomMessageHandler("rave_set_storage", (data) => {
 
 });
 
+// return as is whatever value is given (to update inputs)
+Shiny.addCustomMessageHandler('rave_asis', (data) => {
+  if( typeof(data.inputId) === 'string' ){
+    Shiny.onInputChange(data.inputId, data.value);
+  }
+});
+
+
 
 //Shiny.onInputChange(callback_id, re);
 // Listen to localStorage for messages from other sessions
