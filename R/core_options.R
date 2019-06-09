@@ -224,7 +224,6 @@ rave_setup_workers <- function(n_workers = NULL, use_fork = FALSE, ignore_error 
   options("future.fork.enable" = TRUE)
   future::plan(future::multicore, workers = n_workers)
 
-
   logger('Number of workers switched to - ', future::nbrOfWorkers())
 
 }
