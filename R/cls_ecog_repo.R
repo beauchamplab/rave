@@ -12,7 +12,8 @@
 #' @param op function for baselining
 #' @export
 baseline <- function(el, from, to, method = 'mean', unit = '%',
-                    data_only = F, hybrid = T, swap_file = tempfile(), mem_optimize = T, preop = NULL, op){
+                    data_only = F, hybrid = TRUE, swap_file = tempfile(),
+                    mem_optimize = TRUE, same_dimension = unit %in% c('%', 'dB'), preop = NULL, op){
   if(missing(el)){
     logger('baseline(el...) is changed now. Please update.', level = 'WARNING')
 
@@ -39,12 +40,14 @@ baseline <- function(el, from, to, method = 'mean', unit = '%',
     # for each time points, log10 and substract, Since dB is 10*log10(.)
     op = function(e1, e2){ 10 * (log10(e1) - e2) }
 
-    bs = el$operate(by = bs, match_dim = rest_dim, mem_optimize = mem_optimize, fun = op)
+    bs = el$operate(by = bs, match_dim = rest_dim, mem_optimize = mem_optimize,
+                    fun = op, same_dimension = same_dimension)
   }else if(unit == '%'){
     bs = el$subset(Time = Time %within% c(from, to))
     op = function(e1, e2){ e1 / e2 * 100 - 100 }
     bs = bs$collapse(keep = rest_dim, method = method)
-    bs = el$operate(by = bs, match_dim = rest_dim, mem_optimize = mem_optimize, fun = op)
+    bs = el$operate(by = bs, match_dim = rest_dim, mem_optimize = mem_optimize,
+                    fun = op, same_dimension = same_dimension)
   }else{
     # customizing
     bs = el$subset(Time = Time %within% c(from, to))
@@ -52,12 +55,19 @@ baseline <- function(el, from, to, method = 'mean', unit = '%',
       bs$set_data(preop(bs$get_data()))
     }
     bs = bs$collapse(keep = rest_dim, method = method)
-    bs = el$operate(by = bs, match_dim = rest_dim, mem_optimize = mem_optimize, fun = op)
+    bs = el$operate(by = bs, match_dim = rest_dim, mem_optimize = mem_optimize,
+                    fun = op, same_dimension = same_dimension)
   }
 
   if(data_only){
+    if('Tensor' %in% class(bs)){
+      bs = bs$get_data()
+    }
     return(bs)
   }else{
+    if('Tensor' %in% class(bs)){
+      return(bs)
+    }
     ECoGTensor$new(data = bs, dim = dim(el), dimnames = dimnames(el), varnames = el$varnames, hybrid = hybrid, swap_file = swap_file)
   }
 }
