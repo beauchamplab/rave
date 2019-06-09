@@ -17,16 +17,20 @@ Please [click here for the prerequisite installation guide](./Installation.md) t
 ```r
 # Install RAVE and builtin modules
 install.packages('devtools')
-devtools::install_github('beauchamplab/rave')
+devtools::install_github('dipterix/threeBrain')
+devtools::install_github('dipterix/rutabaga')
 devtools::install_github('beauchamplab/ravebuiltins')
+devtools::install_github('beauchamplab/rave@dev-0.1.6.1')
 ```
 
 Alternative installation command:
 
 ```r
 install.packages('pak')
-pak::pkg_install('beauchamplab/rave')
-pak::pkg_install('beauchamplab/ravebuiltins', upgrade = FALSE, ask = FALSE)
+pak::pkg_install('dipterix/threeBrain')
+pak::pkg_install('dipterix/rutabaga')
+pak::pkg_install('beauchamplab/ravebuiltins')
+pak::pkg_install('beauchamplab/rave@dev-0.1.6.1')
 ```
 
 * After installing or updating RAVE, quit and restart RStudio before continuing.
