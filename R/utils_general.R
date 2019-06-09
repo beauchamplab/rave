@@ -1034,7 +1034,7 @@ lapply_async <- function(
   .niter = length(x)
 
 
-  rave_setup_workers(.ncores, use_fork = TRUE)
+  rave_setup_workers(.ncores)
   if(.ncores != rave_options('max_worker')){
     on.exit({
       rave_setup_workers()

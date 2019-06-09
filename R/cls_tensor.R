@@ -18,11 +18,9 @@ Tensor <- R6::R6Class(
 
     finalize = function(){
       if(self$temporary){
-        sf = self$swap_file
         # recycle at the end of session
-        rave::RaveFinalizer$new(function(){
-          lapply(sf, unlink)
-        })
+        f = RaveFinalizer$new(NULL)
+        f$files = self$swap_file
       }
     },
 

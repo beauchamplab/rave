@@ -471,7 +471,7 @@ Electrode <- R6::R6Class(
 
     },
 
-    epoch = function(epoch_name, pre, post, types = c('volt', 'power', 'phase'), raw = F){
+    epoch = function(epoch_name, pre, post, types = c('volt', 'power', 'phase'), raw = F, hybrid = TRUE){
 
       # epoch_name='YABa';pre=1;post=2;name=types='power';raw=FALSE;private=self$private;rave_id = 'TEMP'
 
@@ -582,7 +582,7 @@ Electrode <- R6::R6Class(
             electrode
           ),
           varnames = c('Trial', 'Time', 'Electrode'),
-          hybrid = TRUE, use_index = FALSE, multi_files = FALSE,
+          hybrid = hybrid, use_index = FALSE, multi_files = FALSE,
           temporary = FALSE, swap_file = file.path(swap_path, name))
 
         rm(placehold)
@@ -674,7 +674,7 @@ Electrode <- R6::R6Class(
             data = placehold, dimnames = dimnames,
             dim = sapply(dimnames, length),
             varnames = c('Trial', 'Frequency', 'Time', 'Electrode'),
-            hybrid = TRUE, use_index = FALSE, multi_files = FALSE,
+            hybrid = hybrid, use_index = FALSE, multi_files = FALSE,
             temporary = FALSE, swap_file = file.path(swap_path, dname))
 
         }

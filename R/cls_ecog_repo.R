@@ -288,23 +288,16 @@ ECoGRepository <- R6::R6Class(
           lapply_async(electrodes, function(e){
             # progress$inc(sprintf('Step %d (of %d) electrode %d (power)', count, n_dt, e))
             electrode = raws$get(as.character(e))
-            electrode$epoch(
-              epoch_name = epoch_name,
-              pre = pre,
-              post = post,
-              types = 'power',
-              raw = !referenced
-            ) ->
-              elc
-            power = elc$power
+            elc = electrode$epoch( epoch_name = epoch_name, pre = pre, post = post,
+                                   types = 'power', raw = !referenced )
+
+            power = elc$power; rm(elc)
             if(!all(freq_subset)){
               power$temporary = TRUE
               power = power$subset(Frequency = freq_subset, drop = F, data_only = F)
               power$to_swap_now(use_index = FALSE)
               power$temporary = FALSE
             }
-            rm(elc)
-
             gc()
 
             # power = elc$power$subset(Frequency = freq_subset, drop = T, data_only = T)
@@ -355,15 +348,9 @@ ECoGRepository <- R6::R6Class(
         if('phase' %in% data_type){
           lapply_async(electrodes, function(e){
             electrode = raws$get(as.character(e))
-            electrode$epoch(
-              epoch_name = epoch_name,
-              pre = pre,
-              post = post,
-              types = 'phase',
-              raw = !referenced
-            ) ->
-              elc
-            phase = elc$phase
+            elc = electrode$epoch(epoch_name = epoch_name, pre = pre, post = post,
+                                  types = 'phase', raw = !referenced)
+            phase = elc$phase; rm(elc)
             # if(!all(freq_subset)){
             #   phase = phase$subset(Frequency = freq_subset, drop = F, data_only = F)
             #   phase$to_swap_now(use_index = FALSE)
@@ -375,12 +362,8 @@ ECoGRepository <- R6::R6Class(
               phase$to_swap_now(use_index = FALSE)
               phase$temporary = FALSE
             }
-            rm(elc)
 
             gc()
-
-
-
             # phase = elc$phase$subset(Frequency = freq_subset, drop = T, data_only = T)
             # rm(elc)
             # phase = as.vector(phase)
@@ -426,14 +409,8 @@ ECoGRepository <- R6::R6Class(
         if('volt' %in% data_type){
           lapply_async(electrodes, function(e){
             electrode = raws$get(as.character(e))
-            electrode$epoch(
-              epoch_name = epoch_name,
-              pre = pre,
-              post = post,
-              types = 'volt',
-              raw = !referenced
-            ) ->
-              elc
+            elc = electrode$epoch( epoch_name = epoch_name, pre = pre, post = post,
+                                   types = 'volt', raw = !referenced )
             # volt = elc$volt$get_data()
             # rm(elc)
             # volt = as.vector(volt)
