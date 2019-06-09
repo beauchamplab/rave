@@ -5,8 +5,8 @@
 \title{Baseline signals}
 \usage{
 baseline(el, from, to, method = "mean", unit = "\%", data_only = F,
-  hybrid = T, swap_file = tempfile(), mem_optimize = T,
-  preop = NULL, op)
+  hybrid = TRUE, swap_file = tempfile(), mem_optimize = TRUE,
+  same_dimension = unit \%in\% c("\%", "dB"), preop = NULL, op)
 }
 \arguments{
 \item{el}{Tensor or ECoGTensor object}

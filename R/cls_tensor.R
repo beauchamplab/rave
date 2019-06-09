@@ -18,7 +18,11 @@ Tensor <- R6::R6Class(
 
     finalize = function(){
       if(self$temporary){
-        lapply(self$swap_file, unlink)
+        sf = self$swap_file
+        # recycle at the end of session
+        rave::RaveFinalizer$new(function(){
+          lapply(sf, unlink)
+        })
       }
     },
 
@@ -423,7 +427,7 @@ Tensor <- R6::R6Class(
 
       return(d)
     },
-    operate = function(by, fun = .Primitive("/"), match_dim, mem_optimize = F){
+    operate = function(by, fun = .Primitive("/"), match_dim, mem_optimize = F, same_dimension = FALSE){
       by_vector = as.vector(by)
       if(missing(match_dim)){
         return(self$get_data() / by_vector)
@@ -436,10 +440,12 @@ Tensor <- R6::R6Class(
       rest_dims = seq_along(self$dim)[-match_dim]
       max_dim = length(self$dim)
 
-      if(mem_optimize && self$hybrid && self$use_index && max_dim %in% rest_dims && self$dim[[max_dim]] != 1){
+      if(mem_optimize && self$hybrid && self$use_index &&
+         max_dim %in% rest_dims && self$dim[[max_dim]] != 1){
         # This is a special case where we can avoid using too much memories
         rest_dims = rest_dims[rest_dims != max_dim]
-        vapply(seq_len(self$dim[[max_dim]]), function(ii){
+
+        .fun = function(ii){
           if(private$multi_files){
             sub = read_fst(self$swap_file[[ii]], as.data.table = F, columns = 'V1')[[1]]
           }else{
@@ -455,14 +461,66 @@ Tensor <- R6::R6Class(
             sub = fun(sub, by_vector)
           }
           sub
-        }, FUN.VALUE = array(0, dim = self$dim[-max_dim])) ->
-          re
+        }
+
+        if(same_dimension){
+          re = lapply(seq_len(self$dim[[max_dim]]), function(ii){
+            sub = .fun(ii)
+            # This means sub and original x has the same dimension
+            # like baseline, then we fast cache the new data
+            dimnames = self$dimnames
+            dimnames[[max_dim]] = dimnames[[max_dim]][ii]
+            dim = c(self$dim[-max_dim], 1)
+            sub = Tensor$new(data = sub, dim = dim, dimnames = dimnames,
+                             varnames = self$varnames, hybrid = FALSE, use_index = FALSE,
+                             temporary = FALSE, multi_files = FALSE)
+            sub$to_swap_now(use_index = FALSE)
+          })
+
+          re = join_tensors(re)
+
+        }else{
+          re = vapply(seq_len(self$dim[[max_dim]]), .fun, FUN.VALUE = array(0, dim = self$dim[-max_dim]))
+        }
+
         return(re)
       }else{
         # general case
         perm = c(match_dim, rest_dims)
 
-        if(any(perm -seq_len(max_dim) != 0)){
+        if(mem_optimize && same_dimension && max_dim %in% match_dim){
+          byidx = which(match_dim == max_dim)
+          byperm = perm[perm != max_dim]
+          last_name = self$varnames[[max_dim]]
+          tmp = new.env(parent = emptyenv())
+          tmp$ii = 1
+          dimnames = self$dimnames
+          dim = self$dim
+          re = apply(by, byidx, function(y){
+            last_d = self$dimnames[[last_name]][[tmp$ii]]
+            tmp$ii = tmp$ii + 1
+            expr = sprintf('self$subset(%s = %s == last_d, data_only = TRUE, drop = FALSE)',
+                           last_name, last_name)
+            sub = eval(parse(text = expr))
+            if(is.unsorted(perm)){
+              sub = aperm(sub, perm = perm)
+              sub = fun(sub, as.vector(y))
+              sub = aperm(sub, order(perm))
+            }else{
+              sub = fun(sub, as.vector(y))
+            }
+            # save to temp file
+            dimnames[[max_dim]] = last_d
+            dim[[max_dim]] = 1
+            sub = Tensor$new(data = sub, dimnames = dimnames, dim = dim, varnames = self$varnames, hybrid = FALSE, use_index = FALSE, temporary = FALSE, multi_files = FALSE)
+            sub$to_swap_now(use_index = FALSE)
+            sub
+          })
+          re = join_tensors(re)
+          return(re)
+        }
+
+        if(is.unsorted(perm)){
           sub = aperm(self$get_data(), perm = perm)
           sub = fun(sub, by_vector)
           sub = aperm(sub, order(perm))

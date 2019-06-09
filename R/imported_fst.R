@@ -9,5 +9,11 @@ write_fst <- function(x, path, ...){
 
 
 read_fst <- function(path, ..., as.data.table = TRUE){
-  fst::read_fst(path, ..., as.data.table = as.data.table)
+  tryCatch({
+    fst::read_fst(path, ..., as.data.table = as.data.table)
+  }, error = function(e){
+    logger('File failure: ', path)
+    stop(e)
+  })
+
 }
