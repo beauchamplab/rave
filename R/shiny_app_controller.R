@@ -25,6 +25,11 @@ app_controller <- function(
 
   # define method to load modules
   load_module = function(module_id, notification = FALSE){
+    if('ModuleEnvir' %in% class(module_id)){
+      # this is a module instance, no need to load new
+      controller_env$loaded_modules[[stringr::str_to_upper(module_id$module_id)]] = module_id
+      return(module_id)
+    }
     module_id = stringr::str_to_upper(module_id)
     # find module
     if(length(loaded_modules[[module_id]])){
@@ -52,7 +57,9 @@ app_controller <- function(
 
     # set module
     for(m in ms){
-      controller_env$loaded_modules[[stringr::str_to_upper(m$module_id)]] = m
+      if(is.null(controller_env$loaded_modules[[stringr::str_to_upper(m$module_id)]])){
+        controller_env$loaded_modules[[stringr::str_to_upper(m$module_id)]] = m
+      }
     }
 
     # If loaded, then this will return module instance, otherwise, returns will be NULL
@@ -61,6 +68,9 @@ app_controller <- function(
 
 
   if(length(modules)){
+    if(!is.list(modules)){
+      modules = unlist(list(modules))
+    }
     for(mid in modules){
       load_module(mid)
     }
@@ -153,7 +163,26 @@ app_controller <- function(
 
   ui_func = app_ui(adapter, token = token)
 
-  server_func = app_server(adapter, instance_id = paste(sample(c(letters, LETTERS, 0:9), 22), collapse = ''))
+  instance_id = paste(sample(c(letters, LETTERS, 0:9), 22), collapse = '')
+  server_func = app_server(adapter, instance_id, token = token)
+
+  reg.finalizer(
+    controller_env,
+    function(e){
+      dir_path = file.path('~/rave_data/cache_dir/', .subset2(e, 'instance_id'))
+      if(dir.exists(dir_path)){
+        unlink(dir_path, recursive = TRUE, FALSE)
+      }
+    },
+    onexit = TRUE
+  )
+
+  RaveFinalizer$new(function(){
+    dir_path = file.path('~/rave_data/cache_dir/', instance_id)
+    if(dir.exists(dir_path)){
+      unlink(dir_path, recursive = TRUE, force = FALSE)
+    }
+  })
 
   shinyApp(ui = ui_func, server = server_func, options = list(launch.browser = launch.browser, ...))
   # shinyApp(ui = ui_func, server = server_func, options = list(launch.browser = T))
@@ -169,7 +198,15 @@ app_ui = function(adapter, token = NULL){
     '404'
   }
 
-  # ...
+  # Case 2 (3D viewer)
+  ui_functions[['3dviewer']] = function(global_id, session_id = NULL){
+    shiny::fillPage(
+      title = 'RAVE 3D Viewer',
+      padding = 0,
+      threejsBrainOutput(global_id, width = '100vw', height = '100vh')
+    )
+  }
+
 
   # Case n (default, load ravebuiltins)
 
@@ -234,15 +271,15 @@ app_ui = function(adapter, token = NULL){
   }
 
 
-
-
   function(req){ #, parent_env = parent.frame()
     # First, get query string
 
     qstr = req$QUERY_STRING
 
     url_info = shiny::parseQueryString(qstr)
-    print(url_info)
+
+    # If token should be provided, check token
+    # ?token=...
     if(!is.null(token)){
       if(!length(url_info$token) || !any(url_info$token %in% token)){
         # Return 404
@@ -250,11 +287,13 @@ app_ui = function(adapter, token = NULL){
       }
     }
 
-    # New load module?
-    module_id = url_info$module_id
-    if(length(module_id)){
-      adapter$load_module(module_id, check = TRUE)
+    # ?type=3dviewer&globalId=...&sessionId=...
+    if(length(url_info$type) == 1 && url_info$type == '3dviewer'){
+      return(ui_functions[['3dviewer']](url_info$globalId, url_info$sessionId))
     }
+
+    # Default, load main app
+    lapply(url_info$module_id, adapter$load_module)
     nomodal = url_info$nomodal
     nomodal %?<-% FALSE
     nomodal = nomodal == 'true'
@@ -266,13 +305,36 @@ app_ui = function(adapter, token = NULL){
 }
 
 
-app_server = function(adapter, instance_id){
+app_server_404 <- function(...){
+
+}
+app_server_3dviewer <- function(input, output, session, master_session, viewer_id){
+  assign('aaa', session, envir = globalenv())
+  assign('bbb', master_session, envir = globalenv())
+  output[[viewer_id]] <- master_session$userData$cross_session_funcs[[viewer_id]]()
+
+  # Observe clicks
+  click_id = paste0(viewer_id, '__mouse_event')
+  observeEvent(input[[click_id]], {
+
+    # send whatever message from 3D viewer back to master_session
+    master_session$sendCustomMessage('rave_asis', list(
+      inputId = click_id,
+      value = input[[click_id]]
+    ))
+  })
+
+}
+
+
+app_server <- function(adapter, instance_id, token = NULL){
 
   this_env = environment()
 
   test.mode = adapter$get_option('test.mode', FALSE)
 
   session_list = list()
+  rave_ids = NULL
 
   storage_keys = NULL
 
@@ -281,10 +343,32 @@ app_server = function(adapter, instance_id){
   function(input, output, session){
     session_id = add_to_session(session)
     add_to_session(session, key = 'rave_instance', val = instance_id, override = TRUE)
+    add_to_session(session, key = 'token', val = token, override = TRUE)
 
     session$sendCustomMessage('rave_set_id', session_id);
+    session$userData$cross_session_funcs = list()
+
+    # 404 Page
+    query_str = shiny::isolate(getQueryString(session))
+
+    if(!is.null(token)){
+      if(!length(query_str$token) || !any(query_str$token %in% token)){
+        # Return 404
+        return(app_server_404(input, output, session))
+      }
+    }
+
+    # 3D viewer
+    if( length(query_str$type) == 1 && query_str$type == '3dviewer' ){
+      ## TODO: handle exceptions
+      return(app_server_3dviewer(
+        input, output, session,
+        this_env$session_list[[query_str$sessionId]], query_str$globalId
+      ))
+    }
 
     this_env$rave_ids = c(this_env$rave_ids, session_id)
+    this_env$session_list[[session_id]] = session
 
     # Global variable, timer etc.
     async_timer = reactiveTimer(5000)
@@ -410,7 +494,7 @@ app_server = function(adapter, instance_id){
 
     observe({
       if(global_reactives$has_data){
-        print(input$sidebar)
+        # print(input$sidebar)
         global_reactives$execute_module = input$sidebar
         shinyjs::hide(id = '__rave__mask__', anim = F)
         shinyjs::removeClass(selector = 'body', class = "rave-noscroll")
@@ -629,7 +713,7 @@ app_server = function(adapter, instance_id){
         execenv = m$get_or_new_exec_env(session = session)
         try({
           inputs = eval(parse(text = all_inputs[[mid]]))
-          print(inputs)
+          # print(inputs)
 
           for(inputId in names(inputs)){
 

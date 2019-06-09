@@ -1071,14 +1071,16 @@ shiny_data_selector <- function(module_id){
 
 
       for(e in valid_e){
-        brain$set_electrode_value(subject = subject, electrode = e, value = -1, time = 0,
+        brain$set_electrode_value(subject = subject, electrode = e, value = 1, time = 0,
                                   message = paste('Reference Group:', tbl$Group[tbl$Electrode == e]))
       }
       for(e in invalid_e){
-        brain$set_electrode_value(subject = subject, electrode = e, value = 1, time = 0,
+        brain$set_electrode_value(subject = subject, electrode = e, value = 2, time = 0,
                                   message = paste('Reference Group:', tbl$Group[tbl$Electrode == e], '(electrode not used)'))
       }
-      brain$view(control_panel = F)
+      brain$view(control_panel = F, show_legend = TRUE,
+                 color_ramp = c('navyblue', 'red', '#e2e2e2'), color_type = 'discrete',
+                 color_names = c('Loading', 'Bad', 'Not Loaded'))
     })
 
 
