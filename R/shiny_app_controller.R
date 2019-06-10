@@ -309,18 +309,28 @@ app_server_404 <- function(...){
 
 }
 app_server_3dviewer <- function(input, output, session, master_session, viewer_id){
-  assign('aaa', session, envir = globalenv())
-  assign('bbb', master_session, envir = globalenv())
+  # assign('aaa', session, envir = globalenv())
+  # assign('bbb', master_session, envir = globalenv())
   output[[viewer_id]] <- master_session$userData$cross_session_funcs[[viewer_id]]()
 
   # Observe clicks
   click_id = paste0(viewer_id, '__mouse_event')
+
   observeEvent(input[[click_id]], {
+    mouse_event = input[[click_id]]
+
+    # Show information when double clicked
+    try({
+      if(mouse_event$event$action == 'dblclick'){
+        shiny::showNotification(p('Sent back to master session.'), type = 'message',
+                                id = paste0(click_id, '_sent'), duration = 1)
+      }
+    }, silent = TRUE)
 
     # send whatever message from 3D viewer back to master_session
     master_session$sendCustomMessage('rave_asis', list(
       inputId = click_id,
-      value = input[[click_id]]
+      value = mouse_event
     ))
   })
 
