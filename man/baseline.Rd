@@ -27,6 +27,8 @@ baseline(el, from, to, method = "mean", unit = "\%", data_only = F,
 
 \item{mem_optimize}{optimize for large dataset? default is TRUE}
 
+\item{same_dimension}{logical, true if \code{op} is element-wise operator}
+
 \item{preop}{function before baselining}
 
 \item{op}{function for baselining}

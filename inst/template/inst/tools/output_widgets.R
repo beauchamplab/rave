@@ -20,6 +20,9 @@ define_output_3d_viewer <- function(
     assign(!!output_call, function(){
       clicked = shiny::isolate(input[[!!output_btn]])
 
+      # Monitor subject change. If changed, then refresh!
+      monitor_subject_change()
+
       htmltools::tagList(
         htmltools::div(
           style = 'padding: 10px;',

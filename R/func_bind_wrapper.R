@@ -23,6 +23,14 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
     self$global_reactives$launch_selector = Sys.time()
   }
 
+  w$monitor_subject_change = function(){
+    if(shiny::is.reactivevalues(self$local_reactives)){
+      return(self$local_reactives$has_data && shiny::isolate(self$local_reactives$focused))
+    }else{
+      return(FALSE)
+    }
+  }
+
   w$switch_to = function(module_id, varriable_name = NULL, value = NULL, quiet = F, ...){
     if(is.reactivevalues(self$global_reactives)){
       # if missing module_id, jump to last activated module

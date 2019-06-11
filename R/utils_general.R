@@ -989,6 +989,8 @@ getDefaultCacheEnvironment <- function(
 #' @param .globals Automatically detect variables. See ?future::future
 #' @param .gc Clean up environment after each iterations? Recommended for large datasets.
 #' @param .envir intrnally used
+#' @param .as_datatable logical, return result as \code{data.table}. Experimental.
+#' @param .nrows integer, if \code{.as_datatable=TRUE}, number of rows expected.
 #' @examples
 #' \dontrun{
 #' lapply_async(1:10, function(x){
