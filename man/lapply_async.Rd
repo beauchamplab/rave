@@ -24,6 +24,10 @@ automatically. Otherwise you have to specify the packages that you want to load.
 \item{.globals}{Automatically detect variables. See ?future::future}
 
 \item{.gc}{Clean up environment after each iterations? Recommended for large datasets.}
+
+\item{.as_datatable}{logical, return result as \code{data.table}. Experimental.}
+
+\item{.nrows}{integer, if \code{.as_datatable=TRUE}, number of rows expected.}
 }
 \description{
 lapply using future package (async)

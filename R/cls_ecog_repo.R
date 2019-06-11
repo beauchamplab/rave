@@ -8,6 +8,7 @@
 #' @param hybrid if return tensor object, swap cache? useful for large dataset
 #' @param swap_file by default tempfile, or you can specify path
 #' @param mem_optimize optimize for large dataset? default is TRUE
+#' @param same_dimension logical, true if \code{op} is element-wise operator
 #' @param preop function before baselining
 #' @param op function for baselining
 #' @export

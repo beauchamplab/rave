@@ -30,6 +30,7 @@ ExecEnvir <- R6::R6Class(
     execute = NULL,
     async_module = FALSE,
     global_reactives = NULL,
+    local_reactives = NULL,
     reload = function(){
       if(is.reactivevalues(self$global_reactives)){
         self$global_reactives$force_refresh_all = Sys.time()

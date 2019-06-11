@@ -188,7 +188,7 @@ app_controller <- function(
   # shinyApp(ui = ui_func, server = server_func, options = list(launch.browser = T))
 }
 
-app_ui = function(adapter, token = NULL){
+app_ui <- function(adapter, token = NULL){
 
   ui_functions = list()
 
@@ -297,7 +297,7 @@ app_ui = function(adapter, token = NULL){
     nomodal = url_info$nomodal
     nomodal %?<-% FALSE
     nomodal = nomodal == 'true'
-    quo = ui_functions[['default']](active_id = module_id, has_modal = !nomodal)
+    quo = ui_functions[['default']](active_id = url_info$module_id, has_modal = !nomodal)
 
   }
 
