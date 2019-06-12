@@ -604,11 +604,6 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
 }
 
 
-#' @rdname init_app
-#' @export
-rave_main <- init_app
 
 
-#' @rdname init_app
-#' @export
-start_rave <- init_app
+

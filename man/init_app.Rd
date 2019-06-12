@@ -2,19 +2,9 @@
 % Please edit documentation in R/init_app.R
 \name{init_app}
 \alias{init_app}
-\alias{rave_main}
-\alias{start_rave}
 \title{Initialize main application}
 \usage{
 init_app(modules = NULL, active_module = NULL, launch.browser = T,
-  theme = "purple", disable_sidebar = FALSE, simplify_header = FALSE,
-  ...)
-
-rave_main(modules = NULL, active_module = NULL, launch.browser = T,
-  theme = "purple", disable_sidebar = FALSE, simplify_header = FALSE,
-  ...)
-
-start_rave(modules = NULL, active_module = NULL, launch.browser = T,
   theme = "purple", disable_sidebar = FALSE, simplify_header = FALSE,
   ...)
 }
