@@ -794,3 +794,23 @@ app_server <- function(adapter, instance_id, token = NULL){
   }
 
 }
+
+
+
+#' @name start_rave
+#' @title Start RAVE main application
+#' @usage start_rave(modules = NULL, active_module = NULL, launch.browser = T,
+#' theme = "purple", disable_sidebar = FALSE, simplify_header = FALSE,
+#' token = NULL, ...)
+#' @param modules character vector, modules modules to load before starting application.
+#' @param active_module character, which module to show as default.
+#' @param launch.browser logical, whether to launch browser.
+#' @param theme character, color theme, default is \code{'purple'}.
+#' @param disable_sidebar logical, whether to hide sidebar.
+#' @param simplify_header logical, whether to show simplified header.
+#' @param token character vector, default is \code{NULL}. If specified, then
+#' a \code{?token=...} is needed in url to access to the application.
+#' @param ... other parameters. See details.
+#'
+#' @export
+start_rave <- app_controller

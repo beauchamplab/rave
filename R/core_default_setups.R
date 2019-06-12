@@ -85,13 +85,20 @@ arrange_modules <- function(refresh = FALSE, reset = FALSE, quiet = FALSE){
     # detect all modules
     tbl = detect_modules(as_module = FALSE)
     tbl = as.data.frame(tbl, stringsAsFactors = F)
-    names(tbl) = col_names[1:4]
+
+    # if(nrow(tbl) == 0){
+    #   stop("No module detected. Please install\n\tdevtools::install_github('beauchamplab/ravebuiltins', upgrade = 'never')\nand then run \n\trave::arrange_modules(refresh = TRUE)")
+    # }
+    #
 
     if(!nrow(tbl)){
       logger('No modules can be found. Installing builtin modules using \n\tremotes::install_github("beauchamplab/ravebuiltins")', level = 'ERROR')
       devtools::install_github("beauchamplab/ravebuiltins", upgrade = 'never')
-      return(invisible())
+
+      tbl = detect_modules(as_module = FALSE)
+      tbl = as.data.frame(tbl, stringsAsFactors = F)
     }
+    names(tbl) = col_names[1:4]
 
 
 
@@ -122,7 +129,7 @@ arrange_modules <- function(refresh = FALSE, reset = FALSE, quiet = FALSE){
     }
 
     # write to fpath
-    write.csv(tbl, fpath, row.names = FALSE)
+    safe_write_csv(tbl, fpath, row.names = FALSE)
   }
 
   tbl$Notes[is.na(tbl$Notes)] = ''
