@@ -127,6 +127,7 @@ wavelet_kernels <- function(freqs, srate, wave_num){
 #' @param freqs - vector of center frequencies for decomposition
 #' @param srate - sample rate (in Hz)
 #' @param wave_num - desired number of cycles in wavelet (typically 3-20 for frequencies 2-200).
+#' @param demean - whether to de-mean data first?
 #' @details
 #' Wavelet
 #' Function for decomposing time series data into time-frequency
@@ -151,7 +152,7 @@ wavelet_kernels <- function(freqs, srate, wave_num){
 #'   3. Return power spec instead of spectrum
 #'   4. Use mvfftw instead of fftw, speed up by another 50%
 #' @export
-wavelet <- function(data, freqs, srate, wave_num){
+wavelet <- function(data, freqs, srate, wave_num, demean = TRUE){
   srate = round(srate);
   if(length(wave_num) != length(freqs)){
     # calculate wavelet cycles for each frequencies
@@ -170,7 +171,12 @@ wavelet <- function(data, freqs, srate, wave_num){
   d_l = length(data)
 
   # normalize data, and fft
-  fft_data = fftwtools::fftw_r2c(data - mean(data))
+  if(demean){
+    fft_data = fftwtools::fftw_r2c(data - mean(data))
+  }else{
+    fft_data = fftwtools::fftw_r2c(data)
+  }
+
 
   # wavelet window calc - each columns of final wave is a wavelet kernel (after fft)
   # sts = wavelet_cycles / (2 * pi * freqs)
