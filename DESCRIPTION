@@ -54,7 +54,8 @@ Imports:
     reticulate (>= 1.6),
     fst (>= 0.8.8),
     servr (>= 0.13),
-    later (>= 0.8.0)
+    later (>= 0.8.0),
+    startup (>= 0.12.0)
 Suggests:
     gifti,
     knitr,
@@ -125,6 +126,7 @@ Collate:
     'pre_process.R'
     'pre_reference.R'
     'pre_wavelet.R'
+    'py_install.R'
     'save_meta.R'
     'shiny_app_controller.R'
     'shiny_customize.R'

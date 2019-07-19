@@ -4,7 +4,7 @@
 \alias{wavelet}
 \title{Wavelet Transformation With Phase}
 \usage{
-wavelet(data, freqs, srate, wave_num)
+wavelet(data, freqs, srate, wave_num, demean = TRUE)
 }
 \arguments{
 \item{data}{- vector of time series to be decomposed}
