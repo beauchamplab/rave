@@ -14,6 +14,8 @@ wavelet(data, freqs, srate, wave_num, demean = TRUE)
 \item{srate}{- sample rate (in Hz)}
 
 \item{wave_num}{- desired number of cycles in wavelet (typically 3-20 for frequencies 2-200).}
+
+\item{demean}{- whether to de-mean data first?}
 }
 \description{
 Wavelet Transformation With Phase
