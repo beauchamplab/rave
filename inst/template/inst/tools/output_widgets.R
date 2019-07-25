@@ -146,7 +146,10 @@ define_output_3d_viewer <- function(
       order = !!order
     )
 
-    load_scripts(rlang::quo({!!quo}))
+    # https://github.com/r-lib/rlang/issues/772
+    # This seems to be an issue of rlang
+    # load_scripts(rlang::quo({!!quo})) will throw error of (Error: `arg` must be a symbol)
+    load_scripts(rlang::quo(!!quo))
   })
   eval(rlang::quo_squash(df), envir = parent.frame())
   # evaluate
