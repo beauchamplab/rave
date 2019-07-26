@@ -133,6 +133,9 @@ define_output_3d_viewer <- function(
 
       # Register cross-session function so that other sessions can register the same output widget
       session$userData$cross_session_funcs %?<-% list()
+      # ns must be defined, but in get_module(..., local=T) will raise error
+      # because we are not in shiny environment
+      ns %?<-% function(x){x} 
       session$userData$cross_session_funcs[[ns(!!outputId)]] = render_func
     })
   })
