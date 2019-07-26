@@ -990,7 +990,8 @@ ExecEnvir <- R6::R6Class(
 
       div(
         class = sprintf('col-sm-%s rave-input-panel', sidebar_width),
-        rlang::eval_tidy(private$inputs$quos, data = rlang::new_data_mask(self$parent_env)),
+        # eval_dirty(private$inputs$quos, env = new.env(), data = self$parent_env),
+        rlang::eval_tidy(private$inputs$quos, data = as.list(self$parent_env)),
         fluidRow(
           uiOutput(self$ns('..params_current')),
           more_ui
@@ -1002,7 +1003,8 @@ ExecEnvir <- R6::R6Class(
       # env = environment()
       div(
         class = sprintf('col-sm-%d rave-output-panel', 12L - sidebar_width),
-        rlang::eval_tidy(private$outputs$quos, data = rlang::new_data_mask(self$parent_env))
+        # eval_dirty(private$outputs$quos, env = new.env(), data = self$parent_env)
+        rlang::eval_tidy(private$outputs$quos, data = as.list(self$parent_env))
       )
 
     },
