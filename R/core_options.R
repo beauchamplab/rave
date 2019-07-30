@@ -175,8 +175,10 @@ save_options <- function(){
 #' @param ... Key-Value option pairs
 #' @param .save save to disk? ignored most of the time
 #' @param launch_gui launch shiny app?
+#' @param host IP address of host
+#' @param port Port number
 #' @export
-rave_options <- function(..., .save = T, launch_gui = T){
+rave_options <- function(..., .save = T, launch_gui = T, host = '127.0.0.1', port = NULL){
   if(!exists('rave_opts', envir = ..setup_env, inherits = F)){
     ..setup_env$rave_opts <- Options$new(conf_path = '~/.rave.yaml', save_default = T)
   }
@@ -193,7 +195,7 @@ rave_options <- function(..., .save = T, launch_gui = T){
     re = ..setup_env$rave_opts$get_options(...)
     if(length(args) == 0 && launch_gui){
       # make a small shiny app to set options
-      return(rave_options_gui())
+      return(rave_options_gui(host = host, port = port))
     }
   }
 
@@ -202,58 +204,29 @@ rave_options <- function(..., .save = T, launch_gui = T){
 
 
 
-
-
+ugly_sample <- function(x, size = length(x), replace = FALSE, ...){
+  oldseed <- .GlobalEnv$.Random.seed
+  on.exit(.GlobalEnv$.Random.seed <- oldseed)
+  sample(x, size = size, replace = replace, ...)
+}
 
 
 #' Default setup for rave, mainly create forked sub-processes
-#' @param func NULL by default, function to be added to default (dangerous)
+#' @param n_workers NULL by default, maximum number of clusters for parallel
+#' @param ignore_error whether ignore the errors
+#' @param use_fork not used
 #' @export
-rave_setup <- function(func = NULL){
-  if(!is.function(func)){
-    if(length(..setup_env$setup_func) == 0){
-      n_workers = max(rave_options('max_worker'), 1)
-      # if(stringr::str_detect(stringr::str_to_lower(Sys.info()['sysname']), 'win[3d]')){
-      #   mcl = parallel::makeCluster
-      # }else{
-      #   mcl = parallel::makeForkCluster
-      # }
+rave_setup_workers <- function(n_workers = NULL, use_fork = FALSE, ignore_error = TRUE){
 
+  # Force n_workers to be rave_option
+  n_workers = max(rave_options('max_worker'), 1)
 
-      # if(is(..setup_env$workers, 'cluster')){
-      #   parallel::stopCluster(..setup_env$workers)
-      # }
-      # ..setup_env$workers = mcl(n_workers)
+  options("future.fork.enable" = TRUE)
+  future::plan(future::multicore, workers = n_workers)
 
-      # future::plan(future::cluster, workers = ..setup_env$workers)
+  logger('Number of workers switched to - ', future::nbrOfWorkers())
 
-      future::plan(future::multiprocess, workers = n_workers)
-
-      # check crayon
-      if(!rave_options('crayon_enabled')){
-        # if(exists('RStudio.Version') && is.function(RStudio.Version)){
-        #   rsver = as.character(RStudio.Version()$version)
-        #   if(utils::compareVersion('1.1', rsver)  > 0){
-        #     warning("Please install newest version of RStudio")
-        #     rave_options(crayon_enabled = FALSE, .save = F)
-        #   }
-        # }else{
-          rave_options(crayon_enabled = FALSE, .save = F)
-        # }
-      }
-    }
-  }else{
-    ..setup_env$setup_func[[length(..setup_env$setup_func) + 1]] = func
-  }
-  if(length(..setup_env$setup_func)){
-    lapply(..setup_env$setup_func, function(f){
-      if(is.function(f)){
-        f()
-      }
-    })
-  }
 }
-
 
 
 

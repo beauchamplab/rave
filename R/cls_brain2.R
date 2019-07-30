@@ -1,7 +1,7 @@
 #' Tools to load and view brain in 3D viewer
 #' @param surfaces one or more from `pial`, `white`, `smoothwm`, brain surface types
 #' @param multiple_subject is this a template brain?
-#' @param prefix internally used, prefix to `FreeSurfer` asc files
+#' @param prefix internally used, prefix to 'FreeSurfer' asc files
 #' @export
 rave_brain2 <- function(surfaces = 'pial', multiple_subject = FALSE, prefix = 'std.141.'){
   env = environment()
@@ -352,12 +352,34 @@ rave_brain2 <- function(surfaces = 'pial', multiple_subject = FALSE, prefix = 's
     calculate_template_brain_location = cache,
 
     set_multiple_subject = set_multiple_subject,
-    view = function(...){
+    view = function(
+      time_range = NULL, value_range = NULL, control_panel = TRUE,
+      control_presets = c('subject', 'surface_type', 'lh_material', 'rh_material',
+                          'electrodes', 'attach_to_surface', 'color_group', 'animation'),
+      color_ramp = c('navyblue', '#e2e2e2', 'red'), color_type = 'continuous', color_names = NULL,
+      show_legend = TRUE, debug = FALSE, side_camera = FALSE,
+      ...
+    ){
       if(brain$multiple_subject){
         set_multiple_subject(brain$multiple_subject)
       }
       env$last_viewer_args = list(...)
-      brain$view(...)
+      env$last_viewer_args[['time_range']] = time_range
+      env$last_viewer_args[['value_range']] = value_range
+      env$last_viewer_args[['control_panel']] = control_panel
+      env$last_viewer_args[['control_presets']] = control_presets
+      env$last_viewer_args[['color_ramp']] = color_ramp
+      env$last_viewer_args[['show_legend']] = show_legend
+      env$last_viewer_args[['debug']] = debug
+      env$last_viewer_args[['side_camera']] = side_camera
+      env$last_viewer_args[['color_type']] = color_type
+      env$last_viewer_args[['color_names']] = color_names
+
+      brain$view(time_range = time_range, value_range = value_range,
+                 control_panel = control_panel, control_presets = control_presets,
+                 color_ramp = color_ramp, show_legend = show_legend,
+                 debug = debug, side_camera = side_camera, color_type = color_type,
+                 color_names = color_names, ...)
     },
 
     save_brain = function(directory, filename = 'index.html', title = '3D Viewer', as_zip = FALSE, ...){

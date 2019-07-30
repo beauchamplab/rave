@@ -83,17 +83,19 @@ LazyFST <- R6::R6Class(
 
       if(private$transpose){
         col_names = private$meta$columnNames[i[real_i]]
-        dat = as.matrix(fst::read_fst(private$file_path, columns = col_names))
+        dat = as.matrix(read_fst(private$file_path, columns = col_names))
         dat = dat[j[real_j], ]
         re[real_i, real_j] = t(dat)
       }else{
         col_names = private$meta$columnNames[j[real_j]]
-        dat = as.matrix(fst::read_fst(private$file_path, columns = col_names))
+        dat = as.matrix(read_fst(private$file_path, columns = col_names))
         dat = dat[i[real_i], ]
         re[real_i, real_j] = dat
       }
       rm(dat)
-      gc()
+
+      # Profiling shows gc() here will take lots of time
+      # gc()
 
       dimnames(re) = NULL
 
@@ -204,7 +206,7 @@ load_fst_or_h5 <- function(
   # check if fst_path exists
   if(file.exists(fst_path)){
     if(ram){
-      re = as.matrix(fst::read_fst(fst_path))
+      re = as.matrix(read_fst(fst_path))
       dimnames(re) = NULL
       if(fst_need_transpose){
         re = t(re)

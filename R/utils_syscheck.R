@@ -101,8 +101,6 @@ rave_version <- function(){
 
     save_options()
 
-    rave_setup()
-
     if(has_data){
       logger("RAVE - (Code: Fir) is loaded!", level = 'INFO')
       logger('Data Repository:    \t', rave_options('data_dir'), level = 'INFO')
@@ -115,8 +113,6 @@ rave_version <- function(){
 
   })
 }
-
-
 
 
 

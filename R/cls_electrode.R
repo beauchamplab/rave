@@ -9,7 +9,7 @@ NULL
 #' @export
 as_printable = function(env){
   assert_that(is.environment(env), msg = 'env MUST be an environment.')
-  cls = c(class(env), 'rave_printable')
+  cls = c('rave_printable', class(env))
   cls = unique(cls[!cls %in% ''])
   class(env) = cls
   return(env)
@@ -86,6 +86,24 @@ Electrode <- R6::R6Class(
       # otherwise we need to reference itself
 
       raw_type = paste0('raw_', type)
+      if('Electrode' %in% class(self$reference) && self$reference$electrode == 'noref'){
+        # not very usual, basically cached as referenced but need to load noref version
+        env = self[[type]]
+
+        lapply(self$blocks, function(b){
+          self[[type]][[b]] = self[[raw_type]][[b]]
+          NULL
+        })
+
+        if(ram){
+          sapply(self$blocks, function(b){
+            env[[b]][]
+          }, simplify = F, USE.NAMES = T) ->
+            env
+        }
+
+        return(env)
+      }
       switch (type,
         'volt' = {
           lapply(self$blocks, function(b){
@@ -362,8 +380,8 @@ Electrode <- R6::R6Class(
             fst_phase = file.path(cache_dir, 'cache', 'reference', 'phase', b, sprintf("%s.fst", electrode))
             if(file.exists(fst_coef) && file.exists(fst_phase)){
               # load from cached reference
-              self$raw_power[[b]] = t(as.matrix(fst::read_fst(fst_coef)))^2
-              self$raw_phase[[b]] = t(as.matrix(fst::read_fst(fst_phase)))
+              self$raw_power[[b]] = t(as.matrix(read_fst(fst_coef)))^2
+              self$raw_phase[[b]] = t(as.matrix(read_fst(fst_phase)))
               # test, result should be 0 0
               # coef = load_h5(file, name = paste0('/wavelet/coef/', b), ram = T)
               # range(self$raw_power[[b]] - (coef[,,1])^2)
@@ -453,7 +471,13 @@ Electrode <- R6::R6Class(
 
     },
 
-    epoch = function(epoch_name, pre, post, types = c('volt', 'power', 'phase'), raw = F){
+    epoch = function(epoch_name, pre, post, types = c('volt', 'power', 'phase'), raw = F, hybrid = TRUE){
+
+      # epoch_name='YABa';pre=1;post=2;name=types='power';raw=FALSE;private=self$private;rave_id = 'TEMP'
+
+      instance_id = add_to_session(getDefaultReactiveDomain(), key = 'rave_instance', val = 'TEMP', override = FALSE)
+      instance_id %?<-% 'TEMP'
+      cache_root_dir = file.path('~/rave_data/cache_dir/', instance_id)
       # prepare data
       epochs = load_meta(meta_type = 'epoch', meta_name = epoch_name, project_name = private$subject$project_name, subject_code = private$subject$subject_code)
       freqs = private$subject$frequencies
@@ -504,25 +528,63 @@ Electrode <- R6::R6Class(
         }) ->
           indices
 
-        env = environment()
+        # env = environment()
         bvec = sapply(indices,'[[', 'block')
 
-        placehold = array(NA, dim = c(dim_1, dim_3, 1))
-        lapply(unique(bvec), function(b){
+        # placehold = array(NA, dim = c(dim_1, dim_3, 1))
+        # lapply(unique(bvec), function(b){
+        #   sel = bvec == b
+        #   subinds = as.vector(sapply(indices[sel], '[[', 'ind'))
+        #   a = self[[name]][[b]][subinds]
+        #   dim(a) = c(dim_3, sum(sel))
+        #   env$placehold[trial_order[sel],, 1] = aperm(a, c(2, 1))
+        #   NULL
+        # })
+
+        placehold = do.call(cbind, lapply(unique(bvec), function(b){
           sel = bvec == b
           subinds = as.vector(sapply(indices[sel], '[[', 'ind'))
           a = self[[name]][[b]][subinds]
-          dim(a) = c(dim_3, sum(sel))
-          env$placehold[trial_order[sel],, 1] = aperm(a, c(2, 1))
-          NULL
-        })
+          as.vector(a)
+        }))
+        dim(placehold) = c(dim_3, length(placehold) / dim_3)
+
+        placehold = t(placehold)
+        # reorder
+        order = do.call(c, lapply(unique(bvec), function(b){ which(bvec == b) }))
+        if(is.unsorted(order)){
+          placehold = placehold[order,,drop = F]
+        }
+
+        if(self$reference_electrode){
+
+          swap_path = file.path(cache_root_dir, self$subject_id, self$electrode, epoch_name)
+        }else{
+          if(!length(self$reference) || is.character(self$reference)){
+            refname = self$reference
+          }else{
+            refname = self$reference$electrode
+          }
+          if(refname == ''){ refname = 'noref' }
+
+          swap_path = file.path(cache_root_dir, self$subject_id, self$electrode, epoch_name, refname)
+        }
+
+        dir.create(swap_path, recursive = FALSE, showWarnings = FALSE)
 
         # assign dim names
-        re[['volt']] = Tensor$new(data = placehold, dimnames = list(
-          epochs$Trial[trial_order],
-          time_points,
-          electrode
-        ), varnames = c('Trial', 'Time', 'Electrode'))
+        re[['volt']] = Tensor$new(
+          data = placehold,
+          dim = c(dim(placehold), 1),
+          dimnames = list(
+            epochs$Trial[trial_order],
+            time_points,
+            electrode
+          ),
+          varnames = c('Trial', 'Time', 'Electrode'),
+          hybrid = hybrid, use_index = FALSE, multi_files = FALSE,
+          temporary = FALSE, swap_file = file.path(swap_path, name))
+
         rm(placehold)
       }
       types = types[types != 'volt']
@@ -537,7 +599,7 @@ Electrode <- R6::R6Class(
           dim_1 = length(ep)
           dim_2 = nrow(freqs)   # Freq
           dim_3 = post + pre + 1     # Time
-          sample = matrix(rep(0, dim_2 * dim_3), c(dim_2, dim_3))
+          # sample = matrix(rep(0, dim_2 * dim_3), c(dim_2, dim_3))
           lapply(ep, function(row){
             block = row[['Block']]
             i = round(row[['Time']] * srate)
@@ -548,25 +610,72 @@ Electrode <- R6::R6Class(
           }) ->
             indices
 
-          env = environment()
+          # env = environment()
           bvec = sapply(indices,'[[', 'block')
-          placehold = array(NA, dim = c(dim_1, dim_2, dim_3, 1))
+          # placehold = array(NA, dim = c(dim_1, dim_2, dim_3, 1))
 
-          lapply(unique(bvec), function(b){
+          # lapply(unique(bvec), function(b){
+          #   sel = bvec == b
+          #   subinds = as.vector(sapply(indices[sel], '[[', 'ind'))
+          #   a = self[[dname]][[b]][,subinds]
+          #   dim(a) = c(nrow(a), dim_3, sum(sel))
+          #   env$placehold[trial_order[sel],,, 1] = aperm(a, c(3, 1, 2))
+          #   NULL
+          # })
+
+          placehold = do.call(cbind, lapply(unique(bvec), function(b){
             sel = bvec == b
             subinds = as.vector(sapply(indices[sel], '[[', 'ind'))
-            a = self[[dname]][[b]][,subinds]
-            dim(a) = c(nrow(a), dim_3, sum(sel))
-            env$placehold[trial_order[sel],,, 1] = aperm(a, c(3, 1, 2))
-            NULL
-          })
+            a = self[[dname]][[b]][,subinds, drop = FALSE]
+            a
+          }))
+          dim(placehold) = c(dim(placehold)[1], dim_3, dim(placehold)[2] / dim_3, 1)
+
+          placehold = aperm(placehold, c(3, 1, 2, 4))
+          # reorder
+          order = do.call(c, lapply(unique(bvec), function(b){ which(bvec == b) }))
+          if(is.unsorted(order)){
+            placehold = placehold[order,,,,drop = F]
+          }
+
           # assign dim names
-          re[[name]] = ECoGTensor$new(data = placehold, dimnames = list(
+          dimnames = list(
             epochs$Trial[trial_order],
             freqs$Frequency,
             time_points,
             electrode
-          ), varnames = c('Trial', 'Frequency', 'Time', 'Electrode'))
+          )
+
+
+
+          if(self$reference_electrode){
+
+            swap_path = file.path(
+              cache_root_dir, self$subject_id,
+              self$electrode, epoch_name
+            )
+          }else{
+            if(!length(self$reference) || is.character(self$reference)){
+              refname = self$reference
+            }else{
+              refname = self$reference$electrode
+            }
+            if(refname == ''){ refname = 'noref' }
+
+            swap_path = file.path(
+              cache_root_dir, self$subject_id,
+              self$electrode, epoch_name, refname
+            )
+          }
+
+          dir.create(swap_path, recursive = FALSE, showWarnings = FALSE)
+
+          re[[name]] = ECoGTensor$new(
+            data = placehold, dimnames = dimnames,
+            dim = sapply(dimnames, length),
+            varnames = c('Trial', 'Frequency', 'Time', 'Electrode'),
+            hybrid = hybrid, use_index = FALSE, multi_files = FALSE,
+            temporary = FALSE, swap_file = file.path(swap_path, dname))
 
         }
         rm(placehold)

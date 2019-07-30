@@ -988,8 +988,9 @@ getDefaultCacheEnvironment <- function(
 #' automatically. Otherwise you have to specify the packages that you want to load.
 #' @param .globals Automatically detect variables. See ?future::future
 #' @param .gc Clean up environment after each iterations? Recommended for large datasets.
-#' @param .future_plan which future plan to use
 #' @param .envir intrnally used
+#' @param .as_datatable logical, return result as \code{data.table}. Experimental.
+#' @param .nrows integer, if \code{.as_datatable=TRUE}, number of rows expected.
 #' @examples
 #' \dontrun{
 #' lapply_async(1:10, function(x){
@@ -1000,65 +1001,105 @@ getDefaultCacheEnvironment <- function(
 #' })
 #' }
 #' @export
-lapply_async <- function(x, fun, ..., .ncores = 0, .future_plan = future::multiprocess,
-                         .call_back = NULL, .packages = NULL, .envir = environment(), .globals = TRUE, .gc = TRUE){
+lapply_async <- function(
+  x, fun, ..., .ncores = 0, .call_back = NULL, .packages = NULL,
+  .envir = environment(), .globals = TRUE, .gc = TRUE, .as_datatable = FALSE,
+  .nrows = 0
+){
+  if(!length(x)){
+    return(list())
+  }
+  .colnames = paste0('V', seq_along(x))
+  .ncores = as.integer(.ncores)
+  if(.ncores <= 0){
+    .ncores = rave_options('max_worker')
+  }
   # compatible with windows
-  if(stringr::str_detect(Sys.info()['sysname'], '^[wW]in')){
-    args = list(...)
+  args = list(...)
+  if(stringr::str_detect(Sys.info()['sysname'], '^[wW]in') || .ncores == 1){
     return(lapply(seq_along(x), function(ii){
       if(is.function(.call_back)){
         try({
           .call_back(ii)
         })
-        do.call(fun, c(
-          list(x[ii]),
-          args
-        ), envir = .envir)
+        do.call(fun, c( list(quote(x[ii])), args), envir = environment())
       }
     }))
   }
 
-  .ncores = as.integer(.ncores)
-  if(.ncores <= 0){
-    .ncores = rave_options('max_worker')
-  }
+
   if(is.null(.packages)){
     .packages = stringr::str_match(search(), 'package:(.*)')
     .packages = .packages[,2]
     .packages = rev(.packages[!is.na(.packages)])
   }
   .niter = length(x)
-  .ncores = min(.ncores, .niter)
+
+
+  rave_setup_workers(.ncores)
+  if(.ncores != rave_options('max_worker')){
+    on.exit({
+      rave_setup_workers()
+    })
+  }
+
 
   .future_list = list()
-  .future_values = list()
 
-  .i = 0
-  while(.i < .niter){
-    .i = .i+1
-    .x = x[[.i]]
+  if(.as_datatable){
+    .future_values = data.table::data.table(
+      V1 = rep(NA, .nrows),
+      keep.rownames = F, stringsAsFactors = F
+    )
+  }else{
+    .future_values = list()
+  }
 
+
+
+
+  if(.niter == 0){
+    return(list())
+  }
+
+  .this_env = environment()
+  ..started = FALSE
+
+
+  lapply(seq_along(x), function(.i){
     if(is.function(.call_back)){
       try({
         .call_back(.i)
       })
     }
 
-    .future_list[[length(.future_list) + 1]] = future::future({
-      fun(.x)
-    }, envir = .envir, substitute = T, lazy = F, globals = .globals, .packages = .packages, gc = .gc,
-    evaluator = .future_plan, workers = .ncores)
+    expr = rlang::quo_squash(rlang::quo({ do.call(fun, c(list(quote(x[[!!.i]])), args)) }))
+
+    .this_env$.future_list[[length(.future_list) + 1]] = future::future(expr, envir = .envir, substitute = FALSE, lazy = FALSE, globals = .globals, .packages = .packages, gc = .gc)
 
 
     if(length(.future_list) >= .ncores){
       # wait for one of futures resolved
+      if(!..started && .as_datatable){
+        .this_env$..started = TRUE
+        .this_env$.future_values[[1]] = future::value(.future_list[[1]])
+      }else{
+        .this_env$.future_values[[1 + length(.future_values)]] = future::value(.future_list[[1]])
+      }
+
+      .this_env$.future_list[[1]] = NULL
+    }
+  })
+
+  if(length(.future_list)){
+    future::resolve(.future_list)
+    while(length(.future_list)){
       .future_values[[1 + length(.future_values)]] = future::value(.future_list[[1]])
       .future_list[[1]] = NULL
     }
-
   }
 
-  return(c(.future_values, future::values(.future_list)))
+  return(.future_values)
 }
 
 

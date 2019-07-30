@@ -50,7 +50,7 @@ progress <- function(
 
   if(quiet || !is_shiny_session){
     progress = NULL
-    inc = function(message){if(!quiet) logger(message)}
+    inc = function(message, amount = 1, ...){if(!quiet) logger(message)}
     close = function(){}
     reset = function(message = NULL, detail = NULL){}
   }else{
@@ -59,8 +59,8 @@ progress <- function(
       max = max
     )
     # progress$set(value = 0, message = title)
-    inc = function(message){
-      progress$inc(amount = 1, detail = message, message = title)
+    inc = function(message, amount = 1, ...){
+      progress$inc(amount = amount, detail = message, message = title)
     }
     close = function(){
       progress$close()

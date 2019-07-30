@@ -550,8 +550,8 @@ local({
   }
 
 
-  function(){
-    shiny::shinyApp(options = list(launch.browser = T),
+  function(..., launch.browser = TRUE){
+    shiny::shinyApp(
       ui = shinydashboard::dashboardPage(
         header = shinydashboard::dashboardHeader(
           title = 'RAVE Settings'
@@ -813,7 +813,8 @@ local({
 
         })
 
-      }
+      },
+      options = list(..., launch.browser = launch.browser)
     )
   }
 

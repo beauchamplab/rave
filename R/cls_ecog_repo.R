@@ -8,18 +8,20 @@
 #' @param hybrid if return tensor object, swap cache? useful for large dataset
 #' @param swap_file by default tempfile, or you can specify path
 #' @param mem_optimize optimize for large dataset? default is TRUE
+#' @param same_dimension logical, true if \code{op} is element-wise operator
 #' @param preop function before baselining
 #' @param op function for baselining
 #' @export
 baseline <- function(el, from, to, method = 'mean', unit = '%',
-                    data_only = F, hybrid = T, swap_file = tempfile(), mem_optimize = T, preop = NULL, op){
+                    data_only = F, hybrid = TRUE, swap_file = tempfile(),
+                    mem_optimize = TRUE, same_dimension = unit %in% c('%', 'dB'), preop = NULL, op){
   if(missing(el)){
     logger('baseline(el...) is changed now. Please update.', level = 'WARNING')
 
     module_tools = get('module_tools', envir = getDefaultDataRepository())
     el = module_tools$get_power()
   }
-  assert_that(is(el, 'Tensor'), msg = 'el must be an Tensor object.')
+  assert_that(any(c('Tensor') %in% class(el)), msg = 'el must be an Tensor object.')
   assert_that('Time' %in% el$varnames, msg = 'Need one dimname to be "Time".')
 
   assert_that(unit %in% c('dB', '%', 'C'), msg = 'unit must be %-percent signal change or dB-dB difference, or C to customize')
@@ -39,12 +41,14 @@ baseline <- function(el, from, to, method = 'mean', unit = '%',
     # for each time points, log10 and substract, Since dB is 10*log10(.)
     op = function(e1, e2){ 10 * (log10(e1) - e2) }
 
-    bs = el$operate(by = bs, match_dim = rest_dim, mem_optimize = mem_optimize, fun = op)
+    bs = el$operate(by = bs, match_dim = rest_dim, mem_optimize = mem_optimize,
+                    fun = op, same_dimension = same_dimension)
   }else if(unit == '%'){
     bs = el$subset(Time = Time %within% c(from, to))
     op = function(e1, e2){ e1 / e2 * 100 - 100 }
     bs = bs$collapse(keep = rest_dim, method = method)
-    bs = el$operate(by = bs, match_dim = rest_dim, mem_optimize = mem_optimize, fun = op)
+    bs = el$operate(by = bs, match_dim = rest_dim, mem_optimize = mem_optimize,
+                    fun = op, same_dimension = same_dimension)
   }else{
     # customizing
     bs = el$subset(Time = Time %within% c(from, to))
@@ -52,12 +56,19 @@ baseline <- function(el, from, to, method = 'mean', unit = '%',
       bs$set_data(preop(bs$get_data()))
     }
     bs = bs$collapse(keep = rest_dim, method = method)
-    bs = el$operate(by = bs, match_dim = rest_dim, mem_optimize = mem_optimize, fun = op)
+    bs = el$operate(by = bs, match_dim = rest_dim, mem_optimize = mem_optimize,
+                    fun = op, same_dimension = same_dimension)
   }
 
   if(data_only){
+    if('Tensor' %in% class(bs)){
+      bs = bs$get_data()
+    }
     return(bs)
   }else{
+    if('Tensor' %in% class(bs)){
+      return(bs)
+    }
     ECoGTensor$new(data = bs, dim = dim(el), dimnames = dimnames(el), varnames = el$varnames, hybrid = hybrid, swap_file = swap_file)
   }
 }
@@ -180,22 +191,33 @@ ECoGRepository <- R6::R6Class(
           ref = ref_table$Reference[ref_table$Electrode == e]
           ref = self$reference$get(ref, ref)
 
-          delayedAssign(
-            x = e_str,
-            value = {
-              Electrode$new(subject = subject_obj, electrode = e, reference_by = ref, is_reference = F)
-            },
-            assign.env = self$raw$private$env
-          )
-          # e_obj = Electrode$new(subject = self$subject, electrode = e, reference_by = ref, is_reference = F)
-          # self$raw$set(key = e_str, value = e_obj)
+          e_obj = Electrode$new(subject = self$subject, electrode = e, reference_by = ref, is_reference = F)
+          self$raw$set(key = e_str, value = e_obj)
         })
+        # self_ref = self$reference
+        # self_sub = self$subject
+        # rave:::future_assign_lapply(
+        #   x = electrodes,
+        #   varnames = as.character(electrodes),
+        #   expr = {
+        #     ref = ref_table$Reference[ref_table$Electrode == e]
+        #     ref = self_ref$get(ref, ref)
+        #     e_obj = Electrode$new(subject = self_sub, electrode = e, reference_by = ref, is_reference = F)
+        #     e_obj
+        #   }, elname = 'e',
+        #   nworkers = rave_options('max_worker'),
+        #   assign.env = self$raw$private$env
+        # )
         logger('Loaded.')
         progress$close()
       }
       invisible()
     },
-    epoch = function(epoch_name, pre, post, electrodes = NULL, frequency_range = NULL, data_type = 'power', referenced = T, func = NULL, quiet = FALSE){
+    epoch = function(epoch_name, pre, post, electrodes = NULL,
+                     frequency_range = NULL, data_type = 'power',
+                     referenced = T, func = NULL, quiet = FALSE
+                     ){
+      # self = .private$repo;referenced = T;epoch_name='YABa';pre=1;post=2;electrodes=preload_info$electrodes;frequency_range=NULL;data_type = 'phase';quiet=F
       if(is.null(electrodes)){
         electrodes = self$subject$valid_electrodes
       }else{
@@ -221,7 +243,7 @@ ECoGRepository <- R6::R6Class(
         freq_subset[which.min(abs(freqs$Frequency - frequency_range[1]))] = T
       }
 
-      progress = progress(title = 'Loading data...', max = (length(electrodes) + 1) * length(data_type), quiet = quiet)
+      progress = progress(title = 'Loading data...', max = (length(electrodes) + 1) * length(data_type) + 1, quiet = quiet)
       on.exit({progress$close()})
 
       epoch_data = self$epochs$get('epoch_data')
@@ -231,7 +253,7 @@ ECoGRepository <- R6::R6Class(
 
       raws = self$raw
 
-      # progress$inc('Finalizing...')
+      progress$inc('Starting...')
       # Get dimension names
       # 1. Trial
       epochs = load_meta(
@@ -261,51 +283,61 @@ ECoGRepository <- R6::R6Class(
       # collapse results
       if(!is.function(func)){
 
-        if('power' %in% data_type){
-          lapply_async(electrodes, function(e){
-            electrode = raws$get(as.character(e))
-            electrode$epoch(
-              epoch_name = epoch_name,
-              pre = pre,
-              post = post,
-              types = 'power',
-              raw = !referenced
-            ) ->
-              elc
 
-            power = elc$power$subset(Frequency = freq_subset, drop = T, data_only = T)
-            rm(elc)
-            power = as.vector(power)
-            return(power)
+        if('power' %in% data_type){
+
+          lapply_async(electrodes, function(e){
+            # progress$inc(sprintf('Step %d (of %d) electrode %d (power)', count, n_dt, e))
+            electrode = raws$get(as.character(e))
+            elc = electrode$epoch( epoch_name = epoch_name, pre = pre, post = post,
+                                   types = 'power', raw = !referenced )
+
+            power = elc$power; rm(elc)
+            if(!all(freq_subset)){
+              power$temporary = TRUE
+              power = power$subset(Frequency = freq_subset, drop = F, data_only = F)
+              power$to_swap_now(use_index = FALSE)
+              power$temporary = FALSE
+            }
+            gc()
+
+            # power = elc$power$subset(Frequency = freq_subset, drop = T, data_only = T)
+            # rm(elc)
+            # power = as.vector(power)
+            # return(power)
+            power
           }, .call_back = function(i){
             progress$inc(sprintf('Step %d (of %d) electrode %d (power)', count, n_dt, electrodes[i]))
           }) ->
             results
+
+          power = join_tensors(results)
+
           count = count + 1
-          gc()
+          # gc()
 
-          names(results) = paste0('V', seq_along(electrodes))
-          results = do.call('data.frame', results)
-
-          # Generate tensor for power
-          power = ECoGTensor$new(0, dim = c(1,1,1,1), varnames = names(dimnames_wave), hybrid = F)
-
-          # erase data
-          power$set_data(NULL)
-          # reset dim and dimnames
-          power$dim = vapply(dimnames_wave, length, FUN.VALUE = 0, USE.NAMES = F)
-          power$dimnames = dimnames_wave
-
-          # generate local cache for power
-          file = tempfile()
-          write_fst(results, file, compress = 20)
+          # names(results) = paste0('V', seq_along(electrodes))
+          # results = do.call('data.frame', results)
+          #
+          # # Generate tensor for power
+          # power = ECoGTensor$new(0, dim = c(1,1,1,1), varnames = names(dimnames_wave), hybrid = F)
+          #
+          # # erase data
+          # power$set_data(NULL)
+          # # reset dim and dimnames
+          # power$dim = vapply(dimnames_wave, length, FUN.VALUE = 0, USE.NAMES = F)
+          # power$dimnames = dimnames_wave
+          #
+          # # generate local cache for power
+          # file = tempfile()
+          # write_fst(results, file, compress = 20)
           rm(results)
           gc()
 
-          # change tensor file path
-          power$swap_file = file
-          power$hybrid = T
-          power$use_index = TRUE
+          # # change tensor file path
+          # power$swap_file = file
+          # power$hybrid = T
+          # power$use_index = TRUE
 
           # set to be read-only
           power$read_only = TRUE
@@ -317,48 +349,56 @@ ECoGRepository <- R6::R6Class(
         if('phase' %in% data_type){
           lapply_async(electrodes, function(e){
             electrode = raws$get(as.character(e))
-            electrode$epoch(
-              epoch_name = epoch_name,
-              pre = pre,
-              post = post,
-              types = 'phase',
-              raw = !referenced
-            ) ->
-              elc
+            elc = electrode$epoch(epoch_name = epoch_name, pre = pre, post = post,
+                                  types = 'phase', raw = !referenced)
+            phase = elc$phase; rm(elc)
+            # if(!all(freq_subset)){
+            #   phase = phase$subset(Frequency = freq_subset, drop = F, data_only = F)
+            #   phase$to_swap_now(use_index = FALSE)
+            # }
+            # phase
+            if(!all(freq_subset)){
+              phase$temporary = TRUE
+              phase = phase$subset(Frequency = freq_subset, drop = F, data_only = F)
+              phase$to_swap_now(use_index = FALSE)
+              phase$temporary = FALSE
+            }
 
-            phase = elc$phase$subset(Frequency = freq_subset, drop = T, data_only = T)
-            rm(elc)
-            phase = as.vector(phase)
+            gc()
+            # phase = elc$phase$subset(Frequency = freq_subset, drop = T, data_only = T)
+            # rm(elc)
+            # phase = as.vector(phase)
             return(phase)
           }, .call_back = function(i){
             progress$inc(sprintf('Step %d (of %d) electrode %d (phase)', count, n_dt, electrodes[i]))
           }) ->
             results
+          phase = join_tensors(results)
           count = count + 1
-          gc()
+          # gc()
 
-          names(results) = paste0('V', seq_along(electrodes))
-          results = do.call('data.frame', results)
-
-          # Generate tensor for phase
-          phase = ECoGTensor$new(0, dim = c(1,1,1,1), varnames = names(dimnames_wave), hybrid = F)
-
-          # erase data
-          phase$set_data(NULL)
-          # reset dim and dimnames
-          phase$dim = vapply(dimnames_wave, length, FUN.VALUE = 0, USE.NAMES = F)
-          phase$dimnames = dimnames_wave
-
-          # generate local cache for phase
-          file = tempfile()
-          write_fst(results, file, compress = 20)
-          rm(results)
-          gc()
-
-          # change tensor file path
-          phase$swap_file = file
-          phase$hybrid = T
-          phase$use_index = TRUE
+          # names(results) = paste0('V', seq_along(electrodes))
+          # results = do.call('data.frame', results)
+          #
+          # # Generate tensor for phase
+          # phase = ECoGTensor$new(0, dim = c(1,1,1,1), varnames = names(dimnames_wave), hybrid = F)
+          #
+          # # erase data
+          # phase$set_data(NULL)
+          # # reset dim and dimnames
+          # phase$dim = vapply(dimnames_wave, length, FUN.VALUE = 0, USE.NAMES = F)
+          # phase$dimnames = dimnames_wave
+          #
+          # # generate local cache for phase
+          # file = tempfile()
+          # write_fst(results, file, compress = 20)
+          # rm(results)
+          # gc()
+          #
+          # # change tensor file path
+          # phase$swap_file = file
+          # phase$hybrid = T
+          # phase$use_index = TRUE
 
           # set to be read-only
           phase$read_only = TRUE
@@ -370,47 +410,44 @@ ECoGRepository <- R6::R6Class(
         if('volt' %in% data_type){
           lapply_async(electrodes, function(e){
             electrode = raws$get(as.character(e))
-            electrode$epoch(
-              epoch_name = epoch_name,
-              pre = pre,
-              post = post,
-              types = 'volt',
-              raw = !referenced
-            ) ->
-              elc
-            volt = elc$volt$get_data()
-            rm(elc)
-            volt = as.vector(volt)
+            elc = electrode$epoch( epoch_name = epoch_name, pre = pre, post = post,
+                                   types = 'volt', raw = !referenced )
+            # volt = elc$volt$get_data()
+            # rm(elc)
+            # volt = as.vector(volt)
+            volt = elc$volt
+            volt
             return(volt)
           }, .call_back = function(i){
             progress$inc(sprintf('Step %d (of %d) electrode %d (voltage)', count, n_dt, electrodes[i]))
           }) ->
             results
+          volt = join_tensors(results)
           count = count + 1
-          gc()
-
-          names(results) = paste0('V', seq_along(electrodes))
-          results = do.call('data.frame', results)
-
-          # Generate tensor for voltage
-          volt = ECoGTensor$new(0, dim = c(1,1,1), varnames = names(dimnames_volt), hybrid = F)
-
-          # erase data
-          volt$set_data(NULL)
-          # reset dim and dimnames
-          volt$dim = vapply(dimnames_volt, length, FUN.VALUE = 0, USE.NAMES = F)
-          volt$dimnames = dimnames_volt
-
-          # generate local cache for volt
-          file = tempfile()
-          write_fst(results, file, compress = 20)
-          rm(results)
-          gc()
-
-          # change tensor file path
-          volt$swap_file = file
-          volt$hybrid = T
-          volt$use_index = TRUE
+          # gc()
+          #
+          # names(results) = paste0('V', seq_along(electrodes))
+          # results = do.call('data.frame', results)
+          #
+          # # Generate tensor for voltage
+          # volt = Tensor$new(0, dim = c(1,1,1), varnames = names(dimnames_volt), hybrid = F)
+          #
+          # # erase data
+          # volt$set_data(NULL)
+          # # reset dim and dimnames
+          # volt$dim = vapply(dimnames_volt, length, FUN.VALUE = 0, USE.NAMES = F)
+          # volt$dimnames = dimnames_volt
+          #
+          # # generate local cache for volt
+          # file = tempfile()
+          # write_fst(results, file, compress = 20)
+          # rm(results)
+          # gc()
+          #
+          # # change tensor file path
+          # volt$swap_file = file
+          # volt$hybrid = T
+          # volt$use_index = TRUE
 
           # set to be read-only
           volt$read_only = TRUE

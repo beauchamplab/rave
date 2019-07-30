@@ -17,8 +17,45 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
       !is.null(repo[[data_type]])
     }
 
+    get_electrode = function(electrode, type = 'power', reference = NULL, epoch = NULL){
+      # type = 'power'; reference = NULL; epoch = NULL
+      assert_that(type %in% c('power', 'phase', 'volt'), msg = 'type must be power, phase or volt')
+      if(is.null(epoch)){
+        epoch = data_env$preload_info$epoch_name
+      }
+      if(is.null(reference)){
+        reference = data_env$preload_info$reference_name
+      }
+      # Check if the epoch and reference is the same as current loaded
+      if(
+        electrode %in% data_env$preload_info$electrodes &&
+        !is.null(data_env$.private$repo[[type]]) &&
+        epoch == data_env$preload_info$epoch_name &&
+        reference == data_env$preload_info$reference_name
+      ){
+        return(data_env$.private$repo[[type]]$subset(Electrode = Electrode == electrode))
+      }
 
-    get_power = function(force = T, referenced = T) {
+      # Not yet loaded, check if can be loaded from fst
+      ref_tbl = load_meta('references', subject_id = data_env$subject$id, meta_name = reference)
+      assert_that(is.data.frame(ref_tbl), msg = paste('Cannot find reference', reference))
+
+      ref = ref_tbl$Reference[ref_tbl$Electrode == electrode]
+      if(!length(ref) || ref == ''){
+        stop('Bad electrode!')
+      }
+
+      time_range = data_env$.private$meta$epoch_info$time_range
+
+      e = Electrode$new(subject = data_env$subject$id, electrode = electrode, reference_by = ref, preload = NULL)
+      re = e$epoch(epoch_name = epoch, pre = time_range[1], post = time_range[2], types = type, raw = FALSE)[[type]]
+
+      re
+
+    }
+
+
+    get_power = function(force = TRUE, referenced = TRUE, use_cache = TRUE) {
       repo = data_env$.private$repo
       on.exit(rm(repo))
       nm = ifelse(referenced, 'power', 'raw_power')
@@ -29,13 +66,17 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
         frequency_range = data_env$preload_info$frequencies
         ref_name = data_env$preload_info$reference_name
 
-        # Try to load from cache
-        re = load_local_cache(
-          project_name = data_env$subject$project_name, subject_code = data_env$subject$subject_code,
-          epoch = epoch_name, time_range = time_range,
-          frequency_range = frequency_range, electrodes = electrodes,
-          referenced = ifelse(referenced, ref_name, FALSE), data_type = c('power', 'phase')
-        )
+        re = NULL
+        if(use_cache){
+          # Try to load from cache
+          re = load_local_cache(
+            project_name = data_env$subject$project_name, subject_code = data_env$subject$subject_code,
+            epoch = epoch_name, time_range = time_range,
+            frequency_range = frequency_range, electrodes = electrodes,
+            referenced = ifelse(referenced, ref_name, FALSE), data_type = c('power', 'phase')
+          )
+        }
+
 
         if(!is.null(re)){
           if(isTRUE(referenced)){

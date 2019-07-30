@@ -109,6 +109,14 @@ Shiny.addCustomMessageHandler("rave_set_storage", (data) => {
 
 });
 
+// return as is whatever value is given (to update inputs)
+Shiny.addCustomMessageHandler('rave_asis', (data) => {
+  if( typeof(data.inputId) === 'string' ){
+    Shiny.onInputChange(data.inputId, data.value);
+  }
+});
+
+
 
 //Shiny.onInputChange(callback_id, re);
 // Listen to localStorage for messages from other sessions
@@ -182,8 +190,23 @@ window.addEventListener("storage", (evt) => {
 // Add message handlers
 Shiny.addCustomMessageHandler("alertmessage", (v) => { alert(v) });
 Shiny.addCustomMessageHandler("rave_sidebar_switch", (m) => {
-  let el = $(".main-sidebar a[data-value='" + message.module_id + "']");
-  el.trigger('click');
+  let el = $(".main-sidebar a[data-value='" + m.module_id + "']");
+  if( el.length > 1 ){
+    el = $(el[0]);
+  }
+
+  // I hate this but I couldn't find a better way to target the element
+  // Find parent, must be an inactive treeview
+  let pa = el.parents('.sidebar-menu>.treeview:not(.active)>.treeview-menu:not(.menu-open)');
+  if( pa.length === 1 ){
+    pa = pa.siblings('a');
+    if( pa.length === 1 ){
+      pa.click();
+    }
+  }
+
+  el.click();
+
 });
 
 

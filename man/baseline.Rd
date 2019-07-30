@@ -5,8 +5,8 @@
 \title{Baseline signals}
 \usage{
 baseline(el, from, to, method = "mean", unit = "\%", data_only = F,
-  hybrid = T, swap_file = tempfile(), mem_optimize = T,
-  preop = NULL, op)
+  hybrid = TRUE, swap_file = tempfile(), mem_optimize = TRUE,
+  same_dimension = unit \%in\% c("\%", "dB"), preop = NULL, op)
 }
 \arguments{
 \item{el}{Tensor or ECoGTensor object}
@@ -26,6 +26,8 @@ baseline(el, from, to, method = "mean", unit = "\%", data_only = F,
 \item{swap_file}{by default tempfile, or you can specify path}
 
 \item{mem_optimize}{optimize for large dataset? default is TRUE}
+
+\item{same_dimension}{logical, true if \code{op} is element-wise operator}
 
 \item{preop}{function before baselining}
 

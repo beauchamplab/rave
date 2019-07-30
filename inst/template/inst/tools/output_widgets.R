@@ -20,6 +20,9 @@ define_output_3d_viewer <- function(
     assign(!!output_call, function(){
       clicked = shiny::isolate(input[[!!output_btn]])
 
+      # Monitor subject change. If changed, then refresh!
+      monitor_subject_change()
+
       htmltools::tagList(
         htmltools::div(
           style = 'padding: 10px;',
@@ -54,58 +57,86 @@ define_output_3d_viewer <- function(
 
         if(!is.null(...local_env$widget)){
 
-          tryCatch({
-            widget = ...local_env$widget
+          # tryCatch({
+          #   widget = ...local_env$widget
+          #
+          #   rave::send_to_daemon({
+          #     widget
+          #   }, type = 'threeBrain', outputId = ns(!!outputId),
+          #   save = c('widget'))
+          # }, error = function(e){
+          #   showNotification(p('Failed to launch the side viewer. Error message: ', e), type = 'error')
+          # })
 
-            rave::send_to_daemon({
-              widget
-            }, type = 'threeBrain', outputId = ns(!!outputId),
-            save = c('widget'))
-          }, error = function(e){
-            showNotification(p('Failed to launch the side viewer. Error message: ', e), type = 'error')
-          })
+          # generate url
+          session = getDefaultReactiveDomain()
+          rave_id = session$userData$rave_id
+          if(is.null(rave_id)){ rave_id = '' }
+          token = session$userData$token
+          if(is.null(token)){ token = '' }
+          globalId = ns(!!outputId)
 
+          query_str = list(
+            type = '3dviewer',
+            globalId = htmltools::urlEncodePath(globalId),
+            sessionId = htmltools::urlEncodePath(rave_id),
+            token = token
+          )
+          url = paste(sprintf('%s=%s', names(query_str), as.vector(query_str)), collapse = '&')
 
-
+          shinyjs::runjs(sprintf('window.open("/?%s");', url))
         }
+
       })
 
-      output[[!!outputId]] <- threeBrain::renderBrain({
-        brain = rave::rave_brain2(surfaces = !!surfaces, multiple_subject = !!multiple_subject)
-        brain$load_electrodes(subject)
-        brain$load_surfaces(subject)
+      render_func = function(){
+        threeBrain::renderBrain({
+          brain = rave::rave_brain2(surfaces = !!surfaces, multiple_subject = !!multiple_subject)
+          brain$load_electrodes(subject)
+          brain$load_surfaces(subject)
 
-        re = brain
-        # Render function
-        if(input[[!!output_btn]] > 0){
-          f = get0(!!output_fun, envir = ..runtime_env, ifnotfound = function(...){
-            rutabaga::cat2('3D Viewer', !!outputId,  'cannot find function', !!output_fun, level = 'INFO')
-          })
+          re = brain
+          # Render function
+          if(input[[!!output_btn]] > 0){
+            f = get0(!!output_fun, envir = ..runtime_env, ifnotfound = function(...){
+              rutabaga::cat2('3D Viewer', !!outputId,  'cannot find function', !!output_fun, level = 'INFO')
+            })
 
-          tryCatch({
-            re = f(brain)
-          }, error = function(e){
-            rave::logger(e, level = 'ERROR')
-          })
+            tryCatch({
+              re = f(brain)
+            }, error = function(e){
+              rave::logger(e, level = 'ERROR')
+            })
 
-        }
+          }
 
-        if('htmlwidget' %in% class(re)){
-          # User called $view() with additional params, directly call the widget
-          ...local_env$widget = re
-          re
-        }else if('rave_three_brain' %in% class(re)){
-          # User just returned brain object
-          ...local_env$widget = re$view()
-          re$view()
-        }else{
-          # User returned nothing
-          ...local_env$widget = brain$view()
-          brain$view()
-        }
+          if('htmlwidget' %in% class(re)){
+            # User called $view() with additional params, directly call the widget
+            ...local_env$widget = re
+            re
+          }else if('rave_three_brain' %in% class(re)){
+            # User just returned brain object
+            ...local_env$widget = re$view()
+            re$view()
+          }else{
+            # User returned nothing
+            ...local_env$widget = brain$view()
+            brain$view()
+          }
 
 
-      })
+        })
+      }
+
+      # Register render function
+      output[[!!outputId]] <- render_func()
+
+      # Register cross-session function so that other sessions can register the same output widget
+      session$userData$cross_session_funcs %?<-% list()
+      # ns must be defined, but in get_module(..., local=T) will raise error
+      # because we are not in shiny environment
+      ns %?<-% function(x){x} 
+      session$userData$cross_session_funcs[[ns(!!outputId)]] = render_func
     })
   })
 
@@ -118,7 +149,10 @@ define_output_3d_viewer <- function(
       order = !!order
     )
 
-    load_scripts(rlang::quo({!!quo}))
+    # https://github.com/r-lib/rlang/issues/772
+    # This seems to be an issue of rlang
+    # load_scripts(rlang::quo({!!quo})) will throw error of (Error: `arg` must be a symbol)
+    load_scripts(rlang::quo(!!quo))
   })
   eval(rlang::quo_squash(df), envir = parent.frame())
   # evaluate

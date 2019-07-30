@@ -258,6 +258,9 @@ shiny_data_selector <- function(module_id){
   control = function(){
     NULL
   }
+
+
+
   server = function(input, output, session, global_reactives){
     # Vars
     group = 'main_app2'
@@ -975,6 +978,10 @@ shiny_data_selector <- function(module_id){
       }
 
 
+      n_trials = as.integer(n_trials)
+      n_time_volt = as.integer(n_time_volt)
+      n_electrodes = as.integer(n_electrodes)
+      n_time_wave = as.integer(n_time_wave)
 
       p(
         strong('Voltage: '), sprintf('%d Trials x %d Timepoints x %d Electrodes (%s)',
@@ -1039,15 +1046,22 @@ shiny_data_selector <- function(module_id){
     # })
 
     output$three_viewer <- renderBrain({
-      validate(need(local_data$has_subject, message = ''))
       project = input$project_name
       subject = input$subject_code
       subject_id = sprintf('%s/%s', project, subject)
       ref = input$reference
       elec = parse_selections(input$electrodes)
       load_mesh = input$load_mesh
+      
+      # Check whether subject exists
+      dirs = get_dir(subject_id = subject_id)
+      
+      validate(
+        need(local_data$has_subject, message = ''),
+        need(dir.exists(dirs$subject_dir), message = 'Subject does not exist!')
+      )
 
-      subject = as_subject(subject_id, reference = ref)
+      subject = as_subject(subject_id, reference = ref, strict = FALSE)
 
       brain = rave_brain2()
       brain$load_electrodes(subject = subject)
@@ -1064,14 +1078,16 @@ shiny_data_selector <- function(module_id){
 
 
       for(e in valid_e){
-        brain$set_electrode_value(subject = subject, electrode = e, value = -1, time = 0,
+        brain$set_electrode_value(subject = subject, electrode = e, value = 1, time = 0,
                                   message = paste('Reference Group:', tbl$Group[tbl$Electrode == e]))
       }
       for(e in invalid_e){
-        brain$set_electrode_value(subject = subject, electrode = e, value = 1, time = 0,
+        brain$set_electrode_value(subject = subject, electrode = e, value = 2, time = 0,
                                   message = paste('Reference Group:', tbl$Group[tbl$Electrode == e], '(electrode not used)'))
       }
-      brain$view(control_panel = F)
+      brain$view(control_panel = F, show_legend = TRUE,
+                 color_ramp = c('navyblue', 'red', '#e2e2e2'), color_type = 'discrete',
+                 color_names = c('Loading', 'Bad', 'Not Loaded'))
     })
 
 
@@ -1167,11 +1183,16 @@ shiny_data_selector <- function(module_id){
 
   }
 
+  launch = function(){
+    shinyjs::click(ns('data_select'))
+  }
+
 
   return(list(
     header = header,
     control = control,
-    server = server
+    server = server,
+    launch = launch
   ))
 }
 

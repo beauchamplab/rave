@@ -4,8 +4,7 @@
 \alias{async}
 \title{Async function to execute code (depricated)}
 \usage{
-async(expr, name = NULL, envir = parent.frame(),
-  plan = future::multisession)
+async(expr, name = NULL, envir = parent.frame())
 }
 \arguments{
 \item{expr}{expression for async exe}
@@ -13,8 +12,6 @@ async(expr, name = NULL, envir = parent.frame(),
 \item{name}{see 'details'}
 
 \item{envir}{environment of code}
-
-\item{plan}{see future::plan}
 }
 \description{
 Async function to execute code (depricated)

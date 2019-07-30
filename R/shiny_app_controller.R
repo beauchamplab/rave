@@ -1,6 +1,7 @@
 app_controller <- function(
   modules = NULL, active_module = NULL, launch.browser = T,
-  theme = "purple", disable_sidebar = FALSE, simplify_header = FALSE, ...
+  theme = "purple", disable_sidebar = FALSE, simplify_header = FALSE,
+  token = NULL, ...
 ){
 
   # Register customized inputs
@@ -12,163 +13,98 @@ app_controller <- function(
   # Get options of whether this is a test mode
   test.mode = list(...)[['test.mode']]; test.mode = isTRUE(test.mode)
 
-  # Load all possiple modules
+  # Get package modules
   controller_env = environment()
+  loaded_modules = list()
   module_table = arrange_modules(refresh = F, reset = F, quiet = T)
-
-  module_list = new.env()
-  module_list2 = new.env()
-
-  # Function to push a module to the list
-  cache_module = function(m, check = FALSE){
-    ## check all module_list2
-    if(check){
-      nms = paste0('.future_', module_table$ID)
-      sel = nms %in% names(module_list2)
-      if(any(sel)){
-        nms = cbind(nms[sel], module_table$ID[sel])
-
-        apply(nms, 1, function(x){
-          if(future::resolved(module_list2[[x[1]]])){
-            m = module_list2[[x[2]]]
-            cache_module(m, check = FALSE)
-          }
-        })
-      }
-
-    }
-
-
-    if(!'R6' %in% class(m)){
-      return()
-    }
-    id = m$module_id
-    sel = module_table$ID == id
-
-    if(length(sel) && sum(sel) == 1 && isTRUE(module_table$Active[sel])){
-      group = module_table$Group[sel]
-      m$label_name = module_table$Name[sel]
-    }else{
-      group = '______'
-    }
-
-    module_list[[group]] %?<-% list()
-
-    has_cached = vapply(module_list[[group]], function(m1){
-      m1$module_id == id
-    }, FUN.VALUE = FALSE)
-    if(!any(has_cached)){
-      module_list[[group]][[length(module_list[[group]]) + 1]] = m
-    }
-
-    invisible()
+  dup = duplicated(module_table$Name)
+  if(any(dup)){
+    module_table$Name[dup] = sprintf('%s (%s)', module_table$Name[dup], module_table$Package[dup])
   }
+  rave_pkgs = unique(module_table$Package)
 
-  cached_ids = NULL
-  if(!is.null(modules)){
-    lapply(unlist(list(modules)), cache_module)
-    cached_ids = sapply(unlist(list(modules)), function(m){m$module_id})
-  }
+  # define method to load modules
+  load_module = function(module_id, notification = FALSE){
+    if('ModuleEnvir' %in% class(module_id)){
+      # this is a module instance, no need to load new
+      controller_env$loaded_modules[[stringr::str_to_upper(module_id$module_id)]] = module_id
+      return(module_id)
+    }
+    module_id = stringr::str_to_upper(module_id)
+    # find module
+    if(length(loaded_modules[[module_id]])){
+      return(loaded_modules[[module_id]])
+    }
 
-  local({
-    tb = module_table[module_table$Active & !module_table$ID %in% cached_ids, ]
-    nmodules = nrow(tb)
-    if(nmodules){
-      future::plan(future::multiprocess, workers = min(nmodules + 1, 20))
-      lapply(seq_len(nmodules), function(ii){
-        row = tb[ii, ]
-        future::futureAssign(row$ID, {
-          get_module(package = row$Package, module_id = row$ID, local = FALSE)
-        }, globals = c('row'), assign.env = module_list2)
+    # Find package name
+    sel = stringr::str_to_upper(module_table$ID) == module_id
+    if(!any(sel)){
+      return(NULL)
+    }
+
+    pkg = module_table$Package[sel][[1]]
+
+    # load the entire package!
+    if(notification){
+      shiny::showNotification(p('Loading module - ', module_id), type = 'message', duration = NULL, id = 'load_module_notif')
+      on.exit({
+        shiny::removeNotification(id = 'load_module_notif')
       })
-
-      future::plan(future::multiprocess, workers = rave_options('max_worker'))
-
     }
-  });
+    logger('Loading module - ', module_id)
+    ms = rave::detect_modules(packages = pkg, as_module = TRUE)
+    ms = unlist(ms)
 
-  .get_module = function(package, module_id, local = FALSE){
-    # m = get0(module_id, envir = module_list2, ifnotfound = NULL)
-    m = module_list2[[module_id]]
-    if(is.null(m)){
-      m = get_module(package = package, module_id = module_id, local = FALSE)
-    }
-    return(m)
-  }
-  load_module = function(module_id = NULL, package = NULL, check = FALSE){
-
-    loaded_ids = sapply(unlist(as.list(module_list)), function(m){ m$module_id})
-
-    if(is.null(module_id) && is.null(package)){
-      if(!package_installed('ravebuiltins')){
-        logger('Installing ravebuiltins', level = 'INFO')
-        devtools::install_github(
-          'beauchamplab/ravebuiltins', upgrade = 'never',
-          dependencies = c("Depends", "Imports")
-        )
-        controller_env$module_table = arrange_modules(T,F,F)
+    # set module
+    for(m in ms){
+      if(is.null(controller_env$loaded_modules[[stringr::str_to_upper(m$module_id)]])){
+        controller_env$loaded_modules[[stringr::str_to_upper(m$module_id)]] = m
       }
-      # check all installed packages
-      installed = vapply(module_table$Package, package_installed, FALSE)
-      is_active = module_table$Active
-      ids = module_table$ID[installed & is_active]
-      ids = ids[!ids %in% loaded_ids]
-      for(mid in ids){
-        if(module_table$Active[module_table$ID == mid]){
-          m = .get_module('ravebuiltins', mid)
-          cache_module(m, check = check)
-        }
-      }
-      return(TRUE)
     }
 
-    if(is.null(module_id)){
-      if(!package_installed(package)){
-        return(FALSE)
-      }
-
-      # package can be length > 1
-      for(pkg in package){
-        sel = module_table$Package == pkg & module_table$Active
-        if(sum(sel)){
-          ms = module_table$ID[sel]
-        }
-        ms = ms[!ms %in% loaded_ids]
-        if(length(ms)){
-          for(mid in ms){
-            cache_module(.get_module(pkg, mid), check = check)
-          }
-        }
-      }
-
-      return(TRUE)
-
-    }
-
-    if(any(!module_id %in% loaded_ids)){
-      module_id = module_id[!module_id %in% loaded_ids]
-      sel = module_table$ID %in% module_id
-      for(ii in which(sel)){
-        pkg = module_table$Package[ii]
-        mid = module_table$ID[ii]
-        cache_module(.get_module(pkg, mid), check = check)
-      }
-
-    }
-
-    return(TRUE)
-
+    # If loaded, then this will return module instance, otherwise, returns will be NULL
+    return(loaded_modules[[module_id]])
   }
 
 
+  if(length(modules)){
+    if(!is.list(modules)){
+      modules = unlist(list(modules))
+    }
+    for(mid in modules){
+      load_module(mid)
+    }
+  }
 
+  # generate module list (for sidebar)
+  groups = unique(module_table$Group)
+  groups[groups == ''] = '______'
+  module_list = sapply(groups, function(group_name){
+    sel = module_table$Group == group_name
+    re = lapply(module_table$ID[sel], function(mid){
+      idx = which(module_table$ID == mid)[1]
+      active = module_table$Active[idx]
+      if(!active){
+        return(NULL)
+      }
+      list(
+        module_id = mid,
+        module_label = module_table$Name[idx],
+        active = module_table$Active[idx],
+        init = function(){
+          load_module(mid)
+        }
+      )
+    })
+    dropNulls(re)
+  })
 
   # Data selector
   data_selector = shiny_data_selector('DATA_SELECTOR')
-
   adapter = new.env()
   adapter$data_selector_header = data_selector$header
   adapter$data_selector_server = data_selector$server
+  adapter$launch_selector = data_selector$launch
   adapter$get_option = function(opt, default = NULL){
     get0(opt, ifnotfound = default, envir = controller_env, inherits = FALSE)
   }
@@ -179,121 +115,98 @@ app_controller <- function(
 
     load_module(active_id)
 
-    group_map = sapply(module_ids, function(mid){
-      module_table[module_table$ID == mid, 'Group']
-    }, USE.NAMES = F, simplify = T)
-    groups = unique(group_map)
+    groups = names(module_list)
 
-    if('______' %in% groups){
-      groups = c(groups[groups != '______'], '______')
-    }
-
+    # Generate quos
     quos = list()
-
-    for(group in groups){
-      ms = as.list(unlist(module_list[[group]]))
-      loaded_ids = sapply(ms, function(m){ m$module_id })
-      names(ms) = loaded_ids
-
-      sub_sel = vapply(module_ids, function(mid){
-        isTRUE(module_table[module_table$ID == mid, 'Group'] == group)
-      }, FALSE)
-
-      ms = lapply(module_ids[sub_sel], function(mid){
-        if(!is.null(ms[[mid]])){
-          return(ms[[mid]])
-        }else{
-          module_table[module_table$ID == mid, ]
-        }
-      })
-      ms = dropNulls(ms)
-
-      if(group == '______' || length(ms) == 1){
-
-        for(m in ms){
-          if(is.data.frame(m)){
-            m$label_name = m$Name
-            m$module_id = m$ID
-          #   quo = rlang::quo(shinydashboard::menuItem(
-          #     text = !!m$Name,
-          #     href = !!sprintf('?module_id=%s&nomodal=true', m$ID),
-          #     newtab = FALSE
-          #   ))
-          # }else{
-          }
-            quo = rlang::quo({
-              shinydashboard::menuItem(
-                text = !!m$label_name,
-                tabName = !!str_to_upper(m$module_id),
-                selected = !!(m$module_id==active_id)
-              )
-            })
-          # }
-          quos[[length(quos) + 1]] = quo
-        }
-
-      }else{
-
-        quo_items = lapply(ms, function(m){
-          if(is.data.frame(m)){
-
-            m$label_name = m$Name
-            m$module_id = m$ID
-
-          #   rlang::quo(shinydashboard::menuSubItem(
-          #     text = !!m$Name,
-          #     href = !!sprintf('?module_id=%s&nomodal=true', m$ID),
-          #     newtab = FALSE
-          #   ))
-          # }else{
-          }
-            rlang::quo(shinydashboard::menuSubItem(
-              text = !!m$label_name,
-              tabName = !!str_to_upper(m$module_id),
-              selected = !!(m$module_id==active_id)
-            ))
-          # }
+    for(g in groups[groups != '______']){
+      modules = module_list[[g]]
+      if(length(modules)){
+        quo_items = lapply(modules, function(m){
+          rlang::quo(shinydashboard::menuSubItem(
+            text = !!m$module_label,
+            tabName = !!stringr::str_to_upper(m$module_id),
+            selected = !!(m$module_id==active_id)
+          ))
         })
-        quos[[length(quos) + 1]] = rlang::quo(shinydashboard::menuItem(
-          text = !!group,
-          !!!quo_items,
-          startExpanded = !!(active_id %in% module_ids[sub_sel])
-        ))
 
+        quos[[length(quos) + 1]] = rlang::quo(shinydashboard::menuItem(
+          text = !!g,
+          !!!quo_items,
+          startExpanded = !!(active_id %in% sapply(modules, '[[', 'module_id'))
+        ))
       }
     }
-    quos
 
+    for(m in module_list[['______']]){
+      quos[[length(quos) + 1]] = rlang::quo({
+        shinydashboard::menuItem(
+          text = !!m$module_label,
+          tabName = !!str_to_upper(m$module_id),
+          selected = !!(m$module_id==active_id)
+        )
+      })
+    }
+    quos
   }
-  adapter$all_modules = function(){
-    unlist(as.list(module_list), use.names = FALSE, recursive = TRUE)
-  }
+  # adapter$all_modules = function(){
+  #   unlist(as.list(module_list), use.names = FALSE, recursive = TRUE)
+  # }
   adapter$module_ids = function(loaded_only = FALSE){
     if(loaded_only){
-      sapply(unlist(as.list(module_list), use.names = FALSE, recursive = TRUE), function(m){
-        m$module_id
-      })
+      sapply(loaded_modules, '[[', 'module_id')
     }else{
       module_table$ID[module_table$Active]
     }
   }
   adapter$load_module = load_module
 
-  ui_func = app_ui(adapter)
+  ui_func = app_ui(adapter, token = token)
 
-  server_func = app_server(adapter)
+  instance_id = paste(sample(c(letters, LETTERS, 0:9), 22), collapse = '')
+  server_func = app_server(adapter, instance_id, token = token)
+
+  reg.finalizer(
+    controller_env,
+    function(e){
+      dir_path = file.path('~/rave_data/cache_dir/', .subset2(e, 'instance_id'))
+      if(dir.exists(dir_path)){
+        unlink(dir_path, recursive = TRUE, FALSE)
+      }
+    },
+    onexit = TRUE
+  )
+
+  RaveFinalizer$new(function(){
+    dir_path = file.path('~/rave_data/cache_dir/', instance_id)
+    if(dir.exists(dir_path)){
+      unlink(dir_path, recursive = TRUE, force = FALSE)
+    }
+  })
 
   shinyApp(ui = ui_func, server = server_func, options = list(launch.browser = launch.browser, ...))
   # shinyApp(ui = ui_func, server = server_func, options = list(launch.browser = T))
 }
 
-app_ui = function(adapter){
+app_ui <- function(adapter, token = NULL){
 
   ui_functions = list()
 
-  # Case 1
+  # Case 1 404
+  ui_functions[['404']] = function(...){
+    # 404
+    '404'
+  }
 
-  # ...
+  # Case 2 (3D viewer)
+  ui_functions[['3dviewer']] = function(global_id, session_id = NULL){
+    shiny::fillPage(
+      title = 'RAVE 3D Viewer',
+      padding = 0,
+      threejsBrainOutput(global_id, width = '100vw', height = '100vh')
+    )
+  }
+
 
   # Case n (default, load ravebuiltins)
 
@@ -334,6 +247,7 @@ app_ui = function(adapter){
           shinydashboard::tabItems,
           args = local({
             re = lapply(adapter$module_ids(), function(module_id) {
+              # module_id = stringr::str_to_upper(module_id)
               shinydashboard::tabItem(tabName = str_to_upper(module_id), uiOutput(str_c(module_id, '_UI')))
             })
             names(re) = NULL
@@ -357,25 +271,33 @@ app_ui = function(adapter){
   }
 
 
-
-
-  function(parent_env = parent.frame()){
+  function(req){ #, parent_env = parent.frame()
     # First, get query string
 
-    qstr = parent_env$QUERY_STRING
+    qstr = req$QUERY_STRING
 
     url_info = shiny::parseQueryString(qstr)
-    print(url_info)
 
-    # New load module?
-    module_id = url_info$module_id
-    if(length(module_id)){
-      adapter$load_module(module_id, check = TRUE)
+    # If token should be provided, check token
+    # ?token=...
+    if(!is.null(token)){
+      if(!length(url_info$token) || !any(url_info$token %in% token)){
+        # Return 404
+        return(ui_functions[['404']]())
+      }
     }
+
+    # ?type=3dviewer&globalId=...&sessionId=...
+    if(length(url_info$type) == 1 && url_info$type == '3dviewer'){
+      return(ui_functions[['3dviewer']](url_info$globalId, url_info$sessionId))
+    }
+
+    # Default, load main app
+    lapply(url_info$module_id, adapter$load_module)
     nomodal = url_info$nomodal
     nomodal %?<-% FALSE
     nomodal = nomodal == 'true'
-    quo = ui_functions[['default']](active_id = module_id, has_modal = !nomodal)
+    quo = ui_functions[['default']](active_id = url_info$module_id, has_modal = !nomodal)
 
   }
 
@@ -383,13 +305,46 @@ app_ui = function(adapter){
 }
 
 
-app_server = function(adapter){
+app_server_404 <- function(...){
+
+}
+app_server_3dviewer <- function(input, output, session, master_session, viewer_id){
+  # assign('aaa', session, envir = globalenv())
+  # assign('bbb', master_session, envir = globalenv())
+  output[[viewer_id]] <- master_session$userData$cross_session_funcs[[viewer_id]]()
+
+  # Observe clicks
+  click_id = paste0(viewer_id, '__mouse_event')
+
+  observeEvent(input[[click_id]], {
+    mouse_event = input[[click_id]]
+
+    # Show information when double clicked
+    try({
+      if(mouse_event$event$action == 'dblclick'){
+        shiny::showNotification(p('Sent back to master session.'), type = 'message',
+                                id = paste0(click_id, '_sent'), duration = 1)
+      }
+    }, silent = TRUE)
+
+    # send whatever message from 3D viewer back to master_session
+    master_session$sendCustomMessage('rave_asis', list(
+      inputId = click_id,
+      value = mouse_event
+    ))
+  })
+
+}
+
+
+app_server <- function(adapter, instance_id, token = NULL){
 
   this_env = environment()
 
   test.mode = adapter$get_option('test.mode', FALSE)
 
   session_list = list()
+  rave_ids = NULL
 
   storage_keys = NULL
 
@@ -397,10 +352,33 @@ app_server = function(adapter){
   #################################################################
   function(input, output, session){
     session_id = add_to_session(session)
+    add_to_session(session, key = 'rave_instance', val = instance_id, override = TRUE)
+    add_to_session(session, key = 'token', val = token, override = TRUE)
 
     session$sendCustomMessage('rave_set_id', session_id);
+    session$userData$cross_session_funcs = list()
+
+    # 404 Page
+    query_str = shiny::isolate(getQueryString(session))
+
+    if(!is.null(token)){
+      if(!length(query_str$token) || !any(query_str$token %in% token)){
+        # Return 404
+        return(app_server_404(input, output, session))
+      }
+    }
+
+    # 3D viewer
+    if( length(query_str$type) == 1 && query_str$type == '3dviewer' ){
+      ## TODO: handle exceptions
+      return(app_server_3dviewer(
+        input, output, session,
+        this_env$session_list[[query_str$sessionId]], query_str$globalId
+      ))
+    }
 
     this_env$rave_ids = c(this_env$rave_ids, session_id)
+    this_env$session_list[[session_id]] = session
 
     # Global variable, timer etc.
     async_timer = reactiveTimer(5000)
@@ -411,32 +389,34 @@ app_server = function(adapter){
       execute_module = '',
       has_data = FALSE,
       switch_module = NULL,
-      timer_count = 0
+      timer_count = 0,
+      launch_selector = NULL
     )
 
     local_data = reactiveValues(
       mem_usage = NULL
     )
-    local_env = environment()
-    modules = list()
-    if(length(modules)){
-      module_ids = str_to_upper(sapply(modules, function(m){m$module_id}))
-      names(modules) = module_ids
-    }
-
     observeEvent(async_timer(), {
       global_reactives$check_results = Sys.time()
     })
 
-    .progress = progress(title = 'Loading Modules', max = length(unlist(modules)) + 1)
-    .progress$inc('Initializing')
-    shinirized_modules = sapply(unlist(modules), function(m){
-      .progress$inc(m$label_name)
-      shinirize(m, test.mode = test.mode)
-    }, simplify = F, USE.NAMES = T)
-    .progress$close()
-
+    local_env = environment()
+    modules = list()
+    shinirized_modules = list()
     module_ui_functions = list()
+    # if(length(modules)){
+    #   module_ids = str_to_upper(sapply(modules, function(m){m$module_id}))
+    #   names(modules) = module_ids
+    # }
+    # .progress = progress(title = 'Loading Modules', max = length(unlist(modules)) + 1)
+    # .progress$inc('Initializing')
+    # shinirized_modules = sapply(unlist(modules), function(m){
+    #   .progress$inc(m$label_name)
+    #   shinirize(m, test.mode = test.mode)
+    # }, simplify = F, USE.NAMES = T)
+    # .progress$close()
+
+
 
 
 
@@ -460,36 +440,25 @@ app_server = function(adapter){
     }
 
     load_module = function(module_id){
-      showNotification(p('Loading module [', module_id, ']'), type = 'message', closeButton = FALSE, id = '..load_module', duration = NULL)
+      module_id = stringr::str_to_upper(module_id)
 
-      loaded = FALSE
-      mid = stringr::str_to_upper(module_id)
-      if(!mid %in% names(local_env$modules)){
-        loaded = adapter$load_module(module_id)
-        ms = adapter$all_modules()
-        sel = vapply(ms, function(m){ isTRUE(m$module_id == module_id) }, FALSE)
+      loaded = TRUE
 
-        if(any(sel)){
-          local_env$modules[[mid]] = ms[[which(sel)]]
+      if(!module_id %in% names(local_env$modules)){
+        loaded = FALSE
+        quo = rlang::quo({
+          modules[[!!module_id]] = adapter$load_module(module_id = !!module_id, notification = TRUE)
+          m = shinirize(modules[[!!module_id]], test.mode = test.mode)
+          shinirized_modules[[!!module_id]] = m
+          callModule(m$server, id = m$id, session = session, global_reactives = global_reactives)
+          module_ui_functions[[m$id]] = m$ui
+          rm(m)
+        })
 
-          quo = rlang::quo({
-            m = shinirize(modules[[!!mid]], test.mode = test.mode)
-            shinirized_modules[[!!mid]] = m
-            callModule(m$server, id = m$id, session = session, global_reactives = global_reactives)
-
-            local_env$module_ui_functions[[m$id]] = m$ui
-            # output[[str_c(m$id, '_UI')]] <- renderUI(m$ui())
-          })
-
-          eval_dirty(quo, env = local_env)
-
-          loaded = TRUE
-        }
-
-
+        # Try catch?
+        eval_dirty(quo, env = local_env)
+        loaded = TRUE
       }
-
-      removeNotification(session = session, id = '..load_module')
 
       return(loaded)
     }
@@ -497,17 +466,21 @@ app_server = function(adapter){
     # Switch to module
     observe({
       module_info = global_reactives$switch_module
+
       if(!is.null(module_info)){
+        module_ids = adapter$module_ids()
         mid = module_info$module_id = str_to_upper(module_info$module_id)
-        if(!mid %in% module_ids){
-          load_module(mid)
-        }
-        if(mid %in% module_ids){
-          logger('Switching to module - ', mid, level = 'INFO')
-          do.call(update_variable, module_info)
-          session$sendCustomMessage('rave_sidebar_switch', module_info)
-        }
+        # print(mid)
+        load_module(mid)
+        logger('Switching to module - ', mid, level = 'INFO')
+        do.call(update_variable, module_info)
+        session$sendCustomMessage('rave_sidebar_switch', module_info)
       }
+
+      # if(open_selector){
+      #   # Open selector!
+      #   adapter$launch_selector()
+      # }
     })
 
 
@@ -525,10 +498,13 @@ app_server = function(adapter){
     # progress bar won't show title here, this is because shiny render detail information first and then
     # message
 
+    observeEvent(global_reactives$launch_selector, {
+      adapter$launch_selector()
+    })
 
     observe({
       if(global_reactives$has_data){
-        print(input$sidebar)
+        # print(input$sidebar)
         global_reactives$execute_module = input$sidebar
         shinyjs::hide(id = '__rave__mask__', anim = F)
         shinyjs::removeClass(selector = 'body', class = "rave-noscroll")
@@ -747,7 +723,7 @@ app_server = function(adapter){
         execenv = m$get_or_new_exec_env(session = session)
         try({
           inputs = eval(parse(text = all_inputs[[mid]]))
-          print(inputs)
+          # print(inputs)
 
           for(inputId in names(inputs)){
 
@@ -818,3 +794,23 @@ app_server = function(adapter){
   }
 
 }
+
+
+
+#' @name start_rave
+#' @title Start RAVE main application
+#' @usage start_rave(modules = NULL, active_module = NULL, launch.browser = T,
+#' theme = "purple", disable_sidebar = FALSE, simplify_header = FALSE,
+#' token = NULL, ...)
+#' @param modules character vector, modules modules to load before starting application.
+#' @param active_module character, which module to show as default.
+#' @param launch.browser logical, whether to launch browser.
+#' @param theme character, color theme, default is \code{'purple'}.
+#' @param disable_sidebar logical, whether to hide sidebar.
+#' @param simplify_header logical, whether to show simplified header.
+#' @param token character vector, default is \code{NULL}. If specified, then
+#' a \code{?token=...} is needed in url to access to the application.
+#' @param ... other parameters. See details.
+#'
+#' @export
+start_rave <- app_controller

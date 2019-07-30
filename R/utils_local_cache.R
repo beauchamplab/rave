@@ -339,30 +339,34 @@ load_local_cache <- function(project_name, subject_code, epoch, time_range,
       el$use_index = T
       el$hybrid = T
 
-      colnames(coef$data) = paste0('V', seq_len(ncol(coef$data)))
-
+      # colnames(coef$data) = paste0('V', seq_len(ncol(coef$data)))
 
 
       if(all(c('power', 'phase') %in% data_type)){
         el2 = el$clone(deep = T)
         el2$swap_file = tempfile()
 
-        power = Mod(coef$data)^2;
-        phase = Arg(coef$data)
-        rm(coef)
+        power = data.table::data.table(V1 = coef$data[[1]])
+        for(ii in seq_len(length(coef$data))){
+          power[[paste0('V', ii)]] = Mod(coef$data[[ii]])^2
+        }
+        write_fst(power, el$swap_file)
+        rm(power)
 
-        write_fst(as.data.frame(phase), el2$swap_file)
+        phase = data.table::data.table(V1 = coef$data[[1]])
+        for(ii in seq_len(length(coef$data))){
+          phase[[ii]] = Arg(coef$data[[ii]])
+        }
+
+        write_fst(phase, el2$swap_file)
+        rm(coef)
         rm(phase)
 
         re[['phase']] = el2
-
-        write_fst(as.data.frame(power), el$swap_file)
-        rm(power)
-
         re[['power']] = el
       }else{
 
-        write_fst(as.data.frame(coef$data), el$swap_file)
+        write_fst(as.data.frame(coef$data, col.names = paste0('V', seq_len(length(coef$data)))), el$swap_file)
         if('power' %in% data_type){
           re[['power']] = el
         }else{
@@ -427,14 +431,14 @@ load_cached_wave = function(cache_dir, electrodes, time_range,
       ref_e = parse_selections(f)
       if(length(ref_e) == 1){
         # this is bipolar-ish reference
-        d = fst::read_fst(file.path(coef_dir, sprintf('%d.fst', ref_e)),
+        d = read_fst(file.path(coef_dir, sprintf('%d.fst', ref_e)),
                           from = idx_range[1], to = idx_range[2])
         ref_data[[f]] = d[idx, ]
         rm(d)
       }
       if(length(ref_e) > 1){
         # this is car-ish reference
-        d = fst::read_fst(file.path(ref_dir, sprintf('%s.h5.coef.fst', f)),
+        d = read_fst(file.path(ref_dir, sprintf('%s.h5.coef.fst', f)),
                           from = idx_range[1], to = idx_range[2])
         ref_data[[f]] = d[idx, ]
         rm(d)
@@ -451,12 +455,11 @@ load_cached_wave = function(cache_dir, electrodes, time_range,
 
 
 
-  data = sapply(electrodes, function(e){
-    progress$inc(message = sprintf('Loading electrode %d', e))
+  data = lapply_async(electrodes, function(e){
     fst_file = file.path(coef_dir, sprintf('%d.fst', e))
 
-    d = fst::read_fst(fst_file, from = idx_range[1], to = idx_range[2])
-    d = d[idx, ]
+    d = read_fst(fst_file, from = idx_range[1], to = idx_range[2])[idx, ]
+    # d = d[idx, ]
 
     # trial x freq x time
 
@@ -478,6 +481,8 @@ load_cached_wave = function(cache_dir, electrodes, time_range,
       }
     }
     return(d)
+  }, .call_back = function(ii){
+    progress$inc(message = sprintf('Loading electrode %d', electrodes[[ii]]))
   })
 
   list(
@@ -517,12 +522,12 @@ load_cached_voltage = function(cache_dir, electrodes, time_range, srate_volt, tr
       ref_e = parse_selections(f)
       if(length(ref_e) == 1){
         # this is bipolar-ish reference
-        d = fst::read_fst(file.path(volt_dir, sprintf('%d.fst', ref_e)), from = idx[1], to = idx[2])[,1]
+        d = read_fst(file.path(volt_dir, sprintf('%d.fst', ref_e)), from = idx[1], to = idx[2])[,1]
         ref_data[[f]] = d
       }
       if(length(ref_e) > 1){
         # this is car-ish reference
-        d = fst::read_fst(file.path(ref_dir, sprintf('%s.h5.volt.fst', f)), from = idx[1], to = idx[2])[,1]
+        d = read_fst(file.path(ref_dir, sprintf('%s.h5.volt.fst', f)), from = idx[1], to = idx[2])[,1]
         ref_data[[f]] = d
       }
     }
@@ -536,7 +541,7 @@ load_cached_voltage = function(cache_dir, electrodes, time_range, srate_volt, tr
   data = sapply(electrodes, function(e){
     progress$inc(message = sprintf('Loading electrode %d', e))
     fst_file = file.path(volt_dir, sprintf('%d.fst', e))
-    d = fst::read_fst(fst_file, from = idx[1], to = idx[2])[,1]
+    d = read_fst(fst_file, from = idx[1], to = idx[2])[,1]
 
     if(need_reference){
       f = ref_table$Reference[ref_table$Electrode == e]

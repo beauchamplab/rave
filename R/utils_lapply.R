@@ -7,7 +7,7 @@ rave_lapply <- function(X, FUN, ..., .get_values = TRUE){
   lapply(X, function(x){
     async({
       FUN(x, ...)
-    }, plan = NULL)
+    })
   }) ->
     futures
 

@@ -2,6 +2,7 @@
 #' @param sidebar_width sibar width from 1 to 12 recommended 3 or 4
 #' @param launch.browser launch browser default is on
 #' @param host default is localhost 127.0.0.1
+#' @param port integer port if the app
 #' @param quiet soft deprecated
 #' @param test.mode passed to shinyApp
 #' @param ver internally used please don't change
@@ -13,6 +14,7 @@ rave_preprocess <- function(
   sidebar_width = 3,
   launch.browser = T,
   host = '127.0.0.1',
+  port = NULL,
   quiet = T,
   test.mode = F,
   modules,
@@ -25,7 +27,7 @@ rave_preprocess <- function(
   default_subject_code = ''
   model_instances = NULL
 
-  future::plan(future::multiprocess, workers = rave_options('max_worker'))
+  rave_setup_workers()
 
 
   modules = list(
@@ -215,7 +217,7 @@ rave_preprocess <- function(
 
 
   shinyApp(ui = ui, server = server, options = list(
-    host = host, launch.browser = launch.browser
+    host = host, port = port, launch.browser = launch.browser
   ))
 }
 

@@ -131,6 +131,8 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         current_param = list()
       )
 
+      execenv$local_reactives = local_data
+
       local_static = new.env()
       local({
         activated = FALSE

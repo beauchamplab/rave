@@ -4,18 +4,15 @@
 \alias{lapply_async}
 \title{lapply using future package (async)}
 \usage{
-lapply_async(x, fun, ..., .ncores = 0,
-  .future_plan = future::multiprocess, .call_back = NULL,
+lapply_async(x, fun, ..., .ncores = 0, .call_back = NULL,
   .packages = NULL, .envir = environment(), .globals = TRUE,
-  .gc = TRUE)
+  .gc = TRUE, .as_datatable = FALSE, .nrows = 0)
 }
 \arguments{
 \item{x, fun, ...}{(See ?lapply)}
 
 \item{.ncores}{Number of cores to use. If the value is 0, the number of cores
 will be determined by rave_options('max_worker').}
-
-\item{.future_plan}{which future plan to use}
 
 \item{.call_back}{A function takes current iteration number as argument, can be NULL.}
 
@@ -27,6 +24,10 @@ automatically. Otherwise you have to specify the packages that you want to load.
 \item{.globals}{Automatically detect variables. See ?future::future}
 
 \item{.gc}{Clean up environment after each iterations? Recommended for large datasets.}
+
+\item{.as_datatable}{logical, return result as \code{data.table}. Experimental.}
+
+\item{.nrows}{integer, if \code{.as_datatable=TRUE}, number of rows expected.}
 }
 \description{
 lapply using future package (async)

@@ -30,6 +30,7 @@ ExecEnvir <- R6::R6Class(
     execute = NULL,
     async_module = FALSE,
     global_reactives = NULL,
+    local_reactives = NULL,
     reload = function(){
       if(is.reactivevalues(self$global_reactives)){
         self$global_reactives$force_refresh_all = Sys.time()
@@ -485,7 +486,7 @@ ExecEnvir <- R6::R6Class(
           pm[[inputId]] = e
           new$execute_with(pm, async = async)
           eval(expr, envir = new$runtime_env)
-        }, .ncores = rave_options('max_worker'), .call_back = function(i){
+        }, .call_back = function(i){
           progress$inc(sprintf('Calculating %d (%d of %d)', electrodes[i], i, length(electrodes)))
         }) ->
           fs
@@ -849,7 +850,7 @@ ExecEnvir <- R6::R6Class(
                   re
                 }
               }, packages = packages, evaluator = future::multiprocess, envir = async_env,
-              gc = T, workers = rave_options('max_worker'))
+              gc = FALSE)
           }
         }else{
           if(length(private$executes)){
@@ -989,7 +990,8 @@ ExecEnvir <- R6::R6Class(
 
       div(
         class = sprintf('col-sm-%s rave-input-panel', sidebar_width),
-        rlang::eval_tidy(private$inputs$quos, data = self$parent_env),
+        # eval_dirty(private$inputs$quos, env = new.env(), data = self$parent_env),
+        rlang::eval_tidy(private$inputs$quos, data = as.list(self$parent_env)),
         fluidRow(
           uiOutput(self$ns('..params_current')),
           more_ui
@@ -1001,7 +1003,8 @@ ExecEnvir <- R6::R6Class(
       # env = environment()
       div(
         class = sprintf('col-sm-%d rave-output-panel', 12L - sidebar_width),
-        rlang::eval_tidy(private$outputs$quos, data = self$parent_env)
+        # eval_dirty(private$outputs$quos, env = new.env(), data = self$parent_env)
+        rlang::eval_tidy(private$outputs$quos, data = as.list(self$parent_env))
       )
 
     },

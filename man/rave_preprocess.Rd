@@ -6,12 +6,12 @@
 \title{RAVE Preprocess Function}
 \usage{
 rave_preprocess(sidebar_width = 3, launch.browser = T,
-  host = "127.0.0.1", quiet = T, test.mode = F, modules, ver = "3",
-  theme = "purple", ...)
+  host = "127.0.0.1", port = NULL, quiet = T, test.mode = F,
+  modules, ver = "3", theme = "purple", ...)
 
 rave_pre_process(sidebar_width = 3, launch.browser = T,
-  host = "127.0.0.1", quiet = T, test.mode = F, modules, ver = "3",
-  theme = "purple", ...)
+  host = "127.0.0.1", port = NULL, quiet = T, test.mode = F,
+  modules, ver = "3", theme = "purple", ...)
 }
 \arguments{
 \item{sidebar_width}{sibar width from 1 to 12 recommended 3 or 4}
@@ -19,6 +19,8 @@ rave_pre_process(sidebar_width = 3, launch.browser = T,
 \item{launch.browser}{launch browser default is on}
 
 \item{host}{default is localhost 127.0.0.1}
+
+\item{port}{integer port if the app}
 
 \item{quiet}{soft deprecated}
 
