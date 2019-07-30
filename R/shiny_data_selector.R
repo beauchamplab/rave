@@ -1046,15 +1046,22 @@ shiny_data_selector <- function(module_id){
     # })
 
     output$three_viewer <- renderBrain({
-      validate(need(local_data$has_subject, message = ''))
       project = input$project_name
       subject = input$subject_code
       subject_id = sprintf('%s/%s', project, subject)
       ref = input$reference
       elec = parse_selections(input$electrodes)
       load_mesh = input$load_mesh
+      
+      # Check whether subject exists
+      dirs = get_dir(subject_id = subject_id)
+      
+      validate(
+        need(local_data$has_subject, message = ''),
+        need(dir.exists(dirs$subject_dir), message = 'Subject does not exist!')
+      )
 
-      subject = as_subject(subject_id, reference = ref)
+      subject = as_subject(subject_id, reference = ref, strict = FALSE)
 
       brain = rave_brain2()
       brain$load_electrodes(subject = subject)
