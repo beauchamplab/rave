@@ -1,5 +1,5 @@
 #' @name ravepy
-#' Manage Python Environment from RAVE
+#' @title Manage Python Environment from RAVE
 NULL
 
 #' @rdname ravepy
