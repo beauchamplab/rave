@@ -266,7 +266,7 @@ body.rave-noscroll {
 }
 
 .rave-output-panel .box:hover .box-header {
-  background-color: aliceblue;
+  /* background-color: aliceblue; */
 }
 .rave-output-panel .box .box-body{
   padding: 0;
