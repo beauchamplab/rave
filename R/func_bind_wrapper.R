@@ -78,10 +78,14 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
   }
 
   w$get_brain = function(surfaces = 'pial', multiple_subject = FALSE){
-    subject = get('subject', envir = rave::getDefaultDataRepository())
-    brain = rave::rave_brain2(surfaces = surfaces, multiple_subject = multiple_subject)
-    brain$load_electrodes(subject)
-    brain$load_surfaces(subject)
+    subject = get0('subject', envir = rave::getDefaultDataRepository(), ifnotfound = NULL)
+    brain = NULL
+    if( !is.null(subject) ){
+      brain = rave_brain2(subject = subject, surfaces = surfaces, compute_template = FALSE)
+      if( multiple_subject ){
+        brain = threeBrain::merge_brain(brain)
+      }
+    }
     brain
   }
 

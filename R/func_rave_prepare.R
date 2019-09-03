@@ -8,7 +8,6 @@
 #' @param reference, similar to epoch, For example, use "default" if exists reference file "reference_default.csv"
 #' @param attach, characters or NULL, NULL if you don't want to attach it, "r" if want to load data as R environment, "py" if python, "matlab" for matlab.
 #' @param data_env, environment to load data into.
-#' @param load_brain try to load freesurf files?
 #' @param strict check data completness? default is FALSE (suggested)
 #' @details Usually this function is for module writters and for debug use, or adhoc analysis.
 #' @export
@@ -19,9 +18,9 @@ rave_prepare <- function(
   frequency_range,
   data_types = c('power'),
   reference = 'default', attach = 'r',
-  load_brain = FALSE,
   data_env = getDefaultDataRepository(),
-  strict = FALSE
+  strict = FALSE,
+  ...
 ){
   # subject = 'congruency/YAB'; electrodes = 14:15; epoch = 'YABa'; time_range = c(1,2); data_types = NULL; reference = 'default'
   if(missing(subject)){
@@ -67,14 +66,6 @@ rave_prepare <- function(
   )
 
 
-  if(load_brain){
-    # try to load and cache brain
-    brain = rave_brain2(surfaces = c('pial', 'white', 'smoothwm'))
-    brain$load_electrodes(subject = repo$subject)
-    brain$load_surfaces(subject = repo$subject)
-    # if brain is not cached, cache it (should we do it here?)
-  }
-
 
   # Register to data_env
   subject = repo$subject
@@ -96,7 +87,6 @@ rave_prepare <- function(
   data_env$.private = new.env(parent = baseenv())
   data_env$.private$repo = repo
   data_env$.private$meta = meta
-  # data_env$.private$brain = brain
   data_env$.private$preproc_tools = rave_preprocess_tools()
   data_env$.private$preproc_tools$check_load_subject(subject_code = subject$subject_code, project_name = subject$project_name, strict = subject$is_strict)
   data_env$data_check = check_subjects2(project_name = subject$project_name,
