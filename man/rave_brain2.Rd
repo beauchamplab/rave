@@ -4,15 +4,11 @@
 \alias{rave_brain2}
 \title{Tools to load and view brain in 3D viewer}
 \usage{
-rave_brain2(surfaces = "pial", multiple_subject = FALSE,
-  prefix = "std.141.")
+rave_brain2(subject, surfaces = "pial", use_141 = TRUE,
+  compute_template = FALSE)
 }
 \arguments{
 \item{surfaces}{one or more from `pial`, `white`, `smoothwm`, brain surface types}
-
-\item{multiple_subject}{is this a template brain?}
-
-\item{prefix}{internally used, prefix to 'FreeSurfer' asc files}
 }
 \description{
 Tools to load and view brain in 3D viewer

@@ -479,17 +479,21 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
 
     output$curr_subj_3d_viewer <- renderBrain({
       btn = input$curr_subj_details_btn
-      if(global_reactives$has_data && check_data_repo('subject')){
-        data_repo = getDefaultDataRepository()
-        subject = data_repo[['subject']]
-        brain = rave_brain2(surfaces = c('pial', 'white', 'smoothwm'), multiple_subject = F)
-        brain$add_subject(subject = subject)
-        brain$load_electrodes(subject)
-        brain$load_surfaces(subject)
-        brain$view()
-      }else{
+      if( ! ( global_reactives$has_data && check_data_repo('subject') ) ){
         return(NULL)
       }
+      
+      subject = get0('subject', envir = getDefaultDataRepository(), ifnotfound = NULL)
+      if( is.null(subject) ){
+        return(NULL)
+      }
+      
+      brain = rave_brain2(subject = subject)
+      if( is.null(brain) ){
+        return(NULL)
+      }
+      
+      brain$plot(control_panel = FALSE, side_canvas = FALSE, volumes = FALSE)
     })
 
     observeEvent(input$curr_subj_launch_suma, {

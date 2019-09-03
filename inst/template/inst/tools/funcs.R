@@ -172,8 +172,6 @@ rave_checks <- function(...){
 
 get_brain = function(surfaces = 'pial', multiple_subject = FALSE){
   subject = get('subject', envir = rave::getDefaultDataRepository())
-  brain = rave::rave_brain2(surfaces = surfaces, multiple_subject = multiple_subject)
-  brain$load_electrodes(subject)
-  brain$load_surfaces(subject)
+  brain = rave::rave_brain2(subject = subject, surfaces = surfaces)
   brain
 }

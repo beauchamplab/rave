@@ -91,9 +91,11 @@ define_output_3d_viewer <- function(
 
       render_func = function(){
         threeBrain::renderBrain({
-          brain = rave::rave_brain2(surfaces = !!surfaces, multiple_subject = !!multiple_subject)
-          brain$load_electrodes(subject)
-          brain$load_surfaces(subject)
+          brain = rave::rave_brain2(subject = subject, surfaces = !!surfaces)
+          
+          shiny::validate(
+            shiny::need(!is.null(brain), message = 'Cannot find surface/volume files')
+          )
 
           re = brain
           # Render function
@@ -114,14 +116,14 @@ define_output_3d_viewer <- function(
             # User called $view() with additional params, directly call the widget
             ...local_env$widget = re
             re
-          }else if('rave_three_brain' %in% class(re)){
+          }else if('rave-brain' %in% class(re)){
             # User just returned brain object
-            ...local_env$widget = re$view()
-            re$view()
+            ...local_env$widget = re$plot()
+            re$plot(side_shift = c(-265, 0))
           }else{
             # User returned nothing
-            ...local_env$widget = brain$view()
-            brain$view()
+            ...local_env$widget = brain$plot()
+            brain$plot(side_shift = c(-265, 0))
           }
 
 
