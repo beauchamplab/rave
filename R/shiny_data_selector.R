@@ -1063,31 +1063,37 @@ shiny_data_selector <- function(module_id){
 
       subject = as_subject(subject_id, reference = ref, strict = FALSE)
 
-      brain = rave_brain2()
-      brain$load_electrodes(subject = subject)
-
-      if(load_mesh){
-        brain$load_surfaces(subject = subject)
+      brain = rave_brain2( subject = subject, surfaces = 'pial', compute_template = FALSE)
+      
+      if( is.null(brain) ){
+        return(NULL)
       }
+
 
       valid_e = subject$filter_valid_electrodes(elec)
       invalid_e = subject$filter_all_electrodes(elec)
       invalid_e = invalid_e[!invalid_e %in% valid_e]
 
+      f = factor(c('Loading', 'Bad', 'Not Loaded'), levels = c('Loading', 'Bad', 'Not Loaded'))
       tbl = subject$electrodes
-
+      tbl$Value = f[3]
+      tbl$Value[tbl$Electrode %in% valid_e] = f[1]
+      tbl$Value[tbl$Electrode %in% invalid_e] = f[2]
+      
+      brain$set_electrode_values(table_or_path = tbl)
 
       for(e in valid_e){
-        brain$set_electrode_value(subject = subject, electrode = e, value = 1, time = 0,
-                                  message = paste('Reference Group:', tbl$Group[tbl$Electrode == e]))
+        if( !is.null(brain$electrodes$objects[[e]]) ){
+          brain$electrodes$objects[[e]]$custom_info = paste('Reference Group:', tbl$Group[tbl$Electrode == e])
+        }
       }
       for(e in invalid_e){
-        brain$set_electrode_value(subject = subject, electrode = e, value = 2, time = 0,
-                                  message = paste('Reference Group:', tbl$Group[tbl$Electrode == e], '(electrode not used)'))
+        if( !is.null(brain$electrodes$objects[[e]]) ){
+          brain$electrodes$objects[[e]]$custom_info = paste('Reference Group:', tbl$Group[tbl$Electrode == e], '(electrode not used)')
+        }
       }
-      brain$view(control_panel = F, show_legend = TRUE,
-                 color_ramp = c('navyblue', 'red', '#e2e2e2'), color_type = 'discrete',
-                 color_names = c('Loading', 'Bad', 'Not Loaded'))
+      brain$plot(control_panel = F, show_legend = TRUE, side_canvas = FALSE, 
+                 color_ramp = c('navyblue', 'red', '#e2e2e2'), color_type = 'discrete')
     })
 
 
