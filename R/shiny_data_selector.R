@@ -1080,7 +1080,7 @@ shiny_data_selector <- function(module_id){
       tbl$Value[tbl$Electrode %in% valid_e] = f[1]
       tbl$Value[tbl$Electrode %in% invalid_e] = f[2]
       
-      brain$set_electrode_values(table_or_path = tbl)
+      brain$set_electrode_values(table_or_path = tbl[, c('Electrode', 'Value')])
 
       for(e in valid_e){
         if( !is.null(brain$electrodes$objects[[e]]) ){
@@ -1092,8 +1092,8 @@ shiny_data_selector <- function(module_id){
           brain$electrodes$objects[[e]]$custom_info = paste('Reference Group:', tbl$Group[tbl$Electrode == e], '(electrode not used)')
         }
       }
-      brain$plot(control_panel = F, show_legend = TRUE, side_canvas = FALSE, 
-                 color_ramp = c('navyblue', 'red', '#e2e2e2'), color_type = 'discrete')
+      brain$plot(control_panel = F, side_canvas = FALSE, default_colormap = 'Value', volumes = FALSE,
+                 palettes = list(Value = c('navyblue', 'red', '#e2e2e2')))
     })
 
 

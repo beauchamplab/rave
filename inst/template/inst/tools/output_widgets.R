@@ -1,6 +1,6 @@
 define_output_3d_viewer <- function(
   outputId, title, surfaces = 'pial', multiple_subject = F,
-  message = 'Generate 3D viewer. ',
+  message = 'Generate 3D Viewer ',
   height = '500px', width = 12, order = 0, additional_ui = NULL
 ){
 
@@ -37,7 +37,12 @@ define_output_3d_viewer <- function(
             id = ns(!!output_new),
             href = '#',
             class = "action-button",
-            'Open viewer in a new window.'
+            ' Open Viewer in a New Window '
+          ),
+          ' | ',
+          htmltools::a(
+            href = 'https://github.com/dipterix/threeBrain/blob/dev/shortcuts.md',
+            target = '_blank', ' Keyboard Shortcuts ', shiny::icon('external-link')
           ),
           eval(!!additional_ui)
         ),
