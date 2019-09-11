@@ -24,6 +24,8 @@ ExecEnvir <- R6::R6Class(
     param_env = NULL,
     ns = NULL,
     auto_execute = TRUE,
+    manual_inputIds = NULL,
+    rendering_inputIds = NULL,
     input_update = NULL,
     register_output_events = NULL,
     register_input_events = NULL,
@@ -515,8 +517,16 @@ ExecEnvir <- R6::R6Class(
       self$ns = shiny::NS(module_env$module_id)
 
     },
-    rave_inputs = function(..., .input_panels = list(), .tabsets = list(), .env = NULL){
+    rave_inputs = function(..., .input_panels = list(), .tabsets = list(), 
+                           .env = NULL, .manual_inputs = NULL, .render_inputs = NULL){
       .tabsets = .input_panels
+      if( !is.list(.tabsets) ){
+        .tabsets = list()
+      }
+      
+      self$manual_inputIds = .manual_inputs
+      self$rendering_inputIds = .render_inputs
+      
       names(.tabsets) = sapply(names(.input_panels), function(nm){
         s = str_trim(unlist(str_split(nm, '\\[|\\]')))
         s = s[s!='']
