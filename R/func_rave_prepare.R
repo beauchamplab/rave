@@ -1,14 +1,15 @@
 #' Function to load subject and create ECoG data environment
 #' @param subject characters, format: "PROJECT/SUBJECT"
 #' @param electrodes numeric vector, which electrodes to be loaded
-#' @param epoch, characters, depending on subject meta data. For example, use "epoch1" if exists epoch file "epoch_epoch1.csv"
-#' @param time_range, vector of length 2 - before and after onset. For example, c(1,2), means 1 second before onset and 2 seconds after onset.
-#' @param frequency_range, vector of length 2 - lowest and highest frequencies. By default is all frequencies. Only applied to power and phase data.
-#' @param data_types, vector of characters, data to be preloaded. "power" - referenced power data, "phase" - referenced phase data, "volt" - referenced voltage data
-#' @param reference, similar to epoch, For example, use "default" if exists reference file "reference_default.csv"
+#' @param epoch characters, depending on subject meta data. For example, use "epoch1" if exists epoch file "epoch_epoch1.csv"
+#' @param time_range vector of length 2 - before and after onset. For example, c(1,2), means 1 second before onset and 2 seconds after onset.
+#' @param frequency_range vector of length 2 - lowest and highest frequencies. By default is all frequencies. Only applied to power and phase data.
+#' @param data_types vector of characters, data to be preloaded. "power" - referenced power data, "phase" - referenced phase data, "volt" - referenced voltage data
+#' @param reference similar to epoch, For example, use "default" if exists reference file "reference_default.csv"
 #' @param attach, characters or NULL, NULL if you don't want to attach it, "r" if want to load data as R environment, "py" if python, "matlab" for matlab.
-#' @param data_env, environment to load data into.
+#' @param data_env environment to load data into.
 #' @param strict check data completness? default is FALSE (suggested)
+#' @param ... to be ignored
 #' @details Usually this function is for module writters and for debug use, or adhoc analysis.
 #' @export
 rave_prepare <- function(
