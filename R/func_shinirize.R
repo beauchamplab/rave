@@ -160,11 +160,17 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       #   }
       #   return(FALSE)
       # })
+      
+      # observe({
+      #   base::print('---------------------')
+      #   base::print(local_data$run_script)
+      # }, priority = 1000)
 
       run_script <- debounce(
         reactive({
           re = local_data$run_script
-          if(check_active()){
+          # cat2('Cheking')
+          if( check_active(reactive = FALSE) && length(re) && !isFALSE(re) ){
             logger('Ready, prepared to execute scripts.')
             return(re)
           }
@@ -224,7 +230,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       cache_all_inputs <- function(save = T){
         # params = isolate(reactiveValuesToList(input))
         lapply(execenv$input_ids, function(inputId){
-          val = isolate(input[[inputId]])
+          val = shiny::isolate({ input[[inputId]] })
           execenv$cache_input(inputId, val, read_only = !save, sig = add_to_session(session))
         }) ->
           altered_params
@@ -338,19 +344,12 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       observe({
         last_input_updated = last_input()
         if(!isFALSE(last_input_updated)){
+          # cat2('Last input updated')
           local_data$run_script = Sys.time()
         }
       })
 
-      # run_script()
-      # What we know:
-      # 1. Initialized, has data, module activated,
-      # 2. Some input changed
-      observe({
-        if(run_script() != FALSE){
-          exec_script()
-        }
-      })
+      
 
       ##### Scripts #####
       exec_script <- function(async = FALSE, force = FALSE){
@@ -380,10 +379,15 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
           cache_all_inputs()
           execenv$cache_input('..onced', TRUE, read_only = F, sig = 'special')
 
-          lapply(execenv$input_ids, function(inputId){
-            val = isolate(input[[inputId]])
-            local_data$current_param[[inputId]] = val
-          })
+          # BIG TODO!!! Uncommenting the following lines triggers executing script twice
+          # My guess is when module is not autoexec, we use local_data$current_param to 
+          # track whether input has been changed. However, that renderUI will create a 
+          # button that belongs to the input, and input$..force_execute will update 
+          # input stack and cause infinite loop (actually twice)
+          #
+          # lapply(execenv$input_ids, function(inputId){
+          #   local_data$current_param[[inputId]] = shiny::isolate({ input[[inputId]] })
+          # })
 
         }, error = function(e){
           logger(e, level = 'ERROR')
@@ -392,6 +396,45 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
         removeNotification(id = '.rave_main')
       }
+      
+      # run_script()
+      # What we know:
+      # 1. Initialized, has data, module activated,
+      # 2. Some input changed
+      junk = new.env()
+      observe({
+        run_script_signal = run_script()
+        if( shiny::isTruthy(run_script_signal) ){
+          # local_data$run_script = FALSE
+          # cat2('checked')
+          # if( !is.null(junk$junk) ){
+          #   for(nm in names(junk$junk)){
+          #     
+          #     
+          #     if(!identical(junk$junk[[nm]], isolate(local_data[[nm]]))){
+          #       base::print(paste0('------------ ', nm))
+          #       if(!is.list(junk$junk[[nm]])){
+          #         base::print(junk$junk[[nm]])
+          #         base::print('???')
+          #         base::print(isolate(local_data[[nm]]))
+          #       }else{
+          #         for(mm in names(junk$junk[[nm]])){
+          #           if(!identical(junk$junk[[nm]][[mm]], isolate(local_data[[nm]][[mm]]))){
+          #             base::print(junk$junk[[nm]][[mm]])
+          #             base::print('???')
+          #             base::print(isolate(local_data[[nm]][[mm]]))
+          #           }
+          #         }
+          #       }
+          #       
+          #     }
+          #     
+          #   }
+          # }
+          # junk$junk = shiny::isolate(shiny::reactiveValuesToList(local_data, all.names = TRUE))
+          exec_script()
+        }
+      })
 
       ##### Async #####
       observeEvent(input$..async_run, {
@@ -681,9 +724,11 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       })
 
       observeEvent(input[['..force_execute_1']], {
+        # cat2('Force execute script')
         exec_script(async = FALSE, force = TRUE)
       })
       observeEvent(input[['..force_execute']], {
+        # cat2('Force execute script')
         exec_script(async = FALSE, force = TRUE)
       })
 
@@ -691,6 +736,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         if(local_data$focused){
           e = global_reactives$keyboard_event
           if(length(e) && length(e$enter_hit) && length(e$ctrl_hit) && e$enter_hit && e$ctrl_hit){
+            # cat2('Keyboard Signal Received.')
             exec_script(async = e$shift_hit, force = TRUE)
           }
         }

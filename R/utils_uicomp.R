@@ -121,7 +121,13 @@ comp_parser <- function(){
           if(isolate(local_data$has_data)){
             exec_env$param_env[[inputId]] = val
             exec_env$runtime_env[[inputId]] = val
-            local_data$last_input = t
+            if( inputId %in% exec_env$rendering_inputIds ){
+              # this input only updates renderings, skip main
+              local_data$has_results = t
+            }else if( !inputId %in% exec_env$manual_inputIds ){
+              # need to run rave_execute
+              local_data$last_input = t
+            }
           }
           # logger('Assigned input - ', inputId, sprintf(' (%.3f sec)', as.numeric(Sys.time() - t)))
         })
@@ -409,7 +415,14 @@ comp_parser <- function(){
             t = Sys.time()
             exec_env$param_env[[inputId]] = val
             exec_env$runtime_env[[inputId]] = val
-            local_data$last_input = t
+            
+            if( inputId %in% exec_env$rendering_inputIds ){
+              # this input only updates renderings, skip main
+              local_data$has_results = t
+            }else if( !inputId %in% exec_env$manual_inputIds ){
+              # need to run rave_execute
+              local_data$last_input = t
+            }
           }
 
         })

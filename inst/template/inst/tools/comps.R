@@ -216,14 +216,18 @@ parse_components <- function(module_id){
 
   # Find inputs
   input_layout = tmp_env[['input_layout']]
+  manual_inputs = tmp_env[['manual_inputs']]
+  render_inputs = tmp_env[['render_inputs']]
+  
   inputs = as.list(input_env)
   defs = lapply(inputs, '[[', 'definition')
   names(defs) = NULL
-  if(is.null(input_layout)){
-    rave_inputs_quo = rlang::quo(rave_inputs(!!!defs))
-  }else{
-    rave_inputs_quo = rlang::quo(rave_inputs(!!!defs, .input_panels = !!input_layout))
-  }
+  # if(is.null(input_layout)){
+  #   rave_inputs_quo = rlang::quo(rave_inputs(!!!defs))
+  # }else{
+  # }
+  rave_inputs_quo = rlang::quo(rave_inputs(!!!defs, .input_panels = !!input_layout, 
+                                           .manual_inputs = !!manual_inputs, .render_inputs = !!render_inputs))
   # Generate rave_updates
   init_expr = envs$init_env$init
   inits = lapply(inputs, '[[', 'initialization')
