@@ -1,11 +1,15 @@
 #' Tools to load and view brain in 3D viewer
+#' @param subject character or `RAVE` subject instance
 #' @param surfaces one or more from `pial`, `white`, `smoothwm`, brain surface types
+#' @param use_141 logical, whether to use standard 141 brain
+#' @param compute_template logical whether to compute nearest 141 node. Please 
+#' also check \code{freesurfer_brain}.
 #' @export
 rave_brain2 <- function(subject, surfaces = 'pial', use_141 = TRUE, compute_template = FALSE){
   
   # if subject is NULL, use current loaded subject
   if( is.character( subject ) ){
-    subject = rave:::as_subject(subject, strict = FALSE)
+    subject = as_subject(subject, strict = FALSE)
   }
 
   # To find freesurfer directory, here are the paths to search
@@ -22,7 +26,8 @@ rave_brain2 <- function(subject, surfaces = 'pial', use_141 = TRUE, compute_temp
   )
   fs_path = NULL
   for( p in fs_paths ){
-    if( threeBrain:::check_freesurfer_path(fs_subject_folder = p, autoinstall_template = FALSE) ){
+    check_freesurfer_path = get_from_package('check_freesurfer_path', 'threeBrain', TRUE)
+    if( check_freesurfer_path(fs_subject_folder = p, autoinstall_template = FALSE) ){
       fs_path = p
       break;
     }

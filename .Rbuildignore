@@ -1,6 +1,7 @@
 ^appveyor\.yml$
 ^Meta$
-^doc$
+^doc/
+^docs/
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^demo

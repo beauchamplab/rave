@@ -8,7 +8,14 @@ rave_brain2(subject, surfaces = "pial", use_141 = TRUE,
   compute_template = FALSE)
 }
 \arguments{
+\item{subject}{character or `RAVE` subject instance}
+
 \item{surfaces}{one or more from `pial`, `white`, `smoothwm`, brain surface types}
+
+\item{use_141}{logical, whether to use standard 141 brain}
+
+\item{compute_template}{logical whether to compute nearest 141 node. Please 
+also check \code{freesurfer_brain}.}
 }
 \description{
 Tools to load and view brain in 3D viewer

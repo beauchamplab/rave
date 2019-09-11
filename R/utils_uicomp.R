@@ -118,9 +118,16 @@ comp_parser <- function(){
         observe({
           val = input[[inputId]]
           t = Sys.time()
+          
+          # Make sure the data has been loaded
           if(isolate(local_data$has_data)){
+            
+            # Assign variables into param_env and runtime env so that rave_execute can access to the variables
             exec_env$param_env[[inputId]] = val
             exec_env$runtime_env[[inputId]] = val
+            
+            # Check variable type. By default it triggers rave_execute and refresh the whole process
+            # However there are two exceptions
             if( inputId %in% exec_env$rendering_inputIds ){
               # this input only updates renderings, skip main
               local_data$has_results = t
