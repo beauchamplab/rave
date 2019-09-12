@@ -24,25 +24,31 @@ collapse <- function(x, keep, average = FALSE){
 }
 
 
-cat2 <- function(
-  ..., level = 'DEBUG', print_level = FALSE,
-  file = "", sep = " ", fill = FALSE, labels = NULL,
-  append = FALSE, end = '\n', pal = list(
-    'DEBUG' = 'grey60',
-    'INFO' = '#1d9f34',
-    'WARNING' = '#ec942c',
-    'ERROR' = '#f02c2c',
-    'FATAL' = '#763053',
-    'DEFAULT' = '#000000'
-  )
-){
-  f = get_from_package('cat2', pkg = 'rutabaga', check = FALSE)
-  if(is.function(f)){
-    call = match.call(expand.dots = FALSE)
-    call[[1]] = quote(f)
-    eval(call)
-  }else{
-    cat(..., sep = sep, end = end, file = file, fill = fill, labels = labels, append = append)
+cat2 <- function (..., level = "DEBUG", print_level = FALSE, file = "", 
+                  sep = " ", fill = FALSE, labels = NULL, append = FALSE, end = "\n", 
+                  pal = list(DEBUG = "grey60", INFO = "#1d9f34", WARNING = "#ec942c", 
+                             ERROR = "#f02c2c", FATAL = "#763053", DEFAULT = "#000000")) 
+{
+  if (!level %in% names(pal)) {
+    level = "DEFAULT"
   }
-  return(invisible())
+  .col = pal[[level]]
+  if (is.null(.col)) {
+    .col = "#000000"
+  }
+  if (base::interactive()) {
+    col = crayon::make_style(.col)
+    if (print_level) {
+      base::cat("[", level, "]: ", sep = "")
+    }
+    base::cat(col(..., sep = sep), end = end, file = file, 
+              fill = fill, labels = labels, append = append)
+  }
+  else {
+    base::cat(...)
+  }
+  if (level == "FATAL") {
+    stop()
+  }
+  invisible()
 }

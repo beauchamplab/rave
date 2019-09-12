@@ -225,6 +225,10 @@ body.rave-noscroll {
   margin-bottom: 5px;
 }
 
+.modal-body .rave-grid-inputs{
+  align-items: baseline;
+}
+
 .rave-grid-inputs .shiny-input-container{
   width: auto;
 }
@@ -238,7 +242,7 @@ body.rave-noscroll {
 
 .rave-grid-inputs>.rave-grid-inputs-legend {
     position: absolute;
-    margin-top: -25px;
+    margin-top: -32px;
     background-color: white;
     padding: 3px;
     font-size: large;
