@@ -1,7 +1,8 @@
 define_output_3d_viewer <- function(
   outputId, title, surfaces = 'pial', multiple_subject = F,
   message = 'Generate 3D Viewer ',
-  height = '500px', width = 12, order = 0, additional_ui = NULL
+  height = '500px', width = 12, order = 0, additional_ui = NULL,
+  hide_btn = FALSE, ...
 ){
 
   # Generate reactives
@@ -22,17 +23,23 @@ define_output_3d_viewer <- function(
 
       # Monitor subject change. If changed, then refresh!
       monitor_subject_change()
+      
+      if( !!hide_btn ){
+        btn = NULL
+      }else{
+        btn = tagList(htmltools::a(
+          id = ns(!!output_btn),
+          href = '#',
+          class = "action-button",
+          !!message
+        ),
+        ' | ')
+      }
 
       htmltools::tagList(
         htmltools::div(
           style = 'padding: 10px;',
-          htmltools::a(
-            id = ns(!!output_btn),
-            href = '#',
-            class = "action-button",
-            !!message
-          ),
-          ' | ',
+          btn,
           htmltools::a(
             id = ns(!!output_new),
             href = '#',
@@ -103,8 +110,15 @@ define_output_3d_viewer <- function(
           )
 
           re = brain
+          
+          local_signal = 0
+          # listen to local_data
+          if( exists('local_data', envir = ..runtime_env) ){
+            local_signal = local_data[[!!output_btn]]
+          }
+          
           # Render function
-          if(input[[!!output_btn]] > 0){
+          if(input[[!!output_btn]] > 0 || local_signal > 0){
             f = get0(!!output_fun, envir = ..runtime_env, ifnotfound = function(...){
               rutabaga::cat2('3D Viewer', !!outputId,  'cannot find function', !!output_fun, level = 'INFO')
             })
@@ -121,7 +135,7 @@ define_output_3d_viewer <- function(
             # User called $view() with additional params, directly call the widget
             ...local_env$widget = re
             re
-          }else if('rave-brain' %in% class(re)){
+          }else if('R6' %in% class(re)){
             # User just returned brain object
             ...local_env$widget = re$plot()
             re$plot(side_shift = c(-265, 0))

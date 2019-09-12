@@ -342,6 +342,43 @@ comp_parser <- function(){
       return(re)
     }
   )
+  
+  parsers[['DT']] = list(
+    'DTOutput' = function(expr, env = environment()){
+      re = parsers[['.default_parser']](expr, env)
+      outputId = re$outputId
+      re$observers = function(input, output, session, local_data, exec_env){
+        output[[outputId]] = do.call(do.call('::', list('DT', 'renderDT')), args = list(quote({
+          local_data$show_results
+          if (isolate(local_data$has_data)) {
+            func = get(outputId, envir = exec_env$param_env,
+                       inherits = T)
+            if (is.function(func)) {
+              func()
+            }
+          }
+        })))
+      }
+      return(re)
+    },
+    'dataTableOutput' = function(expr, env = environment()){
+      re = parsers[['.default_parser']](expr, env)
+      outputId = re$outputId
+      re$observers = function(input, output, session, local_data, exec_env){
+        output[[outputId]] = do.call(do.call('::', list('DT', 'renderDataTable')), args = list(quote({
+          local_data$show_results
+          if (isolate(local_data$has_data)) {
+            func = get(outputId, envir = exec_env$param_env,
+                       inherits = T)
+            if (is.function(func)) {
+              func()
+            }
+          }
+        })))
+      }
+      return(re)
+    }
+  )
 
   parsers[['rave']] = list(
     'customizedUI' = function(expr, env = environment()){
@@ -488,28 +525,31 @@ comp_parser <- function(){
       )
     }
   )
-#
-#   parsers[['threejsr']] = list(
-#     'threejsOutput' = function(expr, env = environment()){
-#       re = parsers[['.default_parser']](expr, env)
-#       outputId = re$outputId
-#
-#       re$observers = function(input, output, session, local_data, exec_env){
-#         output[[outputId]] = do.call(renderThreejs, args = list(quote({
-#           local_data$show_results
-#           if (isolate(local_data$has_data)) {
-#             func = get(outputId, envir = exec_env$param_env,
-#                        inherits = T)
-#             if (is.function(func)) {
-#               func()
-#             }
-#           }
-#         })))
-#       }
-#       return(re)
-#     }
-#   )
-#
+
+  parsers[['threeBrain']] = list(
+    'threejsBrainOutput' = function(expr, env = environment()){
+      re = parsers[['.default_parser']](expr, env)
+      outputId = re$outputId
+
+      re$observers = function(input, output, session, local_data, exec_env){
+        output[[outputId]] = do.call(
+          do.call('::', list('threeBrain', 'renderBrain')), 
+          args = list(quote({
+            local_data$show_results
+            if (isolate(local_data$has_data)) {
+              func = get(outputId, envir = exec_env$param_env,
+                         inherits = T)
+              if (is.function(func)) {
+                func()
+              }
+            }
+          }))
+        )
+      }
+      return(re)
+    }
+  )
+
 
 
 

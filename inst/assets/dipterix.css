@@ -276,6 +276,10 @@ body.rave-noscroll {
 .rave-output-panel .box .box-body{
   padding: 0;
 }
+.rave-output-panel .box .box-body .shiny-datatable-output,
+.rave-output-panel .box .box-body .datatables{
+  padding: 10px;
+}
 
 .rave-border-box {
   border: 1px dashed #efefef;
