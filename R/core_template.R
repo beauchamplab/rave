@@ -1,5 +1,7 @@
 # Function to create a RAVE module template
 create_template <- function(path, ...){
+  this_call = match.call()
+  cat2(this_call)
   args = list(...)
 
   # step 1: get package name

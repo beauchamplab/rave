@@ -11,9 +11,9 @@ dev_subject:
   frequency_range: ~
   data_types: ~
   load_brain: yes
-  download_url: https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/data-large.zip
+  download_url: 'https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/data-large.zip'
 modules:
 - module_id: ${{MODULEID}}
-  module_label: ${{MODULELABEL}}
+  module_label: '${{MODULELABEL}}'
   group_name: ~
 

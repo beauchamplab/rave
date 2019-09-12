@@ -17,10 +17,15 @@ knitr::opts_chunk$set(
 ```
 
 ### Step 1
-
-Build your module first by entering `Command/Ctrl+Shift+Enter`. 
+Build your module first by entering `Command/Ctrl+Shift+B`. 
 
 ### Step 2
+Open and the following two files:
+* 'inst/modules/${{MODULEID}}/comp.R'
+* 'inst/modules/${{MODULEID}}/main.R'
 
-Check `help(package="${{PACKAGE}}")` for vignettes.
-
+### Step 3
+Run this line to integrate your module into `RAVE`
+```{r}
+rave::arrange_modules(refresh = TRUE)
+```

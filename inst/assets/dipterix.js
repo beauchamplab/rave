@@ -87,6 +87,21 @@ const _this = {};
 Shiny.addCustomMessageHandler("rave_set_id", (key) => {
   _this.current_key = key;
 });
+
+Shiny.addCustomMessageHandler("rave_enable_button", (data) => {
+  const el = document.getElementById(data.element_id);
+  if( el ){
+    el.disabled = false;
+  }
+});
+
+Shiny.addCustomMessageHandler("rave_disable_button", (data) => {
+  const el = document.getElementById(data.element_id);
+  if( el ){
+    el.disabled = true;
+  }
+});
+
 Shiny.addCustomMessageHandler("rave_set_storage", (data) => {
   const module_id = data.module_id,
       storage_key = data.storage_key,
