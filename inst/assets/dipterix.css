@@ -273,11 +273,15 @@ body.rave-noscroll {
 .rave-output-panel .box:hover .box-header {
   /* background-color: aliceblue; */
 }
-.rave-output-panel .box .box-body{
+.rave-output-panel .box .box-body,
+.rave-output-panel .nav-tabs-custom .tab-content{
   padding: 0;
 }
 .rave-output-panel .box .box-body .shiny-datatable-output,
-.rave-output-panel .box .box-body .datatables{
+.rave-output-panel .box .box-body .datatables,
+.rave-output-panel .nav-tabs-custom .tab-content .shiny-datatable-output,
+.rave-output-panel .nav-tabs-custom .tab-content .datatables,
+.rave-output-panel .nav-tabs-custom .tab-content h4{
   padding: 10px;
 }
 
