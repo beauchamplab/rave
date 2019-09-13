@@ -489,6 +489,9 @@ app_server <- function(adapter, instance_id, token = NULL){
     observeEvent(input[['..keyboard_event..']], {
       global_reactives$keyboard_event = input[['..keyboard_event..']]
     })
+    observeEvent(input[['..client_size..']], {
+      global_reactives$client_size = input[['..client_size..']]
+    })
 
     ##################################################################
     # Module to load data
