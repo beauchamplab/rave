@@ -14,6 +14,10 @@
 #' @import rutabaga
 NULL
 
+is <- function(comp, cls){
+  isTRUE(all(cls %in% class(comp)))
+}
+
 #' Resolve compatibility issues when using cat2
 #' @param ... objects to be printed
 #' @param end end of print, default is with a new line
@@ -171,7 +175,7 @@ debug_module <- function(module_id, interactive = FALSE, check_dependencies = TR
 
     if(!!async){
       ..tmp[['..async']] = TRUE
-      pkgs = str_match(search(), '^package:(.+)$')[,2]
+      pkgs = stringr::str_match(search(), '^package:(.+)$')[,2]
       pkgs = unique(pkgs[!is.na(pkgs)])
       ..tmp[['..rave_future_obj']] = future::future({
         rave::eval_dirty(quote({!!async_quo}))#, env = async_env)
