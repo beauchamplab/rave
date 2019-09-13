@@ -217,7 +217,7 @@ body.rave-noscroll {
   display: -ms-flexbox;      /* TWEENER - IE 10 */
   display: -webkit-flex;     /* NEW - Chrome */
   display: flex;
-  padding: 15px 5px 0 5px;
+  padding: 7px 5px 7px 5px;
   border: 1px solid #efefef;
   flex-wrap: wrap;
   align-items: baseline;
@@ -242,7 +242,7 @@ body.rave-noscroll {
 
 .rave-grid-inputs>.rave-grid-inputs-legend {
     position: absolute;
-    margin-top: -32px;
+    margin-top: -28px;
     background-color: white;
     padding: 3px;
     font-size: large;
