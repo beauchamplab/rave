@@ -101,7 +101,7 @@ define_output_3d_viewer <- function(
 
       })
 
-      render_func = function(){
+      render_func = function(has_side_shift = FALSE){
         threeBrain::renderBrain({
           brain = rave::rave_brain2(subject = subject, surfaces = !!surfaces)
           
@@ -131,32 +131,43 @@ define_output_3d_viewer <- function(
 
           }
 
-          if('htmlwidget' %in% class(re)){
-            # User called $view() with additional params, directly call the widget
-            ...local_env$widget = re
-            re
-          }else if('R6' %in% class(re)){
-            # User just returned brain object
-            ...local_env$widget = re$plot()
-            re$plot(side_shift = c(-265, 0))
-          }else{
-            # User returned nothing
-            ...local_env$widget = brain$plot()
-            brain$plot(side_shift = c(-265, 0))
+          # if('htmlwidget' %in% class(re)){
+          #   # User called $view() with additional params, directly call the widget
+          #   ...local_env$widget = re
+          #   re
+          # }else if('R6' %in% class(re)){
+          #   # User just returned brain object
+          #   ...local_env$widget = re$plot()
+          #   re$plot(side_shift = c(-265, 0))
+          # }else{
+          #   # User returned nothing
+          #   ...local_env$widget = brain$plot()
+          #   brain$plot(side_shift = c(-265, 0))
+          # }
+          
+          if( 'R6' %in% class(re) ){
+            re = re$plot()
           }
+          if( !has_side_shift ){
+            
+            re$x$settings$side_canvas_shift = c(0, 0)
+          }
+          ...local_env$widget = re
+          re
 
 
         })
       }
 
       # Register render function
-      output[[!!outputId]] <- render_func()
+      output[[!!outputId]] <- render_func(TRUE)
 
       # Register cross-session function so that other sessions can register the same output widget
       session$userData$cross_session_funcs %?<-% list()
       # ns must be defined, but in get_module(..., local=T) will raise error
       # because we are not in shiny environment
       ns %?<-% function(x){x} 
+      # session$userData$cross_session_funcs[[ns(!!outputId)]] = render_func
       session$userData$cross_session_funcs[[ns(!!outputId)]] = render_func
     })
   })
