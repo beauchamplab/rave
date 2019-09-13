@@ -75,8 +75,26 @@ $(document).ready(function(){
   });
 
 
-
-
+  const calculate_client_size = () => {
+    // calculate available width and height
+    let avail_width = screen.availWidth || window.outerWidth;
+    let avail_height = screen.availHeight || window.outerHeight;
+    avail_width = avail_width - window.outerWidth + window.innerWidth;
+    avail_height = avail_height - window.outerHeight + window.innerHeight;
+    Shiny.onInputChange("..client_size..", {
+      // maximized inner dimension
+      available_size : [ avail_width, avail_height ],
+      // current window dimension
+      window_size    : [ window.innerWidth, window.innerHeight ],
+      pixel_ratio    : window.devicePixelRatio
+    });
+  };
+  $(document).on("shiny:connected", (e) => {
+      calculate_client_size();
+  });
+  $(window).resize((e) => {
+      calculate_client_size();
+  });
 
 
 });
@@ -223,6 +241,8 @@ Shiny.addCustomMessageHandler("rave_sidebar_switch", (m) => {
   el.click();
 
 });
+
+
 
 
 
