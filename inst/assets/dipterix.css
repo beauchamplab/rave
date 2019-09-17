@@ -276,6 +276,7 @@ body.rave-noscroll {
 .rave-output-panel .box .box-body,
 .rave-output-panel .nav-tabs-custom .tab-content{
   /* padding: 0; */
+  min-height: 30px;
   position: relative;
 }
 .rave-output-panel .box .box-body .shiny-output-error-validation,
