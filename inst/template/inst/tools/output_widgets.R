@@ -38,7 +38,6 @@ define_output_3d_viewer <- function(
 
       htmltools::tagList(
         htmltools::div(
-          style = 'padding: 10px;',
           btn,
           htmltools::a(
             id = ns(!!output_new),
@@ -53,7 +52,10 @@ define_output_3d_viewer <- function(
           ),
           eval(!!additional_ui)
         ),
-        threeBrain::threejsBrainOutput(ns(!!outputId), height = !!height)
+        htmltools::div(
+          style = 'margin: 0 -10px -10px -10px',
+          threeBrain::threejsBrainOutput(ns(!!outputId), height = !!height)
+        )
       )
     }, envir = environment())
     local({
@@ -101,7 +103,7 @@ define_output_3d_viewer <- function(
 
       })
 
-      render_func = function(has_side_shift = FALSE){
+      render_func = function(){
         threeBrain::renderBrain({
           brain = rave::rave_brain2(subject = subject, surfaces = !!surfaces)
           
@@ -111,14 +113,10 @@ define_output_3d_viewer <- function(
 
           re = brain
           
-          local_signal = 0
-          # listen to local_data
-          if( exists('local_data', envir = ..runtime_env) ){
-            local_signal = local_data[[!!output_btn]]
-          }
+          local_signal = input[[!!output_btn]]
           
           # Render function
-          if(input[[!!output_btn]] > 0 || local_signal > 0){
+          if( length(local_signal) && local_signal > 0 ){
             f = get0(!!output_fun, envir = ..runtime_env, ifnotfound = function(...){
               rutabaga::cat2('3D Viewer', !!outputId,  'cannot find function', !!output_fun, level = 'INFO')
             })
@@ -131,43 +129,32 @@ define_output_3d_viewer <- function(
 
           }
 
-          # if('htmlwidget' %in% class(re)){
-          #   # User called $view() with additional params, directly call the widget
-          #   ...local_env$widget = re
-          #   re
-          # }else if('R6' %in% class(re)){
-          #   # User just returned brain object
-          #   ...local_env$widget = re$plot()
-          #   re$plot(side_shift = c(-265, 0))
-          # }else{
-          #   # User returned nothing
-          #   ...local_env$widget = brain$plot()
-          #   brain$plot(side_shift = c(-265, 0))
-          # }
-          
-          if( 'R6' %in% class(re) ){
-            re = re$plot()
+          if('htmlwidget' %in% class(re)){
+            # User called $view() with additional params, directly call the widget
+            ...local_env$widget = re
+            re
+          }else if('R6' %in% class(re)){
+            # User just returned brain object
+            ...local_env$widget = re$plot()
+            re$plot(side_shift = c(-265, 0))
+          }else{
+            # User returned nothing
+            ...local_env$widget = brain$plot()
+            brain$plot(side_shift = c(-265, 0))
           }
-          if( !has_side_shift ){
-            
-            re$x$settings$side_canvas_shift = c(0, 0)
-          }
-          ...local_env$widget = re
-          re
 
 
         })
       }
 
       # Register render function
-      output[[!!outputId]] <- render_func(TRUE)
+      output[[!!outputId]] <- render_func()
 
       # Register cross-session function so that other sessions can register the same output widget
       session$userData$cross_session_funcs %?<-% list()
       # ns must be defined, but in get_module(..., local=T) will raise error
       # because we are not in shiny environment
       ns %?<-% function(x){x} 
-      # session$userData$cross_session_funcs[[ns(!!outputId)]] = render_func
       session$userData$cross_session_funcs[[ns(!!outputId)]] = render_func
     })
   })
