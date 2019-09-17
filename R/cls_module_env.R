@@ -716,14 +716,30 @@ ExecEnvir <- R6::R6Class(
       lapply(left_ids, function(nm){
         comp = x[[nm]]
         width = comp$width; width %?<-% 12L
-        rlang::quo({
-          expand_box(
-            width = width,
-            title = comp$label,
-            collapsible = T,
-            !!comp$expr
-          )
-        })
+        margin = comp$margin
+        if( length(margin) && is.numeric(margin) ){
+          rlang::quo({
+            expand_box(
+              width = width,
+              title = comp$label,
+              collapsible = T,
+              div(
+                style = sprintf('margin: %.0fpx;', !!margin),
+                !!comp$expr
+              )
+            )
+          })
+        }else{
+          rlang::quo({
+            expand_box(
+              width = width,
+              title = comp$label,
+              collapsible = T,
+              !!comp$expr
+            )
+          })
+        }
+        
       }) ->
         single_boxes
 

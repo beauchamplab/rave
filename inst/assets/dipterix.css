@@ -275,8 +275,22 @@ body.rave-noscroll {
 }
 .rave-output-panel .box .box-body,
 .rave-output-panel .nav-tabs-custom .tab-content{
-  padding: 0;
+  /* padding: 0; */
+  position: relative;
 }
+.rave-output-panel .box .box-body .shiny-output-error-validation,
+.rave-output-panel .nav-tabs-custom .tab-content .shiny-output-error-validation {
+  width: 100%;
+  text-align: center;
+}
+
+.rave-output-panel .box .box-body .shiny-plot-output .shiny-bound-output,
+.rave-output-panel .nav-tabs-custom .tab-content .shiny-plot-output .shiny-bound-output {
+  margin: -10px;
+}
+
+
+/*
 .rave-output-panel .box .box-body .shiny-datatable-output,
 .rave-output-panel .box .box-body .datatables,
 .rave-output-panel .nav-tabs-custom .tab-content .shiny-datatable-output,
@@ -284,6 +298,7 @@ body.rave-noscroll {
 .rave-output-panel .nav-tabs-custom .tab-content h4{
   padding: 10px;
 }
+*/
 
 .rave-border-box {
   border: 1px dashed #efefef;
