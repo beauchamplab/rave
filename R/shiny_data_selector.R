@@ -485,72 +485,72 @@ shiny_data_selector <- function(module_id){
             tags$small(textOutput(ns('epoch_txt')), style = 'color:#a1a1a1;')
           )
         ),
-        div(
-          ####### Frequency UI ######
-          id = ns('frequency-chunk'),
-          class = 'rave-grid-inputs margin-top-20 no-border-inputs',
-          tooltip = ' ',
-          flow = 'right',
-          div(
-            class = 'tooltip-content',
-            style = 'width: 17em; max-width: 300px; text-align: left; padding: 0 1em;',
-            p(h4('Presets:'), br(),
-              HTML(paste(sapply(seq_along(fband), function(ii){
-              nm = names(fband)[[ii]]
-              b = fband[[ii]]
-              sprintf('%s wave: %.1f - %.1f', nm, b[1], b[2])
-            }), collapse = '<br />')))
-          ),
-          div(
-            class = 'rave-grid-inputs-legend',
-            'Frequency'
-          ),
-          div(
-            style="flex-basis: 60%;",
-            sliderInput(ns('frequencies'), 'Frequency Range', min = max(min(freqs)-1, 0), ticks = F,
-                        max = max(freqs)+1, value = range(freqs), step = 0.1, round = TRUE, post = 'Hz')
-          ),
-          div(
-            style="flex-basis: 40%;",
-            tags$label('Presets'),
-            p(
-              tags$label(
-                class = 'label label-default bg-red', style = 'display: inline-block;',
-                tags$a('Delta', style = 'color:white!important', class = 'action-button',
-                       id = ns('freq_preset_1'), href = '#')
-              ),
-              tags$label(
-                class = 'label label-default bg-orange', style = 'display: inline-block;',
-                tags$a('Theta', style = 'color:white!important', class = 'action-button',
-                       id = ns('freq_preset_2'), href = '#')
-              ),
-              tags$label(
-                class = 'label label-default bg-yellow', style = 'display: inline-block;',
-                tags$a('Alpha', style = 'color:white!important', class = 'action-button',
-                       id = ns('freq_preset_3'), href = '#')
-              ),
-              tags$label(
-                class = 'label label-default bg-green', style = 'display: inline-block;',
-                tags$a('Beta', style = 'color:white!important', class = 'action-button',
-                       id = ns('freq_preset_5'), href = '#')
-              ),
-              tags$label(
-                class = 'label label-default bg-blue', style = 'display: inline-block;',
-                tags$a('Low Gamma', style = 'color:white!important', class = 'action-button',
-                       id = ns('freq_preset_6'), href = '#')
-              ),
-              tags$label(
-                class = 'label label-default bg-purple', style = 'display: inline-block;',
-                tags$a('High Gamma', style = 'color:white!important', class = 'action-button',
-                       id = ns('freq_preset_7'), href = '#')
-              )
-            )
-          ),
-          div(
-            style="flex-basis: 100%;",
-            tags$small(textOutput(ns('frequency_txt')), style = 'color:#a1a1a1;')
-          )
-        ),
+        # div(
+        #   ####### Frequency UI ######
+        #   id = ns('frequency-chunk'),
+        #   class = 'rave-grid-inputs margin-top-20 no-border-inputs',
+        #   tooltip = ' ',
+        #   flow = 'right',
+        #   div(
+        #     class = 'tooltip-content',
+        #     style = 'width: 17em; max-width: 300px; text-align: left; padding: 0 1em;',
+        #     p(h4('Presets:'), br(),
+        #       HTML(paste(sapply(seq_along(fband), function(ii){
+        #       nm = names(fband)[[ii]]
+        #       b = fband[[ii]]
+        #       sprintf('%s wave: %.1f - %.1f', nm, b[1], b[2])
+        #     }), collapse = '<br />')))
+        #   ),
+        #   div(
+        #     class = 'rave-grid-inputs-legend',
+        #     'Frequency'
+        #   ),
+        #   div(
+        #     style="flex-basis: 60%;",
+        #     sliderInput(ns('frequencies'), 'Frequency Range', min = max(min(freqs)-1, 0), ticks = F,
+        #                 max = max(freqs)+1, value = range(freqs), step = 0.1, round = TRUE, post = 'Hz')
+        #   ),
+        #   div(
+        #     style="flex-basis: 40%;",
+        #     tags$label('Presets'),
+        #     p(
+        #       tags$label(
+        #         class = 'label label-default bg-red', style = 'display: inline-block;',
+        #         tags$a('Delta', style = 'color:white!important', class = 'action-button',
+        #                id = ns('freq_preset_1'), href = '#')
+        #       ),
+        #       tags$label(
+        #         class = 'label label-default bg-orange', style = 'display: inline-block;',
+        #         tags$a('Theta', style = 'color:white!important', class = 'action-button',
+        #                id = ns('freq_preset_2'), href = '#')
+        #       ),
+        #       tags$label(
+        #         class = 'label label-default bg-yellow', style = 'display: inline-block;',
+        #         tags$a('Alpha', style = 'color:white!important', class = 'action-button',
+        #                id = ns('freq_preset_3'), href = '#')
+        #       ),
+        #       tags$label(
+        #         class = 'label label-default bg-green', style = 'display: inline-block;',
+        #         tags$a('Beta', style = 'color:white!important', class = 'action-button',
+        #                id = ns('freq_preset_5'), href = '#')
+        #       ),
+        #       tags$label(
+        #         class = 'label label-default bg-blue', style = 'display: inline-block;',
+        #         tags$a('Low Gamma', style = 'color:white!important', class = 'action-button',
+        #                id = ns('freq_preset_6'), href = '#')
+        #       ),
+        #       tags$label(
+        #         class = 'label label-default bg-purple', style = 'display: inline-block;',
+        #         tags$a('High Gamma', style = 'color:white!important', class = 'action-button',
+        #                id = ns('freq_preset_7'), href = '#')
+        #       )
+        #     )
+        #   ),
+        #   div(
+        #     style="flex-basis: 100%;",
+        #     tags$small(textOutput(ns('frequency_txt')), style = 'color:#a1a1a1;')
+        #   )
+        # ),
         div(
           ##### Electrodes UI ####
           id = ns('electrode-chunk'),
@@ -583,6 +583,18 @@ shiny_data_selector <- function(module_id){
             uiOutput(ns('ui_mask'))
           )
 
+        ),
+        div(
+          #### Load Estimation ####
+          class = 'rave-grid-inputs margin-top-20',
+          div(
+            class = 'rave-grid-inputs-legend',
+            'Load Estimation'
+          ),
+          div(
+            style="flex-basis: 100%;",
+            uiOutput(ns('ui_summary'))
+          )
         )
       )
     })
@@ -625,10 +637,10 @@ shiny_data_selector <- function(module_id){
       check_result = local_data$check_result
       w = check_result$log$preprocess$wavelet_log
       freqs = w[[length(w)]]$frequencies
-      f = input$frequencies
+      # f = input$frequencies
 
       n_tf = length(freqs)
-      freqs = freqs[freqs %within% f]
+      # freqs = freqs[freqs %within% f]
 
       n_f = length(freqs)
       if(n_f){
@@ -839,22 +851,8 @@ shiny_data_selector <- function(module_id){
                   style = 'position: absolute; z-index:100; ',
                   checkboxInput(ns('load_mesh'), 'Load Mesh', value = isolate(local_data$load_mesh))
                 ),
-                threejsBrainOutput(ns('three_viewer'), height = '500px')
+                threejsBrainOutput(ns('three_viewer'), height = '600px')
                 # threejsOutput(ns('three_viewer'), height = '500px')
-              )
-            )
-          ),
-          column(
-            12,
-            div(
-              class = 'rave-grid-inputs margin-top-20',
-              div(
-                class = 'rave-grid-inputs-legend',
-                'Load Estimation'
-              ),
-              div(
-                style="flex-basis: 100%;",
-                uiOutput(ns('ui_summary'))
               )
             )
           )
@@ -929,7 +927,7 @@ shiny_data_selector <- function(module_id){
       # Frequency
       w = check_result$log$preprocess$wavelet_log
       w = w[[length(w)]]
-      freqs = w$frequencies[w$frequencies %within% input$frequencies]
+      freqs = w$frequencies#[w$frequencies %within% input$frequencies]
       n_freqs = length(freqs)
 
       # Time Points
@@ -1092,7 +1090,7 @@ shiny_data_selector <- function(module_id){
           brain$electrodes$objects[[e]]$custom_info = paste('Reference Group:', tbl$Group[tbl$Electrode == e], '(electrode not used)')
         }
       }
-      brain$plot(control_panel = F, side_canvas = FALSE, default_colormap = 'Value', volumes = FALSE,
+      brain$plot(control_panel = F, side_canvas = FALSE, default_colormap = 'Value', volumes = FALSE, surfaces = load_mesh,
                  palettes = list(Value = c('navyblue', 'red', '#e2e2e2')))
     })
 
@@ -1108,7 +1106,7 @@ shiny_data_selector <- function(module_id){
       }
       subject_code = input$subject_code
       project_name = input$project_name
-      frequencies = input$frequencies
+      
       epoch = input$epoch
       epoch_range = c(input$epoch_pre, input$epoch_post)
       reference = input$reference
@@ -1123,6 +1121,7 @@ shiny_data_selector <- function(module_id){
         return(NULL)
       }
 
+      frequencies = tmp_subject$frequencies$Frequency #input$frequencies
       freqs = tmp_subject$frequencies$Frequency %within% frequencies
       if(!sum(freqs)){
         showNotification('No frequency found in your selected frequency band', type = 'error', id = ns('data_import'))
