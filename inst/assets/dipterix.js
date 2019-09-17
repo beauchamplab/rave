@@ -30,11 +30,14 @@ $(document).ready(function(){
   // Zoom in panels
 	$(document).on("click", ".rave-elastic-btn", (evt) => {
 	  // find its parent div and add class "rave-elastic"
-	  var el = $(evt.target),
-	      // get data-target
-	      target_selector = el.attr('data-target'),
-	      cls_name = "rave-elastic-active",
-	      pa;
+	  const cls_name = "rave-elastic-active";
+	  let el = $(evt.target),
+	      target_selector, pa;
+	      
+	  if( evt.target.tagName === 'I' ){
+	    el = el.parent();
+	  }
+	  target_selector = el.attr('data-target');
 
 	  if(target_selector !== undefined){
 	    pa = el.closest(target_selector);
@@ -46,10 +49,10 @@ $(document).ready(function(){
 
 	  if(pa.hasClass(cls_name)){
 	    pa.removeClass(cls_name);
-	    el.html('<i class="fa fa-expand" aria-hidden="true"></i>');
+	    // el.html('<i class="fa fa-expand" aria-hidden="true"></i>');
 	  }else{
 	    pa.addClass(cls_name);
-	    el.html('<i class="fa fa-compress" aria-hidden="true"></i>');
+	    // el.html('<i class="fa fa-compress" aria-hidden="true"></i>');
 	  }
 	});
 
