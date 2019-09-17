@@ -1,3 +1,7 @@
+
+
+
+
 .sidebar-separator {
   line-height: 30pt;
   text-align: center;
@@ -388,7 +392,8 @@ body.rave-noscroll {
 
 
 .rave-input-panel{
-  padding-right: 0;
+  padding-right: 7px;
+  padding-left: 7px;
   -webkit-transition:-webkit-transform .3s ease-in-out, margin .3s ease-in-out;
   -moz-transition:-moz-transform .3s ease-in-out, margin .3s ease-in-out;
   -o-transition:-o-transform .3s ease-in-out, margin .3s ease-in-out;
@@ -415,9 +420,18 @@ body.rave-noscroll {
   width: 100% !important;
 }
 
+.row{
+  margin-left: -7px;
+  margin-right: -7px;
+}
 
-
-
+div[class^="col-lg-"],
+div[class^="col-md-"],
+div[class^="col-sm-"],
+div[class^="col-xs-"] {
+  padding-right: 7px;
+  padding-left: 7px;
+}
 
 
 
@@ -673,4 +687,12 @@ body.rave-noscroll {
   padding-left: 310px;
   text-align: left;
 }
+
+
+
+
+
+
+
+
 
