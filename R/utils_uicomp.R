@@ -196,7 +196,8 @@ comp_parser <- function(){
       initial_value = args[['value']],
       width = width,
       observers = observers,
-      updates = updates
+      updates = updates,
+      margin = NULL
     )
   }
 
@@ -339,6 +340,25 @@ comp_parser <- function(){
           }
         })))
       }
+      return(re)
+    },
+    'plotOutput' = function(expr, env = environment()){
+      re = parsers[['.default_parser']](expr, env)
+      outputId = re$outputId
+      
+      re$observers = function(input, output, session, local_data, exec_env){
+        output[[outputId]] = do.call(shiny::renderPlot, args = list(quote({
+          local_data$show_results
+          if (isolate(local_data$has_data)) {
+            func = get(outputId, envir = exec_env$param_env,
+                       inherits = T)
+            if (is.function(func)) {
+              func()
+            }
+          }
+        })))
+      }
+      re$margin = -10
       return(re)
     }
   )
@@ -546,6 +566,7 @@ comp_parser <- function(){
           }))
         )
       }
+      re$margin = -10
       return(re)
     }
   )

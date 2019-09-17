@@ -7,11 +7,6 @@
 # otherwise, it's recommended to use the second method to avoid potential conflicts
 
 # Make sure to declare ALL dependencies here to make sure R can find them.
-
-#' @import shiny
-#' @import rlang
-#' @import rave
-#' @import rutabaga
 NULL
 
 is <- function(comp, cls){
