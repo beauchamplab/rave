@@ -73,7 +73,8 @@ Suggests:
     globals (>= 0.12.4),
     roxygen2 (>= 6.0.0)
 Remotes:
-    github::dipterix/rutabaga
+    github::dipterix/rutabaga,
+    github::dipterix/threeBrain
 VignetteBuilder: knitr
 Language: en-US
 Collate: 
@@ -120,6 +121,7 @@ Collate:
     'lib_wavelet.R'
     'pre_epoch.R'
     'pre_load_settings.R'
+    'pre_localization.R'
     'pre_notch.R'
     'pre_overview.R'
     'pre_post_reference.R'

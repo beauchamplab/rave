@@ -1,7 +1,3 @@
-#' Preprocess Module - Wavelet
-#' @param module_id internally used
-#' @param sidebar_width sidebar width from 1 to 12
-#' @export
 rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
   ns = shiny::NS(module_id)
 

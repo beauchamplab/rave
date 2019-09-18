@@ -9,7 +9,6 @@ err_cnd <- function(
 #' Check if epoch file is valid
 #' @param subject subject object or string
 #' @param epoch_name epoch name to check
-#' @export
 check_epoch <- function(subject, epoch_name){
   if(is.character(subject)){
     sub_dir = file.path(rave_options('data_dir'), subject, 'rave')

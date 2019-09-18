@@ -34,8 +34,7 @@ dashboardControl = function (...,
 #' @param disable hide header
 #' @param btn_text_right control panel button name
 #' @param .list see ...
-#' @export
-dashboardHeader = function (..., title = NULL, titleWidth = NULL, disable = FALSE, btn_text_right = 'Controls',
+dashboardHeader <- function (..., title = NULL, titleWidth = NULL, disable = FALSE, btn_text_right = 'Controls',
                             .list = NULL)
 {
   items <- .list
@@ -102,7 +101,6 @@ dashboardHeader = function (..., title = NULL, titleWidth = NULL, disable = FALS
 #' @param skin theme color
 #' @param controlbar_opened open control panel by default or not
 #' @param initial_mask internally used
-#' @export
 dashboardPage <- function (
   header, sidebar, control, body, title = NULL,
   skin = c("blue", "black", "purple", "green", "red", "yellow"), controlbar_opened = FALSE,

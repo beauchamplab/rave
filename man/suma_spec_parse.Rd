@@ -15,7 +15,7 @@ suma_spec_parse(subject, spec_file)
 Parse spec file
 }
 \examples{
-\dontrun{
+\donttest{
 subject = 'Demo/Subject'
 # or create subject object
 subject = Subject$new('Demo', 'Subject')

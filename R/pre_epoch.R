@@ -1,6 +1,3 @@
-#' Preprocess module - epoch
-#' @param module_id used internally "EPOCH_M"
-#' @param sidebar_width 1 to 12 width for sidebar
 pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2){
   ns = shiny::NS(module_id)
   default_epoch = data.frame(

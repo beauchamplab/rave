@@ -62,6 +62,9 @@ NULL
 #' @importFrom servr random_port
 NULL
 
+tags = htmltools::tags
+div = htmltools::div
+
 
 #' Internally use to auto update RAVE package version
 #' DO NOT use it, it's copied from websites and I'll probably remove this function in the future

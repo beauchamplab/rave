@@ -39,21 +39,27 @@ rave_preprocess <- function(
     ),
     list(
       ID = 'NOTCH',
-      name = 'Notch Filter',
+      name = 'Step 1. Notch Filter',
       checklevel = 1,
       ..func = 'rave_pre_notch3'
     ),
     list(
       ID = 'WAVELET',
-      name = 'Wavelet',
+      name = 'Step 2. Wavelet',
       checklevel = 2,
       ..func = 'rave_pre_wavelet3'
     ),
     list(
       ID = 'EPOCH',
-      name = 'Trial Epoch',
+      name = 'Step 3. Trial Epoch',
       checklevel = 1,
       ..func = 'pre_epoch3'
+    ),
+    list(
+      ID = 'ELECLOCAL',
+      name = 'Step 4. Localization',
+      checklevel = 1,
+      ..func = 'rave_pre_eleclocal3'
     )
   )
 
@@ -163,52 +169,6 @@ rave_preprocess <- function(
       logger('Loaded Subject')
     }
 
-
-
-
-    # # Save subject
-    # save_subject = function(subject_code, project_name){
-    #   logger('Saving Subject')
-    #   dirs = get_dir(subject_code = subject_code, project_name = project_name)
-    #   is_created = FALSE
-    #   if(!dir.exists(dirs$preprocess_dir)){
-    #     dirs = get_dir(subject_code = subject_code, project_name = project_name, mkdirs = c('preprocess_dir', 'cache_dir', 'meta_dir'))
-    #     is_created = TRUE
-    #   }else{
-    #     # save informations if subject exists
-    #     if(!is.null(env$subject) && (
-    #       env$subject$subject_code == subject_code &&
-    #       env$subject$project_name == project_name
-    #     )){
-    #       env$subject$save(action = 'Manual Save', message = '')
-    #     }
-    #   }
-    #
-    #   # call to load subject
-    #   utils$load_subject(subject_code, project_name)
-    #
-    #   logger('saved Subject')
-    #   return(is_created)
-    # },
-
-    # save_reference_table = function(tbl){
-    #   if(nrow(tbl)){
-    #     tbl$ChlType = sapply(tbl$Channel, utils$get_channel_type)
-    #   }
-    #   utils$save_to_subject(reference_table = tbl)
-    # },
-
-
-    # save_meta_electrodes = function(){
-    #   Channel = env$subject$channels
-    #   save_meta(
-    #     data = meta_elec,
-    #     meta_type = 'electrodes',
-    #     project_name = env$subject$project_name,
-    #     subject_code = env$subject$subject_code
-    #   )
-    # },
-
     lapply(model_instances, function(x){
       callModule(x$server, id = paste0(x$ID , '_M'), user_data = user_data, utils = utils)
     })
@@ -220,8 +180,4 @@ rave_preprocess <- function(
     host = host, port = port, launch.browser = launch.browser
   ))
 }
-
-#' @name rave_preprocess
-#' @export
-rave_pre_process = rave_preprocess
 

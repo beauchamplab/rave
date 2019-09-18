@@ -58,7 +58,6 @@
 #' get_async_result('test')
 #' # END
 #' }
-#' @export
 async <- function(expr, name = NULL, envir = parent.frame()){
   rave_setup_workers()
   if(is.null(name)){

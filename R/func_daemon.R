@@ -244,8 +244,8 @@ create_daemon <- function(session, idx = '1'){
 #' in the background to communicate with the main process. The daemon process
 #' doesn't share with the original process, hence you need to save whatever
 #' data to be used via `save` argument.
-#' @export
 send_to_daemon <- function(expr, outputId, type = 'threeBrain', save = NULL){
+  .Deprecated()
   .env = parent.frame()
 
   expr = substitute(expr)
