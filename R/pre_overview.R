@@ -1,7 +1,3 @@
-#' Preprocess Module - Overview
-#' @param module_id internally used
-#' @param sidebar_width sidebar width from 1 to 12
-#' @export
 rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
   ns = shiny::NS(module_id)
 
@@ -14,8 +10,36 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
         fluidRow(
           column(
             width = 12,
-            uiOutput(ns('overview_inputs1')),
-            uiOutput(ns('overview_inputs2'))
+            a(href = 'https://openwetware.org/wiki/Beauchamp:RAVE:Data_Formats', target = '_blank',
+              'Please check this to import data to RAVE', shiny::icon('external-link')),
+            div(
+              class = 'rave-grouped-inputs rave-grid-inputs margin-top-20',
+              div(class='rave-grid-inputs-legend', 'Step 1'),
+              div(
+                style = 'flex-basis: 100%;',
+                uiOutput(ns('overview_inputs1')),
+                tags$small(uiOutput(ns('step_1_msg')))
+              )
+            ),
+            div(
+              class = 'rave-grouped-inputs rave-grid-inputs margin-top-20',
+              div(class='rave-grid-inputs-legend', 'Step 2'),
+              div(
+                style = 'flex-basis: 100%;',
+                uiOutput(ns('overview_inputs2')),
+                uiOutput(ns('overview_inputs3')),
+                tags$small(uiOutput(ns('step_2_msg'))),
+                uiOutput(ns('overview_inputs4'))
+              )
+            ),
+            div(
+              class = 'rave-grouped-inputs rave-grid-inputs margin-top-20',
+              div(class='rave-grid-inputs-legend', 'Step 3'),
+              div(
+                style = 'flex-basis: 100%;',
+                uiOutput(ns('overview_inputs5'))
+              )
+            )
           )
         )
       )
@@ -62,8 +86,15 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
 
     # Reactives
     observe({
+      local_data$reset = Sys.time()
+      # project_name_sel = get_val(input, 'project_name_sel', default = 'New Project...')
+      # if( project_name_sel == 'New Project...' ){
+      #   utils$clear_subject()
+      #   return()
+      # }
       project_name = get_val(input, 'project_name', default = '')
       subject_code = get_val(input, 'subject_code', default = '')
+      
       if(!is.blank(subject_code) && !is.blank(project_name)){
         # check if subject dir exists
         dirs = get_dir(subject_code = subject_code, project_name = project_name)
@@ -82,10 +113,12 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
       updateSelectInput(session, 'blocks', label = 'Block', selected = NULL, choices = '')
       updateTextInput(session, 'channels', label = 'Electrodes', value = '')
       updateNumericInput(session, 'srate', label = 'Sample Rate', value = 0)
-      updateActionButton(session, 'save', label = 'Create Subject')
     })
 
-    observeEvent(input$save, {
+    observeEvent({
+      input$save
+      input$save1
+    }, {
       project_name = get_val(input, 'project_name', default = '')
       subject_code = get_val(input, 'subject_code', default = '')
       if(!is.blank(subject_code) && !is.blank(project_name)){
@@ -165,19 +198,101 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
       }
     })
 
-
-    output$overview_inputs1 <- renderUI({
-
-      tagList(
-        textInput(ns('subject_code'), 'Subject Code', value = isolate(local_data$subject_code)),
-        selectInput(ns('project_name_sel'), 'Project', choices = c(
-          'New Project...', local_data$all_projects
-        ), selected = isolate(local_data$project_name))
-      )
+    output$step_1_msg <- renderUI({
+      scode = input$subject_code
+      raw_dir = normalizePath(rave_options('raw_data_dir'), mustWork = FALSE)
+      target_dir = file.path(raw_dir, scode)
+      has_scode = length(scode) && scode != ''
+      if( !has_scode ){
+        return('')
+      }
+      valid_scode = stringr::str_detect(scode, '^[a-zA-Z0-9][a-zA-Z0-9_]{0,50}$')
+      if( !valid_scode ){
+        return(p(style='color:red;word-break: break-word;',
+                    'Invalid subject code. Only letters (A-Z), numbers (0-9) and "_" are allowed. (Do not start with "_")'))
+      }
+      has_dir = dir.exists(target_dir)
+      if( !has_dir ){
+        local_data$has_dir = FALSE
+        return(p(style='color:red;word-break: break-word;',sprintf('%s (NOT found)', target_dir)))
+      }
+      local_data$has_dir = TRUE
+      return(p(style='color:green;word-break: break-word;',sprintf('%s (found!)', target_dir)))
     })
 
+    output$overview_inputs1 <- renderUI({
+      textInput(ns('subject_code'), 'Subject Code (subject folder in raw directory)', value = isolate(local_data$subject_code))
+    })
+    
     output$overview_inputs2 <- renderUI({
+      selectInput(ns('project_name_sel'), 'Project', choices = c(
+        'New Project...', local_data$all_projects
+      ), selected = isolate(local_data$project_name))
+    })
+    output$overview_inputs3 <- renderUI({
+      # reset = user_data$reset
+      if(is.null(input$project_name_sel) || input$project_name_sel == 'New Project...'){
+        re = textInput(ns('project_name'), 'Project Name', value = '')
+      }else{
+        re = div(
+          class = 'hidden',
+          textInput(ns('project_name'), 'Project Name', value = input$project_name_sel)
+        )
+      }
+      re
+    })
+    
+    output$step_2_msg <- renderUI({
+      project_name = get_val(input, 'project_name', default = '')
+      subject_code = get_val(input, 'subject_code', default = '')
+      data_dir = normalizePath(rave_options('data_dir'), mustWork = FALSE)
+      if( subject_code == '' ){
+        if( project_name != '' ){
+          return(p(style='color:red;word-break: break-word;', 'Please enter subject code first!'))
+        }
+        return()
+      }
+      
+      if( !isTRUE(local_data$has_dir) || project_name == '' ){
+        return()
+      }
+      
+      valid_proj = stringr::str_detect(project_name, '^[a-zA-Z0-9][a-zA-Z0-9_]*')
+      if( !valid_proj ){
+        return(p(style='color:red;word-break: break-word;', 'Project name is not valid. Use letters, digits, and "_" (Do not start with "_")'))
+      }
+      
+      fpath = file.path(data_dir, project_name, subject_code)
+      if( dir.exists(fpath) && isTRUE(input$project_name_sel == 'New Project...') ){
+        return(p(style = 'color:blue;word-break: break-word;', sprintf(
+          'Subject [%s/%s] already exists and loaded',
+          project_name, subject_code
+        )))
+      }
+      return(p(style = 'color:green;word-break: break-word;', sprintf(
+        'Subject [%s/%s] will be stored at: %s', 
+        project_name, subject_code, fpath
+      )))
+      
+    })
+    
+    output$overview_inputs4 <- renderUI({
       reset = user_data$reset
+      local_data$reset
+      if( isTRUE(utils$has_subject()) ){
+        return()
+      }else{
+        actionButtonStyled(ns('save1'), 'Create Subject', type = 'primary', width = '100%')
+      }
+    })
+
+    output$overview_inputs5 <- renderUI({
+      reset = user_data$reset
+      local_data$reset
+      if( !isTRUE(utils$has_subject()) ){
+        return(p(style='color:grey;word-break: break-word;',
+                    'Please specify subject code, project name and make sure press the "Create Subject" button'))
+      }
       last_inputs = utils$last_inputs()
       srate = utils$get_from_subject('srate', default = 0)
       block_choices = utils$get_from_subject('available_blocks', '')
@@ -189,47 +304,35 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
       # logger('gen UI')
 
 
-
-      if(is.null(input$project_name_sel) || input$project_name_sel == 'New Project...'){
-        re = tagList(
-          textInput(ns('project_name'), 'Project Name', value = '')
-        )
-      }else{
-        re = tagList(
-          div(
-            class = 'hidden',
-            textInput(ns('project_name'), 'Project Name', value = input$project_name_sel)
-          )
-        )
-      }
-
       block_label = 'Blocks'
       elec_label = 'Electrodes'
       srate_label = 'Sample Rate'
       save_label = 'Update Changes'
 
+      save_type = 'primary';
       if(!utils$has_subject()){
         save_label = 'Create Subject'
       }else{
         if(utils$has_raw_cache()){
           block_label = 'Blocks (read-only)'
           elec_label = 'Electrodes (read-only)'
+          save_type = 'warning'
         }else{
           save_label = 'Import Subject'
         }
         if(utils$notch_filtered()){
           srate_label = 'Sample Rate (read-only)'
+          save_type = 'warning hidden'
         }
       }
 
 
 
       re = tagList(
-        re,
         selectInput(ns('blocks'), block_label, selected = block_selected, choices = block_choices, multiple = T),
         textInput(ns('channels'), elec_label, placeholder = 'E.g. 1-84', value = channels),
         numericInput(ns('srate'), srate_label, value = srate, step = 1L, min = 1L),
-        actionButton(ns('save'), save_label)
+        actionButtonStyled(ns('save'), save_label, type = save_type, width = '100%')
       )
 
 

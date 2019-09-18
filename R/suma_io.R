@@ -182,14 +182,13 @@ read_mgrid <- function(con, raw = F){
 #' @param subject Either characters such as 'Project/Subject' or Subject object created by Subject$new(...)
 #' @param spec_file default decided by rave_options('suma_spec_file'), depending on subjects
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' subject = 'Demo/Subject'
 #' # or create subject object
 #' subject = Subject$new('Demo', 'Subject')
 #'
 #' suma_spec_parse(subject)
 #' }
-#' @export
 suma_spec_parse <- function(subject, spec_file){
   if(missing(spec_file)){
     if(is.character(subject)){
@@ -235,7 +234,6 @@ suma_spec_parse <- function(subject, spec_file){
 
 #' Parse surface volume file header
 #' @param file_path path to brik or head file
-#' @export
 suma_surface_volume_parse <- function(file_path){
   if(str_detect(str_to_lower(file_path), '\\.brik$')){
     file_path = str_replace(file_path, '\\.[bB][rR][iI][kK]$', '.head')

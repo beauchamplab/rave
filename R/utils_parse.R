@@ -48,7 +48,6 @@ parse_selections <- function(text, sep = ',', sort = F, unique = T){
 #' @param link character to concatenate
 #' @param concatenate strings
 #' @param max_lag how to define consecutive
-#' @export
 deparse_selections <- function(nums, link = '-', concatenate = T, max_lag = 1){
   if(length(nums) == 0){
     return('')

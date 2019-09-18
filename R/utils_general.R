@@ -117,7 +117,6 @@ to_datauri <- function(file, mime = ''){
 #' @param ... characters
 #' @param collapse character to collapse characters
 #' @param lookup_env which environment to look for data?
-#' @export
 fprintf <- function(..., collapse = '\n', lookup_env = parent.frame()){
   s = list(...)
   s = paste(sapply(s, as.character), collapse = collapse)
@@ -203,7 +202,6 @@ mem_limit <- function(){
 
 #' Enable RAVE color console
 #' @param enable logical, enable or not
-#' @export
 color_console <- function(enable = T){
   re = rave_options(crayon_enabled = enable)
   if(re){
@@ -222,7 +220,6 @@ time_diff <- function(start, end){
 #' For each element e1 ind1, find next element e2 in ind2 with e1<e2
 #' @param ind1,ind2 two index arrays
 #' @param max_lag if positive, e1 < e2 < e1+max_lag
-#' @export
 align_index <- function(ind1, ind2, max_lag = 0){
   if(zero_length(ind1, ind2)){
     return(NULL)
@@ -633,7 +630,6 @@ is_within <- function(x, ref, strict = FALSE){
 #'
 #' }
 #'
-#' @export
 eval_within <- function(FUN, env = parent.frame(), ..., .args = list(), .tidy = F){
   args = c(.args, list(...))
   if(is.null(env)){
@@ -765,7 +761,6 @@ get_val <- function(x, key = NULL, ..., .invalids = c('null', 'na')){
 #' # stop('') yields error, which will be counted as invalid/zero-length
 #' zero_length(stop(''))
 #' }
-#' @export
 zero_length <- function(..., any = T, na.rm = F){
   parent_env = parent.frame()
   args = as.list(match.call())[-1]
@@ -827,7 +822,6 @@ dropNulls <- function (x, .invalids = c('null')) {
 #' aaa <- 0
 #' safe_str_c('Count - ', aaa, .error = 'aaa not exists')
 #' }
-#' @export
 safe_str_c <- function(..., sep = '', collapse = NULL, .error = ''){
   tryCatch({
     args = dropNulls(list(...))
@@ -949,7 +943,6 @@ cache <- function(key, val, global = FALSE, replace = FALSE, session = NULL, swa
 #' @seealso \code{\link{cache}}
 #' @param all Clear all cache? Don't turn it on in shiny app. This is for debug use.
 #' @param session internally used
-#' @export
 clear_cache <- function(all = FALSE, session = NULL){
   session %?<-% getDefaultReactiveDomain()
   cache_env = getDefaultCacheEnvironment(session = session)

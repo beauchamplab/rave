@@ -8,13 +8,13 @@ define_input_multiple_electrodes <- function(inputId, label = 'Electrodes'){
         electrodes = preload_info$electrodes
 
         last_input = cache_input(!!inputId, val = as.character(electrodes[1]))
-        e = rave::parse_selections(last_input)
+        e = rutabaga::parse_svec(last_input)
         e = e[e %in% electrodes]
         if(!length(e)){
           e = electrodes[1]
         }
-        value = rave::deparse_selections(e)
-        label = paste0('Electrodes (' , rave::deparse_selections(electrodes) , ')')
+        value = rutabaga::deparse_svec(e)
+        label = paste0('Electrodes (' , rutabaga::deparse_svec(electrodes) , ')')
       }
     )
   })

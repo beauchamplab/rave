@@ -1,7 +1,3 @@
-#' Preprocess Module - Notch filter
-#' @param module_id internally used
-#' @param sidebar_width sidebar width from 1 to 12
-#' @export
 rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
   ns = shiny::NS(module_id)
 
@@ -110,8 +106,19 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
         box(
           width = 12,
           title = 'Inspection',
-          selectInput(ns('block'), 'Block', choices = local_data$blocks, selected = last_block),
-          selectInput(ns('electrode'), 'Electrodes', choices = local_data$electrodes, selected = last_elec),
+          downloadLink(ns('pwelch_download'), 'Download as PDF'),
+          hr(),
+          div(
+            class = 'rave-grid-inputs',
+            div(
+              style = 'flex-basis: 50%',
+              selectInput(ns('block'), 'Block', choices = local_data$blocks, selected = last_block)
+            ),
+            div(
+              style = 'flex-basis: 50%',
+              selectInput(ns('electrode'), 'Electrodes', choices = local_data$electrodes, selected = last_elec)
+            )
+          ),
           actionButton(ns('prev'), 'Previous'),
           actionButton(ns('nxt'), 'Next'),
           hr(),
@@ -124,6 +131,47 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2){
 
 
     })
+    
+    output$pwelch_download <- downloadHandler(
+      filename = function(){
+        projn = utils$get_from_subject('project_name')
+        scode = utils$get_from_subject('subject_code')
+        chanl = utils$get_from_subject('channels')
+        chntx = deparse_selections(chanl)
+        if( stringr::str_length(chntx) > 20 ){
+          chntx = sprintf('total %d')
+        }
+        sprintf('[%s][%s] inspection [%s].zip', projn, scode, chntx)
+      }, content = function(con){
+        projn = utils$get_from_subject('project_name')
+        scode = utils$get_from_subject('subject_code')
+        chanl = utils$get_from_subject('channels')
+        block = utils$get_from_subject('blocks')
+        srate = utils$get_srate()
+        
+        winlen = get_val(isolate(input$winlen), default = ceiling(2 * srate))
+        freq_lim = get_val(isolate(input$freq_lim), default = 300)
+        nclass = get_val(isolate(input$nclass), default = 100)
+        
+        tp_dir = tempfile()
+        
+        showNotification(p('Exporting in progress. This might take a while. Please do not change the panel nor close the window...'), 
+                         duration = NULL, closeButton = FALSE, type = 'message', id = ns('notch_noti'))
+        export_diagnose_voltage(
+          subject = sprintf('%s/%s', projn, scode),
+          electrodes = chanl, blocks = block, onefile = TRUE, 
+          winlen = winlen, freq_lim = freq_lim, nclass = nclass, 
+          save_dir = tp_dir
+        )
+        wd = getwd()
+        on.exit({ setwd(wd) })
+        # Get zip
+        setwd(tp_dir)
+        fs = list.files(tp_dir, pattern = '.pdf$')
+        utils::zip(con, fs)
+        removeNotification(id = ns('notch_noti'))
+      }
+    )
 
     # Prev, Next button
     observeEvent(input$nxt, {

@@ -2,14 +2,9 @@
 % Please edit documentation in R/pre_process.R
 \name{rave_preprocess}
 \alias{rave_preprocess}
-\alias{rave_pre_process}
 \title{RAVE Preprocess Function}
 \usage{
 rave_preprocess(sidebar_width = 3, launch.browser = T,
-  host = "127.0.0.1", port = NULL, quiet = T, test.mode = F,
-  modules, ver = "3", theme = "purple", ...)
-
-rave_pre_process(sidebar_width = 3, launch.browser = T,
   host = "127.0.0.1", port = NULL, quiet = T, test.mode = F,
   modules, ver = "3", theme = "purple", ...)
 }

@@ -229,7 +229,12 @@ body.rave-noscroll {
   margin-bottom: 5px;
 }
 
-.modal-body .rave-grid-inputs{
+.rave-grid-inputs div{
+  max-width: 100%;
+}
+
+.modal-body .rave-grid-inputs,
+.rave-grouped-inputs.rave-grid-inputs{
   align-items: baseline;
 }
 

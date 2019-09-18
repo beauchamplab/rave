@@ -199,7 +199,6 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
 #' @param electrodes electrodes to cache
 #' @param referenced which reference to be used
 #' @param data_type which type(s) of data to cache
-#' @export
 load_local_cache <- function(project_name, subject_code, epoch, time_range,
                              frequency_range = NULL, electrodes,
                              referenced = FALSE, data_type = 'voltage'){
