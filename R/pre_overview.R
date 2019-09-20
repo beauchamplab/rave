@@ -2,46 +2,46 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
   ns = shiny::NS(module_id)
 
   body = fluidRow(
-    shinydashboard::tabBox(
-      id = ns('sidebar'),
+    box(
+      # id = ns('sidebar'),
       width = sidebar_width,
-      shiny::tabPanel(
-        title = 'Overview',
-        fluidRow(
-          column(
-            width = 12,
-            a(href = 'https://openwetware.org/wiki/Beauchamp:RAVE:Data_Formats', target = '_blank',
-              'Please check this to import data to RAVE', shiny::icon('external-link')),
+      # shiny::tabPanel(
+      title = 'Overview',
+      fluidRow(
+        column(
+          width = 12,
+          a(href = 'https://openwetware.org/wiki/Beauchamp:RAVE:Data_Formats', target = '_blank',
+            'Please check this to import data to RAVE', shiny::icon('external-link')),
+          div(
+            class = 'rave-grouped-inputs rave-grid-inputs margin-top-20',
+            div(class='rave-grid-inputs-legend', 'Step 1'),
             div(
-              class = 'rave-grouped-inputs rave-grid-inputs margin-top-20',
-              div(class='rave-grid-inputs-legend', 'Step 1'),
-              div(
-                style = 'flex-basis: 100%;',
-                uiOutput(ns('overview_inputs1')),
-                tags$small(uiOutput(ns('step_1_msg')))
-              )
-            ),
+              style = 'flex-basis: 100%;',
+              uiOutput(ns('overview_inputs1')),
+              tags$small(uiOutput(ns('step_1_msg')))
+            )
+          ),
+          div(
+            class = 'rave-grouped-inputs rave-grid-inputs margin-top-20',
+            div(class='rave-grid-inputs-legend', 'Step 2'),
             div(
-              class = 'rave-grouped-inputs rave-grid-inputs margin-top-20',
-              div(class='rave-grid-inputs-legend', 'Step 2'),
-              div(
-                style = 'flex-basis: 100%;',
-                uiOutput(ns('overview_inputs2')),
-                uiOutput(ns('overview_inputs3')),
-                tags$small(uiOutput(ns('step_2_msg'))),
-                uiOutput(ns('overview_inputs4'))
-              )
-            ),
+              style = 'flex-basis: 100%;',
+              uiOutput(ns('overview_inputs2')),
+              uiOutput(ns('overview_inputs3')),
+              tags$small(uiOutput(ns('step_2_msg'))),
+              uiOutput(ns('overview_inputs4'))
+            )
+          ),
+          div(
+            class = 'rave-grouped-inputs rave-grid-inputs margin-top-20',
+            div(class='rave-grid-inputs-legend', 'Step 3'),
             div(
-              class = 'rave-grouped-inputs rave-grid-inputs margin-top-20',
-              div(class='rave-grid-inputs-legend', 'Step 3'),
-              div(
-                style = 'flex-basis: 100%;',
-                uiOutput(ns('overview_inputs5'))
-              )
+              style = 'flex-basis: 100%;',
+              uiOutput(ns('overview_inputs5'))
             )
           )
         )
+        # )
       )
     ),
     box(
