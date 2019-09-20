@@ -57,7 +57,7 @@ rave_preprocess <- function(
     ),
     list(
       ID = 'ELECLOCAL',
-      name = 'Step 4. Localization',
+      name = 'Step 4. Localization (Beta)',
       checklevel = 1,
       ..func = 'rave_pre_eleclocal3'
     )
