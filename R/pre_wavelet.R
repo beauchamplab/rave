@@ -33,6 +33,15 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
       electrodes = utils$get_electrodes()
       vc_txt = deparse_selections(electrodes)
       max_core = max(1, rave_options('max_worker'))
+      best_ncores = 4L
+      try({
+        tmp = as.integer(floor(mem_limit()$total / 1024^3 / 8))
+        if(length(tmp) == 1 && !is.na(tmp) && is.integer(tmp) && tmp > 0){
+          best_ncores = tmp
+        }
+      }, silent = TRUE)
+      best_ncores = min(best_ncores, max_core)
+      
       srate = utils$get_srate()
       target_srate = 100
 
@@ -47,7 +56,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
         title = 'General Settings', width = 12L,
         textInput(ns('wave_electrodes'), 'Electrodes:', value = vc_txt, placeholder = 'Select at least one electrode.'),
         numericInput(ns('target_srate'), 'Target Sample Rate', value = target_srate, min = 10L, max = srate, step = 1L),
-        numericInput(ns('ncores'), 'Parallel, Number of Cores:', value = min(4L, max_core), min = 1L, max = max_core, step = 1L)
+        numericInput(ns('ncores'), 'Parallel, Number of Cores:', value = best_ncores, min = 1L, max = max_core, step = 1L)
       )
     })
 
@@ -111,11 +120,11 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
         div(
           class = 'rave-grid-inputs',
           div(
-            style = 'flex-basis:50%',
+            style = 'flex-basis:50%; height: 80px;',
             selectInput(ns('wave_conf_name'), 'Configuration', choices = choices, selected = selected)
           ),
           div(
-            style = 'flex-basis:50%',
+            style = 'flex-basis:50%; height: 80px;',
             fileInput(ns('wave_conf_load'), 'Upload Preset', multiple = F, accept = c(
               "text/csv",
               "text/comma-separated-values,text/plain",

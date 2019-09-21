@@ -1,17 +1,18 @@
 rave_pre_eleclocal3 <- function(module_id = 'ELECLOCAL_M', sidebar_width = 2){
+  sidebar_width = max(sidebar_width, 4)
   ns = shiny::NS(module_id)
   
   body = fluidRow(
     box(
-      width = sidebar_width,
-      title = 'Electrodes',
-      uiOutput(ns('eloc_inputs1')),
-      uiOutput(ns('eloc_inputs2'))
-    ),
-    box(
       title = 'Viewer',
       width = 12 - sidebar_width,
       uiOutput(ns('eloc_outputs1'))
+    ),
+    box(
+      width = sidebar_width,
+      title = 'Electrode Table',
+      uiOutput(ns('eloc_inputs1')),
+      uiOutput(ns('eloc_inputs2'))
     )
   )
   
@@ -196,6 +197,10 @@ rave_pre_eleclocal3 <- function(module_id = 'ELECLOCAL_M', sidebar_width = 2){
     })
     output$eloc_viewer <- threeBrain::renderBrain({
       validate(need(local_data$has_raw_cache && length(input$use_template), message = ''))
+      
+      showNotification(p('Collecting data. Please wait...'), duration = NULL, id = ns('loc_noti'))
+      on.exit({ shiny::removeNotification(ns('loc_noti')) })
+      
       brain = NULL
       if( !isTRUE(input$use_template) ){
         try({
