@@ -56,7 +56,8 @@ Imports:
     servr (>= 0.13),
     later (>= 0.8.0),
     startup (>= 0.12.0),
-    threeBrain (>= 0.1.3)
+    threeBrain (>= 0.1.3),
+    shinyFiles (>= 0.7.3)
 Suggests:
     gifti,
     knitr,
@@ -122,6 +123,7 @@ Collate:
     'pre_epoch.R'
     'pre_load_settings.R'
     'pre_localization.R'
+    'pre_localization_ct.R'
     'pre_notch.R'
     'pre_overview.R'
     'pre_post_reference.R'
