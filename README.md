@@ -20,7 +20,8 @@ install.packages('devtools')
 devtools::install_github('dipterix/threeBrain')
 devtools::install_github('dipterix/rutabaga')
 devtools::install_github('beauchamplab/ravebuiltins')
-devtools::install_github('beauchamplab/rave@dev-0.1.6.1')
+devtools::install_github('beauchamplab/rave')
+threeBrain::download_N27(make_default = TRUE)
 ```
 
 Alternative installation command:
@@ -30,7 +31,17 @@ install.packages('pak')
 pak::pkg_install('dipterix/threeBrain')
 pak::pkg_install('dipterix/rutabaga')
 pak::pkg_install('beauchamplab/ravebuiltins')
-pak::pkg_install('beauchamplab/rave@dev-0.1.6.1')
+pak::pkg_install('beauchamplab/rave')
+threeBrain::download_N27(make_default = TRUE)
+```
+
+To update `RAVE`:
+
+```r
+devtools::install_github('beauchamplab/ravebuiltins')
+devtools::install_github('beauchamplab/rave')
+devtools::install_github('dipterix/threeBrain')
+threeBrain::download_N27(make_default = TRUE)
 ```
 
 * After installing or updating RAVE, quit and restart RStudio before continuing.
