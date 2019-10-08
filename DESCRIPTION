@@ -124,6 +124,7 @@ Collate:
     'pre_load_settings.R'
     'pre_localization.R'
     'pre_localization_ct.R'
+    'pre_localization_ct_old.R'
     'pre_notch.R'
     'pre_overview.R'
     'pre_post_reference.R'

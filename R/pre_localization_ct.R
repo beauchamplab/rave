@@ -214,7 +214,7 @@ rave_pre_eleclocalct3 <- function(module_id = 'ELECLOCALCT_M', sidebar_width = 2
         lapply(seq_along(traj_names), function(ii){
           meta = traj_names[[ii]]
           anc = rosa$trajectory[[ii]]
-          dir = anc$end - anc$start; n_elec = max(1, norm(dir, '2') / 10)
+          dir = anc$end - anc$start; n_elec = max(1, norm(dir, '2') / 3.5)
           
           # Transform: scanner - tksurfer: ScannerRAS = Norig*inv(Torig)*[tkrR tkrA tkrS 1]'
           # ROSA is using LPS instead of RAS
@@ -226,7 +226,7 @@ rave_pre_eleclocalct3 <- function(module_id = 'ELECLOCALCT_M', sidebar_width = 2
           local_data$trajectories[[c_l + ii]] = list(
             type = 'Straight Line',
             size = c(floor(n_elec),1),
-            space = 10,
+            space = 3.5,
             anchor = c(start_anchor, end_anchor, '0,0,0', '0,0,0'),
             meta = meta,
             color = c_l + ii
@@ -272,6 +272,7 @@ rave_pre_eleclocalct3 <- function(module_id = 'ELECLOCALCT_M', sidebar_width = 2
       space = traj$space
       width = traj$size[[1]]
       
+      
       if( !length(anchors) || any(is.na(anchors)) ){
         showNotification(p('Anchors are invalid. Please make sure they are numeric.'), type = 'error')
         return()
@@ -285,9 +286,13 @@ rave_pre_eleclocalct3 <- function(module_id = 'ELECLOCALCT_M', sidebar_width = 2
         start = anchors[1,]
         end = anchors[2,]
         dir = end - start; dir = dir/ norm(dir, '2')
-        local_data$electrode_locations[[ii]] = lapply(seq_len(width), function(e){
-          start + (e-1) * dir * space
-        })
+        
+        if( width > length(space) + 1 ){
+          space = c(space, rep(space[length(space)], width - length(space)-1))
+        }
+        space = cumsum(c(0, space))
+        
+        local_data$electrode_locations[[ii]] = lapply(space, function(s){ start + dir * s })
         # If CT exists, try to attach to CT
       }else{
         print('TODO: update traj ii')
@@ -341,9 +346,10 @@ rave_pre_eleclocalct3 <- function(module_id = 'ELECLOCALCT_M', sidebar_width = 2
         }
         # Step 2: check space (numeric)
         space = input[[sprintf('traj_space_%d', ii)]]
+        space = as.numeric(stringr::str_split(space, '[^0-9.]+')[[1]])
         if( traj_type %in% c('Straight Line', 'Spline') ){
-          if( !length(space) || is.na(space) || !is.numeric(space) || space <= 0 ){
-            return(gen_warn('Invalid space'))
+          if( !length(space) || any(is.na(space)) || !is.numeric(space) || any(space <= 0) ){
+            return(gen_warn('Invalid spacing'))
           }else{
             changed = TRUE
             traj$space = space
@@ -442,7 +448,7 @@ rave_pre_eleclocalct3 <- function(module_id = 'ELECLOCALCT_M', sidebar_width = 2
           tagList(
             div(
               style = 'flex-basis: 27%; min-height: 75px;',
-              numericInput(ns(sprintf('traj_space_%d', ii)), 'Space (mm)', min = 0, value = el$space, width = '100%')
+              textInput(ns(sprintf('traj_space_%d', ii)), 'Space (mm)', value = paste(el$space, collapse = ','), width = '100%', placeholder = 'e.g. 2,3')
             ), 
             div(
               style = 'flex-basis: 27%; min-height: 75px;',
