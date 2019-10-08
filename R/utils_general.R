@@ -200,6 +200,12 @@ mem_limit <- function(){
 
 }
 
+col2hex <- function(col, alpha = NULL, prefix = '#'){
+  col = grDevices::col2rgb(col, alpha = FALSE) / 255
+  col = grDevices::rgb(red = col[1,], green = col[2,], blue = col[3,], alpha = alpha)
+  stringr::str_replace(col, '^[^0-9A-F]*', prefix)
+}
+
 #' Enable RAVE color console
 #' @param enable logical, enable or not
 color_console <- function(enable = T){
