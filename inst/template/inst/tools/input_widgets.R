@@ -120,36 +120,41 @@ define_input_time <- function(inputId, label = 'Time Range', is_range = TRUE, ro
 
 define_input_condition_groups <- function(inputId, label = 'Group', initial_groups = 1){
   quo = rlang::quo({
-
+    
     define_input(
       definition = compoundInput(
         inputId = !!inputId, prefix= !!label, inital_ncomp = !!initial_groups, components = {
           textInput('group_name', 'Name', value = '', placeholder = 'Condition Name')
           selectInput('group_conditions', ' ', choices = '', multiple = TRUE)
         }),
-
+      
       init_args = c('initialize', 'value'),
-
+      
       init_expr = {
         cond = unique(preload_info$condition)
-
+        
         initialize = list(
           group_conditions = list(
             choices = cond
           )
         )
-        value = cache_input(!!inputId, list(
+        default_val = list(
           list(
             group_name = 'All Conditions',
             group_conditions = list(cond)
           )
-        ))
+        )
+        value = cache_input(!!inputId, default_val)
+        if( !length(value) || !is.list(value[[1]]) ||
+            !length(value[[1]]$group_conditions) || !any(value[[1]]$group_conditions %in% cond)){
+          value = default_val
+        }
       }
     )
   })
-
+  
   parent_frame = parent.frame()
-
+  
   rave::eval_dirty(quo, env = parent_frame)
-
+  
 }
