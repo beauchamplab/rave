@@ -16,11 +16,21 @@ get_projects <- function(){
 
 #' Get all subjects within project
 #' @param project_name project
+#' @param check_subfolders logical, check whether folder `rave` exists in subject folder, default true
+#' @param check_rawdata logical, whether raw subject folder exists, default false
 #' @export
-get_subjects <- function(project_name){
+get_subjects <- function(project_name, check_subfolders = TRUE, check_rawdata = FALSE){
   data_dir = rave_options('data_dir')
   sub = list.dirs(file.path(data_dir, project_name), full.names = F, recursive = F)
-  sub[str_detect(sub, '^[a-zA-Z0-9]') & sub!= 'rave']
+  sub = sub[stringr::str_detect(sub, '^[a-zA-Z0-9]') & sub!= 'rave']
+  if( check_subfolders ){
+    sub = sub[dir.exists(file.path(data_dir, project_name, sub, 'rave'))]
+  }
+  if( check_rawdata ){
+    raw_dir = rave_options('raw_data_dir')
+    sub = sub[dir.exists(file.path(raw_dir, sub))]
+  }
+  sub
 }
 
 #' Get all directories that rave uses
