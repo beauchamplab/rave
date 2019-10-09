@@ -113,7 +113,7 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
   }, .call_back = function(ii){
     progress$inc(sprintf('Electrode %d', electrodes[[ii]]))
     # progress$inc(sprintf('Electrode %d', e))
-  })
+  }, .globals = c('electrodes', 'e', 'subject', 'epoch_tbl', 'srate_wave', 'time_pts_wave', 'subject_cache_dir', 'srate_volt', 'time_pts_volt'))
 
   # save references
   ref_dir = file.path(dirs$cache_dir, 'reference')
@@ -482,7 +482,8 @@ load_cached_wave = function(cache_dir, electrodes, time_range,
     return(d)
   }, .call_back = function(ii){
     progress$inc(message = sprintf('Loading electrode %d', electrodes[[ii]]))
-  })
+  }, .globals = c('electrodes', 'e', 'coef_dir', 'idx_range', 'need_reference', 'ref_table', 'ref_data',
+                  'need_both', 'data_type'))
 
   list(
     data = data,
