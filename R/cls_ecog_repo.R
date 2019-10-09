@@ -308,7 +308,8 @@ ECoGRepository <- R6::R6Class(
             power
           }, .call_back = function(i){
             progress$inc(sprintf('Step %d (of %d) electrode %d (power)', count, n_dt, electrodes[i]))
-          }) ->
+          }, .globals = c('electrodes', 'count', 'n_dt', 'e', 'epoch_name', 'pre', 'post', 
+                          'referenced', 'freq_subset')) ->
             results
 
           power = join_tensors(results)
@@ -371,7 +372,8 @@ ECoGRepository <- R6::R6Class(
             return(phase)
           }, .call_back = function(i){
             progress$inc(sprintf('Step %d (of %d) electrode %d (phase)', count, n_dt, electrodes[i]))
-          }) ->
+          }, .globals = c('electrodes', 'count', 'n_dt', 'e', 'epoch_name', 'pre', 'post', 
+                          'referenced', 'freq_subset')) ->
             results
           phase = join_tensors(results)
           count = count + 1
@@ -420,7 +422,8 @@ ECoGRepository <- R6::R6Class(
             return(volt)
           }, .call_back = function(i){
             progress$inc(sprintf('Step %d (of %d) electrode %d (voltage)', count, n_dt, electrodes[i]))
-          }) ->
+          }, .globals = c('electrodes', 'count', 'n_dt', 'e', 'epoch_name', 'pre', 'post', 
+                          'referenced')) ->
             results
           volt = join_tensors(results)
           count = count + 1
@@ -477,7 +480,8 @@ ECoGRepository <- R6::R6Class(
           return(elc)
         }, .call_back = function(i){
           progress$inc(sprintf('Preparing electrode - %d', electrodes[i]))
-        }) ->
+        }, .globals = c('electrodes', 'e', 'raws', 'epoch_name', 'pre', 'post', 
+                        'referenced', 'freq_subset', 'data_type', 'func')) ->
           results
         gc()
 
