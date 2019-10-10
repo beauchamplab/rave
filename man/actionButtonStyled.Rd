@@ -2,19 +2,13 @@
 % Please edit documentation in R/shiny_customize.R
 \name{actionButtonStyled}
 \alias{actionButtonStyled}
-\title{Re-write shint actionButton to enable styles}
+\title{Re-write shiny actionButton to enable styles}
 \usage{
 actionButtonStyled(inputId, label, icon = NULL, width = NULL,
   type = "default", btn_type = "button", class = "", ...)
 }
 \arguments{
-\item{inputId}{see shiny::actionButton}
-
-\item{label}{see shiny::actionButton}
-
-\item{icon}{see shiny::actionButton}
-
-\item{width}{see shiny::actionButton}
+\item{inputId, label, icon, width}{see \code{shiny::actionButton}}
 
 \item{type}{default, primary, info... see bootstrap}
 
@@ -25,5 +19,5 @@ actionButtonStyled(inputId, label, icon = NULL, width = NULL,
 \item{...}{other methods passed to actionButton}
 }
 \description{
-Re-write shint actionButton to enable styles
+Re-write shiny actionButton to enable styles
 }
