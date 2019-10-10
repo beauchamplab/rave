@@ -3,6 +3,7 @@ app_controller <- function(
   theme = "purple", disable_sidebar = FALSE, simplify_header = FALSE,
   token = NULL, ...
 ){
+  options(shiny.maxRequestSize=1024^3)
 
   # Register customized inputs
   register_compoundInput()

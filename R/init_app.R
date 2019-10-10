@@ -105,7 +105,7 @@ get_mem_usage <- function(modules, data_envir){
 #' @export
 init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
                      theme = "purple", disable_sidebar = FALSE, simplify_header = FALSE, ...){
-
+  options(shiny.maxRequestSize=1024^3)
   register_compoundInput()
   rave_setup_workers()
 
