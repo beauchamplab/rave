@@ -1,8 +1,5 @@
-#' Re-write shint actionButton to enable styles
-#' @param inputId see shiny::actionButton
-#' @param label  see shiny::actionButton
-#' @param icon see shiny::actionButton
-#' @param width see shiny::actionButton
+#' Re-write shiny actionButton to enable styles
+#' @param inputId,label,icon,width see \code{shiny::actionButton}
 #' @param type default, primary, info... see bootstrap
 #' @param btn_type html tag attribute "type"
 #' @param class additional classes
@@ -29,6 +26,52 @@ actionButtonStyled <- function(inputId, label, icon = NULL, width = NULL, type =
     c(
       list(list(icon, label)),
       args
+    )
+  )
+}
+
+#' Re-write shiny `fileInput`, but minimal
+#' @param inputId,label,multiple,accept,width see \code{shiny::fileInput}
+#' @param type button type, such as `primary`, `default`, `warning`, `info`,
+#' @param class additional class to button
+#' @param ... ignored
+#' @export
+fileInputMinimal <- function(inputId, label, multiple = FALSE, accept = NULL, width = 'auto', type = 'default', class = '', ...){
+  # shiny::fileInput('asd','ad', multiple = F, buttonLabel = 'asddd', width = '100%')
+  
+  restoredValue = shiny::restoreInput(id = inputId, default = NULL)
+  if (!is.null(restoredValue) && !is.data.frame(restoredValue)) {
+    warning("Restored value for ", inputId, " has incorrect format.")
+    restoredValue = NULL
+  }
+  if (!is.null(restoredValue)) {
+    restoredValue <- jsonlite::toJSON(restoredValue, strict_atomic = FALSE)
+  }
+  
+  input_ui = htmltools::tags$input(id = inputId, name = inputId, type = 'file', style="display: none;")
+  if(isTRUE(multiple)){
+    input_ui$attribs$multiple = 'multiple'
+  }
+  if (length(accept) > 0){
+    input_ui$attribs$accept <- paste(accept, collapse = ",")
+  }
+  htmltools::div(
+    class = 'form-group shiny-input-container',
+    style = sprintf('width: %s', width),
+    htmltools::div(
+      class = 'input-group',
+      htmltools::tags$label(
+        class = 'input-group-btn',
+        htmltools::span(
+          class = sprintf('btn btn-file btn-%s %s', type, class),
+          label,
+          input_ui
+        )
+      )
+    ),
+    htmltools::div(
+      id = sprintf('%s_progress', inputId), class = "progress progress-striped active shiny-file-input-progress hidden",
+      htmltools::div( class = 'progress-bar' )
     )
   )
 }
