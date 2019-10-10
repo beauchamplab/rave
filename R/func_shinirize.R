@@ -743,6 +743,12 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       })
 
 
+      # Ready, run scripts that marked once execenv is ready
+      lapply(execenv$ready_functions, function(f){
+        if(is.function(f)){
+          try(f())
+        }
+      })
 
 
       # register outputs (rave_outputs)

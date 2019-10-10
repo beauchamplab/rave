@@ -33,6 +33,7 @@ ExecEnvir <- R6::R6Class(
     async_module = FALSE,
     global_reactives = NULL,
     local_reactives = NULL,
+    ready_functions = NULL,
     reload = function(){
       if(is.reactivevalues(self$global_reactives)){
         self$global_reactives$force_refresh_all = Sys.time()
@@ -67,6 +68,7 @@ ExecEnvir <- R6::R6Class(
     initialize = function(session = getDefaultReactiveDomain(),
                           parent_env = NULL){
       private$session = session
+      self$ready_functions = list()
 
       # parent_env should be an unlocked environment that can be active binded
       if(!is.environment(parent_env)){
@@ -591,8 +593,8 @@ ExecEnvir <- R6::R6Class(
                   flex_basis = rep('flex-basis: 50%;', n)
                   flex_basis[length(flex_basis)] = 'flex-basis: 100%;'
                 }else{
-                  flex_basis = rep('flex-basis: 33%;', n)
-                  flex_basis[length(flex_basis) - c(0:1)] = 'flex-basis: 50%;'
+                  flex_basis = rep('flex-basis:33%;', n)
+                  flex_basis[length(flex_basis) - c(0:1)] = 'flex-basis:50%;'
                 }
 
                 return(rlang::quo(
@@ -602,7 +604,7 @@ ExecEnvir <- R6::R6Class(
                       inputId = inputIds[[jj]]
                       rlang::quo(
                         do.call(div, args = c(
-                          list(style = !!flex_basis[[jj]], !!x[[inputId]]$expr)
+                          list(style = sprintf('min-height:80px;%s', !!flex_basis[[jj]]), !!x[[inputId]]$expr)
                         ))
                       )
                     })
