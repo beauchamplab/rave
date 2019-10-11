@@ -399,6 +399,26 @@ comp_parser <- function(){
       return(re)
     }
   )
+  
+  parsers[['dipsaus']] = list(
+    'compoundInput2' = function(expr, env = environment()){
+      re = parsers[['.default_parser']](expr, env)
+      inputId = re$inputId
+      re$updates = function(session, ..., .args = list()){
+        args = c(list(...), .args)
+
+        if(length(args) == 0){
+          return()
+        }
+        args[['session']] = session
+        args[['inputId']] %?<-% inputId
+        
+        do.call(get_from_package('updateCompoundInput2', 'dipsaus'), args = args)
+      }
+      
+      return(re)
+    }
+  )
 
   parsers[['rave']] = list(
     'customizedUI' = function(expr, env = environment()){

@@ -31,7 +31,11 @@ time_delta <- function(t1, t2, units = 'secs'){
 #'   
 #' }
 #' 
+#' \donttest{
+#' \dontrun{
 #' shinyApp(ui, server)
+#' }
+#' }
 #' 
 #' }
 #' @export

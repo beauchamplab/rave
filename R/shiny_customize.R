@@ -64,6 +64,7 @@ fileInputMinimal <- function(inputId, label, multiple = FALSE, accept = NULL, wi
         class = 'input-group-btn',
         htmltools::span(
           class = sprintf('btn btn-file btn-%s %s', type, class),
+          style = 'width:100%',
           label,
           input_ui
         )
