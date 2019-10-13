@@ -43,7 +43,11 @@ server <- function(input, output, session) {
   
 }
 
+\donttest{
+\dontrun{
 shinyApp(ui, server)
+}
+}
 
 }
 }

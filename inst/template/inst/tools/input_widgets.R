@@ -118,7 +118,7 @@ define_input_time <- function(inputId, label = 'Time Range', is_range = TRUE, ro
   rave::eval_dirty(quo, env = parent_frame)
 }
 
-define_input_condition_groups <- function(inputId, label = 'Group', initial_groups = 1){
+define_input_condition_groups_default <- function(inputId, label = 'Group', initial_groups = 1){
   quo = rlang::quo({
     
     define_input(
