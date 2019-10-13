@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Override print method for printable environment — print.rave_printable • rave</title>
+<title>Synchronize Shiny Inputs — sync_shiny_inputs • rave</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,8 @@
 
 
 
-<meta property="og:title" content="Override print method for printable environment — print.rave_printable" />
-<meta property="og:description" content="Override print method for printable environment" />
+<meta property="og:title" content="Synchronize Shiny Inputs — sync_shiny_inputs" />
+<meta property="og:description" content="Synchronize Shiny Inputs" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -118,37 +118,79 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Override print method for printable environment</h1>
+    <h1>Synchronize Shiny Inputs</h1>
     
-    <div class="hidden name"><code>print.rave_printable.Rd</code></div>
+    <div class="hidden name"><code>sync_shiny_inputs.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Override print method for printable environment</p>
+    <p>Synchronize Shiny Inputs</p>
     </div>
 
-    <pre class="usage"><span class='co'># S3 method for rave_printable</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>(<span class='no'>x</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>sync_shiny_inputs</span>(<span class='no'>input</span>, <span class='no'>session</span>, <span class='no'>inputIds</span>, <span class='kw'>uniform</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/rep.html'>rep</a></span>(<span class='st'>"I"</span>,
+  <span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span>(<span class='no'>inputIds</span>)), <span class='no'>updates</span>, <span class='kw'>snap</span> <span class='kw'>=</span> <span class='fl'>250</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>x</th>
-      <td><p>an rave_printable environment</p></td>
+      <th>input, session</th>
+      <td><p>shiny reactive objects</p></td>
     </tr>
     <tr>
-      <th>...</th>
-      <td><p>passed from or to other methods</p></td>
+      <th>inputIds</th>
+      <td><p>input ids to be synchronized</p></td>
+    </tr>
+    <tr>
+      <th>uniform</th>
+      <td><p>functions, equaling to length of <code>inputIds</code>, converting inputs
+to a uniform values</p></td>
+    </tr>
+    <tr>
+      <th>updates</th>
+      <td><p>functions, equaling to length of <code>inputIds</code>, updating input values</p></td>
+    </tr>
+    <tr>
+      <th>snap</th>
+      <td><p>numeric, milliseconds to debounce the changes</p></td>
     </tr>
     </table>
 
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='co'># \donttest{</span>
+
+<span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>shiny</span>)
+
+<span class='no'>ui</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/fluidPage.html'>fluidPage</a></span>(
+  <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/textInput.html'>textInput</a></span>(<span class='st'>'a'</span>, <span class='st'>'a'</span>, <span class='kw'>value</span> <span class='kw'>=</span> <span class='st'>'a'</span>),
+  <span class='fu'><a href='https://rdrr.io/pkg/shiny/man/sliderInput.html'>sliderInput</a></span>(<span class='st'>'b'</span>, <span class='st'>'b'</span>, <span class='kw'>value</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>min</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>max</span> <span class='kw'>=</span> <span class='fl'>1000</span>)
+)
+
+<span class='no'>server</span> <span class='kw'>&lt;-</span> <span class='kw'>function</span>(<span class='no'>input</span>, <span class='no'>output</span>, <span class='no'>session</span>) {
+  <span class='fu'>sync_shiny_inputs</span>(<span class='no'>input</span>, <span class='no'>session</span>, <span class='kw'>inputIds</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>'a'</span>, <span class='st'>'b'</span>), <span class='kw'>uniform</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(
+    <span class='kw'>function</span>(<span class='no'>a</span>){<span class='fu'><a href='https://rdrr.io/r/base/numeric.html'>as.numeric</a></span>(<span class='no'>a</span>)},
+    <span class='st'>'I'</span>
+  ), <span class='kw'>updates</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(
+    <span class='kw'>function</span>(<span class='no'>a</span>){<span class='fu'><a href='https://rdrr.io/pkg/shiny/man/updateTextInput.html'>updateTextInput</a></span>(<span class='no'>session</span>, <span class='st'>'a'</span>, <span class='kw'>value</span> <span class='kw'>=</span> <span class='no'>a</span>)},
+    <span class='kw'>function</span>(<span class='no'>b</span>){<span class='fu'><a href='https://rdrr.io/pkg/shiny/man/updateSliderInput.html'>updateSliderInput</a></span>(<span class='no'>session</span>, <span class='st'>'b'</span>, <span class='kw'>value</span> <span class='kw'>=</span> <span class='no'>b</span>)}
+  ))
+
+}
+
+<span class='co'># \donttest{</span>
+<span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+<span class='fu'><a href='https://rdrr.io/pkg/shiny/man/shinyApp.html'>shinyApp</a></span>(<span class='no'>ui</span>, <span class='no'>server</span>)
+}
+<span class='co'># }</span>
+
+<span class='co'># }</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
+      <li><a href="#examples">Examples</a></li>
     </ul>
 
   </div>

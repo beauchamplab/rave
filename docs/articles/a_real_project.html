@@ -7,8 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>2.2 A Real Project • rave</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous">
-<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- sticky kit --><script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous">
+<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
 <script src="../pkgdown.js"></script><meta property="og:title" content="2.2 A Real Project">
 <meta property="og:description" content="">
 <meta name="twitter:card" content="summary">
@@ -38,7 +39,7 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="../index.html">
-    <span class="fa fa-home fa-lg"></span>
+    <span class="fas fa fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -73,13 +74,14 @@
 <!--/.navbar -->
 
       
+
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1>2.2 A Real Project</h1>
                         <h4 class="author">Vignette Author</h4>
             
-            <h4 class="date">2019-07-30</h4>
+            <h4 class="date">2019-10-13</h4>
       
       
       <div class="hidden name"><code>a_real_project.Rmd</code></div>
@@ -139,7 +141,7 @@
 <div id="run-the-line-4-11-basically" class="section level4">
 <h4 class="hasAnchor">
 <a href="#run-the-line-4-11-basically" class="anchor"></a>2. Run the line 4-11, basically</h4>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">require</a></span>(firstPkg)</a>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw"><a href="https://rdrr.io/r/base/library.html">require</a></span>(firstPkg)</a>
 <a class="sourceLine" id="cb2-2" title="2">env =<span class="st"> </span><span class="kw">dev_firstPkg</span>(T)</a>
 <a class="sourceLine" id="cb2-3" title="3"><span class="kw">mount_demo_subject</span>()</a></code></pre></div>
 <p>The first line imports your package <code>firstPkg</code>.</p>
@@ -167,7 +169,7 @@
 <a href="#replace-the-existing-code-in-inputs-part-with-the-following-code" class="anchor"></a>2. Replace the existing code in “Inputs” part with the following code:</h4>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="kw">define_input_single_electrode</span>(<span class="dt">inputId =</span> <span class="st">'electrode'</span>)</a>
 <a class="sourceLine" id="cb3-2" title="2"><span class="kw">define_input_frequency</span>(<span class="dt">inputId =</span> <span class="st">'frequency'</span>, <span class="dt">is_range =</span> <span class="ot">FALSE</span>, <span class="dt">initial_value =</span> <span class="dv">0</span>)</a>
-<a class="sourceLine" id="cb3-3" title="3"><span class="kw">define_input_time</span>(<span class="dt">inputId =</span> <span class="st">'time_range'</span>, <span class="dt">is_range =</span> <span class="ot">TRUE</span>, <span class="dt">initial_value =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="dv">0</span>,<span class="dv">1</span>))</a></code></pre></div>
+<a class="sourceLine" id="cb3-3" title="3"><span class="kw">define_input_time</span>(<span class="dt">inputId =</span> <span class="st">'time_range'</span>, <span class="dt">is_range =</span> <span class="ot">TRUE</span>, <span class="dt">initial_value =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">0</span>,<span class="dv">1</span>))</a></code></pre></div>
 <p>These three lines define the inputs.</p>
 <ul>
 <li>
@@ -310,12 +312,12 @@
 <a class="sourceLine" id="cb9-23" title="23">requested_electrode =<span class="st"> </span><span class="kw"><a href="../reference/parse_selections.html">parse_selections</a></span>(electrode)</a>
 <a class="sourceLine" id="cb9-24" title="24"></a>
 <a class="sourceLine" id="cb9-25" title="25"><span class="co"># Obtain the nearest frequency </span></a>
-<a class="sourceLine" id="cb9-26" title="26">nearest_frequency =<span class="st"> </span>frequencies[<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/which.min">which.min</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/MathFun">abs</a></span>(frequencies <span class="op">-</span><span class="st"> </span>frequency))]</a>
+<a class="sourceLine" id="cb9-26" title="26">nearest_frequency =<span class="st"> </span>frequencies[<span class="kw"><a href="https://rdrr.io/r/base/which.min.html">which.min</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/MathFun.html">abs</a></span>(frequencies <span class="op">-</span><span class="st"> </span>frequency))]</a>
 <a class="sourceLine" id="cb9-27" title="27"></a>
 <a class="sourceLine" id="cb9-28" title="28"><span class="co"># Obtain the time points selected</span></a>
 <a class="sourceLine" id="cb9-29" title="29">requested_time_range =<span class="st"> </span>time_points[time_points <span class="op">%within%</span><span class="st"> </span>time_range]</a>
 <a class="sourceLine" id="cb9-30" title="30"></a>
-<a class="sourceLine" id="cb9-31" title="31"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/print">print</a></span>(time_range)</a>
+<a class="sourceLine" id="cb9-31" title="31"><span class="kw"><a href="https://rdrr.io/r/base/print.html">print</a></span>(time_range)</a>
 <a class="sourceLine" id="cb9-32" title="32"><span class="co"># &lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt; End ----------------- [DO NOT EDIT THIS LINE] -------------------</span></a></code></pre></div>
 <p>Now we have all the information needed for outputs. You might ask how to debug the code and how RAVE handle the code.</p>
 <p>For the first question, simply run the code above to seek for errors.</p>
@@ -330,7 +332,7 @@
 <li>Check and load demo subject if no subject is loaded</li>
 <li>Parse all UI components in <code>comp.R</code> and wrap up <code>main.R</code> as one function</li>
 </ol>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/formals">formals</a></span>(main)</a>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="kw"><a href="https://rdrr.io/r/base/formals.html">formals</a></span>(main)</a>
 <a class="sourceLine" id="cb11-2" title="2"><span class="co">#&gt; $frequency</span></a>
 <a class="sourceLine" id="cb11-3" title="3"><span class="co">#&gt; [1] 0</span></a>
 <a class="sourceLine" id="cb11-4" title="4"><span class="co">#&gt; </span></a>
@@ -340,13 +342,13 @@
 <a class="sourceLine" id="cb11-8" title="8"><span class="co">#&gt; $electrode</span></a>
 <a class="sourceLine" id="cb11-9" title="9"><span class="co">#&gt; [1] "14"</span></a></code></pre></div>
 <p>If you check the arguments of function <code>main</code>, you will find this function takes in arguments that are defined in <code>comp.R</code>. You can use the default values, or try different choices to change the input values.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1">ret =<span class="st"> </span><span class="kw">main</span>(<span class="dt">time_range =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="dv">0</span>,<span class="dv">2</span>))</a>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1">ret =<span class="st"> </span><span class="kw">main</span>(<span class="dt">time_range =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">0</span>,<span class="dv">2</span>))</a>
 <a class="sourceLine" id="cb12-2" title="2"><span class="co">#&gt; [1] 0 2</span></a>
 <a class="sourceLine" id="cb12-3" title="3"></a>
 <a class="sourceLine" id="cb12-4" title="4">ret =<span class="st"> </span><span class="kw">main</span>(time_range)</a>
 <a class="sourceLine" id="cb12-5" title="5"><span class="co">#&gt; [1] 0 1</span></a></code></pre></div>
 <p>The return <code>ret</code> contains three elements: one <code>results</code> and two outputs.</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/names">names</a></span>(ret)</a>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"><span class="kw"><a href="https://rdrr.io/r/base/names.html">names</a></span>(ret)</a>
 <a class="sourceLine" id="cb13-2" title="2"><span class="co">#&gt; [1] "results"      "table_result" "text_result" </span></a></code></pre></div>
 <p>Right now, we haven’t implemented output handlers, hence the two outputs will run into errors. However, we can use <code>results</code> to create handlers.</p>
 </div>
@@ -368,9 +370,9 @@
 <p>First, run <code>result &lt;- ret$results</code> in your console.</p>
 <p>edit function <code>text_result</code>, as follows:</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1">text_result &lt;-<span class="st"> </span><span class="cf">function</span>(result){</a>
-<a class="sourceLine" id="cb15-2" title="2">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/cat">cat</a></span>(<span class="st">"Electrode Selected:"</span>, result<span class="op">$</span><span class="kw">get_value</span>(<span class="st">'electrode'</span>), <span class="st">'</span><span class="ch">\n</span><span class="st">'</span>)</a>
-<a class="sourceLine" id="cb15-3" title="3">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/cat">cat</a></span>(<span class="st">"Frequency Selected:"</span>, result<span class="op">$</span><span class="kw">get_value</span>(<span class="st">'frequency'</span>), <span class="st">'</span><span class="ch">\n</span><span class="st">'</span>)</a>
-<a class="sourceLine" id="cb15-4" title="4">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/cat">cat</a></span>(<span class="st">"Time Range Selected:"</span>, result<span class="op">$</span><span class="kw">get_value</span>(<span class="st">'time_range'</span>), <span class="st">'</span><span class="ch">\n</span><span class="st">'</span>)</a>
+<a class="sourceLine" id="cb15-2" title="2">  <span class="kw"><a href="https://rdrr.io/r/base/cat.html">cat</a></span>(<span class="st">"Electrode Selected:"</span>, result<span class="op">$</span><span class="kw">get_value</span>(<span class="st">'electrode'</span>), <span class="st">'</span><span class="ch">\n</span><span class="st">'</span>)</a>
+<a class="sourceLine" id="cb15-3" title="3">  <span class="kw"><a href="https://rdrr.io/r/base/cat.html">cat</a></span>(<span class="st">"Frequency Selected:"</span>, result<span class="op">$</span><span class="kw">get_value</span>(<span class="st">'frequency'</span>), <span class="st">'</span><span class="ch">\n</span><span class="st">'</span>)</a>
+<a class="sourceLine" id="cb15-4" title="4">  <span class="kw"><a href="https://rdrr.io/r/base/cat.html">cat</a></span>(<span class="st">"Time Range Selected:"</span>, result<span class="op">$</span><span class="kw">get_value</span>(<span class="st">'time_range'</span>), <span class="st">'</span><span class="ch">\n</span><span class="st">'</span>)</a>
 <a class="sourceLine" id="cb15-5" title="5">}</a></code></pre></div>
 <p>By using <code>result$get_value</code>, you can obtain any variables declared in your main.R as well as input variables.</p>
 </div>
@@ -382,28 +384,28 @@
 <div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" title="1">table_result &lt;-<span class="st"> </span><span class="cf">function</span>(result){</a>
 <a class="sourceLine" id="cb16-2" title="2">  subject_id =<span class="st"> </span>result<span class="op">$</span><span class="kw">get_value</span>(<span class="st">'subject_id'</span>)</a>
 <a class="sourceLine" id="cb16-3" title="3">  </a>
-<a class="sourceLine" id="cb16-4" title="4">  n_trials =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/nrow">nrow</a></span>(result<span class="op">$</span><span class="kw">get_value</span>(<span class="st">'subject_id'</span>))</a>
+<a class="sourceLine" id="cb16-4" title="4">  n_trials =<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/nrow.html">nrow</a></span>(result<span class="op">$</span><span class="kw">get_value</span>(<span class="st">'subject_id'</span>))</a>
 <a class="sourceLine" id="cb16-5" title="5">  </a>
 <a class="sourceLine" id="cb16-6" title="6">  all_freq =<span class="st"> </span>result<span class="op">$</span><span class="kw">get_value</span>(<span class="st">'all_freq'</span>)</a>
 <a class="sourceLine" id="cb16-7" title="7">  frequencies =<span class="st"> </span>result<span class="op">$</span><span class="kw">get_value</span>(<span class="st">'frequencies'</span>)</a>
 <a class="sourceLine" id="cb16-8" title="8">  </a>
-<a class="sourceLine" id="cb16-9" title="9">  n_timepoints =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/length">length</a></span>(result<span class="op">$</span><span class="kw">get_value</span>(<span class="st">'time_points'</span>))</a>
+<a class="sourceLine" id="cb16-9" title="9">  n_timepoints =<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/length.html">length</a></span>(result<span class="op">$</span><span class="kw">get_value</span>(<span class="st">'time_points'</span>))</a>
 <a class="sourceLine" id="cb16-10" title="10">  </a>
 <a class="sourceLine" id="cb16-11" title="11">  all_elec =<span class="st"> </span>result<span class="op">$</span><span class="kw">get_value</span>(<span class="st">'all_elec'</span>)</a>
 <a class="sourceLine" id="cb16-12" title="12">  requested_electrode =<span class="st"> </span>result<span class="op">$</span><span class="kw">get_value</span>(<span class="st">'requested_electrode'</span>)</a>
 <a class="sourceLine" id="cb16-13" title="13">  </a>
-<a class="sourceLine" id="cb16-14" title="14">  tbl =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(</a>
+<a class="sourceLine" id="cb16-14" title="14">  tbl =<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(</a>
 <a class="sourceLine" id="cb16-15" title="15">    <span class="st">'Subject ID'</span> =<span class="st"> </span>subject_id,</a>
 <a class="sourceLine" id="cb16-16" title="16">    <span class="st">'# of Trials'</span> =<span class="st"> </span>n_trials,</a>
-<a class="sourceLine" id="cb16-17" title="17">    <span class="st">'Frequencies Loaded'</span> =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/range">range</a></span>(frequencies), <span class="dt">collapse =</span> <span class="st">' - '</span>),</a>
-<a class="sourceLine" id="cb16-18" title="18">    <span class="st">'Available Frequencies'</span> =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/range">range</a></span>(all_freq), <span class="dt">collapse =</span> <span class="st">' - '</span>),</a>
-<a class="sourceLine" id="cb16-19" title="19">    <span class="st">'Time Points Selected'</span> =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/length">length</a></span>(n_timepoints),</a>
+<a class="sourceLine" id="cb16-17" title="17">    <span class="st">'Frequencies Loaded'</span> =<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/paste.html">paste</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/range.html">range</a></span>(frequencies), <span class="dt">collapse =</span> <span class="st">' - '</span>),</a>
+<a class="sourceLine" id="cb16-18" title="18">    <span class="st">'Available Frequencies'</span> =<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/paste.html">paste</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/range.html">range</a></span>(all_freq), <span class="dt">collapse =</span> <span class="st">' - '</span>),</a>
+<a class="sourceLine" id="cb16-19" title="19">    <span class="st">'Time Points Selected'</span> =<span class="st"> </span><span class="kw"><a href="https://rdrr.io/r/base/length.html">length</a></span>(n_timepoints),</a>
 <a class="sourceLine" id="cb16-20" title="20">    <span class="st">'Electrodes Selected'</span> =<span class="st"> </span><span class="kw"><a href="../reference/deparse_selections.html">deparse_selections</a></span>(requested_electrode),</a>
 <a class="sourceLine" id="cb16-21" title="21">    <span class="st">'Electrodes Total'</span> =<span class="st"> </span><span class="kw"><a href="../reference/deparse_selections.html">deparse_selections</a></span>(all_elec)</a>
 <a class="sourceLine" id="cb16-22" title="22">  )</a>
 <a class="sourceLine" id="cb16-23" title="23">  </a>
-<a class="sourceLine" id="cb16-24" title="24">  <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/data.frame">data.frame</a></span>(</a>
-<a class="sourceLine" id="cb16-25" title="25">    <span class="dt">Name =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/names">names</a></span>(tbl),</a>
+<a class="sourceLine" id="cb16-24" title="24">  <span class="kw"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span>(</a>
+<a class="sourceLine" id="cb16-25" title="25">    <span class="dt">Name =</span> <span class="kw"><a href="https://rdrr.io/r/base/names.html">names</a></span>(tbl),</a>
 <a class="sourceLine" id="cb16-26" title="26">    <span class="dt">Value =</span> tbl</a>
 <a class="sourceLine" id="cb16-27" title="27">  )</a>
 <a class="sourceLine" id="cb16-28" title="28">}</a></code></pre></div>
@@ -422,6 +424,7 @@
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
+
         <div id="tocnav">
       <h2 class="hasAnchor">
 <a href="#tocnav" class="anchor"></a>Contents</h2>
@@ -436,17 +439,20 @@
 </div>
 
 
+
       <footer><div class="copyright">
   <p>Developed by Zhengjia Wang, John Magnotti, Michael S. Beauchamp, Beauchamp lab.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
 </div>
+
       </footer>
 </div>
 
   
+
 
   </body>
 </html>

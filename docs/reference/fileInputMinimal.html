@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Override print method for printable environment — print.rave_printable • rave</title>
+<title>Re-write shiny `fileInput`, but minimal — fileInputMinimal • rave</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,8 @@
 
 
 
-<meta property="og:title" content="Override print method for printable environment — print.rave_printable" />
-<meta property="og:description" content="Override print method for printable environment" />
+<meta property="og:title" content="Re-write shiny `fileInput`, but minimal — fileInputMinimal" />
+<meta property="og:description" content="Re-write shiny `fileInput`, but minimal" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -118,28 +118,36 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Override print method for printable environment</h1>
+    <h1>Re-write shiny `fileInput`, but minimal</h1>
     
-    <div class="hidden name"><code>print.rave_printable.Rd</code></div>
+    <div class="hidden name"><code>fileInputMinimal.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Override print method for printable environment</p>
+    <p>Re-write shiny `fileInput`, but minimal</p>
     </div>
 
-    <pre class="usage"><span class='co'># S3 method for rave_printable</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span>(<span class='no'>x</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>fileInputMinimal</span>(<span class='no'>inputId</span>, <span class='no'>label</span>, <span class='kw'>multiple</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>accept</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>width</span> <span class='kw'>=</span> <span class='st'>"auto"</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"default"</span>, <span class='kw'>class</span> <span class='kw'>=</span> <span class='st'>""</span>, <span class='no'>...</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>x</th>
-      <td><p>an rave_printable environment</p></td>
+      <th>inputId, label, multiple, accept, width</th>
+      <td><p>see <code><a href='https://rdrr.io/pkg/shiny/man/fileInput.html'>shiny::fileInput</a></code></p></td>
+    </tr>
+    <tr>
+      <th>type</th>
+      <td><p>button type, such as `primary`, `default`, `warning`, `info`,</p></td>
+    </tr>
+    <tr>
+      <th>class</th>
+      <td><p>additional class to button</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>passed from or to other methods</p></td>
+      <td><p>ignored</p></td>
     </tr>
     </table>
 
