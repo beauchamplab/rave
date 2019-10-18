@@ -55,6 +55,7 @@ get_dir <- function(subject_code, project_name, block_num, mkdirs = NULL, subjec
     re$subject_name = paste0(project_name, '/', subject_code)
   }else if(!missing(subject_id)){
     re$subject_name = subject_id
+    project_name = stringr::str_split(subject_id, '/')[[1]][[1]]
   }
   if(!is.null(re$subject_name)){
 
@@ -62,6 +63,7 @@ get_dir <- function(subject_code, project_name, block_num, mkdirs = NULL, subjec
     re$preprocess_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'preprocess'))
     # re$pre_visual_dir = (file.path(re$data_dir, re$subject_name, 'preprocess', 'visualizations'))
     re$rave_dir = (file.path(re$data_dir, re$subject_name, 'rave'))
+    re$project_dir = (file.path(re$data_dir, project_name))
     re$meta_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'meta'))
     re$cache_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'data'))
     re$channel_dir = re$cache_dir
