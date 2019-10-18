@@ -1,43 +1,14 @@
 #' Function to download demo data to data repository
 #' @param subject demo subject
-download_sample_data <- function(subject = 'sub1'){
+download_sample_data <- function(subject = 'KC', ...){
   project_name = 'demo'
   data_dir = rave_options('data_dir')
   raw_dir = rave_options('raw_data_dir')
   tmp_dir = tempdir()
-  switch (subject,
-          'sub1' = {
-            # sub1 is at github
-            # link addr: https://github.com/dipterix/rave_example_data/archive/master.zip
-            url = 'https://github.com/dipterix/rave_example_data/archive/master.zip'
-            tmp_zip = file.path(tmp_dir, 'downloaded_sub1.zip')
-            extract_dir = file.path(tmp_dir, 'extract_dir')
-
-            download.file(url = url, destfile = tmp_zip)
-            logger('Expanding zip file', level = 'INFO')
-
-            unzip(tmp_zip, overwrite = T, exdir = extract_dir)
-            sub_data_dir = file.path(extract_dir, 'rave_example_data-master', 'data', 'data_dir', 'demo')
-            sub_raw_dir = file.path(extract_dir, 'rave_example_data-master', 'data', 'raw_dir', 'sub1')
-
-            # copy files
-            logger('Copy from tempdir to data repository', level = 'INFO')
-            file.copy(sub_data_dir, data_dir, overwrite = T, recursive = T)
-            file.copy(sub_raw_dir, raw_dir, overwrite = T, recursive = T)
-
-            # clean up
-            logger('Clean up', level = 'INFO')
-            unlink(extract_dir, recursive = T)
-            unlink(tmp_zip)
-            logger('Done. Subject [sub1] is now at \n', '[Raw Data]: ',
-                   file.path(raw_dir, 'sub1'), '\n[RAVE Data]: ',
-                   file.path(raw_dir, 'demo'), level = 'INFO')
-          },
-          {
-            stop('There is only one sample subject [sub1] right now.')
-          }
-  )
-
+  url = sprintf('https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/demo_%s.zip', subject)
+  tmp_zip = file.path(tmp_dir, 'downloaded_tmp.zip')
+  
+  download_subject_data(url, ...)
 
 }
 
@@ -299,3 +270,97 @@ download_subject_data <- function(
 
 # download_subject_data(con = "~/rave_data/data-small.zip",
 # override_project = 'demo_junk', replace_if_exists = F)
+
+
+
+archive_subject <- function(project_name, subject_code, 
+                            include_cache = FALSE, include_fs = TRUE, include_raw = FALSE,
+                            save_to = tempdir()){
+  subject = Subject$new(project_name = project_name, subject_code = subject_code, strict = FALSE)
+  root_dir = file.path(tempdir(check = TRUE), 'archive')
+  rave_dir = file.path(root_dir, 'data_dir', project_name, subject_code, 'rave')
+  raw_dir = file.path(root_dir, 'raw_dir', subject_code)
+  wd = getwd()
+  on.exit({
+    unlink(root_dir, recursive = TRUE, force = FALSE)
+    setwd(wd)
+  })
+  
+  # setwd(subject$dirs$rave_dir)
+  dir.create(rave_dir, recursive = TRUE, showWarnings = TRUE)
+  dir.create(raw_dir, recursive = TRUE, showWarnings = TRUE)
+  
+  dirs = list.dirs(subject$dirs$rave_dir, full.names = FALSE, recursive = TRUE)
+  
+  dirs = dirs[!stringr::str_detect(dirs, '^fs(/|$)')]
+  
+  sapply(file.path(rave_dir, dirs), function(d){
+    dir.create(d, recursive = TRUE, showWarnings = FALSE)
+  })
+  
+  paths = c(
+    'data/cache/cached_reference.csv',
+    'data/power/',
+    'data/phase/',
+    'data/reference/',
+    'data/voltage/',
+    'log.yaml',
+    'meta/',
+    'preprocess/'
+  )
+  if(include_cache){
+    paths[1] = 'data/cache/'
+  }
+  
+  from_paths = file.path(subject$dirs$rave_dir, paths)
+  sel = file.exists(from_paths)
+  from_paths = from_paths[sel]
+  to_paths = file.path(rave_dir, paths)[sel]
+  
+  apply(cbind(from_paths, to_paths), 1, function(x){
+    x[2] = dirname(x[2])
+    dir.create(x[2], showWarnings = FALSE, recursive = TRUE)
+    print(x[2])
+    if(file.info(x[1])[['isdir']]){
+      file.copy(x[1], x[2], overwrite = TRUE, copy.mode = FALSE, copy.date = TRUE, recursive = TRUE)
+    }else{
+      file.copy(x[1], x[2], overwrite = TRUE, copy.mode = FALSE, copy.date = TRUE)
+    }
+  })
+  
+  if(include_fs){
+    fs_paths = file.path(subject$dirs$rave_dir, c('fs', '../fs'))
+    sel = dir.exists(fs_paths)
+    if(any(sel)){
+      fs_paths = normalizePath(fs_paths[sel][1])
+      target_fs = normalizePath(file.path(rave_dir, '..'))
+      file.copy(fs_paths, target_fs, overwrite = TRUE, recursive = TRUE, copy.mode = FALSE, copy.date = TRUE)
+    }
+    if(!include_cache){
+      unlink(file.path(rave_dir, '..', 'fs', 'RAVE'), recursive = TRUE)
+    }
+  }
+  
+  if(include_raw){
+    raws = list.dirs(subject$dirs$pre_subject_dir, full.names = TRUE, recursive = FALSE)
+    lapply(raws, function(f){
+      file.copy(f, raw_dir, recursive = TRUE, overwrite = TRUE, copy.mode = FALSE, copy.date = TRUE)
+    })
+  }
+  
+  # yaml file
+  conf = list(list(
+    data_dir = sprintf('data_dir/%s/%s', project_name, subject_code),
+    raw_dir = sprintf('raw_dir/%s', subject_code)
+  ))
+  names(conf) = subject$id
+  
+  yaml::write_yaml(conf, file = file.path(root_dir, 'subjects.yaml'), fileEncoding = 'utf-8')
+  dir.create(save_to, showWarnings = FALSE, recursive = TRUE)
+  save_to = file.path(normalizePath(save_to), sprintf('%s_%s.zip', project_name, subject_code))
+  setwd(root_dir)
+  utils::zip(zipfile = save_to, files = '.')
+  setwd(wd)
+  
+  cat2('Please check zip file at ', save_to, level = 'INFO')
+}
