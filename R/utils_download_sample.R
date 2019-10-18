@@ -1,5 +1,7 @@
 #' Function to download demo data to data repository
 #' @param subject demo subject
+#' @param ... other parameters passed to \code{download_subject_data}
+#' @export
 download_sample_data <- function(subject = 'KC', ...){
   project_name = 'demo'
   data_dir = rave_options('data_dir')

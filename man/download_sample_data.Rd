@@ -8,6 +8,8 @@ download_sample_data(subject = "KC", ...)
 }
 \arguments{
 \item{subject}{demo subject}
+
+\item{...}{other parameters passed to \code{download_subject_data}}
 }
 \description{
 Function to download demo data to data repository
