@@ -53,21 +53,29 @@ threeBrain::download_N27(make_default = TRUE)
 * If you do not have any data in RAVE format, we recommend you download some sample data. Copy and paste the following commands into the RStudio console:
 
 ```r
-# load RAVE functions 
-library(rave)
-# download a demo subject ~ 400MB of data
-download_subject_data('https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/data-large.zip')
+# download a demo subject - 500MB ~ 1.5 GB per subject
+rave::download_sample_data('KC')
+rave::download_sample_data('YAB')
+rave::download_sample_data('YAD')
+rave::download_sample_data('YAF')
+rave::download_sample_data('YAH')
+rave::download_sample_data('YAI')
+rave::download_sample_data('YAJ')
+rave::download_sample_data('YAK')
+
+# download group analysis sample - 72 MB. Please download at least 1 subject above.
+rave::download_sample_data('_group_data')
 ```
 
-Once you see the folowing message, the subject is downloaded. The directory (XXX) will vary depending on the machine.
+Once you see the folowing message, the subject is downloaded. The directory (XXX) will vary depending on the machine. If a subject previously exists, RAVE will ask you to choose from replacing, creating new or abandon the downloaded subject. 
 
 ```
 [ INFO ]: Expanding zip file
 [ INFO ]: Copy from tempdir to data repository
 [ INFO ]: Clean up
 [ INFO ]: Done. Subject [sub1] is now at 
-[Raw Data]: /XXX/rave_data/raw_dir/sub1
-[RAVE Data]: /XXX/rave_data/raw_dir/demo
+[Raw Data]: /XXX/rave_data/raw_dir/KC
+[RAVE Data]: /XXX/rave_data/data_dir/demo/KC
 ```
 
 ## Start RAVE 
@@ -78,7 +86,7 @@ Once you see the folowing message, the subject is downloaded. The directory (XXX
 rave::start_rave()
 ```
 
-## Using Rave
+## Using RAVE
 
 * For tutorials on how to use RAVE, [click here](https://openwetware.org/wiki/Beauchamp:RAVE#Tutorials)
 
