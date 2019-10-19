@@ -63,6 +63,7 @@ arrange_modules <- function(refresh = FALSE, reset = FALSE, quiet = FALSE){
   }
   if(!file.exists(fpath)){
     logger('First time? looking for modules', quiet = quiet)
+    refresh = TRUE
   }
 
   old_table = NULL
@@ -92,8 +93,8 @@ arrange_modules <- function(refresh = FALSE, reset = FALSE, quiet = FALSE){
     #
 
     if(!nrow(tbl)){
-      logger('No modules can be found. Installing builtin modules using \n\tremotes::install_github("beauchamplab/ravebuiltins")', level = 'ERROR')
-      devtools::install_github("beauchamplab/ravebuiltins", upgrade = 'never')
+      logger('No modules can be found. Installing builtin modules using \n\tremotes::install_github("beauchamplab/ravebuiltins@dev")', level = 'ERROR')
+      devtools::install_github("beauchamplab/ravebuiltins@dev", upgrade = 'never')
 
       tbl = detect_modules(as_module = FALSE)
       tbl = as.data.frame(tbl, stringsAsFactors = F)
