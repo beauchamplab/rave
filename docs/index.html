@@ -39,7 +39,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.5.51</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.8</span>
       </span>
     </div>
 
@@ -130,17 +130,25 @@
 <ul>
 <li>If you do not have any data in RAVE format, we recommend you download some sample data. Copy and paste the following commands into the RStudio console:</li>
 </ul>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="co"># load RAVE functions </span></a>
-<a class="sourceLine" id="cb4-2" title="2"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(rave)</a>
-<a class="sourceLine" id="cb4-3" title="3"><span class="co"># download a demo subject ~ 400MB of data</span></a>
-<a class="sourceLine" id="cb4-4" title="4"><span class="kw"><a href="reference/download_subject_data.html">download_subject_data</a></span>(<span class="st">'https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/data-large.zip'</span>)</a></code></pre></div>
-<p>Once you see the folowing message, the subject is downloaded. The directory (XXX) will vary depending on the machine.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="co"># download a demo subject - 500MB ~ 1.5 GB per subject</span></a>
+<a class="sourceLine" id="cb4-2" title="2">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'KC'</span>)</a>
+<a class="sourceLine" id="cb4-3" title="3">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'YAB'</span>)</a>
+<a class="sourceLine" id="cb4-4" title="4">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'YAD'</span>)</a>
+<a class="sourceLine" id="cb4-5" title="5">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'YAF'</span>)</a>
+<a class="sourceLine" id="cb4-6" title="6">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'YAH'</span>)</a>
+<a class="sourceLine" id="cb4-7" title="7">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'YAI'</span>)</a>
+<a class="sourceLine" id="cb4-8" title="8">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'YAJ'</span>)</a>
+<a class="sourceLine" id="cb4-9" title="9">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'YAK'</span>)</a>
+<a class="sourceLine" id="cb4-10" title="10"></a>
+<a class="sourceLine" id="cb4-11" title="11"><span class="co"># download group analysis sample - 72 MB. Please download at least 1 subject above.</span></a>
+<a class="sourceLine" id="cb4-12" title="12">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'_group_data'</span>)</a></code></pre></div>
+<p>Once you see the folowing message, the subject is downloaded. The directory (XXX) will vary depending on the machine. If a subject previously exists, RAVE will ask you to choose from replacing, creating new or abandon the downloaded subject.</p>
 <pre><code>[ INFO ]: Expanding zip file
 [ INFO ]: Copy from tempdir to data repository
 [ INFO ]: Clean up
 [ INFO ]: Done. Subject [sub1] is now at 
-[Raw Data]: /XXX/rave_data/raw_dir/sub1
-[RAVE Data]: /XXX/rave_data/raw_dir/demo</code></pre>
+[Raw Data]: /XXX/rave_data/raw_dir/KC
+[RAVE Data]: /XXX/rave_data/data_dir/demo/KC</code></pre>
 </div>
 <div id="start-rave" class="section level2">
 <h2 class="hasAnchor">
@@ -153,7 +161,7 @@
 </div>
 <div id="using-rave" class="section level2">
 <h2 class="hasAnchor">
-<a href="#using-rave" class="anchor"></a>Using Rave</h2>
+<a href="#using-rave" class="anchor"></a>Using RAVE</h2>
 <ul>
 <li><p>For tutorials on how to use RAVE, <a href="https://openwetware.org/wiki/Beauchamp:RAVE#Tutorials">click here</a></p></li>
 <li><p>To preprocess data, copy and paste the following commands into the RStudio console:</p></li>
@@ -191,7 +199,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
 
       </footer>
