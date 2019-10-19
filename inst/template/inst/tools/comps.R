@@ -23,7 +23,7 @@
   if(chunks){
     sep = '^#{6}\'( @[^#]+|)[\\ #]{0,}$'
     sel = stringr::str_detect(content, sep)
-
+    
     if(sum(sel)){
       idx = which(sel)
       if(!1 %in% idx){
@@ -32,7 +32,7 @@
       }
       chunk_names = stringr::str_match(content[idx], sep)[,2]
       chunk_names = stringr::str_remove_all(chunk_names, '[\\ @]')
-
+      
       # 1. auto = true or false
       auto_chunk = stringr::str_detect(chunk_names, '^auto=')
       if(any(auto_chunk)){
@@ -41,14 +41,14 @@
           auto = FALSE
         }
       }
-
+      
       # 2. find async
       async_chunk = stringr::str_detect(chunk_names, '^async(,|$)')
       if(any(async_chunk)){
         async_idx = which(async_chunk)
         async_idx = tail(async_idx, 1)
         chunk_names[-async_idx] = ''
-
+        
         async_chunk = chunk_names[async_idx]
         # try to obtain async_vars
         async_vars = stringr::str_match(async_chunk, 'async_vars=(.*)')[,2]
@@ -64,26 +64,26 @@
       fixes = chunk_names
       fixes[-1] = '}; \n{'
       fixes[1] = '{'
-
+      
       content[idx] = fixes
       content = c(content, '}')
     }else{
       content = c('{', content, '}')
     }
-
+    
   }
-
+  
   text = paste(content, collapse = '\n')
   expr = parse(text = text)
   if(evaluate){
     eval(expr, envir = env)
     return(TRUE)
   }else{
-
+    
     attr(expr, 'chunk_names') = chunk_names
     attr(expr, 'auto') = auto
     attr(expr, 'async_vars') = async_vars
-
+    
     return(expr)
   }
 }
@@ -118,13 +118,13 @@ get_comp_env <- function(module_id){
       sapply(!!init_args, get, envir = environment(), simplify = F, USE.NAMES = T)
     }))
     re[['initialization']] = initialization
-
+    
     input_env[[inputId]] = re
     invisible(re)
   }
   mount_demo_subject <- function(...){}
-
-
+  
+  
   output_env = new.env(parent = emptyenv())
   define_output <- function(definition, title = '', width = 12L, order = Inf){
     definition = substitute(definition)
@@ -138,15 +138,15 @@ get_comp_env <- function(module_id){
     if(has_function){
       mod_id = paste0('..', outputId)
     }
-
+    
     definition[[ifelse(has_output_id, 'outputId', 'inputId')]] = mod_id
-
+    
     # output width
-
+    
     width %?<-% 12
     assertthat::assert_that(width %in% 1:12, msg = 'Output width Must be integer from 1 to 12.')
     definition[['width']] = width
-
+    
     re = list(
       outputId = outputId,
       title = title,
@@ -154,17 +154,20 @@ get_comp_env <- function(module_id){
       order = order
     )
     class(re) = c('comp_output', 'list')
-
-
+    
+    
     output_env[[outputId]] = re
     invisible(re)
   }
-
+  
   init_env = new.env(parent = emptyenv())
   init_env[['init']] = FALSE
   define_initialization = function(definition){
+    if(isFALSE(init_env[['init']])){
+      init_env[['init']] = list()
+    }
     definition = substitute(definition)
-    init_env[['init']] = definition
+    init_env[['init']][[length(init_env[['init']]) + 1]] = definition
   }
   scripts = new.env(parent = emptyenv())
   load_scripts = function(..., asis = FALSE){
@@ -177,11 +180,11 @@ get_comp_env <- function(module_id){
       }
     })
     scripts[['source']] = c(scripts[['source']], fs)
-
+    
     if(is.null(scripts[['asis']])){
       scripts[['asis']] = asis
     }
-
+    
   }
   # load_scripts = function(..., asis = FALSE){
   #   fs = unlist(list(...))
@@ -189,9 +192,9 @@ get_comp_env <- function(module_id){
   #   scripts[['source']] = fs
   #   scripts[['asis']] = asis
   # }
-
+  
   tmp_env = new.env()
-
+  
   return(list(
     content = content,
     input_env = input_env,
@@ -200,7 +203,7 @@ get_comp_env <- function(module_id){
     script_env = scripts,
     tmp_env = tmp_env
   ))
-
+  
 }
 
 
@@ -209,31 +212,33 @@ parse_components <- function(module_id){
   envs = get_comp_env(module_id)
   # Find input init (rave_updates)
   has_content = get_content(content = envs$content, env = envs$tmp_env)
-
+  
   tmp_env = envs$tmp_env
   input_env = envs$input_env
   output_env = envs$output_env
-
+  
   # Find inputs
   input_layout = tmp_env[['input_layout']]
-  manual_inputs = tmp_env[['manual_inputs']]
-  render_inputs = tmp_env[['render_inputs']]
-  
   inputs = as.list(input_env)
   defs = lapply(inputs, '[[', 'definition')
   names(defs) = NULL
-  # if(is.null(input_layout)){
-  #   rave_inputs_quo = rlang::quo(rave_inputs(!!!defs))
-  # }else{
-  # }
-  rave_inputs_quo = rlang::quo(rave_inputs(!!!defs, .input_panels = !!input_layout, 
-                                           .manual_inputs = !!manual_inputs, .render_inputs = !!render_inputs))
+  if(is.null(input_layout)){
+    rave_inputs_quo = rlang::quo(rave_inputs(!!!defs))
+  }else{
+    rave_inputs_quo = rlang::quo(rave_inputs(!!!defs, .input_panels = !!input_layout))
+  }
   # Generate rave_updates
   init_expr = envs$init_env$init
   inits = lapply(inputs, '[[', 'initialization')
   names(inits) = names(inputs)
-  rave_update_quo = rlang::quo(rave_updates({eval(!!init_expr)}, !!!inits))
-
+  
+  init_anon_quos = lapply(init_expr, function(expr){rlang::quo(eval(!!expr))})
+  
+  rlang::quo(rave_updates({!!!init_anon_quos}))
+  
+  rave_update_quo = rlang::quo(rave_updates({!!!init_anon_quos}, !!!inits))
+  # rave_update_quo = rlang::quo(rave_updates({eval(!!init_expr)}, !!!inits))
+  
   # outputs
   output_layout = tmp_env[['output_layout']]
   comps = as.list(output_env)
@@ -243,7 +248,7 @@ parse_components <- function(module_id){
     names(defs) = titles
     order = order(sapply(comps, '[[', 'order'))
     defs = defs[order]
-
+    
     # generate temp functions
     output_functions = lapply(comps, function(comp){
       rlang::quo(function(...){
@@ -252,7 +257,7 @@ parse_components <- function(module_id){
         ._env$get_value = function(key, ifNotFound = NULL){
           get0(key, envir = ._current_env, ifnotfound = ifNotFound)
         }
-
+        
         ._env$async_value = function(key){
           ..param_env = get0('..param_env', envir = ._current_env)
           if(is.environment(..param_env)){
@@ -261,28 +266,28 @@ parse_components <- function(module_id){
               return(async_var(key))
             }
           }
-
+          
           return(NULL)
         }
         do.call(!!comp$outputId, c(list(._env), list(...)))
       })
     })
-
+    
     names(output_functions) = paste0('..', sapply(comps, '[[', 'outputId'))
-
+    
   }else{
     output_functions = NULL
     # need to make sure at least one output
     defs = list('No Output' = quote(textOutput('do_nothing', width = 12L)))
   }
-
+  
   if(is.null(output_layout)){
     rave_output_quo = rlang::quo(rave_outputs(!!!defs))
   }else{
     rave_output_quo = rlang::quo(rave_outputs(!!!defs, .output_tabsets = !!output_layout))
   }
   rave_output_quo
-
+  
   return(list(
     rave_inputs_quo = rave_inputs_quo,
     rave_update_quo = rave_update_quo,
@@ -297,16 +302,16 @@ parse_components <- function(module_id){
 init_module <- function(module_id, debug = FALSE, force_local=FALSE){
   # Make sure subject is loaded
   has_subject = rave::any_subject_loaded()
-
+  
   if(!has_subject){
     cat2('Error: No subject found! Please load subject first', level = 'ERROR')
     if(debug){
       mount_demo_subject()
     }
   }
-
+  
   # Still try to run the rest
-
+  
   # Find proper environment
   pkg_name = get_package_name()
   # if(paste0('package:', pkg_name) %in% search()){
@@ -315,11 +320,11 @@ init_module <- function(module_id, debug = FALSE, force_local=FALSE){
   #   pkg_env = loadNamespace(pkg_name)
   # }
   pkg_env = loadNamespace(pkg_name)
-
-
+  
+  
   # get components
   envs = get_comp_env(module_id = module_id)
-
+  
   if(force_local){
     envs$tmp_env$is_local_debug = function(){TRUE}
     envs$tmp_env$observe = function(...){}
@@ -327,18 +332,18 @@ init_module <- function(module_id, debug = FALSE, force_local=FALSE){
     envs$tmp_env$reactiveValues = function(...){list(...)}
     envs$tmp_env$cache = function(key, val, ...){return(val)}
   }
-
+  
   has_content = get_content(content = envs$content, env = envs$tmp_env)
-
+  
   # Initialize env
   wrapper_env = new.env(parent = pkg_env)
-
+  
   # TODO: need to test variable reference issue
   # Load tools to parse reactive values
   source(get_path('inst/tools/libs.R'), local = wrapper_env)
   source(get_path('inst/tools/funcs_reactives.R'), local = wrapper_env)
   wrapper_env$rave_checks = function(...){}
-
+  
   if(force_local){
     wrapper_env$is_local_debug = function(){TRUE}
     wrapper_env$observe = function(...){}
@@ -346,15 +351,15 @@ init_module <- function(module_id, debug = FALSE, force_local=FALSE){
     wrapper_env$reactiveValues = function(...){list(...)}
     wrapper_env$cache = function(key, val, ...){return(val)}
   }
-
-
+  
+  
   param_env = new.env(parent = wrapper_env)
-
+  
   if(debug){
     # we want to expose functions to global environment if possible
     source(get_path('inst/tools/funcs_reactives.R'), local = param_env)
   }
-
+  
   for(f in envs$script_env[['source']]){
     if(rlang::is_quosure(f)){
       eval(rlang::quo_squash(f), envir = param_env)
@@ -362,11 +367,14 @@ init_module <- function(module_id, debug = FALSE, force_local=FALSE){
       source(file = f, local = param_env)
     }
   }
-
+  
   # initialize global variables
   init_expr = envs$init_env$init
-  base::eval(init_expr, envir = param_env)
-
+  lapply(init_expr, function(expr){
+    base::eval(expr, envir = param_env)
+  })
+  
+  
   # Initialize inputs
   inputs = as.list(envs$input_env)
   lapply(inputs, function(input){
@@ -379,9 +387,9 @@ init_module <- function(module_id, debug = FALSE, force_local=FALSE){
       value %?<-% def[['selected']]
       value %?<-% args[['value']]
       value %?<-% args[['selected']]
-
+      
       init = input$initialization
-
+      
       if(!is.null(init)){
         updates = rave::eval_dirty(init, env = param_env)
         updated_value = updates[['value']]
@@ -392,19 +400,19 @@ init_module <- function(module_id, debug = FALSE, force_local=FALSE){
       }
       value = eval(value)
       param_env[[inputId]] = value
-
+      
       cat2(inputId, '<- ', paste(capture.output(cat2(value)), collapse = '\n'))
-
+      
     }
   })
-
+  
   if(debug){
     list2env(as.list(param_env), globalenv())
-
+    
     return(invisible(param_env))
   }
   return(param_env)
-
+  
 }
 
 
@@ -413,14 +421,14 @@ get_main_function <- function(module_id){
   # module_id = 'power_explorer'
   path = get_path('inst', 'modules', module_id, 'main.R')
   content = readLines(path)
-
+  
   expr = get_content(content = content, evaluate = F, chunks = TRUE)
   main_quos = rlang::quos(!!! as.list(expr))
-
+  
   names(main_quos) = attr(expr, 'chunk_names')
-
+  
   main_quos$async_vars = attr(expr, 'async_vars')
-
+  
   main_quos
 }
 

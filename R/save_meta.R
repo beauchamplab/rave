@@ -123,6 +123,11 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
         if(!'Label' %in% names(tbl)){
           tbl$Label = NA
         }
+        na_labels = is.na(tbl$Label)
+        if(any(na_labels)){
+          tbl$Label[na_labels] = paste0('Unlabeled', seq_len(sum(na_labels)))
+        }
+        
         return(tbl)
       }
     }

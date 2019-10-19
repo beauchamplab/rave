@@ -1,4 +1,36 @@
-
+read.rosa <- function(path){
+  # path = '~/Downloads/XXXXXXXXXXX 20181113 190540.ros'
+  regex_number = '[-]{0,1}[0-9]*[.]{0,1}[0-9]*'
+  re = list()
+  dat = stringr::str_trim(readLines(path))
+  # Trajectory
+  idx_trajectory = which(dat == '[TRAJECTORY]')
+  n_trajectory = as.integer( dat[ idx_trajectory+1 ] )
+  
+  idx_acpc = which(dat == '[ACPC]')
+  trajectory = stringr::str_match(dat[idx_trajectory : idx_acpc], sprintf(
+    '^([^\\ ]+) 0 [0-9]+ 1 (%s) (%s) (%s) [012] (%s) (%s) (%s) %s %s',
+    regex_number, regex_number, regex_number, regex_number, regex_number, 
+    regex_number, regex_number, regex_number
+  ))
+  is_traj = rowSums(!is.na(trajectory)) == 8
+  if(sum(is_traj) != n_trajectory){
+    cat2(sprintf('Trajectory number does not match: expected %s, found %s', n_trajectory, sum(is_traj)), level = 'WARNING')
+  }
+  anchors = trajectory[is_traj,3:8,drop=FALSE]
+  anchors = as.numeric(anchors)
+  dim(anchors) = c(n_trajectory, 6)
+  anchors = apply(anchors, 1, function(x){
+    list(
+      start = x[4:6],
+      end = x[1:3]
+    )
+  })
+  names(anchors) = trajectory[is_traj, 2]
+  
+  re$trajectory = anchors
+  re
+}
 
 
 #

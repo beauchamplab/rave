@@ -24,10 +24,23 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
   }
 
   w$monitor_subject_change = function(){
+    
     if(shiny::is.reactivevalues(self$local_reactives)){
-      return(self$local_reactives$has_data && shiny::isolate(self$local_reactives$focused))
+      if( self$local_reactives$initialized && self$local_reactives$has_data && self$local_reactives$focused ){
+        base::print('subject changed?')
+        return(TRUE)
+      }
+      return(FALSE)
     }else{
       return(FALSE)
+    }
+  }
+  w$get_execenv_local_reactive = function(){
+    self$local_reactives
+  }
+  w$eval_when_ready = function(FUN){
+    if(is.function(FUN)){
+      self$ready_functions[[length(self$ready_functions) + 1]] = FUN
     }
   }
   

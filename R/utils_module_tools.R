@@ -205,7 +205,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
           }, simplify = F, USE.NAMES = T)
         }, .call_back = function(i){
           progress$inc(sprintf('Loading voltage data - %d', electrodes[i]))
-        }) ->re
+        }, .globals = c('electrodes', 'e', 'blocks', 'dirs')) ->re
 
         progress$inc('Finalizing...')
 

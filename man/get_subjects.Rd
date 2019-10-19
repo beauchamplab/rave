@@ -4,10 +4,15 @@
 \alias{get_subjects}
 \title{Get all subjects within project}
 \usage{
-get_subjects(project_name)
+get_subjects(project_name, check_subfolders = TRUE,
+  check_rawdata = FALSE)
 }
 \arguments{
 \item{project_name}{project}
+
+\item{check_subfolders}{logical, check whether folder `rave` exists in subject folder, default true}
+
+\item{check_rawdata}{logical, whether raw subject folder exists, default false}
 }
 \description{
 Get all subjects within project

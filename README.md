@@ -22,6 +22,7 @@ devtools::install_github('dipterix/rutabaga')
 devtools::install_github('beauchamplab/ravebuiltins@dev')
 devtools::install_github('beauchamplab/rave')
 threeBrain::download_N27(make_default = TRUE)
+rave::arrange_modules(TRUE, TRUE)
 ```
 
 Alternative installation command:
@@ -33,6 +34,7 @@ pak::pkg_install('dipterix/rutabaga')
 pak::pkg_install('beauchamplab/ravebuiltins@dev')
 pak::pkg_install('beauchamplab/rave')
 threeBrain::download_N27(make_default = TRUE)
+rave::arrange_modules(TRUE, TRUE)
 ```
 
 To update `RAVE`:

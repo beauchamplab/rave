@@ -79,6 +79,7 @@ $(document).ready(function(){
 
 
   const calculate_client_size = () => {
+    if( !Shiny.onInputChange ){ return; }
     // calculate available width and height
     let avail_width = screen.availWidth || window.outerWidth;
     let avail_height = screen.availHeight || window.outerHeight;

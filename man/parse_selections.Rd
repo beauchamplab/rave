@@ -4,7 +4,7 @@
 \alias{parse_selections}
 \title{Convert text to numeric vector}
 \usage{
-parse_selections(text, sep = ",", sort = F, unique = T)
+parse_selections(text, sep = "[, ]+", sort = F, unique = T)
 }
 \arguments{
 \item{text}{character like "1-10,13"}

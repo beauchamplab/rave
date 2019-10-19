@@ -16,11 +16,21 @@ get_projects <- function(){
 
 #' Get all subjects within project
 #' @param project_name project
+#' @param check_subfolders logical, check whether folder `rave` exists in subject folder, default true
+#' @param check_rawdata logical, whether raw subject folder exists, default false
 #' @export
-get_subjects <- function(project_name){
+get_subjects <- function(project_name, check_subfolders = TRUE, check_rawdata = FALSE){
   data_dir = rave_options('data_dir')
   sub = list.dirs(file.path(data_dir, project_name), full.names = F, recursive = F)
-  sub[str_detect(sub, '^[a-zA-Z0-9]') & sub!= 'rave']
+  sub = sub[stringr::str_detect(sub, '^[a-zA-Z0-9]') & sub!= 'rave']
+  if( check_subfolders ){
+    sub = sub[dir.exists(file.path(data_dir, project_name, sub, 'rave'))]
+  }
+  if( check_rawdata ){
+    raw_dir = rave_options('raw_data_dir')
+    sub = sub[dir.exists(file.path(raw_dir, sub))]
+  }
+  sub
 }
 
 #' Get all directories that rave uses
@@ -45,6 +55,7 @@ get_dir <- function(subject_code, project_name, block_num, mkdirs = NULL, subjec
     re$subject_name = paste0(project_name, '/', subject_code)
   }else if(!missing(subject_id)){
     re$subject_name = subject_id
+    project_name = stringr::str_split(subject_id, '/')[[1]][[1]]
   }
   if(!is.null(re$subject_name)){
 
@@ -52,6 +63,7 @@ get_dir <- function(subject_code, project_name, block_num, mkdirs = NULL, subjec
     re$preprocess_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'preprocess'))
     # re$pre_visual_dir = (file.path(re$data_dir, re$subject_name, 'preprocess', 'visualizations'))
     re$rave_dir = (file.path(re$data_dir, re$subject_name, 'rave'))
+    re$project_dir = (file.path(re$data_dir, project_name))
     re$meta_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'meta'))
     re$cache_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'data'))
     re$channel_dir = re$cache_dir

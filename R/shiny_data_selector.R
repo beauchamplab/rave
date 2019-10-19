@@ -267,7 +267,7 @@ shiny_data_selector <- function(module_id){
     local_data = reactiveValues(
       has_subject = FALSE,
       check_result = list(),
-      load_mesh = TRUE,
+      load_mesh = !isFALSE(last_entry('load_mesh', TRUE, save = FALSE, group = group)),
       # Prevent mis-clicking
       # If "import" button is clicked multiple times, data will be reloaded multiple times.
       # prevent will be set to false only when modal expanded
@@ -305,9 +305,6 @@ shiny_data_selector <- function(module_id){
       last_project = last_entry('project_name', default = NULL, group = group)
       if(length(projects) == 0){
         return(p(strong('No valid project detected. Make sure there is at least one project folder in your data directory!')))
-      }
-      if(length(last_project) != 1 || !last_project %in% projects){
-        last_project = projects[1]
       }
 
       # Return UI
@@ -858,7 +855,14 @@ shiny_data_selector <- function(module_id){
           )
         )
       }
-
+    })
+    
+    observe({
+      load_mesh = input$load_mesh
+      if(length(load_mesh) && is.logical(load_mesh)){
+        local_data$load_mesh = load_mesh
+        last_entry('load_mesh', !isFALSE(load_mesh), save = TRUE, group = group)
+      }
     })
 
     output$ui_summary <- renderUI({
@@ -1132,6 +1136,15 @@ shiny_data_selector <- function(module_id){
         showNotification('Please select valid time range', type = 'error', id = ns('data_import'))
         return(NULL)
       }
+      
+      # register
+      
+      last_entry('project_name', project_name, save = T, group = group)
+      last_entry('subject_code', subject_code, save = T, group = group)
+      last_entry('electrodes', deparse_selections(electrodes), save = T, group = group)
+      last_entry('epoch_name', epoch, save = T, group = group)
+      last_entry('time_range', epoch_range, save = T, group = group)
+      last_entry('reference_name', reference, save = T, group = group)
 
       rave_prepare(
         subject = subject_id,
@@ -1143,15 +1156,6 @@ shiny_data_selector <- function(module_id){
         attach = F,
         data_types = NULL
       )
-      # register
-
-      last_entry('project_name', project_name, save = T, group = group)
-      last_entry('subject_code', subject_code, save = T, group = group)
-      last_entry('electrodes', deparse_selections(electrodes), save = T, group = group)
-      last_entry('epoch_name', epoch, save = T, group = group)
-      last_entry('time_range', epoch_range, save = T, group = group)
-      last_entry('reference_name', reference, save = T, group = group)
-
 
       # refresh UIs
       global_reactives$force_refresh_all = Sys.time()

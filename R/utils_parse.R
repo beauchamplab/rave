@@ -4,7 +4,7 @@
 #' @param sort sort result
 #' @param unique remove duplicated value from result?
 #' @export
-parse_selections <- function(text, sep = ',', sort = F, unique = T){
+parse_selections <- function(text, sep = '[, ]+', sort = F, unique = T){
   if(length(text) == 0 || str_trim(text) == ''){
     return(NULL)
   }
