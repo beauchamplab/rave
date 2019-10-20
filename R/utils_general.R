@@ -1204,7 +1204,6 @@ lapply_async <- function(
   return(.future_values)
 }
 
-
 # to be removed
 
 restart_rave <- function(reload = T, quiet = FALSE){

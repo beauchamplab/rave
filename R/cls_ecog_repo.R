@@ -286,7 +286,7 @@ ECoGRepository <- R6::R6Class(
 
         if('power' %in% data_type){
 
-          lapply_async(electrodes, function(e){
+          results = lapply_async(electrodes, function(e){
             # progress$inc(sprintf('Step %d (of %d) electrode %d (power)', count, n_dt, e))
             electrode = raws$get(as.character(e))
             elc = electrode$epoch( epoch_name = epoch_name, pre = pre, post = post,
@@ -300,45 +300,22 @@ ECoGRepository <- R6::R6Class(
               power$temporary = FALSE
             }
             gc()
-
-            # power = elc$power$subset(Frequency = freq_subset, drop = T, data_only = T)
-            # rm(elc)
-            # power = as.vector(power)
-            # return(power)
             power
           }, .call_back = function(i){
             progress$inc(sprintf('Step %d (of %d) electrode %d (power)', count, n_dt, electrodes[i]))
-          }, .globals = c('electrodes', 'count', 'n_dt', 'e', 'epoch_name', 'pre', 'post', 
-                          'referenced', 'freq_subset')) ->
-            results
+          }
+          # , .globals = c('electrodes', 'count', 'n_dt', 'e', 'epoch_name', 'pre', 'post',
+          #                 'referenced', 'freq_subset', 'raws')
+          )
 
           power = join_tensors(results)
 
           count = count + 1
           # gc()
 
-          # names(results) = paste0('V', seq_along(electrodes))
-          # results = do.call('data.frame', results)
-          #
-          # # Generate tensor for power
-          # power = ECoGTensor$new(0, dim = c(1,1,1,1), varnames = names(dimnames_wave), hybrid = F)
-          #
-          # # erase data
-          # power$set_data(NULL)
-          # # reset dim and dimnames
-          # power$dim = vapply(dimnames_wave, length, FUN.VALUE = 0, USE.NAMES = F)
-          # power$dimnames = dimnames_wave
-          #
-          # # generate local cache for power
-          # file = tempfile()
-          # write_fst(results, file, compress = 20)
           rm(results)
           gc()
 
-          # # change tensor file path
-          # power$swap_file = file
-          # power$hybrid = T
-          # power$use_index = TRUE
 
           # set to be read-only
           power$read_only = TRUE
@@ -348,7 +325,8 @@ ECoGRepository <- R6::R6Class(
         }
 
         if('phase' %in% data_type){
-          lapply_async(electrodes, function(e){
+
+          results = lapply_async(electrodes, function(e){
             electrode = raws$get(as.character(e))
             elc = electrode$epoch(epoch_name = epoch_name, pre = pre, post = post,
                                   types = 'phase', raw = !referenced)
@@ -372,9 +350,7 @@ ECoGRepository <- R6::R6Class(
             return(phase)
           }, .call_back = function(i){
             progress$inc(sprintf('Step %d (of %d) electrode %d (phase)', count, n_dt, electrodes[i]))
-          }, .globals = c('electrodes', 'count', 'n_dt', 'e', 'epoch_name', 'pre', 'post', 
-                          'referenced', 'freq_subset')) ->
-            results
+          })
           phase = join_tensors(results)
           count = count + 1
           # gc()
@@ -410,7 +386,8 @@ ECoGRepository <- R6::R6Class(
         }
 
         if('volt' %in% data_type){
-          lapply_async(electrodes, function(e){
+          
+          results = lapply_async(electrodes, function(e){
             electrode = raws$get(as.character(e))
             elc = electrode$epoch( epoch_name = epoch_name, pre = pre, post = post,
                                    types = 'volt', raw = !referenced )
@@ -418,13 +395,11 @@ ECoGRepository <- R6::R6Class(
             # rm(elc)
             # volt = as.vector(volt)
             volt = elc$volt
-            volt
             return(volt)
           }, .call_back = function(i){
             progress$inc(sprintf('Step %d (of %d) electrode %d (voltage)', count, n_dt, electrodes[i]))
-          }, .globals = c('electrodes', 'count', 'n_dt', 'e', 'epoch_name', 'pre', 'post', 
-                          'referenced')) ->
-            results
+          })
+            
           volt = join_tensors(results)
           count = count + 1
           # gc()
