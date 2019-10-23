@@ -94,6 +94,20 @@ reactiveValues <- function(...){
 }
 
 
+eval_when_ready <- function(f){
+  if(is_local_debug()){
+    env = parent.frame()
+    # TODO what to do?
+    tryCatch({
+      f(env)
+    }, error = function(e){
+      cat2(e)
+    })
+  }else{
+    eval_when_ready = get('eval_when_ready', parent.env(parent.env(..param_env)))
+    eval_when_ready(f)
+  }
+}
 
 
 
