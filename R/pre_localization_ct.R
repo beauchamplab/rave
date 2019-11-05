@@ -394,7 +394,7 @@ rave_pre_eleclocalct3 <- function(module_id = 'ELECLOCALCT_M', sidebar_width = 2
         traj = local_data$trajectories[[ ii ]]
         if(!is.list(traj)){ return(NULL) }
         is_surface = traj$type %in% c('Spline', 'Grid')
-        col = col2hex(traj$color + 1, prefix = '#')
+        col = col2hexStr(traj$color + 1, prefix = '#')
         loc = locs[[ ii ]]
         
         lapply(loc, function(center){
@@ -485,7 +485,7 @@ rave_pre_eleclocalct3 <- function(module_id = 'ELECLOCALCT_M', sidebar_width = 2
           }
         )
         
-        col = col2hex(el$color + 1)
+        col = col2hexStr(el$color + 1)
         
         div(
           class = 'rave-grid-inputs no-border-inputs',

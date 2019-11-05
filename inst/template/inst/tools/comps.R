@@ -391,7 +391,7 @@ init_module <- function(module_id, debug = FALSE, force_local=FALSE){
       init = input$initialization
       
       if(!is.null(init)){
-        updates = rave::eval_dirty(init, env = param_env)
+        updates = dipsaus::eval_dirty(init, env = param_env)
         updated_value = updates[['value']]
         updated_value %?<-% updates[['selected']]
         if(!is.null(updated_value)){

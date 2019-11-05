@@ -413,7 +413,24 @@ comp_parser <- function(){
         args[['session']] = session
         args[['inputId']] %?<-% inputId
         
-        do.call(get_from_package('updateCompoundInput2', 'dipsaus'), args = args)
+        do.call(dipsaus::updateCompoundInput2, args = args)
+      }
+      
+      return(re)
+    },
+    'actionButtonStyled' = function(expr, env = environment()){
+      re = parsers[['.default_parser']](expr, env)
+      inputId = re$inputId
+      re$updates = function(session, ..., .args = list()){
+        args = c(list(...), .args)
+        
+        if(length(args) == 0){
+          return()
+        }
+        args[['session']] = session
+        args[['inputId']] %?<-% inputId
+        
+        do.call(dipsaus::updateActionButtonStyled, args = args)
       }
       
       return(re)

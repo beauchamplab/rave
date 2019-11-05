@@ -3,6 +3,17 @@
 NULL
 
 
+dir_create <- function(x, showWarnings = FALSE, recursive = TRUE, check = TRUE) {
+  if (!dir.exists(x)) {
+    dir.create(x, showWarnings = showWarnings, recursive = recursive)
+  }
+  if (check && !dir.exists(x)) {
+    cat2('Cannot create directory at ', shQuote(x), level = 'FATAL')
+  }
+  invisible(normalizePath(x))
+}
+
+
 # New dir hierachy
 # data_dir > projectdir > subjectdir > rave > {raw, preprocessing, rave, meta, suma}
 

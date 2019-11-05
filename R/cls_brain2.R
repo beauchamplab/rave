@@ -26,8 +26,7 @@ rave_brain2 <- function(subject, surfaces = 'pial', use_141 = TRUE, compute_temp
   )
   fs_path = NULL
   for( p in fs_paths ){
-    check_freesurfer_path = get_from_package('check_freesurfer_path', 'threeBrain', TRUE)
-    if( check_freesurfer_path(fs_subject_folder = p, autoinstall_template = FALSE) ){
+    if( threeBrain::check_freesurfer_path(fs_subject_folder = p, autoinstall_template = FALSE) ){
       fs_path = p
       break;
     }
@@ -37,9 +36,9 @@ rave_brain2 <- function(subject, surfaces = 'pial', use_141 = TRUE, compute_temp
   }
   
   # import from freesurfer folder
-  brain = threeBrain::freesurfer_brain(
+  brain = threeBrain::freesurfer_brain2(
     fs_subject_folder = fs_path, subject_name = subject$subject_code, 
-    additional_surfaces = surfaces, use_cache = TRUE, use_141 = use_141)
+    surface_types = surfaces, use_141 = use_141)
   
   # load electrodes
   electrode_table = load_meta('electrodes', 
@@ -48,7 +47,7 @@ rave_brain2 <- function(subject, surfaces = 'pial', use_141 = TRUE, compute_temp
   brain$set_electrodes(electrodes = electrode_table)
   
   if( compute_template ){
-    tf = tempfile(); 
+    tf = tempfile() 
     new_table = brain$calculate_template_coordinates(save_to = tf)
     if( file.exists(tf) ){
       brain$electrodes$raw_table_path = NULL

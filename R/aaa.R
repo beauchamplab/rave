@@ -1,16 +1,9 @@
 #' @include utils_syscheck.R
 NULL
 
-#' @import utils
-#' @import stats
-#' @import R6
 #' @import htmltools
 #' @import shiny
-#' @import yaml
-#' @import stringr
-#' @import graphics
-#' @import grDevices
-#'
+#' 
 #' @importFrom grid grid.newpage
 #'
 #' @importFrom crayon make_style
@@ -60,59 +53,48 @@ NULL
 #' @importFrom methods signature
 #'
 #' @importFrom servr random_port
+#' 
+#' @importFrom dipsaus collapse
+#' @importFrom dipsaus cat2
+#' @importFrom dipsaus time_delta
+#' @importFrom dipsaus get_ram 
+#' @importFrom dipsaus sync_shiny_inputs
+#' @importFrom dipsaus to_ram_size
+#' @importFrom dipsaus mem_limit2
+#' @importFrom dipsaus col2hexStr
+#' @importFrom dipsaus eval_dirty
+#' @importFrom dipsaus %?<-%
+#' @importFrom dipsaus progress2
+#' @importFrom dipsaus actionButtonStyled
+#' @importFrom dipsaus compoundInput2
+#' 
 NULL
+
+
 
 tags = htmltools::tags
 div = htmltools::div
 
-
-#' Internally use to auto update RAVE package version
-#' DO NOT use it, it's copied from websites and I'll probably remove this function in the future
-#' @param packageLocation To be documented
-updatePackageVersion <- function(packageLocation ="."){
-  ## Read DESCRIPTION file
-  desc <- readLines(file.path(packageLocation, "DESCRIPTION"))
-
-  ## Find the line where the version is defined
-  vLine <- grep("^Version\\:", desc)
-
-  ## Extract version number
-  vNumber <- gsub("^Version\\:\\s*", "", desc[vLine])
-  ## Split the version number into two; a piece to keep, a piece to increment
-  versionNumber <- strsplit(vNumber, "\\.")[[1]]
-  versionParts <- length(versionNumber)
-  vNumberKeep <- paste(versionNumber[1:(versionParts-1)], sep= "", collapse= ".")
-  vNumberUpdate <- versionNumber[versionParts]
-
-  ## Replace old version number with new one (increment by 1)
-  oldVersion <- as.numeric(vNumberUpdate)
-  newVersion <- oldVersion + 1
-
-  ## Build final version number
-  vFinal <- paste(vNumberKeep, stringr::str_pad(newVersion, 4, 'left', '0'), sep = ".")
-
-  ## Update DESCRIPTION file (in R)
-  desc[vLine] <- paste0("Version: ", vFinal )
-
-
-  ## Update Data
-  vLine <- grep("^Date\\:", desc)
-  desc[vLine] = sprintf("Date: %s", Sys.Date())
-
-
-  ## Update the actual DESCRIPTION file
-  writeLines(desc, file.path(packageLocation, "DESCRIPTION"))
-
-  ## Return the updated version number to screen
-  return(vFinal)
+### For dev use only:
+gl <- function(..., .envir = parent.frame()){
+  glue::glue(..., .envir = .envir)
 }
 
+catgl <- function(..., .envir = parent.frame(), level = 'DEBUG'){
+  dipsaus::cat2(gl(..., .envir = .envir), level = level)
+}
 
+soft_deprecated <- function(){
+  env = parent.frame()
+  call = do.call(match.call, envir = env, args = list())
+  catgl('Function {call[[1]]} is soft-Deprecated. Details: \n{deparse(call)}', level = 'WARNING')
+}
 
 ### Stores internal settings (session-based)
 .conf_env <- new.env(parent = emptyenv())
 
 get_conf <- function(key, default = NULL){
+  soft_deprecated()
   if(exists(key, envir = .conf_env)){
     return(.conf_env[[key]])
   }else{
@@ -121,6 +103,7 @@ get_conf <- function(key, default = NULL){
 }
 
 set_conf <- function(key, val, remove_if_null = TRUE){
+  soft_deprecated()
   if(remove_if_null && (missing(val) || is.null(val))){
     rm(list = key, envir = .conf_env, inherits = FALSE)
   }else{

@@ -8,20 +8,20 @@ define_input_multiple_electrodes <- function(inputId, label = 'Electrodes'){
         electrodes = preload_info$electrodes
 
         last_input = cache_input(!!inputId, val = as.character(electrodes[1]))
-        e = rutabaga::parse_svec(last_input)
+        e = dipsaus::parse_svec(last_input)
         e = e[e %in% electrodes]
         if(!length(e)){
           e = electrodes[1]
         }
-        value = rutabaga::deparse_svec(e)
-        label = paste0('Electrodes (' , rutabaga::deparse_svec(electrodes) , ')')
+        value = dipsaus::deparse_svec(e)
+        label = paste0(!!label, ' (currently loaded: ' , dipsaus::deparse_svec(electrodes) , ')')
       }
     )
   })
 
   parent_frame = parent.frame()
 
-  rave::eval_dirty(quo, env = parent_frame)
+  dipsaus::eval_dirty(quo, env = parent_frame)
 }
 
 
@@ -46,7 +46,7 @@ define_input_single_electrode <- function(inputId, label = 'Electrode'){
 
   parent_frame = parent.frame()
 
-  rave::eval_dirty(quo, env = parent_frame)
+  dipsaus::eval_dirty(quo, env = parent_frame)
 }
 
 
@@ -80,7 +80,7 @@ define_input_frequency <- function(inputId, label = 'Frequency', is_range = TRUE
 
   parent_frame = parent.frame()
 
-  rave::eval_dirty(quo, env = parent_frame)
+  dipsaus::eval_dirty(quo, env = parent_frame)
 }
 
 
@@ -115,7 +115,7 @@ define_input_time <- function(inputId, label = 'Time Range', is_range = TRUE, ro
 
   parent_frame = parent.frame()
 
-  rave::eval_dirty(quo, env = parent_frame)
+  dipsaus::eval_dirty(quo, env = parent_frame)
 }
 
 define_input_condition_groups_default <- function(inputId, label = 'Group', initial_groups = 1){
@@ -155,6 +155,89 @@ define_input_condition_groups_default <- function(inputId, label = 'Group', init
   
   parent_frame = parent.frame()
   
-  rave::eval_dirty(quo, env = parent_frame)
+  dipsaus::eval_dirty(quo, env = parent_frame)
   
 }
+
+
+
+
+
+
+
+
+
+
+
+define_input_condition_groups <- function(
+  inputId, label = 'Group', initial_groups = 1, max_group = 10, min_group = 1,
+  label_color = rep('black', max_group), init_args, init_expr, quoted = FALSE, ...){
+  
+  if(missing(init_args)){
+    init_args = c('initialize', 'value')
+  }
+  # dipsaus::registerCompoundInput2()
+  
+  if(missing(init_expr)){
+    init_expr = rlang::quo({
+      cond = unique(preload_info$condition)
+      
+      initialization = list(
+        group_conditions = list(
+          choices = cond
+        )
+      )
+      default_val = list(
+        list(
+          group_name = 'All Conditions',
+          group_conditions = list(cond)
+        )
+      )
+      value = cache_input(!!inputId, default_val)
+      if( !length(value) || !length(value[[1]]$group_conditions) || !any(value[[1]]$group_conditions %in% cond)){
+        value = default_val
+      }
+    })
+  }else if (!quoted){
+    init_expr = substitute(init_expr)
+  }
+  
+  quo = rlang::quo({
+    
+    define_input(
+      definition = dipsaus::compoundInput2(
+        inputId = !!inputId, label = !!label, inital_ncomp = !!initial_groups, 
+        components = htmltools::div(
+          textInput('group_name', 'Name', value = '', placeholder = 'Condition Name'),
+          selectInput('group_conditions', ' ', choices = '', multiple = TRUE)
+        ),
+        label_color = !!label_color, max_ncomp = !!max_group, min_group = !!min_group
+      ),
+      
+      init_args = !!init_args,
+      
+      init_expr = eval(!!init_expr)
+    )
+  })
+  
+  parent_frame = parent.frame()
+  
+  dipsaus::eval_dirty(quo, env = parent_frame)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

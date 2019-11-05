@@ -35,7 +35,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
       max_core = max(1, rave_options('max_worker'))
       best_ncores = 4L
       try({
-        tmp = as.integer(floor(mem_limit()$total / 1024^3 / 8))
+        tmp = as.integer(floor(mem_limit2()$total / 1024^3 / 8))
         if(length(tmp) == 1 && !is.na(tmp) && is.integer(tmp) && tmp > 0){
           best_ncores = tmp
         }

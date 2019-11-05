@@ -5,7 +5,7 @@
 \title{A wrapper for shiny Progress object}
 \usage{
 progress(title, max = 1, session = getDefaultReactiveDomain(),
-  quiet = FALSE)
+  quiet = FALSE, ...)
 }
 \arguments{
 \item{title}{Main title for progress bar}
@@ -15,6 +15,8 @@ progress(title, max = 1, session = getDefaultReactiveDomain(),
 \item{session}{shiny session, default is getDefaultReactiveDomain()}
 
 \item{quiet}{nonreactive-only mode? default is FALSE. If TRUE, then progress bar will be hidden in shiny app}
+
+\item{...}{other parameters passing to \code{dipsaus::progress2}}
 }
 \description{
 A wrapper for shiny Progress object

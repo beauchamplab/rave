@@ -5,6 +5,7 @@
 #' @param max How many steps you have for this process
 #' @param session shiny session, default is getDefaultReactiveDomain()
 #' @param quiet nonreactive-only mode? default is FALSE. If TRUE, then progress bar will be hidden in shiny app
+#' @param ... other parameters passing to \code{dipsaus::progress2}
 #' @examples
 #' \dontrun{
 #' # case 1: non-reactive settings
@@ -25,8 +26,11 @@
 progress <- function(
   title, max = 1,
   session = getDefaultReactiveDomain(),
-  quiet = FALSE
+  quiet = FALSE, ...
 ){
+  
+  return(dipsaus::progress2(title = title, max = max, session = session, quiet = quiet, ...))
+  
   env = environment()
   if(is.null(title)){
     title = ''

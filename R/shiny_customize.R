@@ -1,34 +1,4 @@
-#' Re-write shiny actionButton to enable styles
-#' @param inputId,label,icon,width see \code{shiny::actionButton}
-#' @param type default, primary, info... see bootstrap
-#' @param btn_type html tag attribute "type"
-#' @param class additional classes
-#' @param ... other methods passed to actionButton
-#' @export
-actionButtonStyled <- function(inputId, label, icon = NULL, width = NULL, type = 'default', btn_type = 'button', class = '', ...){
-  value <- shiny::restoreInput(id = inputId, default = NULL)
 
-  args = list(...)
-  style = args[['style']]
-  width %?<-% 'auto'
-  style %?<-% ''
-  style = paste0("width: ", validateCssUnit(width), ";", style)
-
-  args[['style']] = style
-  args[['id']] = inputId
-  args[['type']] = btn_type
-  args[['class']] = sprintf("btn btn-%s action-button %s", type, class)
-  args[['data-val']] = value
-  args[['id']] = inputId
-
-  do.call(
-    tags$button,
-    c(
-      list(list(icon, label)),
-      args
-    )
-  )
-}
 
 #' Re-write shiny `fileInput`, but minimal
 #' @param inputId,label,multiple,accept,width see \code{shiny::fileInput}

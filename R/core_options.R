@@ -1,100 +1,92 @@
 # Scripts to handle settings
-
-opt <- list(
-  # Max memory in GB. R cannot auto detect RAM cap in linux and macos so I set this value
-  max_mem = 256,
-
-  # hard drive speed: seconds per MB (sec/MB)
-  drive_speed = c(0.02, 0.05),
-
-  # disable startup disk check (speed test)
-  disable_startup_speed_check = FALSE,
-
-  # check threejsr, rutabaga updates
-  check_updates_onstartup = T,
-
-  # data repositories
-  raw_data_dir = '~/rave_data/raw_dir/',
-  data_dir = '~/rave_data/data_dir/',
-  module_root_dir = '~/rave_modules/',
-  module_lookup_file = '~/rave_modules/modules.csv',
-
-  # Enable logger
-  logger_enabled = TRUE,
-  logger_level = 'DEBUG',
-
-  # color logger
-  crayon_enabled = TRUE,
-
-
-  # init app test_mode
-  test_mode = FALSE,
-
-  # Not really used, might be depricated in the future. currently used to trim environment
-  # and remove big objects
-  big_object_size = 500000,
-
-  # Not used, but maybe useful in the future
-  server_time_zone = 'America/Chicago',
-
-
-  # input update firing speed (20ms default)
-  delay_input = 20,
-
+default_opts <- function(...){
+  # --------------------- Hardware information ---------------------
+  
+  # RAM
+  max_mem = dipsaus::get_ram() / 1024^3
+  
+  # Harddrive speed
+  drive_speed = c(0.02, 0.05)
+  disable_startup_speed_check = FALSE
+  
   # number of cores to be used
-  max_worker = 8L,
-
-  ## SUMA
-
-  suma_to_niml = '~/abin/ConvertDset -o_niml -input %s -i_1D -node_index_1D %s -prefix %s',
-  suma_send_niml = '~/abin/DriveSuma -com surf_cont -load_dset %s',  # Not used because x11 on mac sucks
-  suma_nodes_per_electrodes = 42L,
-  suma_parallel_cores = 2L,
-  # dyld_library_path = '/opt/X11/lib/flat_namespace',
-  suma_lib = c('DYLD_LIBRARY_PATH=/opt/X11/lib/flat_namespace', "DYLD_FALLBACK_LIBRARY_PATH=/Applications/AFNI"),
-  suma_path = '/Applications/AFNI',
-  suma_spec_file = 'test.spec',
-
-  matlab_path = '/Applications/MATLAB_R2016b.app/bin',
-  py2_path = Sys.which('python'),
-  py3_path = Sys.which('python'),
-  py_virtualenv = '',
-
-  # images
-  image_width = 1280L,
-  image_height = 768L,
-
+  max_worker = future::availableCores() - 1
+  
+  # Not used, but maybe useful in the future
+  server_time_zone = 'America/Chicago'
+  
+  # --------------------- RAVE settings ---------------------
+  
+  # Repositories
+  raw_data_dir = '~/rave_data/raw_dir/'
+  data_dir = '~/rave_data/data_dir/'
+  module_root_dir = '~/rave_modules/'
+  module_lookup_file = '~/rave_modules/modules.csv'
+  
+  # Shiny settings
+  # input update firing speed (20ms default)
+  delay_input = 20
+  # init app test_mode
+  test_mode = FALSE
+  
   # Cache
   # Use fst package to cache power phase volt after wavelet and reference?
   # If running in the local machine, we don't need it because h5 is fast enough
   # and h5 with mpi is even faster
   # However, if data is stored at data server, fst is way faster than h5 (single threaded with forked)
   # Also on windows, fst should be faster than hdf5 in general
-  fast_cache = TRUE,
-
-
-
-
-
-
+  fast_cache = TRUE
+  
+  
+  # --------------------- SUMA Setttings ---------------------
+  # this section is not really used anymore as threeBrain can do most of the work
+  # We still keep it in case 
+  suma_nodes_per_electrodes = 42L
+  suma_lib = c('DYLD_LIBRARY_PATH=/opt/X11/lib/flat_namespace', "DYLD_FALLBACK_LIBRARY_PATH=/Applications/AFNI")
+  suma_path = '/Applications/AFNI'
+  suma_spec_file = 'test.spec'
+  
+  
+  # --------------------- Paths ---------------------
+  # Matlab path not used right now
+  matlab_path = '/Applications/MATLAB_R2016b.app/bin'
+  
+  # Python path, soft deprecated
+  py2_path = Sys.which('python')
+  py3_path = Sys.which('python')
+  py_virtualenv = ''
+  
+  # --------------------- Export options ---------------------
+  image_width = 1280L
+  image_height = 768L
+  
+  
+  
+  
+  
   # Deprecated
-  debug = FALSE,
-  session_based_datarepo = FALSE,
-  module_export = './export',
-  content_regex = 'e([0-9]+)[^0-9]*',
-  content_format = 'mat',
-  export_path = './export',
-  temp_dir = 'temp',
-  suma_monitor_dir = 'temp/monitor',
-  suma_export_dir = 'suma',  # [SUBJECT]/suma, must be relative path, dirname, stores spec files
-  suma_gifti_name_regex = 'electrode_[a-zA-Z0-9]+.gii'
-)
+  # debug = FALSE
+  # session_based_datarepo = FALSE
+  # module_export = './export'
+  # content_regex = 'e([0-9]+)[^0-9]*'
+  # content_format = 'mat'
+  # export_path = './export'
+  # temp_dir = 'temp'
+  # suma_monitor_dir = 'temp/monitor'
+  # suma_export_dir = 'suma'  # [SUBJECT]/suma, must be relative path, dirname, stores spec files
+  # suma_gifti_name_regex = 'electrode_[a-zA-Z0-9]+.gii'
+  # logger_enabled = TRUE
+  # logger_level = 'DEBUG'
+  # suma_to_niml = '~/abin/ConvertDset -o_niml -input %s -i_1D -node_index_1D %s -prefix %s'
+  # suma_send_niml = '~/abin/DriveSuma -com surf_cont -load_dset %s'  # Not used because x11 on mac sucks
+  # suma_parallel_cores = 2L
+  # dyld_library_path = '/opt/X11/lib/flat_namespace'
+  # big_object_size = 500000
+  
+  list2env(list(...), envir = environment())
+  as.list(environment())
+}
 
-# TODO We can use this to make sure we are attaching the dataset to the correct surface, asuming we know / can set the surface name of the electrodes
-# -load_dset DSET: Load a dataset
-# ! NOTE: When using -load_dset you can follow it
-# with -surf_label in order to attach
-# the dataset to a particular target surface.
 
 #' Internal R6 class for rave-options
 Options <- R6::R6Class(
@@ -104,16 +96,13 @@ Options <- R6::R6Class(
   ),
   public = list(
     initialize = function(conf_path = '~/.rave.yaml', save_default = F){
-
-      private$opts = opt
-      if(length(conf_path) != 1 || is.na(conf_path) || !is.character(conf_path) || !file.exists(conf_path)){
-        private$opts = opt
-        if(save_default){
-          self$save_settings(path = '~/.rave.yaml')
-        }
-      }else{
-        self$load_settings(conf_path = conf_path)
+      self$reset()
+      loaded = self$load_settings( conf_path )
+      
+      if( !loaded && save_default ){
+        self$save_settings(path = '~/.rave.yaml')
       }
+      
     },
     get_options = function(...){
       re <- private$opts[...]
@@ -130,34 +119,24 @@ Options <- R6::R6Class(
       return(invisible(self$get_options(names(o))))
     },
     reset = function(){
-      private$opts = opt
+      private$opts = default_opts()
     },
-    load_settings = function(
-      conf_path = system.file('settings.yaml', package = 'rave')
-    ){
+    load_settings = function(conf_path){
       if(length(conf_path) != 1 || is.na(conf_path) || !is.character(conf_path) || !file.exists(conf_path)){
-        return()
+        return(FALSE)
       }
       v = yaml::read_yaml(conf_path)
 
       do.call(self$set_options, args = v)
       self$set_options(conf_path = conf_path)
+      return(TRUE)
     },
     save_settings = function(path = '~/.rave.yaml'){
       dname = dirname(path)
       if(!dir.exists(dname)){
         dir.create(dname, showWarnings = FALSE, recursive = TRUE)
       }
-
-      if(!file.exists(path)){
-        self$set_options(max_worker = future::availableCores() - 1)
-        try({
-          ram = mem_limit()$total / 1024^3
-          self$set_options(max_mem = ram)
-        })
-      }
-      opt = private$opts
-      yaml::write_yaml(opt, file = path, fileEncoding = 'UTF-8')
+      yaml::write_yaml(private$opts, file = path, fileEncoding = 'UTF-8')
     }
   )
 )

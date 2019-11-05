@@ -7,19 +7,19 @@ read_yaml <- function(...){
 
 
 cat2 <- function(...){
-  rutabaga::cat2(...)
+  dipsaus::cat2(...)
 }
 
 check_installed_packages <- function(...){
-  rutabaga::check_installed_packages(...)
+  dipsaus::check_installed_packages(...)
 }
 
 parse_svec <- function(...){
-  rutabaga::parse_svec(...)
+  dipsaus::parse_svec(...)
 }
 
 package_installed <- function(...){
-  rutabaga:::package_installed(...)
+  dipsaus:::package_installed(...)
 }
 
 
@@ -103,7 +103,7 @@ ask_question <- function(title, message, ok = 'Yes', cancel = 'No',
 
 }
 
-`%?<-%` <- rave::`%?<-%`
+`%?<-%` <- dipsaus::`%?<-%`
 
 
 is_local_debug <- function(){

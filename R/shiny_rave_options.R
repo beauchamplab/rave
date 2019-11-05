@@ -8,7 +8,7 @@ local({
     # Core Option
     'raw_data_dir' = 'Raw subject data path',
     'data_dir' = 'RAVE subject data path',
-    'crayon_enabled' = 'Color console',
+    # 'crayon_enabled' = 'Color console',
 
     # SUMA
     'suma_path' = 'SUMA path (absolute path)',
@@ -146,30 +146,30 @@ local({
 
 
   ##### Crayon
-  {
-
-    comps[[length(comps) + 1]] = list(
-      type = 'Core Settings',
-      opt_name = 'crayon_enabled',
-      observer = rlang::quo({
-        opt_id = 'crayon_enabled'
-        output_uiid = paste0(opt_id, '_input')
-        resp_uiid = paste0(opt_id, '_ui')
-        output[[output_uiid]] <- renderUI({
-          tagList(
-            span(strong(opt_names[[opt_id]]), ' - Current status: ',
-                 actionLink(opt_id, ifelse(isTRUE(local_data[[opt_id]]), 'Enabled', 'Disabled')))
-          )
-        })
-        observeEvent(input[[opt_id]], {
-          val = !isTRUE(rave_options(opt_id))
-          set_opt(crayon_enabled = val)
-          txt = ifelse(val, 'Enabled', 'Disabled')
-          showNotification(fprintf('Color console is set to - ${{txt}}'), type = 'message', id = paste0(opt_id, '_noty'))
-        })
-      })
-    )
-  }
+  # {
+  # 
+  #   comps[[length(comps) + 1]] = list(
+  #     type = 'Core Settings',
+  #     opt_name = 'crayon_enabled',
+  #     observer = rlang::quo({
+  #       opt_id = 'crayon_enabled'
+  #       output_uiid = paste0(opt_id, '_input')
+  #       resp_uiid = paste0(opt_id, '_ui')
+  #       output[[output_uiid]] <- renderUI({
+  #         tagList(
+  #           span(strong(opt_names[[opt_id]]), ' - Current status: ',
+  #                actionLink(opt_id, ifelse(isTRUE(local_data[[opt_id]]), 'Enabled', 'Disabled')))
+  #         )
+  #       })
+  #       observeEvent(input[[opt_id]], {
+  #         val = !isTRUE(rave_options(opt_id))
+  #         set_opt(crayon_enabled = val)
+  #         txt = ifelse(val, 'Enabled', 'Disabled')
+  #         showNotification(fprintf('Color console is set to - ${{txt}}'), type = 'message', id = paste0(opt_id, '_noty'))
+  #       })
+  #     })
+  #   )
+  # }
 
 
   ##### suma_path

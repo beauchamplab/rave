@@ -544,8 +544,17 @@ Electrode <- R6::R6Class(
         placehold = do.call(cbind, lapply(unique(bvec), function(b){
           sel = bvec == b
           subinds = as.vector(sapply(indices[sel], '[[', 'ind'))
-          a = self[[name]][[b]][subinds]
-          as.vector(a)
+          vec_len = length(self[[name]][[b]])
+          bad_part = (subinds <= 0) | (subinds > vec_len)
+          has_bad_part = any(bad_part)
+          if(has_bad_part){
+            subinds[bad_part] = 1
+          }
+          a = as.vector(self[[name]][[b]][subinds])
+          if(has_bad_part){
+            a[bad_part] = median(a[!bad_part], na.rm = TRUE)
+          }
+          a
         }))
         dim(placehold) = c(dim_3, length(placehold) / dim_3)
 
@@ -626,7 +635,17 @@ Electrode <- R6::R6Class(
           placehold = do.call(cbind, lapply(unique(bvec), function(b){
             sel = bvec == b
             subinds = as.vector(sapply(indices[sel], '[[', 'ind'))
+            
+            ncols = dim(self[[dname]][[b]])[[2]]
+            bad_part = (subinds <= 0) | (subinds > ncols)
+            has_bad_part = any(bad_part)
+            if(has_bad_part){
+              subinds[bad_part] = 1
+            }
             a = self[[dname]][[b]][,subinds, drop = FALSE]
+            if(has_bad_part){
+              a[,bad_part] = median(a[,!bad_part], na.rm = TRUE)
+            }
             a
           }))
           dim(placehold) = c(dim(placehold)[1], dim_3, dim(placehold)[2] / dim_3, 1)
