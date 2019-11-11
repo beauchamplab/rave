@@ -174,7 +174,7 @@ define_input_condition_groups <- function(
   label_color = rep('black', max_group), init_args, init_expr, quoted = FALSE, ...){
   
   if(missing(init_args)){
-    init_args = c('initialize', 'value')
+    init_args = c('initialization', 'value')
   }
   # dipsaus::registerCompoundInput2()
   
@@ -190,7 +190,7 @@ define_input_condition_groups <- function(
       default_val = list(
         list(
           group_name = 'All Conditions',
-          group_conditions = list(cond)
+          group_conditions = cond
         )
       )
       value = cache_input(!!inputId, default_val)

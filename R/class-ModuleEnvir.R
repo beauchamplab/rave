@@ -1,0 +1,527 @@
+# Function to bind functions to exec_env's wrappers
+# e is the execenv and w is its wrapper
+bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
+  w$async_var = function(x, default = NULL){
+    x_name = deparse(substitute(x))
+    val = NULL
+    future_env = self$param_env[['..rave_future_env']]
+    if(is.environment(future_env) || is.list(future_env)){
+      val = future_env[[x_name]]
+      
+      if(!is.null(val)){
+        return(val)
+      }
+    }
+    return(default)
+  }
+  
+  w$reloadUI = function(){
+    self$reload()
+  }
+  
+  w$launch_selector = function(){
+    self$global_reactives$launch_selector = Sys.time()
+  }
+  
+  w$monitor_subject_change = function(){
+    
+    if(shiny::is.reactivevalues(self$local_reactives)){
+      if( self$local_reactives$initialized && self$local_reactives$has_data && self$local_reactives$focused ){
+        base::print('subject changed?')
+        return(TRUE)
+      }
+      return(FALSE)
+    }else{
+      return(FALSE)
+    }
+  }
+  w$get_execenv_local_reactive = function(){
+    self$local_reactives
+  }
+  w$eval_when_ready = function(FUN){
+    if(is.function(FUN)){
+      self$ready_functions[[length(self$ready_functions) + 1]] = FUN
+    }
+  }
+  
+  w$get_client_size = function(){
+    if(is.reactivevalues(self$global_reactives)){
+      return(shiny::isolate(self$global_reactives$client_size))
+    }
+    return(NULL)
+  }
+  
+  w$switch_to = function(module_id, varriable_name = NULL, value = NULL, quiet = F, ...){
+    if(is.reactivevalues(self$global_reactives)){
+      # if missing module_id, jump to last activated module
+      # This is a hidden feature if not specifying module_id
+      # 1. in the dev mode, I'll raise error if module_id is not string
+      # 2. Be careful when using this hidden feature since it might cause infinite loop
+      if(missing(module_id)){
+        module_id = NULL
+        hist = isolate(self$global_reactives$view_history)
+        if(length(hist) > 1){
+          ind = which(vapply(hist, '[[', logical(1L), 'activated'))
+          if(length(ind)){
+            ind = ind[length(ind)]
+            module_id = hist[[ind]]$module_id
+          }
+        }
+      }
+      if(length(module_id)){
+        self$global_reactives$switch_module = c(
+          list(
+            module_id = module_id,
+            varriable_name = varriable_name,
+            value = value,
+            timestamp = Sys.time()
+          ),
+          list(...)
+        )
+      }else{
+        # showNotification(p('Cannot switch back. You have not opened any modules yet.'), type = 'warning')
+        w$launch_selector()
+      }
+    }
+  }
+  
+  w$reload_module = function(){
+    self$clear_cache()
+    self$input_update(list(), init = TRUE)
+  }
+  
+  w$current_module = function(){
+    if(is.reactivevalues(self$global_reactives)){
+      return(isolate(get_val(self$global_reactives, 'execute_module', default = '')))
+    }
+    return('')
+  }
+  
+  w$get_brain = function(surfaces = 'pial', multiple_subject = FALSE){
+    subject = get0('subject', envir = rave::getDefaultDataRepository(), ifnotfound = NULL)
+    brain = NULL
+    if( !is.null(subject) ){
+      brain = rave_brain2(subject = subject, surfaces = surfaces, compute_template = FALSE)
+      if( multiple_subject ){
+        brain = threeBrain::merge_brain(brain)
+      }
+    }
+    brain
+  }
+  
+  w$require = function(package, ..., character.only = TRUE){
+    p = as.character(substitute(package))
+    if(!dipsaus::package_installed(p)){
+      try({
+        cat2("Installing Package ", p, level = 'WARNING')
+        utils::install.packages(p, type = 'binary')
+      })
+    }
+    do.call('require', args = c(list(
+      package = p,
+      character.only = TRUE
+    ),
+    list(...)))
+  }
+  w$library = w$require
+  
+  w$observe = function(x, env = NULL, quoted = FALSE, priority = 0, domain = NULL, ...){
+    if(!quoted){
+      x = substitute(x)
+    }
+    
+    # Make sure shiny doesn't crash
+    x = rlang::quo_squash(rlang::quo(
+      tryCatch({
+        shiny::withLogErrors({!!x})
+      }, error = function(e){
+        showNotification(htmltools::p(htmltools::strong('An error occurred'), htmltools::br(), 'Details: ',
+                                      htmltools::span(as.character(e), style = 'font-style:italic;')), type = 'error')
+      })
+    ))
+    
+    
+    if(!is.environment(env)){
+      env = self$runtime_env
+    }
+    if(is.null(domain)){
+      domain = self$wrapper_env$getDefaultReactiveDomain()
+    }
+    shiny::observe(
+      x = x,
+      env = env,
+      quoted = T,
+      priority = priority - 1L,
+      domain = domain,
+      ...
+    )
+  }
+  
+  
+  w$observeEvent = function(
+    eventExpr, handlerExpr, event.env = NULL,
+    event.quoted = FALSE, handler.env = NULL, handler.quoted = FALSE,
+    priority = 0, domain = NULL, ...
+  ){
+    if(!event.quoted){
+      eventExpr = substitute(eventExpr)
+    }
+    if(!is.environment(event.env)){
+      event.env = self$runtime_env
+    }
+    
+    if(!handler.quoted){
+      handlerExpr = substitute(handlerExpr)
+    }
+    if(!is.environment(handler.env)){
+      handler.env = self$runtime_env
+    }
+    if(is.null(domain)){
+      domain = self$wrapper_env$getDefaultReactiveDomain()
+    }
+    
+    # Make sure shiny doesn't crash
+    handlerExpr = rlang::quo_squash(rlang::quo(
+      tryCatch({
+        shiny::withLogErrors({!!handlerExpr})
+      }, error = function(e){
+        showNotification(htmltools::p(htmltools::strong('An error occurred'), htmltools::br(), 'Details: ',
+                                      htmltools::span(as.character(e), style = 'font-style:italic;')), type = 'error')
+      })
+    ))
+    
+    shiny::observeEvent(
+      eventExpr = eventExpr, handlerExpr = handlerExpr, event.env = event.env,
+      event.quoted = T, handler.env = handler.env, handler.quoted = T,
+      priority = priority - 1L, domain = domain, ...
+    )
+  }
+  
+  if(shiny_mode){
+    w$rave_inputs = self$rave_inputs
+    w$rave_outputs = self$rave_outputs
+    w$rave_updates = self$rave_updates
+    w$rave_execute = self$rave_execute
+    w$rave_checks = function(...){ f = self$static_env[['rave_checks']]; if(is.function(f)) f(...) }
+    w$cache = self$cache
+    w$cache_input = self$cache_input
+    w$rave_ignore = do_nothing
+  }else{
+    w$rave_inputs = rave_inputs
+    w$rave_outputs = rave_outputs
+    w$rave_updates = rave_updates
+    w$rave_execute = rave_execute
+    w$rave_checks = rave_checks
+    w$cache = cache
+    w$cache_input = cache_input
+    w$rave_ignore = rave_ignore
+  }
+  
+  w$export_report = self$export_report
+  w$rave_prepare = do_nothing
+  w$ns = function(id){
+    # ns will be changed during shinirize process
+    self$ns(id)
+  }
+  
+}
+
+
+#' Module class
+#' @export
+ModuleEnvir <- R6::R6Class(
+  classname = 'ModuleEnvir',
+  portable = FALSE,
+  cloneable = FALSE,
+  private = list(
+    exec_env = NULL,
+    cache_env = NULL
+  ),
+  public = list(
+    module_id = '',
+    label_name = '',
+    script_path = '',
+    script = '',
+    author = NULL,
+    version = NULL,
+    packages = NULL,
+    rmd_path = NULL,
+    parent_env = NULL,
+    from_package = FALSE,
+    sidebar_width = 3L,
+    info = function(){
+      cat('Module Name:', self$label_name, '\n')
+      cat('Version:', self$version, '\n')
+      cat('Script Path:', self$script_path, '\n')
+      cat('Author(s):\n')
+      for(a in self$author){
+        cat(' -', a, '\n')
+      }
+    },
+    print = function(...){
+      self$info()
+      env_address(self)
+    },
+    initialize = function(
+      module_id,
+      label_name,
+      script_path,
+      author = NULL,
+      version = '0',
+      packages = NULL,
+      .script_content = NULL,
+      rmd_path = NULL,
+      parent_env = globalenv()
+    ){
+      self$module_id = module_id
+      self$label_name = label_name
+      self$author = author
+      self$version = version
+      self$packages = c('rave', packages)
+      self$rmd_path = rmd_path
+      private$cache_env = list()
+      
+      # Note as of 11/11/2018:
+      # The structure of module is parent_env -> wrapper -> static -> param -> runtime -> (parser)
+      # Before today, all variables are stored in runtime environment. However if parent_env is
+      # a package environment, there is no way for functions within that package to access those
+      # variables within runtime environment.
+      #
+      # We can't set parent environment of package environment since `parent.env<-` is not recommended
+      # However, we can redirect some variables or to the package and evaluate some functions in
+      # different context
+      #
+      ### Solution: (here is mainly for package parent_env)
+      #
+      # Case 1:
+      # If parent_env is globalenv(), we replace with a new one under globalenv as parent_env
+      # In this case, we load module via scripts (not some packages). There is no scoping issue
+      # as scripts are loaded from runtime environment and then migrated to static environment.
+      # All functions are executed in runtime environment and thus this env is the root and all
+      # its parent envs are accessible
+      #
+      # Case 2:
+      # If parent_env is a some environment, we here need it to be either a package environment
+      # or some unlocked environment.
+      #
+      # Either scenarios will need
+      # 1. parent_env is unlocked.
+      #    If parent_env is locked package environment. RAVE will try to unload this environment
+      #    and load it with partial - loadNamespace(..., partial = T)
+      # 2. RAVE needs to be one of the parent envs (search path). If parent_env is created via
+      #    loadNamespace(..., partial = T), this is automatically true as the search path will be
+      #    package << base << globalenv << ... << rave. For non-package environment, easiest case
+      #    would be using new.env(parent = globalenv()). However, non-package environment is not
+      #    recommended unless you know what I'm doing. Best practice would be using rave built-in
+      #    function to create template R module and modify.
+      #
+      ### Scoping
+      # For package based modules, scoping issue is a big problem as package loaded via loadNamespace
+      # can't control their parents and therefore hard to access runtime env
+      #
+      # To solve this problem, I use the following method:
+      #
+      # 1. Active binding rave module toolbox to package environment (this needs the package env
+      #    unlocked)
+      # 2. Make environment inside of `__init__` visible within package environment. This requires
+      #    a dirty-eval (evaluation with side-effects) within package environment for rave_updates (TODO)
+      # 3. rave_execute will be evaluated within runtime env, and return a variable "result", which will
+      #    be use used as inputs of output functions.
+      #
+      # structure will be
+      #
+      # + parent_env: package environment or  (top environment)
+      # | <--- binded module toolbox
+      # | <--- active bind other util functions (redirect to wrappers)
+      # | <--- contains __init__ environment, or anonymous rave_updates variables
+      # | <--- cannot access to all other runtime environment
+      # |
+      # |---+ wrapper (locked)
+      #     | <--- provide util functions
+      #     | <--- rewrite default functions
+      #     |
+      #     |---+ static (locked, not very useful for package-based modules)
+      #         |
+      #         |---+ param environment
+      #             | <--- stores all the inputs parameters
+      #             | <--- stores all anonymous rave_updates variables (will be removed)
+      #             | <--- stores async futures
+      #             |
+      #             |---+ runtime environment
+      #                 | <--- rave_updates runs here
+      #
+      # Modified on Nov 12, 2018
+      # It turns out even if we active bind variables to package environment, functions within
+      # package cannot access those active bindings. Reasons are simple, when packages are loaded
+      # via loadNamespace, there seems to be a prototype environment created internally from inside
+      # of R. After that, all "loadNamespace" will just copy from that internal environment and all
+      # functions in the package are redirected to the locked environment and thus we can change
+      # nothing to that environment.
+      #
+      # package env (prototype, may be locked)
+      #    ^
+      #    |
+      # package namespaces via loadNamespace (reference env, with active binding)
+      #
+      # Package functions may not look at the namespace they stay in. Instead, they are referenced
+      # to prototype environment sometimes.
+      #
+      # This is sad. Because solution 1 seems not working if the namespace is loaded in other places
+      # and we cannot control users' action. Therefore, I change the implementation back and only make
+      # __init__ and __main__ special
+      #
+      # __init__ is evaluated at param_env
+      # __main__ is evaluated at runtime_env
+      #
+      # hence all variables in __init__ can be accessed by __main__
+      #
+      # These two functions can access all variables. However, other functions can only access
+      # "result" returned by __main__
+      #
+      # This is sad, but very robust as we don't need strict assumptions
+      #
+      
+      
+      if(!is.environment(parent_env) || identical(parent_env, globalenv())){
+        parent_env = new.env(parent = globalenv(), hash = T)
+      }
+      self$parent_env = parent_env
+      
+      # validate script_path
+      if(missing(script_path)){
+        stopifnot2(!is.null(.script_content), msg = 'Script Path not specified')
+        script_path = file.path(dirname(rmd_path), '.rave_tmp.R')
+        writeLines(.script_content, script_path)
+      }
+      
+      stopifnot2(file.exists(script_path), msg = sprintf('[File Not Found] %s', script_path))
+      script_path = base::normalizePath(script_path)
+      self$script_path = script_path
+      
+    },
+    get_or_new_exec_env = function(session = getDefaultReactiveDomain(), ..., new = FALSE){
+      session_id = add_to_session(session)
+      if(is.null(session_id)){
+        session_id = '.TEMP'
+      }
+      
+      if(new || is.null(private$exec_env[[session_id]])){
+        private$exec_env[[session_id]] = ExecEnvir$new(session = session, parent_env = self$parent_env)
+        private$exec_env[[session_id]]$register_module(self)
+      }
+      if(!session_id %in% names(private$cache)){
+        private$cache_env[[session_id]] = new.env()
+      }
+      return(private$exec_env[[session_id]])
+    },
+    load_script = function(session = getDefaultReactiveDomain()){
+      # load default script
+      default_src = readLines(system.file('default_module.R', package = 'rave'))
+      # read in script, get package info
+      src = readLines(self$script_path)
+      src = c(default_src, src)
+      
+      # get
+      static_env = self$get_or_new_exec_env(session = session)$static_env
+      parse_env = self$get_or_new_exec_env(session = session)$parse_env
+      runtime_env = self$get_or_new_exec_env(session = session)$runtime_env
+      clear_env(parse_env)
+      
+      
+      parsed = parse(text = src)
+      for(i in 1:length(parsed)){
+        
+        # Use eval_dirty
+        # Do not use str_c, use as.character instead to avoid warnings
+        tryCatch({
+          dipsaus::eval_dirty(parsed[i], env = runtime_env)
+        }, error = function(e){
+          cat2('[Ignored]: ', as.character(parsed[i]), level = 'INFO')
+          cat2(paste(e, sep = '\n'), level = 'WARNING')
+        })
+        
+        # comp = lazyeval::as.lazy(str_c(parsed[i]), env = static_env)
+        # tryCatch({
+        #   lazyeval::lazy_eval(comp)
+        #   # cat2('[Parsed]: ', str_c(parsed[i]), level = 'DEBUG')
+        # }, error = function(e){
+        #   cat2('[Ignored]: ', str_c(parsed[i]), level = 'INFO')
+        #   cat2(paste(e, sep = '\n'), level = 'WARNING')
+        # })
+      }
+      
+      # Move everything to statis env
+      list2env(as.list(runtime_env, all.names = T), envir = static_env)
+      clear_env(runtime_env)
+      
+      # re-direct function environment to runtime-env where rave_execute take place.
+      # for(nm in ls(static_env, all.names = T)){
+      #   if(is.function(static_env[[nm]])){
+      #     environment(static_env[[nm]]) <- runtime_env
+      #   }
+      # }
+      
+      # lockEnvironment(static_env)
+      
+    },
+    cache = function(key, val, session, replace = FALSE){
+      session_id = add_to_session(session)
+      if(is.null(session_id)){
+        session_id = '.TEMP'
+      }
+      if(!is.environment(private$cache_env[[session_id]])){
+        private$cache_env[[session_id]] = new.env()
+      }
+      env = private$cache_env[[session_id]]
+      if(!replace && exists(key, envir = env)){
+        return(get(key, envir = env))
+      }else{
+        # assume val is evaluated
+        if(!missing(val) && !is.null(val)){
+          force(val)
+          assign(key, val, envir = env)
+          return(val)
+        }else{
+          return(NULL)
+        }
+      }
+    },
+    render_ui = function(session = getDefaultReactiveDomain()){
+      e = self$get_or_new_exec_env(session = session)
+      if(length(e$input_ids)){
+        sidebar_width = self$sidebar_width
+      }else{
+        sidebar_width = 0
+      }
+      shiny::fluidRow(
+        uiOutput(e$ns('.__rave_modal__.')),
+        e$generate_input_ui(sidebar_width = sidebar_width),
+        e$generate_output_ui(sidebar_width = sidebar_width)
+      )
+      
+    },
+    clean = function(session = getDefaultReactiveDomain(),
+                     session_id){
+      
+      if(missing(session_id)){
+        session_id = add_to_session(session)
+      }
+      if(is.character(session_id)){
+        # clear cache
+        cache_env = private$cache_env[[session_id]]
+        if(is.environment(cache_env)){
+          rm(list = ls(envir = cache_env, all.names = T), envir = cache_env)
+        }
+        private$cache_env[[session_id]] = NULL
+        
+        # Clear runtime_env
+        exec_env = private$exec_env[[session_id]]
+        if('ExecEnvir' %in% class(exec_env)){
+          exec_env$clean()
+        }
+        private$exec_env[[session_id]] = NULL
+      }
+    }
+  )
+)
+

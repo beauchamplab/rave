@@ -21,7 +21,7 @@ if(is.null(session)){
 
 #global_reactives$execute_module
 output[['.__rave_modal__.']] <- renderUI({
-  logger('Prepared to show data loading modal')
+  dipsaus::cat2('Prepared to show data loading modal')
   # Unlock data loading
   `.__internal_reactives__.`[['prevent_load']] = FALSE
 
@@ -39,7 +39,7 @@ output[['.__rave_modal__.']] <- renderUI({
   }
   # miss_data_comps = `.__internal_reactives__.`[['miss_data_comps']]
   if(!miss_data || !length(miss_data_message)){
-    logger('No data is missing, proceed.')
+    dipsaus::cat2('No data is missing, proceed.')
     return(NULL)
   }
 
@@ -58,7 +58,7 @@ output[['.__rave_modal__.']] <- renderUI({
       style = 'margin-left:15px;',
       "Load Data"
     )
-    data_msg = sprintf('Estimated size: %s, (%.1f seconds)', to_ram_size(total_size), total_size * 3 * speed / 1e6)
+    data_msg = sprintf('Estimated size: %s, (%.1f seconds)', dipsaus::to_ram_size(total_size), total_size * 3 * speed / 1e6)
   }
 
   div(
@@ -108,8 +108,8 @@ observeEvent(input[['.__load_data__.']], {
 
     tryCatch({
       for(i in seq_len(n_data)){
-        progress$inc(message = msg[[i]])
-        eval_dirty(quos[[i]], env = ..runtime_env)
+        progress$inc(msg[[i]])
+        dipsaus::eval_dirty(quos[[i]], env = ..runtime_env)
       }
       `.__internal_reactives__.`[['miss_data']] = F
     }, error = function(e){
@@ -163,7 +163,7 @@ rave_checks = function(..., data = NULL){
         }))
         size = n1 * n2 * n3 * n4 * base_size
         total_size = total_size + size
-        size = to_ram_size(size)
+        size = dipsaus::to_ram_size(size)
 
         # check if directory exists
         if(!data_check$check$power_dir){
@@ -182,7 +182,7 @@ rave_checks = function(..., data = NULL){
         }))
         size = n1 * n2 * n3 * n4 * base_size
         total_size = total_size + size
-        size = to_ram_size(size)
+        size = dipsaus::to_ram_size(size)
 
         # check if directory exists
         if(!data_check$check$phase_dir){
@@ -208,7 +208,7 @@ rave_checks = function(..., data = NULL){
           size = n_el * n_tp * base_size
           total_size = total_size + size
 
-          size = to_ram_size(size)
+          size = dipsaus::to_ram_size(size)
 
           msg = c(msg, sprintf('Voltage (No epoch, %s)', size))
         }
@@ -222,7 +222,7 @@ rave_checks = function(..., data = NULL){
           size = n1 * n3 * n4 * base_size / srate_wave * srate_volt
           total_size = total_size + size
 
-          size = to_ram_size(size)
+          size = dipsaus::to_ram_size(size)
 
           # check if directory exists
           if(!data_check$check$phase_dir){

@@ -153,7 +153,7 @@ define_output_3d_viewer <- function(
           #   tryCatch({
           #     re = f(brain)
           #   }, error = function(e){
-          #     rave::logger(e, level = 'ERROR')
+          #     dipsaus::cat2(e, level = 'ERROR')
           #   })
           # 
           # }else{
