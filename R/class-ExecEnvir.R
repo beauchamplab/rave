@@ -230,58 +230,58 @@ ExecEnvir <- R6::R6Class(
       }
       return(invisible(self$runtime_env))
     },
-    export_report = function(expr, inputId = 'electrode', electrodes = NULL, async = F){
-      .Deprecated('This function is deprecated', msg = 'Please avoid using this function in your module.')
-
-      # assign('aaa', environment(), envir = globalenv())
-      expr = substitute(expr)
-      params = as.list(self$param_env)
-
-      preload_info = get('preload_info', self$param_env)
-      preload_electrodes = preload_info$electrodes
-      reload = T
-      if(!length(electrodes)){
-        electrodes = preload_electrodes
-        reload = F
-      }else if(setequal(electrodes, preload_electrodes)){
-        reload = F
-      }
-
-      new = self$copy()
-
-      progress = progress('Exporting Report', max = length(electrodes))
-      on.exit({progress$close()}, add = T)
-      rave_data = getDefaultDataRepository()
-
-      tryCatch({
-        sid = rave_data$subject$id
-        epoch_info = rave_data$.private$meta$epoch_info
-        lapply_async(electrodes, function(e){
-          if(reload){
-            rave_prepare(
-              subject = sid,
-              electrodes = e,
-              epoch = epoch_info$name,
-              time_range = epoch_info$time_range,
-              reference = rave_data$preload_info$reference_name,
-              data_types = NULL,
-              attach = F
-            )
-          }
-          pm = params
-          pm[[inputId]] = e
-          new$execute_with(pm, async = async)
-          eval(expr, envir = new$runtime_env)
-        }, .call_back = function(i){
-          progress$inc(sprintf('Calculating %d (%d of %d)', electrodes[i], i, length(electrodes)))
-        }) ->
-          fs
-        return(fs)
-      }, error = function(e){
-        cat2(stringr::str_c(utils::capture.output({traceback(e)}), collapse = '\n'), level = 'ERROR')
-        return(NULL)
-      })
-    },
+    # export_report = function(expr, inputId = 'electrode', electrodes = NULL, async = F){
+    #   .Deprecated('This function is deprecated', msg = 'Please avoid using this function in your module.')
+    # 
+    #   # assign('aaa', environment(), envir = globalenv())
+    #   expr = substitute(expr)
+    #   params = as.list(self$param_env)
+    # 
+    #   preload_info = get('preload_info', self$param_env)
+    #   preload_electrodes = preload_info$electrodes
+    #   reload = T
+    #   if(!length(electrodes)){
+    #     electrodes = preload_electrodes
+    #     reload = F
+    #   }else if(setequal(electrodes, preload_electrodes)){
+    #     reload = F
+    #   }
+    # 
+    #   new = self$copy()
+    # 
+    #   progress = progress('Exporting Report', max = length(electrodes))
+    #   on.exit({progress$close()}, add = T)
+    #   rave_data = getDefaultDataRepository()
+    # 
+    #   tryCatch({
+    #     sid = rave_data$subject$id
+    #     epoch_info = rave_data$.private$meta$epoch_info
+    #     lapply_async(electrodes, function(e){
+    #       if(reload){
+    #         rave_prepare(
+    #           subject = sid,
+    #           electrodes = e,
+    #           epoch = epoch_info$name,
+    #           time_range = epoch_info$time_range,
+    #           reference = rave_data$preload_info$reference_name,
+    #           data_types = NULL,
+    #           attach = F
+    #         )
+    #       }
+    #       pm = params
+    #       pm[[inputId]] = e
+    #       new$execute_with(pm, async = async)
+    #       eval(expr, envir = new$runtime_env)
+    #     }, .call_back = function(i){
+    #       progress$inc(sprintf('Calculating %d (%d of %d)', electrodes[i], i, length(electrodes)))
+    #     }) ->
+    #       fs
+    #     return(fs)
+    #   }, error = function(e){
+    #     cat2(stringr::str_c(utils::capture.output({traceback(e)}), collapse = '\n'), level = 'ERROR')
+    #     return(NULL)
+    #   })
+    # },
     names = function(x){
       if(is.list(x)){
         nm = base::names(x)

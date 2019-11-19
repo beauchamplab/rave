@@ -188,11 +188,11 @@ read_mgrid <- function(con, raw = F){
 #' depending on subjects
 #' @examples
 #' 
+#' \dontrun{
 #' subject = 'Demo/YAB'
 #' # or create subject object
 #' subject = Subject$new('Demo', 'YAB')
-#'
-#' \dontrun{
+#' 
 #' # Please download sample subjects first to run
 #' suma_spec_parse(subject)
 #' }
