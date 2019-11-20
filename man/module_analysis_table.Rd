@@ -4,8 +4,12 @@
 \alias{module_analysis_table}
 \title{Get subject exported analysis table}
 \usage{
-module_analysis_table(project_name, module_id, analysis_name,
-  check_valid = FALSE)
+module_analysis_table(
+  project_name,
+  module_id,
+  analysis_name,
+  check_valid = FALSE
+)
 }
 \arguments{
 \item{project_name}{project name}

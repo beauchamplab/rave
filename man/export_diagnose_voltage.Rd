@@ -4,10 +4,22 @@
 \alias{export_diagnose_voltage}
 \title{Export voltage (analog trace) diagnostic plots for each electrode}
 \usage{
-export_diagnose_voltage(subject, electrodes, blocks,
-  save_dir = "./export", width = 12, height = 7, useDingbats = F,
-  onefile = T, winlen, freq_lim, nclass = 50, fore_col = "black",
-  back_col = "grey80", ...)
+export_diagnose_voltage(
+  subject,
+  electrodes,
+  blocks,
+  save_dir = "./export",
+  width = 12,
+  height = 7,
+  useDingbats = F,
+  onefile = T,
+  winlen,
+  freq_lim,
+  nclass = 50,
+  fore_col = "black",
+  back_col = "grey80",
+  ...
+)
 }
 \arguments{
 \item{subject}{character with the following format: \code{"project_name/subject_code"}}

@@ -4,8 +4,14 @@
 \alias{module_analysis_save}
 \title{Save analysis to look up tables}
 \usage{
-module_analysis_save(project_name, subject_code, module_id, analysis_name,
-  file, meta = NULL)
+module_analysis_save(
+  project_name,
+  subject_code,
+  module_id,
+  analysis_name,
+  file,
+  meta = NULL
+)
 }
 \arguments{
 \item{project_name}{project name}

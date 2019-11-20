@@ -4,9 +4,19 @@
 \alias{lapply_async}
 \title{lapply using future package (async)}
 \usage{
-lapply_async(x, fun, ..., .ncores = 0, .call_back = NULL,
-  .packages = NULL, .envir = environment(), .globals = TRUE,
-  .gc = TRUE, .as_datatable = FALSE, .nrows = 0)
+lapply_async(
+  x,
+  fun,
+  ...,
+  .ncores = 0,
+  .call_back = NULL,
+  .packages = NULL,
+  .envir = environment(),
+  .globals = TRUE,
+  .gc = TRUE,
+  .as_datatable = FALSE,
+  .nrows = 0
+)
 }
 \arguments{
 \item{x, fun, ...}{(See ?lapply)}
@@ -38,7 +48,7 @@ lapply_async(1:10, function(x){
   Sys.sleep(2) # Run for 1 secs
   Sys.getpid()
 }, .ncores = 3, .call_back = function(i){
-  cat('Running iteration -', i, '\\n')
+  cat('Running iteration -', i, '\n')
 })
 }
 }

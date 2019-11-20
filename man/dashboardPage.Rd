@@ -4,9 +4,16 @@
 \alias{dashboardPage}
 \title{Shiny dashboard-adminLTE overrides - dashboardPage}
 \usage{
-dashboardPage(header, sidebar, control, body, title = NULL,
+dashboardPage(
+  header,
+  sidebar,
+  control,
+  body,
+  title = NULL,
   skin = c("blue", "black", "purple", "green", "red", "yellow"),
-  controlbar_opened = FALSE, initial_mask = NULL)
+  controlbar_opened = FALSE,
+  initial_mask = NULL
+)
 }
 \arguments{
 \item{header}{dashboardHeader object}

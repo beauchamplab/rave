@@ -4,8 +4,13 @@
 \alias{progress}
 \title{A wrapper for shiny Progress object}
 \usage{
-progress(title, max = 1, session = getDefaultReactiveDomain(),
-  quiet = FALSE, ...)
+progress(
+  title,
+  max = 1,
+  session = getDefaultReactiveDomain(),
+  quiet = FALSE,
+  ...
+)
 }
 \arguments{
 \item{title}{Main title for progress bar}

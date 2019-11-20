@@ -4,12 +4,25 @@
 \alias{bulk_wavelet}
 \title{Bulk run wavelet (deprecated)}
 \usage{
-bulk_wavelet(project_name, subject_code, blocks, channels, srate,
-  target_srate = 100, frequencies = seq(4, 200, by = 4),
-  wave_num = c(3, 14), compress = 1, replace = F,
-  save_original = F, ncores = future::availableCores() - 2,
-  plan = NULL, save_dir = "cache_dir", filename = "\%d.h5",
-  reference_name = "CAR", ...)
+bulk_wavelet(
+  project_name,
+  subject_code,
+  blocks,
+  channels,
+  srate,
+  target_srate = 100,
+  frequencies = seq(4, 200, by = 4),
+  wave_num = c(3, 14),
+  compress = 1,
+  replace = F,
+  save_original = F,
+  ncores = future::availableCores() - 2,
+  plan = NULL,
+  save_dir = "cache_dir",
+  filename = "\%d.h5",
+  reference_name = "CAR",
+  ...
+)
 }
 \arguments{
 \item{project_name}{project_name}

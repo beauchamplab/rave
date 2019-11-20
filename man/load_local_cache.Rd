@@ -4,9 +4,16 @@
 \alias{load_local_cache}
 \title{Load local cache for fast importing voltage, power, and phase}
 \usage{
-load_local_cache(project_name, subject_code, epoch, time_range,
-  frequency_range = NULL, electrodes, referenced = FALSE,
-  data_type = "voltage")
+load_local_cache(
+  project_name,
+  subject_code,
+  epoch,
+  time_range,
+  frequency_range = NULL,
+  electrodes,
+  referenced = FALSE,
+  data_type = "voltage"
+)
 }
 \arguments{
 \item{project_name}{project name}

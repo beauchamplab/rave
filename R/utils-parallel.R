@@ -120,3 +120,310 @@ lapply_async <- function(
   
   return(.future_values)
 }
+
+# lapply_async <- function(
+#   x, fun, ..., .ncores = 0, .call_back = NULL, .packages = NULL,
+#   .envir = environment(), .globals = TRUE, .gc = TRUE, .as_datatable = FALSE,
+#   .nrows = 0
+# ){
+#   if(!length(x)){
+#     return(list())
+#   }
+#   .colnames = paste0('V', seq_along(x))
+#   .ncores = as.integer(.ncores)
+#   if(.ncores <= 0){
+#     .ncores = rave_options('max_worker')
+#   }
+#   # compatible with windows
+#   args = list(...)
+#   if(stringr::str_detect(Sys.info()['sysname'], '^[wW]in') || .ncores == 1){
+#     return(lapply(seq_along(x), function(ii){
+#       if(is.function(.call_back)){
+#         try({
+#           .call_back(ii)
+#         })
+#         do.call(fun, c( list(quote(x[ii])), args), envir = environment())
+#       }
+#     }))
+#   }
+#   
+#   
+#   if(is.null(.packages)){
+#     .packages = stringr::str_match(search(), 'package:(.*)')
+#     .packages = .packages[,2]
+#     .packages = rev(.packages[!is.na(.packages)])
+#   }
+#   .niter = length(x)
+#   
+#   
+#   rave_setup_workers(.ncores)
+#   if(.ncores != rave_options('max_worker')){
+#     on.exit({
+#       rave_setup_workers()
+#     })
+#   }
+#   
+#   
+#   .future_list = list()
+#   
+#   if(.as_datatable){
+#     .future_values = data.table::data.table(
+#       V1 = rep(NA, .nrows),
+#       keep.rownames = F, stringsAsFactors = F
+#     )
+#   }else{
+#     .future_values = list()
+#   }
+#   
+#   
+#   
+#   
+#   if(.niter == 0){
+#     return(list())
+#   }
+#   
+#   .this_env = environment()
+#   ..started = FALSE
+#   
+#   
+#   lapply(seq_along(x), function(.i){
+#     if(is.function(.call_back)){
+#       try({
+#         .call_back(.i)
+#       })
+#     }
+#     
+#     expr = rlang::quo_squash(rlang::quo({ do.call(fun, c(list(quote(x[[!!.i]])), args)) }))
+#     
+#     .this_env$.future_list[[length(.future_list) + 1]] = future::future(expr, envir = .envir, substitute = FALSE, lazy = FALSE, globals = .globals, .packages = .packages, gc = .gc)
+#     
+#     
+#     if(length(.future_list) >= .ncores){
+#       # wait for one of futures resolved
+#       if(!..started && .as_datatable){
+#         .this_env$..started = TRUE
+#         .this_env$.future_values[[1]] = future::value(.future_list[[1]])
+#       }else{
+#         .this_env$.future_values[[1 + length(.future_values)]] = future::value(.future_list[[1]])
+#       }
+#       
+#       .this_env$.future_list[[1]] = NULL
+#     }
+#   })
+#   
+#   if(length(.future_list)){
+#     future::resolve(.future_list)
+#     while(length(.future_list)){
+#       .future_values[[1 + length(.future_values)]] = future::value(.future_list[[1]])
+#       .future_list[[1]] = NULL
+#     }
+#   }
+#   
+#   return(.future_values)
+# }
+
+
+
+
+setup_async_evaluator <- local({
+  id = rand_string()
+  initialized = FALSE
+  eval_path = file.path('~/rave_data/cache_dir/EVALUATOR', id)
+  nworkers = 0
+  evaluator = NULL
+  
+  function(reset = FALSE, ...){
+    
+    max_worker = rave_options('max_worker')
+    if(nworkers == 0){
+      nworkers <<- max_worker
+    }
+    
+    if(!reset){
+      if(!initialized && dir.exists(eval_path)){
+        unlink(eval_path, recursive = TRUE, force = TRUE)
+      }
+      
+      evaluator <<- dipsaus::make_async_evaluator(
+        name = '.__RAVE_INTERNAL__.', path = eval_path, 
+        n_nodes = 1, n_subnodes = nworkers, ...)
+      if(initialized && nworkers != max_worker){
+        scale_fun = ifelse(max_worker > nworkers, 'scale_up', 'scale_down')
+        nworkers <<- max_worker
+        evaluator[[scale_fun]](1, nworkers)
+      }
+      
+    }else{
+      if( initialized ){
+        evaluator <- dipsaus::make_async_evaluator(
+          name = '.__RAVE_INTERNAL__.', path = eval_path, 
+          n_nodes = 1, n_subnodes = nworkers)
+        evaluator$terminate()
+      }
+      
+      unlink(eval_path, recursive = TRUE, force = TRUE)
+      
+      evaluator <<- dipsaus::make_async_evaluator(
+        name = '.__RAVE_INTERNAL__.', path = eval_path, 
+        n_nodes = 1, n_subnodes = nworkers, ...)
+    }
+    
+    
+    if(!initialized){
+      rave:::RaveFinalizer$new(function(...){
+        try({
+          evaluator$terminate()
+        }, silent = TRUE)
+      })
+    }
+    
+    initialized <<- TRUE
+    
+    evaluator
+  }
+})
+async <- function(expr, varname, success = NULL, failure = NULL, 
+                  quoted = FALSE, assign_env = new.env(parent = emptyenv()), 
+                  eval_env = parent.frame(), ..., .list = list(), 
+                  ...map = dipsaus::text_map(), ...debug = FALSE,
+                  evaluator = NULL){
+  s = Sys.time()
+  if(!quoted){
+    expr <- rlang::enquo(expr)
+  }
+  expr1 <- rlang::quo({
+    ...map = !!...map
+    if(...map$get(!!varname, missing_default = 0) == 0){
+      re = rlang::eval_tidy(!!expr)
+      ...map$set(!!varname, 1)
+      re
+    }
+  })
+  expr2 <- rlang::quo({
+    ...map = !!...map
+    re = rlang::eval_tidy(!!expr)
+    ...map$set(!!varname, 2)
+    re
+  })
+  base::print(Sys.time() - s)
+  
+  # incase the result is not evaluated
+  
+  delayedAssign(varname, {
+    rlang::eval_tidy(expr2, env = eval_env)
+  }, assign.env = assign_env)
+  
+  # TODO: wrap this into a internal function
+  if(...debug){
+    cat2('Obtain evaluator')
+  }
+  base::print(Sys.time() - s)
+  
+  if(is.null(evaluator)){
+    evaluator <- setup_async_evaluator()
+  }
+  
+  base::print(Sys.time() - s)
+  
+  if(...debug){
+    cat2('Schedule task - ', varname)
+  }
+  
+  evaluator$run(
+    expr = expr1,
+    success = function(res){
+      base::print(Sys.time() - s)
+      if(...map$get(varname, 0) == 1){
+        if(...debug){
+          cat2('Captured - ', varname)
+        }
+        assign_env[[varname]] <- res
+        if(is.function(success)){
+          success(res)
+        }
+      }else{
+        if(...debug){
+          cat2('Value already calculated, skipping assignment - ', varname)
+        }
+      }
+    },
+    failure = failure, 
+    ..., .list = .list, quoted = TRUE
+  )
+  base::print(Sys.time() - s)
+  
+  
+  assign_env
+  
+}
+
+
+lapply_async2 <- function(X, FUN, ..., .list = list(), .map = NULL, .await = TRUE){
+  eval_env = parent.frame()
+  assign_env <- new.env(parent = emptyenv())
+  indices <- as.character(seq_along(X))
+  if(is.null(.map)){
+    .map = dipsaus::text_map()
+  }
+  .map$reset()
+  .evaluator = setup_async_evaluator()
+  .master_evaluator = .evaluator$get_instance()
+  .master_evaluator$reset()
+  
+  local({
+    dipsaus::iapply(X, function(el, ii){
+      
+      quo <- FUN(el, ...)
+      
+      
+      if(rlang::is_quosure(quo)){
+        quo = list(expr = quo)
+      }
+      quo$varname = as.character(ii)
+      quo$quoted = TRUE
+      quo$assign_env = assign_env
+      quo$...map = .map
+      quo$evaluator = .evaluator
+      quo$eval_env = eval_env
+      
+      for(nm in names(.list)){
+        quo[[nm]] = .list[[nm]]
+      }
+      do.call('async', quo)
+      FALSE
+    }, .method = 'vapply', FUN.VALUE = FALSE)
+  })
+  
+  assign_env$evaluated <- function(ii){
+    .map$get(as.character(ii), missing_default = 0) > 0
+  }
+  assign_env$as_list <- function(clean = TRUE){
+    re <- lapply(indices, function(ii){
+      assign_env[[ii]]
+    })
+    if(clean){
+      clear_env(assign_env)
+    }
+    re
+  }
+  assign_env$resolved <- function(){
+    sapply(indices, assign_env$evaluated)
+  }
+  
+  if(.await){
+    while (!all(assign_env$resolved())) {
+      # Sys.sleep(.await)
+      if(isTRUE(.list[['...debug']])){
+        print(assign_env$resolved())
+      }
+      # .master_evaluator$`@listen`()
+      later::run_now(.master_evaluator$listen_interval + 0.1)
+    }
+    return(assign_env$as_list())
+  }else{
+    return(assign_env)
+  }
+  
+  
+}
+

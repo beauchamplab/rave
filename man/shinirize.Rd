@@ -4,8 +4,7 @@
 \alias{shinirize}
 \title{Convert module to objects used in shiny}
 \usage{
-shinirize(module, session = getDefaultReactiveDomain(),
-  test.mode = TRUE)
+shinirize(module, session = getDefaultReactiveDomain(), test.mode = TRUE)
 }
 \arguments{
 \item{module}{ModuleEnvir object}

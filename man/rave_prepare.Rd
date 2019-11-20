@@ -4,9 +4,19 @@
 \alias{rave_prepare}
 \title{Function to load subject and create ECoG data environment}
 \usage{
-rave_prepare(subject, electrodes, epoch, time_range, frequency_range,
-  data_types = c("power"), reference = "default", attach = "r",
-  data_env = getDefaultDataRepository(), strict = FALSE, ...)
+rave_prepare(
+  subject,
+  electrodes,
+  epoch,
+  time_range,
+  frequency_range,
+  data_types = c("power"),
+  reference = "default",
+  attach = "r",
+  data_env = getDefaultDataRepository(),
+  strict = FALSE,
+  ...
+)
 }
 \arguments{
 \item{subject}{characters, format: "PROJECT/SUBJECT"}

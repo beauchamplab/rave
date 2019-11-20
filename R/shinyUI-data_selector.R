@@ -26,7 +26,7 @@ shiny_data_selector <- function(module_id){
   
   
   
-  server = function(input, output, session, global_reactives){
+  server = function(input, output, session, global_reactives, clear_cache = NULL){
     # Vars
     group = 'main_app2'
     local_data = reactiveValues(
@@ -910,7 +910,10 @@ shiny_data_selector <- function(module_id){
       last_entry('epoch_name', epoch, save = T, group = group)
       last_entry('time_range', epoch_range, save = T, group = group)
       last_entry('reference_name', reference, save = T, group = group)
-      
+      if(is.function(clear_cache)){
+        clear_cache()
+        gc()
+      }
       rave_prepare(
         subject = subject_id,
         electrodes = electrodes,

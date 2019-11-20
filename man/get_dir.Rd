@@ -4,8 +4,14 @@
 \alias{get_dir}
 \title{Get all directories that rave uses}
 \usage{
-get_dir(subject_code, project_name, block_num, mkdirs = NULL, subject_id,
-  relative = F)
+get_dir(
+  subject_code,
+  project_name,
+  block_num,
+  mkdirs = NULL,
+  subject_id,
+  relative = F
+)
 }
 \arguments{
 \item{subject_code}{subject_code}

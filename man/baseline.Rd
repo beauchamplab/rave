@@ -4,9 +4,20 @@
 \alias{baseline}
 \title{Baseline signals}
 \usage{
-baseline(el, from, to, method = "mean", unit = "\%", data_only = F,
-  hybrid = TRUE, swap_file = tempfile(), mem_optimize = TRUE,
-  same_dimension = unit \%in\% c("\%", "dB"), preop = NULL, op)
+baseline(
+  el,
+  from,
+  to,
+  method = "mean",
+  unit = "\%",
+  data_only = F,
+  hybrid = TRUE,
+  swap_file = tempfile(),
+  mem_optimize = TRUE,
+  same_dimension = unit \%in\% c("\%", "dB"),
+  preop = NULL,
+  op
+)
 }
 \arguments{
 \item{el}{Tensor or ECoGTensor object}

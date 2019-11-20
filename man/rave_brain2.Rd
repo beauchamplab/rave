@@ -4,8 +4,12 @@
 \alias{rave_brain2}
 \title{Tools to load and view brain in 3D viewer}
 \usage{
-rave_brain2(subject, surfaces = "pial", use_141 = TRUE,
-  compute_template = FALSE)
+rave_brain2(
+  subject,
+  surfaces = "pial",
+  use_141 = TRUE,
+  compute_template = FALSE
+)
 }
 \arguments{
 \item{subject}{character or `RAVE` subject instance}

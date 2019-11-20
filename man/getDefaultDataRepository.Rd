@@ -4,8 +4,11 @@
 \alias{getDefaultDataRepository}
 \title{Get environment where subject data is loaded}
 \usage{
-getDefaultDataRepository(session = getDefaultReactiveDomain(),
-  session_id, session_based = NULL)
+getDefaultDataRepository(
+  session = getDefaultReactiveDomain(),
+  session_id,
+  session_based = NULL
+)
 }
 \arguments{
 \item{session}{shiny session, default is NULL}

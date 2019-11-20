@@ -4,11 +4,25 @@
 \alias{plot_signals}
 \title{Plot signals line by line}
 \usage{
-plot_signals(signals, sample_rate = 1, col = 1, space = 0.995,
-  space_mode = "quantile", start_time = 0, duration = NULL,
-  compress = TRUE, channel_names = NULL, ylab = "Channel",
-  time_shift = 0, lwd = 0.5, cex = 2, new_plot = T,
-  plot = "base", xlim = NULL, ...)
+plot_signals(
+  signals,
+  sample_rate = 1,
+  col = 1,
+  space = 0.995,
+  space_mode = "quantile",
+  start_time = 0,
+  duration = NULL,
+  compress = TRUE,
+  channel_names = NULL,
+  ylab = "Channel",
+  time_shift = 0,
+  lwd = 0.5,
+  cex = 2,
+  new_plot = T,
+  plot = "base",
+  xlim = NULL,
+  ...
+)
 }
 \arguments{
 \item{signals}{signals to plot, with each row one signal}

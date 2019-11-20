@@ -13,7 +13,6 @@ getDefaultReactiveDomain <- function(){
 }
 
 
-data_repository = new.env(parent = baseenv())
 
 #' Get environment where subject data is loaded
 #' @param session shiny session, default is NULL
@@ -25,16 +24,16 @@ getDefaultDataRepository <- function(
   session_id,
   session_based = NULL
 ){
-  session_based = F
-  if(missing(session_id) || !is.character(session_id)){
-    session_id %?<-% '.TEMP'
+  
+  # get namespace
+  data_repository = namespace::getRegisteredNamespace('rave:data')
+  if(is.null(data_repository)){
+    data_repository = new.env(parent = asNamespace('rave'))
+    data_repository$.clean = function(){}
+    namespace::registerNamespace(name = 'rave:data', env = data_repository)
   }
-  if(!exists(session_id, envir = data_repository)){
-    e = new.env(parent = do.call('loadNamespace', list('rave')))
-    e$.clean = function(){}
-    data_repository[[session_id]] = e
-  }
-  return(data_repository[[session_id]])
+  
+  return(data_repository)
 }
 
 #' Attach subject data
@@ -171,83 +170,6 @@ export_report <- function(expr, inputId){
 
 }
 
-
-#' Cache object
-#' @param key Any R object, a named list would be the best.
-#' @param val Value to cache, if key exists, then value will not be evaluated nor saved
-#' @param global option for shiny app, where if global, then the the cache will ignore sessions.
-#' @param replace Force replace cache?
-#' @param session internally used
-#' @param swap Save to swap? usually when val is a large matrix or vector
-#' @param file,name If you use swap=T, see \code{\link{save_h5}}
-#' @seealso \code{\link{clear_cache}}
-#' @examples
-#' \dontrun{
-#' cache('a', 1) # returns 1
-#' cache('a', 2) # still returns 1
-#'
-#' # clear cache
-#' clear_cache()
-#' cache('a', 2) # Now returns 2
-#'
-#' # Not run because a is cached
-#' cache('a', 2)
-#' cache('a', {Sys.sleep(10); 1})
-#'
-#' # Use swap
-#'
-#' y = cache('aa', 1:1000000, swap = T)
-#' object.size(1:1000000)
-#' object.size(y)
-#' y[1:5]
-#' }
-#' @export
-cache <- function(key, val, global = FALSE, replace = FALSE, session = NULL, swap = FALSE, file = tempfile(), name = 'data'){
-  if(global){
-    session = NULL
-  }else{
-    session %?<-% getDefaultReactiveDomain()
-  }
-  
-  cache_env = getDefaultCacheEnvironment(session = session)
-  
-  k = digest::digest(key)
-  if(replace){
-    cache_env[[k]] <- val
-  }else{
-    cache_env[[k]] %?<-% val
-  }
-  
-  if(swap && any(
-    is.matrix(cache_env[[k]]),
-    is.array(cache_env[[k]]),
-    is.vector(cache_env[[k]])
-  ) &&
-  is.numeric(cache_env[[k]])
-  ){
-    f = file
-    name = 'junk'
-    save_h5(cache_env[[k]], f, name = name, chunk = NULL, replace = T, new_file = T, level = 0)
-    cache_env[[k]] = load_h5(f, name = name)
-  }
-  
-  return(cache_env[[k]])
-}
-
-
-#' @title Clear cache
-#' @seealso \code{\link{cache}}
-#' @param all Clear all cache? Don't turn it on in shiny app. This is for debug use.
-#' @param session internally used
-clear_cache <- function(all = FALSE, session = NULL){
-  session %?<-% getDefaultReactiveDomain()
-  cache_env = getDefaultCacheEnvironment(session = session)
-  clear_env(cache_env)
-  if(all){
-    cache_env = getDefaultCacheEnvironment(session = NULL)
-    clear_env(cache_env)
-  }
-}
 
 #' Get Cache Environment
 #' @param session internally used

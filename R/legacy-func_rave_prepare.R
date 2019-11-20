@@ -31,6 +31,11 @@ rave_prepare <- function(
     }
     return(invisible())
   }
+  if(identical(data_env, getDefaultDataRepository())){
+    clear_env(data_env)
+    gc()
+  }
+  
   cat2('Preparing subject [', as.character(subject), ']')
   cat2('# of electrodes to be loaded: ', length(electrodes))
   cat2('Data type(s): ', paste(data_types, collapse = ', '))

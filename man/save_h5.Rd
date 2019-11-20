@@ -4,8 +4,17 @@
 \alias{save_h5}
 \title{Save objects to H5 file without trivial checkings}
 \usage{
-save_h5(x, file, name, chunk = "auto", level = 4, replace = TRUE,
-  new_file = FALSE, ctype = NULL, ...)
+save_h5(
+  x,
+  file,
+  name,
+  chunk = "auto",
+  level = 4,
+  replace = TRUE,
+  new_file = FALSE,
+  ctype = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{array, matrix, or vector}

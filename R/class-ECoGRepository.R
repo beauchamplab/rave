@@ -178,6 +178,7 @@ ECoGRepository <- R6::R6Class(
       subject_id = self$subject$id
       
       raws = self$raw
+      base::print(pryr::object_size(raws))
       
       progress$inc('Starting...')
       # Get dimension names
@@ -206,9 +207,10 @@ ECoGRepository <- R6::R6Class(
       )
       count = 1
       
+      # to store raw
+      
       # collapse results
       if(!is.function(func)){
-        
         
         if('power' %in% data_type){
           
@@ -217,7 +219,7 @@ ECoGRepository <- R6::R6Class(
             electrode = raws$get(as.character(e))
             elc = electrode$epoch( epoch_name = epoch_name, pre = pre, post = post,
                                    types = 'power', raw = !referenced )
-            
+
             power = elc$power; rm(elc)
             if(!all(freq_subset)){
               power$temporary = TRUE

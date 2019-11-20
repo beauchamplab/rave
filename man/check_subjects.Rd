@@ -4,11 +4,15 @@
 \alias{check_subjects}
 \title{check subject validity tools (use check_subjects2)}
 \usage{
-check_subjects(project_name, subject_code, check = TRUE,
-  folders = c("Subject Folder", "RAVE Folder", "Preprocessing Folder",
-  "Meta Folder", "Channel Folder"), preprocess = c("Started Preprocess",
-  "Notch Filter", "Wavelet"), Meta = c("Electrode File",
-  "Time point File", "Frequency File", "Epoch File"))
+check_subjects(
+  project_name,
+  subject_code,
+  check = TRUE,
+  folders = c("Subject Folder", "RAVE Folder", "Preprocessing Folder", "Meta Folder",
+    "Channel Folder"),
+  preprocess = c("Started Preprocess", "Notch Filter", "Wavelet"),
+  Meta = c("Electrode File", "Time point File", "Frequency File", "Epoch File")
+)
 }
 \arguments{
 \item{project_name}{project_name}

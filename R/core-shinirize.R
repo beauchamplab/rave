@@ -749,6 +749,9 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       )
 
 
+    },
+    clean = function(){
+      execenv$clear_cache(levels = 1)
     }
   )
 }

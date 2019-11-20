@@ -4,8 +4,14 @@
 \alias{dashboardHeader}
 \title{Shiny dashboard-adminLTE overrides - dashboardHeader}
 \usage{
-dashboardHeader(..., title = NULL, titleWidth = NULL,
-  disable = FALSE, btn_text_right = "Controls", .list = NULL)
+dashboardHeader(
+  ...,
+  title = NULL,
+  titleWidth = NULL,
+  disable = FALSE,
+  btn_text_right = "Controls",
+  .list = NULL
+)
 }
 \arguments{
 \item{...}{additional navigation buttons}

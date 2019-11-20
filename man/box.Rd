@@ -4,10 +4,19 @@
 \alias{box}
 \title{Wrapper for "box" in shinydashboard}
 \usage{
-box(..., title = NULL, footer = NULL, status = NULL,
-  solidHeader = FALSE, background = NULL, width = 12,
-  height = NULL, collapsible = FALSE, collapsed = FALSE,
-  headerColor = "#f4f4f4")
+box(
+  ...,
+  title = NULL,
+  footer = NULL,
+  status = NULL,
+  solidHeader = FALSE,
+  background = NULL,
+  width = 12,
+  height = NULL,
+  collapsible = FALSE,
+  collapsed = FALSE,
+  headerColor = "#f4f4f4"
+)
 }
 \arguments{
 \item{...}{Contents of the box.}

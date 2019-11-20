@@ -4,10 +4,16 @@
 \alias{download_subject_data}
 \title{Function to download subjects from internet/local}
 \usage{
-download_subject_data(con, replace_if_exists = F,
-  override_project = NULL, override_subject = NULL,
-  temp_dir = tempdir(), remove_zipfile = TRUE,
-  subject_settings = NULL, ...)
+download_subject_data(
+  con,
+  replace_if_exists = F,
+  override_project = NULL,
+  override_subject = NULL,
+  temp_dir = tempdir(),
+  remove_zipfile = TRUE,
+  subject_settings = NULL,
+  ...
+)
 }
 \arguments{
 \item{con}{an url or local file path}

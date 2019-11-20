@@ -4,8 +4,13 @@
 \alias{subject_tmpfile}
 \title{Create temp file in subject module folder}
 \usage{
-subject_tmpfile(module_id, fun_name = "", project_name, subject_code,
-  pattern = "file_")
+subject_tmpfile(
+  module_id,
+  fun_name = "",
+  project_name,
+  subject_code,
+  pattern = "file_"
+)
 }
 \arguments{
 \item{module_id}{module id}

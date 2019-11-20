@@ -672,65 +672,41 @@ ExecEnvir <- R6::R6Class(
         return(self$param_env[['..rave_future_obj']])
       }
     },
-    clear_cache = function(){
-      env = private$cache_env
-      nms = names(env)
-      nms = nms[! nms %in% c('.keys', env[['.keys']])]
-      if(length(nms)){
-        rm(list = nms, envir = env)
-      }
+    clear_cache = function(levels = c(1,2)){
+      module_id = private$module_env$module_id
+      levels = levels[!levels %in% c(3,4)]
+      rave::clear_cache(levels = levels, module_id = module_id)
     },
-    cache = function(key, val, global = FALSE, replace = FALSE,
-                     session = getDefaultReactiveDomain(), persist = FALSE){
-      digest = as.character(digest::digest(key))
-      if(global){
-        env = getDefaultCacheEnvironment(session = session)
-      }else{
-        env = private$cache_env
-      }
-      if(!replace){
-        if(exists(digest, envir = env, inherits = FALSE)){
-          return( env[[digest]] )
-        }
-        # else{
-        #   cat('register keeey ', key)
-        # }
-        if(exists(digest, envir = private$cache_env, inherits = FALSE)){
-          return( private$cache_env[[digest]] )
-        }
-      }
-      if(missing(val)){
-        return(NULL)
-      }
-
-      # save cache
-      env[[digest]] = shiny::isolate(val)
-
-      if(persist){
-        env$.keys = unique(c(env$.keys, digest))
-      }
-
-      return(val)
+    cache = function(key, val, name, replace = FALSE, persist = FALSE,
+                     across_instance = FALSE, across_module = FALSE, ...){
+      module_id = private$module_env$module_id
+      rave::cache(key = key, val = val, name = name, module_id = module_id, 
+                  replace = replace, persist = persist, 
+                  across_instance = across_instance, 
+                  across_module = across_module)
+      
     },
-    cache_input = function(inputId, val = NULL, read_only = TRUE, sig = NULL){
-
+    cache_input = function(inputId, val = NULL, read_only = TRUE, sig = NULL,
+                           module_id, ...){
+      
+      if(missing(module_id)){
+        module_id = private$module_env$module_id
+      }
+      
       sig %?<-% add_to_session(private$session)
-      is_global = self$is_global(inputId)
-
+      
       key = list(
         type = '.rave-inputs-Dipterix',
         inputId = inputId,
         sig = sig
       )
-      if(read_only){
-        v = self$cache(key, global = is_global, replace = FALSE, persist = TRUE)
-        v %?<-% val
-      }else{
-        v = self$cache(key, val, global = is_global, replace = TRUE, persist = TRUE)
-      }
-      # cat2(inputId, ' - ', paste(deparse(v), collapse = ''))
-
-      return(v)
+      name = sprintf('.rave-inputs-Dipterix--%s--%s', module_id, inputId)
+      
+      rave::cache(key = key, val = val, name = name, module_id = module_id, 
+                  replace = !read_only, persist = FALSE, 
+                  across_instance = FALSE, 
+                  across_module = TRUE)
+      
     },
     set_browser = function(expr){
 

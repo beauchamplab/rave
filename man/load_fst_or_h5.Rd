@@ -4,8 +4,14 @@
 \alias{load_fst_or_h5}
 \title{Function try to load FST file cache, if not found, read HDF5 file}
 \usage{
-load_fst_or_h5(fst_path, h5_path, h5_name, fst_need_transpose = F,
-  fst_need_drop = F, ram = F)
+load_fst_or_h5(
+  fst_path,
+  h5_path,
+  h5_name,
+  fst_need_transpose = F,
+  fst_need_drop = F,
+  ram = F
+)
 }
 \arguments{
 \item{fst_path}{fst cache path}

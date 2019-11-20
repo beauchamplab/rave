@@ -4,8 +4,7 @@
 \alias{get_subjects}
 \title{Get all subjects within project}
 \usage{
-get_subjects(project_name, check_subfolders = TRUE,
-  check_rawdata = FALSE)
+get_subjects(project_name, check_subfolders = TRUE, check_rawdata = FALSE)
 }
 \arguments{
 \item{project_name}{project}

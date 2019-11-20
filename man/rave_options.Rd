@@ -4,8 +4,7 @@
 \alias{rave_options}
 \title{Function to change rave-options}
 \usage{
-rave_options(..., .save = T, launch_gui = T, host = "127.0.0.1",
-  port = NULL)
+rave_options(..., .save = T, launch_gui = T, host = "127.0.0.1", port = NULL)
 }
 \arguments{
 \item{...}{Key-Value option pairs}
