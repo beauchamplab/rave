@@ -31,6 +31,10 @@ getDefaultDataRepository <- function(
     data_repository = new.env(parent = asNamespace('rave'))
     data_repository$.clean = function(){}
     namespace::registerNamespace(name = 'rave:data', env = data_repository)
+    RaveFinalizer$new(function(...){
+      clear_env(data_repository)
+      namespace::unregisterNamespace('rave:data')
+    })
   }
   
   return(data_repository)

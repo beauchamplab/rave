@@ -64,7 +64,7 @@ ECoGRepository <- R6::R6Class(
       
       cat2('Initializing a Data Repository')
       
-      self$raw = fastmap::fastmap()
+      self$raw = dipsaus::rds_map() #fastmap::fastmap()
       self$reference = fastmap::fastmap()
       self$epochs = fastmap::fastmap()
       if(R6::is.R6(subject) && 'Subject' %in% class(subject)){
