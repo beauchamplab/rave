@@ -175,7 +175,7 @@ Module runtime environment (session based)
 \if{html}{\out{<a id="method-clear_cache"></a>}}
 \subsection{Method \code{clear_cache()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ExecEnvir$clear_cache(levels = c(1, 2))}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{ExecEnvir$clear_cache(levels = 1)}\if{html}{\out{</div>}}
 }
 
 }

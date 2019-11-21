@@ -270,7 +270,7 @@ setup_async_evaluator <- local({
     
     
     if(!initialized){
-      rave:::RaveFinalizer$new(function(...){
+      RaveFinalizer$new(function(...){
         try({
           evaluator$terminate()
         }, silent = TRUE)

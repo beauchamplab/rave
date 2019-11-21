@@ -110,5 +110,12 @@ eval_when_ready <- function(f){
 }
 
 
+trigger_recalculate <- function(){
+  cat2('Re-calculate will be triggered.')
+}
+
+register_auto_calculate_widget <- function(...){
+  dipsaus::cat2('Debug mode')
+}
 
 

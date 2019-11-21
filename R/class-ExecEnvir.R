@@ -672,7 +672,7 @@ ExecEnvir <- R6::R6Class(
         return(self$param_env[['..rave_future_obj']])
       }
     },
-    clear_cache = function(levels = c(1,2)){
+    clear_cache = function(levels = 1){
       module_id = private$module_env$module_id
       levels = levels[!levels %in% c(3,4)]
       rave::clear_cache(levels = levels, module_id = module_id)

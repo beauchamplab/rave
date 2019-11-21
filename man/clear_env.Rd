@@ -4,12 +4,12 @@
 \alias{clear_env}
 \title{Function to clear all elements within environment}
 \usage{
-clear_env(env, all.names = T)
+clear_env(env, ...)
 }
 \arguments{
 \item{env}{environment to clean}
 
-\item{all.names}{clear all variables?}
+\item{...}{ignored}
 }
 \description{
 Function to clear all elements within environment

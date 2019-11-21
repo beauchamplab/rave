@@ -37,6 +37,7 @@ Imports:
     grid,
     crayon,
     cli,
+    namespace,
     signal (>= 0.7-6),
     dipsaus (>= 0.0.2),
     hdf5r (>= 1.0.0),

@@ -358,12 +358,11 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         }
         cat2('Executing Script')
         showNotification(p(MODULE_LABEL, 'is running. Please wait...'), id = '.rave_main', duration = NULL)
-        tryCatch({
+        safe_wrap_expr({
+        # tryCatch({
           # record time
           start_time = Sys.time()
-          withLogErrors({
-            execenv$execute(async = async, force = force)
-          })
+          execenv$execute(async = async, force = force)
           if(async){
             local_data$suspended = FALSE
             showNotification(p('Running in the background. Results will be shown once finished.'), type = 'message', id = 'async_msg')
@@ -388,12 +387,13 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
           #   local_data$current_param[[inputId]] = shiny::isolate({ input[[inputId]] })
           # })
 
-        }, error = function(e){
-          cat2(e, level = 'ERROR')
+        }, onFailure = function(e){
           local_data$last_executed = F
+        }, finally = {
+          
+          removeNotification(id = '.rave_main')
         })
 
-        removeNotification(id = '.rave_main')
       }
       
       # run_script()

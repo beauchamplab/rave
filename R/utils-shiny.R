@@ -1,4 +1,61 @@
 
+safe_wrap_expr <- function(expr, onFailure = NULL, onError = NULL, finally = {}){
+  ...internal_expr... = substitute(expr)
+  withRestarts({
+    
+    tryCatch({
+      force(expr)
+    }, error = function(e){
+      
+      if(is.function(onFailure)){
+        onFailure(e)
+      }
+      
+      if(inherits(e, 'rave-info')){
+        invokeRestart('rave-info', e)
+      }else if(inherits(e, 'rave-warning')){
+        invokeRestart('rave-warning', e)
+      }else if(inherits(e, 'rave-warning')){
+        invokeRestart('rave-error', e)
+      }else{
+        invokeRestart('rave-fatal', e)
+      }
+    }, finally = finally)
+    
+  }, `rave-info` = function(e){
+    dipsaus::cat2(e$message, level = 'INFO')
+    
+  }, `rave-warning` = function(e){
+    dipsaus::cat2(e$message, level = 'WARNING')
+    invokeRestart('rave-notification', e)
+    
+  }, `rave-error` = function(e){
+    dipsaus::cat2(e$message, level = 'ERROR')
+    if(is.function(onError)){
+      onError(e)
+    }
+    invokeRestart('rave-notification', e)
+    
+  }, `rave-fatal` = function(e){
+    dipsaus::cat2(e$message, level = 'ERROR')
+    if(is.function(onError)){
+      onError(e)
+    }
+    print(...internal_expr...)
+    invokeRestart('rave-notification', e)
+    
+  }, `rave-notification` = function(e){
+    session = shiny::getDefaultReactiveDomain()
+    if(!is.null(session)){
+      shiny::showNotification(
+        shiny::p(shiny::span(e$message, style = 'font-style:italic;')), 
+        type = 'error'
+      )
+    }
+  })
+}
+
+
 observe <- function(x, env = NULL, quoted = FALSE, priority = 0, domain = NULL, ...){
   if(!quoted){
     x = substitute(x)
@@ -6,15 +63,8 @@ observe <- function(x, env = NULL, quoted = FALSE, priority = 0, domain = NULL, 
   
   # Make sure shiny doesn't crash
   x = rlang::quo_squash(rlang::quo(
-    tryCatch({
-      shiny::withLogErrors({!!x})
-    }, error = function(e){
-      showNotification(htmltools::p(htmltools::strong('An error occurred'), htmltools::br(), 'Details: ',
-                                    htmltools::span(as.character(e), style = 'font-style:italic;')), type = 'error')
-      print(quote({!!x}))
-    })
+    safe_wrap_expr(!!x)
   ))
-  
   
   if(!is.environment(env)){
     env = parent.frame()
@@ -57,24 +107,12 @@ observeEvent = function(
   
   # Make sure shiny doesn't crash
   eventExpr = rlang::quo_squash(rlang::quo(
-    tryCatch({
-      shiny::withLogErrors({!!eventExpr})
-    }, error = function(e){
-      showNotification(htmltools::p(htmltools::strong('An error occurred'), htmltools::br(), 'Details: ',
-                                    htmltools::span(as.character(e), style = 'font-style:italic;')), type = 'error')
-      print(quote({!!eventExpr}))
-    })
+    safe_wrap_expr(!!eventExpr)
   ))
   
   
   handlerExpr = rlang::quo_squash(rlang::quo(
-    tryCatch({
-      shiny::withLogErrors({!!handlerExpr})
-    }, error = function(e){
-      showNotification(htmltools::p(htmltools::strong('An error occurred'), htmltools::br(), 'Details: ',
-                                    htmltools::span(as.character(e), style = 'font-style:italic;')), type = 'error')
-      print(quote({!!handlerExpr}))
-    })
+    safe_wrap_expr(!!handlerExpr)
   ))
   
   shiny::observeEvent(

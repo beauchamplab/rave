@@ -496,13 +496,14 @@ app_server <- function(adapter, instance_id, token = NULL){
 
     ##################################################################
     # Module to load data
-    callModule(module = adapter$data_selector_server, id = 'DATA_SELECTOR', session = session, global_reactives = global_reactives, clear_cache = function(){
-      lapply(shinirized_modules, function(m){
-        try({
-          m$clean()
-        })
-      })
-    })
+    callModule(module = adapter$data_selector_server, id = 'DATA_SELECTOR', session = session, global_reactives = global_reactives)
+    #            , clear_cache = function(){
+    #   lapply(shinirized_modules, function(m){
+    #     try({
+    #       m$clean()
+    #     })
+    #   })
+    # })
 
     ##################################################################
     # loading modules

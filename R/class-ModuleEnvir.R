@@ -38,6 +38,7 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
   w$get_execenv_local_reactive = function(){
     self$local_reactives
   }
+  
   w$eval_when_ready = function(FUN){
     if(is.function(FUN)){
       self$ready_functions[[length(self$ready_functions) + 1]] = FUN
@@ -89,7 +90,55 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
     self$clear_cache()
     self$input_update(list(), init = TRUE)
   }
+  w$get_input_ids = function(render_inputs = FALSE, manual_inputs = FALSE){
+    input_ids = self$input_ids
+    
+    if( !render_inputs ){
+      render_ids = self$rendering_inputIds
+      input_ids = input_ids[!input_ids %in% render_ids]
+    }
+    if( !manual_inputs ){
+      manual_ids = self$manual_inputIds
+      input_ids = input_ids[!input_ids %in% manual_ids]
+    }
+    input_ids
+  }
   
+  persist_widget = local({
+    auto = TRUE
+    temporary_on = FALSE
+    is_auto = function( on, include_temporary = TRUE ){
+      if(!missing(on)){
+        temporary_on <<- FALSE
+        auto <<- !isFALSE(on)
+        cat2('Auto Re-calculate is set to ', auto)
+      }
+      if( include_temporary ){
+        re = auto || temporary_on
+      }else{
+        re = auto
+      }
+      temporary_on <<- FALSE
+      re
+    }
+    
+    trigger = function(force = TRUE){
+      temporary_on <<- isTRUE(force)
+      if(shiny::is.reactivevalues(self$local_reactives)){
+        self$local_reactives$last_input = Sys.time()
+      }
+    }
+    
+    list(
+      is_auto = is_auto,
+      trigger = trigger
+    )
+    
+  })
+  w$auto_recalculate = persist_widget$is_auto
+  w$trigger_recalculate = persist_widget$trigger
+  
+
   w$current_module = function(){
     if(is.reactivevalues(self$global_reactives)){
       return(isolate(get_val(self$global_reactives, 'execute_module', default = '')))
@@ -132,12 +181,7 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
     
     # Make sure shiny doesn't crash
     x = rlang::quo_squash(rlang::quo(
-      tryCatch({
-        shiny::withLogErrors({!!x})
-      }, error = function(e){
-        showNotification(htmltools::p(htmltools::strong('An error occurred'), htmltools::br(), 'Details: ',
-                                      htmltools::span(as.character(e), style = 'font-style:italic;')), type = 'error')
-      })
+      safe_wrap_expr(!!x)
     ))
     
     
@@ -157,6 +201,7 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
     )
   }
   
+  w$safe_wrap_expr = safe_wrap_expr
   
   w$observeEvent = function(
     eventExpr, handlerExpr, event.env = NULL,
@@ -182,12 +227,7 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
     
     # Make sure shiny doesn't crash
     handlerExpr = rlang::quo_squash(rlang::quo(
-      tryCatch({
-        shiny::withLogErrors({!!handlerExpr})
-      }, error = function(e){
-        showNotification(htmltools::p(htmltools::strong('An error occurred'), htmltools::br(), 'Details: ',
-                                      htmltools::span(as.character(e), style = 'font-style:italic;')), type = 'error')
-      })
+      safe_wrap_expr(!!handlerExpr)
     ))
     
     shiny::observeEvent(

@@ -268,7 +268,7 @@ get_mem_usage <- function(modules, data_envir){
 #' Function to clear all elements within environment
 #'
 #' @param env environment to clean
-#' @param all.names clear all variables?
+#' @param ... ignored
 #'
 #' @examples
 #' \dontrun{
@@ -280,13 +280,44 @@ get_mem_usage <- function(modules, data_envir){
 #' print(as.list(env))
 #' }
 #' @export
-clear_env <- function(env, all.names = T){
+clear_env <- function(env, ...){
   if(is.environment(env)){
-    rm(list = names(env), envir = env)
+    if(environmentIsLocked(env)){
+      return(invisible())
+    }
+    nms = names(env)
+    if(isNamespace(env)){
+      nms = nms[!nms %in% c(".__NAMESPACE__.", ".__S3MethodsTable__.")]
+    }
+    rm(list = nms, envir = env)
   }
+  return(invisible())
 }
 
 rand_string <- function (length = 10) {
   paste(sample(c(letters, LETTERS, 0:9), length, replace = TRUE), 
         collapse = "")
 }
+
+#' RAVE Failure Message
+#' @param message error message, character
+#' @param level level of error message; can be chosen from \code{"INFO"},
+#' \code{"WARNING"}, or \code{"ERROR"}
+#' @param call call expression
+#' @param .stop stop or just return the condition
+#' @return Error condition or stop
+#' @export
+rave_failure <- function(message, level = 'ERROR', call = NULL, .stop = TRUE){
+  class = c("rave-error", "shiny.custom.error", "error", "condition")
+  level = stringr::str_to_upper(level)
+  if( level %in% c('INFO', 'WARNING')){
+    class = c(sprintf('rave-%s', stringr::str_to_lower(level)), class)
+  }
+  err = structure(list(message = as.character(message), call = call, level = level), 
+                  class = class)
+  if(.stop){
+    stop(err)
+  }
+  return(err)
+}
+

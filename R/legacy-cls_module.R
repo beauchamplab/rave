@@ -26,14 +26,16 @@ getDefaultDataRepository <- function(
 ){
   
   # get namespace
-  data_repository = namespace::getRegisteredNamespace('rave:data')
+  data_repository = namespace::getRegisteredNamespace('rave-data')
   if(is.null(data_repository)){
-    data_repository = new.env(parent = asNamespace('rave'))
+    data_repository = namespace::makeNamespace('rave-data')
     data_repository$.clean = function(){}
-    namespace::registerNamespace(name = 'rave:data', env = data_repository)
     RaveFinalizer$new(function(...){
-      clear_env(data_repository)
-      namespace::unregisterNamespace('rave:data')
+      try({
+        clear_env(data_repository)
+        namespace = asNamespace('namespace')
+        rm(.list = 'rave-data', envir = namespace$.getNameSpaceRegistry())
+      })
     })
   }
   

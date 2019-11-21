@@ -263,9 +263,121 @@ rave_checks = function(..., data = NULL){
 }
 
 
+register_auto_calculate_widget = local({
+  
+  session = getDefaultReactiveDomain()
+  output = getDefaultReactiveOutput()
+  input = getDefaultReactiveInput()
+  
+  this_env = environment()
+  checkbox = NULL
+  buttons = NULL
+  
+  input_ids = get_input_ids()
+  
+  eval_when_ready(function(...){
+    input_ids = get_input_ids()
+    
+    params = new.env(parent = emptyenv())
+    
+    observe({
+      if(!auto_recalculate( include_temporary = FALSE ) && length(input_ids)){
+        
+        changed = vapply(input_ids, function(id){
+          if(identical(params[[id]], input[[id]])){
+            return(FALSE)
+          }
+          TRUE
+        }, FUN.VALUE = FALSE)
+        
+        if(any(changed)){
+          dipsaus::cat2('At least one changed: ', paste(input_ids[changed], collapse = ', '))
+          lapply(this_env$buttons, function(bid){
+            dipsaus::updateActionButtonStyled(session, bid, disabled = FALSE, icon = shiny::icon('unlock'))
+          })
+        }else{
+          lapply(this_env$buttons, function(bid){
+            dipsaus::updateActionButtonStyled(session, bid, disabled = TRUE, icon = shiny::icon('lock'))
+          })
+        }
+      }
+    }, env = environment(), priority = 1) # needs to be prior to rave_execute
+    
+    if(length(this_env$checkbox) == 1){
+      observeEvent(input[[this_env$checkbox]], {
+        auto_calc = input[[this_env$checkbox]]
+        if(!(length(auto_calc) == 1 && is.logical(auto_calc))){ return() }
+        auto_recalculate( auto_calc )
+        
+        if(auto_calc){
+          icon = shiny::icon('unlock')
+        }else{
+          icon = shiny::icon('lock')
+        }
+        
+        
+        lapply(this_env$buttons, function(bid){
+          dipsaus::updateActionButtonStyled(session, bid, disabled = auto_calc, icon = icon)
+        })
+        
+        
+        if(auto_calc){
+          trigger_recalculate()
+        }
+        
+      }, event.env = environment(), handler.env = environment())
+    }
+    
+    
+    
+    lapply(this_env$buttons, function(inputId){
+      observeEvent(input[[inputId]], {
+        dipsaus::cat2('Recalculate Triggered!', level = 'INFO')
+        
+        lapply(input_ids, function(id){
+          params[[id]] = input[[id]]
+          NULL
+        })
+        
+        # trigger re-calculate
+        trigger_recalculate( force = TRUE )
+        
+        lapply(buttons, function(bid){
+          dipsaus::updateActionButtonStyled(session, bid, disabled = TRUE, icon = shiny::icon('lock'))
+        })
+      }, event.env = environment(), handler.env = environment())
+      NULL
+    })
+    
+  })
+  
+  function(inputId, type = c('button', 'checkbox'), default_on = TRUE){
+    type = match.arg(type)
+    
+    if(type == 'checkbox'){
+      if(!is.null(this_env$checkbox)){
+        dipsaus::cat2('Auto-recalculate checkbox is defined. Only one widget is allowed', level = 'WARNING')
+        print(this_env$checkbox)
+      }
+      this_env$checkbox = inputId
+      auto_recalculate( default_on )
+      
+    }else{
+      this_env$buttons = c(buttons, inputId)
+    }
+    
+  }
+  
+})
+
+
 rave_execute({
   missing_data = isolate(`.__internal_reactives__.`[['miss_data']])
   if( missing_data ){
-    stop('Need to load data. Waiting for an action.')
+    rave_failure('Need to load data. Waiting for an action.', level = 'INFO')
+  }
+  
+  if( !auto_recalculate() ){
+    rave_failure('Auto Re-calculate is off.', level = 'INFO')
   }
 })

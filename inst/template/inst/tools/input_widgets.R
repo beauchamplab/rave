@@ -161,7 +161,36 @@ define_input_condition_groups_default <- function(inputId, label = 'Group', init
 
 
 
-
+define_input_auto_recalculate <- function(inputId, label, 
+                                          type = c('checkbox', 'button'), 
+                                          button_type = 'primary', 
+                                          default_on = FALSE){
+  type = match.arg(type)
+  widget_id = paste0(inputId, '_', type)
+  
+  quo = rlang::quo({
+    define_input(customizedUI(inputId = !!inputId))
+    load_scripts(rlang::quo({
+      assign(!!inputId, function(){
+        if( !!type == 'checkbox' ){
+          checkboxInput(ns(!!widget_id), label = !!label, value = !!default_on)
+        }else{
+          icon_name = ifelse(!!default_on, 'lock', 'unlock')
+          dipsaus::actionButtonStyled(
+            ns(!!widget_id), !!label, width = '100%', type = !!button_type,
+            icon = shiny::icon(icon_name))
+        }
+      })
+      
+      register_auto_calculate_widget(!!widget_id, !!type, !!default_on)
+      
+    }))
+  })
+  parent_env = parent.frame()
+  dipsaus::eval_dirty(quo, env = parent_env)
+  
+  
+}
 
 
 
