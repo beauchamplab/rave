@@ -2,15 +2,15 @@
 % Please edit documentation in R/class-Subject.R
 \name{r_to_py.Subject}
 \alias{r_to_py.Subject}
-\title{Conver subject to python object}
+\title{Convert subject to python object}
 \usage{
 r_to_py.Subject(obj, convert = FALSE)
 }
 \arguments{
 \item{obj}{Subject class}
 
-\item{convert}{pass to reticulate::r_to_py}
+\item{convert}{pass to \code{\link[reticulate]{r_to_py}}}
 }
 \description{
-Conver subject to python object
+Convert subject to python object
 }

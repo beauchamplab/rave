@@ -67,7 +67,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
       </span>
     </div>
 
@@ -81,24 +81,6 @@
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/a_real_project.html">2.2 A Real Project</a>
-    </li>
-    <li>
-      <a href="../articles/build_your_first_module.html">2.1 Step-by-step, Build Your First RAVE Module</a>
-    </li>
-    <li>
-      <a href="../articles/create_inputs.html">2.3 Create RAVE Inputs</a>
-    </li>
-  </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -139,109 +121,61 @@
         <td>
           <p><code><a href="ECoGRepository.html">ECoGRepository</a></code> </p>
         </td>
-        <td><p>R6 class for ECoG data Repository</p></td>
+        <td><p>R6 class for <code>iEEG/ECoG</code> data Repository</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="ECoGTensor.html">ECoGTensor</a></code> </p>
         </td>
-        <td><p>ECoG Tensor class inherit from Tensor</p></td>
+        <td><p>ECoG Tensor class inherit from <code>Tensor</code></p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="Electrode.html">Electrode</a></code> </p>
         </td>
-        <td><p>R6 class of electrode</p></td>
+        <td><p>R6 Class for Electrode</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="ExecEnvir.html">ExecEnvir</a></code> </p>
         </td>
-        <td><p>Module runtime environment (session based)</p></td>
+        <td><p>Session-based Module Runtime Environment Class</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="LazyFST.html">LazyFST</a></code> </p>
         </td>
-        <td><p>R6 class to load fst files</p></td>
+        <td><p>R6 Class to Load 'fst' Files</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="LazyH5.html">LazyH5</a></code> </p>
         </td>
-        <td><p>File IO: HDF5 file wrapper</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="MVCAdapter.html">MVCAdapter</a></code> </p>
-        </td>
-        <td><p>A special type of Map</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="Map.html">Map</a></code> </p>
-        </td>
-        <td><p>R6 implementation of hashMap (internal use)</p></td>
+        <td><p>Lazy 'HDF5' file loader</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="ModuleEnvir.html">ModuleEnvir</a></code> </p>
         </td>
-        <td><p>Module class</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="Options.html">Options</a></code> </p>
-        </td>
-        <td><p>Internal R6 class for rave-options</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="RAVEHistory.html">RAVEHistory</a></code> </p>
-        </td>
-        <td><p>R6 class for small object caching</p></td>
+        <td><p>R6 'RAVE' Module Class</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="Subject.html">Subject</a></code> </p>
         </td>
-        <td><p>Subject class</p></td>
+        <td><p>R6 Class for 'RAVE' Subject</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="Tensor.html">Tensor</a></code> </p>
         </td>
-        <td><p>Wrapper class for tensor arrays</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="actionButtonStyled.html">actionButtonStyled()</a></code> </p>
-        </td>
-        <td><p>Re-write shiny actionButton to enable styles</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="afni_tools.html">afni_tools()</a></code> </p>
-        </td>
-        <td><p>Read from AFNIio.R, return an environment wrapper for all functions</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="align_index.html">align_index()</a></code> </p>
-        </td>
-        <td><p>For each element e1 ind1, find next element e2 in ind2 with e1&lt;e2</p></td>
+        <td><p>R6 Class for large Tensor (Array) in Hybrid Mode</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="any_subject_loaded.html">any_subject_loaded()</a></code> </p>
         </td>
         <td><p>Function to check if data repository has data</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="are_same.html">are_same()</a></code> </p>
-        </td>
-        <td><p>Check a and b are same</p></td>
       </tr><tr>
         
         <td>
@@ -257,27 +191,9 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="as.character.Subject.html">as.character(<i>&lt;Subject&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Returns subject ID</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="as.vector.Tensor.html">as.vector(<i>&lt;Tensor&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Convert Tensors to Vector</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="as_printable.html">as_printable()</a></code> </p>
         </td>
         <td><p>Function to make an environment printable</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="async.html">async()</a></code> </p>
-        </td>
-        <td><p>Async function to execute code (depricated)</p></td>
       </tr><tr>
         
         <td>
@@ -293,30 +209,6 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="beautify.html">beautify()</a></code> </p>
-        </td>
-        <td><p>I forget the usage but it's related to converting something to strings</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="box.html">box()</a></code> </p>
-        </td>
-        <td><p>Wrapper for "box" in shinydashboard</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="bulk_wavelet.html">bulk_wavelet()</a></code> </p>
-        </td>
-        <td><p>Bulk run wavelet (deprecated)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="cache.html">cache()</a></code> </p>
-        </td>
-        <td><p>Cache object</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="cache_input.html">cache_input()</a></code> </p>
         </td>
         <td><p>Cache input values</p></td>
@@ -325,7 +217,7 @@
         <td>
           <p><code><a href="cache_raw_voltage.html">cache_raw_voltage()</a></code> </p>
         </td>
-        <td><p>Import subject matlab file and create H5 files</p></td>
+        <td><p>Import Subject "Matlab" File and Create "HDF5" files</p></td>
       </tr><tr>
         
         <td>
@@ -353,81 +245,27 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="check_updates.html">check_updates()</a></code> </p>
-        </td>
-        <td><p>Check dependencies and update them at start up (Highly recommended)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="clear_cache.html">clear_cache()</a></code> </p>
-        </td>
-        <td><p>Clear cache</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="clear_env.html">clear_env()</a></code> </p>
         </td>
         <td><p>Function to clear all elements within environment</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="color_console.html">color_console()</a></code> </p>
-        </td>
-        <td><p>Enable RAVE color console</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="compoundInput.html">compoundInput()</a></code> </p>
-        </td>
-        <td><p>Customized input just designed for RAVE to include multiple inputs and duplicate them</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="copy_env.html">copy_env()</a></code> </p>
-        </td>
-        <td><p>Copy objects from one environment to another</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="create_local_cache.html">create_local_cache()</a></code> </p>
         </td>
-        <td><p>Create local cache for fast loadings</p></td>
+        <td><p>Create local cache to speed up loading speed</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="customizedUI.html">customizedUI()</a></code> </p>
         </td>
-        <td><p>Customized UI Element</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="dashboardControl.html">dashboardControl()</a></code> </p>
-        </td>
-        <td><p>Shiny dashboard-adminLTE overrides</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="dashboardHeader.html">dashboardHeader()</a></code> </p>
-        </td>
-        <td><p>Shiny dashboard-adminLTE overrides - dashboardHeader</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="dashboardPage.html">dashboardPage()</a></code> </p>
-        </td>
-        <td><p>Shiny dashboard-adminLTE overrides - dashboardPage</p></td>
+        <td><p>Customized shiny Elements</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="decimate_fir.html">decimate_fir()</a></code> </p>
         </td>
-        <td><p>Decimate signal via FIR1 filter</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="deparse_selections.html">deparse_selections()</a></code> </p>
-        </td>
-        <td><p>Convert integer vector to text</p></td>
+        <td><p>Decimate or Down-sample a Signal using <code>FIR</code> Filters</p></td>
       </tr><tr>
         
         <td>
@@ -439,7 +277,7 @@
         <td>
           <p><code><a href="diagnose_signal.html">diagnose_signal()</a></code> </p>
         </td>
-        <td><p>Signal Inspection Plots</p></td>
+        <td><p>Plot and Inspect Signals in Trace, Periodogram, and Histogram</p></td>
       </tr><tr>
         
         <td>
@@ -461,57 +299,15 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="dropInvalid.html">dropInvalid()</a></code> </p>
-        </td>
-        <td><p>Similar to dropNulls</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="dropNulls.html">dropNulls()</a></code> </p>
-        </td>
-        <td><p>Drop nulls within lists/vectors</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="eval_dirty.html">eval_dirty()</a></code> </p>
-        </td>
-        <td><p>Evaluate expressions</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="eval_within.html">eval_within()</a></code> </p>
-        </td>
-        <td><p>Evaluate function as if it's run within another environment</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="export_diagnose_voltage.html">export_diagnose_voltage()</a></code> </p>
         </td>
-        <td><p>Export voltage diagnostics for electrodes</p></td>
+        <td><p>Export voltage (analog trace) diagnostic plots for each electrode</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="fake_session.html">fake_session()</a></code> </p>
         </td>
         <td><p>internally used to cheat RAVE</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="fileInputMinimal.html">fileInputMinimal()</a></code> </p>
-        </td>
-        <td><p>Re-write shiny `fileInput`, but minimal</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="fprintf.html">fprintf()</a></code> </p>
-        </td>
-        <td><p>Format Print Strings</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="freesurfer_mesh.html">freesurfer_mesh()</a></code> </p>
-        </td>
-        <td><p>Function to parse SUMA spec file and generate threejsr free mesh object</p></td>
       </tr><tr>
         
         <td>
@@ -527,39 +323,15 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="getDefaultReactiveDomain.html">getDefaultReactiveDomain()</a></code> </p>
-        </td>
-        <td><p>Wrapper for shiny::getDefaultReactiveDomain</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="get_async_result.html">get_async_result()</a></code> </p>
-        </td>
-        <td><p>Get async process result (deprecated)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="get_color.html">get_color()</a></code> </p>
-        </td>
-        <td><p>Function to get color without errors</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="get_dir.html">get_dir()</a></code> </p>
         </td>
-        <td><p>Get all directories that rave uses</p></td>
+        <td><p>Get Directories in `RAVE`</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="get_fake_updated_message.html">get_fake_updated_message()</a></code> </p>
         </td>
         <td><p>internally used for debugging functions</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="get_from_package.html">get_from_package()</a></code> </p>
-        </td>
-        <td><p>Get function from external packages</p></td>
       </tr><tr>
         
         <td>
@@ -575,21 +347,9 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="get_people.html">get_people()</a></code> </p>
-        </td>
-        <td><p>Get people who uses this app</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="get_projects.html">get_projects()</a></code> </p>
         </td>
-        <td><p>Find all available projects</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="get_results.html">get_results()</a></code> </p>
-        </td>
-        <td><p>Get future objects result</p></td>
+        <td><p>Find all Available RAVE Projects</p></td>
       </tr><tr>
         
         <td>
@@ -599,69 +359,33 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="get_val.html">get_val()</a></code> </p>
-        </td>
-        <td><p>Get value, if value is invalid, then assign value</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="grapes-help-set-grapes.html">`%?<-%`</a></code> </p>
-        </td>
-        <td><p>Assign if not exists, or NULL</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="has.class.html">has.class()</a></code> </p>
-        </td>
-        <td><p>Check object has classes</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="init_app.html">init_app()</a></code> </p>
         </td>
-        <td><p>Initialize main application</p></td>
+        <td><p>Initialize main application for debugging purpose</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="is.blank.html">is.blank()</a></code> </p>
+          <p><code><a href="join_tensors.html">join_tensors()</a></code> </p>
         </td>
-        <td><p>Check if an object is blank string ""</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="is_invalid.html">is_invalid()</a></code> </p>
-        </td>
-        <td><p>Check if value(s) is invalid</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="is_valid.html">is_valid()</a></code> </p>
-        </td>
-        <td><p>Check if object is invalid</p></td>
+        <td><p>Join Multiple Tensors into One Tensor</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="lapply_async.html">lapply_async()</a></code> </p>
         </td>
-        <td><p>lapply using future package (async)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="last_entry.html">last_entry()</a></code> </p>
-        </td>
-        <td><p>Obtain last saved value - disk cache</p></td>
+        <td><p><code>lapply</code> using future package in asynchronous way</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="load_fst_or_h5.html">load_fst_or_h5()</a></code> </p>
         </td>
-        <td><p>Function try to load FST file cache, if not found, read HDF5 file</p></td>
+        <td><p>Function try to load "fst" file cache, if not found, read "HDF5" file</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="load_h5.html">load_h5()</a></code> </p>
         </td>
-        <td><p>Lazy load HDF5 file via hdf5r package</p></td>
+        <td><p>Lazy Load "HDF5" File via <code><a href='http://hhoeflin.github.io/hdf5r/reference/hdf5r-package.html'>hdf5r-package</a></code></p></td>
       </tr><tr>
         
         <td>
@@ -679,43 +403,13 @@
         <td>
           <p><code><a href="load_modules.html">load_modules()</a></code> </p>
         </td>
-        <td><p>Load Modules (Questioning Lifecycle)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="logger.html">logger()</a></code> </p>
-        </td>
-        <td><p>Color console for RAVE</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="ls.html">ls()</a></code> </p>
-        </td>
-        <td><p>Internal use to fast-list all elements in an environment</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="mem_limit.html">mem_limit()</a></code> </p>
-        </td>
-        <td><p>Get max RAM size (experimental)</p></td>
+        <td><p>Load RAVE Modules</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="module_analysis_names.html">module_analysis_names()</a></code> </p>
         </td>
         <td><p>Find module analysis names</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="module_analysis_save.html">module_analysis_save()</a></code> </p>
-        </td>
-        <td><p>Save analysis to look up tables</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="module_analysis_table.html">module_analysis_table()</a></code> </p>
-        </td>
-        <td><p>Get subject exported analysis table</p></td>
       </tr><tr>
         
         <td>
@@ -727,37 +421,13 @@
         <td>
           <p><code><a href="notch_filter.html">notch_filter()</a></code> </p>
         </td>
-        <td><p>Notch filter</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="package_installed.html">package_installed()</a></code> </p>
-        </td>
-        <td><p>Check if a package is installed</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="parse_selections.html">parse_selections()</a></code> </p>
-        </td>
-        <td><p>Convert text to numeric vector</p></td>
+        <td><p>Apply Notch Filter to Analog Trace Data</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="plot_signals.html">plot_signals()</a></code> </p>
         </td>
         <td><p>Plot signals line by line</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="pre_import_matlab.html">pre_import_matlab()</a></code> </p>
-        </td>
-        <td><p>mport raw voltage signals from matlab file</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="pre_load_settings.html">pre_load_settings()</a></code> </p>
-        </td>
-        <td><p>Deprecated this function was designed for version A,B,C</p></td>
       </tr><tr>
         
         <td>
@@ -775,19 +445,25 @@
         <td>
           <p><code><a href="pwelch.html">pwelch()</a></code> </p>
         </td>
-        <td><p>Welch Periodogram</p></td>
+        <td><p>Plot "Welch" Periodogram</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="r_to_py.Subject.html">r_to_py.Subject()</a></code> </p>
         </td>
-        <td><p>Conver subject to python object</p></td>
+        <td><p>Convert subject to python object</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="r_to_py.Tensor.html">r_to_py.Tensor()</a></code> </p>
         </td>
         <td><p>Convert tensor to python objects</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="rave-cache.html">cache()</a></code> <code><a href="rave-cache.html">clear_cache()</a></code> <code><a href="rave-cache.html">remove_cache()</a></code> <code><a href="rave-cache.html">has_cache()</a></code> </p>
+        </td>
+        <td><p>Cache R Objects with Different levels</p></td>
       </tr><tr>
         
         <td>
@@ -803,21 +479,15 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="rave_deparse.html">rave_deparse()</a></code> </p>
+          <p><code><a href="rave_failure.html">rave_failure()</a></code> </p>
         </td>
-        <td><p>Convert object to strings</p></td>
+        <td><p>RAVE Failure Message</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="rave_ignore.html">rave_ignore()</a></code> </p>
         </td>
-        <td><p>Functions for dev use</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="rave_lapply.html">rave_lapply()</a></code> </p>
-        </td>
-        <td><p>Async way to lapply with no block</p></td>
+        <td><p>Functions for development use</p></td>
       </tr><tr>
         
         <td>
@@ -833,21 +503,9 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="rave_pre_postref3.html">rave_pre_postref3()</a></code> </p>
-        </td>
-        <td><p>Preprocess Module - post-reference (deprecated)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="rave_pre_ref3.html">rave_pre_ref3()</a></code> </p>
-        </td>
-        <td><p>Preprocess Module - Reference (Deprecated)</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="rave_prepare.html">rave_prepare()</a></code> </p>
         </td>
-        <td><p>Function to load subject and create ECoG data environment</p></td>
+        <td><p>Load Subject and Create <code>iEEG/ECoG</code> Data Environment</p></td>
       </tr><tr>
         
         <td>
@@ -863,75 +521,27 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="rave_setup_workers.html">rave_setup_workers()</a></code> </p>
-        </td>
-        <td><p>Default setup for rave, mainly create forked sub-processes</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="rave_version.html">rave_version()</a></code> </p>
         </td>
         <td><p>Get RAVE version</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="ravepy.html">ravepy_remove()</a></code> <code><a href="ravepy.html">ravepy_check()</a></code> <code><a href="ravepy.html">ravepy_register()</a></code> <code><a href="ravepy.html">ravepy_virtualenv_install()</a></code> <code><a href="ravepy.html">ravepy_conda_install()</a></code> <code><a href="ravepy.html">ravepy_info()</a></code> </p>
-        </td>
-        <td><p>Manage Python Environment from RAVE</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="read.freesurf.asc.html">read.freesurf.asc()</a></code> </p>
-        </td>
-        <td><p>Wrapper for "read.freesurf.asc" (threejsr)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="read.freesurf.gii.html">read.freesurf.gii()</a></code> </p>
-        </td>
-        <td><p>Wrapper for "read.freesurf.gii" (threejsr)</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="read_mgrid.html">read_mgrid()</a></code> </p>
         </td>
-        <td><p>Make SUMA grid (I do not know what's this, John wrote it)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="register_compoundInput.html">register_compoundInput()</a></code> </p>
-        </td>
-        <td><p>Function to register compound inputs to shiny</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="renderThreejs.html">renderThreejs()</a></code> </p>
-        </td>
-        <td><p>Wrapper for "renderThreejs" (threejsr)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="safe_env_size.html">safe_env_size()</a></code> </p>
-        </td>
-        <td><p>Get environment size (deprecated)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="safe_str_c.html">safe_str_c()</a></code> </p>
-        </td>
-        <td><p>Convert to string and never goes wrong</p></td>
+        <td><p>Make <code>iElvis</code> <code>mgrid</code> file</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="safe_write_csv.html">safe_write_csv()</a></code> </p>
         </td>
-        <td><p>Save data to csv, if file exists, rename old file</p></td>
+        <td><p>Save data to "CSV", if file exists, rename old file</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="save_h5.html">save_h5()</a></code> </p>
         </td>
-        <td><p>Save objects to H5 file without trivial checkings</p></td>
+        <td><p>Save objects to "HDF5" file without trivial checks</p></td>
       </tr><tr>
         
         <td>
@@ -947,21 +557,9 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="send_to_daemon.html">send_to_daemon()</a></code> </p>
-        </td>
-        <td><p>Send expressions to execute in daemon process (for side viewers)</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="shinirize.html">shinirize()</a></code> </p>
         </td>
         <td><p>Convert module to objects used in shiny</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="shiny_data_selector.html">shiny_data_selector()</a></code> </p>
-        </td>
-        <td><p>Shiny modal to be used by init_app for data selection</p></td>
       </tr><tr>
         
         <td>
@@ -977,76 +575,21 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="subset.Tensor.html">subset(<i>&lt;Tensor&gt;</i>)</a></code> </p>
-        </td>
-        <td><p>Subset for Tensor Object</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="suma_spec_parse.html">suma_spec_parse()</a></code> </p>
         </td>
-        <td><p>Parse spec file</p></td>
+        <td><p>Parse <code>SUMA</code> <code>spec</code> file</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="suma_surface_volume_parse.html">suma_surface_volume_parse()</a></code> </p>
         </td>
-        <td><p>Parse surface volume file header</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="sync_shiny_inputs.html">sync_shiny_inputs()</a></code> </p>
-        </td>
-        <td><p>Synchronize Shiny Inputs</p></td>
+        <td><p>Parse <code>AFNI</code> <code>BRIK/HEAD</code> file</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="test_hdspeed.html">test_hdspeed()</a></code> </p>
         </td>
         <td><p>Function to test local disk speed</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="threejsOutput.html">threejsOutput()</a></code> </p>
-        </td>
-        <td><p>Wrapper for "threejsOutput" (threejsr)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="threejs_scene.html">threejs_scene()</a></code> </p>
-        </td>
-        <td><p>Wrapper for "threejs_scene" (threejsr)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="to_ram_size.html">to_ram_size()</a></code> </p>
-        </td>
-        <td><p>Convert bytes to KB, MB, GB,...</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="trim_env.html">trim_env()</a></code> </p>
-        </td>
-        <td><p>Remove large objects within environment</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="ui_register_function.html">ui_register_function()</a></code> </p>
-        </td>
-        <td><p>Internally register function to shiny (to be deprecated)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="updateCompoundInput.html">updateCompoundInput()</a></code> </p>
-        </td>
-        <td><p>Function to update cmpoundInput (broken)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="updatePackageVersion.html">updatePackageVersion()</a></code> </p>
-        </td>
-        <td><p>Internally use to auto update RAVE package version
-DO NOT use it, it's copied from websites and I'll probably remove this function in the future</p></td>
       </tr><tr>
         
         <td>
@@ -1059,18 +602,6 @@ DO NOT use it, it's copied from websites and I'll probably remove this function 
           <p><code><a href="wavelet_kernels.html">wavelet_kernels()</a></code> </p>
         </td>
         <td><p>Returns wavelets to be used for wavelet function</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="with_fake_session.html">with_fake_session()</a></code> </p>
-        </td>
-        <td><p>internally used for debugging functions (reactive)</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="zero_length.html">zero_length()</a></code> </p>
-        </td>
-        <td><p>Calculate if length of input(s) is zero</p></td>
       </tr>
     </tbody>
     </table>

@@ -15,7 +15,7 @@ spectrum.pgram <- NULL
 #' during this process, however, the trade-off is the speed. 
 #' \code{try_compress=FALSE} indicates that you don't want to compress signals 
 #' under any situation (this might be slow).
-#' @param max_freq Max frequency to be ploted, should be no larger than half of 
+#' @param max_freq Max frequency to plot, should be no larger than half of 
 #' the sampling rate.
 #' @param flim \code{log10} of frequency range to plot
 #' @param window Window length to draw the Periodogram
@@ -152,8 +152,8 @@ diagnose_signal <- function(
 #' 2, 3, 4,... means compress signals by x and then plot. (usually compress signal to save time)
 #' @param channel_names Names for each signals. Will be Y tick labels
 #' @param ylab Y axis label
-#' @param ... pass to matplot
-#' @param plot,xlim,space_mode,time_shift,lwd,cex,new_plot Depricated.
+#' @param ... pass to \code{\link[graphics]{matplot}}
+#' @param plot,xlim,space_mode,time_shift,lwd,cex,new_plot Deprecated
 #' @export
 plot_signals <- function(
   signals, sample_rate = 1, col = 1, space = 0.995, space_mode = 'quantile',

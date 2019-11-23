@@ -1,11 +1,11 @@
-#' Initialize main application
-#' @param modules which modules to show. Default uses "modules.csv" (see load_modules)
+#' Initialize main application for debugging purpose
+#' @param modules which modules to show. See \code{\link[rave]{load_modules}}
 #' @param active_module which module to focus at start up (use module ID)
 #' @param launch.browser launch browsers, default is on
-#' @param theme color theme for GUI
+#' @param theme color theme for the website
 #' @param disable_sidebar hide sidebar at startup?
 #' @param simplify_header hide header at startup?
-#' @param ... other params like test.mode for module debugging
+#' @param ... other parameters like \code{test.mode} for module debugging
 #' @export
 init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
                      theme = "purple", disable_sidebar = FALSE, simplify_header = FALSE, ...){

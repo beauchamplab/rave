@@ -2,11 +2,72 @@
 % Please edit documentation in R/class-Subject.R
 \name{Subject}
 \alias{Subject}
-\title{Subject class}
+\title{R6 Class for 'RAVE' Subject}
 \description{
-Subject class
+contains subject meta information after preprocessing.
+}
+\examples{
+\dontrun{
 
-Subject class
+# Load subject, use `strict=FALSE` if not sure the existence of raw files 
+subject <- Subject$new(project_name = 'demo', 'YAB', strict = FALSE)
+
+# Filter 1:14 to see which numbers refer to the valid electrodes
+subject$filter_valid_electrodes(1:14)
+#> [1] 13 14
+
+}
+}
+\author{
+Zhengjia Wang
+}
+\section{Public fields}{
+\if{html}{\out{<div class="r6-fields">}}
+\describe{
+\item{\code{meta}}{environment stores subject meta data}
+
+\item{\code{subject_id}}{character, subject ID, generated from project name 
+and subject code. For example, project name is \code{"congruency"} and
+subject code is \code{"YAB"}, then the \code{subject_id="congruency/YAB"}}
+
+\item{\code{subject_code}}{identifier for subject}
+
+\item{\code{project_name}}{project name}
+
+\item{\code{dirs}}{stores folder paths for subject data}
+
+\item{\code{is_strict}}{whether preprocess directory is checked when 
+initializing the instance}
+}
+\if{html}{\out{</div>}}
+}
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{electrodes}}{electrode table (read-only)}
+
+\item{\code{frequencies}}{frequency table (read-only)}
+
+\item{\code{time_points}}{time-point table (read-only)}
+
+\item{\code{time_excluded}}{(deprecated) excluded time-point table (read-only)}
+
+\item{\code{sample_rate}}{time-point table (read-only, for compatibility issues)}
+
+\item{\code{volt_sample_rate}}{voltage (trace) sampling rate in Hertz 
+(read-only)}
+
+\item{\code{power_sample_rate}}{power (amplitude) sampling rate in Hertz
+(read-only)}
+
+\item{\code{phase_sample_rate}}{phase sampling rate in Hertz (read-only)}
+
+\item{\code{valid_electrodes}}{all valid electrodes in current reference scheme 
+(read-only)}
+
+\item{\code{id}}{read-only version of subject ID}
+}
+\if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -25,22 +86,31 @@ Subject class
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-info"></a>}}
 \subsection{Method \code{info()}}{
+print the information of the subject
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Subject$info()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+none
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-print"></a>}}
 \subsection{Method \code{print()}}{
+override of default print method
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Subject$print()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+default memory address of the environment
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-finalize"></a>}}
 \subsection{Method \code{finalize()}}{
+called when garbage collected
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Subject$finalize()}\if{html}{\out{</div>}}
 }
@@ -49,42 +119,117 @@ Subject class
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
 \subsection{Method \code{new()}}{
+constructor
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Subject$new(project_name, subject_code, reference = NULL, strict = TRUE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{project_name}}{project name}
+
+\item{\code{subject_code}}{subject code}
+
+\item{\code{reference}}{what kind of reference is default for the subject, 
+default is "default", referring to \code{"reference_default.csv"} in 
+subject meta folder}
+
+\item{\code{strict}}{whether to check if the raw folder exists}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-preprocess_info"></a>}}
 \subsection{Method \code{preprocess_info()}}{
+Obtain preprocessing information.
+This methods is rarely directly called, I wrap up most commonly used 
+fields in other functions
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Subject$preprocess_info(key, default = NULL, customized = F)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Subject$preprocess_info(key, default = NULL, customized = FALSE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{key}}{the fields or items store in \code{SubjectInfo2}
+instance}
+
+\item{\code{default}}{default value if the key is not found}
+
+\item{\code{customized}}{indicates whether the key refers to additional items 
+or fields in \code{SubjectInfo2}. Default is false, meaning 
+the key is the fields.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+the preprocess information correspond to the key
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-filter_all_electrodes"></a>}}
 \subsection{Method \code{filter_all_electrodes()}}{
+filter, and returns existing electrodes
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Subject$filter_all_electrodes(electrodes)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{electrodes}}{integer vector}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+the electrodes that the subject has, including bad, or invalid
+electrodes.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-filter_valid_electrodes"></a>}}
 \subsection{Method \code{filter_valid_electrodes()}}{
+filter, and returns valid electrodes
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Subject$filter_valid_electrodes(electrodes)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{electrodes}}{integer vector}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+the valid electrodes. Invalid electrodes refers to bad 
+electrodes, or the end of bipolar reference. If \code{"Reference"} 
+column is blank in the reference file, then the electrode is invalid.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-has_bad_time_point"></a>}}
 \subsection{Method \code{has_bad_time_point()}}{
+(deprecated) check whether the selected time is excluded
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Subject$has_bad_time_point(block, electrode, start, end)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{block}}{block name}
+
+\item{\code{electrode}}{electrode number}
+
+\item{\code{start}}{start time}
+
+\item{\code{end}}{end time}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

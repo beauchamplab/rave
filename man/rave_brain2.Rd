@@ -14,7 +14,8 @@ rave_brain2(
 \arguments{
 \item{subject}{character or `RAVE` subject instance}
 
-\item{surfaces}{one or more from `pial`, `white`, `smoothwm`, brain surface types}
+\item{surfaces}{one or more from \code{"pial"}, \code{"white"}, 
+\code{"smoothwm"}, brain surface types}
 
 \item{use_141}{logical, whether to use standard 141 brain}
 

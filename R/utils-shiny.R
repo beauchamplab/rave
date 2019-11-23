@@ -151,9 +151,6 @@ fake_session <- function(rave_id = '__fake_session__'){
   fakesession
 }
 
-#' internally used for debugging functions (reactive)
-#' @param func function
-#' @param ... params for function
 with_fake_session <- function(func, ...){
   fakesession = new.env()
   fakesession$sendInputMessage = function(inputId, message){
@@ -191,10 +188,10 @@ get_fake_updated_message <- function(..., .args = list(), .func = NULL){
 
 
 
-#' Customized UI Element
+#' Customized shiny Elements
 #' @param inputId character, input id
 #' @param width integer from 1-12
-#' @param ... passed to shiny::uiOutput
+#' @param ... passed to \code{\link[shiny]{uiOutput}}
 #' @export
 customizedUI <- function(inputId, width = 12L, ...){
   shiny::uiOutput(inputId, ...)

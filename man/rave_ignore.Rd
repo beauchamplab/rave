@@ -2,7 +2,7 @@
 % Please edit documentation in R/legacy-cls_module.R
 \name{rave_ignore}
 \alias{rave_ignore}
-\title{Functions for dev use}
+\title{Functions for development use}
 \usage{
 rave_ignore(...)
 }
@@ -10,5 +10,5 @@ rave_ignore(...)
 \item{...}{Expressions}
 }
 \description{
-Functions for dev use
+Functions for development use
 }

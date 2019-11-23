@@ -1,4 +1,4 @@
-#' Import subject matlab file and create H5 files
+#' Import Subject "Matlab" File and Create "HDF5" files
 #' @param project_name project name
 #' @param subject_code subject code
 #' @param blocks blocks to be imported
@@ -382,7 +382,7 @@ rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = 
 
 
 
-#' Create local cache for fast loadings
+#' Create local cache to speed up loading speed
 #' @param project_name project name
 #' @param subject_code subject code
 #' @param epoch epoch name
@@ -948,13 +948,16 @@ download_sample_data <- function(subject = 'KC', ...){
 
 #' Function to download subjects from internet/local
 #' @param con an url or local file path
-#' @param replace_if_exists Automatically replace current subject if subject files exist (default FALSE)
-#' @param temp_dir temp directory to store downloaded zip files and extracted files
-#' @param remove_zipfile clear downloaded zip files? if con is local file, this will be forced to FALSE
-#' @param subject_settings override subject.yaml see details
+#' @param replace_if_exists Automatically replace current subject if subject 
+#' files exist (default FALSE)
+#' @param temp_dir temp directory to store downloaded zip files and extracted 
+#' files
+#' @param remove_zipfile clear downloaded zip files? if \code{con} is local 
+#' file, this will be forced to FALSE
+#' @param subject_settings override \code{"subject.yaml"} see details
 #' @param override_project if not null, project will be renamed to this value
 #' @param override_subject if not null, subject will be renamed to this value
-#' @param ... passed to download.file
+#' @param ... passed to \code{\link[utils]{download.file}}
 #' @examples
 #' \dontrun{
 #' # Normal example
@@ -985,10 +988,8 @@ download_sample_data <- function(subject = 'KC', ...){
 #' )
 #' }
 #' @details
-#' Each downloaded zip file should have a subject.yaml file indicating default
-#' project name, subject code, data directory and raw data directory. (download
-#' 'https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/data-large.zip'
-#' as an example).
+#' Each downloaded zip file should have a \code{"subject.yaml"} file indicating 
+#' default project name, subject code, data directory and raw data directory. 
 #'
 #' If you want to override subject settings, you need to implement your own
 #' \code{subject_settings}. See examples.
@@ -1346,7 +1347,7 @@ module_analysis_names <- function(module_id, project_name){
 #' @param fun_name function name (usually export_"function_name" in the module)
 #' @param project_name project name
 #' @param subject_code subject code
-#' @param pattern passed to tempfile
+#' @param pattern passed to \code{\link{tempfile}}
 #' @export
 subject_tmpfile <- function(module_id, fun_name = '', project_name, subject_code, pattern = 'file_'){
   soft_deprecated()
@@ -1367,12 +1368,6 @@ subject_tmpfile <- function(module_id, fun_name = '', project_name, subject_code
   tempfile(tmpdir = tmpdir, pattern = pattern)
 }
 
-#' Get subject exported analysis table
-#' @param project_name project name
-#' @param module_id module id
-#' @param analysis_name user-specified, use module_analysis_names to get all of'em
-#' @param check_valid check file existence
-#' @export
 module_analysis_table <- function(project_name, module_id, analysis_name, check_valid = FALSE){
   soft_deprecated()
   # if missing project_name, get from current repository
@@ -1419,14 +1414,6 @@ module_analysis_table <- function(project_name, module_id, analysis_name, check_
 }
 
 
-#' Save analysis to look up tables
-#' @param project_name project name
-#' @param subject_code subject code
-#' @param module_id module id
-#' @param analysis_name user-specified, use module_analysis_names to get all of'em
-#' @param file which file saved to.
-#' @param meta one row of data.frame adding additional data (multiple ones will be ignored)
-#' @export
 module_analysis_save <- function(project_name, subject_code, module_id, analysis_name, file, meta = NULL){
   soft_deprecated()
   # if missing project_name, get from current repository

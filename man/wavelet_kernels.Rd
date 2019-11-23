@@ -7,11 +7,11 @@
 wavelet_kernels(freqs, srate, wave_num)
 }
 \arguments{
-\item{freqs}{- vector of center frequencies for decomposition}
+\item{freqs}{vector of center frequencies for decomposition}
 
-\item{srate}{- sample rate (in Hz)}
+\item{srate}{sample rate (in Hz)}
 
-\item{wave_num}{- desired number of cycles in wavelet (typically 3-20 for frequencies 2-200).}
+\item{wave_num}{desired number of cycles in wavelet (typically 3-20 for frequencies 2-200).}
 }
 \description{
 Returns wavelets to be used for wavelet function

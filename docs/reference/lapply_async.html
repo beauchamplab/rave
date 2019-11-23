@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>lapply using future package (async) — lapply_async • rave</title>
+<title><code>lapply</code> using future package in asynchronous way — lapply_async • rave</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,8 @@
 
 
 
-<meta property="og:title" content="lapply using future package (async) — lapply_async" />
-<meta property="og:description" content="lapply using future package (async)" />
+<meta property="og:title" content="<code>lapply</code> using future package in asynchronous way — lapply_async" />
+<meta property="og:description" content="lapply using future package in asynchronous way" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
       </span>
     </div>
 
@@ -83,24 +83,6 @@
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/a_real_project.html">2.2 A Real Project</a>
-    </li>
-    <li>
-      <a href="../articles/build_your_first_module.html">2.1 Step-by-step, Build Your First RAVE Module</a>
-    </li>
-    <li>
-      <a href="../articles/create_inputs.html">2.3 Create RAVE Inputs</a>
-    </li>
-  </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -118,25 +100,35 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>lapply using future package (async)</h1>
+    <h1><code>lapply</code> using future package in asynchronous way</h1>
     
     <div class="hidden name"><code>lapply_async.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>lapply using future package (async)</p>
+    <p><code>lapply</code> using future package in asynchronous way</p>
     </div>
 
-    <pre class="usage"><span class='fu'>lapply_async</span>(<span class='no'>x</span>, <span class='no'>fun</span>, <span class='no'>...</span>, <span class='kw'>.ncores</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>.call_back</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>.packages</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>.envir</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/environment.html'>environment</a></span>(), <span class='kw'>.globals</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>.gc</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>.as_datatable</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>.nrows</span> <span class='kw'>=</span> <span class='fl'>0</span>)</pre>
+    <pre class="usage"><span class='fu'>lapply_async</span>(
+  <span class='no'>x</span>,
+  <span class='no'>fun</span>,
+  <span class='no'>...</span>,
+  <span class='kw'>.ncores</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+  <span class='kw'>.call_back</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>.packages</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>.envir</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/environment.html'>environment</a></span>(),
+  <span class='kw'>.globals</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>.gc</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>.as_datatable</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>.nrows</span> <span class='kw'>=</span> <span class='fl'>0</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x, fun, ...</th>
-      <td><p>(See ?lapply)</p></td>
+      <td><p>(See <code><a href='https://rdrr.io/r/base/lapply.html'>lapply</a></code>)</p></td>
     </tr>
     <tr>
       <th>.ncores</th>
@@ -154,7 +146,7 @@ automatically. Otherwise you have to specify the packages that you want to load.
     </tr>
     <tr>
       <th>.envir</th>
-      <td><p>intrnally used</p></td>
+      <td><p>internally used</p></td>
     </tr>
     <tr>
       <th>.globals</th>

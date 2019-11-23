@@ -1,11 +1,40 @@
-# fst IO
+# fst IO, documented: 2019-11-21
 
-#' R6 class to load fst files
+
+
+#' @title R6 Class to Load 'fst' Files
+#' @author Zhengjia Wang
+#' @description provides hybrid data structure for 'fst' file
+#' @examples 
+#' 
+#' # Data to save, total 8 MB
+#' x <- matrix(rnorm(1000000), ncol = 100)
+#' 
+#' # Save to local disk
+#' f <- tempfile()
+#' fst::write_fst(as.data.frame(x), path = f, compress = 100)
+#' 
+#' # Load via LazyFST
+#' dat <- LazyFST$new(file_path = f, dims = c(10000, 100))
+#' 
+#' pryr::object_size(dat)
+#' #> 236 kB
+#' 
+#' # Check whether the data is identical
+#' range(dat[] - x)
+#' 
+#' # The reading of column is very fast
+#' system.time(dat[,100])
+#' 
+#' # Reading rows might be slow
+#' system.time(dat[1,])
+#' 
+#' @export
 LazyFST <- R6::R6Class(
   classname = 'LazyFST',
   private = list(
     file_path = NULL,
-    transpose = F,
+    transpose = FALSE,
     meta = NULL,
     dims = NULL,
     data = NULL,
@@ -13,16 +42,35 @@ LazyFST <- R6::R6Class(
     delayed = 3
   ),
   public = list(
+    
+    #' @description to be compatible with \code{\link[rave]{LazyH5}}
+    #' @param ... ignored
+    #' @return none
     open = function(...){},
-    close = function(..., .remove_file = F){
+    
+    #' @description close the connection
+    #' @param ... ignored
+    #' @param .remove_file whether to remove the file when garbage collected
+    #' @return none
+    close = function(..., .remove_file = FALSE){
       if(.remove_file){
         unlink(private$file_path)
       }
     },
+    
+    #' @description to be compatible with \code{\link[rave]{LazyH5}}
+    #' @param ... ignored
+    #' @return none
     save = function(...){
       warning('NOT Implemented yet')
     },
-    initialize = function(file_path, transpose = F, dims = NULL, ...){
+    
+    #' @description constructor
+    #' @param file_path where the data is stored
+    #' @param transpose whether to load data transposed
+    #' @param dims data dimension, only support 1 or 2 dimensions
+    #' @param ... ignored
+    initialize = function(file_path, transpose = FALSE, dims = NULL, ...){
       private$file_path = file_path
       private$transpose = transpose
       # check if dimension matches
@@ -44,10 +92,19 @@ LazyFST <- R6::R6Class(
         }
       }
     },
+    
+    #' @description get data dimension
+    #' @param ... ignored
+    #' @return vector, dimensions
     get_dims = function(...){
       private$dims
     },
-    subset = function(i = NULL, j = NULL, ..., drop = T){
+    
+    #' @description subset data
+    #' @param i,j,... index along each dimension
+    #' @param drop whether to apply \code{\link{drop}} the subset
+    #' @return subset of data
+    subset = function(i = NULL, j = NULL, ..., drop = TRUE){
       if(!length(j)){
         j = seq_len(private$dims[2])
       }

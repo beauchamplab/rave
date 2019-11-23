@@ -1,4 +1,19 @@
-#' Subject class
+# documented 2019-11-22
+
+#' @title R6 Class for 'RAVE' Subject 
+#' @author Zhengjia Wang
+#' @description contains subject meta information after preprocessing.
+#' @examples 
+#' \dontrun{
+#' 
+#' # Load subject, use `strict=FALSE` if not sure the existence of raw files 
+#' subject <- Subject$new(project_name = 'demo', 'YAB', strict = FALSE)
+#' 
+#' # Filter 1:14 to see which numbers refer to the valid electrodes
+#' subject$filter_valid_electrodes(1:14)
+#' #> [1] 13 14
+#' 
+#' }
 #' @export
 Subject <- R6::R6Class(
   classname = 'Subject',
@@ -7,22 +22,54 @@ Subject <- R6::R6Class(
     subjectinfo = NULL
   ),
   public = list(
+    
+    #' @field meta environment stores subject meta data
     meta = NULL,
+    
+    #' @field subject_id character, subject ID, generated from project name 
+    #' and subject code. For example, project name is \code{"congruency"} and
+    #' subject code is \code{"YAB"}, then the \code{subject_id="congruency/YAB"}
     subject_id = NULL,
+    
+    #' @field subject_code identifier for subject
     subject_code = NULL,
+    
+    #' @field project_name project name
     project_name = NULL,
+    
+    #' @field dirs stores folder paths for subject data
     dirs = NULL,
+    
+    #' @field is_strict whether preprocess directory is checked when 
+    #' initializing the instance
     is_strict = TRUE,
+    
+    #' @description print the information of the subject
+    #' @return none
     info = function(){
       cat('<Subject> [', self$subject_id, ']\n - Total electrodes: ', length(self$valid_electrodes), '\n', sep = '')
     },
+    
+    #' @description override of default print method
+    #' @return default memory address of the environment
     print = function(){
       env_address(self)
     },
+    
+    #' @description called when garbage collected
     finalize = function(){
       rm(list = ls(private$loaded), envir = private$loaded)
     },
-    initialize = function(project_name, subject_code, reference = NULL, strict = TRUE){
+    
+    #' @description constructor
+    #' @param project_name project name
+    #' @param subject_code subject code
+    #' @param reference what kind of reference is default for the subject, 
+    #' default is "default", referring to \code{"reference_default.csv"} in 
+    #' subject meta folder
+    #' @param strict whether to check if the raw folder exists
+    initialize = function(project_name, subject_code, reference = NULL, 
+                          strict = TRUE){
       subject_id = sprintf('%s/%s', project_name, subject_code)
       self$project_name = project_name
       self$subject_code = subject_code
@@ -61,7 +108,18 @@ Subject <- R6::R6Class(
       private$subjectinfo = SubjectInfo2$new(project_name = project_name,
                                              subject_code = subject_code, strict = strict)
     },
-    preprocess_info = function(key, default = NULL, customized = F){
+    
+    #' @description Obtain preprocessing information.
+    #' This methods is rarely directly called, I wrap up most commonly used 
+    #' fields in other functions
+    #' @param key the fields or items store in \code{SubjectInfo2}
+    #' instance
+    #' @param default default value if the key is not found
+    #' @param customized indicates whether the key refers to additional items 
+    #' or fields in \code{SubjectInfo2}. Default is false, meaning 
+    #' the key is the fields.
+    #' @return the preprocess information correspond to the key
+    preprocess_info = function(key, default = NULL, customized = FALSE){
       if(customized){
         res = private$subjectinfo$logger$get_or_save(key = key)
       }else{
@@ -70,13 +128,31 @@ Subject <- R6::R6Class(
       res %?<-% default
       return(res)
     },
+    
+    #' @description filter, and returns existing electrodes
+    #' @param electrodes integer vector
+    #' @return the electrodes that the subject has, including bad, or invalid
+    #' electrodes.
     filter_all_electrodes = function(electrodes){
       electrodes = electrodes[electrodes %in% private$subjectinfo$channels]
       electrodes
     },
+    
+    #' @description filter, and returns valid electrodes
+    #' @param electrodes integer vector
+    #' @return the valid electrodes. Invalid electrodes refers to bad 
+    #' electrodes, or the end of bipolar reference. If \code{"Reference"} 
+    #' column is blank in the reference file, then the electrode is invalid. 
     filter_valid_electrodes = function(electrodes){
       electrodes[electrodes %in% self$valid_electrodes]
     },
+    
+    
+    #' @description (deprecated) check whether the selected time is excluded
+    #' @param block block name
+    #' @param electrode electrode number
+    #' @param start start time
+    #' @param end end time
     has_bad_time_point = function(block, electrode, start, end){
       nrow(
         subset(
@@ -91,21 +167,53 @@ Subject <- R6::R6Class(
     }
   ),
   active = list(
+    
+    #' @field electrodes electrode table (read-only)
     electrodes = function(){
       self$meta[['electrode']]
     },
+    
+    #' @field frequencies frequency table (read-only)
     frequencies = function(){
       self$meta[['frequency']]
     },
+    
+    #' @field time_points time-point table (read-only)
     time_points = function(){
       self$meta[['time_points']]
     },
+    
+    
+    #' @field time_excluded (deprecated) excluded time-point table (read-only)
     time_excluded = function(){
       self$meta[['time_excluded']]
     },
+    
+    
+    #' @field sample_rate time-point table (read-only, for compatibility issues)
     sample_rate = function(){
       self$meta[['sample_rate']]
     },
+    
+    #' @field volt_sample_rate voltage (trace) sampling rate in Hertz 
+    #' (read-only)
+    volt_sample_rate = function(){
+      self$preprocess_info('srate')
+    },
+    
+    #' @field power_sample_rate power (amplitude) sampling rate in Hertz
+    #' (read-only)
+    power_sample_rate = function(){
+      self$meta[['sample_rate']]
+    },
+    
+    #' @field phase_sample_rate phase sampling rate in Hertz (read-only)
+    phase_sample_rate = function(){
+      self$meta[['sample_rate']]
+    },
+    
+    #' @field valid_electrodes all valid electrodes in current reference scheme 
+    #' (read-only)
     valid_electrodes = function(){
       tbl = self$meta[['electrode']]
       if(is.data.frame(tbl) && 'Reference' %in% names(tbl)){
@@ -115,6 +223,8 @@ Subject <- R6::R6Class(
       }
       re
     },
+    
+    #' @field id read-only version of subject ID
     id = function(){
       self$subject_id
     }
@@ -122,9 +232,9 @@ Subject <- R6::R6Class(
 )
 
 
-#' Conver subject to python object
+#' Convert subject to python object
 #' @param obj Subject class
-#' @param convert pass to reticulate::r_to_py
+#' @param convert pass to \code{\link[reticulate]{r_to_py}}
 #' @export
 r_to_py.Subject <- function(obj, convert = FALSE){
   reticulate::r_to_py(list(
@@ -150,9 +260,8 @@ asJSON.Subject <- function(obj){
   )
 }
 
-#' Returns subject ID
-#' @param x object to be coerced or tested.
-#' @param ... further arguments passed to or from other methods.
+
+
 #' @export
 as.character.Subject <- function(x, ...){
   x$id

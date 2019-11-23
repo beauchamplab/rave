@@ -1,22 +1,15 @@
 
-#' Lazy load HDF5 file via hdf5r package
+#' Lazy Load "HDF5" File via \code{\link[hdf5r]{hdf5r-package}}
 #'
-#' @param file HDF5 file
-#' @param name group/data_name path to dataset
+#' @description Wrapper for class \code{\link[rave]{LazyH5}}, which load data with 
+#' "lazy" mode - only read part of dataset when needed.
+#' 
+#' @param file "HDF5" file
+#' @param name \code{group/data_name} path to dataset
 #' @param read_only default is TRUE, read dataset only
 #' @param ram load to RAM immediately
 #'
-#' @details load_h5 is a wrapper for class LazyH5, which load data with "lazy" mode -
-#' only read part of dataset when needed.
-#' @seealso \code{\link{save_h5}}
-#' @examples
-#' \dontrun{
-#' f <- system.file('data/data_dir/Subject_RAVE_Demo/rave/cache/6.h5', package = 'rave')
-#' name <- '/wavelet/power/008'
-#' dat <- load_h5(f, name)
-#' dim(dat)
-#' dat[,1:3]
-#' }
+#' @seealso \code{\link[rave]{save_h5}}
 #' @export
 load_h5 <- function(file, name, read_only = T, ram = F){
   f = re = LazyH5$new(file_path = file, data_name = name, read_only = read_only)
@@ -35,31 +28,29 @@ load_h5 <- function(file, name, read_only = T, ram = F){
 
 
 
-#' Save objects to H5 file without trivial checkings
-#'
+#' Save objects to "HDF5" file without trivial checks
 #' @param x array, matrix, or vector
-#' @param file HDF5 file
-#' @param name group/data_name path to dataset
+#' @param file \code{HDF5} file
+#' @param name path to dataset in format like \code{"group/data_name"}
 #' @param chunk chunk size
 #' @param level compress level
 #' @param replace if dataset exists, replace?
 #' @param new_file remove old file if exists?
 #' @param ctype dataset type: numeric? character?
-#' @param ... passed to other LazyH5$save
+#' @param ... passed to other \code{LazyH5$save}
 #'
 #' @seealso \code{\link{load_h5}}
 #' @examples
-#' \dontrun{
+#' 
 #' file <- tempfile()
 #' x <- 1:120; dim(x) <- 2:5
-#'
+#' 
 #' # save x to file with name /group/dataset/1
 #' save_h5(x, file, '/group/dataset/1', chunk = dim(x))
-#'
+#' 
 #' # read data
 #' y <- load_h5(file, '/group/dataset/1')
 #' y[]
-#' }
 #' @export
 save_h5 <- function(x, file, name, chunk = 'auto', level = 4,replace = TRUE, new_file = FALSE, ctype = NULL, ...){
   f = LazyH5$new(file, name, read_only = F)

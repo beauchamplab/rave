@@ -2,11 +2,37 @@
 % Please edit documentation in R/class-LazyFST.R
 \name{LazyFST}
 \alias{LazyFST}
-\title{R6 class to load fst files}
+\title{R6 Class to Load 'fst' Files}
 \description{
-R6 class to load fst files
+provides hybrid data structure for 'fst' file
+}
+\examples{
 
-R6 class to load fst files
+# Data to save, total 8 MB
+x <- matrix(rnorm(1000000), ncol = 100)
+
+# Save to local disk
+f <- tempfile()
+fst::write_fst(as.data.frame(x), path = f, compress = 100)
+
+# Load via LazyFST
+dat <- LazyFST$new(file_path = f, dims = c(10000, 100))
+
+pryr::object_size(dat)
+#> 236 kB
+
+# Check whether the data is identical
+range(dat[] - x)
+
+# The reading of column is very fast
+system.time(dat[,100])
+
+# Reading rows might be slow
+system.time(dat[1,])
+
+}
+\author{
+Zhengjia Wang
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -23,50 +49,123 @@ R6 class to load fst files
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-open"></a>}}
 \subsection{Method \code{open()}}{
+to be compatible with \code{\link[rave]{LazyH5}}
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{LazyFST$open(...)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{ignored}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+none
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-close"></a>}}
 \subsection{Method \code{close()}}{
+close the connection
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{LazyFST$close(..., .remove_file = F)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{LazyFST$close(..., .remove_file = FALSE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{ignored}
+
+\item{\code{.remove_file}}{whether to remove the file when garbage collected}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+none
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-save"></a>}}
 \subsection{Method \code{save()}}{
+to be compatible with \code{\link[rave]{LazyH5}}
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{LazyFST$save(...)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{ignored}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+none
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
 \subsection{Method \code{new()}}{
+constructor
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{LazyFST$new(file_path, transpose = F, dims = NULL, ...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{LazyFST$new(file_path, transpose = FALSE, dims = NULL, ...)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{file_path}}{where the data is stored}
+
+\item{\code{transpose}}{whether to load data transposed}
+
+\item{\code{dims}}{data dimension, only support 1 or 2 dimensions}
+
+\item{\code{...}}{ignored}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-get_dims"></a>}}
 \subsection{Method \code{get_dims()}}{
+get data dimension
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{LazyFST$get_dims(...)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{ignored}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+vector, dimensions
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-subset"></a>}}
 \subsection{Method \code{subset()}}{
+subset data
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{LazyFST$subset(i = NULL, j = NULL, ..., drop = T)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{LazyFST$subset(i = NULL, j = NULL, ..., drop = TRUE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{i, j, ...}}{index along each dimension}
+
+\item{\code{drop}}{whether to apply \code{\link{drop}} the subset}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+subset of data
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

@@ -362,12 +362,15 @@ check_epoch <- function(subject, epoch_name){
 
 
 #' Check if data is loaded for current module
-#' @param ... see defails
-#' @param data same as ..., but can be a vector
-#' @details This function checks whether ECoG data is loaded. The format is: DATA+(blankspace)+TYPE. DATA can be
-#' "power" (Wavelet transform amplitude), "phase" (Complex angle), or "volt"/"voltage" (Before wavelet). TYPE can
-#' be "raw" (no reference), "referenced" (referenced by common average reference, white matter reference, or bipolar reference).
-#' For voltage data, there is one more special type "full" which loads voltage data for all electrodes.
+#' @param ... see details
+#' @param data same as \code{...}, but can be a vector
+#' @details This function checks whether "ECoG" data is loaded. The format is: 
+#' \code{"DATA+(blankspace)+TYPE"}. \code{"DATA"} can be "power" (wavelet 
+#' transform amplitude), "phase" (complex angle), or "volt"/"voltage" (Before 
+#' wavelet). \code{"TYPE"} can be "raw" (no reference), "referenced" 
+#' (referenced by common average reference, white matter reference, or 
+#' bipolar reference). For voltage data, there is one more special type 
+#' "full" which loads voltage data for all electrodes.
 #' @export
 rave_checks <- function(..., data = NULL){
   data = unlist(c(data, list(...)))

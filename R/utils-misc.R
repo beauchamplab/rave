@@ -201,7 +201,7 @@ time_diff <- function(start, end){
 
 #' Get RAM usage
 #' @param modules which module(s)
-#' @param data_envir default uses getDefaultDataRepository
+#' @param data_envir default uses \code{\link[rave]{getDefaultDataRepository}}
 get_mem_usage <- function(modules, data_envir){
   if(missing(data_envir)){
     data_envir = getDefaultDataRepository()

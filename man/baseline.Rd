@@ -20,7 +20,7 @@ baseline(
 )
 }
 \arguments{
-\item{el}{Tensor or ECoGTensor object}
+\item{el}{\code{\link[rave]{Tensor}} or \code{\link[rave]{ECoGTensor}} object}
 
 \item{from}{baseline start time}
 
@@ -34,15 +34,15 @@ baseline(
 
 \item{hybrid}{if return tensor object, swap cache? useful for large dataset}
 
-\item{swap_file}{by default tempfile, or you can specify path}
+\item{swap_file}{by default \code{tempfile()}, or you can specify path}
 
 \item{mem_optimize}{optimize for large dataset? default is TRUE}
 
 \item{same_dimension}{logical, true if \code{op} is element-wise operator}
 
-\item{preop}{function before baselining}
+\item{preop}{function before baseline}
 
-\item{op}{function for baselining}
+\item{op}{function for baseline}
 }
 \description{
 Baseline signals

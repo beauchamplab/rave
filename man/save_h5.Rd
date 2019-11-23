@@ -2,7 +2,7 @@
 % Please edit documentation in R/io-hdf5.R
 \name{save_h5}
 \alias{save_h5}
-\title{Save objects to H5 file without trivial checkings}
+\title{Save objects to "HDF5" file without trivial checks}
 \usage{
 save_h5(
   x,
@@ -19,9 +19,9 @@ save_h5(
 \arguments{
 \item{x}{array, matrix, or vector}
 
-\item{file}{HDF5 file}
+\item{file}{\code{HDF5} file}
 
-\item{name}{group/data_name path to dataset}
+\item{name}{path to dataset in format like \code{"group/data_name"}}
 
 \item{chunk}{chunk size}
 
@@ -33,13 +33,13 @@ save_h5(
 
 \item{ctype}{dataset type: numeric? character?}
 
-\item{...}{passed to other LazyH5$save}
+\item{...}{passed to other \code{LazyH5$save}}
 }
 \description{
-Save objects to H5 file without trivial checkings
+Save objects to "HDF5" file without trivial checks
 }
 \examples{
-\dontrun{
+
 file <- tempfile()
 x <- 1:120; dim(x) <- 2:5
 
@@ -49,7 +49,6 @@ save_h5(x, file, '/group/dataset/1', chunk = dim(x))
 # read data
 y <- load_h5(file, '/group/dataset/1')
 y[]
-}
 }
 \seealso{
 \code{\link{load_h5}}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/legacy-func_rave_prepare.R
 \name{rave_prepare}
 \alias{rave_prepare}
-\title{Function to load subject and create ECoG data environment}
+\title{Load Subject and Create \code{iEEG/ECoG} Data Environment}
 \usage{
 rave_prepare(
   subject,
@@ -19,31 +19,40 @@ rave_prepare(
 )
 }
 \arguments{
-\item{subject}{characters, format: "PROJECT/SUBJECT"}
+\item{subject}{characters, format: \code{"PROJECT/SUBJECT"}}
 
-\item{electrodes}{numeric vector, which electrodes to be loaded}
+\item{electrodes}{integer vector, which electrodes to be loaded}
 
-\item{epoch}{characters, depending on subject meta data. For example, use "epoch1" if exists epoch file "epoch_epoch1.csv"}
+\item{epoch}{characters, name for epoch data. For example, \code{"epoch1"} 
+refers to epoch file \code{"epoch_epoch1.csv"} in subject meta folder}
 
-\item{time_range}{vector of length 2 - before and after onset. For example, c(1,2), means 1 second before onset and 2 seconds after onset.}
+\item{time_range}{vector of length 2. \code{time_range[1]=1} indicates 1 
+second before onset will be loaded; \code{time_range[2]=1.5} means 1.5 
+seconds after onset will be loaded. Make sure both are positive number in 
+seconds}
 
-\item{frequency_range}{vector of length 2 - lowest and highest frequencies. By default is all frequencies. Only applied to power and phase data.}
+\item{frequency_range}{vector of length 2 - lowest and highest frequencies. 
+By default is all frequencies. Only applied to power and phase data.}
 
-\item{data_types}{vector of characters, data to be preloaded. "power" - referenced power data, "phase" - referenced phase data, "volt" - referenced voltage data}
+\item{data_types}{vector of characters, data to be pre-loaded. 
+\code{"power"} refers to referenced power (power spectrum) data, 
+\code{"phase"} refers to referenced phase data, and \code{"volt"} 
+is referenced voltage (original analog traces) data}
 
-\item{reference}{similar to epoch, For example, use "default" if exists reference file "reference_default.csv"}
+\item{reference}{name of reference data. For example, \code{"default"} refers
+to reference file \code{"reference_default.csv"} in subject meta folder}
 
-\item{attach, }{characters or NULL, NULL if you don't want to attach it, "r" if want to load data as R environment, "py" if python, "matlab" for matlab.}
+\item{attach, }{characters or \code{NULL}, \code{NULL} if you don't want to 
+attach it, \code{"r"} if want to load data as R environment, \code{"py"} is 
+for python, and \code{"matlab"} is for Matlab. (python and Matlab are under 
+construction)}
 
 \item{data_env}{environment to load data into.}
 
-\item{strict}{check data completness? default is FALSE (suggested)}
+\item{strict}{whether to check if raw data exists. Default is no (suggested)}
 
-\item{...}{to be ignored}
+\item{...}{ignored}
 }
 \description{
-Function to load subject and create ECoG data environment
-}
-\details{
-Usually this function is for module writters and for debug use, or adhoc analysis.
+Loads subject data along with \code{iEEG/ECoG} data into memory.
 }

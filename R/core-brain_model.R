@@ -1,6 +1,7 @@
 #' Tools to load and view brain in 3D viewer
 #' @param subject character or `RAVE` subject instance
-#' @param surfaces one or more from `pial`, `white`, `smoothwm`, brain surface types
+#' @param surfaces one or more from \code{"pial"}, \code{"white"}, 
+#' \code{"smoothwm"}, brain surface types
 #' @param use_141 logical, whether to use standard 141 brain
 #' @param compute_template logical whether to compute nearest 141 node. Please 
 #' also check \code{freesurfer_brain}.

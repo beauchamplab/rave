@@ -17,11 +17,11 @@ read_fst <- function(path, ..., as.data.table = TRUE){
   
 }
 
-#' Function try to load FST file cache, if not found, read HDF5 file
-#' @param fst_path fst cache path
-#' @param h5_path alternate hdf5 path
-#' @param h5_name hdf5 data name
-#' @param fst_need_transpose does fst data need transpose?
+#' Function try to load "fst" file cache, if not found, read "HDF5" file
+#' @param fst_path \code{fst} cache path
+#' @param h5_path alternate \code{hdf5} path
+#' @param h5_name \code{hdf5} data name
+#' @param fst_need_transpose does \code{fst} data need transpose?
 #' @param fst_need_drop drop dimensions
 #' @param ram read to ram?
 #'

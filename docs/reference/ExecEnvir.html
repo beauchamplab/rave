@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Module runtime environment (session based) — ExecEnvir • rave</title>
+<title>Session-based Module Runtime Environment Class — ExecEnvir • rave</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,10 @@
 
 
 
-<meta property="og:title" content="Module runtime environment (session based) — ExecEnvir" />
-<meta property="og:description" content="Module runtime environment (session based)" />
+<meta property="og:title" content="Session-based Module Runtime Environment Class — ExecEnvir" />
+<meta property="og:description" content="where all the module functions are executed. It's rarely created
+manually, use get_module to create module, run with 
+start_app(m, test.mode=TRUE), and then inspect modules." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -69,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
       </span>
     </div>
 
@@ -83,24 +85,6 @@
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/a_real_project.html">2.2 A Real Project</a>
-    </li>
-    <li>
-      <a href="../articles/build_your_first_module.html">2.1 Step-by-step, Build Your First RAVE Module</a>
-    </li>
-    <li>
-      <a href="../articles/create_inputs.html">2.3 Create RAVE Inputs</a>
-    </li>
-  </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -118,29 +102,502 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Module runtime environment (session based)</h1>
+    <h1>Session-based Module Runtime Environment Class</h1>
     
     <div class="hidden name"><code>ExecEnvir.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Module runtime environment (session based)</p>
+    <p>where all the module functions are executed. It's rarely created
+manually, use <code><a href='get_module.html'>get_module</a></code> to create module, run with 
+<code>start_app(m, test.mode=TRUE)</code>, and then inspect modules.</p>
     </div>
 
-    <pre class="usage"><span class='no'>ExecEnvir</span></pre>
 
 
-    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
+    <h2 class="hasAnchor" id="public-fields"><a class="anchor" href="#public-fields"></a>Public fields</h2>
 
-    <p>An object of class <code>R6ClassGenerator</code> of length 24.</p>
+    <p><div class="r6-fields"></p><dl class='dl-horizontal'>
+<dt><code>parent_env</code></dt><dd><p>the parent/top environment of the module, usually 
+global environment or some name-space if the module is implemented as 
+an R package</p></dd>
 
+<dt><code>wrapper_env</code></dt><dd><p>stores all the utility functions. Some functions are 
+overridden there such as <code><a href='https://rdrr.io/pkg/shiny/man/observe.html'>observe</a></code>, 
+<code>rave_checks</code>, or <code>eval_when_ready</code>. These functions behave 
+differently inside or outside of shiny context, and with or without data 
+loaded. The environment will be locked once the module is initialized. 
+The parent environment is <code>parent_env</code></p></dd>
+
+<dt><code>static_env</code></dt><dd><p>stores module static functions. These functions are 
+evaluated under <code>parse_env</code> and then moved here. The environment
+is locked after initialization. Its parent environment is 
+<code>wrapper_env</code></p></dd>
+
+<dt><code>param_env</code></dt><dd><p>stores parameters and most of the user inputs. It can 
+also serve as a repository for global variables. Unlike the previous
+environments, <code>param_env</code> is unlocked, but module creators do not 
+have access to this environment directly. The parent environment is 
+<code>static_env</code></p></dd>
+
+<dt><code>runtime_env</code></dt><dd><p>where the main part of module is running. All shiny
+<code><a href='https://rdrr.io/pkg/shiny/man/observe.html'>observe</a></code> and <code><a href='https://rdrr.io/pkg/shiny/man/observeEvent.html'>observeEvent</a></code> are 
+redirected to this environment by default (unless using 
+<code><a href='https://rdrr.io/pkg/shiny/man/observe.html'>shiny::observe</a></code>). All functions in <code>static_env</code> have access 
+to this environment. The parent environment is <code>param_env</code></p></dd>
+
+<dt><code>parse_env</code></dt><dd><p>environment where modules are parsed. The parent 
+environment is <code>runtime_env</code>. Once all functions are evaluated, 
+this environment is not used. However, module creators don't directly 
+access this environment once the module is initialized.</p></dd>
+
+<dt><code>ns</code></dt><dd><p>shiny name-space functions, is equivalent to 
+<code><a href='https://rdrr.io/pkg/shiny/man/NS.html'>shiny::NS(module_id)</a></code>. The goal is to add prefixes to module inputs
+so that two modules with the same input ID are named differently</p></dd>
+
+<dt><code>auto_execute</code></dt><dd><p>(Deprecated) whether to auto-calculate results</p></dd>
+
+<dt><code>manual_inputIds</code></dt><dd><p>character vector; name list of manually input IDs.
+Used when the algorithm takes long to run</p></dd>
+
+<dt><code>rendering_inputIds</code></dt><dd><p>character vector; name list of input IDs that 
+when one of the corresponding inputs is changed, then <code>rave_execute</code>
+will not get evaluated. Only the outputs are changed.</p></dd>
+
+<dt><code>input_update</code></dt><dd><p>expressions to update inputs</p></dd>
+
+<dt><code>register_output_events</code></dt><dd><p>expressions to register outputs</p></dd>
+
+<dt><code>register_input_events</code></dt><dd><p>expressions to register inputs</p></dd>
+
+<dt><code>execute</code></dt><dd><p>module main function. The function is dynamically 
+generated. Don't call directly.</p></dd>
+
+<dt><code>async_module</code></dt><dd><p>(experimental) whether the module contains any 
+asynchronous part</p></dd>
+
+<dt><code>global_reactives</code></dt><dd><p>shiny global <code>reactives</code>, internal use only</p></dd>
+
+<dt><code>local_reactives</code></dt><dd><p>shiny local <code>reactives</code>, internal use only</p></dd>
+
+<dt><code>ready_functions</code></dt><dd><p>functions to run when the module is ready. The 
+functions are called at the last step of <code><a href='shinirize.html'>shinirize</a></code>. 
+Usually it's used along with <code>eval_when_ready</code>, to make sure  
+<code>global_reactives</code> and <code>local_reactives</code> getting registered
+before functions calls</p></dd>
+
+</dl><p></div></p>
+    <h2 class="hasAnchor" id="active-bindings"><a class="anchor" href="#active-bindings"></a>Active bindings</h2>
+
+    <p><div class="r6-active-bindings"></p><dl class='dl-horizontal'>
+<dt><code>input_ids</code></dt><dd><p>vector of input IDs (read-only)</p></dd>
+
+<dt><code>input_labels</code></dt><dd><p>vector of input labels (read-only)</p></dd>
+
+<dt><code>output_labels</code></dt><dd><p>vector of output labels (read-only)</p></dd>
+
+<dt><code>output_ids</code></dt><dd><p>vector of output IDs (read-only)</p></dd>
+
+</dl><p></div></p>
+    <h2 class="hasAnchor" id="methods"><a class="anchor" href="#methods"></a>Methods</h2>
+
+    
+<h3>Public methods</h3>
+
+<ul>
+<li><p><a href='#method-reload'><code>ExecEnvir$reload()</code></a></p></li>
+<li><p><a href='#method-finalize'><code>ExecEnvir$finalize()</code></a></p></li>
+<li><p><a href='#method-info'><code>ExecEnvir$info()</code></a></p></li>
+<li><p><a href='#method-print'><code>ExecEnvir$print()</code></a></p></li>
+<li><p><a href='#method-clean'><code>ExecEnvir$clean()</code></a></p></li>
+<li><p><a href='#method-new'><code>ExecEnvir$new()</code></a></p></li>
+<li><p><a href='#method-reset'><code>ExecEnvir$reset()</code></a></p></li>
+<li><p><a href='#method-copy'><code>ExecEnvir$copy()</code></a></p></li>
+<li><p><a href='#method-execute_with'><code>ExecEnvir$execute_with()</code></a></p></li>
+<li><p><a href='#method-names'><code>ExecEnvir$names()</code></a></p></li>
+<li><p><a href='#method-register_module'><code>ExecEnvir$register_module()</code></a></p></li>
+<li><p><a href='#method-rave_inputs'><code>ExecEnvir$rave_inputs()</code></a></p></li>
+<li><p><a href='#method-rave_outputs'><code>ExecEnvir$rave_outputs()</code></a></p></li>
+<li><p><a href='#method-rave_updates'><code>ExecEnvir$rave_updates()</code></a></p></li>
+<li><p><a href='#method-rave_execute'><code>ExecEnvir$rave_execute()</code></a></p></li>
+<li><p><a href='#method-clear_cache'><code>ExecEnvir$clear_cache()</code></a></p></li>
+<li><p><a href='#method-cache'><code>ExecEnvir$cache()</code></a></p></li>
+<li><p><a href='#method-cache_input'><code>ExecEnvir$cache_input()</code></a></p></li>
+<li><p><a href='#method-set_browser'><code>ExecEnvir$set_browser()</code></a></p></li>
+<li><p><a href='#method-generate_input_ui'><code>ExecEnvir$generate_input_ui()</code></a></p></li>
+<li><p><a href='#method-generate_output_ui'><code>ExecEnvir$generate_output_ui()</code></a></p></li>
+<li><p><a href='#method-is_global'><code>ExecEnvir$is_global()</code></a></p></li>
+<li><p><a href='#method-clone'><code>ExecEnvir$clone()</code></a></p></li>
+</ul>
+<p><hr>
+<a id="method-reload"></a></p><h3>Method <code>reload()</code></h3>
+<p>(experimental) signal the modules to reload</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ExecEnvir$reload()</pre><p></div></p>
+
+<h3>Returns</h3>
+<p>none</p>
+<p><hr>
+<a id="method-finalize"></a></p><h3>Method <code>finalize()</code></h3>
+<p>garbage collection</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ExecEnvir$finalize()</pre><p></div></p>
+
+<h3>Returns</h3>
+<p>none</p>
+<p><hr>
+<a id="method-info"></a></p><h3>Method <code>info()</code></h3>
+<p>print variables in different layers (environment)</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ExecEnvir$info()</pre><p></div></p>
+
+<h3>Returns</h3>
+<p>none</p>
+<p><hr>
+<a id="method-print"></a></p><h3>Method <code><a href='https://rdrr.io/r/base/print.html'>print()</a></code></h3>
+<p>print the memory address</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ExecEnvir$print(...)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>...</code></dt><dd><p>ignored</p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>memory address</p>
+<p><hr>
+<a id="method-clean"></a></p><h3>Method <code>clean()</code></h3>
+<p>clean the environments to release the resource</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ExecEnvir$clean()</pre><p></div></p>
+
+<h3>Returns</h3>
+<p>none</p>
+<p><hr>
+<a id="method-new"></a></p><h3>Method <code>new()</code></h3>
+<p>constructor</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ExecEnvir$new(session = getDefaultReactiveDomain(), parent_env = NULL)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>session</code></dt><dd><p>shiny session instance</p></dd>
+
+<dt><code>parent_env</code></dt><dd><p>parent environment of this instance: package name space
+or global environment</p></dd>
+
+</dl><p></div></p>
+<p><hr>
+<a id="method-reset"></a></p><h3>Method <code>reset()</code></h3>
+<p>reset the runtime environment, rarely used</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ExecEnvir$reset(inputs)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>inputs</code></dt><dd><p>reactive value list</p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>none</p>
+<p><hr>
+<a id="method-copy"></a></p><h3>Method <code>copy()</code></h3>
+<p>(deprecated) copy the instance locally</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ExecEnvir$copy(
+  session_id = "__fake_runtime_env__",
+  data_env = getDefaultDataRepository()
+)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>session_id</code></dt><dd><p>character</p></dd>
+
+<dt><code>data_env</code></dt><dd><p>where the data is stored, default is the environment 
+returned by <code><a href='getDefaultDataRepository.html'>getDefaultDataRepository</a></code></p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>a copied instance</p>
+<p><hr>
+<a id="method-execute_with"></a></p><h3>Method <code>execute_with()</code></h3>
+<p>(deprecated) execute module with given parameter</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ExecEnvir$execute_with(param, async = FALSE, plan = NULL)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>param</code></dt><dd><p>named list</p></dd>
+
+<dt><code>async</code></dt><dd><p>whether to run the whole module</p></dd>
+
+<dt><code>plan</code></dt><dd><p>future plan</p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>runtime environment</p>
+<p><hr>
+<a id="method-names"></a></p><h3>Method <code><a href='https://rdrr.io/r/base/names.html'>names()</a></code></h3>
+<p>returns names of a list, if names are null, 
+returns blank characters</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ExecEnvir$names(x)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>x</code></dt><dd><p>a list</p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>the names of the list</p>
+<p><hr>
+<a id="method-register_module"></a></p><h3>Method <code>register_module()</code></h3>
+<p>register <code><a href='ModuleEnvir.html'>ModuleEnvir</a></code> instance</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ExecEnvir$register_module(module_env)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>module_env</code></dt><dd><p><code><a href='ModuleEnvir.html'>ModuleEnvir</a></code> instance. The modules
+are shared across different sessions, but to run the module, we need 
+to create runtime environment, which is <code>ExecEnvir</code></p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>none</p>
+<p><hr>
+<a id="method-rave_inputs"></a></p><h3>Method <code>rave_inputs()</code></h3>
+<p>parse input components</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ExecEnvir$rave_inputs(
+  ...,
+  .input_panels = list(),
+  .tabsets = list(),
+  .env = NULL,
+  .manual_inputs = NULL,
+  .render_inputs = NULL
+)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>...</code></dt><dd><p>shiny input calls, such as <code>textInput('id', 'Name', ...)</code></p></dd>
+
+<dt><code>.input_panels, .tabsets</code></dt><dd><p>together define the input layouts</p></dd>
+
+<dt><code>.env</code></dt><dd><p>ignored, debug only</p></dd>
+
+<dt><code>.manual_inputs</code></dt><dd><p>input IDs that won't cause module re-calculate
+when inputs are updated</p></dd>
+
+<dt><code>.render_inputs</code></dt><dd><p>input IDs that only trigger render functions when
+updated</p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>none</p>
+<p><hr>
+<a id="method-rave_outputs"></a></p><h3>Method <code>rave_outputs()</code></h3>
+<p>parse output components</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ExecEnvir$rave_outputs(
+  ...,
+  .output_tabsets = list(),
+  .tabsets = list(),
+  .env = NULL
+)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>...</code></dt><dd><p>shiny output calls, such as <code>plotOutput('id', 'Title')</code></p></dd>
+
+<dt><code>.output_tabsets, .tabsets</code></dt><dd><p>together define the output layouts</p></dd>
+
+<dt><code>.env</code></dt><dd><p>debug use</p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>none</p>
+<p><hr>
+<a id="method-rave_updates"></a></p><h3>Method <code>rave_updates()</code></h3>
+<p>input initialization when <code>iEEG/ECoG</code> data are imported</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ExecEnvir$rave_updates(..., .env = NULL)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>...</code></dt><dd><p>R expressions</p></dd>
+
+<dt><code>.env</code></dt><dd><p>for debug use</p></dd>
+
+</dl><p></div></p>
+<p><hr>
+<a id="method-rave_execute"></a></p><h3>Method <code>rave_execute()</code></h3>
+<p>parse, and compile to main function</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ExecEnvir$rave_execute(..., auto = TRUE, .env = NULL, async_vars = NULL)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>...</code></dt><dd><p>R expressions</p></dd>
+
+<dt><code>auto</code></dt><dd><p>whether the module should run automatically</p></dd>
+
+<dt><code>.env</code></dt><dd><p>debug use</p></dd>
+
+<dt><code>async_vars</code></dt><dd><p>variables further passed to <code>async</code> module</p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>none, but <code>ExecEnvir$execute</code> will be generated.</p>
+<p><hr>
+<a id="method-clear_cache"></a></p><h3>Method <code><a href='rave-cache.html'>clear_cache()</a></code></h3>
+<p>clear cached objects</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ExecEnvir$clear_cache(levels = 1)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>levels</code></dt><dd><p>passed to <code><a href='rave-cache.html'>clear_cache</a></code>. Only level 1 and
+2 are allowed</p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>none</p>
+<p><hr>
+<a id="method-cache"></a></p><h3>Method <code><a href='rave-cache.html'>cache()</a></code></h3>
+<p>create cache</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ExecEnvir$cache(
+  key,
+  val,
+  name,
+  replace = FALSE,
+  persist = FALSE,
+  across_instance = FALSE,
+  across_module = FALSE,
+  ...
+)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>key</code></dt><dd><p>any R object</p></dd>
+
+<dt><code>val</code></dt><dd><p>value to associate with key</p></dd>
+
+<dt><code>name</code></dt><dd><p>cache name, unique</p></dd>
+
+<dt><code>replace</code></dt><dd><p>whether to force replace even if the cache exists</p></dd>
+
+<dt><code>persist</code></dt><dd><p>whether to persist on hard drive</p></dd>
+
+<dt><code>across_instance</code></dt><dd><p>whether to share across shiny session</p></dd>
+
+<dt><code>across_module</code></dt><dd><p>whether to share across modules</p></dd>
+
+<dt><code>...</code></dt><dd><p>ignored</p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>value if no cache is found, or the cached value</p>
+<p><hr>
+<a id="method-cache_input"></a></p><h3>Method <code><a href='cache_input.html'>cache_input()</a></code></h3>
+<p>cache input, internally used</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ExecEnvir$cache_input(
+  inputId,
+  val = NULL,
+  read_only = TRUE,
+  sig = NULL,
+  module_id,
+  ...
+)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>inputId</code></dt><dd><p>input ID, character</p></dd>
+
+<dt><code>val</code></dt><dd><p>the value of the input</p></dd>
+
+<dt><code>read_only</code></dt><dd><p>whether to read or to replace</p></dd>
+
+<dt><code>sig</code></dt><dd><p>signature, usually automatically generated</p></dd>
+
+<dt><code>module_id</code></dt><dd><p>module ID, usually automatically generated, unless
+obtaining from other module, then <code>read_only</code> is forced to be TRUE</p></dd>
+
+<dt><code>...</code></dt><dd><p>ignored</p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>the cached input value</p>
+<p><hr>
+<a id="method-set_browser"></a></p><h3>Method <code>set_browser()</code></h3>
+<p>(experimental) cache R expression in browser 
+<code>localStorage</code></p><h3>Usage</h3>
+<p><div class="r"></p><pre>ExecEnvir$set_browser(expr)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>expr</code></dt><dd><p>R expression</p></dd>
+
+</dl><p></div></p>
+<p><hr>
+<a id="method-generate_input_ui"></a></p><h3>Method <code>generate_input_ui()</code></h3>
+<p>generate input panels according to parsed <code>rave_inputs</code></p><h3>Usage</h3>
+<p><div class="r"></p><pre>ExecEnvir$generate_input_ui(sidebar_width = 3L)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>sidebar_width</code></dt><dd><p>integer from 1 to 11, the width of the input panels</p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>HTML tags</p>
+<p><hr>
+<a id="method-generate_output_ui"></a></p><h3>Method <code>generate_output_ui()</code></h3>
+<p>generate outputs labels according to parsed 
+<code>rave_outputs</code></p><h3>Usage</h3>
+<p><div class="r"></p><pre>ExecEnvir$generate_output_ui(sidebar_width = 3L)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>sidebar_width</code></dt><dd><p>integer from 1 to 11, the width of the input panels,
+the output panel width is calculated as <code>12-sidebar_width</code></p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>HTML tags</p>
+<p><hr>
+<a id="method-is_global"></a></p><h3>Method <code>is_global()</code></h3>
+<p>(deprecated) check if variable is shared across modules.
+Please use <code>cache_input</code> instead to get variable values.</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ExecEnvir$is_global(inputId)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>inputId</code></dt><dd><p>input ID</p></dd>
+
+</dl><p></div></p>
+<p><hr>
+<a id="method-clone"></a></p><h3>Method <code>clone()</code></h3>
+<p>The objects of this class are cloneable with this method.</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ExecEnvir$clone(deep = FALSE)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>deep</code></dt><dd><p>Whether to make a deep clone.</p></dd>
+
+</dl><p></div></p>
+
+
+
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'>
+<span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+
+<span class='co'># Load module</span>
+<span class='no'>module</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='get_module.html'>get_module</a></span>(<span class='st'>'ravebuiltins'</span>, <span class='st'>'power_explorer'</span>)
+
+<span class='co'># Create execute environmen</span>
+<span class='no'>execenv</span> <span class='kw'>&lt;-</span> <span class='no'>module</span>$<span class='fu'>get_or_new_exec_env</span>()
+<span class='no'>execenv</span>$<span class='fu'>info</span>()
+
+}</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#format">Format</a></li>
+      <li><a href="#public-fields">Public fields</a></li>
+      <li><a href="#active-bindings">Active bindings</a></li>
+      <li><a href="#methods">Methods</a></li>
+      <li><a href="#examples">Examples</a></li>
     </ul>
 
+    <h2>Author</h2>
+    <p>Zhengjia Wang</p>
   </div>
 </div>
 

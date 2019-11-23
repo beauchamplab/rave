@@ -1,7 +1,8 @@
 #' Convert module to objects used in shiny
-#' @param module ModuleEnvir object
-#' @param session shiny session, default let shiny decide
-#' @param test.mode passed by init_app
+#' @param module \code{\link[rave]{ModuleEnvir}} object
+#' @param session shiny session, default is current shiny session
+#' @param test.mode passed by \code{\link[rave]{start_rave}} or
+#' \code{\link[rave]{init_app}}
 shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = TRUE){
   # assign variables
   MODULE_ID = module$module_id

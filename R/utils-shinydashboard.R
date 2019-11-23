@@ -1,7 +1,4 @@
-#' Shiny dashboard-adminLTE overrides
-#' @param ... components to be added to control panel
-#' @param disable to show it or not
-#' @param collapsed initialize collapsed
+
 dashboardControl = function (...,
                              disable = FALSE,
                              collapsed = FALSE)
@@ -27,13 +24,7 @@ dashboardControl = function (...,
   )
 }
 
-#' Shiny dashboard-adminLTE overrides - dashboardHeader
-#' @param ... additional navigation buttons
-#' @param title header title
-#' @param titleWidth not used
-#' @param disable hide header
-#' @param btn_text_right control panel button name
-#' @param .list see ...
+
 dashboardHeader <- function (..., title = NULL, titleWidth = NULL, disable = FALSE, btn_text_right = 'Controls',
                              .list = NULL)
 {
@@ -93,15 +84,6 @@ dashboardHeader <- function (..., title = NULL, titleWidth = NULL, disable = FAL
   )
 }
 
-#' Shiny dashboard-adminLTE overrides - dashboardPage
-#' @param header dashboardHeader object
-#' @param sidebar dashboardSidebar object
-#' @param control dashboardControl object
-#' @param body dashboardBody object
-#' @param title title name
-#' @param skin theme color
-#' @param controlbar_opened open control panel by default or not
-#' @param initial_mask internally used
 dashboardPage <- function (
   header, sidebar, control, body, title = NULL,
   skin = c("blue", "black", "purple", "green", "red", "yellow"), controlbar_opened = FALSE,
@@ -224,19 +206,7 @@ dashboardPage <- function (
 }
 
 
-#' Wrapper for "box" in shinydashboard
-#' @param title title.
-#' @param footer footer text
-#' @param status The status of the item
-#' @param solidHeader Should the header have solid color background?
-#' @param background a color string
-#' @param width Integer from 1-12
-#' @param height The height of a box
-#' @param collapsible If TRUE, display a button in the upper right that allows
-#'   the user to collapse the box.
-#' @param collapsed If TRUE, start collapsed.
-#' @param headerColor color of header
-#' @param ... Contents of the box.
+
 box = function (..., title = NULL, footer = NULL, status = NULL, solidHeader = FALSE,
                 background = NULL, width = 12, height = NULL, collapsible = FALSE,
                 collapsed = FALSE, headerColor = '#f4f4f4')

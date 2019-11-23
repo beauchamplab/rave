@@ -1,6 +1,8 @@
 #' Export voltage (analog trace) diagnostic plots for each electrode
-#' @description You must import subject throught \code{rave_preprocess()} and then run this function
-#' @param subject character with the following format: \code{"project_name/subject_code"}
+#' @description You must import subject through \code{rave_preprocess()} and 
+#' then run this function
+#' @param subject character with the following format: 
+#' \code{"project_name/subject_code"}
 #' @param electrodes a integer vector. For example: \code{c(1,3,4,10:15)}
 #' @param blocks the blocks to include. Default is all blocks of this subject
 #' @param save_dir the directory you want to save the files
@@ -11,8 +13,9 @@
 #' @param back_col Periodogram color for raw signals
 #' @param width,height,useDingbats passed to \code{\link[grDevices]{pdf}}
 #' @param onefile collect images within one file?
-#' @param ... All other params will be passed to \code{\link[grDevices]{pdf}} 
-#' @seealso \code{\link[grDevices]{pdf}}, \code{\link{diagnose_signal}}, \code{\link{pwelch}}
+#' @param ... All other parameters passed to \code{\link[grDevices]{pdf}} 
+#' @seealso \code{\link[grDevices]{pdf}}, \code{\link{diagnose_signal}}, 
+#' \code{\link[rave]{pwelch}}
 #' @export
 export_diagnose_voltage = function(
   subject, electrodes, blocks, save_dir = './export', width = 12, height = 7, 

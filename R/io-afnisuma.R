@@ -1,9 +1,9 @@
 # SUMA files IO
 
 
-#' Make 'iElvis' mgrid file
-#' @author J.Magnnotti
-#' @param con mgrid file
+#' Make \code{iElvis} \code{mgrid} file
+#' @author John Magnotti
+#' @param con \code{mgrid} file
 #' @param raw raw file or processed I guess
 read_mgrid <- function(con, raw = F){
   soft_deprecated()
@@ -181,9 +181,9 @@ read_mgrid <- function(con, raw = F){
 }
 
 
-#' Parse SUMA spec file
-#' @param subject Either characters in format like \code{'Project/Subject'} or 
-#' \code{Subject} object created by \code{Subject$new(...)}
+#' Parse \code{SUMA} \code{spec} file
+#' @param subject either characters in format like \code{'Project/Subject'} or 
+#' \code{\link[rave]{Subject}} object created by \code{Subject$new(...)}
 #' @param spec_file default decided by \code{rave_options('suma_spec_file')}, 
 #' depending on subjects
 #' @examples
@@ -240,8 +240,8 @@ suma_spec_parse <- function(subject, spec_file){
 }
 
 
-#' Parse AFNI BRIK/HEAD file
-#' @param file_path path to BRIK or HEAD file
+#' Parse \code{AFNI} \code{BRIK/HEAD} file
+#' @param file_path path to \code{BRIK} or \code{HEAD} file
 suma_surface_volume_parse <- function(file_path){
   soft_deprecated()
   if(stringr::str_detect(stringr::str_to_lower(file_path), '\\.brik$')){

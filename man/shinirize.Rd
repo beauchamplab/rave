@@ -7,11 +7,12 @@
 shinirize(module, session = getDefaultReactiveDomain(), test.mode = TRUE)
 }
 \arguments{
-\item{module}{ModuleEnvir object}
+\item{module}{\code{\link[rave]{ModuleEnvir}} object}
 
-\item{session}{shiny session, default let shiny decide}
+\item{session}{shiny session, default is current shiny session}
 
-\item{test.mode}{passed by init_app}
+\item{test.mode}{passed by \code{\link[rave]{start_rave}} or
+\code{\link[rave]{init_app}}}
 }
 \description{
 Convert module to objects used in shiny

@@ -21,7 +21,7 @@ subject_tmpfile(
 
 \item{subject_code}{subject code}
 
-\item{pattern}{passed to tempfile}
+\item{pattern}{passed to \code{\link{tempfile}}}
 }
 \description{
 Create temp file in subject module folder

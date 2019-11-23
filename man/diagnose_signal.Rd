@@ -49,7 +49,7 @@ during this process, however, the trade-off is the speed.
 \code{try_compress=FALSE} indicates that you don't want to compress signals 
 under any situation (this might be slow).}
 
-\item{max_freq}{Max frequency to be ploted, should be no larger than half of 
+\item{max_freq}{Max frequency to plot, should be no larger than half of 
 the sampling rate.}
 
 \item{window}{Window length to draw the Periodogram}

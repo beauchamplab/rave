@@ -1,4 +1,35 @@
-#' File IO: HDF5 file wrapper
+# File IO: HDF5 file wrapper
+
+#' @title Lazy 'HDF5' file loader
+#' @author Zhengjia Wang
+#' @description provides hybrid data structure for 'HDF5' file
+#' 
+#' @examples 
+#' # Data to save
+#' x <- array(rnorm(1000), c(10,10,10))
+#' 
+#' # Save to local disk
+#' f <- tempfile()
+#' save_h5(x, file = f, name = 'x', chunk = c(10,10,10), level = 0)
+#' 
+#' # Load via LazyFST
+#' dat <- LazyH5$new(file_path = f, data_name = 'x', read_only = TRUE)
+#' 
+#' dat
+#' #> Class: H5D
+#' #> Dataset: /x
+#' #> Filename: ...
+#' #> Access type: H5F_ACC_RDONLY
+#' #> Datatype: H5T_IEEE_F64LE
+#' #> Space: Type=Simple     Dims=10 x 10 x 10     Maxdims=Inf x Inf x Inf
+#' #> Chunk: 11 x 11 x 11
+#' 
+#' # Check whether the data is identical
+#' range(dat - x)
+#' 
+#' # Read a slice of the data
+#' system.time(dat[,10,])
+#' 
 #' @export
 LazyH5 <- R6::R6Class(
   classname = 'LazyH5',
@@ -12,9 +43,15 @@ LazyH5 <- R6::R6Class(
     last_dim = NULL
   ),
   public = list(
+    
+    #' @description garbage collection method
+    #' @return none
     finalize = function(){
       self$close(all = TRUE)
     },
+    
+    #' @description overrides print method
+    #' @return self instance
     print = function(){
       if(!is.null(private$data_ptr)){
         if(private$data_ptr$is_valid){
@@ -25,7 +62,15 @@ LazyH5 <- R6::R6Class(
       }
       invisible(self)
     },
-    initialize = function(file_path, data_name, read_only = F){
+    
+    #' @description constructor
+    #' @param file_path where data is stored in 'HDF5' format
+    #' @param data_name the data stored in the file
+    #' @param read_only whether to open the file in read-only mode. It's highly
+    #' recommended to set this to be true, otherwise the file connection is
+    #' exclusive.
+    #' @return self instance
+    initialize = function(file_path, data_name, read_only = FALSE){
       
       # First get absolute path, otherwise hdf5r may report file not found error
       if(read_only){
@@ -42,8 +87,22 @@ LazyH5 <- R6::R6Class(
       private$read_only = read_only
     },
     
-    save = function(x, chunk = 'auto', level = 7, replace = TRUE, new_file = FALSE,
-                    force = TRUE, ctype = NULL, size = NULL, ...){
+    #' @description save data to a 'HDF5' file
+    #' @param x vector, matrix, or array
+    #' @param chunk chunk size, length should matches with data dimension
+    #' @param level compress level, from 1 to 9
+    #' @param replace if the data exists in the file, replace the file or not
+    #' @param new_file remove the whole file if exists before writing?
+    #' @param force if you open the file in read-only mode, then saving 
+    #' objects to the file will raise error. Use \code{force=TRUE} to force 
+    #' write data
+    #' @param ctype data type, see \code{\link{mode}}, usually the data type
+    #' of \code{x}. Try \code{mode(x)} or \code{storage.mode(x)} as hints.
+    #' @param size deprecated, for compatibility issues
+    #' @param ... passed to self \code{open()} method
+    save = function(x, chunk = 'auto', level = 7, replace = TRUE, 
+                    new_file = FALSE, force = TRUE, ctype = NULL, size = NULL,
+                    ...){
       # ctype and size is deprecated but kept in case of compatibility issues
       # ptr$create_dataset =
       # function (name, robj = NULL, dtype = NULL, space = NULL, dims = NULL,
@@ -74,7 +133,13 @@ LazyH5 <- R6::R6Class(
       
     },
     
-    open = function(new_dataset = F, robj, ...){
+    
+    #' @description open connection
+    #' @param new_dataset only used when the internal pointer is closed, or
+    #' to write the data
+    #' @param robj data array to save
+    #' @param ... passed to \code{\link[hdf5r]{createDataSet}}
+    open = function(new_dataset = FALSE, robj, ...){
       
       # check data pointer
       # if valid, no need to do anything, otherwise, enter if clause
@@ -142,6 +207,11 @@ LazyH5 <- R6::R6Class(
       
     },
     
+    
+    #' @description close connection
+    #' @param all whether to close all connections associated to the data file.
+    #' If true, then all connections, including access from other programs, 
+    #' will be closed
     close = function(all = FALSE){
       # check if data link is valid
       if(!is.null(private$data_ptr) && private$data_ptr$is_valid){
@@ -154,9 +224,16 @@ LazyH5 <- R6::R6Class(
       }
     },
     
+    #' @description subset data
+    #' @param i,j,... index along each dimension
+    #' @param drop whether to apply \code{\link{drop}} the subset
+    #' @param stream whether to read partial data at a time
+    #' @param envir if \code{i,j,...} are expressions, where should the 
+    #' expression be evaluated
+    #' @return subset of data
     subset = function(
       ...,
-      drop = FALSE, stream = F,
+      drop = FALSE, stream = FALSE,
       envir = parent.frame()
     ) {
       self$open()
@@ -243,7 +320,11 @@ LazyH5 <- R6::R6Class(
       }
     },
     
-    get_dims = function(stay_open = T){
+    
+    #' @description get data dimension
+    #' @param stay_open whether to leave the connection opened
+    #' @return dimension of the array
+    get_dims = function(stay_open = TRUE){
       self$open()
       re = private$data_ptr$dims
       if(!stay_open){

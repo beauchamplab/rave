@@ -1,12 +1,11 @@
-#' Welch Periodogram
-#' @details This function is modified from \code{pwelch} function from "oce"
-#' package and is designed for visualizing ECoG voltage data.
+#' Plot "Welch" Periodogram
 #' @param x signal
 #' @param fs sample rate
 #' @param window window length, default 128
-#' @param nfft number of DFT points
+#' @param nfft number of basis functions
 #' @param noverlap overlap between two adjacent windows, by default is 8
-#' @param log '', 'x', 'y', 'xy', indicates which axis should be log10 value.
+#' @param log indicates which axis should be \code{\link{log10}} value. options 
+#' are \code{''}, \code{'x'}, \code{'y'}, \code{'xy'}.
 #' @param plot logical, plot the result or not
 #' @param col,xlim,ylim,main,cex,... will be passed to plot
 #' @param spec_func deprecated

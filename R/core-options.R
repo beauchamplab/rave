@@ -88,7 +88,7 @@ default_opts <- function(...){
 }
 
 
-#' Internal R6 class for rave-options
+# Internal R6 class for rave-options
 Options <- R6::R6Class(
   "Options",
   private = list(

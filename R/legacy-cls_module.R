@@ -5,7 +5,6 @@
 # This will help create a clean environment for modules.
 NULL
 
-#' Wrapper for shiny::getDefaultReactiveDomain
 getDefaultReactiveDomain <- function(){
   session = shiny::getDefaultReactiveDomain()
   session %?<-% get0('session', envir = globalenv())
@@ -19,28 +18,27 @@ getDefaultReactiveDomain <- function(){
 #' @param session_id internal use
 #' @param session_based internal use
 #' @export
-getDefaultDataRepository <- function(
-  session = getDefaultReactiveDomain(),
-  session_id,
-  session_based = NULL
-){
+getDefaultDataRepository <- local({
+  data_repository <- new.env(parent = baseenv())
   
-  # get namespace
-  data_repository = namespace::getRegisteredNamespace('rave-data')
-  if(is.null(data_repository)){
-    data_repository = namespace::makeNamespace('rave-data')
-    data_repository$.clean = function(){}
-    RaveFinalizer$new(function(...){
-      try({
-        clear_env(data_repository)
-        namespace = asNamespace('namespace')
-        rm(.list = 'rave-data', envir = namespace$.getNameSpaceRegistry())
+  initialized <- FALSE
+  
+  function(
+    session = getDefaultReactiveDomain(),
+    session_id,
+    session_based = NULL
+  ){
+    if(!initialized){
+      initialized <<- TRUE
+      RaveFinalizer$new(function(...){
+        try({
+          clear_env(data_repository)
+        })
       })
-    })
+    }
+    data_repository
   }
-  
-  return(data_repository)
-}
+})
 
 #' Attach subject data
 #' @param unload TRUE if you want to detach
@@ -63,7 +61,7 @@ attachDefaultDataRepository <- function(unload = T){
 
 
 
-#' Functions for dev use
+#' Functions for development use
 #' @param ... Expressions
 #' @export
 rave_ignore <- function(...){

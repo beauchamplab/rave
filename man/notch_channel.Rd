@@ -20,11 +20,3 @@ upper bound is 60+1=61Hz.}
 \description{
 Filter line noise out from ECoG channels
 }
-\examples{
-\dontrun{
-\donttest{
-s <- rnorm(100000)
-notch_channel(s, 1000, c(60, 120, 180, c(1,2,2)))
-}
-}
-}

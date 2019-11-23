@@ -1,5 +1,46 @@
+# Documented 2019-10-12
 
-#' R6 class of electrode
+
+#' @title R6 Class for Electrode
+#' @author Zhengjia Wang
+#' @description Stores single electrode or reference signals
+#' @examples 
+#' \dontrun{
+#' # Electrode with no reference
+#' e1 <- Electrode$new('demo/YAB', electrode = 14, reference_by = 'noref')
+#' e1$reference
+#' #> Subject: demo/YAB
+#' #> Electrode: noref (Reference)
+#' 
+#' # Add Common Average Reference in rave/data/reference/ref_13-63,65-84.h5
+#' e2 <- Electrode$new('demo/YAB', electrode = 14, 
+#'                     reference_by = 'ref_13-63,65-84')
+#' 
+#' # Electrode with bipolar reference by another electrode
+#' e3 <- Electrode$new('demo/YAB', electrode = 14, reference_by = 'ref_15')
+#' 
+#' # Alternative way
+#' reference <- Electrode$new('demo/YAB', electrode = 15, is_reference = TRUE)
+#' e4 <- Electrode$new('demo/YAB', electrode = 14, reference_by = reference)
+#' 
+#' # e3, e4 are the same in scientific meaning. To test it, epoch them
+#' power3 <- e3$epoch('YABaOutlier', 1, 2, 'power', 
+#'                    raw = FALSE, hybrid = FALSE)$power
+#' power4 <- e4$epoch('YABaOutlier', 1, 2, 'power',
+#'                    raw = FALSE, hybrid = TRUE)$power
+#' 
+#' # Compare e3 and e4, result difference should be 0
+#' range(power3$get_data() - power4$get_data())
+#' #> 0
+#' 
+#' # With or without hybrid, the size will be different
+#' # No hybrid, totally in memory
+#' pryr::object_size(power3)
+#' #> 12 MB
+#' # Hybrid, data is swapped to hard-drive
+#' pryr::object_size(power4)
+#' #> 908 kB
+#' }
 #' @export
 Electrode <- R6::R6Class(
   classname = 'Electrode',
@@ -10,29 +51,61 @@ Electrode <- R6::R6Class(
     is_reference = F
   ),
   public = list(
+    
+    #' @field electrode electrode number in integer
     electrode = NULL,
+    
+    #' @field raw_power stores pre-epoch power spectrum with no reference
     raw_power = NULL, # before reference
+    
+    #' @field raw_phase stores pre-epoch phase with no reference
     raw_phase = NULL, # before reference
+    
+    #' @field raw_volt stores pre-epoch analog traces with no reference
     raw_volt = NULL, # Voltage before ref
+    
+    #' @field phase stores pre-epoch phase after reference
     phase = NULL,  # referenced phase
+    
+    #' @field power stores pre-epoch power spectrum after reference
     power = NULL,  # referenced power
+    
+    #' @field volt stores pre-epoch analog traces after reference
     volt = NULL,   #
+    
+    #' @field preload which of the three data are pre-loaded
     preload = NULL,
+    
+    #' @field reference character or \code{Electrode} instance indicating the 
+    #' reference for current electrode
     reference = NULL,
+    
+    #' @field has_power,has_phase,has_volt whether power, phase, or voltage
+    #' data exist in file system before and after reference
     has_power = c(TRUE, TRUE),
     has_phase = c(TRUE, TRUE),
     has_volt = c(TRUE, TRUE),
     
+    #' @description print electrode information
+    #' @return none
     info = function(){
       cat('Subject: ', self$subject_id, '\nElectrode: ', self$electrode, ifelse(self$reference_electrode, ' (Reference)',''), '\n', sep = '')
       if(length(self$power) > 0){
         cat('Blocks: [', paste(self$blocks, collapse = ', '), ']\n')
       }
     },
+    
+    #' @description overrides default print method
+    #' @param ... ignored
+    #' @return none
     print = function(...){
       self$info()
     },
     
+    
+    #' @description switch reference (experimental)
+    #' @param new_reference An electrode instance
+    #' @return none
     switch_reference = function(new_reference){
       stopifnot2(is(new_reference, 'Electrode'), msg = 'new_reference MUST be a reference electrode instance.')
       self$reference = new_reference
@@ -40,9 +113,18 @@ Electrode <- R6::R6Class(
       rm(list = ls(self$power, all.names = T), envir = self$power)
       rm(list = ls(self$phase, all.names = T), envir = self$phase)
       rm(list = ls(self$volt, all.names = T), envir = self$volt)
+      invisible()
     },
     
-    referenced = function(type = 'power', ram = T){
+    #' @description get referenced data
+    #' @param type which data to reference, default is power
+    #' @param ram whether to load data to memory
+    #' @return If \code{ram} is true, then returns a list of matrices. The 
+    #' length of the list equals the number of blocks, and each matrix is 
+    #' frequency by time points. If \code{ram} is false, then returns an 
+    #' environment with each element a \code{\link[rave]{LazyH5}} or 
+    #' \code{\link[rave]{LazyFST}} instance.
+    referenced = function(type = 'power', ram = TRUE){
       
       if(is.character(self$reference) || setequal(names(self[[type]]), self$blocks)){
         env = self[[type]]
@@ -99,7 +181,11 @@ Electrode <- R6::R6Class(
       
     },
     
-    clean = function(types = c('power', 'phase', 'volt'), force = F){
+    #' @description remove data from memory
+    #' @param types data types to clean
+    #' @param force whether to remove pre-loaded data types
+    #' @return none
+    clean = function(types = c('power', 'phase', 'volt'), force = FALSE){
       if(is(self$reference, 'Electrode')){
         if(!force){
           types = types[!types %in% self$preload]
@@ -112,9 +198,22 @@ Electrode <- R6::R6Class(
           rm(list = ls(env, all.names = T), envir = env)
         }
       }
+      invisible()
     },
     
-    initialize = function(subject, electrode, reference_by = 'noref', preload = NULL, is_reference = FALSE){
+    
+    #' @description constructor
+    #' @param subject \code{\link[rave]{Subject}} instance or characters like 
+    #' \code{"proj/sub"}
+    #' @param electrode number, integer
+    #' @param reference_by reference signals, choices are character, or 
+    #' \code{\link[rave]{Electrode}} instance; default is \code{"noref"}, 
+    #' meaning no reference to the electrode
+    #' @param preload data to load along with constructor
+    #' @param is_reference is current instance a reference?
+    #' @return An \code{\link[rave]{Electrode}} instance
+    initialize = function(subject, electrode, reference_by = 'noref', 
+                          preload = NULL, is_reference = FALSE){
       if(!(R6::is.R6(subject) && 'Subject' %in% class(subject))){
         stopifnot2('character' %in% class(subject),
                     msg = 'Param <subject> needs to be either subject ID or a Subject instance')
@@ -443,7 +542,19 @@ Electrode <- R6::R6Class(
       
     },
     
-    epoch = function(epoch_name, pre, post, types = c('volt', 'power', 'phase'), raw = F, hybrid = TRUE){
+    #' @description epoch electrode
+    #' @param epoch_name epoch name, for example, \code{epoch_name="default"}
+    #' refers to epoch file \code{"epoch_default.csv"} in subject meta folder
+    #' @param pre seconds before trial onset to load
+    #' @param post seconds after trial onset to load
+    #' @param types characters, data types to load; choices are \code{"volt"},
+    #' \code{"power"}, and \code{"phase"}
+    #' @param raw whether epoch pre-referenced data?
+    #' @param hybrid whether to fast-cache the data on hard-drive? See also 
+    #' \code{\link[rave]{Tensor}}
+    #' @return list of data after epoch
+    epoch = function(epoch_name, pre, post, types = c('volt', 'power', 'phase'),
+                     raw = FALSE, hybrid = TRUE){
       
       # epoch_name='YABa';pre=1;post=2;name=types='power';raw=FALSE;private=self$private;rave_id = 'TEMP'
       
@@ -677,12 +788,17 @@ Electrode <- R6::R6Class(
     }
   ),
   active = list(
+    #' @field blocks character vector of block names (read-only)
     blocks = function(){
       private$subject$preprocess_info('blocks', customized = F)
     },
+    
+    #' @field subject_id character of subject ID (read-only)
     subject_id = function(){
       private$subject$subject_id
     },
+    
+    #' @field reference_electrode whether this is a reference (read-only)
     reference_electrode = function(){
       private$is_reference
     }

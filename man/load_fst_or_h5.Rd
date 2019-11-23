@@ -2,7 +2,7 @@
 % Please edit documentation in R/io-fst.R
 \name{load_fst_or_h5}
 \alias{load_fst_or_h5}
-\title{Function try to load FST file cache, if not found, read HDF5 file}
+\title{Function try to load "fst" file cache, if not found, read "HDF5" file}
 \usage{
 load_fst_or_h5(
   fst_path,
@@ -14,18 +14,18 @@ load_fst_or_h5(
 )
 }
 \arguments{
-\item{fst_path}{fst cache path}
+\item{fst_path}{\code{fst} cache path}
 
-\item{h5_path}{alternate hdf5 path}
+\item{h5_path}{alternate \code{hdf5} path}
 
-\item{h5_name}{hdf5 data name}
+\item{h5_name}{\code{hdf5} data name}
 
-\item{fst_need_transpose}{does fst data need transpose?}
+\item{fst_need_transpose}{does \code{fst} data need transpose?}
 
 \item{fst_need_drop}{drop dimensions}
 
 \item{ram}{read to ram?}
 }
 \description{
-Function try to load FST file cache, if not found, read HDF5 file
+Function try to load "fst" file cache, if not found, read "HDF5" file
 }

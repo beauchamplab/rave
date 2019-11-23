@@ -5,7 +5,7 @@ warnings_are_errors: false
 os:
   - linux
 r:
-  - 3.4
+  - release
   - devel
 
 env:

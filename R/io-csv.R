@@ -1,9 +1,9 @@
 # Normal File IOs
 
 
-#' Save data to csv, if file exists, rename old file
+#' Save data to "CSV", if file exists, rename old file
 #' @param data data frame
-#' @param file csv file to save
+#' @param file "CSV" file to save
 #' @param quiet suppress overwrite message
 #' @param ... pass to \code{\link[utils]{write.csv}}
 safe_write_csv <- function(data, file, ..., quiet = F){

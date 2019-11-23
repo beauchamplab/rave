@@ -2,7 +2,7 @@
 % Please edit documentation in R/shinyUI-debug_app.R
 \name{init_app}
 \alias{init_app}
-\title{Initialize main application}
+\title{Initialize main application for debugging purpose}
 \usage{
 init_app(
   modules = NULL,
@@ -15,20 +15,20 @@ init_app(
 )
 }
 \arguments{
-\item{modules}{which modules to show. Default uses "modules.csv" (see load_modules)}
+\item{modules}{which modules to show. See \code{\link[rave]{load_modules}}}
 
 \item{active_module}{which module to focus at start up (use module ID)}
 
 \item{launch.browser}{launch browsers, default is on}
 
-\item{theme}{color theme for GUI}
+\item{theme}{color theme for the website}
 
 \item{disable_sidebar}{hide sidebar at startup?}
 
 \item{simplify_header}{hide header at startup?}
 
-\item{...}{other params like test.mode for module debugging}
+\item{...}{other parameters like \code{test.mode} for module debugging}
 }
 \description{
-Initialize main application
+Initialize main application for debugging purpose
 }

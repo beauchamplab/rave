@@ -18,19 +18,19 @@ rave_preprocess(
 )
 }
 \arguments{
-\item{sidebar_width}{sibar width from 1 to 12 recommended 3 or 4}
+\item{sidebar_width}{sidebar width from 1 to 11.}
 
-\item{launch.browser}{launch browser default is on}
+\item{launch.browser}{whether to launch browser, default is on}
 
-\item{host}{default is localhost 127.0.0.1}
+\item{host}{default is \code{"localhost"}}
 
-\item{port}{integer port if the app}
+\item{port}{integer port of the app}
 
 \item{quiet}{soft deprecated}
 
-\item{test.mode}{passed to shinyApp}
+\item{test.mode}{passed to \code{\link[shiny]{shinyApp}}}
 
-\item{modules}{preprocess modules to load, reserved for future use}
+\item{modules}{preprocess modules to load, reserved}
 
 \item{ver}{internally used please don't change}
 

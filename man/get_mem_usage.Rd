@@ -9,7 +9,7 @@ get_mem_usage(modules, data_envir)
 \arguments{
 \item{modules}{which module(s)}
 
-\item{data_envir}{default uses getDefaultDataRepository}
+\item{data_envir}{default uses \code{\link[rave]{getDefaultDataRepository}}}
 }
 \description{
 Get RAM usage

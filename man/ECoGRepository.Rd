@@ -2,11 +2,69 @@
 % Please edit documentation in R/class-ECoGRepository.R
 \name{ECoGRepository}
 \alias{ECoGRepository}
-\title{R6 class for ECoG data Repository}
+\title{R6 class for \code{iEEG/ECoG} data Repository}
 \description{
-R6 class for ECoG data Repository
+A repository to keep subject information, including electrode
+instances, reference information, epoch data, and offers method to epoch 
+data.
+}
+\examples{
+\dontrun{
 
-R6 class for ECoG data Repository
+# Two ways to create instances
+repo <- ECoGRepository$new('demo/YAB')
+
+subject <- Subject$new(project_name = 'demo', subject_code = 'YAB')
+repo <- ECoGRepository$new(subject)
+
+# Create an instance without auto collecting references, only load 
+# interesting electrodes
+repo <- ECoGRepository$new('demo/YAB', autoload = FALSE)
+repo$load_electrodes(c(14,15))
+
+# Create an instance with non-default reference
+repo <- ECoGRepository$new('demo/YAB', reference = 'bipolar')
+
+# Epoch data according to epoch file "epoch_YABaOutlier.csv" in meta folder
+# epoch_name should be "epoch_(name).csv"
+repo$epoch(epoch_name = 'YABaOutlier', pre = 1, post = 2, 
+           electrodes = 14, referenced = TRUE, data_type = "power")
+repo$power
+#> Dimension:  287 x 16 x 301 x 1 
+#> - Trial: 1, 2, 3, 4, 5, 6,...
+#> - Frequency: 2, 12, 22, 32, 42...
+#> - Time: -1, -0.99, -0.98,...
+#> - Electrode: 14
+
+}
+}
+\author{
+Zhengjia Wang
+}
+\section{Public fields}{
+\if{html}{\out{<div class="r6-fields">}}
+\describe{
+\item{\code{subject}}{\code{\link[rave]{Subject}} instance}
+
+\item{\code{raw}}{dictionary to store \code{\link[rave]{Electrode}} instances}
+
+\item{\code{reference}}{dictionary to store references for electrodes}
+
+\item{\code{epochs}}{dictionary to store epoch data}
+
+\item{\code{raw_volt}}{environment, stores pre-referenced analog traces}
+
+\item{\code{raw_power}}{environment, stores pre-referenced power spectrum}
+
+\item{\code{raw_phase}}{environment, stores pre-referenced phase data}
+
+\item{\code{volt}}{environment, stores referenced analog traces}
+
+\item{\code{power}}{environment, stores referenced power spectrum}
+
+\item{\code{phase}}{environment, stores referenced phase data}
+}
+\if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -24,46 +82,115 @@ R6 class for ECoG data Repository
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-info"></a>}}
 \subsection{Method \code{info()}}{
+obtain the information
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ECoGRepository$info(print = TRUE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{print}}{logical, whether to print the information, default is true}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+character of the information
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-print"></a>}}
 \subsection{Method \code{print()}}{
+print memory address
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ECoGRepository$print(...)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{ignored}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+none
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
 \subsection{Method \code{new()}}{
+constructor
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ECoGRepository$new(subject, reference = "default", autoload = T)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{ECoGRepository$new(subject, reference = "default", autoload = TRUE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{subject}}{character such as \code{"project/subject"} or 
+\code{\link[rave]{Subject}} instance}
+
+\item{\code{reference}}{character, reference name, default is \code{"default"}, 
+which refers to \code{"reference_default.csv"} in subject meta folder}
+
+\item{\code{autoload}}{logical, whether to auto-load reference for all 
+electrodes, default is yes.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+An \code{ECoGRepository} instance
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-get_electrode"></a>}}
 \subsection{Method \code{get_electrode()}}{
+get \code{\link[rave]{Electrode}} instances
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ECoGRepository$get_electrode(electrode, name = "raw")}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{electrode}}{integers, referring to electrode numbers}
+
+\item{\code{name}}{character, \code{"raw"}, \code{"power"}, \code{"raw_phase"}, 
+etc.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+list of environments containing electrode instances
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-load_electrodes"></a>}}
 \subsection{Method \code{load_electrodes()}}{
+load electrodes; usually don't need to directly call this 
+method if \code{autoload} is true when initializing the repository
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ECoGRepository$load_electrodes(electrodes, reference = "default")}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{electrodes}}{electrode number (integer)}
+
+\item{\code{reference}}{name of reference}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+none
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-epoch"></a>}}
 \subsection{Method \code{epoch()}}{
+slice the data according to epoch table
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ECoGRepository$epoch(
   epoch_name,
@@ -72,27 +199,83 @@ R6 class for ECoG data Repository
   electrodes = NULL,
   frequency_range = NULL,
   data_type = "power",
-  referenced = T,
+  referenced = TRUE,
   func = NULL,
   quiet = FALSE
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{epoch_name}}{the name of epoch; for example, \code{"YABa"} refers
+to \code{"epoch_YABa.csv"} in subject meta folder.}
+
+\item{\code{pre}}{positive number in seconds, how long should the time be 
+kept before the onset}
+
+\item{\code{post}}{positive number in seconds, how long should the time be 
+kept after onset}
+
+\item{\code{electrodes}}{integers, electrode numbers}
+
+\item{\code{frequency_range}}{experimental, frequency range to include}
+
+\item{\code{data_type}}{data types to epoch; default is \code{"power"}, which 
+is power spectrum, or amplitude. Other choices are \code{"phase"} 
+for phase data and \code{"volt"} for voltage or analog signal traces.}
+
+\item{\code{referenced}}{whether to load data referenced or without reference}
+
+\item{\code{func}}{experimental, function to apply to each electrodes}
+
+\item{\code{quiet}}{whether to suppress output messages, default is no}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+none. However the results are stored in public fields.
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-load_reference"></a>}}
 \subsection{Method \code{load_reference()}}{
+load references
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ECoGRepository$load_reference(ref_name, electrodes = NULL)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{ref_name}}{reference name}
+
+\item{\code{electrodes}}{electrode numbers}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+none
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-baseline"></a>}}
 \subsection{Method \code{baseline()}}{
+baseline signals (deprecated)
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ECoGRepository$baseline(from, to, electrodes = NULL, print.time = FALSE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{from, to, electrodes, print.time}}{internally used}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+data after baseline. Please use \code{\link[rave]{baseline}} 
+instead
+}
 }
 }

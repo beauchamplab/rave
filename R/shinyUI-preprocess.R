@@ -1,13 +1,13 @@
 #' RAVE Preprocess Function
-#' @param sidebar_width sibar width from 1 to 12 recommended 3 or 4
-#' @param launch.browser launch browser default is on
-#' @param host default is localhost 127.0.0.1
-#' @param port integer port if the app
+#' @param sidebar_width sidebar width from 1 to 11.
+#' @param launch.browser whether to launch browser, default is on
+#' @param host default is \code{"localhost"}
+#' @param port integer port of the app
 #' @param quiet soft deprecated
-#' @param test.mode passed to shinyApp
+#' @param test.mode passed to \code{\link[shiny]{shinyApp}}
 #' @param ver internally used please don't change
 #' @param theme color theme
-#' @param modules preprocess modules to load, reserved for future use
+#' @param modules preprocess modules to load, reserved
 #' @param ... not used
 #' @export
 rave_preprocess <- function(

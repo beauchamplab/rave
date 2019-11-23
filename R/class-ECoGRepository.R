@@ -1,21 +1,81 @@
+# Documented with roxygen 7.0.0 on 2019-11-10
 
-#' R6 class for ECoG data Repository
+
+
+#' @title R6 class for \code{iEEG/ECoG} data Repository
+#' @author Zhengjia Wang
+#' @description A repository to keep subject information, including electrode
+#' instances, reference information, epoch data, and offers method to epoch 
+#' data.
+#' @examples 
+#' \dontrun{
+#' 
+#' # Two ways to create instances
+#' repo <- ECoGRepository$new('demo/YAB')
+#' 
+#' subject <- Subject$new(project_name = 'demo', subject_code = 'YAB')
+#' repo <- ECoGRepository$new(subject)
+#' 
+#' # Create an instance without auto collecting references, only load 
+#' # interesting electrodes
+#' repo <- ECoGRepository$new('demo/YAB', autoload = FALSE)
+#' repo$load_electrodes(c(14,15))
+#' 
+#' # Create an instance with non-default reference
+#' repo <- ECoGRepository$new('demo/YAB', reference = 'bipolar')
+#' 
+#' # Epoch data according to epoch file "epoch_YABaOutlier.csv" in meta folder
+#' # epoch_name should be "epoch_(name).csv"
+#' repo$epoch(epoch_name = 'YABaOutlier', pre = 1, post = 2, 
+#'            electrodes = 14, referenced = TRUE, data_type = "power")
+#' repo$power
+#' #> Dimension:  287 x 16 x 301 x 1 
+#' #> - Trial: 1, 2, 3, 4, 5, 6,...
+#' #> - Frequency: 2, 12, 22, 32, 42...
+#' #> - Time: -1, -0.99, -0.98,...
+#' #> - Electrode: 14
+#' 
+#' }
 #' @export
 ECoGRepository <- R6::R6Class(
   classname = 'ECoGRepository',
   portable = FALSE,
   cloneable = FALSE,
   public = list(
+    
+    #' @field subject \code{\link[rave]{Subject}} instance
     subject = NULL,
+    
+    #' @field raw dictionary to store \code{\link[rave]{Electrode}} instances
     raw = NULL,         # Map to store electrodes
+    
+    #' @field reference dictionary to store references for electrodes
     reference = NULL,   # Map to store references
+    
+    #' @field epochs dictionary to store epoch data
     epochs = NULL,      # map to store epoch infos
+    
+    #' @field raw_volt environment, stores pre-referenced analog traces
     raw_volt = NULL,
+    
+    #' @field raw_power environment, stores pre-referenced power spectrum
     raw_power = NULL,
+    
+    #' @field raw_phase environment, stores pre-referenced phase data
     raw_phase = NULL,
+    
+    #' @field volt environment, stores referenced analog traces
     volt = NULL,
+    
+    #' @field power environment, stores referenced power spectrum
     power = NULL,
+    
+    #' @field phase environment, stores referenced phase data
     phase = NULL,
+    
+    #' @description obtain the information 
+    #' @param print logical, whether to print the information, default is true
+    #' @return character of the information
     info = function(print = TRUE){
       id = self$subject$subject_id
       epoch_info = self$epochs$get('epoch_name')
@@ -55,12 +115,25 @@ ECoGRepository <- R6::R6Class(
         id = id, epoch_info = epoch_info, ref_name = ref_name, wave_info = wave_info, volt_info = volt_info
       ))
     },
+    
+    #' @description print memory address
+    #' @param ... ignored
+    #' @return none
     print = function(...){
       # To compatible with globals package
       cat(env_address(self))
       invisible()
     },
-    initialize = function(subject, reference = 'default', autoload = T){
+    
+    #' @description constructor
+    #' @param subject character such as \code{"project/subject"} or 
+    #' \code{\link[rave]{Subject}} instance
+    #' @param reference character, reference name, default is \code{"default"}, 
+    #' which refers to \code{"reference_default.csv"} in subject meta folder
+    #' @param autoload logical, whether to auto-load reference for all 
+    #' electrodes, default is yes.
+    #' @return An \code{ECoGRepository} instance
+    initialize = function(subject, reference = 'default', autoload = TRUE){
       
       cat2('Initializing a Data Repository')
       
@@ -82,6 +155,13 @@ ECoGRepository <- R6::R6Class(
       }
       invisible()
     },
+    
+    
+    #' @description get \code{\link[rave]{Electrode}} instances
+    #' @param electrode integers, referring to electrode numbers
+    #' @param name character, \code{"raw"}, \code{"power"}, \code{"raw_phase"}, 
+    #' etc.
+    #' @return list of environments containing electrode instances
     get_electrode = function(electrode, name = 'raw'){
       e_str = as.character(electrode)
       re = lapply(name, function(nm){
@@ -90,6 +170,12 @@ ECoGRepository <- R6::R6Class(
       names(re) = name
       return(re)
     },
+    
+    #' @description load electrodes; usually don't need to directly call this 
+    #' method if \code{autoload} is true when initializing the repository
+    #' @param electrodes electrode number (integer)
+    #' @param reference name of reference
+    #' @return none
     load_electrodes = function(electrodes, reference = 'default'){
       if(missing(electrodes)){
         electrodes = self$subject$valid_electrodes
@@ -139,9 +225,27 @@ ECoGRepository <- R6::R6Class(
       }
       invisible()
     },
+    
+    
+    #' @description slice the data according to epoch table
+    #' @param epoch_name the name of epoch; for example, \code{"YABa"} refers
+    #' to \code{"epoch_YABa.csv"} in subject meta folder.
+    #' @param pre positive number in seconds, how long should the time be 
+    #' kept before the onset
+    #' @param post positive number in seconds, how long should the time be 
+    #' kept after onset
+    #' @param electrodes integers, electrode numbers
+    #' @param frequency_range experimental, frequency range to include
+    #' @param data_type data types to epoch; default is \code{"power"}, which 
+    #' is power spectrum, or amplitude. Other choices are \code{"phase"} 
+    #' for phase data and \code{"volt"} for voltage or analog signal traces.
+    #' @param referenced whether to load data referenced or without reference
+    #' @param func experimental, function to apply to each electrodes
+    #' @param quiet whether to suppress output messages, default is no
+    #' @return none. However the results are stored in public fields.
     epoch = function(epoch_name, pre, post, electrodes = NULL,
                      frequency_range = NULL, data_type = 'power',
-                     referenced = T, func = NULL, quiet = FALSE
+                     referenced = TRUE, func = NULL, quiet = FALSE
     ){
       # self = .private$repo;referenced = T;epoch_name='YABa';pre=1;post=2;electrodes=preload_info$electrodes;frequency_range=NULL;data_type = 'phase';quiet=F
       if(is.null(electrodes)){
@@ -392,6 +496,12 @@ ECoGRepository <- R6::R6Class(
       }
       
     },
+    
+    
+    #' @description load references
+    #' @param ref_name reference name
+    #' @param electrodes electrode numbers
+    #' @return none
     load_reference = function(ref_name, electrodes = NULL){
       
       if(!length(electrodes)){
@@ -441,8 +551,14 @@ ECoGRepository <- R6::R6Class(
         ref_env[[ref]] = Electrode$new(subject = self$subject, electrode = ref, is_reference = T)
       })
       progress$close()
-      
+      invisible()
     },
+    
+    
+    #' @description baseline signals (deprecated)
+    #' @param from,to,electrodes,print.time internally used
+    #' @return data after baseline. Please use \code{\link[rave]{baseline}} 
+    #' instead
     baseline = function(from, to, electrodes = NULL, print.time = FALSE){
       stopifnot2(!is.null(self$power), msg = 'Please epoch power spectrum first.')
       

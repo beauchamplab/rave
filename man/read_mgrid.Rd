@@ -2,18 +2,18 @@
 % Please edit documentation in R/io-afnisuma.R
 \name{read_mgrid}
 \alias{read_mgrid}
-\title{Make 'iElvis' mgrid file}
+\title{Make \code{iElvis} \code{mgrid} file}
 \usage{
 read_mgrid(con, raw = F)
 }
 \arguments{
-\item{con}{mgrid file}
+\item{con}{\code{mgrid} file}
 
 \item{raw}{raw file or processed I guess}
 }
 \description{
-Make 'iElvis' mgrid file
+Make \code{iElvis} \code{mgrid} file
 }
 \author{
-J.Magnnotti
+John Magnotti
 }

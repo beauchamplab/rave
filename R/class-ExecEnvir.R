@@ -1,4 +1,24 @@
-#' Module runtime environment (session based)
+# Documented on 2019-11-21
+
+#' @title Session-based Module Runtime Environment Class
+#' @author Zhengjia Wang
+#' @description where all the module functions are executed. It's rarely created
+#' manually, use \code{\link[rave]{get_module}} to create module, run with 
+#' \code{start_app(m, test.mode=TRUE)}, and then inspect modules.
+#' 
+#' @examples 
+#' 
+#' \dontrun{
+#' 
+#' # Load module
+#' module <- get_module('ravebuiltins', 'power_explorer')
+#' 
+#' # Create execute environmen
+#' execenv <- module$get_or_new_exec_env()
+#' execenv$info()
+#' 
+#' }
+#' 
 #' @export
 ExecEnvir <- R6::R6Class(
   classname = 'ExecEnvir',
@@ -16,34 +36,110 @@ ExecEnvir <- R6::R6Class(
     executes = NULL
   ),
   public = list(
+    
+    #' @field parent_env the parent/top environment of the module, usually 
+    #' global environment or some name-space if the module is implemented as 
+    #' an R package
     parent_env = NULL,
+    
+    #' @field wrapper_env stores all the utility functions. Some functions are 
+    #' overridden there such as \code{\link[shiny]{observe}}, 
+    #' \code{rave_checks}, or \code{eval_when_ready}. These functions behave 
+    #' differently inside or outside of shiny context, and with or without data 
+    #' loaded. The environment will be locked once the module is initialized. 
+    #' The parent environment is \code{parent_env}
     wrapper_env = NULL,
+    
+    #' @field static_env stores module static functions. These functions are 
+    #' evaluated under \code{parse_env} and then moved here. The environment
+    #' is locked after initialization. Its parent environment is 
+    #' \code{wrapper_env}
     static_env = NULL,
-    runtime_env = NULL,
-    parse_env = NULL,
+    
+    #' @field param_env stores parameters and most of the user inputs. It can 
+    #' also serve as a repository for global variables. Unlike the previous
+    #' environments, \code{param_env} is unlocked, but module creators do not 
+    #' have access to this environment directly. The parent environment is 
+    #' \code{static_env}
     param_env = NULL,
+    
+    #' @field runtime_env where the main part of module is running. All shiny
+    #' \code{\link[shiny]{observe}} and \code{\link[shiny]{observeEvent}} are 
+    #' redirected to this environment by default (unless using 
+    #' \code{shiny::observe}). All functions in \code{static_env} have access 
+    #' to this environment. The parent environment is \code{param_env}
+    runtime_env = NULL,
+    
+    #' @field parse_env environment where modules are parsed. The parent 
+    #' environment is \code{runtime_env}. Once all functions are evaluated, 
+    #' this environment is not used. However, module creators don't directly 
+    #' access this environment once the module is initialized.
+    parse_env = NULL,
+    
+    #' @field ns shiny name-space functions, is equivalent to 
+    #' \code{shiny::NS(module_id)}. The goal is to add prefixes to module inputs
+    #' so that two modules with the same input ID are named differently
     ns = NULL,
+    
+    #' @field auto_execute (Deprecated) whether to auto-calculate results
     auto_execute = TRUE,
+    
+    #' @field manual_inputIds character vector; name list of manually input IDs.
+    #' Used when the algorithm takes long to run 
     manual_inputIds = NULL,
+    
+    #' @field rendering_inputIds character vector; name list of input IDs that 
+    #' when one of the corresponding inputs is changed, then \code{rave_execute}
+    #' will not get evaluated. Only the outputs are changed.
     rendering_inputIds = NULL,
+    
+    #' @field input_update expressions to update inputs
     input_update = NULL,
+    
+    #' @field register_output_events expressions to register outputs
     register_output_events = NULL,
+    #' @field register_input_events expressions to register inputs
     register_input_events = NULL,
+    
+    #' @field execute module main function. The function is dynamically 
+    #' generated. Don't call directly.
     execute = NULL,
+    
+    #' @field async_module (experimental) whether the module contains any 
+    #' asynchronous part
     async_module = FALSE,
+    
+    #' @field global_reactives shiny global \code{reactives}, internal use only
     global_reactives = NULL,
+    
+    #' @field local_reactives shiny local \code{reactives}, internal use only
     local_reactives = NULL,
+    
+    #' @field ready_functions functions to run when the module is ready. The 
+    #' functions are called at the last step of \code{\link[rave]{shinirize}}. 
+    #' Usually it's used along with \code{eval_when_ready}, to make sure  
+    #' \code{global_reactives} and \code{local_reactives} getting registered
+    #' before functions calls
     ready_functions = NULL,
+    
+    #' @description (experimental) signal the modules to reload
+    #' @return none
     reload = function(){
       if(is.reactivevalues(self$global_reactives)){
         self$global_reactives$force_refresh_all = Sys.time()
         self$global_reactives$has_data = Sys.time()
       }
     },
+    
+    #' @description garbage collection
+    #' @return none
     finalize = function(){
       self$clean()
       cat2(sprintf('[%s] Runtime Environment Removed.', private$module_env$module_id))
     },
+    
+    #' @description print variables in different layers (environment)
+    #' @return none
     info = function(){
       cat('- wrapper environment -\n')
       cat(ls(self$wrapper_env))
@@ -54,9 +150,16 @@ ExecEnvir <- R6::R6Class(
       cat('\n- runtime environment -\n')
       cat(ls(self$runtime_env))
     },
+    
+    #' @description print the memory address 
+    #' @param ... ignored
+    #' @return memory address
     print = function(...){
       env_address(self)
     },
+    
+    #' @description clean the environments to release the resource
+    #' @return none
     clean = function(){
       # WARNING: this is not clean, but should be able to clear most of the large objects
       clear_env(self$parse_env)
@@ -64,7 +167,13 @@ ExecEnvir <- R6::R6Class(
       clear_env(self$runtime_env)
       # clear_env(self$static_env)
       clear_env(private$cache_env)
+      invisible()
     },
+    
+    #' @description constructor
+    #' @param session shiny session instance
+    #' @param parent_env parent environment of this instance: package name space
+    #' or global environment
     initialize = function(session = getDefaultReactiveDomain(),
                           parent_env = NULL){
       private$session = session
@@ -148,6 +257,7 @@ ExecEnvir <- R6::R6Class(
           stop('No module detected, please run "self$register_module(...)" to register module.')
         }
         private$session$makeScope(id)
+        private$session
       }
 
       self$wrapper_env$getDefaultReactiveInput = function(){
@@ -176,6 +286,10 @@ ExecEnvir <- R6::R6Class(
       lockEnvironment(self$wrapper_env)
 
     },
+    
+    #' @description reset the runtime environment, rarely used
+    #' @param inputs reactive value list
+    #' @return none
     reset = function(inputs){
       if(shiny::is.reactivevalues(inputs)){
         inputs = shiny::isolate(shiny::reactiveValuesToList(inputs))
@@ -184,7 +298,14 @@ ExecEnvir <- R6::R6Class(
       for(nm in self$input_ids){
         assign(nm, inputs[[nm]], envir = self$runtime_env)
       }
+      invisible()
     },
+    
+    #' @description (deprecated) copy the instance locally
+    #' @param session_id character
+    #' @param data_env where the data is stored, default is the environment 
+    #' returned by \code{\link[rave]{getDefaultDataRepository}}
+    #' @return a copied instance
     copy = function(
       session_id = '__fake_runtime_env__', data_env = getDefaultDataRepository()
     ){
@@ -219,6 +340,12 @@ ExecEnvir <- R6::R6Class(
 
       return(new_exec)
     },
+    
+    #' @description (deprecated) execute module with given parameter
+    #' @param param named list
+    #' @param async whether to run the whole module
+    #' @param plan future plan
+    #' @return runtime environment
     execute_with = function(param, async = FALSE, plan = NULL){
       lapply(names(param), function(nm){
         self$runtime_env[[nm]] = param[[nm]]
@@ -230,58 +357,11 @@ ExecEnvir <- R6::R6Class(
       }
       return(invisible(self$runtime_env))
     },
-    # export_report = function(expr, inputId = 'electrode', electrodes = NULL, async = F){
-    #   .Deprecated('This function is deprecated', msg = 'Please avoid using this function in your module.')
-    # 
-    #   # assign('aaa', environment(), envir = globalenv())
-    #   expr = substitute(expr)
-    #   params = as.list(self$param_env)
-    # 
-    #   preload_info = get('preload_info', self$param_env)
-    #   preload_electrodes = preload_info$electrodes
-    #   reload = T
-    #   if(!length(electrodes)){
-    #     electrodes = preload_electrodes
-    #     reload = F
-    #   }else if(setequal(electrodes, preload_electrodes)){
-    #     reload = F
-    #   }
-    # 
-    #   new = self$copy()
-    # 
-    #   progress = progress('Exporting Report', max = length(electrodes))
-    #   on.exit({progress$close()}, add = T)
-    #   rave_data = getDefaultDataRepository()
-    # 
-    #   tryCatch({
-    #     sid = rave_data$subject$id
-    #     epoch_info = rave_data$.private$meta$epoch_info
-    #     lapply_async(electrodes, function(e){
-    #       if(reload){
-    #         rave_prepare(
-    #           subject = sid,
-    #           electrodes = e,
-    #           epoch = epoch_info$name,
-    #           time_range = epoch_info$time_range,
-    #           reference = rave_data$preload_info$reference_name,
-    #           data_types = NULL,
-    #           attach = F
-    #         )
-    #       }
-    #       pm = params
-    #       pm[[inputId]] = e
-    #       new$execute_with(pm, async = async)
-    #       eval(expr, envir = new$runtime_env)
-    #     }, .call_back = function(i){
-    #       progress$inc(sprintf('Calculating %d (%d of %d)', electrodes[i], i, length(electrodes)))
-    #     }) ->
-    #       fs
-    #     return(fs)
-    #   }, error = function(e){
-    #     cat2(stringr::str_c(utils::capture.output({traceback(e)}), collapse = '\n'), level = 'ERROR')
-    #     return(NULL)
-    #   })
-    # },
+
+    #' @description returns names of a list, if names are null, 
+    #' returns blank characters
+    #' @param x a list
+    #' @return the names of the list
     names = function(x){
       if(is.list(x)){
         nm = base::names(x)
@@ -293,14 +373,31 @@ ExecEnvir <- R6::R6Class(
       }
       return(nm)
     },
+    
+    #' @description register \code{\link[rave]{ModuleEnvir}} instance
+    #' @param module_env \code{\link[rave]{ModuleEnvir}} instance. The modules
+    #' are shared across different sessions, but to run the module, we need 
+    #' to create runtime environment, which is \code{ExecEnvir}
+    #' @return none
     register_module = function(module_env){
       if(!is.null(private$module_env)){
         cat2('Overriding Module Environment.', level = 'WARNING')
       }
       private$module_env = module_env
       self$ns = shiny::NS(module_env$module_id)
-
+      
+      invisible()
     },
+    
+    #' @description parse input components
+    #' @param ... shiny input calls, such as \code{textInput('id', 'Name', ...)}
+    #' @param .input_panels,.tabsets together define the input layouts
+    #' @param .env ignored, debug only
+    #' @param .manual_inputs input IDs that won't cause module re-calculate
+    #' when inputs are updated
+    #' @param .render_inputs input IDs that only trigger render functions when
+    #' updated
+    #' @return none
     rave_inputs = function(..., .input_panels = list(), .tabsets = list(), 
                            .env = NULL, .manual_inputs = NULL, .render_inputs = NULL){
       .tabsets = .input_panels
@@ -418,6 +515,13 @@ ExecEnvir <- R6::R6Class(
 
       invisible()
     },
+    
+    
+    #' @description parse output components
+    #' @param ... shiny output calls, such as \code{plotOutput('id', 'Title')}
+    #' @param .output_tabsets,.tabsets together define the output layouts
+    #' @param .env debug use
+    #' @return none
     rave_outputs = function(..., .output_tabsets = list(), .tabsets = list(), .env = NULL){
       .tabsets = .output_tabsets
       quos = rlang::quos(...)
@@ -539,7 +643,12 @@ ExecEnvir <- R6::R6Class(
           comp$observers(input, output, session, local_data, self)
         })
       }
+      invisible()
     },
+    
+    #' @description input initialization when \code{iEEG/ECoG} data are imported
+    #' @param ... R expressions
+    #' @param .env for debug use
     rave_updates = function(..., .env = NULL){
       quos = rlang::quos(...)
       private$update = quos
@@ -625,6 +734,13 @@ ExecEnvir <- R6::R6Class(
       }
       invisible()
     },
+    
+    #' @description parse, and compile to main function
+    #' @param ... R expressions
+    #' @param auto whether the module should run automatically
+    #' @param async_vars variables further passed to \code{async} module
+    #' @param .env debug use
+    #' @return none, but \code{ExecEnvir$execute} will be generated.
     rave_execute = function(..., auto = TRUE, .env = NULL, async_vars = NULL){
       quos = rlang::quos_auto_name(rlang::quos(...))
 
@@ -672,11 +788,27 @@ ExecEnvir <- R6::R6Class(
         return(self$param_env[['..rave_future_obj']])
       }
     },
+    
+    #' @description clear cached objects
+    #' @param levels passed to \code{\link[rave]{clear_cache}}. Only level 1 and
+    #' 2 are allowed
+    #' @return none
     clear_cache = function(levels = 1){
       module_id = private$module_env$module_id
       levels = levels[!levels %in% c(3,4)]
       rave::clear_cache(levels = levels, module_id = module_id)
     },
+    
+    #' @description create cache
+    #' @param key any R object
+    #' @param val value to associate with key
+    #' @param name cache name, unique
+    #' @param replace whether to force replace even if the cache exists
+    #' @param persist whether to persist on hard drive
+    #' @param across_instance whether to share across shiny session
+    #' @param across_module whether to share across modules
+    #' @param ... ignored
+    #' @return value if no cache is found, or the cached value
     cache = function(key, val, name, replace = FALSE, persist = FALSE,
                      across_instance = FALSE, across_module = FALSE, ...){
       module_id = private$module_env$module_id
@@ -686,11 +818,23 @@ ExecEnvir <- R6::R6Class(
                   across_module = across_module)
       
     },
+    
+    #' @description cache input, internally used
+    #' @param inputId input ID, character
+    #' @param val the value of the input
+    #' @param read_only whether to read or to replace
+    #' @param sig signature, usually automatically generated
+    #' @param module_id module ID, usually automatically generated, unless
+    #' obtaining from other module, then \code{read_only} is forced to be TRUE
+    #' @param ... ignored
+    #' @return  the cached input value
     cache_input = function(inputId, val = NULL, read_only = TRUE, sig = NULL,
                            module_id, ...){
       
       if(missing(module_id)){
         module_id = private$module_env$module_id
+      }else if(module_id != private$module_env$module_id){
+        read_only = TRUE
       }
       
       sig %?<-% add_to_session(private$session)
@@ -708,6 +852,11 @@ ExecEnvir <- R6::R6Class(
                   across_module = TRUE)
       
     },
+    
+    
+    #' @description (experimental) cache R expression in browser 
+    #' \code{localStorage}
+    #' @param expr R expression
     set_browser = function(expr){
 
       current_key = add_to_session(private$session)
@@ -728,9 +877,12 @@ ExecEnvir <- R6::R6Class(
       })
 
     },
+    
+    #' @description generate input panels according to parsed \code{rave_inputs}
+    #' @param sidebar_width integer from 1 to 11, the width of the input panels
+    #' @return HTML tags
     generate_input_ui = function(sidebar_width = 3L){
       ns = self$ns
-      # TODO change it to package environment, otherwise customized package code won't work like `get_palette`
       # env = environment()
 
       more_btns = list(
@@ -785,6 +937,12 @@ ExecEnvir <- R6::R6Class(
         )
       )
     },
+    
+    #' @description generate outputs labels according to parsed 
+    #' \code{rave_outputs}
+    #' @param sidebar_width integer from 1 to 11, the width of the input panels,
+    #' the output panel width is calculated as \code{12-sidebar_width}
+    #' @return HTML tags
     generate_output_ui = function(sidebar_width = 3L){
       ns = self$ns
       # env = environment()
@@ -795,6 +953,10 @@ ExecEnvir <- R6::R6Class(
       )
 
     },
+    
+    #' @description (deprecated) check if variable is shared across modules.
+    #' Please use \code{cache_input} instead to get variable values.
+    #' @param inputId input ID
     is_global = function(inputId){
       tabsets = private$tabsets
       if(length(tabsets) == 0){
@@ -809,19 +971,27 @@ ExecEnvir <- R6::R6Class(
     }
   ),
   active = list(
+    
+    #' @field input_ids vector of input IDs (read-only)
     input_ids = function(){
       names(private$inputs$comp)
     },
+    
+    #' @field input_labels vector of input labels (read-only)
     input_labels = function(){
       re = lapply(private$inputs$comp, function(x){x$args$label})
       names(re) = names(private$inputs$comp)
       return(re)
     },
+    
+    #' @field output_labels vector of output labels (read-only)
     output_labels = function(){
       re = lapply(private$outputs$comp, function(x){x$label})
       names(re) = names(private$outputs$comp)
       return(re)
     },
+    
+    #' @field output_ids vector of output IDs (read-only)
     output_ids = function(){
       names(private$outputs$comp)
     }

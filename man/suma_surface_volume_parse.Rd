@@ -2,13 +2,13 @@
 % Please edit documentation in R/io-afnisuma.R
 \name{suma_surface_volume_parse}
 \alias{suma_surface_volume_parse}
-\title{Parse AFNI BRIK/HEAD file}
+\title{Parse \code{AFNI} \code{BRIK/HEAD} file}
 \usage{
 suma_surface_volume_parse(file_path)
 }
 \arguments{
-\item{file_path}{path to BRIK or HEAD file}
+\item{file_path}{path to \code{BRIK} or \code{HEAD} file}
 }
 \description{
-Parse AFNI BRIK/HEAD file
+Parse \code{AFNI} \code{BRIK/HEAD} file
 }

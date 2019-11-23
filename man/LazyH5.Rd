@@ -2,11 +2,39 @@
 % Please edit documentation in R/class-LazyH5.R
 \name{LazyH5}
 \alias{LazyH5}
-\title{File IO: HDF5 file wrapper}
+\title{Lazy 'HDF5' file loader}
 \description{
-File IO: HDF5 file wrapper
+provides hybrid data structure for 'HDF5' file
+}
+\examples{
+# Data to save
+x <- array(rnorm(1000), c(10,10,10))
 
-File IO: HDF5 file wrapper
+# Save to local disk
+f <- tempfile()
+save_h5(x, file = f, name = 'x', chunk = c(10,10,10), level = 0)
+
+# Load via LazyFST
+dat <- LazyH5$new(file_path = f, data_name = 'x', read_only = TRUE)
+
+dat
+#> Class: H5D
+#> Dataset: /x
+#> Filename: ...
+#> Access type: H5F_ACC_RDONLY
+#> Datatype: H5T_IEEE_F64LE
+#> Space: Type=Simple     Dims=10 x 10 x 10     Maxdims=Inf x Inf x Inf
+#> Chunk: 11 x 11 x 11
+
+# Check whether the data is identical
+range(dat - x)
+
+# Read a slice of the data
+system.time(dat[,10,])
+
+}
+\author{
+Zhengjia Wang
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -25,30 +53,56 @@ File IO: HDF5 file wrapper
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-finalize"></a>}}
 \subsection{Method \code{finalize()}}{
+garbage collection method
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{LazyH5$finalize()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+none
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-print"></a>}}
 \subsection{Method \code{print()}}{
+overrides print method
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{LazyH5$print()}\if{html}{\out{</div>}}
 }
 
+\subsection{Returns}{
+self instance
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
 \subsection{Method \code{new()}}{
+constructor
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{LazyH5$new(file_path, data_name, read_only = F)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{LazyH5$new(file_path, data_name, read_only = FALSE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{file_path}}{where data is stored in 'HDF5' format}
+
+\item{\code{data_name}}{the data stored in the file}
+
+\item{\code{read_only}}{whether to open the file in read-only mode. It's highly
+recommended to set this to be true, otherwise the file connection is
+exclusive.}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+self instance
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-save"></a>}}
 \subsection{Method \code{save()}}{
+save data to a 'HDF5' file
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{LazyH5$save(
   x,
@@ -63,38 +117,116 @@ File IO: HDF5 file wrapper
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{vector, matrix, or array}
+
+\item{\code{chunk}}{chunk size, length should matches with data dimension}
+
+\item{\code{level}}{compress level, from 1 to 9}
+
+\item{\code{replace}}{if the data exists in the file, replace the file or not}
+
+\item{\code{new_file}}{remove the whole file if exists before writing?}
+
+\item{\code{force}}{if you open the file in read-only mode, then saving 
+objects to the file will raise error. Use \code{force=TRUE} to force 
+write data}
+
+\item{\code{ctype}}{data type, see \code{\link{mode}}, usually the data type
+of \code{x}. Try \code{mode(x)} or \code{storage.mode(x)} as hints.}
+
+\item{\code{size}}{deprecated, for compatibility issues}
+
+\item{\code{...}}{passed to self \code{open()} method}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-open"></a>}}
 \subsection{Method \code{open()}}{
+open connection
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{LazyH5$open(new_dataset = F, robj, ...)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{LazyH5$open(new_dataset = FALSE, robj, ...)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{new_dataset}}{only used when the internal pointer is closed, or
+to write the data}
+
+\item{\code{robj}}{data array to save}
+
+\item{\code{...}}{passed to \code{\link[hdf5r]{createDataSet}}}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-close"></a>}}
 \subsection{Method \code{close()}}{
+close connection
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{LazyH5$close(all = FALSE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{all}}{whether to close all connections associated to the data file.
+If true, then all connections, including access from other programs, 
+will be closed}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-subset"></a>}}
 \subsection{Method \code{subset()}}{
+subset data
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{LazyH5$subset(..., drop = FALSE, stream = F, envir = parent.frame())}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{LazyH5$subset(..., drop = FALSE, stream = FALSE, envir = parent.frame())}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{drop}}{whether to apply \code{\link{drop}} the subset}
+
+\item{\code{stream}}{whether to read partial data at a time}
+
+\item{\code{envir}}{if \code{i,j,...} are expressions, where should the 
+expression be evaluated}
+
+\item{\code{i, j, ...}}{index along each dimension}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+subset of data
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-get_dims"></a>}}
 \subsection{Method \code{get_dims()}}{
+get data dimension
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{LazyH5$get_dims(stay_open = T)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{LazyH5$get_dims(stay_open = TRUE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{stay_open}}{whether to leave the connection opened}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+dimension of the array
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}

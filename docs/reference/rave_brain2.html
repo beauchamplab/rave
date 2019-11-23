@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
       </span>
     </div>
 
@@ -83,24 +83,6 @@
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/a_real_project.html">2.2 A Real Project</a>
-    </li>
-    <li>
-      <a href="../articles/build_your_first_module.html">2.1 Step-by-step, Build Your First RAVE Module</a>
-    </li>
-    <li>
-      <a href="../articles/create_inputs.html">2.3 Create RAVE Inputs</a>
-    </li>
-  </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -127,8 +109,12 @@
     <p>Tools to load and view brain in 3D viewer</p>
     </div>
 
-    <pre class="usage"><span class='fu'>rave_brain2</span>(<span class='no'>subject</span>, <span class='kw'>surfaces</span> <span class='kw'>=</span> <span class='st'>"pial"</span>, <span class='kw'>use_141</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>compute_template</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
+    <pre class="usage"><span class='fu'>rave_brain2</span>(
+  <span class='no'>subject</span>,
+  <span class='kw'>surfaces</span> <span class='kw'>=</span> <span class='st'>"pial"</span>,
+  <span class='kw'>use_141</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>compute_template</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -139,7 +125,8 @@
     </tr>
     <tr>
       <th>surfaces</th>
-      <td><p>one or more from `pial`, `white`, `smoothwm`, brain surface types</p></td>
+      <td><p>one or more from <code>"pial"</code>, <code>"white"</code>, 
+<code>"smoothwm"</code>, brain surface types</p></td>
     </tr>
     <tr>
       <th>use_141</th>

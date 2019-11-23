@@ -2,19 +2,19 @@
 % Please edit documentation in R/io-afnisuma.R
 \name{suma_spec_parse}
 \alias{suma_spec_parse}
-\title{Parse SUMA spec file}
+\title{Parse \code{SUMA} \code{spec} file}
 \usage{
 suma_spec_parse(subject, spec_file)
 }
 \arguments{
-\item{subject}{Either characters in format like \code{'Project/Subject'} or 
-\code{Subject} object created by \code{Subject$new(...)}}
+\item{subject}{either characters in format like \code{'Project/Subject'} or 
+\code{\link[rave]{Subject}} object created by \code{Subject$new(...)}}
 
 \item{spec_file}{default decided by \code{rave_options('suma_spec_file')}, 
 depending on subjects}
 }
 \description{
-Parse SUMA spec file
+Parse \code{SUMA} \code{spec} file
 }
 \examples{
 

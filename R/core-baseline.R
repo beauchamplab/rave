@@ -1,16 +1,16 @@
 #' Baseline signals
-#' @param el Tensor or ECoGTensor object
+#' @param el \code{\link[rave]{Tensor}} or \code{\link[rave]{ECoGTensor}} object
 #' @param from baseline start time
 #' @param to baseline end time
 #' @param method mean or median, default is mean
 #' @param unit "\%" percent signal change or "dB" decibel unit
 #' @param data_only return array or tensor object?
 #' @param hybrid if return tensor object, swap cache? useful for large dataset
-#' @param swap_file by default tempfile, or you can specify path
+#' @param swap_file by default \code{tempfile()}, or you can specify path
 #' @param mem_optimize optimize for large dataset? default is TRUE
 #' @param same_dimension logical, true if \code{op} is element-wise operator
-#' @param preop function before baselining
-#' @param op function for baselining
+#' @param preop function before baseline
+#' @param op function for baseline
 #' @export
 baseline <- function(el, from, to, method = 'mean', unit = '%',
                      data_only = F, hybrid = TRUE, swap_file = tempfile(),

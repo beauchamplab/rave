@@ -1,5 +1,5 @@
-#' lapply using future package (async)
-#' @param x,fun,... (See ?lapply)
+#' \code{lapply} using future package in asynchronous way
+#' @param x,fun,... (See \code{\link{lapply}})
 #' @param .ncores Number of cores to use. If the value is 0, the number of cores
 #' will be determined by rave_options('max_worker').
 #' @param .call_back A function takes current iteration number as argument, can be NULL.
@@ -7,7 +7,7 @@
 #' automatically. Otherwise you have to specify the packages that you want to load.
 #' @param .globals Automatically detect variables. See ?future::future
 #' @param .gc Clean up environment after each iterations? Recommended for large datasets.
-#' @param .envir intrnally used
+#' @param .envir internally used
 #' @param .as_datatable logical, return result as \code{data.table}. Experimental.
 #' @param .nrows integer, if \code{.as_datatable=TRUE}, number of rows expected.
 #' @examples

@@ -1,5 +1,4 @@
-#' Shiny modal to be used by init_app for data selection
-#' @param module_id any character containing 0-9 a-z A-Z
+
 shiny_data_selector <- function(module_id){
   
   fband = list(

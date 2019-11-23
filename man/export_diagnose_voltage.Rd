@@ -22,7 +22,8 @@ export_diagnose_voltage(
 )
 }
 \arguments{
-\item{subject}{character with the following format: \code{"project_name/subject_code"}}
+\item{subject}{character with the following format: 
+\code{"project_name/subject_code"}}
 
 \item{electrodes}{a integer vector. For example: \code{c(1,3,4,10:15)}}
 
@@ -44,11 +45,13 @@ export_diagnose_voltage(
 
 \item{back_col}{Periodogram color for raw signals}
 
-\item{...}{All other params will be passed to \code{\link[grDevices]{pdf}}}
+\item{...}{All other parameters passed to \code{\link[grDevices]{pdf}}}
 }
 \description{
-You must import subject throught \code{rave_preprocess()} and then run this function
+You must import subject through \code{rave_preprocess()} and 
+then run this function
 }
 \seealso{
-\code{\link[grDevices]{pdf}}, \code{\link{diagnose_signal}}, \code{\link{pwelch}}
+\code{\link[grDevices]{pdf}}, \code{\link{diagnose_signal}}, 
+\code{\link[rave]{pwelch}}
 }

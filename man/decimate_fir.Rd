@@ -2,20 +2,20 @@
 % Please edit documentation in R/signal-decimate.R
 \name{decimate_fir}
 \alias{decimate_fir}
-\title{Decimate or downsample a signal using FIR filter}
+\title{Decimate or Down-sample a Signal using \code{FIR} Filters}
 \usage{
 decimate_fir(x, q, n = 30)
 }
 \arguments{
 \item{x}{signal to be decimated}
 
-\item{q}{integer factor to downsample by}
+\item{q}{integer factor to decimated by}
 
-\item{n}{filter order used in the downsampling, default 30}
+\item{n}{filter order used for down-sample procedure, default is 30}
 }
 \value{
-Downsampled signal
+Down-sampled signal
 }
 \description{
-Decimate or downsample a signal using FIR filter
+Decimate or Down-sample a Signal using \code{FIR} Filters
 }

@@ -1,5 +1,5 @@
 #' Tools for module writers
-#' @param env environtment to save tools in
+#' @param env environment to save tools in
 #' @param data_env rave data repository returned by rave_prepare, internally used
 #' @param quiet logical
 #' @export

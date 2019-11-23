@@ -12,7 +12,7 @@ Please [click here for the prerequisite installation guide](./Installation.md) t
 
 * RAVE runs best on modern computers with multicore CPUs, [click here for suggested system configurations](./Requirements.md).
 
-* After the prerequisites are installed, open R-Studio (in Mac OSX, Rstudio icon is installed in your Applications folder). Copy and paste the following commands into the RStudio console to download the current version of RAVE. The commands must be typed one at a time. If packages need to be installed, you may accept the defaults by typing "Yes" to any questions that appear. In the case of errors, relaunch RStudio and repeat the commands or try the alternative installation command.
+* After the prerequisites are installed, open R-Studio (on Mac OSX, RStudio icon is installed in your Applications folder). Copy and paste the following commands into the RStudio console to download the current version of RAVE. The commands must be typed one at a time. If packages need to be installed, you may accept the defaults by typing "Yes" to any questions that appear. In the case of errors, relaunch RStudio and repeat the commands or try the alternative installation command.
 
 ```r
 # Install RAVE and builtin modules
@@ -67,7 +67,7 @@ rave::download_sample_data('YAK')
 rave::download_sample_data('_group_data')
 ```
 
-Once you see the folowing message, the subject is downloaded. The directory (XXX) will vary depending on the machine. If a subject previously exists, RAVE will ask you to choose from replacing, creating new or abandon the downloaded subject. 
+Once you see the following message, the subject is downloaded. The directory (XXX) will vary depending on the machine. If a subject previously exists, RAVE will ask you to choose from replacing, creating new or abandon the downloaded subject. 
 
 ```
 [ INFO ]: Expanding zip file

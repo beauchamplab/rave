@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils-shiny.R
 \name{customizedUI}
 \alias{customizedUI}
-\title{Customized UI Element}
+\title{Customized shiny Elements}
 \usage{
 customizedUI(inputId, width = 12L, ...)
 }
@@ -11,8 +11,8 @@ customizedUI(inputId, width = 12L, ...)
 
 \item{width}{integer from 1-12}
 
-\item{...}{passed to shiny::uiOutput}
+\item{...}{passed to \code{\link[shiny]{uiOutput}}}
 }
 \description{
-Customized UI Element
+Customized shiny Elements
 }

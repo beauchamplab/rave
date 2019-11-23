@@ -1,9 +1,9 @@
 # Signal processing - Wavelet
 
 #' Returns wavelets to be used for wavelet function
-#' @param freqs - vector of center frequencies for decomposition
-#' @param srate - sample rate (in Hz)
-#' @param wave_num - desired number of cycles in wavelet (typically 3-20 for frequencies 2-200).
+#' @param freqs vector of center frequencies for decomposition
+#' @param srate sample rate (in Hz)
+#' @param wave_num desired number of cycles in wavelet (typically 3-20 for frequencies 2-200).
 wavelet_kernels <- function(freqs, srate, wave_num){
   srate = round(srate);
   # calculate wavelet cycles for each frequencies
@@ -124,35 +124,32 @@ wavelet_kernels <- function(freqs, srate, wave_num){
   invisible(fft_waves)
 }
 
+
+# Last edited: Zhengjia Wang - Mar, 2018
+# Changes:
+#   1. Uses fftwtools instead of native functions
+#   manually calculate convolutions
+#   Save 50% runtime
+#   2. Adjusted window length
+#   3. Return power spec instead of spectrum
+#   4. Use mvfftw instead of fftw, speed up by another 50%
+
+
 #' @title Wavelet Transformation With Phase
+#' @description The code was translated from Matlab script written by 
+#' Brett Foster, Stanford Memory Lab, 2015 with permission to use in `RAVE`.
 #' @param data - vector of time series to be decomposed
 #' @param freqs - vector of center frequencies for decomposition
 #' @param srate - sample rate (in Hz)
-#' @param wave_num - desired number of cycles in wavelet (typically 3-20 for frequencies 2-200).
-#' @param demean - whether to de-mean data first?
+#' @param wave_num - desired number of cycles in wavelet (typically 3-20 for 
+#' frequencies 2-200).
+#' @param demean - whether to remove the mean of data first?
 #' @details
-#' Wavelet
-#' Function for decomposing time series data into time-frequency
+#' Decompose time series data into time-frequency
 #' representation (spectral decomposition) using wavelet transform. Employs
-#' Morlet wavelet method (gaussian taper sine wave) to obtain the analytic
+#' "Morlet" wavelet method (gaussian taper sine wave) to obtain the analytic
 #' signal for specified frequencies (via convolution).
-#' Inputs:
-#'  data - vector of time series to be decomposed
-#'  freqs - vector of center frequencies for decomposition
-#'  srate - sample rate (in Hz)
-#'  wave_num - desired number of cycles in wavelet (typically 5-10).
 #'
-#' Translated from Matlab script written by Brett Foster,
-#' Stanford Memory Lab, Feb. 2015
-#'
-#' Last edited: Zhengjia Wang - Mar, 2018
-#' Changes:
-#'   1. Uses fftwtools instead of native functions
-#'   manually calculate convolutions
-#'   Save 50% runtime
-#'   2. Adjusted window length
-#'   3. Return power spec instead of spectrum
-#'   4. Use mvfftw instead of fftw, speed up by another 50%
 #' @export
 wavelet <- function(data, freqs, srate, wave_num, demean = TRUE){
   srate = round(srate);
@@ -256,24 +253,7 @@ wavelet <- function(data, freqs, srate, wave_num, demean = TRUE){
 
 
 
-#' Bulk run wavelet (deprecated)
-#' @param project_name project_name
-#' @param subject_code subject_code
-#' @param blocks blocks
-#' @param channels channels
-#' @param srate srate
-#' @param target_srate target_srate
-#' @param frequencies frequencies
-#' @param wave_num wave_num
-#' @param compress compress
-#' @param replace replace
-#' @param save_original save_original
-#' @param ncores ncores
-#' @param plan plan
-#' @param save_dir save_dir
-#' @param filename filename
-#' @param reference_name reference_name
-#' @param ... other args
+# Bulk run wavelet (deprecated)
 bulk_wavelet <- function(
   project_name, subject_code, blocks, channels, srate, target_srate = 100,
   frequencies = seq(4, 200, by = 4), wave_num = c(3,14), compress = 1, replace = F, save_original = F,

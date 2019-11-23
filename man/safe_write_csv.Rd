@@ -2,19 +2,19 @@
 % Please edit documentation in R/io-csv.R
 \name{safe_write_csv}
 \alias{safe_write_csv}
-\title{Save data to csv, if file exists, rename old file}
+\title{Save data to "CSV", if file exists, rename old file}
 \usage{
 safe_write_csv(data, file, ..., quiet = F)
 }
 \arguments{
 \item{data}{data frame}
 
-\item{file}{csv file to save}
+\item{file}{"CSV" file to save}
 
 \item{...}{pass to \code{\link[utils]{write.csv}}}
 
 \item{quiet}{suppress overwrite message}
 }
 \description{
-Save data to csv, if file exists, rename old file
+Save data to "CSV", if file exists, rename old file
 }

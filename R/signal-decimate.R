@@ -69,11 +69,11 @@ decimate <- function (x, q, n = if (ftype == "iir") 8 else 30, ftype = "iir") {
   y[seq(1, l_x, by = q)]
 }
 
-#' Decimate or downsample a signal using FIR filter
+#' Decimate or Down-sample a Signal using \code{FIR} Filters
 #' @param x signal to be decimated
-#' @param q integer factor to downsample by
-#' @param n filter order used in the downsampling, default 30
-#' @return Downsampled signal
+#' @param q integer factor to decimated by
+#' @param n filter order used for down-sample procedure, default is 30
+#' @return Down-sampled signal
 #' @export
 decimate_fir <- function(x, q, n = 30){
   decimate(x = x, q = q, n = n, ftype = "fir")

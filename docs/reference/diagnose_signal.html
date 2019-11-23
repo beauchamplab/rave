@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Signal Inspection Plots — diagnose_signal • rave</title>
+<title>Plot and Inspect Signals in Trace, Periodogram, and Histogram — diagnose_signal • rave</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,8 @@
 
 
 
-<meta property="og:title" content="Signal Inspection Plots — diagnose_signal" />
-<meta property="og:description" content="Signal Inspection Plots" />
+<meta property="og:title" content="Plot and Inspect Signals in Trace, Periodogram, and Histogram — diagnose_signal" />
+<meta property="og:description" content="Plot and Inspect Signals in Trace, Periodogram, and Histogram" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
       </span>
     </div>
 
@@ -83,24 +83,6 @@
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/a_real_project.html">2.2 A Real Project</a>
-    </li>
-    <li>
-      <a href="../articles/build_your_first_module.html">2.1 Step-by-step, Build Your First RAVE Module</a>
-    </li>
-    <li>
-      <a href="../articles/create_inputs.html">2.3 Create RAVE Inputs</a>
-    </li>
-  </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -118,21 +100,38 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Signal Inspection Plots</h1>
+    <h1>Plot and Inspect Signals in Trace, Periodogram, and Histogram</h1>
     
     <div class="hidden name"><code>diagnose_signal.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Signal Inspection Plots</p>
+    <p>Plot and Inspect Signals in Trace, Periodogram, and Histogram</p>
     </div>
 
-    <pre class="usage"><span class='fu'>diagnose_signal</span>(<span class='no'>s1</span>, <span class='kw'>s2</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>sc</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>srate</span>, <span class='kw'>name</span> <span class='kw'>=</span> <span class='st'>""</span>,
-  <span class='kw'>try_compress</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>max_freq</span> <span class='kw'>=</span> <span class='fl'>300</span>, <span class='kw'>window</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>ceiling</a></span>(<span class='no'>srate</span> * <span class='fl'>2</span>),
-  <span class='kw'>noverlap</span> <span class='kw'>=</span> <span class='no'>window</span>/<span class='fl'>2</span>, <span class='kw'>std</span> <span class='kw'>=</span> <span class='fl'>3</span>, <span class='kw'>cex</span> <span class='kw'>=</span> <span class='fl'>1.5</span>, <span class='kw'>lwd</span> <span class='kw'>=</span> <span class='fl'>0.5</span>,
-  <span class='kw'>flim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>nclass</span> <span class='kw'>=</span> <span class='fl'>100</span>, <span class='kw'>main</span> <span class='kw'>=</span> <span class='st'>"Channel Inspection"</span>,
-  <span class='kw'>col</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"black"</span>, <span class='st'>"red"</span>), <span class='kw'>which</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>start_time</span> <span class='kw'>=</span> <span class='fl'>0</span>,
-  <span class='kw'>boundary</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>mar</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>5.2</span>, <span class='fl'>5.1</span>, <span class='fl'>4.1</span>, <span class='fl'>2.1</span>), <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>diagnose_signal</span>(
+  <span class='no'>s1</span>,
+  <span class='kw'>s2</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>sc</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='no'>srate</span>,
+  <span class='kw'>name</span> <span class='kw'>=</span> <span class='st'>""</span>,
+  <span class='kw'>try_compress</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>max_freq</span> <span class='kw'>=</span> <span class='fl'>300</span>,
+  <span class='kw'>window</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/Round.html'>ceiling</a></span>(<span class='no'>srate</span> * <span class='fl'>2</span>),
+  <span class='kw'>noverlap</span> <span class='kw'>=</span> <span class='no'>window</span>/<span class='fl'>2</span>,
+  <span class='kw'>std</span> <span class='kw'>=</span> <span class='fl'>3</span>,
+  <span class='kw'>cex</span> <span class='kw'>=</span> <span class='fl'>1.5</span>,
+  <span class='kw'>lwd</span> <span class='kw'>=</span> <span class='fl'>0.5</span>,
+  <span class='kw'>flim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>nclass</span> <span class='kw'>=</span> <span class='fl'>100</span>,
+  <span class='kw'>main</span> <span class='kw'>=</span> <span class='st'>"Channel Inspection"</span>,
+  <span class='kw'>col</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"black"</span>, <span class='st'>"red"</span>),
+  <span class='kw'>which</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>start_time</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+  <span class='kw'>boundary</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>mar</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>5.2</span>, <span class='fl'>5.1</span>, <span class='fl'>4.1</span>, <span class='fl'>2.1</span>),
+  <span class='no'>...</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -147,41 +146,45 @@
     </tr>
     <tr>
       <th>sc</th>
-      <td><p>compressed signal to speedup , if not provided, then either s1 is used,
-or s1 will be compressed to 100Hz, see also <code>try_compress</code></p></td>
+      <td><p>compressed signal to speedup the trace plot, if not provided, then 
+either the original <code>s1</code> is used, or a compressed version will be used. 
+See parameter <code>try_compress</code>.</p></td>
     </tr>
     <tr>
       <th>srate</th>
-      <td><p>Sample rate of s1, I assume that s2 and s1 have the same sample rate</p></td>
+      <td><p>Sample rate of s1, note that <code>s2</code> and <code>s1</code> must have 
+the same sample rate</p></td>
     </tr>
     <tr>
       <th>name</th>
-      <td><p>Analysis name, for e.g. 'CAR', 'Notch', etc.</p></td>
+      <td><p>Analysis name, for e.g. "CAR", "Notch", etc.</p></td>
     </tr>
     <tr>
       <th>try_compress</th>
-      <td><p>If length(s1) is big, R might take long to run, a solution is to
-down-sample s1 first (like what matlab does), and then plot compressed
-signal. However, some information will be lost during this process.
-<code>try_compress=FALSE</code> indicates that you want raw signal (s1) rather than
-compressed signal</p></td>
+      <td><p>If length of <code>s1</code> is too large, it might take long 
+to draw trace plot, my solution is to down-sample s1 first (like what Matlab 
+does), and then plot the compressed signal. Some information will be lost 
+during this process, however, the trade-off is the speed. 
+<code>try_compress=FALSE</code> indicates that you don't want to compress signals 
+under any situation (this might be slow).</p></td>
     </tr>
     <tr>
       <th>max_freq</th>
-      <td><p>Max frequency to be ploted, should be smaller than srate/2</p></td>
+      <td><p>Max frequency to plot, should be no larger than half of 
+the sampling rate.</p></td>
     </tr>
     <tr>
       <th>window</th>
-      <td><p>Window length to draw periodogram</p></td>
+      <td><p>Window length to draw the Periodogram</p></td>
     </tr>
     <tr>
       <th>noverlap</th>
-      <td><p>Number of data points that each adjacent windows overlap?</p></td>
+      <td><p>Number of data points that each adjacent windows overlap</p></td>
     </tr>
     <tr>
       <th>std</th>
-      <td><p>Error bar (red line) be draw at std * sd(s1), by default is 3, which
-means 3 standard deviation</p></td>
+      <td><p>Error bar (red line) be drawn at standard deviations, by default 
+is 3, meaning the error bars represent 3 standard deviations.</p></td>
     </tr>
     <tr>
       <th>cex, lwd, mar, ...</th>
@@ -189,7 +192,7 @@ means 3 standard deviation</p></td>
     </tr>
     <tr>
       <th>flim</th>
-      <td><p>log10-Frequency range to plot (left bottom plot y range)</p></td>
+      <td><p><code>log10</code> of frequency range to plot</p></td>
     </tr>
     <tr>
       <th>nclass</th>
@@ -201,11 +204,11 @@ means 3 standard deviation</p></td>
     </tr>
     <tr>
       <th>col</th>
-      <td><p>Two elements: the first is for s1, second is for s2.</p></td>
+      <td><p>Color for two signals, length of 2.</p></td>
     </tr>
     <tr>
       <th>which</th>
-      <td><p>Which subplot to plot</p></td>
+      <td><p>Which sub-plot to plot</p></td>
     </tr>
     <tr>
       <th>start_time</th>
@@ -213,21 +216,31 @@ means 3 standard deviation</p></td>
     </tr>
     <tr>
       <th>boundary</th>
-      <td><p>Boundary for signal plot, default is 1 standard dev</p></td>
+      <td><p>Boundary for signal plot, default is 1 standard deviation</p></td>
     </tr>
     </table>
 
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
-<span class='no'>time</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span>(<span class='fl'>0</span>, <span class='fl'>300</span>, <span class='fl'>1</span>/<span class='fl'>2000</span>)
-<span class='no'>s2</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/Trig.html'>sin</a></span>(<span class='no'>pi</span>/<span class='fl'>30</span> * <span class='no'>time</span> + <span class='fu'><a href='https://rdrr.io/r/stats/Cauchy.html'>rcauchy</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span>(<span class='no'>time</span>)) / <span class='fl'>1000</span>) + <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span>(<span class='no'>time</span>))
-<span class='fu'>diagnose_signal</span>(<span class='no'>s2</span>, <span class='kw'>srate</span> <span class='kw'>=</span> <span class='fl'>2000</span>, <span class='kw'>flim</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(-<span class='fl'>4</span>,-<span class='fl'>1</span>))
-
+    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>stats</span>)
+<span class='no'>time</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq</a></span>(<span class='fl'>0</span>, <span class='fl'>100</span>, <span class='kw'>by</span> <span class='kw'>=</span> <span class='fl'>1</span>/<span class='fl'>200</span>)
+<span class='no'>s2</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/Trig.html'>sin</a></span>(<span class='fl'>2</span> * <span class='no'>pi</span> * <span class='fl'>60</span> * <span class='no'>time</span>) + <span class='fu'><a href='https://rdrr.io/r/stats/Normal.html'>rnorm</a></span>(<span class='fu'><a href='https://rdrr.io/r/base/length.html'>length</a></span>(<span class='no'>time</span>))
+<span class='fu'>diagnose_signal</span>(<span class='no'>s2</span>, <span class='kw'>srate</span> <span class='kw'>=</span> <span class='fl'>200</span>)</div><div class='img'><img src='diagnose_signal-1.png' alt='' width='700' height='433' /></div><div class='output co'>#&gt; $ylim
+#&gt; [1] 4.859044
+#&gt; 
+#&gt; $boundary
+#&gt; [1] 3.675596
+#&gt; </div><div class='input'>
 <span class='co'># Apply notch filter</span>
-<span class='no'>s1</span> <span class='kw'>=</span> <span class='fu'><a href='notch_filter.html'>notch_filter</a></span>(<span class='no'>s2</span>, <span class='fl'>2000</span>, <span class='fl'>58</span>,<span class='fl'>62</span>)
-<span class='fu'>diagnose_signal</span>(<span class='no'>s1</span>, <span class='no'>s2</span>, <span class='kw'>srate</span> <span class='kw'>=</span> <span class='fl'>2000</span>, <span class='kw'>flim</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(-<span class='fl'>4</span>,-<span class='fl'>1</span>))
-}</div></pre>
+<span class='no'>s1</span> <span class='kw'>=</span> <span class='fu'><a href='notch_filter.html'>notch_filter</a></span>(<span class='no'>s2</span>, <span class='fl'>200</span>, <span class='fl'>58</span>,<span class='fl'>62</span>)
+<span class='fu'>diagnose_signal</span>(<span class='no'>s1</span>, <span class='no'>s2</span>, <span class='kw'>srate</span> <span class='kw'>=</span> <span class='fl'>200</span>)</div><div class='img'><img src='diagnose_signal-2.png' alt='' width='700' height='433' /></div><div class='output co'>#&gt; $ylim
+#&gt; [1] 4.294848
+#&gt; 
+#&gt; $boundary
+#&gt; [1] 2.983221
+#&gt; </div><div class='input'>
+
+</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

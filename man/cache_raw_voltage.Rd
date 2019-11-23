@@ -2,7 +2,7 @@
 % Please edit documentation in R/io-subject.R
 \name{cache_raw_voltage}
 \alias{cache_raw_voltage}
-\title{Import subject matlab file and create H5 files}
+\title{Import Subject "Matlab" File and Create "HDF5" files}
 \usage{
 cache_raw_voltage(project_name, subject_code, blocks, electrodes, ...)
 }
@@ -18,5 +18,5 @@ cache_raw_voltage(project_name, subject_code, blocks, electrodes, ...)
 \item{...}{ignored}
 }
 \description{
-Import subject matlab file and create H5 files
+Import Subject "Matlab" File and Create "HDF5" files
 }

@@ -2,7 +2,7 @@ library(rave)
 # Import already preprocessed data into RAVE
 
 # Step 1: subject settings and implementations
-# You need to implement some defails in this step
+# You need to implement some details in this step
 
 # TODO: set sample rate for voltage and wavelet, in addition, set frequencies
 subject_info = list(

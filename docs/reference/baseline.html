@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
       </span>
     </div>
 
@@ -83,24 +83,6 @@
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/a_real_project.html">2.2 A Real Project</a>
-    </li>
-    <li>
-      <a href="../articles/build_your_first_module.html">2.1 Step-by-step, Build Your First RAVE Module</a>
-    </li>
-    <li>
-      <a href="../articles/create_inputs.html">2.3 Create RAVE Inputs</a>
-    </li>
-  </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -127,16 +109,27 @@
     <p>Baseline signals</p>
     </div>
 
-    <pre class="usage"><span class='fu'>baseline</span>(<span class='no'>el</span>, <span class='no'>from</span>, <span class='no'>to</span>, <span class='kw'>method</span> <span class='kw'>=</span> <span class='st'>"mean"</span>, <span class='kw'>unit</span> <span class='kw'>=</span> <span class='st'>"%"</span>, <span class='kw'>data_only</span> <span class='kw'>=</span> <span class='no'>F</span>,
-  <span class='kw'>hybrid</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>swap_file</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/tempfile.html'>tempfile</a></span>(), <span class='kw'>mem_optimize</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>same_dimension</span> <span class='kw'>=</span> <span class='no'>unit</span> <span class='kw'>%in%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"%"</span>, <span class='st'>"dB"</span>), <span class='kw'>preop</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>op</span>)</pre>
+    <pre class="usage"><span class='fu'>baseline</span>(
+  <span class='no'>el</span>,
+  <span class='no'>from</span>,
+  <span class='no'>to</span>,
+  <span class='kw'>method</span> <span class='kw'>=</span> <span class='st'>"mean"</span>,
+  <span class='kw'>unit</span> <span class='kw'>=</span> <span class='st'>"%"</span>,
+  <span class='kw'>data_only</span> <span class='kw'>=</span> <span class='no'>F</span>,
+  <span class='kw'>hybrid</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>swap_file</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/tempfile.html'>tempfile</a></span>(),
+  <span class='kw'>mem_optimize</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>same_dimension</span> <span class='kw'>=</span> <span class='no'>unit</span> <span class='kw'>%in%</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"%"</span>, <span class='st'>"dB"</span>),
+  <span class='kw'>preop</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='no'>op</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>el</th>
-      <td><p>Tensor or ECoGTensor object</p></td>
+      <td><p><code><a href='Tensor.html'>Tensor</a></code> or <code><a href='ECoGTensor.html'>ECoGTensor</a></code> object</p></td>
     </tr>
     <tr>
       <th>from</th>
@@ -164,7 +157,7 @@
     </tr>
     <tr>
       <th>swap_file</th>
-      <td><p>by default tempfile, or you can specify path</p></td>
+      <td><p>by default <code><a href='https://rdrr.io/r/base/tempfile.html'>tempfile()</a></code>, or you can specify path</p></td>
     </tr>
     <tr>
       <th>mem_optimize</th>
@@ -176,11 +169,11 @@
     </tr>
     <tr>
       <th>preop</th>
-      <td><p>function before baselining</p></td>
+      <td><p>function before baseline</p></td>
     </tr>
     <tr>
       <th>op</th>
-      <td><p>function for baselining</p></td>
+      <td><p>function for baseline</p></td>
     </tr>
     </table>
 

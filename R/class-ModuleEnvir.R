@@ -1,3 +1,6 @@
+# Documented 2019-11-21
+
+
 # Function to bind functions to exec_env's wrappers
 # e is the execenv and w is its wrapper
 bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
@@ -267,7 +270,20 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
 }
 
 
-#' Module class
+#' @title R6 'RAVE' Module Class
+#' @description contains module data, functions, etc.
+#' 
+#' @examples 
+#' \dontrun{
+#' 
+#' module <- get_module('ravebuiltins', 'power_explorer')
+#' module
+#' #> Module Name: Power Explorer 
+#' #> Version: 0 
+#' #> Script Path: ... 
+#' #> Author(s):
+#' 
+#' }
 #' @export
 ModuleEnvir <- R6::R6Class(
   classname = 'ModuleEnvir',
@@ -278,17 +294,43 @@ ModuleEnvir <- R6::R6Class(
     cache_env = NULL
   ),
   public = list(
+    
+    #' @field module_id module ID, unique
     module_id = '',
+    
+    #' @field label_name corresponding module name
     label_name = '',
+    
+    #' @field script_path compiled module scripts
     script_path = '',
+    
+    #' @field script if \code{script_path} not exists, alternative script
     script = '',
+    
+    #' @field author who wrote the module not often used
     author = NULL,
+    
+    #' @field version module version
     version = NULL,
+    
+    #' @field packages the packages to be loaded for the module
     packages = NULL,
+    
+    #' @field rmd_path deprecated
     rmd_path = NULL,
+    
+    #' @field parent_env parent environment of the module, usually global 
+    #' environment or package environment
     parent_env = NULL,
+    
+    #' @field from_package whether the module is compiled from another R package
     from_package = FALSE,
+    
+    #' @field sidebar_width input panel width, from 1 to 11
     sidebar_width = 3L,
+    
+    #' @description print module information
+    #' @return none
     info = function(){
       cat('Module Name:', self$label_name, '\n')
       cat('Version:', self$version, '\n')
@@ -298,10 +340,18 @@ ModuleEnvir <- R6::R6Class(
         cat(' -', a, '\n')
       }
     },
+    
+    #' @description print module information and returns memory address
+    #' @param ... ignored
     print = function(...){
       self$info()
       env_address(self)
     },
+    
+    #' @description constructor
+    #' @param module_id,label_name,script_path,author,version see fields
+    #' @param packages,parent_env,rmd_path see fields
+    #' @param .script_content internal use
     initialize = function(
       module_id,
       label_name,
@@ -439,7 +489,18 @@ ModuleEnvir <- R6::R6Class(
       self$script_path = script_path
       
     },
-    get_or_new_exec_env = function(session = getDefaultReactiveDomain(), ..., new = FALSE){
+    
+    
+    #' @description get the corresponding \code{\link[rave]{ExecEnvir}} with 
+    #' shiny session
+    #' @param session shiny session; see shiny \code{\link[shiny]{domains}}
+    #' @param new whether to force creating a new runtime environment if 
+    #' previous one already exists
+    #' @param ... ignored
+    #' @return an \code{\link[rave]{ExecEnvir}} instance associated with 
+    #' current module and given session
+    get_or_new_exec_env = function(session = getDefaultReactiveDomain(), 
+                                   ..., new = FALSE){
       session_id = add_to_session(session)
       if(is.null(session_id)){
         session_id = '.TEMP'
@@ -454,6 +515,11 @@ ModuleEnvir <- R6::R6Class(
       }
       return(private$exec_env[[session_id]])
     },
+    
+    #' @description load and compile script into registered 
+    #' \code{\link[rave]{ExecEnvir}}
+    #' @param session shiny session; see shiny \code{\link[shiny]{domains}}
+    #' @return none
     load_script = function(session = getDefaultReactiveDomain()){
       # load default script
       default_src = readLines(system.file('default_module.R', package = 'rave'))
@@ -504,6 +570,13 @@ ModuleEnvir <- R6::R6Class(
       # lockEnvironment(static_env)
       
     },
+    
+    #' @description (deprecated) cache data
+    #' @param key list of R objects
+    #' @param val value to cache
+    #' @param session shiny session
+    #' @param replace whether to replace cache even if it exists
+    #' @return cached value
     cache = function(key, val, session, replace = FALSE){
       session_id = add_to_session(session)
       if(is.null(session_id)){
@@ -526,6 +599,11 @@ ModuleEnvir <- R6::R6Class(
         }
       }
     },
+    
+    
+    #' @description generate 'HTML' tags
+    #' @param session shiny session; see shiny \code{\link[shiny]{domains}}
+    #' @return 'HTML' tags
     render_ui = function(session = getDefaultReactiveDomain()){
       e = self$get_or_new_exec_env(session = session)
       if(length(e$input_ids)){
@@ -540,6 +618,11 @@ ModuleEnvir <- R6::R6Class(
       )
       
     },
+    
+    
+    #' @description clean the module environment
+    #' @param session shiny session; see shiny \code{\link[shiny]{domains}}
+    #' @param session_id shiny 'RAVE' ID, default is auto-generated
     clean = function(session = getDefaultReactiveDomain(),
                      session_id){
       

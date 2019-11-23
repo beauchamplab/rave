@@ -2,7 +2,7 @@
 % Please edit documentation in R/core-file_structure.R
 \name{get_dir}
 \alias{get_dir}
-\title{Get all directories that rave uses}
+\title{Get Directories in `RAVE`}
 \usage{
 get_dir(
   subject_code,
@@ -14,18 +14,19 @@ get_dir(
 )
 }
 \arguments{
-\item{subject_code}{subject_code}
+\item{subject_code}{subject code; can be ignored when \code{subject_id} is provided}
 
-\item{project_name}{project_name}
+\item{project_name}{project name; can be ignored when \code{subject_id} is provided}
 
-\item{block_num}{block_num (optional)}
+\item{block_num}{block name (optional)}
 
-\item{mkdirs}{mkdirs ensure that some directory exists}
+\item{mkdirs}{internally used}
 
-\item{subject_id}{subject_id (project_name/subject_code)}
+\item{subject_id}{subject ID; can be omitted if \code{subject_code} and 
+\code{project_name} are provided}
 
-\item{relative}{relative path or absolute to root data dir}
+\item{relative}{whether to return relative path or absolute to root directory}
 }
 \description{
-Get all directories that rave uses
+Get Directories in `RAVE`
 }

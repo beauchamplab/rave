@@ -36,7 +36,8 @@
 
 
 <meta property="og:title" content="Wavelet Transformation With Phase — wavelet" />
-<meta property="og:description" content="Wavelet Transformation With Phase" />
+<meta property="og:description" content="The code was translated from Matlab script written by 
+Brett Foster, Stanford Memory Lab, 2015 with permission to use in `RAVE`." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -69,7 +70,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
       </span>
     </div>
 
@@ -83,24 +84,6 @@
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/a_real_project.html">2.2 A Real Project</a>
-    </li>
-    <li>
-      <a href="../articles/build_your_first_module.html">2.1 Step-by-step, Build Your First RAVE Module</a>
-    </li>
-    <li>
-      <a href="../articles/create_inputs.html">2.3 Create RAVE Inputs</a>
-    </li>
-  </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -124,7 +107,8 @@
     </div>
 
     <div class="ref-description">
-    <p>Wavelet Transformation With Phase</p>
+    <p>The code was translated from Matlab script written by 
+Brett Foster, Stanford Memory Lab, 2015 with permission to use in `RAVE`.</p>
     </div>
 
     <pre class="usage"><span class='fu'>wavelet</span>(<span class='no'>data</span>, <span class='no'>freqs</span>, <span class='no'>srate</span>, <span class='no'>wave_num</span>, <span class='kw'>demean</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
@@ -146,36 +130,21 @@
     </tr>
     <tr>
       <th>wave_num</th>
-      <td><p>- desired number of cycles in wavelet (typically 3-20 for frequencies 2-200).</p></td>
+      <td><p>- desired number of cycles in wavelet (typically 3-20 for 
+frequencies 2-200).</p></td>
     </tr>
     <tr>
       <th>demean</th>
-      <td><p>- whether to de-mean data first?</p></td>
+      <td><p>- whether to remove the mean of data first?</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>Wavelet
-Function for decomposing time series data into time-frequency
+    <p>Decompose time series data into time-frequency
 representation (spectral decomposition) using wavelet transform. Employs
-Morlet wavelet method (gaussian taper sine wave) to obtain the analytic
-signal for specified frequencies (via convolution).
-Inputs:
- data - vector of time series to be decomposed
- freqs - vector of center frequencies for decomposition
- srate - sample rate (in Hz)
- wave_num - desired number of cycles in wavelet (typically 5-10).</p>
-<p>Translated from Matlab script written by Brett Foster,
-Stanford Memory Lab, Feb. 2015</p>
-<p>Last edited: Zhengjia Wang - Mar, 2018
-Changes:
-  1. Uses fftwtools instead of native functions
-  manually calculate convolutions
-  Save 50<!-- % runtime -->
-  2. Adjusted window length
-  3. Return power spec instead of spectrum
-  4. Use mvfftw instead of fftw, speed up by another 50<!-- % --></p>
+"Morlet" wavelet method (gaussian taper sine wave) to obtain the analytic
+signal for specified frequencies (via convolution).</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

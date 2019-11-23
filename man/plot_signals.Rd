@@ -47,9 +47,9 @@ Default is NULL (Total time range)}
 
 \item{ylab}{Y axis label}
 
-\item{plot, xlim, space_mode, time_shift, lwd, cex, new_plot}{Depricated.}
+\item{plot, xlim, space_mode, time_shift, lwd, cex, new_plot}{Deprecated}
 
-\item{...}{pass to matplot}
+\item{...}{pass to \code{\link[graphics]{matplot}}}
 }
 \description{
 Plot signals line by line

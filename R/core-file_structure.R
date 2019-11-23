@@ -170,13 +170,14 @@ get_subjects <- function(project_name, check_subfolders = TRUE, check_rawdata = 
   sub
 }
 
-#' Get all directories that rave uses
-#' @param subject_code subject_code
-#' @param project_name project_name
-#' @param block_num block_num (optional)
-#' @param mkdirs mkdirs ensure that some directory exists
-#' @param subject_id subject_id (project_name/subject_code)
-#' @param relative relative path or absolute to root data dir
+#' Get Directories in `RAVE`
+#' @param subject_code subject code; can be ignored when \code{subject_id} is provided
+#' @param project_name project name; can be ignored when \code{subject_id} is provided
+#' @param block_num block name (optional)
+#' @param mkdirs internally used
+#' @param subject_id subject ID; can be omitted if \code{subject_code} and 
+#' \code{project_name} are provided
+#' @param relative whether to return relative path or absolute to root directory
 #' @export
 get_dir <- function(subject_code, project_name, block_num, mkdirs = NULL, subject_id, relative = F){
   re = list()

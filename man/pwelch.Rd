@@ -2,7 +2,7 @@
 % Please edit documentation in R/signal-pwelch.R
 \name{pwelch}
 \alias{pwelch}
-\title{Welch Periodogram}
+\title{Plot "Welch" Periodogram}
 \usage{
 pwelch(
   x,
@@ -30,20 +30,17 @@ pwelch(
 
 \item{noverlap}{overlap between two adjacent windows, by default is 8}
 
-\item{nfft}{number of DFT points}
+\item{nfft}{number of basis functions}
 
 \item{col, xlim, ylim, main, cex, ...}{will be passed to plot}
 
 \item{plot}{logical, plot the result or not}
 
-\item{log}{'', 'x', 'y', 'xy', indicates which axis should be log10 value.}
+\item{log}{indicates which axis should be \code{\link{log10}} value. options 
+are \code{''}, \code{'x'}, \code{'y'}, \code{'xy'}.}
 
 \item{spec_func}{deprecated}
 }
 \description{
-Welch Periodogram
-}
-\details{
-This function is modified from \code{pwelch} function from "oce"
-package and is designed for visualizing ECoG voltage data.
+Plot "Welch" Periodogram
 }

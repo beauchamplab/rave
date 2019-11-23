@@ -39,7 +39,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
       </span>
     </div>
 
@@ -53,24 +53,6 @@
 </li>
 <li>
   <a href="reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-<li>
-      <a href="articles/a_real_project.html">2.2 A Real Project</a>
-    </li>
-    <li>
-      <a href="articles/build_your_first_module.html">2.1 Step-by-step, Build Your First RAVE Module</a>
-    </li>
-    <li>
-      <a href="articles/create_inputs.html">2.3 Create RAVE Inputs</a>
-    </li>
-  </ul>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right"></ul>
@@ -97,7 +79,7 @@
 <ul>
 <li><p>RAVE requires the installation of the language “R” and other miscellaneous programming tools, including “RStudio”. Please <a href="./Installation.html">click here for the prerequisite installation guide</a> to install all needed tools for your operating system.</p></li>
 <li><p>RAVE runs best on modern computers with multicore CPUs, <a href="./Requirements.html">click here for suggested system configurations</a>.</p></li>
-<li><p>After the prerequisites are installed, open R-Studio (in Mac OSX, Rstudio icon is installed in your Applications folder). Copy and paste the following commands into the RStudio console to download the current version of RAVE. The commands must be typed one at a time. If packages need to be installed, you may accept the defaults by typing “Yes” to any questions that appear. In the case of errors, relaunch RStudio and repeat the commands or try the alternative installation command.</p></li>
+<li><p>After the prerequisites are installed, open R-Studio (on Mac OSX, RStudio icon is installed in your Applications folder). Copy and paste the following commands into the RStudio console to download the current version of RAVE. The commands must be typed one at a time. If packages need to be installed, you may accept the defaults by typing “Yes” to any questions that appear. In the case of errors, relaunch RStudio and repeat the commands or try the alternative installation command.</p></li>
 </ul>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="co"># Install RAVE and builtin modules</span></a>
 <a class="sourceLine" id="cb1-2" title="2"><span class="kw"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">'devtools'</span>)</a>
@@ -142,7 +124,7 @@
 <a class="sourceLine" id="cb4-10" title="10"></a>
 <a class="sourceLine" id="cb4-11" title="11"><span class="co"># download group analysis sample - 72 MB. Please download at least 1 subject above.</span></a>
 <a class="sourceLine" id="cb4-12" title="12">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'_group_data'</span>)</a></code></pre></div>
-<p>Once you see the folowing message, the subject is downloaded. The directory (XXX) will vary depending on the machine. If a subject previously exists, RAVE will ask you to choose from replacing, creating new or abandon the downloaded subject.</p>
+<p>Once you see the following message, the subject is downloaded. The directory (XXX) will vary depending on the machine. If a subject previously exists, RAVE will ask you to choose from replacing, creating new or abandon the downloaded subject.</p>
 <pre><code>[ INFO ]: Expanding zip file
 [ INFO ]: Copy from tempdir to data repository
 [ INFO ]: Clean up

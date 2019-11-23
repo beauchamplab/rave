@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils-parallel.R
 \name{lapply_async}
 \alias{lapply_async}
-\title{lapply using future package (async)}
+\title{\code{lapply} using future package in asynchronous way}
 \usage{
 lapply_async(
   x,
@@ -19,7 +19,7 @@ lapply_async(
 )
 }
 \arguments{
-\item{x, fun, ...}{(See ?lapply)}
+\item{x, fun, ...}{(See \code{\link{lapply}})}
 
 \item{.ncores}{Number of cores to use. If the value is 0, the number of cores
 will be determined by rave_options('max_worker').}
@@ -29,7 +29,7 @@ will be determined by rave_options('max_worker').}
 \item{.packages}{NULL be default, then the function will detect attached packages
 automatically. Otherwise you have to specify the packages that you want to load.}
 
-\item{.envir}{intrnally used}
+\item{.envir}{internally used}
 
 \item{.globals}{Automatically detect variables. See ?future::future}
 
@@ -40,7 +40,7 @@ automatically. Otherwise you have to specify the packages that you want to load.
 \item{.nrows}{integer, if \code{.as_datatable=TRUE}, number of rows expected.}
 }
 \description{
-lapply using future package (async)
+\code{lapply} using future package in asynchronous way
 }
 \examples{
 \dontrun{

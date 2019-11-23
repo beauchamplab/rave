@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>R6 class for ECoG data Repository — ECoGRepository • rave</title>
+<title>R6 class for <code>iEEG/ECoG</code> data Repository — ECoGRepository • rave</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,10 @@
 
 
 
-<meta property="og:title" content="R6 class for ECoG data Repository — ECoGRepository" />
-<meta property="og:description" content="R6 class for ECoG data Repository" />
+<meta property="og:title" content="R6 class for <code>iEEG/ECoG</code> data Repository — ECoGRepository" />
+<meta property="og:description" content="A repository to keep subject information, including electrode
+instances, reference information, epoch data, and offers method to epoch 
+data." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -69,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
       </span>
     </div>
 
@@ -83,24 +85,6 @@
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/a_real_project.html">2.2 A Real Project</a>
-    </li>
-    <li>
-      <a href="../articles/build_your_first_module.html">2.1 Step-by-step, Build Your First RAVE Module</a>
-    </li>
-    <li>
-      <a href="../articles/create_inputs.html">2.3 Create RAVE Inputs</a>
-    </li>
-  </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -118,29 +102,244 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>R6 class for ECoG data Repository</h1>
+    <h1>R6 class for <code>iEEG/ECoG</code> data Repository</h1>
     
     <div class="hidden name"><code>ECoGRepository.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>R6 class for ECoG data Repository</p>
+    <p>A repository to keep subject information, including electrode
+instances, reference information, epoch data, and offers method to epoch 
+data.</p>
     </div>
 
-    <pre class="usage"><span class='no'>ECoGRepository</span></pre>
 
 
-    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
+    <h2 class="hasAnchor" id="public-fields"><a class="anchor" href="#public-fields"></a>Public fields</h2>
 
-    <p>An object of class <code>R6ClassGenerator</code> of length 24.</p>
+    <p><div class="r6-fields"></p><dl class='dl-horizontal'>
+<dt><code>subject</code></dt><dd><p><code><a href='Subject.html'>Subject</a></code> instance</p></dd>
 
+<dt><code>raw</code></dt><dd><p>dictionary to store <code><a href='Electrode.html'>Electrode</a></code> instances</p></dd>
+
+<dt><code>reference</code></dt><dd><p>dictionary to store references for electrodes</p></dd>
+
+<dt><code>epochs</code></dt><dd><p>dictionary to store epoch data</p></dd>
+
+<dt><code>raw_volt</code></dt><dd><p>environment, stores pre-referenced analog traces</p></dd>
+
+<dt><code>raw_power</code></dt><dd><p>environment, stores pre-referenced power spectrum</p></dd>
+
+<dt><code>raw_phase</code></dt><dd><p>environment, stores pre-referenced phase data</p></dd>
+
+<dt><code>volt</code></dt><dd><p>environment, stores referenced analog traces</p></dd>
+
+<dt><code>power</code></dt><dd><p>environment, stores referenced power spectrum</p></dd>
+
+<dt><code>phase</code></dt><dd><p>environment, stores referenced phase data</p></dd>
+
+</dl><p></div></p>
+    <h2 class="hasAnchor" id="methods"><a class="anchor" href="#methods"></a>Methods</h2>
+
+    
+<h3>Public methods</h3>
+
+<ul>
+<li><p><a href='#method-info'><code>ECoGRepository$info()</code></a></p></li>
+<li><p><a href='#method-print'><code>ECoGRepository$print()</code></a></p></li>
+<li><p><a href='#method-new'><code>ECoGRepository$new()</code></a></p></li>
+<li><p><a href='#method-get_electrode'><code>ECoGRepository$get_electrode()</code></a></p></li>
+<li><p><a href='#method-load_electrodes'><code>ECoGRepository$load_electrodes()</code></a></p></li>
+<li><p><a href='#method-epoch'><code>ECoGRepository$epoch()</code></a></p></li>
+<li><p><a href='#method-load_reference'><code>ECoGRepository$load_reference()</code></a></p></li>
+<li><p><a href='#method-baseline'><code>ECoGRepository$baseline()</code></a></p></li>
+</ul>
+<p><hr>
+<a id="method-info"></a></p><h3>Method <code>info()</code></h3>
+<p>obtain the information</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ECoGRepository$info(print = TRUE)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>print</code></dt><dd><p>logical, whether to print the information, default is true</p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>character of the information</p>
+<p><hr>
+<a id="method-print"></a></p><h3>Method <code><a href='https://rdrr.io/r/base/print.html'>print()</a></code></h3>
+<p>print memory address</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ECoGRepository$print(...)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>...</code></dt><dd><p>ignored</p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>none</p>
+<p><hr>
+<a id="method-new"></a></p><h3>Method <code>new()</code></h3>
+<p>constructor</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ECoGRepository$new(subject, reference = "default", autoload = TRUE)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>subject</code></dt><dd><p>character such as <code>"project/subject"</code> or 
+<code><a href='Subject.html'>Subject</a></code> instance</p></dd>
+
+<dt><code>reference</code></dt><dd><p>character, reference name, default is <code>"default"</code>, 
+which refers to <code>"reference_default.csv"</code> in subject meta folder</p></dd>
+
+<dt><code>autoload</code></dt><dd><p>logical, whether to auto-load reference for all 
+electrodes, default is yes.</p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>An <code>ECoGRepository</code> instance</p>
+<p><hr>
+<a id="method-get_electrode"></a></p><h3>Method <code>get_electrode()</code></h3>
+<p>get <code><a href='Electrode.html'>Electrode</a></code> instances</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ECoGRepository$get_electrode(electrode, name = "raw")</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>electrode</code></dt><dd><p>integers, referring to electrode numbers</p></dd>
+
+<dt><code>name</code></dt><dd><p>character, <code>"raw"</code>, <code>"power"</code>, <code>"raw_phase"</code>, 
+etc.</p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>list of environments containing electrode instances</p>
+<p><hr>
+<a id="method-load_electrodes"></a></p><h3>Method <code>load_electrodes()</code></h3>
+<p>load electrodes; usually don't need to directly call this 
+method if <code>autoload</code> is true when initializing the repository</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ECoGRepository$load_electrodes(electrodes, reference = "default")</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>electrodes</code></dt><dd><p>electrode number (integer)</p></dd>
+
+<dt><code>reference</code></dt><dd><p>name of reference</p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>none</p>
+<p><hr>
+<a id="method-epoch"></a></p><h3>Method <code>epoch()</code></h3>
+<p>slice the data according to epoch table</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ECoGRepository$epoch(
+  epoch_name,
+  pre,
+  post,
+  electrodes = NULL,
+  frequency_range = NULL,
+  data_type = "power",
+  referenced = TRUE,
+  func = NULL,
+  quiet = FALSE
+)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>epoch_name</code></dt><dd><p>the name of epoch; for example, <code>"YABa"</code> refers
+to <code>"epoch_YABa.csv"</code> in subject meta folder.</p></dd>
+
+<dt><code>pre</code></dt><dd><p>positive number in seconds, how long should the time be 
+kept before the onset</p></dd>
+
+<dt><code>post</code></dt><dd><p>positive number in seconds, how long should the time be 
+kept after onset</p></dd>
+
+<dt><code>electrodes</code></dt><dd><p>integers, electrode numbers</p></dd>
+
+<dt><code>frequency_range</code></dt><dd><p>experimental, frequency range to include</p></dd>
+
+<dt><code>data_type</code></dt><dd><p>data types to epoch; default is <code>"power"</code>, which 
+is power spectrum, or amplitude. Other choices are <code>"phase"</code> 
+for phase data and <code>"volt"</code> for voltage or analog signal traces.</p></dd>
+
+<dt><code>referenced</code></dt><dd><p>whether to load data referenced or without reference</p></dd>
+
+<dt><code>func</code></dt><dd><p>experimental, function to apply to each electrodes</p></dd>
+
+<dt><code>quiet</code></dt><dd><p>whether to suppress output messages, default is no</p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>none. However the results are stored in public fields.</p>
+<p><hr>
+<a id="method-load_reference"></a></p><h3>Method <code>load_reference()</code></h3>
+<p>load references</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ECoGRepository$load_reference(ref_name, electrodes = NULL)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>ref_name</code></dt><dd><p>reference name</p></dd>
+
+<dt><code>electrodes</code></dt><dd><p>electrode numbers</p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>none</p>
+<p><hr>
+<a id="method-baseline"></a></p><h3>Method <code><a href='baseline.html'>baseline()</a></code></h3>
+<p>baseline signals (deprecated)</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ECoGRepository$baseline(from, to, electrodes = NULL, print.time = FALSE)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>from, to, electrodes, print.time</code></dt><dd><p>internally used</p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>data after baseline. Please use <code><a href='baseline.html'>baseline</a></code> 
+instead</p>
+
+
+
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+
+<span class='co'># Two ways to create instances</span>
+<span class='no'>repo</span> <span class='kw'>&lt;-</span> <span class='no'>ECoGRepository</span>$<span class='fu'>new</span>(<span class='st'>'demo/YAB'</span>)
+
+<span class='no'>subject</span> <span class='kw'>&lt;-</span> <span class='no'>Subject</span>$<span class='fu'>new</span>(<span class='kw'>project_name</span> <span class='kw'>=</span> <span class='st'>'demo'</span>, <span class='kw'>subject_code</span> <span class='kw'>=</span> <span class='st'>'YAB'</span>)
+<span class='no'>repo</span> <span class='kw'>&lt;-</span> <span class='no'>ECoGRepository</span>$<span class='fu'>new</span>(<span class='no'>subject</span>)
+
+<span class='co'># Create an instance without auto collecting references, only load </span>
+<span class='co'># interesting electrodes</span>
+<span class='no'>repo</span> <span class='kw'>&lt;-</span> <span class='no'>ECoGRepository</span>$<span class='fu'>new</span>(<span class='st'>'demo/YAB'</span>, <span class='kw'>autoload</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
+<span class='no'>repo</span>$<span class='fu'>load_electrodes</span>(<span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>14</span>,<span class='fl'>15</span>))
+
+<span class='co'># Create an instance with non-default reference</span>
+<span class='no'>repo</span> <span class='kw'>&lt;-</span> <span class='no'>ECoGRepository</span>$<span class='fu'>new</span>(<span class='st'>'demo/YAB'</span>, <span class='kw'>reference</span> <span class='kw'>=</span> <span class='st'>'bipolar'</span>)
+
+<span class='co'># Epoch data according to epoch file "epoch_YABaOutlier.csv" in meta folder</span>
+<span class='co'># epoch_name should be "epoch_(name).csv"</span>
+<span class='no'>repo</span>$<span class='fu'>epoch</span>(<span class='kw'>epoch_name</span> <span class='kw'>=</span> <span class='st'>'YABaOutlier'</span>, <span class='kw'>pre</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>post</span> <span class='kw'>=</span> <span class='fl'>2</span>,
+           <span class='kw'>electrodes</span> <span class='kw'>=</span> <span class='fl'>14</span>, <span class='kw'>referenced</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>data_type</span> <span class='kw'>=</span> <span class='st'>"power"</span>)
+<span class='no'>repo</span>$<span class='no'>power</span>
+<span class='co'>#&gt; Dimension:  287 x 16 x 301 x 1 </span>
+<span class='co'>#&gt; - Trial: 1, 2, 3, 4, 5, 6,...</span>
+<span class='co'>#&gt; - Frequency: 2, 12, 22, 32, 42...</span>
+<span class='co'>#&gt; - Time: -1, -0.99, -0.98,...</span>
+<span class='co'>#&gt; - Electrode: 14</span>
+
+}</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#format">Format</a></li>
+      <li><a href="#public-fields">Public fields</a></li>
+      <li><a href="#methods">Methods</a></li>
+      <li><a href="#examples">Examples</a></li>
     </ul>
 
+    <h2>Author</h2>
+    <p>Zhengjia Wang</p>
   </div>
 </div>
 

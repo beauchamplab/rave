@@ -1,4 +1,45 @@
-#' Wrapper class for tensor arrays
+
+#' @title R6 Class for large Tensor (Array) in Hybrid Mode
+#' @description can store on hard drive, and read slices of GB-level data in 
+#' seconds
+#' @examples 
+#' 
+#' # Create a tensor
+#' ts <- Tensor$new(
+#'   data = 1:18000000, c(3000,300,20), 
+#'   dimnames = list(A = 1:3000, B = 1:300, C = 1:20), 
+#'   varnames = c('A', 'B', 'C'))
+#' 
+#' # Size of tensor when in memory is usually large
+#' pryr::object_size(ts)
+#' #> 8.02 MB
+#' 
+#' # Enable hybrid mode
+#' ts$to_swap_now()
+#' 
+#' # Hybrid mode, usually less than 1 MB
+#' pryr::object_size(ts)
+#' #> 814 kB
+#' 
+#' # Subset data
+#' start1 <- Sys.time()
+#' subset(ts, C ~ C < 10 & C > 5, A ~ A < 10)
+#' #> Dimension:  9 x 300 x 4 
+#' #> - A: 1, 2, 3, 4, 5, 6,...
+#' #> - B: 1, 2, 3, 4, 5, 6,...
+#' #> - C: 6, 7, 8, 9
+#' end1 <- Sys.time(); end1 - start1
+#' #> Time difference of 0.188035 secs
+#' 
+#' # Join tensors
+#' ts <- lapply(1:20, function(ii){
+#'   Tensor$new(
+#'     data = 1:9000, c(30,300,1), 
+#'     dimnames = list(A = 1:30, B = 1:300, C = ii), 
+#'     varnames = c('A', 'B', 'C'), use_index = 2)
+#' })
+#' ts <- join_tensors(ts, temporary = TRUE)
+#' 
 #' @export
 Tensor <- R6::R6Class(
   classname = 'Tensor',
@@ -8,14 +49,30 @@ Tensor <- R6::R6Class(
     multi_files = FALSE
   ),
   public = list(
+    
+    #' @field dim dimension of the array
     dim = NULL,
+    
+    #' @field dimnames dimension names of the array
     dimnames = NULL,
-    use_index = F,
+    
+    #' @field use_index whether to use one dimension as index when storing data
+    #' as multiple files
+    use_index = FALSE,
+    
+    #' @field swap_file file or files to save data to
     swap_file = '',
-    hybrid = F,
+    
+    #' @field hybrid whether to allow data to be written to disk
+    hybrid = FALSE,
+    
+    #' @field last_used timestamp of the object was read
     last_used = NULL,
+    
+    #' @field temporary whether to remove the files once garbage collected
     temporary = TRUE,
 
+    #' @description release resource and remove files for temporary instances
     finalize = function(){
       if(self$temporary){
         # recycle at the end of session
@@ -24,6 +81,9 @@ Tensor <- R6::R6Class(
       }
     },
 
+    #' @description print out the data dimensions and snapshot
+    #' @param ... ignored
+    #' @return self
     print = function(...){
       cat('Dimension: ', paste(sprintf('%d', self$dim), collapse = ' x '), '\n')
 
@@ -43,12 +103,27 @@ Tensor <- R6::R6Class(
       invisible(self)
     },
 
+    #' @description Internally used, whether to use multiple files to cache 
+    #' data instead of one
+    #' @param mult logical
     .use_multi_files = function(mult){
       private$multi_files = isTRUE(mult)
     },
 
-    initialize = function(data, dim, dimnames, varnames, hybrid = F, use_index = F,
-                          swap_file = tempfile(), temporary = TRUE, multi_files = FALSE){
+    #' @description constructor
+    #' @param data numeric array
+    #' @param dim dimension of the array
+    #' @param dimnames dimension names of the array
+    #' @param varnames characters, names of \code{dimnames}
+    #' @param hybrid whether to enable hybrid mode
+    #' @param use_index whether to use the last dimension for indexing
+    #' @param temporary whether to remove temporary files when existing
+    #' @param multi_files if \code{use_index} is true, whether to use multiple
+    #' @param swap_file where to store the data in hybrid mode
+    #' files to save data by index
+    initialize = function(data, dim, dimnames, varnames, hybrid = FALSE,
+                          use_index = FALSE, swap_file = tempfile(), 
+                          temporary = TRUE, multi_files = FALSE){
 
       self$temporary = temporary
       # get attributes of data
@@ -142,23 +217,55 @@ Tensor <- R6::R6Class(
       # private$.data = data
       # self$last_used = Sys.time()
     },
-    subset = function(..., drop = FALSE, data_only = F, .env = parent.frame()){
+    
+    
+    #' @description subset tensor 
+    #' @param ... dimension slices
+    #' @param drop whether to apply \code{\link{drop}} on subset data
+    #' @param data_only whether just return the data value, or wrap them as a 
+    #' \code{Tensor} instance
+    #' @param .env environment where \code{...} is evaluated
+    #' @return the sliced data
+    subset = function(..., drop = FALSE, data_only = FALSE, 
+                      .env = parent.frame()){
       ..wrapper = list2env(self$dimnames, parent = .env)
       # expr = lapply(lazyeval::lazy_dots(...), function(x){x$env = .env; x})
       # class(expr) <- 'lazy_dots'
       # re = lazyeval::lazy_eval(expr, data = self$dimnames)
       quos = rlang::quos(...)
-      re = sapply(quos, function(quo){
+      nms = names(quos)
+      if(length(nms) == 0){
+        nms = rep('', length(quos))
+      }
+      quos = lapply(seq_along(nms), function(ii){
+        if( nms[[ii]] == '' ){
+          fml = rlang::eval_tidy(quos[[ii]], env = ..wrapper)
+          if(rlang::is_formula(fml)){
+            return(list(
+              name = as.character(fml[[2]]),
+              quo = fml[[3]]
+            ))
+          }
+        }
+        return(list(
+          name = nms[[ii]],
+          quo = quos[[ii]]
+        ))
+      })
+      
+      
+      re = lapply(quos, function(item){
         # Use eval_dirty!
         # quo = rlang::quo_set_env(quo, ..wrapper)
         # eval_tidy(quo)
-        dipsaus::eval_dirty(quo, env = ..wrapper)
-      }, simplify = F, USE.NAMES = T)
+        dipsaus::eval_dirty(item$quo, env = ..wrapper)
+      })
+      names(re) = sapply(quos, '[[', 'name')
 
       dims = self$dim
       varnames = names(self$dimnames)
 
-      tmp = self$dimnames; tmp = lapply(tmp, function(x){rep(T, length(x))})
+      tmp = self$dimnames; tmp = lapply(tmp, function(x){rep(TRUE, length(x))})
       sub_dimnames = self$dimnames
 
       for(i in 1:length(re)){
@@ -255,7 +362,14 @@ Tensor <- R6::R6Class(
 
 
     },
-    flatten = function(include_index = F, value_name = 'value'){
+    
+    
+    #' @description converts tensor (array) to a table (data frame)
+    #' @param include_index logical, whether to include dimension names
+    #' @param value_name character, column name of the value
+    #' @return a data frame with the dimension names as index columns and 
+    #' \code{value_name} as value column
+    flatten = function(include_index = FALSE, value_name = 'value'){
       nrow = prod(self$dim)
       re = data.frame(V = as.vector(self$get_data()))
       names(re) = value_name
@@ -276,8 +390,14 @@ Tensor <- R6::R6Class(
       re
     },
 
-    # Serialize tensor to a file and store it via write_fst
-    to_swap = function(use_index = F, delay = 0){
+    #' @description Serialize tensor to a file and store it via 
+    #' \code{\link[fst]{write_fst}}
+    #' @param use_index whether to use one of the dimension as index for faster
+    #' loading
+    #' @param delay if greater than 0, then check when last used, if not long 
+    #' ago, then do not swap to hard drive. If the difference of time is 
+    #' greater than \code{delay} in seconds, then swap immediately.
+    to_swap = function(use_index = FALSE, delay = 0){
       if(delay == 0){
         self$to_swap_now(use_index = use_index)
       }else{
@@ -288,14 +408,19 @@ Tensor <- R6::R6Class(
         }
       }
     },
-    to_swap_now = function(use_index = F){
-      if(!file.exists(self$swap_file)){
+    
+    #' @description Serialize tensor to a file and store it via 
+    #' \code{\link[fst]{write_fst}} immediately
+    #' @param use_index whether to use one of the dimension as index for faster
+    #' loading
+    to_swap_now = function(use_index = FALSE){
+      if(!all(file.exists(self$swap_file))){
         self$swap_file = tempfile()
         private$multi_files = FALSE
       }
       swap_file = self$swap_file
 
-      self$hybrid = T
+      self$hybrid = TRUE
       d = private$.data
       if(is.null(d)){
         return()
@@ -325,7 +450,13 @@ Tensor <- R6::R6Class(
       }
 
     },
-    get_data = function(drop = F, gc_delay = 3){
+    
+    
+    #' @description restore data from hard drive to memory
+    #' @param drop whether to apply \code{\link{drop}} to the data
+    #' @param gc_delay seconds to delay the garbage collection
+    #' @return original array
+    get_data = function(drop = FALSE, gc_delay = 3){
       self$last_used = Sys.time()
       d = NULL
       if(!is.null(private$.data)){
@@ -372,6 +503,11 @@ Tensor <- R6::R6Class(
 
       return(d)
     },
+    
+    #' @description set/replace data with given array
+    #' @param v the value to replace the old one, must have the same dimension
+    #' @param notice the a tensor is an environment. If you change at one place,
+    #' the data from all other places will change. So use it carefully.
     set_data = function(v){
       if(private$fst_locked){
         stop('This tensor instance is locked for read-only purpose. Cannot set data!')
@@ -382,6 +518,12 @@ Tensor <- R6::R6Class(
         self$to_swap_now(use_index = self$use_index)
       }
     },
+    
+    
+    #' @description apply mean, sum, or median to collapse data
+    #' @param keep which dimensions to keep
+    #' @param method \code{"mean"}, \code{"sum"}, or \code{"median"}
+    #' @return the collapsed data
     collapse = function(keep, method = 'mean'){
       sel = keep %in% seq_along(self$dim)
       if(any(!sel)){
@@ -425,7 +567,17 @@ Tensor <- R6::R6Class(
 
       return(d)
     },
-    operate = function(by, fun = .Primitive("/"), match_dim, mem_optimize = F, same_dimension = FALSE){
+    
+    
+    #' @description apply the tensor by anything along given dimension
+    #' @param by R object
+    #' @param fun function to apply
+    #' @param match_dim which dimensions to match with the data
+    #' @param mem_optimize optimize memory
+    #' @param same_dimension whether the return value has the same dimension as
+    #' the original instance
+    operate = function(by, fun = .Primitive("/"), match_dim, 
+                       mem_optimize = FALSE, same_dimension = FALSE){
       by_vector = as.vector(by)
       if(missing(match_dim)){
         return(self$get_data() / by_vector)
@@ -530,18 +682,13 @@ Tensor <- R6::R6Class(
     }
   ),
   active = list(
+    
+    #' @field varnames dimension names (read-only)
     varnames = function(){
       return(names(self$dimnames))
     },
-    # data = function(v){
-    #   if(missing(v)){
-    #     cat2('Tensor$data is deprecated, use Tensor$get_data() instead!', level = 'WARNING')
-    #     stop('Tensor$data is deprecated, use Tensor$set_data(data) instead!')
-    #     # self$get_data()
-    #   }else{
-    #     stop('Tensor$data is deprecated, use Tensor$set_data(data) instead!')
-    #   }
-    # },
+    
+    #' @field read_only whether to protect the swap files from being changed
     read_only = function(v){
       if(missing(v)){
         return(private$fst_locked)
@@ -620,18 +767,12 @@ content <- function(obj, ...){
   UseMethod('content')
 }
 
-#' Subset for Tensor Object
-#' @param x	object to be subsetted.
-#' @param ... further arguments to be passed to or from other methods.
-#' @param .env environtment to evaluate in
+
 #' @export
 subset.Tensor <- function(x, ..., .env = parent.frame()){
   x$subset(...,.env = .env)
 }
 
-#' Convert Tensors to Vector
-#' @param x an R object.
-#' @param ... passed from or to other methods.
 #' @export
 as.vector.Tensor <- function(x, ...){
   d = x$get_data()

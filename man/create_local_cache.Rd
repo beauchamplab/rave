@@ -2,7 +2,7 @@
 % Please edit documentation in R/io-subject.R
 \name{create_local_cache}
 \alias{create_local_cache}
-\title{Create local cache for fast loadings}
+\title{Create local cache to speed up loading speed}
 \usage{
 create_local_cache(project_name, subject_code, epoch, time_range)
 }
@@ -16,5 +16,5 @@ create_local_cache(project_name, subject_code, epoch, time_range)
 \item{time_range}{time range to cache}
 }
 \description{
-Create local cache for fast loadings
+Create local cache to speed up loading speed
 }

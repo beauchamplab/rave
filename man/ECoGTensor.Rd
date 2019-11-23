@@ -2,11 +2,14 @@
 % Please edit documentation in R/class-ECoGTensor.R
 \name{ECoGTensor}
 \alias{ECoGTensor}
-\title{ECoG Tensor class inherit from Tensor}
+\title{ECoG Tensor class inherit from \code{\link[rave]{Tensor}}}
 \description{
-ECoG Tensor class inherit from Tensor
-
-ECoG Tensor class inherit from Tensor
+Four-mode tensor (array) especially designed for 
+\code{iEEG/ECoG} data. The Dimension names are: \code{Trial}, 
+\code{Frequency}, \code{Time}, and \code{Electrode}.
+}
+\author{
+Zhengjia Wang
 }
 \section{Super class}{
 \code{\link[rave:Tensor]{rave::Tensor}} -> \code{ECoGTensor}
@@ -38,21 +41,36 @@ ECoG Tensor class inherit from Tensor
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-flatten"></a>}}
 \subsection{Method \code{flatten()}}{
+converts tensor (array) to a table (data frame)
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ECoGTensor$flatten(include_index = T, value_name = "value")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{ECoGTensor$flatten(include_index = TRUE, value_name = "value")}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{include_index}}{logical, whether to include dimension names}
+
+\item{\code{value_name}}{character, column name of the value}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+a data frame with the dimension names as index columns and 
+\code{value_name} as value column
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
 \subsection{Method \code{new()}}{
+constructor
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ECoGTensor$new(
   data,
   dim,
   dimnames,
   varnames,
-  hybrid = F,
+  hybrid = FALSE,
   swap_file = tempfile(),
   temporary = TRUE,
   multi_files = FALSE,
@@ -61,6 +79,37 @@ ECoG Tensor class inherit from Tensor
 )}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{data}}{array or vector}
+
+\item{\code{dim}}{dimension of data, mush match with \code{data}}
+
+\item{\code{dimnames}}{list of dimension names, equal length as \code{dim}}
+
+\item{\code{varnames}}{names of \code{dimnames}, recommended names are: 
+\code{Trial}, \code{Frequency}, \code{Time}, and \code{Electrode}}
+
+\item{\code{hybrid}}{whether to enable hybrid mode to reduce RAM usage}
+
+\item{\code{swap_file}}{if hybrid mode, where to store the data}
+
+\item{\code{temporary}}{whether to clean up the space when exiting R session}
+
+\item{\code{multi_files}}{logical, whether to use multiple files instead of 
+one giant file to store data}
+
+\item{\code{use_index}}{logical, when \code{multi_files} is true, whether use 
+index dimension as partition number}
+
+\item{\code{...}}{further passed to \code{\link[rave]{Tensor}} constructor}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+an \code{ECoGTensor} instance
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}
