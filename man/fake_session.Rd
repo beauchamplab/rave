@@ -2,13 +2,18 @@
 % Please edit documentation in R/utils-shiny.R
 \name{fake_session}
 \alias{fake_session}
-\title{internally used to cheat RAVE}
+\title{Fake 'shiny' Session for Debug Purpose}
 \usage{
-fake_session(rave_id = "__fake_session__")
+fake_session(rave_id = "__fake_session__", id = NULL)
 }
 \arguments{
 \item{rave_id}{internally used}
+
+\item{id}{module ID, used to create scope, will passed to \code{\link[shiny]{NS}}}
+}
+\value{
+Fake shiny session for debug purpose
 }
 \description{
-internally used to cheat RAVE
+Fake 'shiny' Session for Debug Purpose
 }

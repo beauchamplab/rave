@@ -139,15 +139,35 @@ add_to_session <- function(
   return(NULL)
 }
 
-#' internally used to cheat RAVE
+#' Fake 'shiny' Session for Debug Purpose
 #' @param rave_id internally used
-fake_session <- function(rave_id = '__fake_session__'){
+#' @param id module ID, used to create scope, will passed to \code{\link[shiny]{NS}}
+#' @return Fake shiny session for debug purpose
+#' @export
+fake_session <- function(rave_id = '__fake_session__', id = NULL){
+  self_id = id
   fakesession = new.env()
+  
+  shiny = asNamespace('shiny')
+  list2env(as.list(shiny$createMockDomain()), fakesession)
+  
   fakesession$sendInputMessage = function(inputId, message){
     return(message)
   }
   fakesession$userData = new.env(parent = emptyenv())
   fakesession$userData$rave_id = rave_id
+  fakesession$ns = shiny::NS(id)
+  
+  fakesession$makeScope = function(id = NULL){
+    if( identical(self_id, id) ){
+      return(fakesession)
+    }else{
+      re = fake_session(rave_id = rave_id, id = id)
+      re$userData = fakesession$userData
+      return(re)
+    }
+  }
+  
   fakesession
 }
 
@@ -188,7 +208,7 @@ get_fake_updated_message <- function(..., .args = list(), .func = NULL){
 
 
 
-#' Customized shiny Elements
+#' Customized Shiny Elements
 #' @param inputId character, input id
 #' @param width integer from 1-12
 #' @param ... passed to \code{\link[shiny]{uiOutput}}
@@ -196,6 +216,7 @@ get_fake_updated_message <- function(..., .args = list(), .func = NULL){
 customizedUI <- function(inputId, width = 12L, ...){
   shiny::uiOutput(inputId, ...)
 }
+
 
 
 div_elastic <- function(css_selector, any = T){
@@ -323,7 +344,7 @@ comp_parser <- function(){
               local_data$has_results = t
             }else if( !inputId %in% exec_env$manual_inputIds ){
               # need to run rave_execute
-              cat2('Input ', inputId, ' is changed')
+              # cat2('Input ', inputId, ' is changed')
               local_data$last_input = t
             }
           }
@@ -559,7 +580,7 @@ comp_parser <- function(){
       re = parsers[['.default_parser']](expr, env)
       outputId = re$outputId
       re$observers = function(input, output, session, local_data, exec_env){
-        output[[outputId]] = do.call(do.call('::', list('DT', 'renderDT')), args = list(quote({
+        output[[outputId]] = DT::renderDT({
           local_data$show_results
           if (isolate(local_data$has_data)) {
             func = get(outputId, envir = exec_env$param_env,
@@ -568,7 +589,7 @@ comp_parser <- function(){
               func()
             }
           }
-        })))
+        })
       }
       return(re)
     },
@@ -576,7 +597,7 @@ comp_parser <- function(){
       re = parsers[['.default_parser']](expr, env)
       outputId = re$outputId
       re$observers = function(input, output, session, local_data, exec_env){
-        output[[outputId]] = do.call(do.call('::', list('DT', 'renderDataTable')), args = list(quote({
+        output[[outputId]] = DT::renderDataTable({
           local_data$show_results
           if (isolate(local_data$has_data)) {
             func = get(outputId, envir = exec_env$param_env,
@@ -585,7 +606,7 @@ comp_parser <- function(){
               func()
             }
           }
-        })))
+        })
       }
       return(re)
     }
@@ -780,19 +801,16 @@ comp_parser <- function(){
       outputId = re$outputId
       
       re$observers = function(input, output, session, local_data, exec_env){
-        output[[outputId]] = do.call(
-          do.call('::', list('threeBrain', 'renderBrain')), 
-          args = list(quote({
-            local_data$show_results
-            if (isolate(local_data$has_data)) {
-              func = get(outputId, envir = exec_env$param_env,
-                         inherits = T)
-              if (is.function(func)) {
-                func()
-              }
+        output[[outputId]] = threeBrain::renderBrain({
+          local_data$show_results
+          if (isolate(local_data$has_data)) {
+            func = get(outputId, envir = exec_env$param_env,
+                       inherits = TRUE)
+            if (is.function(func)) {
+              func()
             }
-          }))
-        )
+          }
+        })
       }
       re$margin = -10
       return(re)

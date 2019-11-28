@@ -3,65 +3,109 @@
 \name{rave-cache}
 \alias{rave-cache}
 \alias{cache}
+\alias{cache.default}
+\alias{cache.rave_running}
+\alias{cache.rave_running_local}
+\alias{cache_input}
 \alias{clear_cache}
-\alias{remove_cache}
-\alias{has_cache}
 \title{Cache R Objects with Different levels}
 \usage{
 cache(
   key,
   val,
   name,
-  module_id,
   replace = FALSE,
-  across_instance = TRUE,
-  across_module = TRUE,
-  persist = FALSE
+  global = FALSE,
+  persist = FALSE,
+  test = FALSE,
+  ...
 )
 
-clear_cache(levels = 1, module_id)
+\method{cache}{default}(
+  key,
+  val,
+  name,
+  replace = FALSE,
+  global = FALSE,
+  persist = FALSE,
+  test = FALSE,
+  ...
+)
 
-remove_cache(name, module_id)
+\method{cache}{rave_running}(
+  key,
+  val,
+  name,
+  replace = FALSE,
+  global = FALSE,
+  persist = FALSE,
+  test = FALSE,
+  ...
+)
 
-has_cache(name, module_id, key)
+\method{cache}{rave_running_local}(key, val, ...)
+
+cache_input(inputId, val = NULL, read_only = TRUE, ...)
+
+clear_cache(levels = 1)
 }
 \arguments{
 \item{key}{any R object, a named list would be the best.}
 
 \item{val}{value to cache, if key exists, then value will not be evaluated nor saved}
 
-\item{name}{name of the dataset}
-
-\item{module_id}{character, used if object not shared across modules}
+\item{name, inputId}{character name of the dataset or input}
 
 \item{replace}{if true, force replace the cached object with current one}
 
-\item{across_instance}{logical, whether can be accessed across shiny session}
+\item{global}{whether to cache the variable in global environment. If true,
+then the variable will be accessable from other instances and modules.}
 
-\item{across_module}{logical, whether can be accessed across 'RAVE' modules}
+\item{persist}{logical, whether persist on the hard-disk, only used when 
+\code{global=FALSE}, the persisted data will be used by each modules}
 
-\item{persist}{logical, whether persist on the hard-disk}
+\item{test, read_only}{whether not to save the value if cache is not found}
+
+\item{...}{ignored}
 
 \item{levels}{levels when clear the cache}
+}
+\value{
+Cached value, or \code{val}. If cache and \code{val} are both 
+missing, then return \code{NULL}.
 }
 \description{
 Cache R Objects with Different levels
 }
 \examples{
 
-print(cache('a', 1, name = 'data')) # returns 1
-print(cache('a', 2, name = 'data')) # still returns 1
+# global can be set to false within RAVE modules
+print(cache('a', 1, name = 'data', global = TRUE)) # returns 1
+print(cache('a', 2, name = 'data', global = TRUE)) # still returns 1
 
-# clear cache
-clear_cache(levels = 3)
-print(cache('a', 2, name = 'data')) # Now returns 2
+# clear cache (for global=TRUE)
+clear_cache(levels = 1:3)
+print(cache('a', 2, name = 'data', global = TRUE)) # Now returns 2
 
-# Not run because a is cached
-print(cache('a', 2, name = 'data'))
-print(cache('a', {Sys.sleep(10); 1}, name = 'data'))
+# Not run `Sys.sleep` because a is cached
+print(cache('a', 2, name = 'data', global = TRUE))
+print(cache('a', {Sys.sleep(10); 1}, name = 'data', global = TRUE))
 
-# Persist on hard-disk
-cache('aa', 1:1000000, name = 'junk', replace = TRUE, persist = TRUE)
-has_cache('junk')                   # Has data called 'junk'
-has_cache('junk', key = 'aaa')      # but no data called 'junk' matching the key
+# get data without key
+cache(name = 'data', global = TRUE)
+
+# clear cache that is global-only
+clear_cache(levels = 2)
+
+# Test (test=TRUE) if cache exists, if not, return value but no save
+cache(name = 'abracadabra', val = 'no cache', global = TRUE, test = TRUE)
+cache(name = 'abracadabra', global = TRUE)
+
+# cache module inputs
+\dontrun{
+# Need to run in package module environment
+cache_input('abracadabra', 'no-magic', read_only = TRUE)  
+}
+
+
 }

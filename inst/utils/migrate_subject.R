@@ -53,7 +53,7 @@ load_data = function(block, electrode){
 # Step 2: create subject
 utils = rave_preprocess_tools()
 
-assertthat::assert_that(
+rave:::stopifnot2(
   !utils$has_raw_cache(),
   msg = 'WARNING!!! You already have the subject!')
 

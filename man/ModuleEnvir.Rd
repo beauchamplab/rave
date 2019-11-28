@@ -21,6 +21,8 @@ module
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
+\item{\code{cache_env}}{cache environment for module}
+
 \item{\code{module_id}}{module ID, unique}
 
 \item{\code{label_name}}{corresponding module name}
@@ -40,7 +42,10 @@ module
 \item{\code{parent_env}}{parent environment of the module, usually global 
 environment or package environment}
 
-\item{\code{from_package}}{whether the module is compiled from another R package}
+\item{\code{from_package}}{whether the module is compiled from another R 
+package. This value is required to be true since \code{"rave-0.1.9"}.}
+
+\item{\code{package_name}}{which package does the module belong to?}
 
 \item{\code{sidebar_width}}{input panel width, from 1 to 11}
 }
@@ -54,7 +59,6 @@ environment or package environment}
 \item \href{#method-new}{\code{ModuleEnvir$new()}}
 \item \href{#method-get_or_new_exec_env}{\code{ModuleEnvir$get_or_new_exec_env()}}
 \item \href{#method-load_script}{\code{ModuleEnvir$load_script()}}
-\item \href{#method-cache}{\code{ModuleEnvir$cache()}}
 \item \href{#method-render_ui}{\code{ModuleEnvir$render_ui()}}
 \item \href{#method-clean}{\code{ModuleEnvir$clean()}}
 }
@@ -165,31 +169,6 @@ load and compile script into registered
 }
 \subsection{Returns}{
 none
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cache"></a>}}
-\subsection{Method \code{cache()}}{
-(deprecated) cache data
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ModuleEnvir$cache(key, val, session, replace = FALSE)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{key}}{list of R objects}
-
-\item{\code{val}}{value to cache}
-
-\item{\code{session}}{shiny session}
-
-\item{\code{replace}}{whether to replace cache even if it exists}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-cached value
 }
 }
 \if{html}{\out{<hr>}}

@@ -7,8 +7,8 @@
 #' @param simplify_header hide header at startup?
 #' @param ... other parameters like \code{test.mode} for module debugging
 #' @export
-init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
-                     theme = "purple", disable_sidebar = FALSE, simplify_header = FALSE, ...){
+init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE,
+                     theme = "red", disable_sidebar = FALSE, simplify_header = FALSE, ...){
   options(shiny.maxRequestSize=1024^3)
   # register_compoundInput()
   rave_setup_workers()
@@ -20,9 +20,9 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
   test.mode = list(...)[['test.mode']]
   if(is.null(test.mode)) {
     if(is.null(modules)){
-      test.mode = rave_options('test_mode')
+      test.mode = isTRUE(rave_options('test_mode'))
     }else{
-      test.mode = F
+      test.mode = FALSE
     }
   }
   if(!length(modules)){
@@ -170,20 +170,41 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
     
     # unlist(modules) will flatten modules but it's still a list
     module_ids = stringr::str_to_upper(sapply(unlist(modules), function(m){m$module_id}))
-    update_variable = function(module_id, variable_name = NULL, value = NULL, flush = T, ...){
-      if(is.null(variable_name)){
-        return()
+    session$userData$rave_module = function(module_id){
+      module_id = stringr::str_to_upper(module_id)
+      if(module_id %in% module_ids){
+        for(m in unlist(modules)){
+          if(stringr::str_to_upper(m$module_id) == module_id){
+            return(m)
+          }
+        }
       }
+      return(NULL)
+    }
+    update_variable = function(module_id, variable_name = NULL, value = NULL, 
+                               flush = TRUE, ...){
+      
+      if(is.null(variable_name)){ return() }
+      sidebar_id = stringr::str_to_upper(shiny::isolate(input$sidebar))
       tryCatch({
         module_id = stringr::str_to_upper(module_id)
         m = unlist(modules)[module_ids %in% module_id]
+        
         if(length(m) == 1){
+          
           m = m[[1]]
           e = m$get_or_new_exec_env()
-          e$cache_input(inputId = variable_name, val = value, read_only = F)
-          if(flush && module_id == stringr::str_to_upper(isolate(input$sidebar))){
+          local({
+            rave_context(senv = e)
+            
+            cache_input(inputId = variable_name, val = value, 
+                        read_only = FALSE)
+            
+          })
+          
+          if(flush && module_id == sidebar_id){
             # When target module is not the same as current module, we need manually refresh current module
-            e$input_update(input = list(), init = T)
+            e$input_update(input = list(), init = TRUE)
           }
         }
       }, error = function(e){
@@ -294,7 +315,9 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = T,
     
     observe({
       if(global_reactives$has_data){
-        global_reactives$execute_module = input$sidebar
+        current_module_id = input$sidebar
+        global_reactives$execute_module = current_module_id
+        session$userData$rave_current_module_id = current_module_id
         shinyjs::hide(id = '__rave__mask__', anim = T, animType = 'slide')
         shinyjs::removeClass(selector = 'body', class = "rave-noscroll")
       }else{

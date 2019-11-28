@@ -25,10 +25,8 @@ ExecEnvir <- R6::R6Class(
   portable = FALSE,
   cloneable = TRUE,
   private = list(
-    module_env = NULL,
     data_env = NULL,
     session = NULL,
-    cache_env = NULL,
     inputs = NULL,
     outputs = NULL,
     update = NULL,
@@ -36,6 +34,26 @@ ExecEnvir <- R6::R6Class(
     executes = NULL
   ),
   public = list(
+    #' @field .__rave_context__. context string for current instance, indicating
+    #' whether the module is running locally (public, but internally used)
+    .__rave_context__. = 'rave_running_local',
+    
+    #' @field .__rave_package__. current package name to run (public, 
+    #' but internally used)
+    .__rave_package__. = character(0),
+    
+    #' @field .__rave_module__. module ID (public, but internally used)
+    .__rave_module__. = character(0),
+    
+    #' @field .__rave_module_instance__. self instance (public, but internally
+    #' used)
+    .__rave_module_instance__. = NULL,
+    
+    #' @field module_env \code{\link[rave]{ModuleEnvir}} instance
+    module_env = NULL,
+    
+    #' @field cache_env cache environment to store key-value pairs locally
+    cache_env = NULL,
     
     #' @field parent_env the parent/top environment of the module, usually 
     #' global environment or some name-space if the module is implemented as 
@@ -115,6 +133,10 @@ ExecEnvir <- R6::R6Class(
     #' @field local_reactives shiny local \code{reactives}, internal use only
     local_reactives = NULL,
     
+    #' @field internal_reactives internal reactives to control some elements, 
+    #' nternal use only
+    internal_reactives = NULL,
+    
     #' @field ready_functions functions to run when the module is ready. The 
     #' functions are called at the last step of \code{\link[rave]{shinirize}}. 
     #' Usually it's used along with \code{eval_when_ready}, to make sure  
@@ -135,7 +157,7 @@ ExecEnvir <- R6::R6Class(
     #' @return none
     finalize = function(){
       self$clean()
-      cat2(sprintf('[%s] Runtime Environment Removed.', private$module_env$module_id))
+      cat2(sprintf('[%s] Runtime Environment Removed.', self$module_env$module_id))
     },
     
     #' @description print variables in different layers (environment)
@@ -166,7 +188,9 @@ ExecEnvir <- R6::R6Class(
       clear_env(self$param_env)
       clear_env(self$runtime_env)
       # clear_env(self$static_env)
-      clear_env(private$cache_env)
+      if(!is.null(self$cache_env)){
+        self$cache_env$reset()
+      }
       invisible()
     },
     
@@ -178,6 +202,10 @@ ExecEnvir <- R6::R6Class(
                           parent_env = NULL){
       private$session = session
       self$ready_functions = list()
+      self$internal_reactives = shiny::reactiveValues()
+      self$cache_env = dipsaus::session_map()
+      self$cache_env$has_locker = FALSE
+      self$.__rave_module_instance__. = self
 
       # parent_env should be an unlocked environment that can be active binded
       if(!is.environment(parent_env)){
@@ -216,8 +244,6 @@ ExecEnvir <- R6::R6Class(
       self$parse_env = new.env(parent = self$runtime_env)
 
 
-      private$cache_env = new.env()
-      private$cache_env$.keys = c()
       self$ns = base::I
 
       bind_wrapper_env(self, self$wrapper_env)
@@ -228,7 +254,7 @@ ExecEnvir <- R6::R6Class(
         }
 
         # Try to use the file under the same dir
-        dir = dirname(private$module_env$script_path)
+        dir = dirname(self$module_env$script_path)
         tmp_file = file.path(dir, file)
         if(file.exists(tmp_file)){
           cat2('Try to source from [', tmp_file, ']')
@@ -252,18 +278,19 @@ ExecEnvir <- R6::R6Class(
 
       # advanced usage
       self$wrapper_env$getDefaultReactiveDomain = function(){
-        id = private$module_env$module_id
-        if(is.null(id) || !is(private$session, 'ShinySession')){
-          stop('No module detected, please run "self$register_module(...)" to register module.')
-        }
+        id = self$module_env$module_id
         private$session$makeScope(id)
-        private$session
       }
 
       self$wrapper_env$getDefaultReactiveInput = function(){
         session = self$wrapper_env$getDefaultReactiveDomain()
         input = NULL
-        if(!is.null(session) && is(session, 'session_proxy')){
+        
+        if(inherits(session, 'ShinySession')){
+          session = session$makeScope(self$module_env$module_id)
+        }
+        
+        if(inherits(session, 'session_proxy')){
           input = session$input
         }else{
           stop('No module detected, please run "self$register_module(...)" to register module.')
@@ -274,7 +301,12 @@ ExecEnvir <- R6::R6Class(
       self$wrapper_env$getDefaultReactiveOutput = function(){
         session = self$wrapper_env$getDefaultReactiveDomain()
         output = NULL
-        if(!is.null(session) && is(session, 'session_proxy')){
+        
+        if(inherits(session, 'ShinySession')){
+          session = session$makeScope(self$module_env$module_id)
+        }
+        
+        if(inherits(session, 'session_proxy')){
           output = session$output
         }else{
           stop('No module detected, please run "self$register_module(...)" to register module.')
@@ -283,7 +315,7 @@ ExecEnvir <- R6::R6Class(
       }
 
 
-      lockEnvironment(self$wrapper_env)
+      # lockEnvironment(self$wrapper_env)
 
     },
     
@@ -312,31 +344,15 @@ ExecEnvir <- R6::R6Class(
       # deep clone, but sharing the data, module environment
       fakesession = fake_session(rave_id = session_id)
 
-      m = private$module_env
+      m = self$module_env
       new_exec = m$get_or_new_exec_env(
         parent_env = data_env, session = fakesession, new = T
       )
 
-      # if(m$externalpackage){
-      #   env = do.call("loadNamespace", list(package = "RAVEbeauchamplab"))
-      #   if (!environmentIsLocked(new_exec$static_env)) {
-      #     ..rdata_file = system.file("vars.RData", package = "RAVEbeauchamplab")
-      #     base::load(file = ..rdata_file, envir = new_exec$static_env)
-      #     lapply(names(as.list(env, all.names = T)), function(nm) {
-      #       fun = env[[nm]]
-      #       if (is.function(fun)) {
-      #         environment(fun) = new_exec$runtime_env
-      #       }
-      #       new_exec$static_env[[nm]] = fun
-      #     })
-      #   }
-      # }
-
-
 
       # migrate param_env
-      list2env(as.list(self$param_env, all.names = T), new_exec$param_env)
-      new_exec$private$module_env$load_script(session = fakesession)
+      list2env(as.list(self$param_env, all.names = TRUE), new_exec$param_env)
+      new_exec$self$module_env$load_script(session = fakesession)
 
       return(new_exec)
     },
@@ -380,12 +396,43 @@ ExecEnvir <- R6::R6Class(
     #' to create runtime environment, which is \code{ExecEnvir}
     #' @return none
     register_module = function(module_env){
-      if(!is.null(private$module_env)){
+      
+      if(!is.null(self$module_env)){
         cat2('Overriding Module Environment.', level = 'WARNING')
       }
-      private$module_env = module_env
+      
+      self$module_env = module_env
       self$ns = shiny::NS(module_env$module_id)
       
+      # Set context
+      if( module_env$from_package ){
+        self$.__rave_package__. = module_env$package_name
+      }else{
+        cat2('Module is not from a known package, try to read from current context...', level = 'INFO')
+        ctx = rave_context(disallowed_context = 'default')
+        self$.__rave_package__. = ctx$package
+      }
+      
+      self$.__rave_module__. = module_env$module_id
+      
+      self$register_context(self$.__rave_context__.)
+      
+      invisible()
+    },
+    
+    #' @description Register 'RAVE' context for current environment 
+    #' (internally used)
+    #' @param context context string to indicate whether the module is running 
+    #' locally
+    #' @return None
+    register_context = function(context = c('rave_running', 'rave_running_local')){
+      context = match.arg(context)
+      self$.__rave_context__. = context
+      rave_context(senv = self, tenv = self$wrapper_env)
+      rave_context(senv = self, tenv = self$static_env)
+      rave_context(senv = self, tenv = self$param_env)
+      rave_context(senv = self, tenv = self$runtime_env)
+      rave_context(senv = self, tenv = self$parse_env)
       invisible()
     },
     
@@ -765,7 +812,7 @@ ExecEnvir <- R6::R6Class(
 
             packages = stringr::str_match(search(), '^package:(.+)$')[,2] 
             packages = packages[!is.na(packages)]
-            packages = unique(packages, private$module_env$packages)
+            packages = unique(packages, self$module_env$packages)
 
             self$param_env$..rave_future_obj =
               future::future({
@@ -789,71 +836,6 @@ ExecEnvir <- R6::R6Class(
       }
     },
     
-    #' @description clear cached objects
-    #' @param levels passed to \code{\link[rave]{clear_cache}}. Only level 1 and
-    #' 2 are allowed
-    #' @return none
-    clear_cache = function(levels = 1){
-      module_id = private$module_env$module_id
-      levels = levels[!levels %in% c(3,4)]
-      rave::clear_cache(levels = levels, module_id = module_id)
-    },
-    
-    #' @description create cache
-    #' @param key any R object
-    #' @param val value to associate with key
-    #' @param name cache name, unique
-    #' @param replace whether to force replace even if the cache exists
-    #' @param persist whether to persist on hard drive
-    #' @param across_instance whether to share across shiny session
-    #' @param across_module whether to share across modules
-    #' @param ... ignored
-    #' @return value if no cache is found, or the cached value
-    cache = function(key, val, name, replace = FALSE, persist = FALSE,
-                     across_instance = FALSE, across_module = FALSE, ...){
-      module_id = private$module_env$module_id
-      rave::cache(key = key, val = val, name = name, module_id = module_id, 
-                  replace = replace, persist = persist, 
-                  across_instance = across_instance, 
-                  across_module = across_module)
-      
-    },
-    
-    #' @description cache input, internally used
-    #' @param inputId input ID, character
-    #' @param val the value of the input
-    #' @param read_only whether to read or to replace
-    #' @param sig signature, usually automatically generated
-    #' @param module_id module ID, usually automatically generated, unless
-    #' obtaining from other module, then \code{read_only} is forced to be TRUE
-    #' @param ... ignored
-    #' @return  the cached input value
-    cache_input = function(inputId, val = NULL, read_only = TRUE, sig = NULL,
-                           module_id, ...){
-      
-      if(missing(module_id)){
-        module_id = private$module_env$module_id
-      }else if(module_id != private$module_env$module_id){
-        read_only = TRUE
-      }
-      
-      sig %?<-% add_to_session(private$session)
-      
-      key = list(
-        type = '.rave-inputs-Dipterix',
-        inputId = inputId,
-        sig = sig
-      )
-      name = sprintf('.rave-inputs-Dipterix--%s--%s', module_id, inputId)
-      
-      rave::cache(key = key, val = val, name = name, module_id = module_id, 
-                  replace = !read_only, persist = FALSE, 
-                  across_instance = FALSE, 
-                  across_module = TRUE)
-      
-    },
-    
-    
     #' @description (experimental) cache R expression in browser 
     #' \code{localStorage}
     #' @param expr R expression
@@ -865,7 +847,7 @@ ExecEnvir <- R6::R6Class(
       children_keys = children_keys[!children_keys %in% current_key]
       # children_keys = unique(c(current_key, children_keys))
 
-      module_id = private$module_env$module_id
+      module_id = self$module_env$module_id
 
       lapply(children_keys, function(storage_key){
         private$session$sendCustomMessage('rave_set_storage', list(
@@ -905,22 +887,22 @@ ExecEnvir <- R6::R6Class(
         more_btns[['async']] = NULL
       }
 
-
-      if(length(more_btns)){
-        names(more_btns) = NULL
-        more_ui = box(
-          title = 'More...',
-          collapsed = T,
-          tags$ul(
-            class = 'rave-grid-inputs',
-            tagList(more_btns)
-          ),
-          width = 12,
-          collapsible = T
-        )
-      }else{
-        more_ui = NULL
-      }
+      more_ui = NULL
+      
+      # TODO: do we really want more...? 
+      # if(length(more_btns)){
+      #   names(more_btns) = NULL
+      #   more_ui = box(
+      #     title = 'More...',
+      #     collapsed = T,
+      #     tags$ul(
+      #       class = 'rave-grid-inputs',
+      #       tagList(more_btns)
+      #     ),
+      #     width = 12,
+      #     collapsible = T
+      #   )
+      # }
 
 
       if(sidebar_width == 0){

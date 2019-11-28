@@ -246,10 +246,10 @@ test_that('Function rave_prepare with demo/YAB', {
     
     data_env$module_tools = rave_module_tools(data_env = data_env)
     
-    expect_null(rave:::rave_checks('raw power', 'referenced power'))
+    expect_null(rave:::rave_checks('raw power', 'referenced power')$quos)
     
     data_env$module_tools$clean(items = 'power')
-    expect_null(rave:::rave_checks('raw power'))
+    expect_null(rave:::rave_checks('raw power')$quos)
     
     data_env$module_tools$clean(items = 'raw_power')
     # No

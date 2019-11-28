@@ -364,6 +364,7 @@ check_epoch <- function(subject, epoch_name){
 #' Check if data is loaded for current module
 #' @param ... see details
 #' @param data same as \code{...}, but can be a vector
+#' @param .raise_error whether to raise error if data is missing
 #' @details This function checks whether "ECoG" data is loaded. The format is: 
 #' \code{"DATA+(blankspace)+TYPE"}. \code{"DATA"} can be "power" (wavelet 
 #' transform amplitude), "phase" (complex angle), or "volt"/"voltage" (Before 
@@ -372,23 +373,17 @@ check_epoch <- function(subject, epoch_name){
 #' bipolar reference). For voltage data, there is one more special type 
 #' "full" which loads voltage data for all electrodes.
 #' @export
-rave_checks <- function(..., data = NULL){
+#' @name rave_checks
+NULL
+.rave_checks <- function(..., data = NULL, .raise_error = TRUE){
   data = unlist(c(data, list(...)))
   if(!length(data)){
     return()
   }
-  is_reactive = F
-  if(is.null(getDefaultReactiveDomain())){
-    `.__internal_reactives__.` = list()
-    is_reactive = T
-  }
-  
   rave_data = getDefaultDataRepository()
   module_tools = rave_data$module_tools
   preload_info = rave_data$preload_info
   subject = rave_data$subject
-  
-  
   n1 = nrow(module_tools$get_meta(name = 'trials'))
   n2 = length(preload_info$frequencies)
   n3 = length(preload_info$time_points)
@@ -456,6 +451,7 @@ rave_checks <- function(..., data = NULL){
       }
       rm(dat)
     }
+  
   }
   
   if(length(quos)){
@@ -463,20 +459,51 @@ rave_checks <- function(..., data = NULL){
     order = order(msg)
     msg = msg[order]
     quos = quos[order]
-    # show modal
-    `.__internal_reactives__.`[['miss_data']] = T
-    `.__internal_reactives__.`[['miss_data_message']] = msg
-    `.__internal_reactives__.`[['miss_data_comps']] = quos
-    stop('Needs to load data')
+    
+    if( .raise_error ){
+      cat2('Data is not loaded: \n\t', paste(msg, collapse = '\n\t'), level = 'FATAL')
+    }else{
+      cat2('Data is not loaded: \n\t', paste(msg, collapse = '\n\t'), level = 'ERROR')
+    }
+  }
+  
+  list(
+    msg = msg,
+    quos = quos
+  )
+}
+
+#' @rdname rave_checks
+#' @export
+rave_checks <- rave_context_generics('rave_checks', .rave_checks)
+#' @export
+rave_checks.default <- function(...){
+  if(!any_subject_loaded()){
+    stop('Please run rave_prepare(...) first.')
+  }
+  .rave_checks(...)
+}
+#' @export
+rave_checks.rave_running_local <- function(...){}
+#' @export
+rave_checks.rave_module_debug <- function(...){
+  rave_context()
+  mount_demo_subject()
+  .rave_checks(...)
+  invisible()
+}
+#' @export
+rave_checks.rave_running <- function(..., .raise_error = FALSE){
+  ctx = rave_context()
+  res = .rave_checks(..., .raise_error = FALSE)
+  
+  if(length(res$quos)){
+    ctx$instance$internal_reactives$miss_data = TRUE
+    ctx$instance$internal_reactives$miss_data_message = res$msg
+    ctx$instance$internal_reactives$miss_data_comps = res$quos
+    rave_failure('Needs to load data', level = 'INFO')
   }else{
-    `.__internal_reactives__.`[['miss_data']] = F
+    ctx$instance$internal_reactives$miss_data = FALSE
   }
-  
-  if(is_reactive){
-    print(`.__internal_reactives__.`)
-  }
-  
-  return()
-  
 }
 

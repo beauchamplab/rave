@@ -42,11 +42,6 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
     self$local_reactives
   }
   
-  w$eval_when_ready = function(FUN){
-    if(is.function(FUN)){
-      self$ready_functions[[length(self$ready_functions) + 1]] = FUN
-    }
-  }
   
   w$get_client_size = function(){
     if(is.reactivevalues(self$global_reactives)){
@@ -90,7 +85,7 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
   }
   
   w$reload_module = function(){
-    self$clear_cache()
+    clear_cache(levels = 1)
     self$input_update(list(), init = TRUE)
   }
   w$get_input_ids = function(render_inputs = FALSE, manual_inputs = FALSE){
@@ -245,18 +240,12 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
     w$rave_outputs = self$rave_outputs
     w$rave_updates = self$rave_updates
     w$rave_execute = self$rave_execute
-    w$rave_checks = function(...){ f = self$static_env[['rave_checks']]; if(is.function(f)) f(...) }
-    w$cache = self$cache
-    w$cache_input = self$cache_input
     w$rave_ignore = do_nothing
   }else{
     w$rave_inputs = rave_inputs
     w$rave_outputs = rave_outputs
     w$rave_updates = rave_updates
     w$rave_execute = rave_execute
-    w$rave_checks = rave_checks
-    w$cache = cache
-    w$cache_input = cache_input
     w$rave_ignore = rave_ignore
   }
   
@@ -290,10 +279,11 @@ ModuleEnvir <- R6::R6Class(
   portable = FALSE,
   cloneable = FALSE,
   private = list(
-    exec_env = NULL,
-    cache_env = NULL
+    exec_env = NULL
   ),
   public = list(
+    #' @field cache_env cache environment for module
+    cache_env = NULL,
     
     #' @field module_id module ID, unique
     module_id = '',
@@ -323,8 +313,12 @@ ModuleEnvir <- R6::R6Class(
     #' environment or package environment
     parent_env = NULL,
     
-    #' @field from_package whether the module is compiled from another R package
+    #' @field from_package whether the module is compiled from another R 
+    #' package. This value is required to be true since \code{"rave-0.1.9"}.
     from_package = FALSE,
+    
+    #' @field package_name which package does the module belong to?
+    package_name = '',
     
     #' @field sidebar_width input panel width, from 1 to 11
     sidebar_width = 3L,
@@ -369,7 +363,11 @@ ModuleEnvir <- R6::R6Class(
       self$version = version
       self$packages = c('rave', packages)
       self$rmd_path = rmd_path
-      private$cache_env = list()
+      
+      # Persist light version of module settings
+      self$cache_env = dipsaus::text_map(path = file.path(
+        '~/rave_modules/settings/', module_id
+      ))
       
       # Note as of 11/11/2018:
       # The structure of module is parent_env -> wrapper -> static -> param -> runtime -> (parser)
@@ -510,9 +508,6 @@ ModuleEnvir <- R6::R6Class(
         private$exec_env[[session_id]] = ExecEnvir$new(session = session, parent_env = self$parent_env)
         private$exec_env[[session_id]]$register_module(self)
       }
-      if(!session_id %in% names(private$cache)){
-        private$cache_env[[session_id]] = new.env()
-      }
       return(private$exec_env[[session_id]])
     },
     
@@ -521,16 +516,24 @@ ModuleEnvir <- R6::R6Class(
     #' @param session shiny session; see shiny \code{\link[shiny]{domains}}
     #' @return none
     load_script = function(session = getDefaultReactiveDomain()){
+      
+      rave_context(senv = parent.frame())
       # load default script
       default_src = readLines(system.file('default_module.R', package = 'rave'))
       # read in script, get package info
       src = readLines(self$script_path)
       src = c(default_src, src)
       
+      execenv = self$get_or_new_exec_env(session = session)
+      
+      on.exit({
+        rm(execenv)
+      }, add = TRUE)
+      
       # get
-      static_env = self$get_or_new_exec_env(session = session)$static_env
-      parse_env = self$get_or_new_exec_env(session = session)$parse_env
-      runtime_env = self$get_or_new_exec_env(session = session)$runtime_env
+      static_env = execenv$static_env
+      parse_env = execenv$parse_env
+      runtime_env = execenv$runtime_env
       clear_env(parse_env)
       
       
@@ -546,18 +549,10 @@ ModuleEnvir <- R6::R6Class(
           cat2(paste(e, sep = '\n'), level = 'WARNING')
         })
         
-        # comp = lazyeval::as.lazy(str_c(parsed[i]), env = static_env)
-        # tryCatch({
-        #   lazyeval::lazy_eval(comp)
-        #   # cat2('[Parsed]: ', str_c(parsed[i]), level = 'DEBUG')
-        # }, error = function(e){
-        #   cat2('[Ignored]: ', str_c(parsed[i]), level = 'INFO')
-        #   cat2(paste(e, sep = '\n'), level = 'WARNING')
-        # })
       }
       
       # Move everything to statis env
-      list2env(as.list(runtime_env, all.names = T), envir = static_env)
+      list2env(as.list(runtime_env, all.names = TRUE), envir = static_env)
       clear_env(runtime_env)
       
       # re-direct function environment to runtime-env where rave_execute take place.
@@ -569,35 +564,6 @@ ModuleEnvir <- R6::R6Class(
       
       # lockEnvironment(static_env)
       
-    },
-    
-    #' @description (deprecated) cache data
-    #' @param key list of R objects
-    #' @param val value to cache
-    #' @param session shiny session
-    #' @param replace whether to replace cache even if it exists
-    #' @return cached value
-    cache = function(key, val, session, replace = FALSE){
-      session_id = add_to_session(session)
-      if(is.null(session_id)){
-        session_id = '.TEMP'
-      }
-      if(!is.environment(private$cache_env[[session_id]])){
-        private$cache_env[[session_id]] = new.env()
-      }
-      env = private$cache_env[[session_id]]
-      if(!replace && exists(key, envir = env)){
-        return(get(key, envir = env))
-      }else{
-        # assume val is evaluated
-        if(!missing(val) && !is.null(val)){
-          force(val)
-          assign(key, val, envir = env)
-          return(val)
-        }else{
-          return(NULL)
-        }
-      }
     },
     
     
@@ -630,13 +596,6 @@ ModuleEnvir <- R6::R6Class(
         session_id = add_to_session(session)
       }
       if(is.character(session_id)){
-        # clear cache
-        cache_env = private$cache_env[[session_id]]
-        if(is.environment(cache_env)){
-          rm(list = ls(envir = cache_env, all.names = T), envir = cache_env)
-        }
-        private$cache_env[[session_id]] = NULL
-        
         # Clear runtime_env
         exec_env = private$exec_env[[session_id]]
         if('ExecEnvir' %in% class(exec_env)){

@@ -697,7 +697,44 @@ div[class^="col-xs-"] {
 
 
 
+/*Dark-mode*/
+body.rave-dark,
+body.rave-dark button,
+body.rave-dark .modal-content,
+body.rave-dark .btn-default,
+body.rave-dark .box,
+body.rave-dark .rave-content-modal .centered,
+body.rave-dark .rave-grid-inputs-legend,
+body.rave-dark .selectize-input.full,
+body.rave-dark .selectize-dropdown, 
+body.rave-dark .selectize-dropdown.form-control,
+body.rave-dark .selectize-input, 
+body.rave-dark .selectize-control.single .selectize-input.input-active,
+body.rave-dark .form-control,
+body.rave-dark .rave-output-panel .box .box-body,
+body.rave-dark .rave-output-panel .shiny-bound-output,
+body.rave-dark .nav-tabs-custom,
+body.rave-dark .nav-tabs-custom>.tab-content {
+  background-color: #1e1e1e;
+  color: #fdfdfd;
+}
 
+body.rave-dark,
+body.rave-dark .content-wrapper {
+  background-color: #1a1a1a;
+}
 
+body.rave-dark .box-header,
+body.rave-dark .rave-output-panel .tab-content h4,
+body.rave-dark .nav-tabs-custom>.nav-tabs,
+body.rave-dark .nav-tabs-custom>.nav-tabs>li.header,
+body.rave-dark .nav-tabs-custom>.nav-tabs>li>a, 
+body.rave-dark .nav-tabs-custom>.nav-tabs>li>a:hover,
+body.rave-dark .nav-tabs-custom>.tab-content {
+  color: #fdfdfd;
+  background-color: #222d33;
+}
 
-
+body.rave-dark .dipsaus-compound-input legend {
+  background-color: #efefef;
+}

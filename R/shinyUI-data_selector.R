@@ -909,10 +909,8 @@ shiny_data_selector <- function(module_id){
       last_entry('epoch_name', epoch, save = T, group = group)
       last_entry('time_range', epoch_range, save = T, group = group)
       last_entry('reference_name', reference, save = T, group = group)
-      if(is.function(clear_cache)){
-        clear_cache()
-        gc()
-      }
+      clear_cache(levels = 1)
+      gc()
       rave_prepare(
         subject = subject_id,
         electrodes = electrodes,

@@ -58,12 +58,12 @@ dev_${{PACKAGE}} <- function(expose_functions = FALSE, reload = TRUE){
   # Reload first
   if(reload){
     env = rave_dev_load(local = T)
-    env$reload_this_package(expose = FALSE, clear_env = FALSE)
+    env$reload_module_package(expose = FALSE, clear_env = FALSE)
   }
 
   env = rave_dev_load(local = !expose_functions)
 
-  env$load_dev_env()
+  env$rave_dev_env()
 
   return(invisible(env))
 }

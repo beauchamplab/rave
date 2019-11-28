@@ -4,12 +4,14 @@
 \alias{rave_checks}
 \title{Check if data is loaded for current module}
 \usage{
-rave_checks(..., data = NULL)
+rave_checks(..., data = NULL, .raise_error = TRUE)
 }
 \arguments{
 \item{...}{see details}
 
 \item{data}{same as \code{...}, but can be a vector}
+
+\item{.raise_error}{whether to raise error if data is missing}
 }
 \description{
 Check if data is loaded for current module

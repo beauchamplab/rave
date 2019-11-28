@@ -91,7 +91,7 @@ define_input(
     loaded_electrodes = preload_info$electrodes
 
     # Generate text for loaded electrodes
-    text = deparse_selections(loaded_electrodes)
+    text = dipsaus::deparse_svec(loaded_electrodes)
 
     # Update
     label = paste0('Electrode (', text, ')')

@@ -13,18 +13,18 @@ load_modules <- function(legacy = FALSE){
     if(!dipsaus::package_installed('ravebuiltins')){
       if( requireNamespace('remotes') ){
         tryCatch({
-          remotes::install_github('beauchamplab/ravebuiltins', upgrade = 'never', force = F)
+          remotes::install_github('beauchamplab/ravebuiltins', upgrade = 'never', force = FALSE)
         }, error = function(e){
           stop('Fail to install RAVE builtin modules. Please install it manually via the following command!\n\tremotes::install_github("beauchamplab/ravebuiltins")')
         })
       }
     }
     
-    m = detect_modules('ravebuiltins')
+    m = detect_modules('ravebuiltins', rave_running = TRUE)
     return(m)
   }
   
-  modules = utils::read.csv(rave_options('module_lookup_file'), stringsAsFactors = F)
+  modules = utils::read.csv(rave_options('module_lookup_file'), stringsAsFactors = FALSE)
   
   #1. filter out all deactived packages
   modules = modules[modules$Active, ]
@@ -85,41 +85,36 @@ load_modules <- function(legacy = FALSE){
 
 
 
-
-
-
 #' Check all packages to for new RAVE module packages
 #' @param packages array of packages to search for, default is all packages
 #' @param as_module logical, try to return module instances or just a list of modules
+#' @param ... ignored for compatibility purpose
 #' @export
-detect_modules <- function(packages, as_module = TRUE){
+detect_modules <- function(packages, as_module = TRUE, ...){
   
   lib_path = .libPaths()
-  all_packages = unlist(sapply(lib_path, function(lp){
-    list.dirs(lp, recursive = FALSE, full.names = FALSE)
-  }, simplify = F))
-  all_packages = unique(all_packages)
   
-  if(!missing(packages)){
-    all_packages = all_packages[all_packages %in% packages]
+  if(missing(packages)){
+    packages = unlist(sapply(lib_path, function(lp){
+      list.dirs(lp, recursive = FALSE, full.names = FALSE)
+    }, simplify = FALSE))
+    packages = unique(packages)
   }
   
-  yaml_path = sapply(all_packages, function(p){
+  yaml_path = sapply(packages, function(p){
     system.file('rave.yaml', package = p)
   })
   
-  packages %?<-% all_packages
-  
-  sel = (yaml_path != '' & all_packages %in% packages)
+  sel = yaml_path != ''
   
   if(!sum(sel)){
     return(NULL)
   }
   
-  all_packages = all_packages[sel]
+  packages = packages[sel]
   yaml_path = yaml_path[sel]
   
-  m_info = cbind(all_packages, yaml_path)
+  m_info = cbind(packages, yaml_path)
   
   # load yaml
   m_data = lapply(seq_len(nrow(m_info)), function(ii){
@@ -161,12 +156,15 @@ detect_modules <- function(packages, as_module = TRUE){
       
       m = lapply(which(sel), function(ii){
         x = m_data[ii,]
-        tryCatch({
-          get_module(package = x[4], module_id = x[1])
-        }, error = function(e){
-          cat2(e, level = 'WARNING')
-          cat2('Error found! Please check dependencies. Will not import module ', x[1], level = 'INFO')
-        })
+        
+        get_module(package = x[4], module_id = x[1])
+        
+        # tryCatch({
+        #   get_module(package = x[4], module_id = x[1])
+        # }, error = function(e){
+        #   cat2(e, level = 'WARNING')
+        #   cat2('Error found! Please check dependencies. Will not import module ', x[1], level = 'INFO')
+        # })
       })
       
       m = dipsaus::drop_nulls(m)
@@ -187,59 +185,68 @@ detect_modules <- function(packages, as_module = TRUE){
 }
 
 
-
 #' Function to find modules in packages
 #' @param package package name to search for modules
 #' @param module_id (optional) module ID if the package contains multiple modules
 #' @param local run module locally?
+#' @param ... ignored for compatibility purpose
 #' @export
-get_module <- function(package, module_id, local = FALSE){
+get_module <- function(package, module_id, local = FALSE, ...){
   require(rave)
+  rave_context()
+  
+  .__rave_context__. = 'rave_running_local'
+  .__rave_package__. = package
+  
   
   if(local){
     if(missing(module_id)){
       cat2('You are running module locally. Please specify module ID.', level = 'ERROR')
       return(invisible())
     }else{
-      return(debug_module(package = package, module_id = module_id, local = local))
+      # FIXME
+      .__rave_module__. = module_id
+      return(module_as_function(package = package, module_id = module_id, reload = FALSE))
     }
   }
   
-  yml = system.file('rave.yaml', package = package)
-  if(yml == ''){
-    cat2('Package ', package, ' contains no RAVE module.', level = 'ERROR')
+  conf = tryCatch({
+    load_rave_yaml()
+  }, error = function(e){
+    cat2('Package ', package, ' has no RAVE modules.', level = 'INFO')
+    list()
+  })
+  if(!length(conf)){
     return(invisible())
-  }else{
-    conf = yaml::read_yaml(yml)
-    ids = sapply(conf$modules, '[[', 'module_id')
-    
-    if(missing(module_id)){
-      module_id = ids
-    }else if(any(!module_id %in% ids)){
-      cat2('Cannot find module ', paste(module_id[!module_id %in% ids], collapse = ', '), ' in package ', package, ' - Terminate.', level = 'ERROR')
-      return(invisible())
-    }
   }
+  ids = sapply(conf$modules, '[[', 'module_id')
   
-  # Load dev environment
-  .fs = list.files(system.file('template/inst/tools', package = 'rave'), pattern = '\\.R$', full.names = T)
-  .fs = c(.fs, system.file('tools/input_widgets.R', package = package))
-  .fs = .fs[.fs != '']
-  # env = new.env()
-  env = new.env(parent = do.call('loadNamespace', list(package = package)))
-  for(.f in .fs){
-    source(.f, local = env)
+  if(missing(module_id)){
+    module_id = ids
+  }else if(any(!module_id %in% ids)){
+    cat2('Cannot find module ', paste(module_id[!module_id %in% ids], collapse = ', '), ' in package ', package, ' - Terminate.', level = 'ERROR')
+    return(invisible())
   }
-  env$.packageName = package
   
   if(length(module_id) == 1){
-    module = env$to_module(module_id = module_id, sidebar_width = 3L)
+    cat2('Compile module ', module_id)
+    
+    .__rave_module__. = module_id
+    
+    module = to_module(module_id = module_id, sidebar_width = 3L, 
+                       parse_context = 'rave_running_local')
+    cat2('Compiled module ', module_id, '; path: - ',
+         module$script_path)
     
     return(module)
   }else{
     modules = lapply(module_id, function(mid){
+      .__rave_context__. = .__rave_context__.
+      .__rave_package__. = package
+      .__rave_module__. = module_id
+      
       tryCatch({
-        env$to_module(module_id = mid, sidebar_width = 3L)
+        to_module(module_id = mid, sidebar_width = 3L, parse_context = 'rave_running_local')
       }, error = function(e){
         cat2('An error occurred during parsing module ', mid, ' (', package, '). Please check source code if you are module developer. [Ignored]', level = 'WARNING')
         NULL
@@ -257,39 +264,29 @@ get_module <- function(package, module_id, local = FALSE){
 }
 
 
-debug_module <- function(package = package, module_id = module_id, reload = FALSE, local=FALSE){
-  .fs = list.files(system.file('template/inst/tools', package = 'rave'), pattern = '\\.R$', full.names = T)
-  .fs = c(.fs, system.file('tools/input_widgets.R', package = package))
+
+
+
+
+
+
+
+
+module_as_function <- function(package = package, module_id = module_id, reload = FALSE, ...){
   
-  .fs = .fs[.fs != '']
+  .__rave_context__. = 'rave_running_local'
+  .__rave_package__. = package
+  .__rave_module__. = module_id
+  # .__rave_module_instance__.
   
-  rave_dev_load <- function(){
-    # Get package name
-    # env = new.env()
-    env = new.env(parent = do.call('loadNamespace', list(package = package)))
-    for(.f in .fs){
-      source(.f, local = env)
-    }
-    env$.packageName = package
-    if(local){
-      env$is_local_debug = function(){TRUE}
-      env$observe = function(...){}
-      env$observeEvent = function(...){}
-      env$reactiveValues = function(...){list(...)}
-      env$cache = function(key, val, ...){return(val)}
-    }
-    return(env)
-  }
-  # Reload first
   if(reload){
-    env = rave_dev_load()
-    env$reload_this_package(expose = FALSE, clear_env = FALSE)
+    reload_module_package(expose = FALSE, clear_env = FALSE)
   }
   
+  # Load UI
   
-  env = rave_dev_load()
+  # comps = parse_components(module_id = module_id, parse_context = 'rave_running_local')
   
-  # Need to load subject first
   has_subject = any_subject_loaded()
   
   if(!has_subject){
@@ -302,13 +299,13 @@ debug_module <- function(package = package, module_id = module_id, reload = FALS
   }
   
   # assign('aaa', env, envir = globalenv())
-  param_env = env$init_module(module_id = module_id, force_local = local)
+  param_env = init_module(module_id = module_id, debug = FALSE, parse_context = 'rave_running_local')
   
   
   runtime_env = new.env(parent = param_env)
   
-  envs = env$get_comp_env(module_id = module_id)
-  has_content = env$get_content(content = envs$content, env = envs$tmp_env)
+  envs = get_comp_env(module_id = module_id, parse_context = 'rave_running_local')
+  get_content(content = envs$content, env = envs$tmp_env)
   inputs = lapply(envs$input_env, function(comp){
     if(inherits(comp, 'comp_input')){
       return(comp$inputId)
@@ -320,7 +317,7 @@ debug_module <- function(package = package, module_id = module_id, reload = FALS
   
   args = as.list(param_env)[inputs]
   
-  main_quos = env$get_main_function(module_id)
+  main_quos = get_main_function(module_id)
   
   outputIds = lapply(envs$output_env, function(comp){
     if(inherits(comp, 'comp_output')){

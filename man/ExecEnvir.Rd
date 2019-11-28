@@ -28,6 +28,21 @@ Zhengjia Wang
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
+\item{\code{.__rave_context__.}}{context string for current instance, indicating
+whether the module is running locally (public, but internally used)}
+
+\item{\code{.__rave_package__.}}{current package name to run (public, 
+but internally used)}
+
+\item{\code{.__rave_module__.}}{module ID (public, but internally used)}
+
+\item{\code{.__rave_module_instance__.}}{self instance (public, but internally
+used)}
+
+\item{\code{module_env}}{\code{\link[rave]{ModuleEnvir}} instance}
+
+\item{\code{cache_env}}{cache environment to store key-value pairs locally}
+
 \item{\code{parent_env}}{the parent/top environment of the module, usually 
 global environment or some name-space if the module is implemented as 
 an R package}
@@ -90,6 +105,9 @@ asynchronous part}
 
 \item{\code{local_reactives}}{shiny local \code{reactives}, internal use only}
 
+\item{\code{internal_reactives}}{internal reactives to control some elements, 
+nternal use only}
+
 \item{\code{ready_functions}}{functions to run when the module is ready. The 
 functions are called at the last step of \code{\link[rave]{shinirize}}. 
 Usually it's used along with \code{eval_when_ready}, to make sure  
@@ -125,13 +143,11 @@ before functions calls}
 \item \href{#method-execute_with}{\code{ExecEnvir$execute_with()}}
 \item \href{#method-names}{\code{ExecEnvir$names()}}
 \item \href{#method-register_module}{\code{ExecEnvir$register_module()}}
+\item \href{#method-register_context}{\code{ExecEnvir$register_context()}}
 \item \href{#method-rave_inputs}{\code{ExecEnvir$rave_inputs()}}
 \item \href{#method-rave_outputs}{\code{ExecEnvir$rave_outputs()}}
 \item \href{#method-rave_updates}{\code{ExecEnvir$rave_updates()}}
 \item \href{#method-rave_execute}{\code{ExecEnvir$rave_execute()}}
-\item \href{#method-clear_cache}{\code{ExecEnvir$clear_cache()}}
-\item \href{#method-cache}{\code{ExecEnvir$cache()}}
-\item \href{#method-cache_input}{\code{ExecEnvir$cache_input()}}
 \item \href{#method-set_browser}{\code{ExecEnvir$set_browser()}}
 \item \href{#method-generate_input_ui}{\code{ExecEnvir$generate_input_ui()}}
 \item \href{#method-generate_output_ui}{\code{ExecEnvir$generate_output_ui()}}
@@ -334,6 +350,27 @@ none
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-register_context"></a>}}
+\subsection{Method \code{register_context()}}{
+Register 'RAVE' context for current environment 
+(internally used)
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ExecEnvir$register_context(context = c("rave_running", "rave_running_local"))}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{context}}{context string to indicate whether the module is running 
+locally}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+None
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-rave_inputs"></a>}}
 \subsection{Method \code{rave_inputs()}}{
 parse input components
@@ -438,105 +475,6 @@ parse, and compile to main function
 }
 \subsection{Returns}{
 none, but \code{ExecEnvir$execute} will be generated.
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clear_cache"></a>}}
-\subsection{Method \code{clear_cache()}}{
-clear cached objects
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ExecEnvir$clear_cache(levels = 1)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{levels}}{passed to \code{\link[rave]{clear_cache}}. Only level 1 and
-2 are allowed}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-none
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cache"></a>}}
-\subsection{Method \code{cache()}}{
-create cache
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ExecEnvir$cache(
-  key,
-  val,
-  name,
-  replace = FALSE,
-  persist = FALSE,
-  across_instance = FALSE,
-  across_module = FALSE,
-  ...
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{key}}{any R object}
-
-\item{\code{val}}{value to associate with key}
-
-\item{\code{name}}{cache name, unique}
-
-\item{\code{replace}}{whether to force replace even if the cache exists}
-
-\item{\code{persist}}{whether to persist on hard drive}
-
-\item{\code{across_instance}}{whether to share across shiny session}
-
-\item{\code{across_module}}{whether to share across modules}
-
-\item{\code{...}}{ignored}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-value if no cache is found, or the cached value
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-cache_input"></a>}}
-\subsection{Method \code{cache_input()}}{
-cache input, internally used
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ExecEnvir$cache_input(
-  inputId,
-  val = NULL,
-  read_only = TRUE,
-  sig = NULL,
-  module_id,
-  ...
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{inputId}}{input ID, character}
-
-\item{\code{val}}{the value of the input}
-
-\item{\code{read_only}}{whether to read or to replace}
-
-\item{\code{sig}}{signature, usually automatically generated}
-
-\item{\code{module_id}}{module ID, usually automatically generated, unless
-obtaining from other module, then \code{read_only} is forced to be TRUE}
-
-\item{\code{...}}{ignored}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-the cached input value
 }
 }
 \if{html}{\out{<hr>}}

@@ -4,12 +4,14 @@
 \alias{detect_modules}
 \title{Check all packages to for new RAVE module packages}
 \usage{
-detect_modules(packages, as_module = TRUE)
+detect_modules(packages, as_module = TRUE, ...)
 }
 \arguments{
 \item{packages}{array of packages to search for, default is all packages}
 
 \item{as_module}{logical, try to return module instances or just a list of modules}
+
+\item{...}{ignored for compatibility purpose}
 }
 \description{
 Check all packages to for new RAVE module packages

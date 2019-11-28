@@ -115,6 +115,7 @@ observeEvent(input[['.__load_data__.']], {
     }, error = function(e){
       showNotification(p('One or more error occur during loading. The data might be broken or missing.'), type = 'error')
     })
+    
 
     reload_module()
   }
@@ -293,11 +294,11 @@ register_auto_calculate_widget = local({
         if(any(changed)){
           dipsaus::cat2('At least one changed: ', paste(input_ids[changed], collapse = ', '))
           lapply(this_env$buttons, function(bid){
-            dipsaus::updateActionButtonStyled(session, bid, disabled = FALSE, icon = shiny::icon('unlock'))
+            dipsaus::updateActionButtonStyled(session, bid, disabled = FALSE, icon = shiny::icon('arrow-right'))
           })
         }else{
           lapply(this_env$buttons, function(bid){
-            dipsaus::updateActionButtonStyled(session, bid, disabled = TRUE, icon = shiny::icon('lock'))
+            dipsaus::updateActionButtonStyled(session, bid, disabled = TRUE, icon = NULL)
           })
         }
       }
@@ -310,9 +311,9 @@ register_auto_calculate_widget = local({
         auto_recalculate( auto_calc )
         
         if(auto_calc){
-          icon = shiny::icon('unlock')
+          icon = shiny::icon('arrow-right')
         }else{
-          icon = shiny::icon('lock')
+          icon = NULL
         }
         
         
@@ -343,7 +344,7 @@ register_auto_calculate_widget = local({
         trigger_recalculate( force = TRUE )
         
         lapply(buttons, function(bid){
-          dipsaus::updateActionButtonStyled(session, bid, disabled = TRUE, icon = shiny::icon('lock'))
+          dipsaus::updateActionButtonStyled(session, bid, disabled = TRUE, icon = NULL)
         })
       }, event.env = environment(), handler.env = environment())
       NULL
@@ -369,7 +370,6 @@ register_auto_calculate_widget = local({
   }
   
 })
-
 
 rave_execute({
   missing_data = isolate(`.__internal_reactives__.`[['miss_data']])

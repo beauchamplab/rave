@@ -175,10 +175,13 @@ define_input_auto_recalculate <- function(inputId, label,
         if( !!type == 'checkbox' ){
           checkboxInput(ns(!!widget_id), label = !!label, value = !!default_on)
         }else{
-          icon_name = ifelse(!!default_on, 'lock', 'unlock')
+          icon = NULL
+          if(!!(!default_on)){
+            icon = shiny::icon('arrow-right')
+          }
           dipsaus::actionButtonStyled(
             ns(!!widget_id), !!label, width = '100%', type = !!button_type,
-            icon = shiny::icon(icon_name))
+            icon = icon)
         }
       })
       

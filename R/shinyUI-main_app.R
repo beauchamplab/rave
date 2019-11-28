@@ -17,7 +17,7 @@ app_controller <- function(
   # Get package modules
   controller_env = environment()
   loaded_modules = list()
-  module_table = arrange_modules(refresh = F, reset = F, quiet = T)
+  module_table = arrange_modules(refresh = FALSE, reset = FALSE, quiet = TRUE)
   dup = duplicated(module_table$Name)
   if(any(dup)){
     module_table$Name[dup] = sprintf('%s (%s)', module_table$Name[dup], module_table$Package[dup])
@@ -53,7 +53,7 @@ app_controller <- function(
       })
     }
     cat2('Loading module - ', module_id)
-    ms = rave::detect_modules(packages = pkg, as_module = TRUE)
+    ms = detect_modules(packages = pkg, as_module = TRUE)
     ms = unlist(ms)
 
     # set module
@@ -422,18 +422,27 @@ app_server <- function(adapter, instance_id, token = NULL){
 
 
 
-    update_variable = function(module_id, variable_name = NULL, value = NULL, flush = T, ...){
+    update_variable = function(module_id, variable_name = NULL, value = NULL, flush = TRUE, ...){
       if(is.null(variable_name)){ return() }
+      sidebar_id = stringr::str_to_upper(shiny::isolate(input$sidebar))
       tryCatch({
         m = modules[[stringr::str_to_upper(module_id)]]
         if(is.null(m)){
           load_module(module_id)
         }
         e = m$get_or_new_exec_env()
-        e$cache_input(inputId = variable_name, val = value, read_only = F)
-        if(flush && module_id == stringr::str_to_upper(isolate(input$sidebar))){
+        
+        local({
+          rave_context(senv = e)
+          
+          cache_input(inputId = variable_name, val = value, 
+                      read_only = FALSE)
+          
+        })
+        
+        if(flush && module_id == sidebar_id){
           # When target module is not the same as current module, we need manually refresh current module
-          e$input_update(input = list(), init = T)
+          e$input_update(input = list(), init = TRUE)
         }
       }, error = function(e){
         cat2('Cannot update variable ', variable_name, ' in module ', module_id, level = 'WARNING')
@@ -458,12 +467,16 @@ app_server <- function(adapter, instance_id, token = NULL){
         })
 
         # Try catch?
-        dipsaus::eval_dirty(quo, env = local_env)
-        loaded = TRUE
+        safe_wrap_expr({
+          dipsaus::eval_dirty(quo, env = local_env)
+          loaded = TRUE
+        })
+        
       }
 
       return(loaded)
     }
+    session$userData$rave_module = load_module
 
     # Switch to module
     observe({
@@ -517,7 +530,9 @@ app_server <- function(adapter, instance_id, token = NULL){
     observe({
       if(global_reactives$has_data){
         # print(input$sidebar)
-        global_reactives$execute_module = input$sidebar
+        current_module_id = input$sidebar
+        global_reactives$execute_module = current_module_id
+        session$userData$rave_current_module_id = current_module_id
         shinyjs::hide(id = '__rave__mask__', anim = F)
         shinyjs::removeClass(selector = 'body', class = "rave-noscroll")
       }else{
@@ -742,15 +757,15 @@ app_server <- function(adapter, instance_id, token = NULL){
           # print(inputs)
 
           for(inputId in names(inputs)){
-
-            key = list( type = '.rave-inputs-Dipterix', inputId = inputId, sig = session_id )
+            
             cat2('Updating ', inputId, ' - ', session_id)
-
             global = execenv$is_global(inputId)
-            new_v = inputs[[inputId]]
-            old_v = execenv$cache( key, new_v, global = global, replace = FALSE, persist = FALSE)
-            execenv$cache( key, new_v, global = global, replace = TRUE, persist = TRUE)
 
+            new_v = inputs[[inputId]]
+            
+            old_v = cache_input(inputId = inputId, val = new_v, read_only = TRUE)
+            cache_input(inputId = inputId, val = new_v, read_only = FALSE)
+            
             if(!identical(new_v, old_v)){
               changed = TRUE
             }

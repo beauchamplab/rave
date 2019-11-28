@@ -286,6 +286,7 @@ clear_env <- function(env, ...){
       return(invisible())
     }
     nms = names(env)
+    nms = nms[!stringr::str_detect(nms, '^\\.__rave')]
     if(isNamespace(env)){
       nms = nms[!nms %in% c(".__NAMESPACE__.", ".__S3MethodsTable__.")]
     }

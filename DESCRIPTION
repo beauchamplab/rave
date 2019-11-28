@@ -67,8 +67,9 @@ Suggests:
     rmarkdown,
     spelling,
     pryr (>= 0.1.3),
-    roxygen2 (>= 6.0.0),
-    testthat
+    roxygen2,
+    testthat,
+    rstudioapi
 Remotes:
     github::dipterix/rutabaga
 VignetteBuilder: knitr

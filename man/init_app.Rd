@@ -7,8 +7,8 @@
 init_app(
   modules = NULL,
   active_module = NULL,
-  launch.browser = T,
-  theme = "purple",
+  launch.browser = TRUE,
+  theme = "red",
   disable_sidebar = FALSE,
   simplify_header = FALSE,
   ...

@@ -14,11 +14,17 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
   data_env = getDefaultDataRepository()
 
+  # Runtime environment
+  execenv = module$get_or_new_exec_env(session = session)
+  execenv$register_context('rave_running')
+  rave_context(senv = execenv)
+  
+  # TODO: remove debug
+  # rave_context(senv = execenv, tenv = globalenv())
+  
   # load script
   module$load_script(session = session)
 
-  # Runtime environment
-  execenv = module$get_or_new_exec_env(session = session)
 
   # ui
   list(
@@ -144,7 +150,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         reactive({
           re = local_data$last_input
           if(check_active()){
-            cat2('Input changed')
+            # cat2('Input changed')
             return(re)
           }
           return(FALSE)
@@ -227,11 +233,11 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         }
       }
 
-      cache_all_inputs <- function(save = T){
+      cache_all_inputs <- function(save = TRUE){
         # params = isolate(reactiveValuesToList(input))
         lapply(execenv$input_ids, function(inputId){
           val = shiny::isolate({ input[[inputId]] })
-          execenv$cache_input(inputId, val, read_only = !save, sig = add_to_session(session))
+          cache_input(inputId = inputId, val = val, read_only = !save)
         }) ->
           altered_params
 
@@ -264,7 +270,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         local_static$activated = FALSE
 
         params = isolate(reactiveValuesToList(input))
-        execenv$clear_cache()
+        clear_cache(levels = 1)
         execenv$reset(params)
       }, priority = 999L)
 
@@ -316,7 +322,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         params = cache_all_inputs(save = F)
 
         # step 2: set initializa = T
-        local_data$initialized = T
+        local_data$initialized = TRUE
 
         # step 3: update UI
         err_info = execenv$input_update(input = params, session = session, init = TRUE)
@@ -374,9 +380,9 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
             cat2(MODULE_LABEL, ' - Exec time: ', sprintf('%.3f (%s)', dta$delta, dta$units), level = 'INFO')
           }
 
-          local_data$last_executed = T
+          local_data$last_executed = TRUE
           cache_all_inputs()
-          execenv$cache_input('..onced', TRUE, read_only = F, sig = 'special')
+          cache_input(inputId = '..onced', val = TRUE, read_only = FALSE, shared = FALSE)
 
           # BIG TODO!!! Uncommenting the following lines triggers executing script twice
           # My guess is when module is not autoexec, we use local_data$current_param to 
@@ -389,7 +395,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
           # })
 
         }, onFailure = function(e){
-          local_data$last_executed = F
+          local_data$last_executed = FALSE
         }, finally = {
           
           removeNotification(id = '.rave_main')
@@ -752,7 +758,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
     },
     clean = function(){
-      execenv$clear_cache(levels = 1)
+      clear_cache(levels = 1)
     }
   )
 }

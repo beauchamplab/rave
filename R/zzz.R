@@ -58,11 +58,11 @@ rave_version <- function(){
         "RAVE is loaded! - %s",
         "Data Repository:     \t%s",
         "Raw-data Repository: \t%s",
-        "\nTo set option, type %s or %s for details.",
+        "\nTo set option, type %s.",
         sep = '\n'
       ),
       rave_version(), rave_options('data_dir'), rave_options('raw_data_dir'),
-      sQuote('rave_options(launch_gui = T)'), sQuote('?rave_options')
+      sQuote('rave_options(launch_gui=TRUE)')
       ))
     }else{
       packageStartupMessage('[WARNING]: Cannot find RAVE repository! Please run the following command set them.\n\trave::rave_options()')

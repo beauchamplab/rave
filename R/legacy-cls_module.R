@@ -142,17 +142,6 @@ rave_execute <- function(..., auto = TRUE, .env = globalenv()){
 }
 
 
-
-#' Cache input values
-#' @param inputId input ID
-#' @param val value if not cached
-#' @param read_only logical, if FALSE, replace cache
-#' @export
-cache_input <- function(inputId, val, read_only = T){
-  return(val)
-}
-
-
 # Get x or default
 async_var <- function(x, default = NULL){
   tryCatch({
@@ -173,25 +162,5 @@ async_var <- function(x, default = NULL){
 export_report <- function(expr, inputId){
 
 }
-
-
-#' Get Cache Environment
-#' @param session internally used
-#' @export
-getDefaultCacheEnvironment <- function(
-  session = getDefaultReactiveDomain()
-){
-  session_id = add_to_session(session)
-  session_id %?<-% '.TEMP'
-  global_env = globalenv()
-  if(!is.environment(global_env[['.cache_rave']])){
-    global_env[['.cache_rave']] = new.env(parent = emptyenv())
-  }
-  global_env[['.cache_rave']][[session_id]] %?<-% new.env(parent = emptyenv())
-  return(global_env[['.cache_rave']][[session_id]])
-}
-
-
-
 
 

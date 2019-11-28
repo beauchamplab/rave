@@ -157,9 +157,11 @@ save_options <- function(){
 #' @param host IP address of host
 #' @param port Port number
 #' @export
-rave_options <- function(..., .save = T, launch_gui = T, host = '127.0.0.1', port = NULL){
-  if(!exists('rave_opts', envir = ..setup_env, inherits = F)){
-    ..setup_env$rave_opts <- Options$new(conf_path = '~/.rave.yaml', save_default = T)
+rave_options <- function(..., .save = TRUE, launch_gui = TRUE,
+                         host = '127.0.0.1', port = NULL){
+  if(!exists('rave_opts', envir = ..setup_env, inherits = FALSE)){
+    ..setup_env$rave_opts <- Options$new(conf_path = '~/.rave.yaml', 
+                                         save_default = TRUE)
   }
   args = list(...)
   if(length(args) && length(names(args))){
