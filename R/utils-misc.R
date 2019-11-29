@@ -70,7 +70,7 @@ is_invalid <- function(x, any = F, .invalids = c('null', 'na')){
   return(FALSE)
 }
 
-
+#' @export
 get_val <- function(x, key = NULL, ..., .invalids = c('null', 'na')){
   
   if(is.null(key)){

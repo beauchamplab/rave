@@ -530,7 +530,7 @@ ExecEnvir <- R6::R6Class(
                       inputId = inputIds[[jj]]
                       rlang::quo(
                         do.call(div, args = c(
-                          list(style = sprintf('min-height:80px;%s', !!flex_basis[[jj]]), !!x[[inputId]]$expr)
+                          list(style = !!flex_basis[[jj]], !!x[[inputId]]$expr)
                         ))
                       )
                     })
@@ -657,7 +657,7 @@ ExecEnvir <- R6::R6Class(
             expand_box(
               width = width,
               title = comp$label,
-              collapsible = T,
+              collapsible = TRUE,
               div(
                 style = sprintf('margin: %.0fpx;', !!margin),
                 !!comp$expr
@@ -669,7 +669,7 @@ ExecEnvir <- R6::R6Class(
             expand_box(
               width = width,
               title = comp$label,
-              collapsible = T,
+              collapsible = TRUE,
               !!comp$expr
             )
           })

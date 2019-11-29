@@ -25,11 +25,19 @@ NULL
   if(!shiny_is_running()){
     cat2(deparse(definition[[1]]), ' is defined as an output with title ', sQuote(title))
   }
+  parser = rave:::comp_parser()
+  comp = parser$parse_quo(rlang::quo(!!definition))
   
-  definition = dipsaus::match_calls(
-    definition, quoted = TRUE, envir = parent.frame(), 
-    replace_args = structure(list(prepend_ns), names = keyword)
-  )
+  if(ctx$context == 'rave_running'){
+    session = getDefaultReactiveDomain()
+    input = getDefaultReactiveInput()
+    output = getDefaultReactiveOutput()
+    instance = ctx$instance
+    output[[comp$outputId]] = comp$observers(input, output, session,
+                                             instance$local_reactives,
+                                             instance)
+  }
+  
   invisible(eval(definition, envir = list(ns = ns), enclos = parent.frame()))
 }
 
@@ -107,7 +115,7 @@ define_output.rave_module_debug <- function(
 
 
 #' @export
-define_output.rave_running <- function(
+define_output.rave_running_local <- function(
   definition, title = '', width = 12L, order = Inf, keyword = 'outputId', ...
 ){
   rave_context()
@@ -149,7 +157,7 @@ define_output.rave_running <- function(
 }
 
 #' @export
-define_output.rave_running_local <- define_output.rave_running
+define_output.rave_running <- .define_output
 
 
 

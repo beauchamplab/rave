@@ -4,8 +4,8 @@
 \alias{define_input}
 \alias{define_input.default}
 \alias{define_input.rave_module_debug}
-\alias{define_input.rave_running}
 \alias{define_input.rave_running_local}
+\alias{define_input.rave_running}
 \title{Defines 'RAVE' Module Inputs}
 \usage{
 define_input(
@@ -28,7 +28,7 @@ define_input(
 
 \method{define_input}{rave_module_debug}(definition, init_args, init_expr, ...)
 
-\method{define_input}{rave_running}(
+\method{define_input}{rave_running_local}(
   definition,
   init_args,
   init_expr,
@@ -37,7 +37,7 @@ define_input(
   ...
 )
 
-\method{define_input}{rave_running_local}(
+\method{define_input}{rave_running}(
   definition,
   init_args,
   init_expr,

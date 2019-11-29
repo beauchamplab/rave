@@ -1,136 +1,183 @@
-# define_ui <- rave_context_generics('define_ui', function(definition, keyword, global_scope, env){})
-# 
-# define_ui.rave_module_debug <- function(definition, keyword, global_scope, env){
-#   ctx = rave_context('rave_module_debug')
-#   
-#   
-#   definition = dipsaus::match_calls(definition, quoted = TRUE)
-#   eval(definition, envir = list(ns = ns), enclos = env)
-# }
-# 
-# define_ui <- function(definition, keyword, global_scope, env){
-#   ns = NULL
-#   if(global_scope){
-#     execenv = getCurrentExecEnvir()
-#     if(!is.null(execenv)){
-#       ns = execenv$ns
-#     }
-#     if(!is.function(ns)){
-#       stop('You cannot call ', sQuote('define_input'), ' in shiny context without RAVE module')
-#     }
-#   }else{
-#     session = shiny::getDefaultReactiveDomain()
-#     ns = session$ns
-#   }
-#   
-#   definition = dipsaus::match_calls(
-#     definition, quoted = TRUE, 
-#     replace_args = structure(list(prepend_ns), names = keyword), envir = env)
-#   eval(definition, envir = list(ns = ns), enclos = env)
-# }
-# 
-# 
-# 
-# define_output2 <- rave_context_generics('define_output2', alist(
-#   definition = , title = '', width = 12L, order = Inf, listen_to = , 
-#   keyword = 'outputId', ... = 
-# ))
+`print.rave-palettes` <- function(x, plot=FALSE, dark, ...){
+  ctx = rave_context()
+  cat('RAVE palettes in "', paste(x$themes, collapse = '", "'), '" mode', 
+      ifelse(length(x$themes) > 1, 's', ''), ' for "', 
+      paste(x$types, collapse = '", "'), '" variables\n', sep = '')
+  npal = length(x$palettes)
+  cat('Total ', npal, ' palettes:\n', sep = '')
+  lapply(x$palettes, function(p){
+    cat('  ', p$name, ' (', length(p$colors), ' unique colors)\n', sep = '')
+    NULL
+  })
+  max_col = max(sapply(x$palettes, function(p){ length(p$colors) }))
+  if( plot || ctx$context == 'rave_module_debug' ){
+    if(missing(dark)){
+      dark = 'dark' %in% x$themes
+    }
+    mfrow = par('mfrow')
+    bg = par('bg')
+    fg = par('fg')
+    on.exit(par(mfrow = mfrow, bg = bg, fg = fg), add = TRUE)
+    par(mfrow = c(1, 1))
+    if( dark ){
+      par(bg = '#1A1A1A', fg = 'white')
+    }else{
+      par(bg = 'white', fg = 'black')
+    }
+    font_col = ifelse(dark, 'white', 'black')
+    plot(c(0, npal*2+1), c(0, max_col + 1), type = 'n', 
+         main = 'Color Palettes', axes = FALSE, cex.main = 2,
+         xlab = '', ylab = '', col.main = font_col)
+    axis(1, line = NA, at = seq_len(npal)*2-0.5, labels = seq_len(npal), 
+         lwd = 0, cex.axis = 1.6, col.axis = font_col)
+    
+    draw_cols_cont = function(p, idx){
+      y = seq_len(max_col)
+      rect(xleft = idx-0.5, xright = idx+0.5, ybottom = y-0.5, ytop = y+0.5,
+           col = p$colors, border = NA)
+    }
+    draw_cols_disc = function(p, idx){
+      y = seq_along(p$colors)
+      points(rep(idx, length(y)), y, col = p$colors, pch = 16)
+    }
+    
+    lapply(seq_along(x$palettes), function(ii){
+      p = x$palettes[[ii]]
+      draw_cols_cont(p, ii*2-1)
+      draw_cols_disc(p, ii*2)
+    })
+  }
+  invisible(x)
+}
 
-# 
-# 
-# 
-# 
-# `define_output2.rave-session_proxy` <- function(
-#   definition, title = '', width = 12L, order = Inf, 
-#   listen_to, keyword = 'outputId', ...){
-#   env = parent.frame()
-#   definition = substitute(definition)
-#   define_ui(definition, keyword, FALSE, env)
-# }
-# 
-# `define_output2.rave-ShinySession` <- function(
-#   definition, title = '', width = 12L, order = Inf, 
-#   listen_to, keyword = 'outputId', ...){
-#   env = parent.frame()
-#   definition = substitute(definition)
-#   define_ui(definition, keyword, TRUE, env)
-# }
-# 
-# `define_output2.rave_compile` <- function(
-#   definition, title = '', width = 12L, order = Inf, 
-#   listen_to, keyword = 'outputId', ...){
-#   stopifnot2(width %in% seq_len(12), msg = 'width must be integer from 1 to 12')
-#   
-#   definition = substitute(definition)
-#   definition = dipsaus::match_calls(definition, quoted = TRUE, envir = parent.frame())
-#   outputId = eval(definition[[keyword]], list(), enclos = baseenv())
-#   fun_name = paste0('...___', outputId)
-#   definition[[keyword]] = fun_name
-#   definition[['width']] = width
-#   
-#   
-#   # Unlike inputs, outputs might exists in package namespace
-#   package_name = get('.__rave_package__.', envir = parent.frame(), inherits = TRUE)
-#   pkg_env = get('...pkg_env', envir = parent.frame(), inherits = TRUE)
-#   shared_env = get('...shared_env', envir = parent.frame(), inherits = TRUE)
-#   output_env = get('...output_env', envir = parent.frame(), inherits = TRUE)
-#   
-#   # try to see if exists function `outputId` from the package
-#   has_function = is.function(pkg_env[[outputId]])
-#   
-#   # Defines function, to be evaluated within the module
-#   if(has_function){
-#     assign_quo = rlang::quo({
-#       assign(!!fun_name, function(...){
-#         ._current_env = environment()
-#         ._env = new.env()
-#         ._env$get_value = function(key, ifNotFound = NULL){
-#           get0(key, envir = ._current_env, ifnotfound = ifNotFound)
-#         }
-#         
-#         ._env$async_value = function(key){
-#           ..param_env = get0('..param_env', envir = ._current_env)
-#           if(is.environment(..param_env)){
-#             async_var = get0('async_var', envir = ..param_env)
-#             if(is.function(async_var)){
-#               return(async_var(key))
-#             }
-#           }
-#           
-#           return(NULL)
-#         }
-#         do.call(
-#           asNamespace(package_name)[[!!outputId]],
-#           c(list(._env), list(...))
-#         )
-#         
-#       })
-#     })
-#   }else{
-#     assign_quo = rlang::quo({
-#       assign(!!fun_name, function(...){
-#         
-#         # Directly call the function 
-#         do.call(!!outputId, list())
-#       })
-#     })
-#   }
-#   
-#   
-#   re = list(
-#     outputId = outputId,
-#     title = title,
-#     definition = definition,
-#     order = order
-#   )
-#   class(re) = c('comp_output', 'list')
-#   
-#   
-#   output_env[[outputId]] = re
-#   invisible(re)
-# }
-# 
-# 
-# 
-# 
-# 
+.get_rave_theme <- function(
+  packages = NULL, type = 'continuous', theme
+){
+  if(missing(theme)){
+    theme = rave_options('default_theme')
+    if(is.null(theme)){
+      theme = 'light'
+    }
+  }
+  stopifnot2(length(theme)==1 && theme %in% c('light', 'dark'),
+             msg = 'theme must be either light or dark')
+  stopifnot2(all(type %in% c('continuous', 'discrete')),
+             msg = 'type must be either continuous or discrete, or both')
+  packages = unique(c(packages, 'rave'))
+  packages = packages[dipsaus::package_installed(packages)]
+  
+  # for each one of them, get yaml
+  pals = lapply(packages, function(pkg){
+    rave_context('rave_module_debug')
+    .__rave_package__. = pkg
+    pal_yaml = get_path('inst/palettes.yaml')
+    if(length(pal_yaml) && file.exists(pal_yaml)){
+      pal = yaml::read_yaml(pal_yaml)
+      re = lapply(pal, function(p){
+        p = as.list(p)
+        if(any(type %in% p$type) && 
+           any(theme %in% p$theme) && 
+           any(type %in% p$type)){
+          p$package = pkg
+          return(p)
+        }
+        return(NULL)
+      })
+      re = dipsaus::drop_nulls(re)
+      if(!length(re)){ re = NULL }else{ names(re) = NULL }
+      re
+    }else{
+      NULL
+    }
+  })
+  pals = unlist(pals, recursive = FALSE)
+  
+  # Find duplicated palettes
+  nms = sapply(pals, '[[', 'name')
+  pals = lapply(seq_along(nms), function(ii){
+    p = pals[[ii]]
+    p
+  })
+  names(pals) = sprintf('%d. %s', seq_along(nms), nms)
+  re = list(
+    names = names(pals),
+    types = type,
+    themes = theme,
+    packages = packages,
+    palettes = pals
+  )
+  class(re) <- c('rave-palettes', 'list')
+  re
+}
+
+#' @title Get and Set 'RAVE' Themes
+#' @export
+get_rave_theme <- rave_context_generics('get_rave_theme', .get_rave_theme)
+
+#' @export
+get_rave_theme.default <- .get_rave_theme
+
+#' @export
+get_rave_theme.rave_module_debug <- function(packages = NULL, ...){
+  ctx = rave_context()
+  packages = c(ctx$package, packages)
+  .get_rave_theme(packages, ...)
+}
+
+#' @export
+get_rave_theme.rave_running <- function(packages = NULL, type = 'continuous',
+                                        theme){
+  ctx = rave_context()
+  if(missing(theme)){
+    session = shiny::getDefaultReactiveDomain()
+    theme = session$userData$rave_theme
+    theme %?<-% rave_options('default_theme')
+    theme %?<-% 'light'
+  }
+  packages = c(ctx$package, packages)
+  .get_rave_theme(packages, type, theme)
+}
+
+#' @export
+get_rave_theme.rave_running_local <- get_rave_theme.rave_running
+
+
+
+#' @export
+set_rave_theme <- function(theme, .set_default = FALSE){
+  ctx = rave_context()
+  default_theme = rave_options('default_theme')
+  if(missing(theme)){
+    theme = rave_options('default_theme')
+    if(is.null(theme) || !theme %in% c('light', 'dark')){
+      theme = 'light'
+    }
+  }
+  theme = match.arg(theme, c('light', 'dark'), several.ok = FALSE)
+  
+  if(!isTRUE(theme == default_theme) && .set_default){
+    rave_options('default_theme' = theme)
+  }
+  
+  session = shiny::getDefaultReactiveDomain()
+  if(ctx$context == 'rave_running'){
+    session$userData$rave_theme = theme
+  }
+  if(!is.null(session)){
+    if( theme == 'light' ){
+      shinyjs::removeClass(class = 'rave-dark', selector = 'body')
+      shinyjs::addClass(class = 'rave-light', selector = 'body')
+    }else{
+      shinyjs::removeClass(class = 'rave-light', selector = 'body')
+      shinyjs::addClass(class = 'rave-dark', selector = 'body')
+    }
+  }
+  if(theme == 'light'){
+    par(bg = 'white', fg = 'black', col = 'black', col.axis = 'black',
+        col.main = 'black', col.lab = 'black', col.sub = 'black')
+  }else{
+    par(bg = '#1A1A1A', fg = 'white', col = 'white', col.axis = 'white',
+        col.main = 'white', col.lab = 'white', col.sub = 'white')
+  }
+  return(theme)
+}

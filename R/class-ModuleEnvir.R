@@ -43,13 +43,6 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
   }
   
   
-  w$get_client_size = function(){
-    if(is.reactivevalues(self$global_reactives)){
-      return(shiny::isolate(self$global_reactives$client_size))
-    }
-    return(NULL)
-  }
-  
   w$switch_to = function(module_id, varriable_name = NULL, value = NULL, quiet = F, ...){
     if(is.reactivevalues(self$global_reactives)){
       # if missing module_id, jump to last activated module

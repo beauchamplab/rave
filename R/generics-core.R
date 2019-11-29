@@ -9,12 +9,13 @@ prepend_ns <- function(arg, call){
 }
 
 
+#' @export
 getExecEnvirFromContext <- function(){
   ctx = rave_context()
   ctx$instance
 }
 
-# TODO
+#' @export
 getModuleEnvirFromContext <- function(){
   e = getExecEnvirFromContext()
   if(!is.null(e)){

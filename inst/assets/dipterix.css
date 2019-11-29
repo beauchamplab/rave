@@ -248,6 +248,10 @@ body.rave-noscroll {
   padding-right: 5px;
 }
 
+.rave-input-panel .rave-grid-inputs{
+  min-height: 74px;
+}
+
 
 .rave-grid-inputs>.rave-grid-inputs-legend {
     position: absolute;

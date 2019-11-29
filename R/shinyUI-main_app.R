@@ -820,6 +820,9 @@ app_server <- function(adapter, instance_id, token = NULL){
       })
 
     }
+    
+    # Set theme
+    set_rave_theme()
 
 
   }

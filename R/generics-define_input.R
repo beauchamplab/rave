@@ -119,7 +119,7 @@ define_input.rave_module_debug <- function(definition, init_args, init_expr, ...
 
 #' @rdname define_input
 #' @export
-define_input.rave_running <- function(
+define_input.rave_running_local <- function(
   definition, init_args, init_expr, keyword = 'inputId',
   update_level = 2, ...
 ){
@@ -163,7 +163,7 @@ define_input.rave_running <- function(
 
 #' @rdname define_input
 #' @export
-define_input.rave_running_local <- define_input.rave_running
+define_input.rave_running <- .define_input
 
 
 
