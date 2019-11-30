@@ -42,6 +42,7 @@ safe_wrap_expr <- function(expr, onFailure = NULL, onError = NULL, finally = {})
       onError(e)
     }
     print(...internal_expr...)
+    print(traceback(e))
     invokeRestart('rave-notification', e)
     
   }, `rave-notification` = function(e){
@@ -308,10 +309,8 @@ expand_box <- function(
 # run_outputs <- function(exec_env, outputId, ){
 #   rave_context(senv = exec_env, tpos = 1L)
 #   exec_env$local_reactives$show_results
-#   local_data$show_results
-#   if (isolate(local_data$has_data)) {
-#     func = get0(outputId, envir = exec_env$param_env,
-#                 inherits = TRUE)
+#   if (shiny::isolate(exec_env$local_reactives$has_data)) {
+#     func = get0(outputId, envir = exec_env$param_env, inherits = TRUE)
 #     if (is.function(func)) {
 #       func()
 #     }

@@ -157,14 +157,12 @@ detect_modules <- function(packages, as_module = TRUE, ...){
       m = lapply(which(sel), function(ii){
         x = m_data[ii,]
         
-        get_module(package = x[4], module_id = x[1])
-        
-        # tryCatch({
-        #   get_module(package = x[4], module_id = x[1])
-        # }, error = function(e){
-        #   cat2(e, level = 'WARNING')
-        #   cat2('Error found! Please check dependencies. Will not import module ', x[1], level = 'INFO')
-        # })
+        tryCatch({
+          get_module(package = x[4], module_id = x[1])
+        }, error = function(e){
+          cat2(e, level = 'WARNING')
+          cat2('Error found! Please check dependencies. Will not import module ', x[1], level = 'INFO')
+        })
       })
       
       m = dipsaus::drop_nulls(m)
@@ -195,7 +193,7 @@ get_module <- function(package, module_id, local = FALSE, ...){
   require(rave)
   rave_context()
   
-  .__rave_context__. = 'rave_running_local'
+  .__rave_context__. = 'rave_module_debug'
   .__rave_package__. = package
   
   
@@ -205,16 +203,15 @@ get_module <- function(package, module_id, local = FALSE, ...){
       return(invisible())
     }else{
       # FIXME
+      .__rave_context__. = 'rave_running_local'
       .__rave_module__. = module_id
       return(module_as_function(package = package, module_id = module_id, reload = FALSE))
     }
   }
-  
   conf = tryCatch({
     load_rave_yaml()
   }, error = function(e){
     cat2('Package ', package, ' has no RAVE modules.', level = 'INFO')
-    list()
   })
   if(!length(conf)){
     return(invisible())
@@ -231,6 +228,7 @@ get_module <- function(package, module_id, local = FALSE, ...){
   if(length(module_id) == 1){
     cat2('Compile module ', module_id)
     
+    .__rave_context__. = 'rave_running_local'
     .__rave_module__. = module_id
     
     module = to_module(module_id = module_id, sidebar_width = 3L, 
@@ -241,7 +239,7 @@ get_module <- function(package, module_id, local = FALSE, ...){
     return(module)
   }else{
     modules = lapply(module_id, function(mid){
-      .__rave_context__. = .__rave_context__.
+      .__rave_context__. = 'rave_running_local'
       .__rave_package__. = package
       .__rave_module__. = module_id
       

@@ -1,3 +1,4 @@
+#' @export
 `print.rave-palettes` <- function(x, plot=FALSE, dark, ...){
   ctx = rave_context()
   cat('RAVE palettes in "', paste(x$themes, collapse = '", "'), '" mode', 
@@ -20,7 +21,7 @@
     on.exit(par(mfrow = mfrow, bg = bg, fg = fg), add = TRUE)
     par(mfrow = c(1, 1))
     if( dark ){
-      par(bg = '#1A1A1A', fg = 'white')
+      par(bg = '#1E1E1E', fg = 'white')
     }else{
       par(bg = 'white', fg = 'black')
     }
@@ -176,7 +177,7 @@ set_rave_theme <- function(theme, .set_default = FALSE){
     par(bg = 'white', fg = 'black', col = 'black', col.axis = 'black',
         col.main = 'black', col.lab = 'black', col.sub = 'black')
   }else{
-    par(bg = '#1A1A1A', fg = 'white', col = 'white', col.axis = 'white',
+    par(bg = '#1E1E1E', fg = 'white', col = 'white', col.axis = 'white',
         col.main = 'white', col.lab = 'white', col.sub = 'white')
   }
   return(theme)

@@ -290,13 +290,17 @@ rave_context <- function(context, require_contexts, disallowed_context,
   if(!missing(tpos)){
     tenv = parent.frame(tpos)
   }
+  penv = parent.frame()
   if(missing(context)){
     context = get0('.__rave_context__.', envir = senv, ifnotfound = 'default', inherits = TRUE)
   }
   
+  call = paste(deparse(do.call(sys.call, list(), envir = senv)), collapse = '')
+  
   if(!missing(require_contexts)){
     if(!all(require_contexts %in% context)){
-      call = paste(deparse(sys.call(2L)[[1]]), collapse = '')
+      # call = paste(deparse(sys.call(1L)[[1]]), collapse = '')
+      cat(penv$.__rave_calls__., sep = '\n', end = '\n')
       if(!missing(error_msg)){
         do.call(rave_failure, list(
           message = paste0('Context error: in ', sQuote(call), ': ', error_msg),
@@ -320,7 +324,8 @@ rave_context <- function(context, require_contexts, disallowed_context,
   if(!missing(disallowed_context)){
     sel = context %in% disallowed_context
     if(any(sel)){
-      call = paste(deparse(sys.call(2L)[[1]]), collapse = '')
+      # call = paste(deparse(sys.call(1L)[[1]]), collapse = '')
+      cat(penv$.__rave_calls__., sep = '\n', end = '\n')
       if(!missing(error_msg)){
         do.call(rave_failure, list(
           message = paste0('Context error: in ', sQuote(call), ': ', error_msg),
@@ -343,6 +348,12 @@ rave_context <- function(context, require_contexts, disallowed_context,
   if(!all(context %in% rave_context_c)){
     cat2("Context doesn't exists: ", paste(context[!context %in% rave_context_c], collapse = ', '), level = 'FATAL')
   }
+  # if(!context %in% rave_context_c[-1]){
+  #   call = paste(deparse(do.call(sys.call, list(), envir = parent.frame())), collapse = '')
+  #   cat2('Default context - ', call)
+  # }
+  
+  
   
   package = get0('.__rave_package__.', envir = senv, inherits = TRUE, ifnotfound = '')
   moduleid = get0('.__rave_module__.', envir = senv, inherits = TRUE, ifnotfound = '')
@@ -372,7 +383,9 @@ rave_context <- function(context, require_contexts, disallowed_context,
     context = context,
     package = package,
     module_id = moduleid,
-    instance = instance
+    instance = instance,
+    source_env = senv,
+    target_env = tenv
   ))
 }
 
@@ -387,7 +400,7 @@ rave_context_generics <- function(fun_name, fun = function(){}){
   stopifnot2(is.character(fun_name), msg = 'fun_name must be characters')
   
   body(fun) <- rlang::quo_squash(rlang::quo({
-    .__rave_temp__. = rave_context()
+    .__rave_temp__. = rave_context(spos = 2L)
     # cat2(!!fun_name, ' - ', paste(unlist(.__rave_temp__.), collapse = ','))
     UseMethod(!!fun_name, structure(list(), class = .__rave_temp__.$context))
   }))

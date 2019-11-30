@@ -210,7 +210,7 @@ compile_module_ui <- function(
 #' @param context pre-assign contexts in tool_env and tmp_enc
 #' 
 #' @noRd
-parse_components <- function(module_id, parse_context = c("rave_running", "rave_running_local")){
+parse_components <- function(module_id, parse_context = c("rave_running_local", "rave_running")){
   
   parse_context = match.arg(parse_context)
   # requires at least package name to be present
