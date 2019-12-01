@@ -280,17 +280,42 @@ get_running_instance <- function(senv, test = TRUE){
 #' 
 #' 
 #' 
+#' @name rave_context
+NULL
+
+#' @rdname rave_context
 #' @export
 rave_context <- function(context, require_contexts, disallowed_context, 
-                        error_msg, senv = parent.frame(2L), spos,
-                        tenv = parent.frame(), tpos){
-  if(!missing(spos)){
-    senv = parent.frame(spos)
-  }
-  if(!missing(tpos)){
+                        error_msg, spos = 2L, senv,
+                        tpos = 1L, tenv){
+  if(missing(tenv)){
     tenv = parent.frame(tpos)
   }
-  penv = parent.frame()
+  # if(missing(senv)){
+  #   senv = parent.frame(spos)
+  # }
+  if(missing(senv)){
+    sys_parents = rev(sys.parents())
+    idx = which(sys_parents == 0)
+    if(length(idx)){
+      sys_parents = sys_parents[seq_len(idx[[1]])]
+    }
+    if(spos >= 2L){
+      sys_parents = sys_parents[-seq_len(spos-1)]
+    }
+    
+    senv = parent.frame()
+    for(n in sys_parents){
+      if(exists('.__rave_context__.', frame = n)){
+        senv = sys.frame(n)
+        break()
+      }
+    }
+  }
+  
+  # if(missing(senv)){
+  #   senv = sys.frame(spos)
+  # }
   if(missing(context)){
     context = get0('.__rave_context__.', envir = senv, ifnotfound = 'default', inherits = TRUE)
   }
@@ -300,13 +325,12 @@ rave_context <- function(context, require_contexts, disallowed_context,
   if(!missing(require_contexts)){
     if(!all(require_contexts %in% context)){
       # call = paste(deparse(sys.call(1L)[[1]]), collapse = '')
-      cat(penv$.__rave_calls__., sep = '\n', end = '\n')
       if(!missing(error_msg)){
         do.call(rave_failure, list(
           message = paste0('Context error: in ', sQuote(call), ': ', error_msg),
           level = 'ERROR',
           .stop = TRUE
-        ), envir = parent.frame())
+        ), envir = sys.frame())
         # stop('Context error: in ', sQuote(call), ': ', error_msg)
       }
       
@@ -316,7 +340,7 @@ rave_context <- function(context, require_contexts, disallowed_context,
         ),
         level = 'ERROR',
         .stop = TRUE
-      ), envir = parent.frame())
+      ), envir = sys.frame())
       # stop('Context error: in ', sQuote(call), ': required context: ', paste(require_contexts, ', '))
     }
   }
@@ -324,23 +348,27 @@ rave_context <- function(context, require_contexts, disallowed_context,
   if(!missing(disallowed_context)){
     sel = context %in% disallowed_context
     if(any(sel)){
-      # call = paste(deparse(sys.call(1L)[[1]]), collapse = '')
-      cat(penv$.__rave_calls__., sep = '\n', end = '\n')
+      calls = sys.calls()
+      lapply(seq_along(calls), function(ii){
+        call = calls[[ii]]
+        s = deparse(call)[[1]]
+        cat('[', ii, ']\t', s, '\n', sep = '')
+      })
       if(!missing(error_msg)){
         do.call(rave_failure, list(
-          message = paste0('Context error: in ', sQuote(call), ': ', error_msg),
+          message = paste0('Context error, ', error_msg),
           level = 'ERROR',
           .stop = TRUE
-        ), envir = parent.frame())
+        ), envir = sys.frame())
         # stop('Context error: in ', sQuote(call), ': ', error_msg)
       }
       do.call(rave_failure, list(
         message = paste0(
-          'Context error: in ', sQuote(call), ': disallow context: ', paste(context[sel], ', ')
+          'Context error, disallow context: ', paste(context[sel], ', ')
         ),
         level = 'ERROR',
         .stop = TRUE
-      ), envir = parent.frame())
+      ), envir = sys.frame())
       # stop('Context error: in ', sQuote(call), ': disallow context: ', paste(context[sel], ', '))
     }
   }
@@ -389,6 +417,35 @@ rave_context <- function(context, require_contexts, disallowed_context,
   ))
 }
 
+# @rdname rave_context
+# @export
+# rave_context <- function(..., senv, tenv){
+#   if(missing(senv)){
+#     sys_parents = rev(sys.parents())
+#     idx = which(sys_parents == 0)
+#     if(length(idx)){
+#       sys_parents = sys_parents[seq_len(idx[[1]])]
+#     }
+#     senv = parent.frame()
+#     for(n in sys_parents){
+#       if(exists('.__rave_context__.', frame = n)){
+#         senv = sys.frame(n)
+#         break()
+#       }
+#     }
+#   }
+#   if(missing(tenv)){
+#     tenv = parent.frame()
+#   }
+#   
+#   call = match.call()
+#   call[[1]] = quote(.rave_context)
+#   call[['senv']] = quote(senv)
+#   call[['tenv']] = quote(tenv)
+#   eval(call)
+# }
+
+
 
 #' @title Create S3 Generics that Respects 'RAVE' Context
 #' @param fun_name generic function name
@@ -400,7 +457,7 @@ rave_context_generics <- function(fun_name, fun = function(){}){
   stopifnot2(is.character(fun_name), msg = 'fun_name must be characters')
   
   body(fun) <- rlang::quo_squash(rlang::quo({
-    .__rave_temp__. = rave_context(spos = 2L)
+    .__rave_temp__. = rave_context()
     # cat2(!!fun_name, ' - ', paste(unlist(.__rave_temp__.), collapse = ','))
     UseMethod(!!fun_name, structure(list(), class = .__rave_temp__.$context))
   }))

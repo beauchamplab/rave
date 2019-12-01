@@ -499,6 +499,7 @@ ModuleEnvir <- R6::R6Class(
     #' current module and given session
     get_or_new_exec_env = function(session = getDefaultReactiveDomain(), 
                                    ..., new = FALSE){
+      rave_context()
       session_id = add_to_session(session)
       if(is.null(session_id)){
         session_id = '.TEMP'
@@ -517,7 +518,7 @@ ModuleEnvir <- R6::R6Class(
     #' @return none
     load_script = function(session = getDefaultReactiveDomain()){
       
-      rave_context(senv = parent.frame())
+      rave_context()
       # load default script
       default_src = readLines(system.file('default_module.R', package = 'rave'))
       # read in script, get package info

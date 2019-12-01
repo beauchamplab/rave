@@ -154,7 +154,8 @@ get_comp_env <- function(module_id, parse_context = c("rave_running", "rave_runn
   
   # environment to run the code with context
   tmp_env = new.env(parent = tool_env)
-  rave_context(context = parse_context, spos = 1L, tenv = tmp_env)
+  # rave_context(context = parse_context, spos = 1L, tenv = tmp_env)
+  rave_context(context = parse_context, tenv = tmp_env)
   
   # Add references to make sure the environments can be accessed from context
   # `rave_compile`
@@ -343,7 +344,8 @@ get_main_function <- function(module_id, parse_context = c("rave_running", "rave
   if(debug){
     list2env(as.list(envs$tool_env), envir = param_env)
   }
-  rave_context(context = parse_context, spos = 1L, tenv = param_env)
+  # rave_context(context = parse_context, spos = 1L, tenv = param_env)
+  rave_context(context = parse_context, tenv = param_env)
   
   mount_demo_subject()
   

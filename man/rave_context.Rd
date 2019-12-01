@@ -9,10 +9,10 @@ rave_context(
   require_contexts,
   disallowed_context,
   error_msg,
-  senv = parent.frame(2L),
-  spos,
-  tenv = parent.frame(),
-  tpos
+  spos = 2L,
+  senv,
+  tpos = 1L,
+  tenv
 )
 }
 \arguments{
@@ -28,15 +28,15 @@ will raise errors}
 \item{error_msg}{characters, (optional): if running in improper contexts, the
 message to display, will passed to \code{\link{stop}}}
 
-\item{senv}{environment to read 'RAVE' contexts}
-
 \item{spos}{levels to go up to search for \code{senv}, passed to 
 \code{\link{parent.frame}}}
 
-\item{tenv}{environment to set 'RAVE' contexts}
+\item{senv}{environment to read 'RAVE' contexts}
 
 \item{tpos}{levels to go up to search for \code{tenv}, passed to 
 \code{\link{parent.frame}}}
+
+\item{tenv}{environment to set 'RAVE' contexts}
 }
 \value{
 A list of current context, including the package name, module ID, 

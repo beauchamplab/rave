@@ -306,17 +306,6 @@ expand_box <- function(
 }
 
 
-# run_outputs <- function(exec_env, outputId, ){
-#   rave_context(senv = exec_env, tpos = 1L)
-#   exec_env$local_reactives$show_results
-#   if (shiny::isolate(exec_env$local_reactives$has_data)) {
-#     func = get0(outputId, envir = exec_env$param_env, inherits = TRUE)
-#     if (is.function(func)) {
-#       func()
-#     }
-#   }
-# }
-
 
 comp_parser <- function(){
   parsers = new.env()
@@ -340,7 +329,8 @@ comp_parser <- function(){
       expr[['inputId']] = as.call(list(quote(ns), inputId))
       observers = function(input, output, session, local_data, exec_env){
         observe({
-          rave_context(senv = exec_env, tpos = 1L)
+          # rave_context(senv = exec_env, tpos = 1L)
+          rave_context(senv = exec_env)
           val = input[[inputId]]
           t = Sys.time()
           
@@ -400,7 +390,7 @@ comp_parser <- function(){
           fun_name = stringr::str_replace(fun_name, 'Output', '')
           
           output[[outputId]] = do.call(fun_name, args = list(quote({
-            rave_context(senv = exec_env, tpos = 1L)
+            rave_context(senv = exec_env)
             local_data$show_results
             if(isolate(local_data$has_data)){
               func = get0(outputId, envir = exec_env$param_env, inherits = TRUE)
@@ -539,7 +529,7 @@ comp_parser <- function(){
       
       re$observers = function(input, output, session, local_data, exec_env){
         output[[outputId]] = shiny::renderText({
-          rave_context(senv = exec_env, tpos = 1L)
+          rave_context(senv = exec_env)
           local_data$show_results
           if (isolate(local_data$has_data)) {
             func = get0(outputId, envir = exec_env$param_env,
@@ -558,7 +548,7 @@ comp_parser <- function(){
       
       re$observers = function(input, output, session, local_data, exec_env){
         output[[outputId]] = shiny::renderPrint({
-          rave_context(senv = exec_env, tpos = 1L)
+          rave_context(senv = exec_env)
           local_data$show_results
           if (isolate(local_data$has_data)) {
             func = get0(outputId, envir = exec_env$param_env,
@@ -577,7 +567,7 @@ comp_parser <- function(){
       
       re$observers = function(input, output, session, local_data, exec_env){
         output[[outputId]] = shiny::renderPlot({
-          rave_context(senv = exec_env, tpos = 1L)
+          rave_context(senv = exec_env)
           local_data$show_results
           if (isolate(local_data$has_data)) {
             func = get0(outputId, envir = exec_env$param_env,
@@ -599,7 +589,7 @@ comp_parser <- function(){
       outputId = re$outputId
       re$observers = function(input, output, session, local_data, exec_env){
         output[[outputId]] = DT::renderDT({
-          rave_context(senv = exec_env, tpos = 1L)
+          rave_context(senv = exec_env)
           local_data$show_results
           if (isolate(local_data$has_data)) {
             func = get0(outputId, envir = exec_env$param_env,
@@ -617,7 +607,7 @@ comp_parser <- function(){
       outputId = re$outputId
       re$observers = function(input, output, session, local_data, exec_env){
         output[[outputId]] = DT::renderDataTable({
-          rave_context(senv = exec_env, tpos = 1L)
+          rave_context(senv = exec_env)
           local_data$show_results
           if (isolate(local_data$has_data)) {
             func = get0(outputId, envir = exec_env$param_env,
@@ -687,7 +677,7 @@ comp_parser <- function(){
       expr[[1]] = quote(shiny::uiOutput)
       observers = function(input, output, session, local_data, exec_env){
         output[[inputId]] <- shiny::renderUI({
-          rave_context(senv = exec_env, tpos = 1L)
+          rave_context(senv = exec_env)
           if(local_data$has_data){
             func = exec_env$static_env[[inputId]]
             tryCatch({
@@ -823,7 +813,7 @@ comp_parser <- function(){
       
       re$observers = function(input, output, session, local_data, exec_env){
         output[[outputId]] = threeBrain::renderBrain({
-          rave_context(senv = exec_env, tpos = 1L)
+          rave_context(senv = exec_env)
           local_data$show_results
           if (isolate(local_data$has_data)) {
             func = get0(outputId, envir = exec_env$param_env,

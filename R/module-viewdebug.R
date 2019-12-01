@@ -7,7 +7,7 @@ to_module <- function(module_id, sidebar_width = 3, parse_context = c(
   'rave_running_local', 'rave_running'
 )){
   parse_context = match.arg(parse_context)
-  ctx = rave_context(disallowed_context = 'default', spos = 2L)
+  ctx = rave_context(disallowed_context = 'default')
   pkg_name = ctx$package
   .__rave_module__. = module_id
   cat2('parsing module ', module_id, ' in the following context: ', parse_context, level = 'INFO')

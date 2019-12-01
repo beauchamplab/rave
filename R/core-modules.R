@@ -191,7 +191,7 @@ detect_modules <- function(packages, as_module = TRUE, ...){
 #' @export
 get_module <- function(package, module_id, local = FALSE, ...){
   require(rave)
-  rave_context()
+  # rave_context()
   
   .__rave_context__. = 'rave_module_debug'
   .__rave_package__. = package
@@ -208,10 +208,13 @@ get_module <- function(package, module_id, local = FALSE, ...){
       return(module_as_function(package = package, module_id = module_id, reload = FALSE))
     }
   }
+  
+  # If you see context error, uncomment this line and expose the error
+  # load_rave_yaml()
   conf = tryCatch({
     load_rave_yaml()
   }, error = function(e){
-    cat2('Package ', package, ' has no RAVE modules.', level = 'INFO')
+    cat2('Package ', package, ' has no RAVE modules.', level = 'WARNING')
   })
   if(!length(conf)){
     return(invisible())
