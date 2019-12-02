@@ -220,7 +220,7 @@ customizedUI <- function(inputId, width = 12L, ...){
 
 
 
-div_elastic <- function(css_selector, any = T){
+div_elastic <- function(css_selector, any = TRUE){
   div(
     class = 'btn btn-box-tool rave-elastic-btn force-recalculate',
     tag('i', list(class = "fa fa-expand"))

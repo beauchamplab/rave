@@ -348,12 +348,13 @@ rave_context <- function(context, require_contexts, disallowed_context,
   if(!missing(disallowed_context)){
     sel = context %in% disallowed_context
     if(any(sel)){
-      calls = sys.calls()
-      lapply(seq_along(calls), function(ii){
-        call = calls[[ii]]
-        s = deparse(call)[[1]]
-        cat('[', ii, ']\t', s, '\n', sep = '')
-      })
+      # calls = sys.calls()
+      # lapply(seq_along(calls), function(ii){
+      #   call = calls[[ii]]
+      #   s = deparse(call)[[1]]
+      #   cat('[', ii, ']\t', s, '\n', sep = '')
+      # })
+      print(rlang::trace_back())
       if(!missing(error_msg)){
         do.call(rave_failure, list(
           message = paste0('Context error, ', error_msg),

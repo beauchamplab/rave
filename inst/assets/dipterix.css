@@ -753,6 +753,7 @@ body.rave-dark table.dataTable.display tbody tr.even {
   background-color: #0f0f0f;
 }
 
+body.rave-dark .table-striped>tbody>tr:nth-of-type(odd),
 body.rave-dark table.dataTable.stripe tbody tr.odd, 
 body.rave-dark table.dataTable.display tbody tr.odd {
   background-color: #1a1a1a;
@@ -762,4 +763,7 @@ body.rave-dark table.dataTable.hover tbody tr:hover, table.dataTable.display tbo
   background-color: inherit;
 }
 
+body.rave-dark .rave-grid-inputs {
+  border: 1px solid #272727;
+}
 
