@@ -146,10 +146,14 @@ get_rave_theme.rave_running_local <- get_rave_theme.rave_running
 
 #' @export
 set_rave_theme <- function(theme, .set_default = FALSE){
-  ctx = rave_context()
-  default_theme = rave_options('default_theme')
+  rave_context()
+  session = shiny::getDefaultReactiveDomain()
+  if(!is.null(session)){
+    default_theme = session$userData$rave_theme
+  }
+  default_theme %?<-% rave_options('default_theme')
   if(missing(theme)){
-    theme = rave_options('default_theme')
+    theme = default_theme
     if(is.null(theme) || !theme %in% c('light', 'dark')){
       theme = 'light'
     }
@@ -160,17 +164,14 @@ set_rave_theme <- function(theme, .set_default = FALSE){
     rave_options('default_theme' = theme)
   }
   
-  session = shiny::getDefaultReactiveDomain()
-  if(ctx$context == 'rave_running'){
-    session$userData$rave_theme = theme
-  }
   if(!is.null(session)){
+    
     if( theme == 'light' ){
-      shinyjs::removeClass(class = 'rave-dark', selector = 'body')
-      shinyjs::addClass(class = 'rave-light', selector = 'body')
+      session$userData$rave_theme = 'light'
+      session$sendCustomMessage('rave_set_theme', list(theme = 'light'))
     }else{
-      shinyjs::removeClass(class = 'rave-light', selector = 'body')
-      shinyjs::addClass(class = 'rave-dark', selector = 'body')
+      session$userData$rave_theme = 'dark'
+      session$sendCustomMessage('rave_set_theme', list(theme = 'dark'))
     }
   }
   if(theme == 'light'){

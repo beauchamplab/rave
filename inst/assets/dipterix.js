@@ -110,6 +110,13 @@ Shiny.addCustomMessageHandler("rave_set_id", (key) => {
   _this.current_key = key;
 });
 
+Shiny.addCustomMessageHandler('rave_set_theme', (params) => {
+  let theme = params.theme || 'light';
+  $('body').removeClass('rave-dark');
+  $('body').removeClass('rave-light');
+  $('body').addClass('rave-' + theme);
+});
+
 Shiny.addCustomMessageHandler("rave_enable_button", (data) => {
   const el = document.getElementById(data.element_id);
   if( el ){
