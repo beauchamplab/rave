@@ -4,7 +4,7 @@
 \alias{arrange_data_dir}
 \title{Initialize data repository}
 \usage{
-arrange_data_dir(first_time = F, reset = F)
+arrange_data_dir(first_time = FALSE, reset = FALSE)
 }
 \arguments{
 \item{first_time}{will create data repositories for you}

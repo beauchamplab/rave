@@ -40,15 +40,6 @@ rave_version <- function(){
         rave_ver = new_ver
       )
       
-      try({
-        if(!isTRUE(rave_options('disable_startup_speed_check'))){
-          remotes::install_github('dipterix/dipsaus', upgrade = FALSE, force = FALSE)
-          remotes::install_github('dipterix/rutabaga@develop', upgrade = FALSE, force = FALSE)
-          remotes::install_github('dipterix/threeBrain', upgrade = FALSE, force = FALSE)
-          remotes::install_github('beauchamplab/ravebuiltins@migrate2', upgrade = FALSE, force = FALSE)
-        }
-      }, silent = TRUE)
-      
     }else{
       has_data = arrange_data_dir(F)
     }
@@ -56,6 +47,20 @@ rave_version <- function(){
     save_options()
     
   })
+}
+
+#' @title Check and Install RAVE Dependencies
+#' @export
+check_dependencies <- function(){
+  cat2('Check pacakge rutabaga - Plot Helpers')
+  remotes::install_github('dipterix/rutabaga@develop', upgrade = FALSE, force = FALSE, quiet = TRUE)
+  cat2('Check pacakge threeBrain - 3D Viewer')
+  remotes::install_github('dipterix/threeBrain', upgrade = FALSE, force = FALSE, quiet = TRUE)
+  cat2('Check pacakge ravebuiltins - Default RAVE modules')
+  remotes::install_github('beauchamplab/ravebuiltins@migrate2', upgrade = FALSE, force = FALSE, quiet = TRUE)
+  cat2('Check pacakge dipsaus - System Utils')
+  remotes::install_github('dipterix/dipsaus', upgrade = FALSE, force = FALSE, quiet = TRUE)
+  invisible()
 }
 
 
