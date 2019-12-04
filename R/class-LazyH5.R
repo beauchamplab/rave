@@ -157,7 +157,7 @@ LazyH5 <- R6::R6Class(
             # will lock the file for writting
             f = hdf5r::H5File$new(private$file, 'r')
             cat2('Closing all other connections to [', private$file, '] - ', f$get_obj_count() - 1)
-            f$close_all()
+            try({ f$close_all() }, silent = TRUE)
             private$file_ptr = hdf5r::H5File$new(private$file, mode)
           })
         }
@@ -213,15 +213,17 @@ LazyH5 <- R6::R6Class(
     #' If true, then all connections, including access from other programs, 
     #' will be closed
     close = function(all = FALSE){
-      # check if data link is valid
-      if(!is.null(private$data_ptr) && private$data_ptr$is_valid){
-        private$data_ptr$close()
-      }
-      
-      # if file link is valid, get_obj_ids() should return a vector of 1
-      if(all && !is.null(private$file_ptr) && private$file_ptr$is_valid){
-        private$file_ptr$close_all()
-      }
+      try({
+        # check if data link is valid
+        if(!is.null(private$data_ptr) && private$data_ptr$is_valid){
+          private$data_ptr$close()
+        }
+        
+        # if file link is valid, get_obj_ids() should return a vector of 1
+        if(all && !is.null(private$file_ptr) && private$file_ptr$is_valid){
+          private$file_ptr$close_all()
+        }
+      }, silent = TRUE)
     },
     
     #' @description subset data

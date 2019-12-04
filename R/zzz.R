@@ -23,12 +23,11 @@ rave_version <- function(){
       return(TRUE)
     })
     if(is_newer){
-      catgl('RAVE Updated from {old_ver} ==> {new_ver}')
-      catgl('Updating module information', level = 'INFO')
+      packageStartupMessage(sprintf('RAVE Updated from %s ==> %s. Updating module information...', old_ver, new_ver))
       # New RAVE installed! update
       
       # 3. Data files
-      has_data = arrange_data_dir(T)
+      has_data = arrange_data_dir(TRUE)
       
       
       rave_hist$save('..rave_ver..' = new_ver)
@@ -40,6 +39,15 @@ rave_version <- function(){
         # crayon_enabled = TRUE,
         rave_ver = new_ver
       )
+      
+      try({
+        if(!isTRUE(rave_options('disable_startup_speed_check'))){
+          remotes::install_github('dipterix/dipsaus', upgrade = FALSE, force = FALSE)
+          remotes::install_github('dipterix/rutabaga@develop', upgrade = FALSE, force = FALSE)
+          remotes::install_github('dipterix/threeBrain', upgrade = FALSE, force = FALSE)
+          remotes::install_github('beauchamplab/ravebuiltins@migrate2', upgrade = FALSE, force = FALSE)
+        }
+      }, silent = TRUE)
       
     }else{
       has_data = arrange_data_dir(F)

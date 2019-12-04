@@ -53,9 +53,9 @@ load_h5 <- function(file, name, read_only = T, ram = F){
 #' y[]
 #' @export
 save_h5 <- function(x, file, name, chunk = 'auto', level = 4,replace = TRUE, new_file = FALSE, ctype = NULL, ...){
-  f = LazyH5$new(file, name, read_only = F)
+  f = LazyH5$new(file, name, read_only = FALSE)
   f$save(x, chunk = chunk, level = level, replace = replace, new_file = new_file, ctype = ctype, force = TRUE, ...)
-  f$clone()
+  f$close(all = TRUE)
   return()
 }
 

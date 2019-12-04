@@ -4,17 +4,17 @@
 #' @param first_time will create data repositories for you
 #' @param reset reset to default data directory
 #' @export
-arrange_data_dir <- function(first_time = F, reset = F){
+arrange_data_dir <- function(first_time = FALSE, reset = FALSE){
   if(first_time || reset){
     data_dir = '~/rave_data/data_dir'
     raw_dir = '~/rave_data/raw_dir'
     
-    dir.create(data_dir, showWarnings = F, recursive = T)
-    dir.create(raw_dir, showWarnings = F, recursive = T)
+    dir.create(data_dir, showWarnings = FALSE, recursive = TRUE)
+    dir.create(raw_dir, showWarnings = FALSE, recursive = TRUE)
     
     # Russian rocket: RE-DO whenever fails
-    file.copy(system.file('data/data_dir', package = 'rave'), '~/rave_data/', recursive = T, overwrite = T)
-    file.copy(system.file('data/raw_dir', package = 'rave'), '~/rave_data/', recursive = T, overwrite = T)
+    file.copy(system.file('data/data_dir', package = 'rave'), '~/rave_data/', recursive = TRUE, overwrite = TRUE)
+    file.copy(system.file('data/raw_dir', package = 'rave'), '~/rave_data/', recursive = TRUE, overwrite = TRUE)
   }
   
   if(reset){
