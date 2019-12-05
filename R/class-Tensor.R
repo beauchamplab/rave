@@ -580,7 +580,7 @@ Tensor <- R6::R6Class(
                        mem_optimize = FALSE, same_dimension = FALSE){
       by_vector = as.vector(by)
       if(missing(match_dim)){
-        return(self$get_data() / by_vector)
+        return(fun(self$get_data(), by_vector))
       }
       stopifnot2(
         all(match_dim %in% seq_along(self$dim)),
@@ -625,6 +625,7 @@ Tensor <- R6::R6Class(
                              varnames = self$varnames, hybrid = FALSE, use_index = FALSE,
                              temporary = FALSE, multi_files = FALSE)
             sub$to_swap_now(use_index = FALSE)
+            sub
           })
 
           re = join_tensors(re)
