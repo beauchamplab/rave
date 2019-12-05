@@ -676,7 +676,7 @@ Tensor <- R6::R6Class(
           sub = fun(sub, by_vector)
           sub = aperm(sub, order(perm))
         }else{
-          sub = fun(sub, by_vector)
+          sub = fun(self$get_data(), by_vector)
         }
         return(sub)
       }
