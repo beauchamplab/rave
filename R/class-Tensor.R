@@ -584,7 +584,7 @@ Tensor <- R6::R6Class(
       }
       stopifnot2(
         all(match_dim %in% seq_along(self$dim)),
-        sum(abs(self$dim[match_dim] - dim(by))) == 0,
+        (is.null(by) || sum(abs(self$dim[match_dim] - dim(by))) == 0),
         msg = 'Dimension does not match: self$dim[match_dim] = dim(by) ?'
       )
       rest_dims = seq_along(self$dim)[-match_dim]
