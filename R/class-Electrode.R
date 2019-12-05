@@ -635,7 +635,7 @@ Electrode <- R6::R6Class(
           }
           a = as.vector(self[[name]][[b]][subinds])
           if(has_bad_part){
-            a[bad_part] = median(a[!bad_part], na.rm = TRUE)
+            a[bad_part] = NA#median(a[!bad_part], na.rm = TRUE)
           }
           a
         }))
@@ -727,7 +727,7 @@ Electrode <- R6::R6Class(
             }
             a = self[[dname]][[b]][,subinds, drop = FALSE]
             if(has_bad_part){
-              a[,bad_part] = median(a[,!bad_part], na.rm = TRUE)
+              a[,bad_part] = NA#median(a[,!bad_part], na.rm = TRUE)
             }
             a
           }))
