@@ -51,20 +51,33 @@ NULL
 
 .cache_global_container <- local({
   map = NULL
-  function(){
+  tmp_map = NULL
+  function(temorary = FALSE){
     if(is.null(map)){
       map <<- dipsaus::session_map()
       map$has_locker = FALSE
       RaveFinalizer$new(function(...){
         map$destroy()
       })
+      
+      tmp_map <<- dipsaus::session_map()
+      tmp_map$has_locker = FALSE
+      RaveFinalizer$new(function(...){
+        tmp_map$destroy()
+      })
     }
-    map
+    if( temorary ){
+      tmp_map
+    }else{
+      map
+    }
+    
   }
 })
 
-.cache_global <- function(key, val, name, replace=FALSE, has_key = TRUE, test = FALSE, ...){
-  map = .cache_global_container()
+.cache_global <- function(key, val, name, replace=FALSE, has_key = TRUE, 
+                          test = FALSE, temporary = FALSE, ...){
+  map = .cache_global_container(temporary)
   tres = FALSE
   if( has_key ){
     tres = map$has(name, signature = key)
@@ -84,7 +97,7 @@ NULL
 }
 
 .cache <- function(key, val, name, replace=FALSE, global=FALSE, 
-                   persist=FALSE, test = FALSE, ...){
+                   persist=FALSE, test = FALSE, temporary = FALSE, ...){
   
   ctx = rave_context()
   instance = ctx$instance
@@ -114,11 +127,13 @@ NULL
     if( test ){
       # Variable is cached in global environment, check whether cache exists
       tres_gl = .cache_global(key = key, name = name, replace = FALSE, 
-                              has_key = has_key, test = TRUE)
+                              has_key = has_key, test = TRUE, 
+                              temporary = temporary)
       # if exist in global cache, then obtain the value
       if(tres_gl){
         return(.cache_global(name = name, replace = FALSE, 
-                             has_key = FALSE, test = FALSE))
+                             has_key = FALSE, test = FALSE, 
+                             temporary = temporary))
       }
       
       # No cache found, return value
@@ -126,7 +141,8 @@ NULL
     }
     
     return(.cache_global(key = key, val = val, name = name, 
-                         replace = replace, has_key = has_key, test = FALSE))
+                         replace = replace, has_key = has_key, 
+                         test = FALSE, temporary = temporary))
   }
   
   # global is false
@@ -175,7 +191,13 @@ cache.rave_running = .cache
 
 #' @rdname rave-cache
 #' @export
-cache.rave_running_local <- function(key, val, ...){ val }
+cache.rave_running_local <- function(...){
+  ..call = sys.call()
+  ..call$global = TRUE
+  ..call$temporary = TRUE
+  ..call[[1]] = quote(.cache)
+  eval(..call)
+}
 
 #' @rdname rave-cache
 #' @export
@@ -230,4 +252,6 @@ clear_cache <- function(levels = 1){
       ctx$instance$module_env$cache_env$reset()
     }
   }
+  tmp_map = .cache_global_container(TRUE)
+  tmp_map$reset()
 }

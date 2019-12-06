@@ -18,6 +18,7 @@ cache(
   global = FALSE,
   persist = FALSE,
   test = FALSE,
+  temporary = FALSE,
   ...
 )
 
@@ -29,6 +30,7 @@ cache(
   global = FALSE,
   persist = FALSE,
   test = FALSE,
+  temporary = FALSE,
   ...
 )
 
@@ -40,10 +42,11 @@ cache(
   global = FALSE,
   persist = FALSE,
   test = FALSE,
+  temporary = FALSE,
   ...
 )
 
-\method{cache}{rave_running_local}(key, val, ...)
+\method{cache}{rave_running_local}(...)
 
 cache_input(inputId, val = NULL, read_only = TRUE, ...)
 
