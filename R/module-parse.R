@@ -371,7 +371,7 @@ get_main_function <- function(module_id, parse_context = c("rave_running", "rave
       inputId = input$inputId
       def = input$definition
       f = def[[1]]
-      args = formals(eval(f))
+      args = formals(eval(f, envir = list(), enclos = param_env))
       value = dipsaus::eval_dirty(def[['value']], env = param_env)
       value %?<-% dipsaus::eval_dirty(def[['selected']], env = param_env)
       value %?<-% dipsaus::eval_dirty(args[['value']], env = param_env)

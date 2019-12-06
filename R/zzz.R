@@ -52,13 +52,13 @@ rave_version <- function(){
 #' @title Check and Install RAVE Dependencies
 #' @export
 check_dependencies <- function(){
-  cat2('Check pacakge rutabaga - Plot Helpers')
+  cat2('Check package rutabaga - Plot Helpers')
   remotes::install_github('dipterix/rutabaga@develop', upgrade = FALSE, force = FALSE, quiet = TRUE)
-  cat2('Check pacakge threeBrain - 3D Viewer')
+  cat2('Check package threeBrain - 3D Viewer')
   remotes::install_github('dipterix/threeBrain', upgrade = FALSE, force = FALSE, quiet = TRUE)
-  cat2('Check pacakge ravebuiltins - Default RAVE modules')
+  cat2('Check package ravebuiltins - Default RAVE modules')
   remotes::install_github('beauchamplab/ravebuiltins@migrate2', upgrade = FALSE, force = FALSE, quiet = TRUE)
-  cat2('Check pacakge dipsaus - System Utils')
+  cat2('Check package dipsaus - System Utils')
   remotes::install_github('dipterix/dipsaus', upgrade = FALSE, force = FALSE, quiet = TRUE)
   invisible()
 }
