@@ -11,7 +11,7 @@
 #'
 #' @seealso \code{\link[rave]{save_h5}}
 #' @export
-load_h5 <- function(file, name, read_only = T, ram = F){
+load_h5 <- function(file, name, read_only = TRUE, ram = FALSE){
   f = re = LazyH5$new(file_path = file, data_name = name, read_only = read_only)
   if(ram){
     re = re[]
@@ -54,8 +54,11 @@ load_h5 <- function(file, name, read_only = T, ram = F){
 #' @export
 save_h5 <- function(x, file, name, chunk = 'auto', level = 4,replace = TRUE, new_file = FALSE, ctype = NULL, ...){
   f = LazyH5$new(file, name, read_only = FALSE)
+  on.exit({
+    f$close(all = TRUE)
+  }, add = TRUE)
   f$save(x, chunk = chunk, level = level, replace = replace, new_file = new_file, ctype = ctype, force = TRUE, ...)
-  f$close(all = TRUE)
+  
   return()
 }
 

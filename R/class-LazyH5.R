@@ -114,11 +114,12 @@ LazyH5 <- R6::R6Class(
         }else{
           # Close current pointer
           self$close(all = TRUE)
-          private$read_only = F
+          private$read_only = FALSE
           
           on.exit({
-            private$read_only = T
-          }, add = T, after = F)
+            self$close(all = TRUE)
+            private$read_only = TRUE
+          }, add = TRUE, after = FALSE)
         }
       }
       
@@ -212,7 +213,7 @@ LazyH5 <- R6::R6Class(
     #' @param all whether to close all connections associated to the data file.
     #' If true, then all connections, including access from other programs, 
     #' will be closed
-    close = function(all = FALSE){
+    close = function(all = TRUE){
       try({
         # check if data link is valid
         if(!is.null(private$data_ptr) && private$data_ptr$is_valid){

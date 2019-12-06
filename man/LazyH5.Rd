@@ -170,7 +170,7 @@ to write the data}
 \subsection{Method \code{close()}}{
 close connection
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{LazyH5$close(all = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{LazyH5$close(all = TRUE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

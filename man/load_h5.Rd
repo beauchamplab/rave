@@ -4,7 +4,7 @@
 \alias{load_h5}
 \title{Lazy Load "HDF5" File via \code{\link[hdf5r]{hdf5r-package}}}
 \usage{
-load_h5(file, name, read_only = T, ram = F)
+load_h5(file, name, read_only = TRUE, ram = FALSE)
 }
 \arguments{
 \item{file}{"HDF5" file}
