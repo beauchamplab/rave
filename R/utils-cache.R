@@ -183,21 +183,18 @@ cache <- rave_context_generics('cache', .cache)
 
 #' @rdname rave-cache
 #' @export
-cache.default = .cache
-
-#' @rdname rave-cache
-#' @export
 cache.rave_running = .cache
 
 #' @rdname rave-cache
 #' @export
-cache.rave_running_local <- function(...){
-  ..call = sys.call()
-  ..call$global = TRUE
-  ..call$temporary = TRUE
-  ..call[[1]] = quote(.cache)
-  eval(..call)
+cache.rave_running_local <- function(..., global = TRUE){
+  .cache(..., global = TRUE, temporary = TRUE)
 }
+
+#' @rdname rave-cache
+#' @export
+cache.default <- cache.rave_running_local
+
 
 #' @rdname rave-cache
 #' @export
