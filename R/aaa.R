@@ -21,6 +21,12 @@ catgl <- function(..., .envir = parent.frame(), level = 'DEBUG', .pal){
   }
 }
 
+debug <- function(..., .envir = parent.frame()){
+  if(TRUE){
+    catgl(..., .envir = .envir)
+  }
+}
+
 cat2 <- dipsaus::cat2
 
 soft_deprecated <- function(){

@@ -93,14 +93,19 @@ NULL
   if(missing(val)){
     val = NULL
     replace = FALSE
-  }else if(missing(key)){
+  }
+  if(missing(key)){
     key = NULL
     replace = FALSE
     has_key = FALSE
   }
   if(test){
-    has_key = FALSE
+    # has_key = FALSE
     replace = FALSE
+    if(missing(key)){
+      key = NULL
+      has_key = FALSE
+    }
   }
   
   if(!global && is.null(instance)){
@@ -110,14 +115,20 @@ NULL
   }
   
   if( global ){
-    tres_gl = .cache_global(key = key, name = name, replace = FALSE, 
-                            has_key = has_key, test = TRUE)
-    if( tres_gl && !has_key ){
-      return(.cache_global(key = key, name = name, replace = FALSE, 
-                           has_key = has_key, test = FALSE))
+    if( test ){
+      # Variable is cached in global environment, check whether cache exists
+      tres_gl = .cache_global(key = key, name = name, replace = FALSE, 
+                              has_key = has_key, test = TRUE)
+      # if exist in global cache, then obtain the value
+      if(tres_gl){
+        return(.cache_global(name = name, replace = FALSE, 
+                             has_key = FALSE, test = FALSE))
+      }
+      
+      # No cache found, return value
+      return( val )
     }
-    # No cache
-    if( !has_key ){ return(val) }
+    
     return(.cache_global(key = key, val = val, name = name, 
                          replace = replace, has_key = has_key, test = FALSE))
   }
