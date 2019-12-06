@@ -15,6 +15,7 @@ load_h5 <- function(file, name, read_only = TRUE, ram = FALSE){
   
   re = tryCatch({
     re = LazyH5$new(file_path = file, data_name = name, read_only = read_only)
+    re$open()
     re
   }, error = function(e){
     
@@ -73,6 +74,8 @@ load_h5 <- function(file, name, read_only = TRUE, ram = FALSE){
 save_h5 <- function(x, file, name, chunk = 'auto', level = 4,replace = TRUE, new_file = FALSE, ctype = NULL, ...){
   f = tryCatch({
     f = LazyH5$new(file, name, read_only = FALSE)
+    f$open()
+    f$close()
     f
   }, error = function(e){
     cat2('Saving failed. Attempt to unlink the file and retry...', level = 'INFO')
