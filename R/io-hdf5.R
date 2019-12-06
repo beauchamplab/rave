@@ -12,8 +12,28 @@
 #' @seealso \code{\link[rave]{save_h5}}
 #' @export
 load_h5 <- function(file, name, read_only = TRUE, ram = FALSE){
-  f = re = LazyH5$new(file_path = file, data_name = name, read_only = read_only)
+  
+  re = tryCatch({
+    re = LazyH5$new(file_path = file, data_name = name, read_only = read_only)
+    re$open()
+    re$close()
+    re
+  }, error = function(e){
+    
+    if(!read_only){
+      stop('Another process is locking the file. Cannot open file with write permission; use ', sQuote('save_h5'), ' instead...\n  file: ', file, '\n  name: ', name)
+    }
+    cat2('Open failed. Attempt to open with a temporary copy...', level = 'INFO')
+    
+    # Fails when other process holds a connection to it!
+    # If read_only, then copy the file to local directory 
+    tmpf = tempfile(fileext = 'conflict.h5')
+    file.copy(file, tmpf)
+    LazyH5$new(file_path = tmpf, data_name = name, read_only = read_only)
+  })
+  
   if(ram){
+    f = re
     re = re[]
     f$close()
   }
@@ -53,7 +73,21 @@ load_h5 <- function(file, name, read_only = TRUE, ram = FALSE){
 #' y[]
 #' @export
 save_h5 <- function(x, file, name, chunk = 'auto', level = 4,replace = TRUE, new_file = FALSE, ctype = NULL, ...){
-  f = LazyH5$new(file, name, read_only = FALSE)
+  f = tryCatch({
+    f = LazyH5$new(file, name, read_only = FALSE)
+    f$open()
+    f$close()
+    f
+  }, error = function(e){
+    cat2('Saving failed. Attempt to unlink the file and retry...', level = 'INFO')
+    # File is locked, 
+    tmpf = tempfile(fileext = 'conflict.w.h5')
+    file.copy(file, tmpf)
+    unlink(file, recursive = FALSE, force = TRUE)
+    file.copy(tmpf, file)
+    unlink(tmpf)
+    LazyH5$new(file, name, read_only = FALSE)
+  })
   on.exit({
     f$close(all = TRUE)
   }, add = TRUE)
