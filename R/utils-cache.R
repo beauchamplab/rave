@@ -102,10 +102,6 @@ NULL
   if(test){
     # has_key = FALSE
     replace = FALSE
-    if(missing(key)){
-      key = NULL
-      has_key = FALSE
-    }
   }
   
   if(!global && is.null(instance)){
@@ -153,7 +149,7 @@ NULL
     }
   }
   
-  if( !has_key ){ return(val) }
+  if( !has_key || test ){ return(val) }
   
   if( !persist ){
     instance$cache_env$set(name, val, key)
@@ -205,8 +201,10 @@ cache_input <- function(inputId, val = NULL, read_only = TRUE, ... ){
     cache(key, val, nm, replace = !read_only, global = TRUE)
   }
   
-  cache(key, val, inputId, replace = !read_only, global = FALSE, 
+  re = cache(key, val, inputId, replace = !read_only, global = FALSE, 
         persist = FALSE, test = test)
+  debug('Cache {inputId} - {paste(deparse(re), collapse = "")}')
+  re
 }
 
 #' @rdname rave-cache
