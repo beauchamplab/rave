@@ -8,8 +8,9 @@
 #' \code{global=FALSE}, the persisted data will be used by each modules
 #' @param test,read_only whether not to save the value if cache is not found
 #' @param global whether to cache the variable in global environment. If true,
-#' then the variable will be accessable from other instances and modules.
+#' then the variable will be accessible from other instances and modules.
 #' @param levels levels when clear the cache
+#' @param temporary whether to use temporary map to cache, used internally.
 #' @param ... ignored
 #' 
 #' @return Cached value, or \code{val}. If cache and \code{val} are both 

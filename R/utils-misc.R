@@ -70,6 +70,13 @@ is_invalid <- function(x, any = F, .invalids = c('null', 'na')){
   return(FALSE)
 }
 
+
+#' @title Get Value or Default
+#' @param x a list, or environment, or just any R object
+#' @param key the name to obtain from \code{x}. Default is \code{NULL}
+#' @param ... if the value is invalid, the default value to return
+#' @param .invalids what counts as invalid? Default is \code{NULL} and 
+#' \code{NA}, represented by \code{"null"} and \code{"na"}
 #' @export
 get_val <- function(x, key = NULL, ..., .invalids = c('null', 'na')){
   
@@ -79,14 +86,10 @@ get_val <- function(x, key = NULL, ..., .invalids = c('null', 'na')){
     val = x[[key]]
   }
   if(is_invalid(val, .invalids = .invalids)){
-    args = list(...)
-    len = length(args)
-    if(len){
-      if(len == 1){
-        val = args[[1]]
-      }else{
-        val = args
-      }
+    if(...length() > 1){
+      return(list(...))
+    } else{
+      return(...elt(1))
     }
   }
   return(val)

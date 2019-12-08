@@ -3,26 +3,14 @@
 \name{rave-cache}
 \alias{rave-cache}
 \alias{cache}
-\alias{cache.default}
 \alias{cache.rave_running}
 \alias{cache.rave_running_local}
+\alias{cache.default}
 \alias{cache_input}
 \alias{clear_cache}
 \title{Cache R Objects with Different levels}
 \usage{
 cache(
-  key,
-  val,
-  name,
-  replace = FALSE,
-  global = FALSE,
-  persist = FALSE,
-  test = FALSE,
-  temporary = FALSE,
-  ...
-)
-
-\method{cache}{default}(
   key,
   val,
   name,
@@ -46,7 +34,9 @@ cache(
   ...
 )
 
-\method{cache}{rave_running_local}(...)
+\method{cache}{rave_running_local}(..., global = TRUE)
+
+\method{cache}{default}(..., global = TRUE)
 
 cache_input(inputId, val = NULL, read_only = TRUE, ...)
 
@@ -62,12 +52,14 @@ clear_cache(levels = 1)
 \item{replace}{if true, force replace the cached object with current one}
 
 \item{global}{whether to cache the variable in global environment. If true,
-then the variable will be accessable from other instances and modules.}
+then the variable will be accessible from other instances and modules.}
 
 \item{persist}{logical, whether persist on the hard-disk, only used when 
 \code{global=FALSE}, the persisted data will be used by each modules}
 
 \item{test, read_only}{whether not to save the value if cache is not found}
+
+\item{temporary}{whether to use temporary map to cache, used internally.}
 
 \item{...}{ignored}
 

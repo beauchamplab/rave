@@ -21,8 +21,8 @@ None, but will source, or run whatever code provided.
 }
 \description{
 Use in \code{comp.R} to load scripts that cannot be put into 
-package \code{"R/"} folder. Usually the scripts contains shiny rectives 
-that changes dynamically.
+package \code{"R/"} folder. Usually the scripts contains shiny reactive
+values that changes dynamically.
 }
 \details{
 This function raises error when running in default contexts, and 

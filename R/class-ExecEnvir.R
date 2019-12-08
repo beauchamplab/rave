@@ -133,8 +133,8 @@ ExecEnvir <- R6::R6Class(
     #' @field local_reactives shiny local \code{reactives}, internal use only
     local_reactives = NULL,
     
-    #' @field internal_reactives internal reactives to control some elements, 
-    #' nternal use only
+    #' @field internal_reactives internal reactive values to control some 
+    #' elements, internal use only
     internal_reactives = NULL,
     
     #' @field ready_functions functions to run when the module is ready. The 

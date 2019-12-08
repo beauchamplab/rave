@@ -11,7 +11,7 @@ rave_version <- function(){
   try({
     # get rave_version
     old_ver = rave_options('rave_ver')
-    old_ver %?<-% rave_hist$get_or_save('..rave_ver..', '0.0.0.0000')
+    old_ver %?<-% rave_hist()$get_or_save('..rave_ver..', '0.0.0.0000')
     new_ver = rave_version()
     is_newer = tryCatch({
       is_newer = utils::compareVersion(old_ver, new_ver) < 0
@@ -23,14 +23,18 @@ rave_version <- function(){
       return(TRUE)
     })
     if(is_newer){
-      packageStartupMessage(sprintf('RAVE Updated from %s ==> %s. Updating module information...', old_ver, new_ver))
+      rave_hist()$save(
+        '..rave_startup_msg..' = 
+          sprintf('RAVE %s ==> %s. Module information has been updated.',
+                  old_ver, new_ver)
+      )
       # New RAVE installed! update
       
       # 3. Data files
       has_data = arrange_data_dir(TRUE)
       
       
-      rave_hist$save('..rave_ver..' = new_ver)
+      rave_hist()$save('..rave_ver..' = new_ver)
       
       # 1. additional settings
       rave_options(
@@ -82,6 +86,16 @@ check_dependencies <- function(){
     }
     
   }, silent = TRUE)
+  
+  try({
+    startup_msg = rave_hist()$get_or_save('..rave_startup_msg..')
+    if(interactive() && !is.null(startup_msg)){
+      rave_hist()$save('..rave_startup_msg..' = NULL)
+      packageStartupMessage(startup_msg)
+      packageStartupMessage('Please run ', sQuote("rave::check_dependencies()"), " to check dependencies.")
+    }
+  }, silent = TRUE)
+  
   
 }
 

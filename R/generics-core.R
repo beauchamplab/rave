@@ -8,13 +8,17 @@ prepend_ns <- function(arg, call){
   }
 }
 
-
+#' @title Get Module Runtime Environment from Current Context
+#' @return An \code{\link[rave]{ExecEnvir}} instance
 #' @export
 getExecEnvirFromContext <- function(){
   ctx = rave_context()
   ctx$instance
 }
 
+
+#' @title Get Module Instance from Current Context
+#' @return An \code{\link[rave]{ModuleEnvir}} instance
 #' @export
 getModuleEnvirFromContext <- function(){
   e = getExecEnvirFromContext()

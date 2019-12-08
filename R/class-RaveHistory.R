@@ -74,12 +74,20 @@ RAVEHistory <- R6::R6Class(
   )
 )
 
-rave_hist <- RAVEHistory$new(use_yaml = TRUE)
+rave_hist <- local({
+  h <- NULL
+  function(){
+    if(is.null(h)){
+      h <<- RAVEHistory$new(use_yaml = TRUE)
+    }
+    h
+  }
+})
 
 
 last_entry <- function(key, default, save = F, group = 'customized'){
   stopifnot2(is.character(key), msg = 'Key must be a string')
-  dict = rave_hist$get_or_save(key = group, val = list(), save = F)
+  dict = rave_hist()$get_or_save(key = group, val = list(), save = F)
   val = dict[[key]]
   val %?<-% default
   
@@ -89,7 +97,7 @@ last_entry <- function(key, default, save = F, group = 'customized'){
   if(save){
     dict[[key]] = default
     arg = list(dict); names(arg) = group
-    do.call(rave_hist$save, arg)
+    do.call(rave_hist()$save, arg)
     return(invisible(val))
   }else{
     return(val)

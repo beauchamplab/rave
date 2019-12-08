@@ -76,7 +76,7 @@ the module.
 
 If \code{update_level} is `0` then the input is defined as  manual inputs, 
 which will not trigger re-calculate if changed. If `1` is set, then the 
-input is a renderer's input, and only update render functions. If `2` is 
+input is a render's input, and only update render functions. If `2` is 
 used, then once user change an input, then the whole module is re-calculated.
 
 \code{init_args} must be argument names of the definition. Once subject is 

@@ -32,7 +32,7 @@ library(shiny)
 
 test_that('module configuration info', {
   
-  rave_set_context('default')
+  rave_context('default')
   
   expect_error(get_root_dir())
   expect_error(get_package_name())
@@ -41,17 +41,20 @@ test_that('module configuration info', {
   expect_error(get_module_label('power_explorer'))
   
   
+  
   local({
-    `.__rave_package__.` = 'ravebuiltins'
-    rave_set_context('rave_module_debug')
+    .__rave_package__. = 'ravebuiltins'
+    ctx = rave_context('rave_module_debug')
+    .__rave_package__. = 'ravebuiltins'
+    
     
     expect_true(get_root_dir() %in% c(
-      system.file('', package = `.__rave_package__.`)
+      system.file('', package = .__rave_package__.)
     ))
     
-    expect_equal(get_package_name(), `.__rave_package__.`)
-    expect_equal(get_path('inst/tools'), system.file('tools', package = `.__rave_package__.`))
-    expect_equal(get_path('inst/'), system.file('', package = `.__rave_package__.`))
+    expect_equal(get_package_name(), .__rave_package__.)
+    expect_equal(get_path('inst/tools'), system.file('tools', package = .__rave_package__.))
+    # expect_equal(get_path('inst/'), system.file('', package = .__rave_package__.))
     expect_equal(get_module_label('power_explorer'), 'Power Explorer')
     
     

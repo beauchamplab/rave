@@ -51,6 +51,23 @@
   invisible(x)
 }
 
+
+#' @title Get RAVE Theme from Package Settings
+#' @param packages packages to check
+#' @param type characters, \code{"continuous"}, \code{"discrete"}, or both
+#' @param theme \code{"light"} or \code{"dark"}; default is current 
+#' theme saved in \code{rave_options('current_theme')}
+#' @return A list contains all palettes found in the packages.
+#' @name get_rave_theme
+#' @examples 
+#' pal = get_rave_theme('rave', type = c('continuous', 'discrete'), theme='light')
+#' print(pal, plot=TRUE)
+#' 
+#' pal = get_rave_theme('rave', type = c('continuous', 'discrete'), theme='dark')
+#' print(pal, plot=TRUE)
+#' 
+NULL
+
 .get_rave_theme <- function(
   packages = NULL, type = 'continuous', theme
 ){
@@ -118,12 +135,6 @@ get_rave_theme <- rave_context_generics('get_rave_theme', .get_rave_theme)
 #' @export
 get_rave_theme.default <- .get_rave_theme
 
-#' @export
-get_rave_theme.rave_module_debug <- function(packages = NULL, ...){
-  ctx = rave_context()
-  packages = c(ctx$package, packages)
-  .get_rave_theme(packages, ...)
-}
 
 #' @export
 get_rave_theme.rave_running <- function(packages = NULL, type = 'continuous',
@@ -143,7 +154,32 @@ get_rave_theme.rave_running <- function(packages = NULL, type = 'continuous',
 get_rave_theme.rave_running_local <- get_rave_theme.rave_running
 
 
-
+#' @title Set and Return RAVE theme
+#' @param theme \code{"light"} or \code{"dark"}. See details if missing
+#' @param .set_default whether to save current theme as default, default is no.
+#' @details RAVE support two themes: "light" mode and "dark" mode. In "light"
+#' mode, the web application background will be light gray and white. In "dark"
+#' mode, the application background will be gray and foreground will be white.
+#' 
+#' If \code{theme} is missing and RAVE is running as web application, then 
+#' it is set from current session, otherwise, the default theme is retrieved 
+#' from \code{rave_options('default_theme')}. If option \code{"default_theme"}
+#' is missing, then it defaults to "light".
+#' 
+#' @return \code{theme} under current context.
+#' @examples 
+#' 
+#' # Retrieve current theme
+#' get_val(rave_options('default_theme'), default = 'light')
+#' 
+#' # Set light mode
+#' set_rave_theme('light')
+#' plot(1:10, main = 'test light mode')
+#' 
+#' # Set dark mode
+#' set_rave_theme('dark')
+#' plot(1:10, main = 'test dark mode')
+#' 
 #' @export
 set_rave_theme <- function(theme, .set_default = FALSE){
   rave_context()

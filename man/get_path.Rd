@@ -15,7 +15,7 @@ get_path(..., mustWork = FALSE, is_directory = FALSE)
 }
 \value{
 If you are developing the package, \code{get_path} returns the 
-obsolute file path, otherwise it uses \code{\link[base]{system.file}} to 
+absolute file path, otherwise it uses \code{\link[base]{system.file}} to 
 get the file from package library.
 }
 \description{

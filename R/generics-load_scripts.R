@@ -1,7 +1,7 @@
 #' @title Load scripts that cannot put into package R folder
 #' @description Use in \code{comp.R} to load scripts that cannot be put into 
-#' package \code{"R/"} folder. Usually the scripts contains shiny rectives 
-#' that changes dynamically. 
+#' package \code{"R/"} folder. Usually the scripts contains shiny reactive
+#' values that changes dynamically. 
 #' @param ... script files that are wrapped by \code{\link[rave]{get_path}}, 
 #' or R quasi-quotations wrapped by \code{\link[rlang]{quo}}.
 #' @param asis if the scripts to be loaded is a file, whether to copy to a

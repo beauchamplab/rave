@@ -144,9 +144,9 @@ rave_preprocess <- function(
     }
 
     utils$last_inputs = function(name){
-      last_project_name = rave_hist$get_or_save('.rave_pre_project_name', '', save = FALSE)
-      last_subject_code = rave_hist$get_or_save('.rave_pre_subject_code', '', save = FALSE)
-      last_notch_freq = rave_hist$get_or_save('.rave_pre_notch_freq', 60, save = FALSE)
+      last_project_name = rave_hist()$get_or_save('.rave_pre_project_name', '', save = FALSE)
+      last_subject_code = rave_hist()$get_or_save('.rave_pre_subject_code', '', save = FALSE)
+      last_notch_freq = rave_hist()$get_or_save('.rave_pre_notch_freq', 60, save = FALSE)
 
       return(list(
         last_project_name = last_project_name,
@@ -164,7 +164,7 @@ rave_preprocess <- function(
       s = SubjectInfo2$new(project_name = project_name, subject_code = subject_code)
       id = paste0(s$project_name , '/' , s$subject_code)
 
-      rave_hist$save(
+      rave_hist()$save(
         .rave_pre_project_name = project_name,
         .rave_pre_subject_code = subject_code
       )

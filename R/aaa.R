@@ -1,6 +1,7 @@
 #' @import shiny
 #' @importFrom dipsaus %?<-%
 #' @importFrom dipsaus collapse
+#' @importFrom graphics axis par points rect
 NULL
 
 
@@ -145,7 +146,7 @@ get_running_instance <- function(senv, test = TRUE){
 #' @details Context strings tells the function which context it's running, 
 #' and it will affect the behaviors of functions within its environment. 
 #' Because 'RAVE' modules are usually R packages, the context strings help 
-#' the module writters determine where the function is running. For example, 
+#' the module writers determine where the function is running. For example, 
 #' running locally, or in 'RAVE' container, or debug mode. A typical example 
 #' would be \code{\link[rave]{get_path}} function. All external scripts used 
 #' in R packages require to be obtained using \code{\link[base]{system.file}}. 

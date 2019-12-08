@@ -35,7 +35,7 @@ get_root_dir <- function(){
 #' @param mustWork whether the file must exists
 #' @param is_directory whether required file is a directory
 #' @return If you are developing the package, \code{get_path} returns the 
-#' obsolute file path, otherwise it uses \code{\link[base]{system.file}} to 
+#' absolute file path, otherwise it uses \code{\link[base]{system.file}} to 
 #' get the file from package library.
 #' @export
 get_path <- function(..., mustWork = FALSE, is_directory = FALSE){

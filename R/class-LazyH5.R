@@ -192,6 +192,9 @@ LazyH5 <- R6::R6Class(
           }
           # new create
           cat2(private$file, ' => ', private$name, ' (Dataset Created)\n')
+          if(missing(robj)){
+            robj = NA
+          }
           ptr$create_dataset(nm, robj = robj, ...)
           if(ptr$is_valid && inherits(ptr, 'H5Group')){
             ptr$close()

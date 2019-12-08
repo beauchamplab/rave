@@ -2,10 +2,31 @@
 % Please edit documentation in R/generics-shiny.R
 \name{get_rave_theme}
 \alias{get_rave_theme}
-\title{Get and Set 'RAVE' Themes}
+\title{Get RAVE Theme from Package Settings}
 \usage{
 get_rave_theme(packages = NULL, type = "continuous", theme)
 }
+\arguments{
+\item{packages}{packages to check}
+
+\item{type}{characters, \code{"continuous"}, \code{"discrete"}, or both}
+
+\item{theme}{\code{"light"} or \code{"dark"}; default is current 
+theme saved in \code{rave_options('current_theme')}}
+}
+\value{
+A list contains all palettes found in the packages.
+}
 \description{
+Get RAVE Theme from Package Settings
+
 Get and Set 'RAVE' Themes
+}
+\examples{
+pal = get_rave_theme('rave', type = c('continuous', 'discrete'), theme='light')
+print(pal, plot=TRUE)
+
+pal = get_rave_theme('rave', type = c('continuous', 'discrete'), theme='dark')
+print(pal, plot=TRUE)
+
 }

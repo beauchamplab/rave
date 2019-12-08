@@ -79,12 +79,15 @@ save_h5 <- function(x, file, name, chunk = 'auto', level = 4,replace = TRUE, new
     f
   }, error = function(e){
     cat2('Saving failed. Attempt to unlink the file and retry...', level = 'INFO')
-    # File is locked, 
-    tmpf = tempfile(fileext = 'conflict.w.h5')
-    file.copy(file, tmpf)
-    unlink(file, recursive = FALSE, force = TRUE)
-    file.copy(tmpf, file)
-    unlink(tmpf)
+    if(file.exists(file)){
+      # File is locked, 
+      tmpf = tempfile(fileext = 'conflict.w.h5')
+      file.copy(file, tmpf)
+      unlink(file, recursive = FALSE, force = TRUE)
+      file.copy(tmpf, file)
+      unlink(tmpf)
+    }
+    # Otherwise it's some wierd error, or dirname not exists, expose the error
     LazyH5$new(file, name, read_only = FALSE)
   })
   on.exit({
