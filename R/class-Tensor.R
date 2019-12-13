@@ -527,18 +527,18 @@ Tensor <- R6::R6Class(
     collapse = function(keep, method = 'mean'){
       sel = keep %in% seq_along(self$dim)
       if(any(!sel)){
-        stop('Argument keep is improper.')
+        cat2('Argument keep is improper.', level = 'FATAL')
       }
       d = self$get_data()
 
       if(!is.numeric(d) && !is.complex(d)){
-        stop('This tensor is not a numeric tensor')
+        cat2('This tensor is not a numeric tensor', level = 'FATAL')
       }
 
-      if(any(!is.finite(d))){
-        cat2('Tensor contains NaNs, converting to zeros', level = 'WARNING')
-        d[!is.finite(d)] = 0
-      }
+      # if(any(!is.finite(d))){
+      #   cat2('Tensor contains NaNs, converting to zeros', level = 'WARNING')
+      #   d[!is.finite(d)] = 0
+      # }
 
       f_c = function(d){
         switch (
