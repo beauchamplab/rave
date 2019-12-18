@@ -377,7 +377,7 @@ rave_execute({
     rave_failure('Need to load data. Waiting for an action.', level = 'INFO')
   }
   
-  if( !auto_recalculate() ){
+  if( !auto_recalculate( include_temporary = TRUE, cancel_temporary = TRUE ) ){
     rave_failure('Auto Re-calculate is off.', level = 'INFO')
   }
 })

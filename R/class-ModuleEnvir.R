@@ -105,7 +105,7 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
   persist_widget = local({
     auto = TRUE
     temporary_on = FALSE
-    is_auto = function( on, include_temporary = TRUE ){
+    is_auto = function( on, include_temporary = FALSE, cancel_temporary = FALSE ){
       if(!missing(on)){
         temporary_on <<- FALSE
         auto <<- !isFALSE(on)
@@ -116,7 +116,10 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
       }else{
         re = auto
       }
-      temporary_on <<- FALSE
+      if(cancel_temporary){
+        temporary_on <<- FALSE
+      }
+      
       re
     }
     
