@@ -1,4 +1,4 @@
-rave_pre_eleclocalct3 <- function(module_id = 'ELECLOCALCT_M', sidebar_width = 2){
+rave_pre_eleclocalct3 <- function(module_id = 'ELECLOCALCT_M', sidebar_width = 2, ...){
   sidebar_width = max(sidebar_width, 4)
   ns = shiny::NS(module_id)
   REGEX_POS = '^[ ]*([-]{0,1}[0-9]+[.]{0,1}[0-9]*)[ ]*,[ ]*([-]{0,1}[0-9]+[.]{0,1}[0-9]*)[ ]*,[ ]*([-]{0,1}[0-9]+[.]{0,1}[0-9]*)[ ]*$'
@@ -29,7 +29,7 @@ rave_pre_eleclocalct3 <- function(module_id = 'ELECLOCALCT_M', sidebar_width = 2
     
   )
   
-  server = function(input, output, session, user_data, utils){
+  server = function(input, output, session, user_data, utils, ...){
     
     local_data = reactiveValues()
     local_env = new.env(parent = emptyenv())

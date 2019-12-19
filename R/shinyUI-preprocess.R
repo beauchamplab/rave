@@ -8,7 +8,7 @@
 #' @param ver internally used please don't change
 #' @param theme color theme
 #' @param modules preprocess modules to load, reserved
-#' @param ... not used
+#' @param ... used for other functions for configuration and debug only
 #' @export
 rave_preprocess <- function(
   sidebar_width = 3,
@@ -177,7 +177,8 @@ rave_preprocess <- function(
     }
 
     lapply(model_instances, function(x){
-      callModule(x$server, id = paste0(x$ID , '_M'), user_data = user_data, utils = utils)
+      cat2(x$ID)
+      callModule(x$server, id = paste0(x$ID , '_M'), user_data = user_data, utils = utils, ...)
     })
 
   }

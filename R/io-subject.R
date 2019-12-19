@@ -166,7 +166,7 @@ rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = 
       utils$set_electrodes(electrodes = sel_elec)
       utils$collect_raw_voltage()
       if(launch_preprocess){
-        return(rave_preprocess())
+        return(rave_preprocess(project_name = project_name, subject_code = subject_code))
       }else{
         dipsaus::cat2('Loaded. Please launch preprocess:\n    rave::rave_preprocess()', level = 'INFO')
         return(ptype)
@@ -186,13 +186,17 @@ rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = 
         re = re[!is.na(re)]
         re
       })
-      files = table(unlist(files))
-      files = names(files)[files == nchoices]
-      stopifnot2(length(files), msg = "All data files across blocks MUST have the same name")
-      ans = dipsaus::ask_or_default('The following Matlab/HDF5 files are found, which one stores the analog traces?\n\t',
-                           paste(files, collapse = ', '), '\n', default = files[[1]])
-      if( !ans %in% files ){
-        dipsaus::cat2('Cannot find file ', ans, ' in all the blocks', level = 'ERROR')
+      
+      
+      # filenames, must be length >= 1 as otherwise we wouldn't enter the clause
+      files = unlist(files)
+      opt = unique(files)
+      
+      ans = dipsaus::ask_or_default('The following txt files were found in the first block. Which file contains the raw analog traces? (This file name MUST be used by all blocks)\n\t',
+                                    paste(opt, collapse = ', '), '\n', default = opt[[1]])
+      
+      if( sum(files == ans) != nchoices ){
+        dipsaus::cat2(sprintf('Cannot find file %s in all blocks', sQuote(ans)), level = 'ERROR')
         return(invisible())
       }
       
@@ -288,13 +292,16 @@ rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = 
         re = re[!is.na(re)]
         re
       })
-      files = table(unlist(files))
-      files = names(files)[files == nchoices]
-      stopifnot2(length(files), msg = "All data files across blocks MUST have the same name")
-      ans = dipsaus::ask_or_default('The following txt/csv files are found, which one stores the analog traces?\n\t',
-                           paste(files, collapse = ', '), '\n', default = files[[1]])
-      if( !ans %in% files ){
-        dipsaus::cat2('Cannot find file ', ans, ' in all the blocks', level = 'ERROR')
+      
+      # filenames, must be length >= 1 as otherwise we wouldn't enter the clause
+      files = unlist(files)
+      opt = unique(files)
+      
+      ans = dipsaus::ask_or_default('The following txt files were found in the first block. Which file contains the raw analog traces? (This file name MUST be used by all blocks)\n\t',
+                              paste(opt, collapse = ', '), '\n', default = opt[[1]])
+      
+      if( sum(files == ans) != nchoices ){
+        dipsaus::cat2(sprintf('Cannot find file %s in all blocks', sQuote(ans)), level = 'ERROR')
         return(invisible())
       }
       

@@ -1,4 +1,4 @@
-pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2){
+pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, ...){
   ns = shiny::NS(module_id)
   default_epoch = data.frame(
     Block = NULL,
@@ -75,7 +75,7 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2){
     )
   )
 
-  server = function(input, output, session, user_data, utils){
+  server = function(input, output, session, user_data, utils, ...){
     local_data = reactiveValues(
       blocks = '',
       efile = NULL

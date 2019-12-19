@@ -69,7 +69,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
 
 
 
-  server = function(input, output, session, user_data, utils){
+  server = function(input, output, session, user_data, utils, project_name = NULL, subject_code = NULL, ...){
     local_data = reactiveValues(
       all_projects = '',
       project_name = '',
@@ -81,8 +81,19 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
     local_data$all_projects = potential_projects = get_projects()
 
     last_inputs = utils$last_inputs()
-    local_data$project_name = last_inputs$last_project_name
-    local_data$subject_code = last_inputs$last_subject_code
+    if(!is.null(project_name)){
+      local_data$project_name = project_name
+    }else{
+      local_data$project_name = last_inputs$last_project_name
+    }
+    
+    if(!is.null(subject_code)){
+      local_data$subject_code = subject_code
+    }else{
+      local_data$subject_code = last_inputs$last_subject_code
+    }
+    
+    
 
     # Reactives
     observe({

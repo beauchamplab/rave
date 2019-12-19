@@ -1,4 +1,4 @@
-rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
+rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, ...){
   ns = shiny::NS(module_id)
   
   body = fluidRow(
@@ -16,7 +16,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
     )
   )
   
-  server = function(input, output, session, user_data, utils){
+  server = function(input, output, session, user_data, utils, ...){
     local_data = reactiveValues(
       prevent_rewavelet = TRUE,
       wave_param = NULL

@@ -36,7 +36,7 @@ rave_preprocess(
 
 \item{theme}{color theme}
 
-\item{...}{not used}
+\item{...}{used for other functions for configuration and debug only}
 }
 \description{
 RAVE Preprocess Function
