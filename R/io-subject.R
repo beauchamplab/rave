@@ -41,8 +41,11 @@ cache_raw_voltage <- function(project_name, subject_code, blocks, electrodes, ..
 }
 
 
-
-
+#' @title Import Raw Signal from Non-standard Formats
+#' @param subject_code subject code to search for in the raw folder
+#' @param project_name project name to create
+#' @param launch_preprocess whether to launch preprocess app, default is true
+#' @export
 rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = TRUE){
   subject = subject_code
   
@@ -185,6 +188,7 @@ rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = 
       })
       files = table(unlist(files))
       files = names(files)[files == nchoices]
+      stopifnot2(length(files), msg = "All data files across blocks MUST have the same name")
       ans = dipsaus::ask_or_default('The following Matlab/HDF5 files are found, which one stores the analog traces?\n\t',
                            paste(files, collapse = ', '), '\n', default = files[[1]])
       if( !ans %in% files ){
@@ -286,6 +290,7 @@ rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = 
       })
       files = table(unlist(files))
       files = names(files)[files == nchoices]
+      stopifnot2(length(files), msg = "All data files across blocks MUST have the same name")
       ans = dipsaus::ask_or_default('The following txt/csv files are found, which one stores the analog traces?\n\t',
                            paste(files, collapse = ', '), '\n', default = files[[1]])
       if( !ans %in% files ){
