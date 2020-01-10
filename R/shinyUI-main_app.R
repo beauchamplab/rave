@@ -312,7 +312,9 @@ app_server_404 <- function(...){
 app_server_3dviewer <- function(input, output, session, master_session, viewer_id){
   # assign('aaa', session, envir = globalenv())
   # assign('bbb', master_session, envir = globalenv())
-  output[[viewer_id]] <- master_session$userData$cross_session_funcs[[viewer_id]]()
+  output[[viewer_id]] <- threeBrain::renderBrain({
+    master_session$userData$cross_session_funcs[[viewer_id]]()
+  })
 
   # Observe clicks
   click_id = paste0(viewer_id, '_mouse_clicked')

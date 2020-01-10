@@ -102,7 +102,7 @@ define_output_3d_viewer <- function(
       })
 
       render_func = function(){
-        threeBrain::renderBrain({
+        
           
           # Monitor subject change. If changed, then refresh!
           if(!monitor_subject_change()){
@@ -176,13 +176,14 @@ define_output_3d_viewer <- function(
           # }
 
 
-        })
       }
 
       # Because monitor_subject_change needs execenv to be ready
       eval_when_ready(function(...){
         # Register render function
-        output[[!!output_call]] <- render_func()
+        output[[!!output_call]] <- threeBrain::renderBrain({
+          render_func()
+        })
       })
       
 
