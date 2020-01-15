@@ -10,8 +10,8 @@ Minimum system requirements:
 
 Suggested system requirements:
 
-- 4 Core CPU (e.g. core i5)
-- 64GB RAM
+- at least 4 Core CPU (e.g. core i5)
+- 64GB RAM (recommend 8 GB per core)
 - 1T Hard Disk Space
 - 1 GB Video Memory
 - WebGL-enabled Web Browser (such as Chrome)
