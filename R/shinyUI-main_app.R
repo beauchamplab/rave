@@ -316,28 +316,60 @@ app_server_3dviewer <- function(input, output, session, master_session, viewer_i
   master_proxy = threeBrain::brain_proxy(viewer_id, master_root)
   
   output[[viewer_id]] <- threeBrain::renderBrain({
-    master_session$userData$cross_session_funcs[[viewer_id]]( proxy )
+    f = master_session$userData$cross_session_funcs[[viewer_id]]
+    if(length(formals(f))){
+      f( proxy )
+    }else{
+      f()
+    }
   })
   
-  observeEvent(master_proxy$background, {
-    value = master_proxy$background
-    proxy$set_background(value)
+  # observeEvent(master_proxy$background, {
+  #   value = master_proxy$background
+  #   proxy$set_background(value)
+  # })
+  # 
+  # observeEvent(master_proxy$main_camera, {
+  #   value = master_proxy$main_camera
+  #   if(!length(value)){ return() }
+  #   if(length(value$position) && length(value$up)){
+  #     proxy$set_camera(position = as.numeric(value$position), up = as.numeric(value$up))
+  #   }
+  #   if(length(value$zoom)){
+  #     proxy$set_zoom_level(value$zoom)
+  #   }
+  # })
+  observeEvent(master_proxy$sync, {
+    ctrl = master_proxy$get_controllers()
+    main_camera = master_proxy$main_camera
+    if(length(main_camera)){
+      if(length(main_camera$position) && length(main_camera$up)){
+        proxy$set_camera(position = as.numeric(main_camera$position), up = as.numeric(main_camera$up))
+      }
+      if(length(main_camera$zoom) == 1){
+        proxy$set_zoom_level(main_camera$zoom)
+      }
+    }
+    proxy$set_controllers( ctrl )
   })
-
-  observeEvent(master_proxy$main_camera, {
-    value = master_proxy$main_camera
-    if(!length(value)){ return() }
-    if(length(value$position) && length(value$up)){
-      proxy$set_camera(position = as.numeric(value$position), up = as.numeric(value$up))
+  
+  observeEvent(proxy$sync, {
+    ctrl = proxy$get_controllers()
+    main_camera = proxy$main_camera
+    if(length(main_camera)){
+      if(length(main_camera$position) && length(main_camera$up)){
+        master_proxy$set_camera(position = as.numeric(main_camera$position), up = as.numeric(main_camera$up))
+      }
+      if(length(main_camera$zoom) == 1){
+        master_proxy$set_zoom_level(main_camera$zoom)
+      }
     }
-    if(length(value$zoom)){
-      proxy$set_zoom_level(value$zoom)
-    }
+    master_proxy$set_controllers( ctrl )
   })
 
 
   # Observe clicks
-  click_id = paste0(viewer_id, '_mouse_clicked')
+  # click_id = paste0(viewer_id, '_mouse_clicked')
   dblclick_id = paste0(viewer_id, '_mouse_dblclicked')
 
   observeEvent(input[[dblclick_id]], {
