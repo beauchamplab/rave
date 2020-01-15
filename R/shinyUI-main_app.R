@@ -642,18 +642,12 @@ app_server <- function(adapter, instance_id, token = NULL){
         title = subject$id,
         easyClose = T,
         size = 'l',
-        shinydashboard::tabBox(
-          width = 12,
-          tabPanel(
-            title = '3D Viewer',
-            threeBrain::threejsBrainOutput('curr_subj_3d_viewer')
-          ),
-          tabPanel(
-            title = 'Electrode Table',
-            dataTableOutput('curr_subj_elec_table')
-          )
-        )
-
+        tags$style('.modal-lg { min-width: 80vw; }'),
+        h4('Electrode Table'),
+        shiny::tableOutput('curr_subj_elec_table'),
+        br(),
+        h4('3D Viewer'),
+        threeBrain::threejsBrainOutput('curr_subj_3d_viewer')
       )
     }
 
@@ -668,7 +662,7 @@ app_server <- function(adapter, instance_id, token = NULL){
       }
     })
 
-    output$curr_subj_elec_table <- renderDataTable({
+    output$curr_subj_elec_table <- shiny::renderTable({
       btn = input$curr_subj_details_btn
       if(global_reactives$has_data && check_data_repo('subject')){
         data_repo = getDefaultDataRepository()
@@ -680,7 +674,7 @@ app_server <- function(adapter, instance_id, token = NULL){
       }else{
         return(NULL)
       }
-    })
+    }, striped = TRUE, spacing = 'xs', width = '100%', rownames = FALSE, digits = 2)
 
     output$curr_subj_3d_viewer <- threeBrain::renderBrain({
       btn = input$curr_subj_details_btn
@@ -698,7 +692,10 @@ app_server <- function(adapter, instance_id, token = NULL){
         return(NULL)
       }
       
-      brain$plot(control_panel = FALSE, side_canvas = FALSE, volumes = FALSE)
+      theme = get_rave_theme()$themes[[1]]
+      background = ifelse(theme == 'dark', '#1E1E1E', '#FFFFFF')
+      
+      brain$plot(side_display = FALSE, background = background)
     })
 
     observeEvent(input$curr_subj_launch_suma, {

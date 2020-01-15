@@ -8,7 +8,8 @@ rave_brain2(
   subject,
   surfaces = "pial",
   use_141 = TRUE,
-  compute_template = FALSE
+  compute_template = FALSE,
+  usetemplateifmissing = FALSE
 )
 }
 \arguments{
@@ -21,6 +22,9 @@ rave_brain2(
 
 \item{compute_template}{logical whether to compute nearest 141 node. Please 
 also check \code{freesurfer_brain}.}
+
+\item{usetemplateifmissing}{whether logical, to display template brain if 
+subject brain not found, default is false}
 }
 \description{
 Tools to load and view brain in 3D viewer
