@@ -320,7 +320,7 @@ app_server_3dviewer <- function(input, output, session, master_session, viewer_i
     if(length(formals(f))){
       f( proxy )
     }else{
-      f()
+      f() 
     }
   })
   
