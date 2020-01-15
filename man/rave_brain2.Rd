@@ -8,6 +8,8 @@ rave_brain2(
   subject,
   surfaces = "pial",
   use_141 = TRUE,
+  recache = FALSE,
+  clean_before_cache = FALSE,
   compute_template = FALSE,
   usetemplateifmissing = FALSE
 )
@@ -19,6 +21,11 @@ rave_brain2(
 \code{"smoothwm"}, brain surface types}
 
 \item{use_141}{logical, whether to use standard 141 brain}
+
+\item{recache}{whether to force cache data, default is false}
+
+\item{clean_before_cache}{whether to clean cache before redo cache, default 
+is false}
 
 \item{compute_template}{logical whether to compute nearest 141 node. Please 
 also check \code{freesurfer_brain}.}

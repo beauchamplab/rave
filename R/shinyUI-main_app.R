@@ -320,7 +320,7 @@ app_server_3dviewer <- function(input, output, session, master_session, viewer_i
     if(length(formals(f))){
       f( proxy )
     }else{
-      f() 
+      f()
     }
   })
   
@@ -695,7 +695,7 @@ app_server <- function(adapter, instance_id, token = NULL){
       theme = get_rave_theme()$themes[[1]]
       background = ifelse(theme == 'dark', '#1E1E1E', '#FFFFFF')
       
-      brain$plot(side_display = FALSE, background = background)
+      brain$plot(control_display = TRUE, side_display = FALSE, background = background)
     })
 
     observeEvent(input$curr_subj_launch_suma, {
