@@ -811,6 +811,7 @@ shiny_data_selector <- function(module_id){
     #   brain$view(control_gui = F, width = '100%', height = '500px', center = T, show_mesh = load_mesh)
     # })
     
+    proxy = threeBrain::brain_proxy('three_viewer')
     output$three_viewer <- threeBrain::renderBrain({
       project = input$project_name
       subject = input$subject_code
@@ -829,7 +830,9 @@ shiny_data_selector <- function(module_id){
       
       subject = as_subject(subject_id, reference = ref, strict = FALSE)
       
-      brain = rave_brain2( subject = subject, surfaces = 'pial', compute_template = FALSE)
+      brain = rave_brain2( subject = subject, surfaces = 'pial', 
+                           compute_template = FALSE, 
+                           usetemplateifmissing = TRUE )
       
       if( is.null(brain) ){
         return(NULL)
@@ -846,7 +849,18 @@ shiny_data_selector <- function(module_id){
       tbl$Value[tbl$Electrode %in% valid_e] = f[1]
       tbl$Value[tbl$Electrode %in% invalid_e] = f[2]
       
+      is_template = FALSE
+      if(length(brain$template_object)){
+        brain = brain$template_object
+        is_template = TRUE
+      }
       brain$set_electrode_values(table_or_path = tbl[, c('Electrode', 'Value')])
+      
+      if(is_template){
+        for(e in brain$electrodes$objects){
+          e$name = paste(stringr::str_replace(e$name, '^[^,]*, ', ''), '(template brain)')
+        }
+      }
       
       for(e in valid_e){
         if( !is.null(brain$electrodes$objects[[e]]) ){
@@ -858,7 +872,16 @@ shiny_data_selector <- function(module_id){
           brain$electrodes$objects[[e]]$custom_info = paste('Reference Group:', tbl$Group[tbl$Electrode == e], '(electrode not used)')
         }
       }
-      brain$plot(control_panel = F, side_canvas = FALSE, default_colormap = 'Value', volumes = FALSE, surfaces = load_mesh,
+      
+      zoom = shiny::isolate({
+        proxy$main_camera$zoom
+      })
+      theme = get_rave_theme()$themes[[1]]
+      background = ifelse(theme == 'dark', '#1E1E1E', '#FFFFFF')
+      brain$plot(control_panel = FALSE, side_canvas = FALSE, 
+                 default_colormap = 'Value', volumes = FALSE, 
+                 surfaces = load_mesh, start_zoom = zoom, 
+                 timestamp = FALSE, background = background,
                  palettes = list(Value = c('navyblue', 'red', '#e2e2e2')))
     })
     

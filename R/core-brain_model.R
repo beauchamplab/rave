@@ -5,8 +5,15 @@
 #' @param use_141 logical, whether to use standard 141 brain
 #' @param compute_template logical whether to compute nearest 141 node. Please 
 #' also check \code{freesurfer_brain}.
+#' @param usetemplateifmissing whether logical, to display template brain if 
+#' subject brain not found, default is false
+#' @param recache whether to force cache data, default is false
+#' @param clean_before_cache whether to clean cache before redo cache, default 
+#' is false
 #' @export
-rave_brain2 <- function(subject, surfaces = 'pial', use_141 = TRUE, compute_template = FALSE){
+rave_brain2 <- function(subject, surfaces = 'pial', use_141 = TRUE, 
+                        recache = FALSE, clean_before_cache = FALSE,
+                        compute_template = FALSE, usetemplateifmissing = FALSE){
   
   # if subject is NULL, use current loaded subject
   if( is.character( subject ) ){
@@ -32,33 +39,52 @@ rave_brain2 <- function(subject, surfaces = 'pial', use_141 = TRUE, compute_temp
       break;
     }
   }
-  if( is.null(fs_path) ){
-    return(invisible())
-  }
-  
-  # import from freesurfer folder
-  brain = threeBrain::freesurfer_brain2(
-    fs_subject_folder = fs_path, subject_name = subject$subject_code, 
-    surface_types = surfaces, use_141 = use_141)
   
   # load electrodes
   electrode_table = load_meta('electrodes', 
                               project_name = subject$project_name, 
                               subject_code = subject$subject_code)
-  brain$set_electrodes(electrodes = electrode_table)
   
-  if( compute_template ){
-    tf = tempfile() 
-    new_table = brain$calculate_template_coordinates(save_to = tf)
-    if( file.exists(tf) ){
-      brain$electrodes$raw_table_path = NULL
-      unlink(tf)
-      # need to update meta
-      save_meta(new_table, meta_type = 'electrodes', 
-                project_name = subject$project_name, 
-                subject_code = subject$subject_code)
+  if( is.null(fs_path) ){
+    if( !usetemplateifmissing ){
+      return(invisible())
+    }
+    
+    brain = threeBrain::merge_brain()
+    
+    brain$set_electrodes(electrodes = electrode_table)
+    
+  }else{
+    # import from freesurfer folder
+    if(recache){
+      if( clean_before_cache ){
+        fs = list.files(file.path(fs_path, 'RAVE'), pattern = '\\.json$',
+                        all.files = FALSE, recursive = FALSE, full.names = TRUE, 
+                        ignore.case = TRUE, include.dirs = FALSE, no.. = TRUE)
+        lapply(fs, unlink)
+      }
+      threeBrain::import_from_freesurfer(fs_path, subject_name = subject$subject_code)
+    }
+    brain = threeBrain::freesurfer_brain2(
+      fs_subject_folder = fs_path, subject_name = subject$subject_code, 
+      surface_types = surfaces, use_141 = use_141)
+    
+    brain$set_electrodes(electrodes = electrode_table)
+    
+    if( compute_template ){
+      tf = tempfile() 
+      new_table = brain$calculate_template_coordinates(save_to = tf)
+      if( file.exists(tf) ){
+        brain$electrodes$raw_table_path = NULL
+        unlink(tf)
+        # need to update meta
+        save_meta(new_table, meta_type = 'electrodes', 
+                  project_name = subject$project_name, 
+                  subject_code = subject$subject_code)
+      }
     }
   }
+  
   
   brain
 }
