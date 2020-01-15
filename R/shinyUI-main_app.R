@@ -310,11 +310,31 @@ app_server_404 <- function(...){
 
 }
 app_server_3dviewer <- function(input, output, session, master_session, viewer_id){
-  # assign('aaa', session, envir = globalenv())
-  # assign('bbb', master_session, envir = globalenv())
+  master_root = master_session$rootScope()
+  
+  proxy = threeBrain::brain_proxy(viewer_id, session)
+  master_proxy = threeBrain::brain_proxy(viewer_id, master_root)
+  
   output[[viewer_id]] <- threeBrain::renderBrain({
-    master_session$userData$cross_session_funcs[[viewer_id]]()
+    master_session$userData$cross_session_funcs[[viewer_id]]( proxy )
   })
+  
+  observeEvent(master_proxy$background, {
+    value = master_proxy$background
+    proxy$set_background(value)
+  })
+
+  observeEvent(master_proxy$main_camera, {
+    value = master_proxy$main_camera
+    if(!length(value)){ return() }
+    if(length(value$position) && length(value$up)){
+      proxy$set_camera(position = as.numeric(value$position), up = as.numeric(value$up))
+    }
+    if(length(value$zoom)){
+      proxy$set_zoom_level(value$zoom)
+    }
+  })
+
 
   # Observe clicks
   click_id = paste0(viewer_id, '_mouse_clicked')
@@ -337,6 +357,7 @@ app_server_3dviewer <- function(input, output, session, master_session, viewer_i
       value = mouse_event
     ))
   })
+  
 
 }
 

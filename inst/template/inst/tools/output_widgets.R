@@ -101,7 +101,7 @@ define_output_3d_viewer <- function(
 
       })
 
-      render_func = function(){
+      render_func = function( proxy ){
         
           
           # Monitor subject change. If changed, then refresh!
@@ -110,9 +110,9 @@ define_output_3d_viewer <- function(
           }
           local_signal = input[[!!output_btn]]
           render_value = length(local_signal) && local_signal > .env$local_signal
-          if( render_value ){
-            .env$local_signal = local_signal
-          }
+          # if( render_value ){
+          #   .env$local_signal = local_signal
+          # }
           
           # get render function
           f = get0(!!output_fun, envir = ..runtime_env, ifnotfound = function(...){
@@ -127,7 +127,7 @@ define_output_3d_viewer <- function(
             side_width = 250
           }
           ...local_env$widget = NULL
-          re = f(render_value, side_width, ...local_env)
+          re = f(render_value, side_width, ...local_env, proxy)
           if(is.null(...local_env$widget)){
             ...local_env$widget = re
           }
@@ -181,8 +181,9 @@ define_output_3d_viewer <- function(
       # Because monitor_subject_change needs execenv to be ready
       eval_when_ready(function(...){
         # Register render function
+        proxy <- threeBrain::brain_proxy(!!output_call)
         output[[!!output_call]] <- threeBrain::renderBrain({
-          render_func()
+          render_func( proxy )
         })
       })
       
