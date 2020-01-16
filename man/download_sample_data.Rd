@@ -4,10 +4,12 @@
 \alias{download_sample_data}
 \title{Function to download demo data to data repository}
 \usage{
-download_sample_data(subject = "KC", ...)
+download_sample_data(subject = "KC", version = "v0.1.8-beta", ...)
 }
 \arguments{
 \item{subject}{demo subject}
+
+\item{version}{rave release version}
 
 \item{...}{other parameters passed to \code{download_subject_data}}
 }

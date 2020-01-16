@@ -950,11 +950,12 @@ load_cached_voltage <- function(cache_dir, electrodes, time_range, srate_volt, t
 
 #' Function to download demo data to data repository
 #' @param subject demo subject
+#' @param version rave release version
 #' @param ... other parameters passed to \code{download_subject_data}
 #' @return Nothing
 #' @export
-download_sample_data <- function(subject = 'KC', ...){
-  url = sprintf('https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/demo_%s.zip', subject)
+download_sample_data <- function(subject = 'KC', version = 'v0.1.8-beta', ...){
+  url = sprintf('https://github.com/beauchamplab/rave/releases/download/%s/demo_%s.zip', version, subject)
   download_subject_data(url, ...)
 }
 
