@@ -1220,7 +1220,18 @@ download_subject_data <- function(
 # override_project = 'demo_junk', replace_if_exists = F)
 
 
-
+#' Archive Subject into Zipped file
+#' @description Save subject data, including brain imaging files into a zipped 
+#' file. Notice this function does not guarantee every file is in. Please always
+#' double check what's inside.
+#' @param project_name project name
+#' @param subject_code subject code
+#' @param include_cache whether to include cache for faster loading. Default is 
+#' false
+#' @param include_fs whether to include 'FreeSurfer' and 'AFNI/SUMA' files
+#' @param include_raw whether to include raw data
+#' @param save_to directory to save file to
+#' @export
 archive_subject <- function(project_name, subject_code, 
                             include_cache = FALSE, include_fs = TRUE, include_raw = FALSE,
                             save_to = tempdir()){
