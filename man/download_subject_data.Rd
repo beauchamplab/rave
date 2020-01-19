@@ -6,7 +6,7 @@
 \usage{
 download_subject_data(
   con,
-  replace_if_exists = F,
+  replace_if_exists = FALSE,
   override_project = NULL,
   override_subject = NULL,
   temp_dir = tempdir(),

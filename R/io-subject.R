@@ -1008,7 +1008,7 @@ download_sample_data <- function(subject = 'KC', version = 'v0.1.8-beta', ...){
 #' \code{subject_settings}. See examples.
 #' @export
 download_subject_data <- function(
-  con, replace_if_exists = F, override_project = NULL, override_subject = NULL,
+  con, replace_if_exists = FALSE, override_project = NULL, override_subject = NULL,
   temp_dir = tempdir(), remove_zipfile = TRUE, subject_settings = NULL,
   ...){
   url = con
@@ -1096,35 +1096,45 @@ download_subject_data <- function(
     
     data_dir = meta[[ii]][['data_dir']]
     raw_dir = meta[[ii]][['raw_dir']]
+    
+    # check if data_dir exists
+    rdir = extract_dir
+    ds = list.dirs(extract_dir, full.names = FALSE, recursive = FALSE)
+    if( !'data_dir' %in% ds ){
+      ds = ds[stringr::str_length(ds) == 1 | stringr::str_detect(ds, '^[^.~][^_]')]
+      ds = ds[!ds %in% c('.', '_', '~', '^')]
+      if(length(ds)){
+        rdir = file.path(rdir, ds[1])
+      }
+    }
+    
     if(length(data_dir) == 1 && is.character(data_dir)){
       # try to find dir
-      data_dir = file.path(extract_dir, data_dir)
+      data_dir = file.path(rdir, data_dir)
       if(!dir.exists(data_dir)){
-        cat2('\n\tdata_dir not exists, abort this one\n',
-               '\tPlease check existence of data_dir: \n', data_dir, level = 'ERROR')
-        next();
+        cat2('\n\tdata_dir not exists\n',
+               '\tPlease check existence of data_dir: \n', data_dir, level = 'WARNING')
       }else{
         cat2('\tdata directory found! - \n', data_dir, level = 'INFO')
       }
     }else{
-      cat2('No "data_dir" in subject settings, abort this one', level = 'ERROR')
-      next();
+      data_dir = NULL
+      cat2('No "data_dir" in subject settings', level = 'WARNING')
     }
     
     
     if(length(raw_dir) == 1 && is.character(raw_dir)){
       # try to find dir
-      raw_dir = file.path(extract_dir, raw_dir)
+      raw_dir = file.path(rdir, raw_dir)
       if(!dir.exists(raw_dir)){
-        cat2('\n\traw_dir not exists, abort this one\n',
-               '\tPlease check existence of raw_dir: \n', raw_dir, level = 'ERROR')
-        next;
+        cat2('\n\traw_dir not exists\n',
+               '\tPlease check existence of raw_dir: \n', raw_dir, level = 'WARNING')
       }else{
         cat2('\traw directory found! - \n', raw_dir, level = 'INFO')
       }
     }else{
-      cat2('No "raw_dir" in subject settings, abort this one', level = 'ERROR')
-      next();
+      raw_dir = NULL
+      cat2('No "raw_dir" in subject settings, abort this one', level = 'WARNING')
     }
     
     
@@ -1132,17 +1142,17 @@ download_subject_data <- function(
     rave_data_dir = rave_options('data_dir')
     rave_raw_dir = rave_options('raw_data_dir')
     check_existence = function(subject_code){
-      has_subject = c(F, F)
-      exist_proj = list.dirs(rave_data_dir, full.names = F, recursive = F)
+      has_subject = c(FALSE, FALSE)
+      exist_proj = list.dirs(rave_data_dir, full.names = FALSE, recursive = FALSE)
       if(project_name %in% exist_proj){
         # need to check if subject exists
-        exist_subs = list.dirs(file.path(rave_data_dir, project_name), full.names = F, recursive = F)
+        exist_subs = list.dirs(file.path(rave_data_dir, project_name), full.names = FALSE, recursive = FALSE)
         if(subject_code %in% exist_subs){
-          has_subject[2] = T
+          has_subject[2] = TRUE
         }
       }
-      if(subject_code %in% list.dirs(rave_raw_dir, full.names = F, recursive = F)){
-        has_subject[1] = T
+      if(subject_code %in% list.dirs(rave_raw_dir, full.names = FALSE, recursive = FALSE)){
+        has_subject[1] = TRUE
       }
       has_subject
     }
@@ -1191,22 +1201,28 @@ download_subject_data <- function(
     cat2('Copy files:', level = 'INFO')
     # raw dir
     to_dir = file.path(rave_raw_dir, subject_code)
-    dir_create(to_dir)
-    lapply(list.files(raw_dir, all.files = T, full.names = T, recursive = F), function(d){
-      file.copy(d, to_dir, overwrite = T, recursive = T)
-    })
+    if(length(raw_dir)){
+      dir_create(to_dir)
+      lapply(list.files(raw_dir, all.files = T, full.names = T, recursive = F), function(d){
+        file.copy(d, to_dir, overwrite = T, recursive = T)
+      })
+      cat2('[New raw dir] ', to_dir, level = 'INFO')
+    }else{
+      cat2('Raw data is not imported.')
+    }
     
-    
-    cat2('[New raw dir] ', to_dir, level = 'INFO')
     
     # data dir
     to_dir = file.path(rave_data_dir, project_name, subject_code)
-    dir_create(to_dir)
-    lapply(list.files(data_dir, all.files = T, full.names = T, recursive = F), function(d){
-      file.copy(d, to_dir, overwrite = T, recursive = T)
-    })
-    
-    cat2('[New data dir] ', to_dir, level = 'INFO')
+    if(length(data_dir)){
+      dir_create(to_dir)
+      lapply(list.files(data_dir, all.files = T, full.names = T, recursive = F), function(d){
+        file.copy(d, to_dir, overwrite = T, recursive = T)
+      })
+      cat2('[New data dir] ', to_dir, level = 'INFO')
+    }else{
+      cat2('RAVE data is not imported.')
+    }
     
     cat2('\n\t[', project_name, '/', subject_code, '] Done.\n', level = 'INFO')
   }

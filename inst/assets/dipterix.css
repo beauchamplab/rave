@@ -352,7 +352,8 @@ body.rave-noscroll {
 }
 
 /* If shiny output is directly child of elastic div  */
-.rave-elastic.rave-elastic-active>.shiny-bound-output {
+.rave-elastic.rave-elastic-active>.shiny-bound-output,
+.rave-elastic.rave-elastic-active .threejs_brain.shiny-bound-output.threejs-brain-container {
   min-height: 90vh;
 }
 
