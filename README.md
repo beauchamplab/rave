@@ -34,7 +34,7 @@ threeBrain::download_N27(make_default = TRUE)
 rave::arrange_modules(TRUE, TRUE)
 ```
 
-To update `RAVE`:
+To update existing installations of `RAVE`. Make sure to update "R" and "RStudio" (see first step, above):
 
 ```r
 devtools::install_github('beauchamplab/ravebuiltins@dev')
