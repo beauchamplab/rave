@@ -55,19 +55,15 @@ rave::start_rave()
 ## Using RAVE
 
 * To use RAVE, you will need to load data by clicking "Select Data". If you do not have any data in RAVE format, you will need to create some. 
-
 * Option 1: You can download sample data (see next step).
-
 * Option 2: Create data in RAVE format by preprocessing your existing raw data. To preprocess data 
 ```r
 rave::rave_preprocess()
 ```
-
 * Option 3: If you have RAVE format data on a server (or anywhere besides the default local directory), point RAVE to it with
 ```r
 rave::rave_options()
 ```
-
 * For tutorials on how to use RAVE, [click here](https://openwetware.org/wiki/Beauchamp:RAVE#Tutorials)
 
 ## Download Demo Data 
