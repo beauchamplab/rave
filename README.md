@@ -48,6 +48,15 @@ threeBrain::download_N27(make_default = TRUE)
 
 * After installing or updating RAVE, quit and restart RStudio before continuing.
 
+## Start RAVE 
+
+* To start RAVE, copy and paste the following commands into the RStudio console:
+```r
+# Launch main app
+rave::start_rave()
+```
+* If installation has proceeded correctly, a new web browser window should happen with the RAVE splash screen.
+
 ## Download Demo Data 
 
 * If you do not have any data in RAVE format, we recommend you download some sample data. Copy and paste the following commands into the RStudio console:
@@ -78,13 +87,6 @@ Once you see the following message, the subject is downloaded. The directory (XX
 [RAVE Data]: /XXX/rave_data/data_dir/demo/KC
 ```
 
-## Start RAVE 
-
-* To start RAVE, copy and paste the following commands into the RStudio console:
-```r
-# Launch main app
-rave::start_rave()
-```
 
 ## Using RAVE
 
