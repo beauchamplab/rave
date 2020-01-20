@@ -55,7 +55,21 @@ threeBrain::download_N27(make_default = TRUE)
 # Launch main app
 rave::start_rave()
 ```
-* If installation has proceeded correctly, a new web browser window should happen with the RAVE splash screen.
+* If installation has proceeded correctly, a new web browser window should open with the RAVE splash screen.
+
+## Using RAVE
+
+* To use RAVE, you will need to load data by clicking "Select Data". If you do not have any data in RAVE format, you will need to create some. 
+* Option 1: You can download sample data (see next step).
+* Option 2: Create data in RAVE format by preprocessing your existing raw data. To preprocess data, copy and paste the following commands into the RStudio console:
+```r
+# Preprocess
+rave::rave_preprocess()
+```
+* Option 3: If you have RAVE format data on a server (or anywhere besides the default local directory), you can point RAVE to it with the following command:
+rave::rave_options()
+
+* For tutorials on how to use RAVE, [click here](https://openwetware.org/wiki/Beauchamp:RAVE#Tutorials)
 
 ## Download Demo Data 
 
@@ -88,15 +102,6 @@ Once you see the following message, the subject is downloaded. The directory (XX
 ```
 
 
-## Using RAVE
-
-* For tutorials on how to use RAVE, [click here](https://openwetware.org/wiki/Beauchamp:RAVE#Tutorials)
-
-* To preprocess data, copy and paste the following commands into the RStudio console:
-```r
-# Preprocess
-rave::rave_preprocess()
-```
 
 
 
