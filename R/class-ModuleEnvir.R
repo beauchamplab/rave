@@ -30,7 +30,7 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
     
     if(shiny::is.reactivevalues(self$local_reactives)){
       if( self$local_reactives$initialized && self$local_reactives$has_data && self$local_reactives$focused ){
-        base::print('subject changed?')
+        # base::print('subject changed?')
         return(TRUE)
       }
       return(FALSE)
