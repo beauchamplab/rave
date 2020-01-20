@@ -7,10 +7,7 @@ __R__ __A__*nalysis and* __V__*isualization of intracranial* __E__*lectroencepha
 
 ## Installation
 
-* RAVE requires the latest versions of the language "R" and "RStudio". Trying to install RAVE with older versions of "R" and "RStudio" will lead to unpredictable error messages. 
-Please [click here for the prerequisite installation guide](./Installation.md) to install the latest versions of all required tools. 
-
-* RAVE runs best on modern computers with multicore CPUs, [click here for suggested system configurations](./Requirements.md).
+* RAVE requires the latest versions of the language "R" and "RStudio". Trying to install RAVE with older versions of "R" and "RStudio" will lead to unpredictable error messages. [Click here for the prerequisite installation guide](./Installation.md) to install the latest versions of all required tools. RAVE runs on a variety of operating systems. [Click here for suggested system configurations](./Requirements.md).
 
 * After the prerequisites are installed, open R-Studio (on Mac OSX, RStudio icon is installed in your Applications folder). Copy and paste the following commands into the RStudio console to download the current version of RAVE. The commands must be typed one at a time. If packages need to be installed, you may accept the defaults by typing "Yes" to any questions that appear. In the case of errors, relaunch RStudio and repeat the commands or try the alternative installation command.
 
