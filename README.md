@@ -7,7 +7,7 @@ __R__ __A__*nalysis and* __V__*isualization of intracranial* __E__*lectroencepha
 
 ## Installation
 
-* RAVE requires the installation of the language "R" and other miscellaneous programming tools, including "RStudio".
+* RAVE requires the latest versions of the language "R" and "RStudio". Trying to install RAVE with older versions of "R" and "RStudio" will lead to unpredictable error messages. 
 Please [click here for the prerequisite installation guide](./Installation.md) to install all needed tools for your operating system. 
 
 * RAVE runs best on modern computers with multicore CPUs, [click here for suggested system configurations](./Requirements.md).
