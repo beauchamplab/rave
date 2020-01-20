@@ -12,7 +12,6 @@ __R__ __A__*nalysis and* __V__*isualization of intracranial* __E__*lectroencepha
 * After the prerequisites are installed, open R-Studio (on Mac OSX, RStudio icon is installed in your Applications folder). Copy and paste the following commands into the RStudio console to download the current version of RAVE. The commands must be typed one at a time. If packages need to be installed, you may accept the defaults by typing "Yes" to any questions that appear. In the case of errors, relaunch RStudio and repeat the commands or try the alternative installation command.
 
 ```r
-# Install RAVE and builtin modules
 install.packages('devtools')
 devtools::install_github('dipterix/threeBrain')
 devtools::install_github('dipterix/rutabaga')
@@ -47,9 +46,8 @@ threeBrain::download_N27(make_default = TRUE)
 
 ## Start RAVE 
 
-* To start RAVE, copy and paste the following commands into the RStudio console:
+* To start RAVE, type (or copy and paste) the following command into the RStudio console:
 ```r
-# Launch main app
 rave::start_rave()
 ```
 * If installation has proceeded correctly, a new web browser window should open with the RAVE splash screen.
@@ -58,22 +56,22 @@ rave::start_rave()
 
 * To use RAVE, you will need to load data by clicking "Select Data". If you do not have any data in RAVE format, you will need to create some. 
 * Option 1: You can download sample data (see next step).
-* Option 2: Create data in RAVE format by preprocessing your existing raw data. To preprocess data, copy and paste the following commands into the RStudio console:
+* Option 2: Create data in RAVE format by preprocessing your existing raw data. To preprocess data, type (or copy and paste)into the RStudio console:
 ```r
-# Preprocess
 rave::rave_preprocess()
 ```
-* Option 3: If you have RAVE format data on a server (or anywhere besides the default local directory), you can point RAVE to it with the following command:
+* Option 3: If you have RAVE format data on a server (or anywhere besides the default local directory), you can point RAVE to it with the following RStudio command:
+```r
 rave::rave_options()
+```
 
 * For tutorials on how to use RAVE, [click here](https://openwetware.org/wiki/Beauchamp:RAVE#Tutorials)
 
 ## Download Demo Data 
 
-* If you do not have any data in RAVE format, we recommend you download some sample data. Copy and paste the following commands into the RStudio console:
-
+* If you do not have any data in RAVE format, we recommend you download some sample data. Each RStudio command below downloads a dataset from a single subject.
 ```r
-# download a demo subject - 500MB ~ 1.5 GB per subject
+# 500MB ~ 1.5 GB per subject
 rave::download_sample_data('KC')
 rave::download_sample_data('YAB')
 rave::download_sample_data('YAD')
