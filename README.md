@@ -84,7 +84,7 @@ rave::download_sample_data('YAK')
 rave::download_sample_data('_group_data')
 ```
 
-Once you see the folowing message, the subject is downloaded. The directory (XXX) will vary depending on the machine. If a subject previously exists, RAVE will ask you to choose from replacing, creating new or abandon the downloaded subject. 
+Once you see the following message, the subject is downloaded. The directory (XXX) will vary depending on the machine. If a subject previously exists, RAVE will ask you to choose from replacing, creating new or abandon the downloaded subject. 
 
 ```
 [ INFO ]: Expanding zip file

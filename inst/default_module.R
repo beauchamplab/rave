@@ -21,7 +21,7 @@ if(is.null(session)){
 
 #global_reactives$execute_module
 output[['.__rave_modal__.']] <- renderUI({
-  logger('Prepared to show data loading modal')
+  dipsaus::cat2('Prepared to show data loading modal')
   # Unlock data loading
   `.__internal_reactives__.`[['prevent_load']] = FALSE
 
@@ -39,7 +39,7 @@ output[['.__rave_modal__.']] <- renderUI({
   }
   # miss_data_comps = `.__internal_reactives__.`[['miss_data_comps']]
   if(!miss_data || !length(miss_data_message)){
-    logger('No data is missing, proceed.')
+    dipsaus::cat2('No data is missing, proceed.')
     return(NULL)
   }
 
@@ -58,7 +58,7 @@ output[['.__rave_modal__.']] <- renderUI({
       style = 'margin-left:15px;',
       "Load Data"
     )
-    data_msg = sprintf('Estimated size: %s, (%.1f seconds)', to_ram_size(total_size), total_size * 3 * speed / 1e6)
+    data_msg = sprintf('Estimated size: %s, (%.1f seconds)', dipsaus::to_ram_size(total_size), total_size * 3 * speed / 1e6)
   }
 
   div(
@@ -108,13 +108,14 @@ observeEvent(input[['.__load_data__.']], {
 
     tryCatch({
       for(i in seq_len(n_data)){
-        progress$inc(message = msg[[i]])
-        eval_dirty(quos[[i]], env = ..runtime_env)
+        progress$inc(msg[[i]])
+        dipsaus::eval_dirty(quos[[i]], env = ..runtime_env)
       }
       `.__internal_reactives__.`[['miss_data']] = F
     }, error = function(e){
       showNotification(p('One or more error occur during loading. The data might be broken or missing.'), type = 'error')
     })
+    
 
     reload_module()
   }
@@ -163,7 +164,7 @@ rave_checks = function(..., data = NULL){
         }))
         size = n1 * n2 * n3 * n4 * base_size
         total_size = total_size + size
-        size = to_ram_size(size)
+        size = dipsaus::to_ram_size(size)
 
         # check if directory exists
         if(!data_check$check$power_dir){
@@ -182,7 +183,7 @@ rave_checks = function(..., data = NULL){
         }))
         size = n1 * n2 * n3 * n4 * base_size
         total_size = total_size + size
-        size = to_ram_size(size)
+        size = dipsaus::to_ram_size(size)
 
         # check if directory exists
         if(!data_check$check$phase_dir){
@@ -208,7 +209,7 @@ rave_checks = function(..., data = NULL){
           size = n_el * n_tp * base_size
           total_size = total_size + size
 
-          size = to_ram_size(size)
+          size = dipsaus::to_ram_size(size)
 
           msg = c(msg, sprintf('Voltage (No epoch, %s)', size))
         }
@@ -222,7 +223,7 @@ rave_checks = function(..., data = NULL){
           size = n1 * n3 * n4 * base_size / srate_wave * srate_volt
           total_size = total_size + size
 
-          size = to_ram_size(size)
+          size = dipsaus::to_ram_size(size)
 
           # check if directory exists
           if(!data_check$check$phase_dir){
@@ -263,9 +264,120 @@ rave_checks = function(..., data = NULL){
 }
 
 
+register_auto_calculate_widget = local({
+  
+  session = getDefaultReactiveDomain()
+  output = getDefaultReactiveOutput()
+  input = getDefaultReactiveInput()
+  
+  this_env = environment()
+  checkbox = NULL
+  buttons = NULL
+  
+  input_ids = get_input_ids()
+  
+  eval_when_ready(function(...){
+    input_ids = get_input_ids()
+    
+    params = new.env(parent = emptyenv())
+    
+    observe({
+      if(!auto_recalculate( include_temporary = FALSE ) && length(input_ids)){
+        
+        changed = vapply(input_ids, function(id){
+          if(identical(params[[id]], input[[id]])){
+            return(FALSE)
+          }
+          TRUE
+        }, FUN.VALUE = FALSE)
+        
+        if(any(changed)){
+          dipsaus::cat2('At least one changed: ', paste(input_ids[changed], collapse = ', '))
+          lapply(this_env$buttons, function(bid){
+            dipsaus::updateActionButtonStyled(session, bid, disabled = FALSE, icon = shiny::icon('arrow-right'))
+          })
+        }else{
+          lapply(this_env$buttons, function(bid){
+            dipsaus::updateActionButtonStyled(session, bid, disabled = TRUE, icon = NULL)
+          })
+        }
+      }
+    }, env = environment(), priority = 1) # needs to be prior to rave_execute
+    
+    if(length(this_env$checkbox) == 1){
+      observeEvent(input[[this_env$checkbox]], {
+        auto_calc = input[[this_env$checkbox]]
+        if(!(length(auto_calc) == 1 && is.logical(auto_calc))){ return() }
+        auto_recalculate( auto_calc )
+        
+        if(auto_calc){
+          icon = shiny::icon('arrow-right')
+        }else{
+          icon = NULL
+        }
+        
+        
+        lapply(this_env$buttons, function(bid){
+          dipsaus::updateActionButtonStyled(session, bid, disabled = auto_calc, icon = icon)
+        })
+        
+        
+        if(auto_calc){
+          trigger_recalculate()
+        }
+        
+      }, event.env = environment(), handler.env = environment())
+    }
+    
+    
+    
+    lapply(this_env$buttons, function(inputId){
+      observeEvent(input[[inputId]], {
+        dipsaus::cat2('Recalculate Triggered!', level = 'INFO')
+        
+        lapply(input_ids, function(id){
+          params[[id]] = input[[id]]
+          NULL
+        })
+        
+        # trigger re-calculate
+        trigger_recalculate( force = TRUE )
+        
+        lapply(buttons, function(bid){
+          dipsaus::updateActionButtonStyled(session, bid, disabled = TRUE, icon = NULL)
+        })
+      }, event.env = environment(), handler.env = environment())
+      NULL
+    })
+    
+  })
+  
+  function(inputId, type = c('button', 'checkbox'), default_on = TRUE){
+    type = match.arg(type)
+    
+    if(type == 'checkbox'){
+      if(!is.null(this_env$checkbox)){
+        dipsaus::cat2('Auto-recalculate checkbox is defined. Only one widget is allowed', level = 'WARNING')
+        print(this_env$checkbox)
+      }
+      this_env$checkbox = inputId
+      auto_recalculate( default_on )
+      
+    }else{
+      this_env$buttons = c(buttons, inputId)
+    }
+    
+  }
+  
+})
+
 rave_execute({
   missing_data = isolate(`.__internal_reactives__.`[['miss_data']])
   if( missing_data ){
-    stop('Need to load data. Waiting for an action.')
+    rave_failure('Need to load data. Waiting for an action.', level = 'INFO')
+  }
+  
+  if( !auto_recalculate( include_temporary = TRUE, cancel_temporary = TRUE ) ){
+    rave_failure('Auto Re-calculate is off.', level = 'INFO')
   }
 })

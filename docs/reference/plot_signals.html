@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -83,24 +83,6 @@
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/a_real_project.html">2.2 A Real Project</a>
-    </li>
-    <li>
-      <a href="../articles/build_your_first_module.html">2.1 Step-by-step, Build Your First RAVE Module</a>
-    </li>
-    <li>
-      <a href="../articles/create_inputs.html">2.3 Create RAVE Inputs</a>
-    </li>
-  </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -127,11 +109,25 @@
     <p>Plot signals line by line</p>
     </div>
 
-    <pre class="usage"><span class='fu'>plot_signals</span>(<span class='no'>signals</span>, <span class='kw'>sample_rate</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>col</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>space</span> <span class='kw'>=</span> <span class='fl'>0.995</span>,
-  <span class='kw'>space_mode</span> <span class='kw'>=</span> <span class='st'>"quantile"</span>, <span class='kw'>start_time</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>duration</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>compress</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>channel_names</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>ylab</span> <span class='kw'>=</span> <span class='st'>"Channel"</span>,
-  <span class='kw'>time_shift</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>lwd</span> <span class='kw'>=</span> <span class='fl'>0.5</span>, <span class='kw'>cex</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>new_plot</span> <span class='kw'>=</span> <span class='no'>T</span>,
-  <span class='kw'>plot</span> <span class='kw'>=</span> <span class='st'>"base"</span>, <span class='kw'>xlim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>plot_signals</span>(
+  <span class='no'>signals</span>,
+  <span class='kw'>sample_rate</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>col</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>space</span> <span class='kw'>=</span> <span class='fl'>0.995</span>,
+  <span class='kw'>space_mode</span> <span class='kw'>=</span> <span class='st'>"quantile"</span>,
+  <span class='kw'>start_time</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+  <span class='kw'>duration</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>compress</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>channel_names</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>ylab</span> <span class='kw'>=</span> <span class='st'>"Channel"</span>,
+  <span class='kw'>time_shift</span> <span class='kw'>=</span> <span class='fl'>0</span>,
+  <span class='kw'>lwd</span> <span class='kw'>=</span> <span class='fl'>0.5</span>,
+  <span class='kw'>cex</span> <span class='kw'>=</span> <span class='fl'>2</span>,
+  <span class='kw'>new_plot</span> <span class='kw'>=</span> <span class='no'>T</span>,
+  <span class='kw'>plot</span> <span class='kw'>=</span> <span class='st'>"base"</span>,
+  <span class='kw'>xlim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='no'>...</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -161,7 +157,7 @@ space will be as is.</p></td>
     <tr>
       <th>duration</th>
       <td><p>length of 1. Time in seconds the duration of time to be drawn.
-Default is NULL (Total time span)</p></td>
+Default is NULL (Total time range)</p></td>
     </tr>
     <tr>
       <th>compress</th>
@@ -178,11 +174,11 @@ Default is NULL (Total time span)</p></td>
     </tr>
     <tr>
       <th>plot, xlim, space_mode, time_shift, lwd, cex, new_plot</th>
-      <td><p>Depricated.</p></td>
+      <td><p>Deprecated</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>pass to matplot</p></td>
+      <td><p>pass to <code><a href='https://rdrr.io/r/graphics/matplot.html'>matplot</a></code></p></td>
     </tr>
     </table>
 

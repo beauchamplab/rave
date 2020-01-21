@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Subject class — Subject • rave</title>
+<title>R6 Class for 'RAVE' Subject — Subject • rave</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,8 @@
 
 
 
-<meta property="og:title" content="Subject class — Subject" />
-<meta property="og:description" content="Subject class" />
+<meta property="og:title" content="R6 Class for 'RAVE' Subject — Subject" />
+<meta property="og:description" content="contains subject meta information after preprocessing." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -83,24 +83,6 @@
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/a_real_project.html">2.2 A Real Project</a>
-    </li>
-    <li>
-      <a href="../articles/build_your_first_module.html">2.1 Step-by-step, Build Your First RAVE Module</a>
-    </li>
-    <li>
-      <a href="../articles/create_inputs.html">2.3 Create RAVE Inputs</a>
-    </li>
-  </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -118,29 +100,216 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Subject class</h1>
+    <h1>R6 Class for 'RAVE' Subject</h1>
     
     <div class="hidden name"><code>Subject.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Subject class</p>
+    <p>contains subject meta information after preprocessing.</p>
     </div>
 
-    <pre class="usage"><span class='no'>Subject</span></pre>
 
 
-    <h2 class="hasAnchor" id="format"><a class="anchor" href="#format"></a>Format</h2>
+    <h2 class="hasAnchor" id="public-fields"><a class="anchor" href="#public-fields"></a>Public fields</h2>
 
-    <p>An object of class <code>R6ClassGenerator</code> of length 24.</p>
+    <p><div class="r6-fields"></p><dl class='dl-horizontal'>
+<dt><code>meta</code></dt><dd><p>environment stores subject meta data</p></dd>
 
+<dt><code>subject_id</code></dt><dd><p>character, subject ID, generated from project name 
+and subject code. For example, project name is <code>"congruency"</code> and
+subject code is <code>"YAB"</code>, then the <code>subject_id="congruency/YAB"</code></p></dd>
+
+<dt><code>subject_code</code></dt><dd><p>identifier for subject</p></dd>
+
+<dt><code>project_name</code></dt><dd><p>project name</p></dd>
+
+<dt><code>dirs</code></dt><dd><p>stores folder paths for subject data</p></dd>
+
+<dt><code>is_strict</code></dt><dd><p>whether preprocess directory is checked when 
+initializing the instance</p></dd>
+
+</dl><p></div></p>
+    <h2 class="hasAnchor" id="active-bindings"><a class="anchor" href="#active-bindings"></a>Active bindings</h2>
+
+    <p><div class="r6-active-bindings"></p><dl class='dl-horizontal'>
+<dt><code>electrodes</code></dt><dd><p>electrode table (read-only)</p></dd>
+
+<dt><code>frequencies</code></dt><dd><p>frequency table (read-only)</p></dd>
+
+<dt><code>time_points</code></dt><dd><p>time-point table (read-only)</p></dd>
+
+<dt><code>time_excluded</code></dt><dd><p>(deprecated) excluded time-point table (read-only)</p></dd>
+
+<dt><code>sample_rate</code></dt><dd><p>time-point table (read-only, for compatibility issues)</p></dd>
+
+<dt><code>volt_sample_rate</code></dt><dd><p>voltage (trace) sampling rate in Hertz 
+(read-only)</p></dd>
+
+<dt><code>power_sample_rate</code></dt><dd><p>power (amplitude) sampling rate in Hertz
+(read-only)</p></dd>
+
+<dt><code>phase_sample_rate</code></dt><dd><p>phase sampling rate in Hertz (read-only)</p></dd>
+
+<dt><code>valid_electrodes</code></dt><dd><p>all valid electrodes in current reference scheme 
+(read-only)</p></dd>
+
+<dt><code>id</code></dt><dd><p>read-only version of subject ID</p></dd>
+
+</dl><p></div></p>
+    <h2 class="hasAnchor" id="methods"><a class="anchor" href="#methods"></a>Methods</h2>
+
+    
+<h3>Public methods</h3>
+
+<ul>
+<li><p><a href='#method-info'><code>Subject$info()</code></a></p></li>
+<li><p><a href='#method-print'><code>Subject$print()</code></a></p></li>
+<li><p><a href='#method-finalize'><code>Subject$finalize()</code></a></p></li>
+<li><p><a href='#method-new'><code>Subject$new()</code></a></p></li>
+<li><p><a href='#method-preprocess_info'><code>Subject$preprocess_info()</code></a></p></li>
+<li><p><a href='#method-filter_all_electrodes'><code>Subject$filter_all_electrodes()</code></a></p></li>
+<li><p><a href='#method-filter_valid_electrodes'><code>Subject$filter_valid_electrodes()</code></a></p></li>
+<li><p><a href='#method-has_bad_time_point'><code>Subject$has_bad_time_point()</code></a></p></li>
+<li><p><a href='#method-clone'><code>Subject$clone()</code></a></p></li>
+</ul>
+<p><hr>
+<a id="method-info"></a></p><h3>Method <code>info()</code></h3>
+<p>print the information of the subject</p><h3>Usage</h3>
+<p><div class="r"></p><pre>Subject$info()</pre><p></div></p>
+
+<h3>Returns</h3>
+<p>none</p>
+<p><hr>
+<a id="method-print"></a></p><h3>Method <code><a href='https://rdrr.io/r/base/print.html'>print()</a></code></h3>
+<p>override of default print method</p><h3>Usage</h3>
+<p><div class="r"></p><pre>Subject$print()</pre><p></div></p>
+
+<h3>Returns</h3>
+<p>default memory address of the environment</p>
+<p><hr>
+<a id="method-finalize"></a></p><h3>Method <code>finalize()</code></h3>
+<p>called when garbage collected</p><h3>Usage</h3>
+<p><div class="r"></p><pre>Subject$finalize()</pre><p></div></p>
+
+<p><hr>
+<a id="method-new"></a></p><h3>Method <code>new()</code></h3>
+<p>constructor</p><h3>Usage</h3>
+<p><div class="r"></p><pre>Subject$new(project_name, subject_code, reference = NULL, strict = TRUE)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>project_name</code></dt><dd><p>project name</p></dd>
+
+<dt><code>subject_code</code></dt><dd><p>subject code</p></dd>
+
+<dt><code>reference</code></dt><dd><p>what kind of reference is default for the subject, 
+default is "default", referring to <code>"reference_default.csv"</code> in 
+subject meta folder</p></dd>
+
+<dt><code>strict</code></dt><dd><p>whether to check if the raw folder exists</p></dd>
+
+</dl><p></div></p>
+<p><hr>
+<a id="method-preprocess_info"></a></p><h3>Method <code>preprocess_info()</code></h3>
+<p>Obtain preprocessing information.
+This methods is rarely directly called, I wrap up most commonly used 
+fields in other functions</p><h3>Usage</h3>
+<p><div class="r"></p><pre>Subject$preprocess_info(key, default = NULL, customized = FALSE)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>key</code></dt><dd><p>the fields or items store in <code>SubjectInfo2</code>
+instance</p></dd>
+
+<dt><code>default</code></dt><dd><p>default value if the key is not found</p></dd>
+
+<dt><code>customized</code></dt><dd><p>indicates whether the key refers to additional items 
+or fields in <code>SubjectInfo2</code>. Default is false, meaning 
+the key is the fields.</p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>the preprocess information correspond to the key</p>
+<p><hr>
+<a id="method-filter_all_electrodes"></a></p><h3>Method <code>filter_all_electrodes()</code></h3>
+<p>filter, and returns existing electrodes</p><h3>Usage</h3>
+<p><div class="r"></p><pre>Subject$filter_all_electrodes(electrodes)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>electrodes</code></dt><dd><p>integer vector</p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>the electrodes that the subject has, including bad, or invalid
+electrodes.</p>
+<p><hr>
+<a id="method-filter_valid_electrodes"></a></p><h3>Method <code>filter_valid_electrodes()</code></h3>
+<p>filter, and returns valid electrodes</p><h3>Usage</h3>
+<p><div class="r"></p><pre>Subject$filter_valid_electrodes(electrodes)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>electrodes</code></dt><dd><p>integer vector</p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>the valid electrodes. Invalid electrodes refers to bad 
+electrodes, or the end of bipolar reference. If <code>"Reference"</code> 
+column is blank in the reference file, then the electrode is invalid.</p>
+<p><hr>
+<a id="method-has_bad_time_point"></a></p><h3>Method <code>has_bad_time_point()</code></h3>
+<p>(deprecated) check whether the selected time is excluded</p><h3>Usage</h3>
+<p><div class="r"></p><pre>Subject$has_bad_time_point(block, electrode, start, end)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>block</code></dt><dd><p>block name</p></dd>
+
+<dt><code>electrode</code></dt><dd><p>electrode number</p></dd>
+
+<dt><code>start</code></dt><dd><p>start time</p></dd>
+
+<dt><code>end</code></dt><dd><p>end time</p></dd>
+
+</dl><p></div></p>
+<p><hr>
+<a id="method-clone"></a></p><h3>Method <code>clone()</code></h3>
+<p>The objects of this class are cloneable with this method.</p><h3>Usage</h3>
+<p><div class="r"></p><pre>Subject$clone(deep = FALSE)</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>deep</code></dt><dd><p>Whether to make a deep clone.</p></dd>
+
+</dl><p></div></p>
+
+
+
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+
+<span class='co'># Load subject, use `strict=FALSE` if not sure the existence of raw files </span>
+<span class='no'>subject</span> <span class='kw'>&lt;-</span> <span class='no'>Subject</span>$<span class='fu'>new</span>(<span class='kw'>project_name</span> <span class='kw'>=</span> <span class='st'>'demo'</span>, <span class='st'>'YAB'</span>, <span class='kw'>strict</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
+
+<span class='co'># Filter 1:14 to see which numbers refer to the valid electrodes</span>
+<span class='no'>subject</span>$<span class='fu'>filter_valid_electrodes</span>(<span class='fl'>1</span>:<span class='fl'>14</span>)
+<span class='co'>#&gt; [1] 13 14</span>
+
+}</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#format">Format</a></li>
+      <li><a href="#public-fields">Public fields</a></li>
+      <li><a href="#active-bindings">Active bindings</a></li>
+      <li><a href="#methods">Methods</a></li>
+      <li><a href="#examples">Examples</a></li>
     </ul>
 
+    <h2>Author</h2>
+    <p>Zhengjia Wang</p>
   </div>
 </div>
 

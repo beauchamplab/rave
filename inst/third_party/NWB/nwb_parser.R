@@ -8,7 +8,7 @@ NWB_parser <- function(nwb_file, verbose = FALSE, progress = NULL){
     if(!is.null(progress)){
       progress$inc(paste0(...))
     }else if(verbose){
-      logger(...)
+      dipsaus::cat2(...)
     }
   }
 
@@ -55,7 +55,7 @@ NWB_parser <- function(nwb_file, verbose = FALSE, progress = NULL){
           for(jj in seq_len(nattr) - 1){
             attr_name = obj[[name]]$attr_name_by_idx(jj, '.')
             if(verbose){
-              logger('\t', attr_name)
+              dipsaus::cat2('\t', attr_name)
             }
 
             attr_value = obj[[name]]$attr_open_by_idx(jj, '.')$read()
@@ -73,7 +73,7 @@ NWB_parser <- function(nwb_file, verbose = FALSE, progress = NULL){
           for(jj in seq_len(nattr) - 1){
             attr_name = obj[[name]]$attr_name_by_idx(jj, '.')
             if(verbose){
-              logger('\t', attr_name)
+              dipsaus::cat2('\t', attr_name)
             }
             attr_value = obj[[name]]$attr_open_by_idx(jj, '.')$read()
             attr(dat, attr_name) = attr_value
@@ -117,7 +117,7 @@ print.rave_nwb_container = function(x, ...){
   cat = function(...){
     base::cat(..., sep = '', end = '\n')
   }
-  cat('  In-RAM size: ', as.character(rave::to_ram_size(pryr::object_size(x))))
+  cat('  In-RAM size: ', as.character(dipsaus::to_ram_size(pryr::object_size(x))))
   cat('')
   # ---- attributes
   def = attr(x, 'NWB_DEF')

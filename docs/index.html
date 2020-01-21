@@ -39,7 +39,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -53,24 +53,6 @@
 </li>
 <li>
   <a href="reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-<li>
-      <a href="articles/a_real_project.html">2.2 A Real Project</a>
-    </li>
-    <li>
-      <a href="articles/build_your_first_module.html">2.1 Step-by-step, Build Your First RAVE Module</a>
-    </li>
-    <li>
-      <a href="articles/create_inputs.html">2.3 Create RAVE Inputs</a>
-    </li>
-  </ul>
 </li>
       </ul>
 <ul class="nav navbar-nav navbar-right"></ul>
@@ -95,18 +77,16 @@
 <h2 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h2>
 <ul>
-<li><p>RAVE requires the installation of the language “R” and other miscellaneous programming tools, including “RStudio”. Please <a href="./Installation.html">click here for the prerequisite installation guide</a> to install all needed tools for your operating system.</p></li>
-<li><p>RAVE runs best on modern computers with multicore CPUs, <a href="./Requirements.html">click here for suggested system configurations</a>.</p></li>
+<li><p>RAVE runs on Mac, Windows or Linux. <a href="./Installation.html">Click here for the prerequisite installation guide</a> to install the latest versions of all required tools. RAVE requires the latest versions of the language “R” and “RStudio” and trying to install RAVE on older versions will lead to unpredictable error messages. <a href="./Requirements.html">Click here for suggested system configurations</a>.</p></li>
 <li><p>After the prerequisites are installed, open R-Studio (in Mac OSX, Rstudio icon is installed in your Applications folder). Copy and paste the following commands into the RStudio console to download the current version of RAVE. The commands must be typed one at a time. If packages need to be installed, you may accept the defaults by typing “Yes” to any questions that appear. In the case of errors, relaunch RStudio and repeat the commands or try the alternative installation command.</p></li>
 </ul>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="co"># Install RAVE and builtin modules</span></a>
-<a class="sourceLine" id="cb1-2" title="2"><span class="kw"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">'devtools'</span>)</a>
-<a class="sourceLine" id="cb1-3" title="3">devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/devtools/man/remote-reexports.html">install_github</a></span>(<span class="st">'dipterix/threeBrain'</span>)</a>
-<a class="sourceLine" id="cb1-4" title="4">devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/devtools/man/remote-reexports.html">install_github</a></span>(<span class="st">'dipterix/rutabaga'</span>)</a>
-<a class="sourceLine" id="cb1-5" title="5">devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/devtools/man/remote-reexports.html">install_github</a></span>(<span class="st">'beauchamplab/ravebuiltins@dev'</span>)</a>
-<a class="sourceLine" id="cb1-6" title="6">devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/devtools/man/remote-reexports.html">install_github</a></span>(<span class="st">'beauchamplab/rave'</span>)</a>
-<a class="sourceLine" id="cb1-7" title="7">threeBrain<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/threeBrain/man/template_subject.html">download_N27</a></span>(<span class="dt">make_default =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb1-8" title="8">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/arrange_modules.html">arrange_modules</a></span>(<span class="ot">TRUE</span>, <span class="ot">TRUE</span>)</a></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">'devtools'</span>)</a>
+<a class="sourceLine" id="cb1-2" title="2">devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/devtools/man/remote-reexports.html">install_github</a></span>(<span class="st">'dipterix/threeBrain'</span>)</a>
+<a class="sourceLine" id="cb1-3" title="3">devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/devtools/man/remote-reexports.html">install_github</a></span>(<span class="st">'dipterix/rutabaga'</span>)</a>
+<a class="sourceLine" id="cb1-4" title="4">devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/devtools/man/remote-reexports.html">install_github</a></span>(<span class="st">'beauchamplab/ravebuiltins@dev'</span>)</a>
+<a class="sourceLine" id="cb1-5" title="5">devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/devtools/man/remote-reexports.html">install_github</a></span>(<span class="st">'beauchamplab/rave'</span>)</a>
+<a class="sourceLine" id="cb1-6" title="6">threeBrain<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/threeBrain/man/template_subject.html">download_N27</a></span>(<span class="dt">make_default =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb1-7" title="7">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/arrange_modules.html">arrange_modules</a></span>(<span class="ot">TRUE</span>, <span class="ot">TRUE</span>)</a></code></pre></div>
 <p>Alternative installation command:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">'pak'</span>)</a>
 <a class="sourceLine" id="cb2-2" title="2">pak<span class="op">::</span><span class="kw"><a href="http://pak.r-lib.org/reference/pkg_install.html">pkg_install</a></span>(<span class="st">'dipterix/threeBrain'</span>)</a>
@@ -115,7 +95,7 @@
 <a class="sourceLine" id="cb2-5" title="5">pak<span class="op">::</span><span class="kw"><a href="http://pak.r-lib.org/reference/pkg_install.html">pkg_install</a></span>(<span class="st">'beauchamplab/rave'</span>)</a>
 <a class="sourceLine" id="cb2-6" title="6">threeBrain<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/threeBrain/man/template_subject.html">download_N27</a></span>(<span class="dt">make_default =</span> <span class="ot">TRUE</span>)</a>
 <a class="sourceLine" id="cb2-7" title="7">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/arrange_modules.html">arrange_modules</a></span>(<span class="ot">TRUE</span>, <span class="ot">TRUE</span>)</a></code></pre></div>
-<p>To update <code>RAVE</code>:</p>
+<p>To update existing installations of <code>RAVE</code>. Make sure to update “R” and “RStudio” (see first step, above):</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/devtools/man/remote-reexports.html">install_github</a></span>(<span class="st">'beauchamplab/ravebuiltins@dev'</span>)</a>
 <a class="sourceLine" id="cb3-2" title="2">devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/devtools/man/remote-reexports.html">install_github</a></span>(<span class="st">'beauchamplab/rave'</span>)</a>
 <a class="sourceLine" id="cb3-3" title="3">devtools<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/devtools/man/remote-reexports.html">install_github</a></span>(<span class="st">'dipterix/threeBrain'</span>)</a>
@@ -124,50 +104,60 @@
 <li>After installing or updating RAVE, quit and restart RStudio before continuing.</li>
 </ul>
 </div>
+<div id="start-rave" class="section level2">
+<h2 class="hasAnchor">
+<a href="#start-rave" class="anchor"></a>Start RAVE</h2>
+<ul>
+<li>To start RAVE, type (or copy and paste) the following command into the RStudio console:</li>
+</ul>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/start_rave.html">start_rave</a></span>()</a></code></pre></div>
+<ul>
+<li>If installation has proceeded correctly, a new web browser window should open with the RAVE splash screen.</li>
+</ul>
+</div>
+<div id="using-rave" class="section level2">
+<h2 class="hasAnchor">
+<a href="#using-rave" class="anchor"></a>Using RAVE</h2>
+<ul>
+<li>To use RAVE, you will need to load data by clicking “Select Data”. If you do not have any data in RAVE format, you will need to create some.</li>
+<li>Option 1: You can download sample data (see next step).</li>
+<li>Option 2: Create data in RAVE format by preprocessing your existing raw data. To preprocess data</li>
+</ul>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/rave_preprocess.html">rave_preprocess</a></span>()</a></code></pre></div>
+<ul>
+<li>Option 3: If you have RAVE format data on a server (or anywhere besides the default local directory), point RAVE to it with</li>
+</ul>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/rave_options.html">rave_options</a></span>()</a></code></pre></div>
+<ul>
+<li>For tutorials on how to use RAVE, <a href="https://openwetware.org/wiki/Beauchamp:RAVE#Tutorials">click here</a>
+</li>
+</ul>
+</div>
 <div id="download-demo-data" class="section level2">
 <h2 class="hasAnchor">
 <a href="#download-demo-data" class="anchor"></a>Download Demo Data</h2>
 <ul>
-<li>If you do not have any data in RAVE format, we recommend you download some sample data. Copy and paste the following commands into the RStudio console:</li>
+<li>If you do not have any data in RAVE format, we recommend you download some sample data. Each RStudio command below downloads a dataset from a single subject.</li>
 </ul>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="co"># download a demo subject - 500MB ~ 1.5 GB per subject</span></a>
-<a class="sourceLine" id="cb4-2" title="2">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'KC'</span>)</a>
-<a class="sourceLine" id="cb4-3" title="3">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'YAB'</span>)</a>
-<a class="sourceLine" id="cb4-4" title="4">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'YAD'</span>)</a>
-<a class="sourceLine" id="cb4-5" title="5">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'YAF'</span>)</a>
-<a class="sourceLine" id="cb4-6" title="6">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'YAH'</span>)</a>
-<a class="sourceLine" id="cb4-7" title="7">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'YAI'</span>)</a>
-<a class="sourceLine" id="cb4-8" title="8">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'YAJ'</span>)</a>
-<a class="sourceLine" id="cb4-9" title="9">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'YAK'</span>)</a>
-<a class="sourceLine" id="cb4-10" title="10"></a>
-<a class="sourceLine" id="cb4-11" title="11"><span class="co"># download group analysis sample - 72 MB. Please download at least 1 subject above.</span></a>
-<a class="sourceLine" id="cb4-12" title="12">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'_group_data'</span>)</a></code></pre></div>
-<p>Once you see the folowing message, the subject is downloaded. The directory (XXX) will vary depending on the machine. If a subject previously exists, RAVE will ask you to choose from replacing, creating new or abandon the downloaded subject.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="co"># 500MB ~ 1.5 GB per subject</span></a>
+<a class="sourceLine" id="cb7-2" title="2">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'KC'</span>)</a>
+<a class="sourceLine" id="cb7-3" title="3">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'YAB'</span>)</a>
+<a class="sourceLine" id="cb7-4" title="4">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'YAD'</span>)</a>
+<a class="sourceLine" id="cb7-5" title="5">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'YAF'</span>)</a>
+<a class="sourceLine" id="cb7-6" title="6">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'YAH'</span>)</a>
+<a class="sourceLine" id="cb7-7" title="7">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'YAI'</span>)</a>
+<a class="sourceLine" id="cb7-8" title="8">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'YAJ'</span>)</a>
+<a class="sourceLine" id="cb7-9" title="9">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'YAK'</span>)</a>
+<a class="sourceLine" id="cb7-10" title="10"></a>
+<a class="sourceLine" id="cb7-11" title="11"><span class="co"># download group analysis sample - 72 MB. Please download at least 1 subject above.</span></a>
+<a class="sourceLine" id="cb7-12" title="12">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/download_sample_data.html">download_sample_data</a></span>(<span class="st">'_group_data'</span>)</a></code></pre></div>
+<p>Once you see the following message, the subject is downloaded. The directory (XXX) will vary depending on the machine. If a subject previously exists, RAVE will ask you to choose from replacing, creating new or abandon the downloaded subject.</p>
 <pre><code>[ INFO ]: Expanding zip file
 [ INFO ]: Copy from tempdir to data repository
 [ INFO ]: Clean up
 [ INFO ]: Done. Subject [sub1] is now at 
 [Raw Data]: /XXX/rave_data/raw_dir/KC
 [RAVE Data]: /XXX/rave_data/data_dir/demo/KC</code></pre>
-</div>
-<div id="start-rave" class="section level2">
-<h2 class="hasAnchor">
-<a href="#start-rave" class="anchor"></a>Start RAVE</h2>
-<ul>
-<li>To start RAVE, copy and paste the following commands into the RStudio console:</li>
-</ul>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="co"># Launch main app</span></a>
-<a class="sourceLine" id="cb6-2" title="2">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/start_rave.html">start_rave</a></span>()</a></code></pre></div>
-</div>
-<div id="using-rave" class="section level2">
-<h2 class="hasAnchor">
-<a href="#using-rave" class="anchor"></a>Using RAVE</h2>
-<ul>
-<li><p>For tutorials on how to use RAVE, <a href="https://openwetware.org/wiki/Beauchamp:RAVE#Tutorials">click here</a></p></li>
-<li><p>To preprocess data, copy and paste the following commands into the RStudio console:</p></li>
-</ul>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="co"># Preprocess</span></a>
-<a class="sourceLine" id="cb7-2" title="2">rave<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/rave/man/rave_preprocess.html">rave_preprocess</a></span>()</a></code></pre></div>
 </div>
 </div>
 

@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -83,24 +83,6 @@
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/a_real_project.html">2.2 A Real Project</a>
-    </li>
-    <li>
-      <a href="../articles/build_your_first_module.html">2.1 Step-by-step, Build Your First RAVE Module</a>
-    </li>
-    <li>
-      <a href="../articles/create_inputs.html">2.3 Create RAVE Inputs</a>
-    </li>
-  </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -127,27 +109,34 @@
     <p>Check if data is loaded for current module</p>
     </div>
 
-    <pre class="usage"><span class='fu'>rave_checks</span>(<span class='no'>...</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+    <pre class="usage"><span class='fu'>rave_checks</span>(<span class='no'>...</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>.raise_error</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>...</th>
-      <td><p>see defails</p></td>
+      <td><p>see details</p></td>
     </tr>
     <tr>
       <th>data</th>
-      <td><p>same as ..., but can be a vector</p></td>
+      <td><p>same as <code>...</code>, but can be a vector</p></td>
+    </tr>
+    <tr>
+      <th>.raise_error</th>
+      <td><p>whether to raise error if data is missing</p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>This function checks whether ECoG data is loaded. The format is: DATA+(blankspace)+TYPE. DATA can be
-"power" (Wavelet transform amplitude), "phase" (Complex angle), or "volt"/"voltage" (Before wavelet). TYPE can
-be "raw" (no reference), "referenced" (referenced by common average reference, white matter reference, or bipolar reference).
-For voltage data, there is one more special type "full" which loads voltage data for all electrodes.</p>
+    <p>This function checks whether "ECoG" data is loaded. The format is: 
+<code>"DATA+(blankspace)+TYPE"</code>. <code>"DATA"</code> can be "power" (wavelet 
+transform amplitude), "phase" (complex angle), or "volt"/"voltage" (Before 
+wavelet). <code>"TYPE"</code> can be "raw" (no reference), "referenced" 
+(referenced by common average reference, white matter reference, or 
+bipolar reference). For voltage data, there is one more special type 
+"full" which loads voltage data for all electrodes.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

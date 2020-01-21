@@ -3,5 +3,6 @@
 export(dev_${{PACKAGE}})
 import(rave)
 import(rlang)
+import(dipsaus)
 import(rutabaga)
 import(shiny)

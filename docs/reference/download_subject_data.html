@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -83,24 +83,6 @@
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/a_real_project.html">2.2 A Real Project</a>
-    </li>
-    <li>
-      <a href="../articles/build_your_first_module.html">2.1 Step-by-step, Build Your First RAVE Module</a>
-    </li>
-    <li>
-      <a href="../articles/create_inputs.html">2.3 Create RAVE Inputs</a>
-    </li>
-  </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -127,10 +109,16 @@
     <p>Function to download subjects from internet/local</p>
     </div>
 
-    <pre class="usage"><span class='fu'>download_subject_data</span>(<span class='no'>con</span>, <span class='kw'>replace_if_exists</span> <span class='kw'>=</span> <span class='no'>F</span>,
-  <span class='kw'>override_project</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>override_subject</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>temp_dir</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/tempfile.html'>tempdir</a></span>(), <span class='kw'>remove_zipfile</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>subject_settings</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>download_subject_data</span>(
+  <span class='no'>con</span>,
+  <span class='kw'>replace_if_exists</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>override_project</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>override_subject</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>temp_dir</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/tempfile.html'>tempdir</a></span>(),
+  <span class='kw'>remove_zipfile</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>subject_settings</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='no'>...</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -141,7 +129,8 @@
     </tr>
     <tr>
       <th>replace_if_exists</th>
-      <td><p>Automatically replace current subject if subject files exist (default FALSE)</p></td>
+      <td><p>Automatically replace current subject if subject 
+files exist (default FALSE)</p></td>
     </tr>
     <tr>
       <th>override_project</th>
@@ -153,28 +142,28 @@
     </tr>
     <tr>
       <th>temp_dir</th>
-      <td><p>temp directory to store downloaded zip files and extracted files</p></td>
+      <td><p>temp directory to store downloaded zip files and extracted 
+files</p></td>
     </tr>
     <tr>
       <th>remove_zipfile</th>
-      <td><p>clear downloaded zip files? if con is local file, this will be forced to FALSE</p></td>
+      <td><p>clear downloaded zip files? if <code>con</code> is local 
+file, this will be forced to FALSE</p></td>
     </tr>
     <tr>
       <th>subject_settings</th>
-      <td><p>override subject.yaml see details</p></td>
+      <td><p>override <code>"subject.yaml"</code> see details</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>passed to download.file</p></td>
+      <td><p>passed to <code><a href='https://rdrr.io/r/utils/download.file.html'>download.file</a></code></p></td>
     </tr>
     </table>
 
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>Each downloaded zip file should have a subject.yaml file indicating default
-project name, subject code, data directory and raw data directory. (download
-'https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/data-large.zip'
-as an example).</p>
+    <p>Each downloaded zip file should have a <code>"subject.yaml"</code> file indicating 
+default project name, subject code, data directory and raw data directory.</p>
 <p>If you want to override subject settings, you need to implement your own
 <code>subject_settings</code>. See examples.</p>
 

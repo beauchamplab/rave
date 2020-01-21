@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function to load subject and create ECoG data environment — rave_prepare • rave</title>
+<title>Load Subject and Create <code>iEEG/ECoG</code> Data Environment — rave_prepare • rave</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,8 @@
 
 
 
-<meta property="og:title" content="Function to load subject and create ECoG data environment — rave_prepare" />
-<meta property="og:description" content="Function to load subject and create ECoG data environment" />
+<meta property="og:title" content="Load Subject and Create <code>iEEG/ECoG</code> Data Environment — rave_prepare" />
+<meta property="og:description" content="Loads subject data along with iEEG/ECoG data into memory." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -83,24 +83,6 @@
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/a_real_project.html">2.2 A Real Project</a>
-    </li>
-    <li>
-      <a href="../articles/build_your_first_module.html">2.1 Step-by-step, Build Your First RAVE Module</a>
-    </li>
-    <li>
-      <a href="../articles/create_inputs.html">2.3 Create RAVE Inputs</a>
-    </li>
-  </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -118,53 +100,75 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Function to load subject and create ECoG data environment</h1>
+    <h1>Load Subject and Create <code>iEEG/ECoG</code> Data Environment</h1>
     
     <div class="hidden name"><code>rave_prepare.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Function to load subject and create ECoG data environment</p>
+    <p>Loads subject data along with <code>iEEG/ECoG</code> data into memory.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>rave_prepare</span>(<span class='no'>subject</span>, <span class='no'>electrodes</span>, <span class='no'>epoch</span>, <span class='no'>time_range</span>, <span class='no'>frequency_range</span>,
-  <span class='kw'>data_types</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"power"</span>), <span class='kw'>reference</span> <span class='kw'>=</span> <span class='st'>"default"</span>, <span class='kw'>attach</span> <span class='kw'>=</span> <span class='st'>"r"</span>,
-  <span class='kw'>data_env</span> <span class='kw'>=</span> <span class='fu'><a href='getDefaultDataRepository.html'>getDefaultDataRepository</a></span>(), <span class='kw'>strict</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>rave_prepare</span>(
+  <span class='no'>subject</span>,
+  <span class='no'>electrodes</span>,
+  <span class='no'>epoch</span>,
+  <span class='no'>time_range</span>,
+  <span class='no'>frequency_range</span>,
+  <span class='kw'>data_types</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"power"</span>),
+  <span class='kw'>reference</span> <span class='kw'>=</span> <span class='st'>"default"</span>,
+  <span class='kw'>attach</span> <span class='kw'>=</span> <span class='st'>"r"</span>,
+  <span class='kw'>data_env</span> <span class='kw'>=</span> <span class='fu'><a href='getDefaultDataRepository.html'>getDefaultDataRepository</a></span>(),
+  <span class='kw'>strict</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='no'>...</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>subject</th>
-      <td><p>characters, format: "PROJECT/SUBJECT"</p></td>
+      <td><p>characters, format: <code>"PROJECT/SUBJECT"</code></p></td>
     </tr>
     <tr>
       <th>electrodes</th>
-      <td><p>numeric vector, which electrodes to be loaded</p></td>
+      <td><p>integer vector, which electrodes to be loaded</p></td>
     </tr>
     <tr>
       <th>epoch</th>
-      <td><p>characters, depending on subject meta data. For example, use "epoch1" if exists epoch file "epoch_epoch1.csv"</p></td>
+      <td><p>characters, name for epoch data. For example, <code>"epoch1"</code> 
+refers to epoch file <code>"epoch_epoch1.csv"</code> in subject meta folder</p></td>
     </tr>
     <tr>
       <th>time_range</th>
-      <td><p>vector of length 2 - before and after onset. For example, c(1,2), means 1 second before onset and 2 seconds after onset.</p></td>
+      <td><p>vector of length 2. <code>time_range[1]=1</code> indicates 1 
+second before onset will be loaded; <code>time_range[2]=1.5</code> means 1.5 
+seconds after onset will be loaded. Make sure both are positive number in 
+seconds</p></td>
     </tr>
     <tr>
       <th>frequency_range</th>
-      <td><p>vector of length 2 - lowest and highest frequencies. By default is all frequencies. Only applied to power and phase data.</p></td>
+      <td><p>vector of length 2 - lowest and highest frequencies. 
+By default is all frequencies. Only applied to power and phase data.</p></td>
     </tr>
     <tr>
       <th>data_types</th>
-      <td><p>vector of characters, data to be preloaded. "power" - referenced power data, "phase" - referenced phase data, "volt" - referenced voltage data</p></td>
+      <td><p>vector of characters, data to be pre-loaded. 
+<code>"power"</code> refers to referenced power (power spectrum) data, 
+<code>"phase"</code> refers to referenced phase data, and <code>"volt"</code> 
+is referenced voltage (original analog traces) data</p></td>
     </tr>
     <tr>
       <th>reference</th>
-      <td><p>similar to epoch, For example, use "default" if exists reference file "reference_default.csv"</p></td>
+      <td><p>name of reference data. For example, <code>"default"</code> refers
+to reference file <code>"reference_default.csv"</code> in subject meta folder</p></td>
     </tr>
     <tr>
       <th>attach, </th>
-      <td><p>characters or NULL, NULL if you don't want to attach it, "r" if want to load data as R environment, "py" if python, "matlab" for matlab.</p></td>
+      <td><p>characters or <code>NULL</code>, <code>NULL</code> if you don't want to 
+attach it, <code>"r"</code> if want to load data as R environment, <code>"py"</code> is 
+for python, and <code>"matlab"</code> is for Matlab. (python and Matlab are under 
+construction)</p></td>
     </tr>
     <tr>
       <th>data_env</th>
@@ -172,24 +176,20 @@
     </tr>
     <tr>
       <th>strict</th>
-      <td><p>check data completness? default is FALSE (suggested)</p></td>
+      <td><p>whether to check if raw data exists. Default is no (suggested)</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>to be ignored</p></td>
+      <td><p>ignored</p></td>
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
-
-    <p>Usually this function is for module writters and for debug use, or adhoc analysis.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-      <li><a href="#details">Details</a></li>
     </ul>
 
   </div>

@@ -2,7 +2,7 @@ library(rave)
 # Import already preprocessed data into RAVE
 
 # Step 1: subject settings and implementations
-# You need to implement some defails in this step
+# You need to implement some details in this step
 
 # TODO: set sample rate for voltage and wavelet, in addition, set frequencies
 subject_info = list(
@@ -53,7 +53,7 @@ load_data = function(block, electrode){
 # Step 2: create subject
 utils = rave_preprocess_tools()
 
-assertthat::assert_that(
+rave:::stopifnot2(
   !utils$has_raw_cache(),
   msg = 'WARNING!!! You already have the subject!')
 

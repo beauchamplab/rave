@@ -1,7 +1,7 @@
 Package: rave
 Type: Package
 Title: R Analysis and Visualization of 'ECOG/iEEG' Data
-Version: 0.1.8
+Version: 1.0.0
 Authors@R: c(
     person("Zhengjia", "Wang", email = "dipterix.wang@gmail.com", role = c("aut", "cre")),
     person("John", "Magnotti", role = c("aut")),
@@ -24,21 +24,26 @@ Description: R Analysis and Visualization of 'ECOG/iEEG' Data
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
+Depends: R (>= 3.6.0)
 Imports:
     utils,
     stats,
-    methods,
     graphics,
     grDevices,
+    glue,
+    remotes,
     htmltools (>= 0.3.6),
     devtools,
     grid,
+    crayon,
+    cli,
+    signal (>= 0.7-6),
+    dipsaus (>= 0.0.4),
     hdf5r (>= 1.0.0),
     R.matlab (>= 3.6.1),
     R6 (>= 2.2.2),
     jsonlite (>= 1.5),
-    crayon (>= 1.3.4),
     future (>= 1.10.0),
     shiny (>= 1.0.5),
     stringr (>= 1.2.0),
@@ -54,118 +59,18 @@ Imports:
     servr (>= 0.13),
     later (>= 0.8.0),
     startup (>= 0.12.0),
-    threeBrain (>= 0.1.3),
+    threeBrain (>= 0.1.5),
+    data.table (>= 1.11.8),
+    pryr (>= 0.1.3),
     shinyFiles (>= 0.7.3)
 Suggests:
-    gifti,
     knitr,
     rmarkdown,
     spelling,
-    V8 (>= 1.5),
-    data.table (>= 1.11.8),
-    fftw (>= 1.0-3),
-    gridBase (>= 0.4-7),
-    httpuv (>= 1.3.6.1),
-    assertthat (>= 0.2.0),
-    magrittr (>= 1.5),
-    pryr (>= 0.1.3),
-    globals (>= 0.12.4),
-    roxygen2 (>= 6.0.0)
+    roxygen2,
+    testthat,
+    rstudioapi
 Remotes:
-    github::dipterix/rutabaga,
-    github::dipterix/threeBrain
+    github::dipterix/rutabaga
 VignetteBuilder: knitr
 Language: en-US
-Collate: 
-    'utils_syscheck.R'
-    'aaa.R'
-    'cls_brain.R'
-    'cls_brain2.R'
-    'cls_ecog_repo.R'
-    'cls_electrode.R'
-    'cls_finalizer.R'
-    'cls_map.R'
-    'cls_module.R'
-    'cls_module_env.R'
-    'cls_subject.R'
-    'cls_subjectinfo.R'
-    'cls_tensor.R'
-    'cls_tensor_ecog.R'
-    'core_default_setups.R'
-    'core_options.R'
-    'utils_history.R'
-    'core_singletons.R'
-    'core_template.R'
-    'func_bind_wrapper.R'
-    'func_check_epoch.R'
-    'func_daemon.R'
-    'func_group_analysis.R'
-    'func_iter_results.R'
-    'func_module_debug.R'
-    'func_rave_prepare.R'
-    'func_shinirize.R'
-    'imported_assertthat.R'
-    'imported_fst.R'
-    'imported_overall.R'
-    'imported_pryr.R'
-    'imported_rutabaga.R'
-    'imported_shinydashboard.R'
-    'imported_threebrain.R'
-    'imported_threejsr.R'
-    'init_app.R'
-    'io_raw_signal.R'
-    'lib_notch_filter.R'
-    'lib_plot_notch.R'
-    'lib_resample.R'
-    'lib_wavelet.R'
-    'pre_epoch.R'
-    'pre_load_settings.R'
-    'pre_localization.R'
-    'pre_localization_ct.R'
-    'pre_localization_ct_old.R'
-    'pre_notch.R'
-    'pre_overview.R'
-    'pre_post_reference.R'
-    'pre_process.R'
-    'pre_reference.R'
-    'pre_wavelet.R'
-    'py_install.R'
-    'save_meta.R'
-    'shiny_app_controller.R'
-    'shiny_customize.R'
-    'shiny_dashboard.R'
-    'shiny_data_selector.R'
-    'shiny_rave_options.R'
-    'suma_io.R'
-    'utils_3drender.R'
-    'utils_afni.R'
-    'utils_async.R'
-    'utils_async_io.R'
-    'utils_check_repo.R'
-    'utils_checkvalid.R'
-    'utils_debug.R'
-    'utils_dir.R'
-    'utils_download_sample.R'
-    'utils_export.R'
-    'utils_general.R'
-    'utils_io_fst.R'
-    'utils_io_h5.R'
-    'utils_lapply.R'
-    'utils_local_cache.R'
-    'utils_logger.R'
-    'utils_mem.R'
-    'utils_module_devs.R'
-    'utils_module_tools.R'
-    'utils_modules.R'
-    'utils_niml.R'
-    'utils_normalize_path.R'
-    'utils_parse.R'
-    'utils_parse_call.R'
-    'utils_progress.R'
-    'utils_python.R'
-    'utils_record_plot.R'
-    'utils_tools.R'
-    'utils_uicomp.R'
-    'vis_channel.R'
-    'visual_signal.R'
-    'zzz.R'

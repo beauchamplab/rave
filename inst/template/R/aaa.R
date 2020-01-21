@@ -9,42 +9,22 @@
 # Make sure to declare ALL dependencies here to make sure R can find them.
 NULL
 
+
+#' @importFrom dipsaus cat2
+
+
+
+
 is <- function(comp, cls){
   isTRUE(all(cls %in% class(comp)))
 }
 
-#' Resolve compatibility issues when using cat2
-#' @param ... objects to be printed
-#' @param end end of print, default is with a new line
-#' @param level six levels, check pal
-#' @param print_level logical, prepend level information to the output
-#' @param pal a list of palette indicating the color of each level
-cat2 <- function(..., end = '\n', level = 'DEBUG', print_level = FALSE, pal = list(
-  'DEBUG' = 'grey60',
-  'INFO' = '#1d9f34',
-  'WARNING' = '#ec942c',
-  'ERROR' = '#f02c2c',
-  'FATAL' = '#763053',
-  'DEFAULT' = '#000000'
-)){
-  if(system.file('', package = 'rutabaga') != ''){
-    f = do.call('::', list(pkg = 'rutabaga', name = 'cat2'))
-  }else{
-    f = function(..., level = level, print_level = print_level, pal = pal){
-      if(print_level){
-        base::cat(paste0('[', level, ']'), ...)
-      }else{
-        base::cat(...)
-      }
-    }
-  }
-  f(..., end = end, level = level, print_level = print_level, pal = pal)
-}
-
 
 #' Function to load all dev funtions and wrap them within an environment
-#' @param expose_functions logical indicating whether to expose all dev functions to the global environment
-#' @param reload logical, do you want to fast-reload the package before load the functions?
+#' @param expose_functions logical indicating whether to expose all development 
+#' functions to the global environment
+#' @param reload logical, do you want to fast-reload the package before load the 
+#' functions?
 #' @export
 dev_${{PACKAGE}} <- function(expose_functions = FALSE, reload = TRUE){
 
@@ -78,12 +58,12 @@ dev_${{PACKAGE}} <- function(expose_functions = FALSE, reload = TRUE){
   # Reload first
   if(reload){
     env = rave_dev_load(local = T)
-    env$reload_this_package(expose = FALSE, clear_env = FALSE)
+    env$reload_module_package(expose = FALSE, clear_env = FALSE)
   }
 
   env = rave_dev_load(local = !expose_functions)
 
-  env$load_dev_env()
+  env$rave_dev_env()
 
   return(invisible(env))
 }
@@ -173,7 +153,7 @@ debug_module <- function(module_id, interactive = FALSE, check_dependencies = TR
       pkgs = stringr::str_match(search(), '^package:(.+)$')[,2]
       pkgs = unique(pkgs[!is.na(pkgs)])
       ..tmp[['..rave_future_obj']] = future::future({
-        rave::eval_dirty(quote({!!async_quo}))#, env = async_env)
+        dipsaus::eval_dirty(quote({!!async_quo}))#, env = async_env)
         ..async_var = !!async_vars
         if(is.null(..async_var)){
           return(environment())

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Get value, if value is invalid, then assign value — get_val • rave</title>
+<title>Get Value or Default — get_val • rave</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,8 @@
 
 
 
-<meta property="og:title" content="Get value, if value is invalid, then assign value — get_val" />
-<meta property="og:description" content="Get value, if value is invalid, then assign value" />
+<meta property="og:title" content="Get Value or Default — get_val" />
+<meta property="og:description" content="Get Value or Default" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -83,24 +83,6 @@
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/a_real_project.html">2.2 A Real Project</a>
-    </li>
-    <li>
-      <a href="../articles/build_your_first_module.html">2.1 Step-by-step, Build Your First RAVE Module</a>
-    </li>
-    <li>
-      <a href="../articles/create_inputs.html">2.3 Create RAVE Inputs</a>
-    </li>
-  </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -118,13 +100,13 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Get value, if value is invalid, then assign value</h1>
+    <h1>Get Value or Default</h1>
     
     <div class="hidden name"><code>get_val.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Get value, if value is invalid, then assign value</p>
+    <p>Get Value or Default</p>
     </div>
 
     <pre class="usage"><span class='fu'>get_val</span>(<span class='no'>x</span>, <span class='kw'>key</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>...</span>, <span class='kw'>.invalids</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"null"</span>, <span class='st'>"na"</span>))</pre>
@@ -134,19 +116,20 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>List or variable</p></td>
+      <td><p>a list, or environment, or just any R object</p></td>
     </tr>
     <tr>
       <th>key</th>
-      <td><p>If not NULL, <code>x[[key]]</code> will be evaluated</p></td>
+      <td><p>the name to obtain from <code>x</code>. Default is <code>NULL</code></p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>Default value to be returned if x or x$key is invalid</p></td>
+      <td><p>if the value is invalid, the default value to return</p></td>
     </tr>
     <tr>
       <th>.invalids</th>
-      <td><p>See ?is_invalid</p></td>
+      <td><p>what counts as invalid? Default is <code>NULL</code> and 
+<code>NA</code>, represented by <code>"null"</code> and <code>"na"</code></p></td>
     </tr>
     </table>
 

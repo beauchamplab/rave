@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Developer Notes • rave</title>
+<title>Dev Checks • rave</title>
 
 
 <!-- jquery -->
@@ -35,7 +35,7 @@
 
 
 
-<meta property="og:title" content="Developer Notes" />
+<meta property="og:title" content="Dev Checks" />
 
 
 
@@ -67,7 +67,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -81,24 +81,6 @@
 </li>
 <li>
   <a href="reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="articles/a_real_project.html">2.2 A Real Project</a>
-    </li>
-    <li>
-      <a href="articles/build_your_first_module.html">2.1 Step-by-step, Build Your First RAVE Module</a>
-    </li>
-    <li>
-      <a href="articles/create_inputs.html">2.3 Create RAVE Inputs</a>
-    </li>
-  </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -116,10 +98,10 @@
 <div class="row">
   <div class="contents col-md-9">
     <div class="page-header">
-      <h1>Developer Notes</h1>
+      <h1>Dev Checks</h1>
     </div>
 
-<div id="developer-notes" class="section level1">
+<div id="dev-checks" class="section level1">
 
 <p><strong>Starting From 03/11/2019</strong></p>
 <p><strong>Created by: Zhengjia Wang</strong></p>
@@ -136,83 +118,15 @@
 <tr class="odd">
 <td align="left">MacOS, Ubuntu</td>
 <td align="center"><a href="https://travis-ci.org/beauchamplab/rave"><img src="https://travis-ci.org/beauchamplab/rave.svg?branch=master" alt="Build Status"></a></td>
-<td align="center"><a href="https://travis-ci.org/beauchamplab/rave"><img src="https://travis-ci.org/beauchamplab/rave.svg?branch=rave-fir" alt="Build Status"></a></td>
+<td align="center"><a href="https://travis-ci.org/beauchamplab/rave"><img src="https://travis-ci.org/beauchamplab/rave.svg?branch=dev-0.1.9" alt="Build Status"></a></td>
 </tr>
 <tr class="even">
 <td align="left">Windows</td>
 <td align="center"><a href="https://ci.appveyor.com/project/beauchamplab/rave"><img src="https://ci.appveyor.com/api/projects/status/github/beauchamplab/rave?branch=master&amp;svg=true" alt="AppVeyor build status"></a></td>
-<td align="center"><a href="https://ci.appveyor.com/project/beauchamplab/rave"><img src="https://ci.appveyor.com/api/projects/status/github/beauchamplab/rave?branch=rave-fir&amp;svg=true" alt="AppVeyor build status"></a></td>
+<td align="center"><a href="https://ci.appveyor.com/project/beauchamplab/rave"><img src="https://ci.appveyor.com/api/projects/status/github/beauchamplab/rave?branch=dev-0.1.9&amp;svg=true" alt="AppVeyor build status"></a></td>
 </tr>
 </tbody>
 </table>
-</div>
-<div id="notes" class="section level2">
-<h2 class="hasAnchor">
-<a href="#notes" class="anchor"></a>Notes</h2>
-<div id="todos-for-the-next-mini-version" class="section level3">
-<h3 class="hasAnchor">
-<a href="#todos-for-the-next-mini-version" class="anchor"></a>TODOs for the next mini-version</h3>
-</div>
-<div id="04092019" class="section level3">
-<h3 class="hasAnchor">
-<a href="#04092019" class="anchor"></a>04/09/2019</h3>
-<ul>
-<li>Fixed <code>ravebuiltins</code> bugs, migrating to new decorator system</li>
-<li>Updated READMEs</li>
-<li>Re-order the loading screen by making 3D viewer to the top</li>
-<li>Updated AWS instance with newest RAVE</li>
-<li>Added alias <code>start_rave</code>
-</li>
-<li>Added support to use package function to generate UI</li>
-<li>Safe wrap <code>observer</code> and <code>observeEvent</code> to avoid crash</li>
-<li>Load N27 only for multiple subjects to save RAM</li>
-<li>Got rid of <code>%&amp;%</code>
-</li>
-<li>Modules can call themselves, making it easier to export module results</li>
-</ul>
-</div>
-<div id="03202019" class="section level3">
-<h3 class="hasAnchor">
-<a href="#03202019" class="anchor"></a>03/20/2019</h3>
-<ul>
-<li>
-<code>threeBrain</code> to <code>RAVE</code> double click events</li>
-<li>maximize widget height</li>
-<li>migrate all <code>threejsr</code> to <code>threeBrain</code>
-</li>
-<li>fix <code>threeBrain</code> gui height and scroll problem</li>
-<li>Enabled multiple subject in N27 brain</li>
-</ul>
-</div>
-<div id="03122019" class="section level3">
-<h3 class="hasAnchor">
-<a href="#03122019" class="anchor"></a>03/12/2019</h3>
-<ul>
-<li>Pushed package <code>rutabaga</code> and <code>threeBrain</code> to cran, pending for inspection.</li>
-<li>Load mesh by default shiny_data_selector (when launching RAVE to select data)</li>
-<li>gui.dat transparency is now set to 0 (no transparency)</li>
-<li>
-<code>threeBrain</code> now can show customized information</li>
-<li>
-<code>threeBrain</code> has octree removed and embrace the native raycasters.</li>
-</ul>
-<p>Bug fixes</p>
-<ul>
-<li>
-<code>threeBrain</code> scene.clear_all() not clean all objects from clickable (fixed)</li>
-</ul>
-</div>
-<div id="03112019" class="section level3">
-<h3 class="hasAnchor">
-<a href="#03112019" class="anchor"></a>03/11/2019</h3>
-<ul>
-<li>Added <code>threeBrain</code> package to github to replace <code>threejsr</code>
-</li>
-<li>Added <code>define_output_3d_viewer</code> to customized module packages to build 3D viewer easier for module writers.</li>
-</ul>
-<p>Note:</p>
-<p><code>threeBrain</code> package re-implements JS library to render meshes in a more efficient way than <code>threejsr</code>. It also uses the latest three.js framework.</p>
-</div>
 </div>
 </div>
 

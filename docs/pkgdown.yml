@@ -1,8 +1,5 @@
 pandoc: 2.7.2
 pkgdown: 1.4.1
 pkgdown_sha: ~
-articles:
-  a_real_project: a_real_project.html
-  build_your_first_module: build_your_first_module.html
-  create_inputs: create_inputs.html
+articles: []
 

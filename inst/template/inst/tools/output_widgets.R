@@ -67,7 +67,7 @@ define_output_3d_viewer <- function(
       )
     }, envir = environment())
     local({
-      `%?<-%` <- rave::`%?<-%`
+      `%?<-%` <- dipsaus::`%?<-%`
       input = getDefaultReactiveInput()
       output = getDefaultReactiveOutput()
       session = getDefaultReactiveDomain()
@@ -79,17 +79,6 @@ define_output_3d_viewer <- function(
         cat2('Opening a side window...')
 
         if(!is.null(...local_env$widget)){
-
-          # tryCatch({
-          #   widget = ...local_env$widget
-          #
-          #   rave::send_to_daemon({
-          #     widget
-          #   }, type = 'threeBrain', outputId = ns(!!outputId),
-          #   save = c('widget'))
-          # }, error = function(e){
-          #   showNotification(p('Failed to launch the side viewer. Error message: ', e), type = 'error')
-          # })
 
           # generate url
           session = getDefaultReactiveDomain()
@@ -112,8 +101,8 @@ define_output_3d_viewer <- function(
 
       })
 
-      render_func = function(){
-        threeBrain::renderBrain({
+      render_func = function( proxy ){
+        
           
           # Monitor subject change. If changed, then refresh!
           if(!monitor_subject_change()){
@@ -121,13 +110,13 @@ define_output_3d_viewer <- function(
           }
           local_signal = input[[!!output_btn]]
           render_value = length(local_signal) && local_signal > .env$local_signal
-          if( render_value ){
-            .env$local_signal = local_signal
-          }
+          # if( render_value ){
+          #   .env$local_signal = local_signal
+          # }
           
           # get render function
           f = get0(!!output_fun, envir = ..runtime_env, ifnotfound = function(...){
-            rutabaga::cat2('3D Viewer', !!outputId,  'cannot find function', !!output_fun, level = 'INFO')
+            dipsaus::cat2('3D Viewer', !!outputId,  'cannot find function', !!output_fun, level = 'INFO')
           })
           
           # get client size
@@ -138,7 +127,7 @@ define_output_3d_viewer <- function(
             side_width = 250
           }
           ...local_env$widget = NULL
-          re = f(render_value, side_width, ...local_env)
+          re = f(render_value, side_width, ...local_env, proxy)
           if(is.null(...local_env$widget)){
             ...local_env$widget = re
           }
@@ -158,13 +147,13 @@ define_output_3d_viewer <- function(
           # if( length(local_signal) && local_signal > .env$local_signal ){
           #   .env$local_signal = local_signal
           #   f = get0(!!output_fun, envir = ..runtime_env, ifnotfound = function(...){
-          #     rutabaga::cat2('3D Viewer', !!outputId,  'cannot find function', !!output_fun, level = 'INFO')
+          #     dipsaus::cat2('3D Viewer', !!outputId,  'cannot find function', !!output_fun, level = 'INFO')
           #   })
           # 
           #   tryCatch({
           #     re = f(brain)
           #   }, error = function(e){
-          #     rave::logger(e, level = 'ERROR')
+          #     dipsaus::cat2(e, level = 'ERROR')
           #   })
           # 
           # }else{
@@ -187,13 +176,15 @@ define_output_3d_viewer <- function(
           # }
 
 
-        })
       }
 
       # Because monitor_subject_change needs execenv to be ready
       eval_when_ready(function(...){
         # Register render function
-        output[[!!output_call]] <- render_func()
+        proxy <- threeBrain::brain_proxy(!!output_call)
+        output[[!!output_call]] <- threeBrain::renderBrain({
+          render_func( proxy )
+        })
       })
       
 

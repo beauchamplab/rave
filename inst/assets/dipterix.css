@@ -248,6 +248,10 @@ body.rave-noscroll {
   padding-right: 5px;
 }
 
+.rave-input-panel .rave-grid-inputs{
+  min-height: 74px;
+}
+
 
 .rave-grid-inputs>.rave-grid-inputs-legend {
     position: absolute;
@@ -348,7 +352,8 @@ body.rave-noscroll {
 }
 
 /* If shiny output is directly child of elastic div  */
-.rave-elastic.rave-elastic-active>.shiny-bound-output {
+.rave-elastic.rave-elastic-active>.shiny-bound-output,
+.rave-elastic.rave-elastic-active .threejs_brain.shiny-bound-output.threejs-brain-container {
   min-height: 90vh;
 }
 
@@ -697,7 +702,69 @@ div[class^="col-xs-"] {
 
 
 
+/*Dark-mode*/
+body.rave-dark,
+body.rave-dark button,
+body.rave-dark .modal-content,
+body.rave-dark .btn-default,
+body.rave-dark .box,
+body.rave-dark .rave-elastic.rave-elastic-active,
+body.rave-dark .rave-content-modal .centered,
+body.rave-dark .rave-grid-inputs-legend,
+body.rave-dark .selectize-input.full,
+body.rave-dark .selectize-dropdown, 
+body.rave-dark .selectize-dropdown.form-control,
+body.rave-dark .selectize-input, 
+body.rave-dark .selectize-control.single .selectize-input.input-active,
+body.rave-dark .form-control,
+body.rave-dark .rave-output-panel .box .box-body,
+body.rave-dark .rave-output-panel .shiny-bound-output,
+body.rave-dark .nav-tabs-custom,
+body.rave-dark .nav-tabs-custom>.tab-content {
+  background-color: #1e1e1e;
+  color: #fdfdfd;
+}
+
+body.rave-dark,
+body.rave-dark .content-wrapper {
+  background-color: #1a1a1a;
+}
+
+body.rave-dark .box-header,
+body.rave-dark .nav-tabs-custom>.nav-tabs,
+body.rave-dark .nav-tabs-custom>.nav-tabs>li.header,
+body.rave-dark .nav-tabs-custom>.nav-tabs>li>a, 
+body.rave-dark .nav-tabs-custom>.nav-tabs>li>a:hover {
+  color: #fdfdfd;
+  background-color: #222d33;
+}
 
 
+body.rave-dark .rave-output-panel .tab-content .shiny-bound-output h4 {
+  background-color: unset;
+}
 
+body.rave-dark .dipsaus-compound-input legend {
+  background-color: #efefef;
+}
+
+body.rave-dark table.dataTable tbody tr,
+body.rave-dark table.dataTable.stripe tbody tr.even, 
+body.rave-dark table.dataTable.display tbody tr.even {
+  background-color: #0f0f0f;
+}
+
+body.rave-dark .table-striped>tbody>tr:nth-of-type(odd),
+body.rave-dark table.dataTable.stripe tbody tr.odd, 
+body.rave-dark table.dataTable.display tbody tr.odd {
+  background-color: #1a1a1a;
+}
+
+body.rave-dark table.dataTable.hover tbody tr:hover, table.dataTable.display tbody tr:hover{
+  background-color: inherit;
+}
+
+body.rave-dark .rave-grid-inputs {
+  border: 1px solid #272727;
+}
 

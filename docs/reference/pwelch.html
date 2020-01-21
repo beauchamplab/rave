@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Welch Periodogram — pwelch • rave</title>
+<title>Plot "Welch" Periodogram — pwelch • rave</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,8 @@
 
 
 
-<meta property="og:title" content="Welch Periodogram — pwelch" />
-<meta property="og:description" content="Welch Periodogram" />
+<meta property="og:title" content="Plot "Welch" Periodogram — pwelch" />
+<meta property="og:description" content="Plot &quot;Welch&quot; Periodogram" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -83,24 +83,6 @@
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/a_real_project.html">2.2 A Real Project</a>
-    </li>
-    <li>
-      <a href="../articles/build_your_first_module.html">2.1 Step-by-step, Build Your First RAVE Module</a>
-    </li>
-    <li>
-      <a href="../articles/create_inputs.html">2.3 Create RAVE Inputs</a>
-    </li>
-  </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -118,18 +100,31 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Welch Periodogram</h1>
+    <h1>Plot "Welch" Periodogram</h1>
     
     <div class="hidden name"><code>pwelch.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Welch Periodogram</p>
+    <p>Plot "Welch" Periodogram</p>
     </div>
 
-    <pre class="usage"><span class='fu'>pwelch</span>(<span class='no'>x</span>, <span class='no'>fs</span>, <span class='kw'>window</span> <span class='kw'>=</span> <span class='fl'>64</span>, <span class='kw'>noverlap</span> <span class='kw'>=</span> <span class='fl'>8</span>, <span class='kw'>nfft</span> <span class='kw'>=</span> <span class='fl'>256</span>, <span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"black"</span>,
-  <span class='kw'>xlim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>ylim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>main</span> <span class='kw'>=</span> <span class='st'>"Welch periodogram"</span>,
-  <span class='kw'>plot</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>log</span> <span class='kw'>=</span> <span class='st'>"xy"</span>, <span class='kw'>spec_func</span> <span class='kw'>=</span> <span class='no'>spectrum</span>, <span class='kw'>cex</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='no'>...</span>)</pre>
+    <pre class="usage"><span class='fu'>pwelch</span>(
+  <span class='no'>x</span>,
+  <span class='no'>fs</span>,
+  <span class='kw'>window</span> <span class='kw'>=</span> <span class='fl'>64</span>,
+  <span class='kw'>noverlap</span> <span class='kw'>=</span> <span class='fl'>8</span>,
+  <span class='kw'>nfft</span> <span class='kw'>=</span> <span class='fl'>256</span>,
+  <span class='kw'>col</span> <span class='kw'>=</span> <span class='st'>"black"</span>,
+  <span class='kw'>xlim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>ylim</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>main</span> <span class='kw'>=</span> <span class='st'>"Welch periodogram"</span>,
+  <span class='kw'>plot</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>log</span> <span class='kw'>=</span> <span class='st'>"xy"</span>,
+  <span class='kw'>spec_func</span> <span class='kw'>=</span> <span class='kw pkg'>stats</span><span class='kw ns'>::</span><span class='no'><a href='https://rdrr.io/r/stats/spectrum.html'>spectrum</a></span>,
+  <span class='kw'>cex</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='no'>...</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -152,7 +147,7 @@
     </tr>
     <tr>
       <th>nfft</th>
-      <td><p>number of DFT points</p></td>
+      <td><p>number of basis functions</p></td>
     </tr>
     <tr>
       <th>col, xlim, ylim, main, cex, ...</th>
@@ -164,7 +159,8 @@
     </tr>
     <tr>
       <th>log</th>
-      <td><p>'', 'x', 'y', 'xy', indicates which axis should be log10 value.</p></td>
+      <td><p>indicates which axis should be <code><a href='https://rdrr.io/r/base/Log.html'>log10</a></code> value. options 
+are <code>''</code>, <code>'x'</code>, <code>'y'</code>, <code>'xy'</code>.</p></td>
     </tr>
     <tr>
       <th>spec_func</th>
@@ -172,17 +168,12 @@
     </tr>
     </table>
 
-    <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
-
-    <p>This function is modified from <code>pwelch</code> function from "oce"
-package and is designed for visualizing ECoG voltage data.</p>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-      <li><a href="#details">Details</a></li>
     </ul>
 
   </div>

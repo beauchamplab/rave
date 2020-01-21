@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Decimate signal via FIR1 filter — decimate_fir • rave</title>
+<title>Decimate or Down-sample a Signal using <code>FIR</code> Filters — decimate_fir • rave</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,8 @@
 
 
 
-<meta property="og:title" content="Decimate signal via FIR1 filter — decimate_fir" />
-<meta property="og:description" content="Decimate signal via FIR1 filter" />
+<meta property="og:title" content="Decimate or Down-sample a Signal using <code>FIR</code> Filters — decimate_fir" />
+<meta property="og:description" content="Decimate or Down-sample a Signal using FIR Filters" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -83,24 +83,6 @@
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/a_real_project.html">2.2 A Real Project</a>
-    </li>
-    <li>
-      <a href="../articles/build_your_first_module.html">2.1 Step-by-step, Build Your First RAVE Module</a>
-    </li>
-    <li>
-      <a href="../articles/create_inputs.html">2.3 Create RAVE Inputs</a>
-    </li>
-  </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -118,13 +100,13 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Decimate signal via FIR1 filter</h1>
+    <h1>Decimate or Down-sample a Signal using <code>FIR</code> Filters</h1>
     
     <div class="hidden name"><code>decimate_fir.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Decimate signal via FIR1 filter</p>
+    <p>Decimate or Down-sample a Signal using <code>FIR</code> Filters</p>
     </div>
 
     <pre class="usage"><span class='fu'>decimate_fir</span>(<span class='no'>x</span>, <span class='no'>q</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>30</span>)</pre>
@@ -134,15 +116,15 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>x</th>
-      <td><p>signal (vector)</p></td>
+      <td><p>signal to be decimated</p></td>
     </tr>
     <tr>
       <th>q</th>
-      <td><p>Compress rate or downsample rate</p></td>
+      <td><p>integer factor to decimated by</p></td>
     </tr>
     <tr>
       <th>n</th>
-      <td><p>nth order of FIR kernel will be used, default 30</p></td>
+      <td><p>filter order used for down-sample procedure, default is 30</p></td>
     </tr>
     </table>
 

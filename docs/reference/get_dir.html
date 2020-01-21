@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Get all directories that rave uses — get_dir • rave</title>
+<title>Get Directories in `RAVE` — get_dir • rave</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,8 @@
 
 
 
-<meta property="og:title" content="Get all directories that rave uses — get_dir" />
-<meta property="og:description" content="Get all directories that rave uses" />
+<meta property="og:title" content="Get Directories in `RAVE` — get_dir" />
+<meta property="og:description" content="Get Directories in `RAVE`" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -83,24 +83,6 @@
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/a_real_project.html">2.2 A Real Project</a>
-    </li>
-    <li>
-      <a href="../articles/build_your_first_module.html">2.1 Step-by-step, Build Your First RAVE Module</a>
-    </li>
-    <li>
-      <a href="../articles/create_inputs.html">2.3 Create RAVE Inputs</a>
-    </li>
-  </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -118,44 +100,51 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Get all directories that rave uses</h1>
+    <h1>Get Directories in `RAVE`</h1>
     
     <div class="hidden name"><code>get_dir.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Get all directories that rave uses</p>
+    <p>Get Directories in `RAVE`</p>
     </div>
 
-    <pre class="usage"><span class='fu'>get_dir</span>(<span class='no'>subject_code</span>, <span class='no'>project_name</span>, <span class='no'>block_num</span>, <span class='kw'>mkdirs</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>subject_id</span>,
-  <span class='kw'>relative</span> <span class='kw'>=</span> <span class='no'>F</span>)</pre>
+    <pre class="usage"><span class='fu'>get_dir</span>(
+  <span class='no'>subject_code</span>,
+  <span class='no'>project_name</span>,
+  <span class='no'>block_num</span>,
+  <span class='kw'>mkdirs</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='no'>subject_id</span>,
+  <span class='kw'>relative</span> <span class='kw'>=</span> <span class='no'>F</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>subject_code</th>
-      <td><p>subject_code</p></td>
+      <td><p>subject code; can be ignored when <code>subject_id</code> is provided</p></td>
     </tr>
     <tr>
       <th>project_name</th>
-      <td><p>project_name</p></td>
+      <td><p>project name; can be ignored when <code>subject_id</code> is provided</p></td>
     </tr>
     <tr>
       <th>block_num</th>
-      <td><p>block_num (optional)</p></td>
+      <td><p>block name (optional)</p></td>
     </tr>
     <tr>
       <th>mkdirs</th>
-      <td><p>mkdirs ensure that some directory exists</p></td>
+      <td><p>internally used</p></td>
     </tr>
     <tr>
       <th>subject_id</th>
-      <td><p>subject_id (project_name/subject_code)</p></td>
+      <td><p>subject ID; can be omitted if <code>subject_code</code> and 
+<code>project_name</code> are provided</p></td>
     </tr>
     <tr>
       <th>relative</th>
-      <td><p>relative path or absolute to root data dir</p></td>
+      <td><p>whether to return relative path or absolute to root directory</p></td>
     </tr>
     </table>
 

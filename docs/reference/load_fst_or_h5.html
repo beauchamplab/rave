@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function try to load FST file cache, if not found, read HDF5 file — load_fst_or_h5 • rave</title>
+<title>Function try to load "fst" file cache, if not found, read "HDF5" file — load_fst_or_h5 • rave</title>
 
 
 <!-- jquery -->
@@ -35,8 +35,8 @@
 
 
 
-<meta property="og:title" content="Function try to load FST file cache, if not found, read HDF5 file — load_fst_or_h5" />
-<meta property="og:description" content="Function try to load FST file cache, if not found, read HDF5 file" />
+<meta property="og:title" content="Function try to load "fst" file cache, if not found, read "HDF5" file — load_fst_or_h5" />
+<meta property="og:description" content="Function try to load &quot;fst&quot; file cache, if not found, read &quot;HDF5&quot; file" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -83,24 +83,6 @@
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
-</li>
-<li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
-    Articles
-     
-    <span class="caret"></span>
-  </a>
-  <ul class="dropdown-menu" role="menu">
-    <li>
-      <a href="../articles/a_real_project.html">2.2 A Real Project</a>
-    </li>
-    <li>
-      <a href="../articles/build_your_first_module.html">2.1 Step-by-step, Build Your First RAVE Module</a>
-    </li>
-    <li>
-      <a href="../articles/create_inputs.html">2.3 Create RAVE Inputs</a>
-    </li>
-  </ul>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -118,36 +100,42 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Function try to load FST file cache, if not found, read HDF5 file</h1>
+    <h1>Function try to load "fst" file cache, if not found, read "HDF5" file</h1>
     
     <div class="hidden name"><code>load_fst_or_h5.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Function try to load FST file cache, if not found, read HDF5 file</p>
+    <p>Function try to load "fst" file cache, if not found, read "HDF5" file</p>
     </div>
 
-    <pre class="usage"><span class='fu'>load_fst_or_h5</span>(<span class='no'>fst_path</span>, <span class='no'>h5_path</span>, <span class='no'>h5_name</span>, <span class='kw'>fst_need_transpose</span> <span class='kw'>=</span> <span class='no'>F</span>,
-  <span class='kw'>fst_need_drop</span> <span class='kw'>=</span> <span class='no'>F</span>, <span class='kw'>ram</span> <span class='kw'>=</span> <span class='no'>F</span>)</pre>
+    <pre class="usage"><span class='fu'>load_fst_or_h5</span>(
+  <span class='no'>fst_path</span>,
+  <span class='no'>h5_path</span>,
+  <span class='no'>h5_name</span>,
+  <span class='kw'>fst_need_transpose</span> <span class='kw'>=</span> <span class='no'>F</span>,
+  <span class='kw'>fst_need_drop</span> <span class='kw'>=</span> <span class='no'>F</span>,
+  <span class='kw'>ram</span> <span class='kw'>=</span> <span class='no'>F</span>
+)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>fst_path</th>
-      <td><p>fst cache path</p></td>
+      <td><p><code>fst</code> cache path</p></td>
     </tr>
     <tr>
       <th>h5_path</th>
-      <td><p>alternate hdf5 path</p></td>
+      <td><p>alternate <code>hdf5</code> path</p></td>
     </tr>
     <tr>
       <th>h5_name</th>
-      <td><p>hdf5 data name</p></td>
+      <td><p><code>hdf5</code> data name</p></td>
     </tr>
     <tr>
       <th>fst_need_transpose</th>
-      <td><p>does fst data need transpose?</p></td>
+      <td><p>does <code>fst</code> data need transpose?</p></td>
     </tr>
     <tr>
       <th>fst_need_drop</th>
