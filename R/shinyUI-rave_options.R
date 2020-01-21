@@ -813,6 +813,10 @@ rave_options_gui <- local({
           
         })
         
+        session$onSessionEnded(function() {
+          shiny::stopApp()
+        })
+        
       },
       options = list(..., launch.browser = launch.browser)
     )
