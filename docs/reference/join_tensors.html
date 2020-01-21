@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -142,7 +142,8 @@ validation test. Use with cautions.</p>
 <span class='no'>tensor2</span> <span class='kw'>&lt;-</span> <span class='no'>Tensor</span>$<span class='fu'>new</span>(<span class='kw'>data</span> <span class='kw'>=</span> <span class='fl'>10</span>:<span class='fl'>18</span>, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='fl'>3</span>,<span class='fl'>3</span>,<span class='fl'>1</span>), <span class='kw'>dimnames</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(
   <span class='kw'>A</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>3</span>, <span class='kw'>B</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>3</span>, <span class='kw'>C</span> <span class='kw'>=</span> <span class='fl'>2</span>
 ), <span class='kw'>varnames</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>'A'</span>, <span class='st'>'B'</span>, <span class='st'>'C'</span>))
-<span class='no'>merged</span> <span class='kw'>&lt;-</span> <span class='fu'>join_tensors</span>(<span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='no'>tensor1</span>, <span class='no'>tensor2</span>))</div><div class='output co'>#&gt; Writing to path:  /var/folders/rh/4bkfl5z50wgbbjd85xvc695c0000gn/T//RtmpFMhZU7/filed55e177f92feWriting to path:  /var/folders/rh/4bkfl5z50wgbbjd85xvc695c0000gn/T//RtmpFMhZU7/filed55e388b6dbf</div><div class='input'><span class='no'>merged</span>$<span class='fu'>get_data</span>()</div><div class='output co'>#&gt; , , C = 1
+<span class='no'>merged</span> <span class='kw'>&lt;-</span> <span class='fu'>join_tensors</span>(<span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='no'>tensor1</span>, <span class='no'>tensor2</span>))
+<span class='no'>merged</span>$<span class='fu'>get_data</span>()</div><div class='output co'>#&gt; , , C = 1
 #&gt; 
 #&gt;    B
 #&gt; A   1 2 3

@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -109,7 +109,7 @@
     <p>Check if data is loaded for current module</p>
     </div>
 
-    <pre class="usage"><span class='fu'>rave_checks</span>(<span class='no'>...</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+    <pre class="usage"><span class='fu'>rave_checks</span>(<span class='no'>...</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>.raise_error</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -121,6 +121,10 @@
     <tr>
       <th>data</th>
       <td><p>same as <code>...</code>, but can be a vector</p></td>
+    </tr>
+    <tr>
+      <th>.raise_error</th>
+      <td><p>whether to raise error if data is missing</p></td>
     </tr>
     </table>
 

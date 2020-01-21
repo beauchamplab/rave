@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -113,7 +113,10 @@
   <span class='no'>subject</span>,
   <span class='kw'>surfaces</span> <span class='kw'>=</span> <span class='st'>"pial"</span>,
   <span class='kw'>use_141</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
-  <span class='kw'>compute_template</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
+  <span class='kw'>recache</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>clean_before_cache</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>compute_template</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>usetemplateifmissing</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>
 )</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -133,9 +136,23 @@
       <td><p>logical, whether to use standard 141 brain</p></td>
     </tr>
     <tr>
+      <th>recache</th>
+      <td><p>whether to force cache data, default is false</p></td>
+    </tr>
+    <tr>
+      <th>clean_before_cache</th>
+      <td><p>whether to clean cache before redo cache, default 
+is false</p></td>
+    </tr>
+    <tr>
       <th>compute_template</th>
       <td><p>logical whether to compute nearest 141 node. Please 
 also check <code>freesurfer_brain</code>.</p></td>
+    </tr>
+    <tr>
+      <th>usetemplateifmissing</th>
+      <td><p>whether logical, to display template brain if 
+subject brain not found, default is false</p></td>
     </tr>
     </table>
 

@@ -70,7 +70,7 @@ seconds" />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -378,9 +378,10 @@ the original instance</p></dd>
 <span class='kw pkg'>pryr</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/pryr/man/object_size.html'>object_size</a></span>(<span class='no'>ts</span>)</div><div class='output co'>#&gt; 72.3 MB</div><div class='input'><span class='co'>#&gt; 8.02 MB</span>
 
 <span class='co'># Enable hybrid mode</span>
-<span class='no'>ts</span>$<span class='fu'>to_swap_now</span>()</div><div class='output co'>#&gt; Writing to path:  /var/folders/rh/4bkfl5z50wgbbjd85xvc695c0000gn/T//RtmpFMhZU7/filed55e6824ad0d</div><div class='input'>
+<span class='no'>ts</span>$<span class='fu'>to_swap_now</span>()
+
 <span class='co'># Hybrid mode, usually less than 1 MB</span>
-<span class='kw pkg'>pryr</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/pryr/man/object_size.html'>object_size</a></span>(<span class='no'>ts</span>)</div><div class='output co'>#&gt; 282 kB</div><div class='input'><span class='co'>#&gt; 814 kB</span>
+<span class='kw pkg'>pryr</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/pryr/man/object_size.html'>object_size</a></span>(<span class='no'>ts</span>)</div><div class='output co'>#&gt; 281 kB</div><div class='input'><span class='co'>#&gt; 814 kB</span>
 
 <span class='co'># Subset data</span>
 <span class='no'>start1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/Sys.time.html'>Sys.time</a></span>()
@@ -391,7 +392,7 @@ the original instance</p></dd>
 <span class='co'>#&gt; - A: 1, 2, 3, 4, 5, 6,...</span>
 <span class='co'>#&gt; - B: 1, 2, 3, 4, 5, 6,...</span>
 <span class='co'>#&gt; - C: 6, 7, 8, 9</span>
-<span class='no'>end1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/Sys.time.html'>Sys.time</a></span>(); <span class='no'>end1</span> - <span class='no'>start1</span></div><div class='output co'>#&gt; Time difference of 0.3443501 secs</div><div class='input'><span class='co'>#&gt; Time difference of 0.188035 secs</span>
+<span class='no'>end1</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/Sys.time.html'>Sys.time</a></span>(); <span class='no'>end1</span> - <span class='no'>start1</span></div><div class='output co'>#&gt; Time difference of 0.3278 secs</div><div class='input'><span class='co'>#&gt; Time difference of 0.188035 secs</span>
 
 <span class='co'># Join tensors</span>
 <span class='no'>ts</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/lapply.html'>lapply</a></span>(<span class='fl'>1</span>:<span class='fl'>20</span>, <span class='kw'>function</span>(<span class='no'>ii</span>){
@@ -400,8 +401,7 @@ the original instance</p></dd>
     <span class='kw'>dimnames</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>A</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>30</span>, <span class='kw'>B</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>300</span>, <span class='kw'>C</span> <span class='kw'>=</span> <span class='no'>ii</span>),
     <span class='kw'>varnames</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>'A'</span>, <span class='st'>'B'</span>, <span class='st'>'C'</span>), <span class='kw'>use_index</span> <span class='kw'>=</span> <span class='fl'>2</span>)
 })
-<span class='no'>ts</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='join_tensors.html'>join_tensors</a></span>(<span class='no'>ts</span>, <span class='kw'>temporary</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</div><div class='output co'>#&gt; Writing to path:  /var/folders/rh/4bkfl5z50wgbbjd85xvc695c0000gn/T//RtmpFMhZU7/filed55e19ce8000Writing to path:  /var/folders/rh/4bkfl5z50wgbbjd85xvc695c0000gn/T//RtmpFMhZU7/filed55e44358d3cWriting to path:  /var/folders/rh/4bkfl5z50wgbbjd85xvc695c0000gn/T//RtmpFMhZU7/filed55e17cb8120Writing to path:  /var/folders/rh/4bkfl5z50wgbbjd85xvc695c0000gn/T//RtmpFMhZU7/filed55e318a6814Writing to path:  /var/folders/rh/4bkfl5z50wgbbjd85xvc695c0000gn/T//RtmpFMhZU7/filed55e75b71274Writing to path:  /var/folders/rh/4bkfl5z50wgbbjd85xvc695c0000gn/T//RtmpFMhZU7/filed55e461cba0cWriting to path:  /var/folders/rh/4bkfl5z50wgbbjd85xvc695c0000gn/T//RtmpFMhZU7/filed55e7fa8dcaWriting to path:  /var/folders/rh/4bkfl5z50wgbbjd85xvc695c0000gn/T//RtmpFMhZU7/filed55e5272ccddWriting to path:  /var/folders/rh/4bkfl5z50wgbbjd85xvc695c0000gn/T//RtmpFMhZU7/filed55e6ee7eb74Writing to path:  /var/folders/rh/4bkfl5z50wgbbjd85xvc695c0000gn/T//RtmpFMhZU7/filed55e3c13458eWriting to path:  /var/folders/rh/4bkfl5z50wgbbjd85xvc695c0000gn/T//RtmpFMhZU7/filed55e153b8c72Writing to path:  /var/folders/rh/4bkfl5z50wgbbjd85xvc695c0000gn/T//RtmpFMhZU7/filed55e78819b41Writing to path:  /var/folders/rh/4bkfl5z50wgbbjd85xvc695c0000gn/T//RtmpFMhZU7/filed55e4f80636Writing to path:  /var/folders/rh/4bkfl5z50wgbbjd85xvc695c0000gn/T//RtmpFMhZU7/filed55e375fc5c6Writing to path:  /var/folders/rh/4bkfl5z50wgbbjd85xvc695c0000gn/T//RtmpFMhZU7/filed55e70b16690Writing to path:  /var/folders/rh/4bkfl5z50wgbbjd85xvc695c0000gn/T//RtmpFMhZU7/filed55eec4b1bdWriting to path:  /var/folders/rh/4bkfl5z50wgbbjd85xvc695c0000gn/T//RtmpFMhZU7/filed55e1370f6deWriting to path:  /var/folders/rh/4bkfl5z50wgbbjd85xvc695c0000gn/T//RtmpFMhZU7/filed55e5d5f72caWriting to path:  /var/folders/rh/4bkfl5z50wgbbjd85xvc695c0000gn/T//RtmpFMhZU7/filed55e25695baaWriting to path:  /var/folders/rh/4bkfl5z50wgbbjd85xvc695c0000gn/T//RtmpFMhZU7/filed55e28010916</div><div class='input'>
-</div></pre>
+<span class='no'>ts</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='join_tensors.html'>join_tensors</a></span>(<span class='no'>ts</span>, <span class='kw'>temporary</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

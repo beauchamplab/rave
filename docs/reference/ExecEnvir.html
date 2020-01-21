@@ -71,7 +71,7 @@ start_app(m, test.mode=TRUE), and then inspect modules." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -118,6 +118,21 @@ manually, use <code><a href='get_module.html'>get_module</a></code> to create mo
     <h2 class="hasAnchor" id="public-fields"><a class="anchor" href="#public-fields"></a>Public fields</h2>
 
     <p><div class="r6-fields"></p><dl class='dl-horizontal'>
+<dt><code>.__rave_context__.</code></dt><dd><p>context string for current instance, indicating
+whether the module is running locally (public, but internally used)</p></dd>
+
+<dt><code>.__rave_package__.</code></dt><dd><p>current package name to run (public, 
+but internally used)</p></dd>
+
+<dt><code>.__rave_module__.</code></dt><dd><p>module ID (public, but internally used)</p></dd>
+
+<dt><code>.__rave_module_instance__.</code></dt><dd><p>self instance (public, but internally
+used)</p></dd>
+
+<dt><code>module_env</code></dt><dd><p><code><a href='ModuleEnvir.html'>ModuleEnvir</a></code> instance</p></dd>
+
+<dt><code>cache_env</code></dt><dd><p>cache environment to store key-value pairs locally</p></dd>
+
 <dt><code>parent_env</code></dt><dd><p>the parent/top environment of the module, usually 
 global environment or some name-space if the module is implemented as 
 an R package</p></dd>
@@ -180,6 +195,9 @@ asynchronous part</p></dd>
 
 <dt><code>local_reactives</code></dt><dd><p>shiny local <code>reactives</code>, internal use only</p></dd>
 
+<dt><code>internal_reactives</code></dt><dd><p>internal reactive values to control some 
+elements, internal use only</p></dd>
+
 <dt><code>ready_functions</code></dt><dd><p>functions to run when the module is ready. The 
 functions are called at the last step of <code><a href='shinirize.html'>shinirize</a></code>. 
 Usually it's used along with <code>eval_when_ready</code>, to make sure  
@@ -216,13 +234,11 @@ before functions calls</p></dd>
 <li><p><a href='#method-execute_with'><code>ExecEnvir$execute_with()</code></a></p></li>
 <li><p><a href='#method-names'><code>ExecEnvir$names()</code></a></p></li>
 <li><p><a href='#method-register_module'><code>ExecEnvir$register_module()</code></a></p></li>
+<li><p><a href='#method-register_context'><code>ExecEnvir$register_context()</code></a></p></li>
 <li><p><a href='#method-rave_inputs'><code>ExecEnvir$rave_inputs()</code></a></p></li>
 <li><p><a href='#method-rave_outputs'><code>ExecEnvir$rave_outputs()</code></a></p></li>
 <li><p><a href='#method-rave_updates'><code>ExecEnvir$rave_updates()</code></a></p></li>
 <li><p><a href='#method-rave_execute'><code>ExecEnvir$rave_execute()</code></a></p></li>
-<li><p><a href='#method-clear_cache'><code>ExecEnvir$clear_cache()</code></a></p></li>
-<li><p><a href='#method-cache'><code>ExecEnvir$cache()</code></a></p></li>
-<li><p><a href='#method-cache_input'><code>ExecEnvir$cache_input()</code></a></p></li>
 <li><p><a href='#method-set_browser'><code>ExecEnvir$set_browser()</code></a></p></li>
 <li><p><a href='#method-generate_input_ui'><code>ExecEnvir$generate_input_ui()</code></a></p></li>
 <li><p><a href='#method-generate_output_ui'><code>ExecEnvir$generate_output_ui()</code></a></p></li>
@@ -356,6 +372,20 @@ to create runtime environment, which is <code>ExecEnvir</code></p></dd>
 <h3>Returns</h3>
 <p>none</p>
 <p><hr>
+<a id="method-register_context"></a></p><h3>Method <code>register_context()</code></h3>
+<p>Register 'RAVE' context for current environment 
+(internally used)</p><h3>Usage</h3>
+<p><div class="r"></p><pre>ExecEnvir$register_context(context = c("rave_running", "rave_running_local"))</pre><p></div></p>
+
+<h3>Arguments</h3>
+<p><div class="arguments"></p><dl class='dl-horizontal'>
+<dt><code>context</code></dt><dd><p>context string to indicate whether the module is running 
+locally</p></dd>
+
+</dl><p></div></p>
+<h3>Returns</h3>
+<p>None</p>
+<p><hr>
 <a id="method-rave_inputs"></a></p><h3>Method <code>rave_inputs()</code></h3>
 <p>parse input components</p><h3>Usage</h3>
 <p><div class="r"></p><pre>ExecEnvir$rave_inputs(
@@ -435,84 +465,6 @@ updated</p></dd>
 </dl><p></div></p>
 <h3>Returns</h3>
 <p>none, but <code>ExecEnvir$execute</code> will be generated.</p>
-<p><hr>
-<a id="method-clear_cache"></a></p><h3>Method <code><a href='rave-cache.html'>clear_cache()</a></code></h3>
-<p>clear cached objects</p><h3>Usage</h3>
-<p><div class="r"></p><pre>ExecEnvir$clear_cache(levels = 1)</pre><p></div></p>
-
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
-<dt><code>levels</code></dt><dd><p>passed to <code><a href='rave-cache.html'>clear_cache</a></code>. Only level 1 and
-2 are allowed</p></dd>
-
-</dl><p></div></p>
-<h3>Returns</h3>
-<p>none</p>
-<p><hr>
-<a id="method-cache"></a></p><h3>Method <code><a href='rave-cache.html'>cache()</a></code></h3>
-<p>create cache</p><h3>Usage</h3>
-<p><div class="r"></p><pre>ExecEnvir$cache(
-  key,
-  val,
-  name,
-  replace = FALSE,
-  persist = FALSE,
-  across_instance = FALSE,
-  across_module = FALSE,
-  ...
-)</pre><p></div></p>
-
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
-<dt><code>key</code></dt><dd><p>any R object</p></dd>
-
-<dt><code>val</code></dt><dd><p>value to associate with key</p></dd>
-
-<dt><code>name</code></dt><dd><p>cache name, unique</p></dd>
-
-<dt><code>replace</code></dt><dd><p>whether to force replace even if the cache exists</p></dd>
-
-<dt><code>persist</code></dt><dd><p>whether to persist on hard drive</p></dd>
-
-<dt><code>across_instance</code></dt><dd><p>whether to share across shiny session</p></dd>
-
-<dt><code>across_module</code></dt><dd><p>whether to share across modules</p></dd>
-
-<dt><code>...</code></dt><dd><p>ignored</p></dd>
-
-</dl><p></div></p>
-<h3>Returns</h3>
-<p>value if no cache is found, or the cached value</p>
-<p><hr>
-<a id="method-cache_input"></a></p><h3>Method <code><a href='cache_input.html'>cache_input()</a></code></h3>
-<p>cache input, internally used</p><h3>Usage</h3>
-<p><div class="r"></p><pre>ExecEnvir$cache_input(
-  inputId,
-  val = NULL,
-  read_only = TRUE,
-  sig = NULL,
-  module_id,
-  ...
-)</pre><p></div></p>
-
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
-<dt><code>inputId</code></dt><dd><p>input ID, character</p></dd>
-
-<dt><code>val</code></dt><dd><p>the value of the input</p></dd>
-
-<dt><code>read_only</code></dt><dd><p>whether to read or to replace</p></dd>
-
-<dt><code>sig</code></dt><dd><p>signature, usually automatically generated</p></dd>
-
-<dt><code>module_id</code></dt><dd><p>module ID, usually automatically generated, unless
-obtaining from other module, then <code>read_only</code> is forced to be TRUE</p></dd>
-
-<dt><code>...</code></dt><dd><p>ignored</p></dd>
-
-</dl><p></div></p>
-<h3>Returns</h3>
-<p>the cached input value</p>
 <p><hr>
 <a id="method-set_browser"></a></p><h3>Method <code>set_browser()</code></h3>
 <p>(experimental) cache R expression in browser 

@@ -69,7 +69,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -114,6 +114,8 @@
     <h2 class="hasAnchor" id="public-fields"><a class="anchor" href="#public-fields"></a>Public fields</h2>
 
     <p><div class="r6-fields"></p><dl class='dl-horizontal'>
+<dt><code>cache_env</code></dt><dd><p>cache environment for module</p></dd>
+
 <dt><code>module_id</code></dt><dd><p>module ID, unique</p></dd>
 
 <dt><code>label_name</code></dt><dd><p>corresponding module name</p></dd>
@@ -133,7 +135,10 @@
 <dt><code>parent_env</code></dt><dd><p>parent environment of the module, usually global 
 environment or package environment</p></dd>
 
-<dt><code>from_package</code></dt><dd><p>whether the module is compiled from another R package</p></dd>
+<dt><code>from_package</code></dt><dd><p>whether the module is compiled from another R 
+package. This value is required to be true since <code>"rave-0.1.9"</code>.</p></dd>
+
+<dt><code>package_name</code></dt><dd><p>which package does the module belong to?</p></dd>
 
 <dt><code>sidebar_width</code></dt><dd><p>input panel width, from 1 to 11</p></dd>
 
@@ -149,7 +154,6 @@ environment or package environment</p></dd>
 <li><p><a href='#method-new'><code>ModuleEnvir$new()</code></a></p></li>
 <li><p><a href='#method-get_or_new_exec_env'><code>ModuleEnvir$get_or_new_exec_env()</code></a></p></li>
 <li><p><a href='#method-load_script'><code>ModuleEnvir$load_script()</code></a></p></li>
-<li><p><a href='#method-cache'><code>ModuleEnvir$cache()</code></a></p></li>
 <li><p><a href='#method-render_ui'><code>ModuleEnvir$render_ui()</code></a></p></li>
 <li><p><a href='#method-clean'><code>ModuleEnvir$clean()</code></a></p></li>
 </ul>
@@ -230,24 +234,6 @@ current module and given session</p>
 </dl><p></div></p>
 <h3>Returns</h3>
 <p>none</p>
-<p><hr>
-<a id="method-cache"></a></p><h3>Method <code><a href='rave-cache.html'>cache()</a></code></h3>
-<p>(deprecated) cache data</p><h3>Usage</h3>
-<p><div class="r"></p><pre>ModuleEnvir$cache(key, val, session, replace = FALSE)</pre><p></div></p>
-
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
-<dt><code>key</code></dt><dd><p>list of R objects</p></dd>
-
-<dt><code>val</code></dt><dd><p>value to cache</p></dd>
-
-<dt><code>session</code></dt><dd><p>shiny session</p></dd>
-
-<dt><code>replace</code></dt><dd><p>whether to replace cache even if it exists</p></dd>
-
-</dl><p></div></p>
-<h3>Returns</h3>
-<p>cached value</p>
 <p><hr>
 <a id="method-render_ui"></a></p><h3>Method <code>render_ui()</code></h3>
 <p>generate 'HTML' tags</p><h3>Usage</h3>

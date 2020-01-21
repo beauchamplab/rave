@@ -67,7 +67,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
       </span>
     </div>
 
@@ -179,6 +179,12 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="archive_subject.html">archive_subject()</a></code> </p>
+        </td>
+        <td><p>Archive Subject into Zipped file</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="arrange_data_dir.html">arrange_data_dir()</a></code> </p>
         </td>
         <td><p>Initialize data repository</p></td>
@@ -209,12 +215,6 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="cache_input.html">cache_input()</a></code> </p>
-        </td>
-        <td><p>Cache input values</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="cache_raw_voltage.html">cache_raw_voltage()</a></code> </p>
         </td>
         <td><p>Import Subject "Matlab" File and Create "HDF5" files</p></td>
@@ -224,6 +224,12 @@
           <p><code><a href="check_data_repo.html">check_data_repo()</a></code> </p>
         </td>
         <td><p>Check if default data environment has object</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="check_dependencies.html">check_dependencies()</a></code> </p>
+        </td>
+        <td><p>Check and Install RAVE Dependencies</p></td>
       </tr><tr>
         
         <td>
@@ -259,13 +265,34 @@
         <td>
           <p><code><a href="customizedUI.html">customizedUI()</a></code> </p>
         </td>
-        <td><p>Customized shiny Elements</p></td>
+        <td><p>Customized Shiny Elements</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="decimate_fir.html">decimate_fir()</a></code> </p>
         </td>
         <td><p>Decimate or Down-sample a Signal using <code>FIR</code> Filters</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="define_initialization.html">define_initialization()</a></code> </p>
+        </td>
+        <td><p>Defines 'RAVE' Module Initialization
+Defines the global variables for the module. Called along with 
+<code>define_input</code> to define UI initialization
+actions once a subject is loaded.</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="define_input.html">define_input()</a></code> </p>
+        </td>
+        <td><p>Defines 'RAVE' Module Inputs</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="define_output.html">define_output()</a></code> </p>
+        </td>
+        <td><p>Define 'RAVE' Module Output</p></td>
       </tr><tr>
         
         <td>
@@ -299,6 +326,12 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="eval_when_ready.html">eval_when_ready()</a></code> </p>
+        </td>
+        <td><p>Add Function to run once Module is Ready</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="export_diagnose_voltage.html">export_diagnose_voltage()</a></code> </p>
         </td>
         <td><p>Export voltage (analog trace) diagnostic plots for each electrode</p></td>
@@ -307,19 +340,31 @@
         <td>
           <p><code><a href="fake_session.html">fake_session()</a></code> </p>
         </td>
-        <td><p>internally used to cheat RAVE</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="getDefaultCacheEnvironment.html">getDefaultCacheEnvironment()</a></code> </p>
-        </td>
-        <td><p>Get Cache Environment</p></td>
+        <td><p>Fake 'shiny' Session for Debug Purpose</p></td>
       </tr><tr>
         
         <td>
           <p><code><a href="getDefaultDataRepository.html">getDefaultDataRepository()</a></code> </p>
         </td>
         <td><p>Get environment where subject data is loaded</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="getExecEnvirFromContext.html">getExecEnvirFromContext()</a></code> </p>
+        </td>
+        <td><p>Get Module Runtime Environment from Current Context</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="getModuleEnvirFromContext.html">getModuleEnvirFromContext()</a></code> </p>
+        </td>
+        <td><p>Get Module Instance from Current Context</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="get_content.html">get_content()</a></code> </p>
+        </td>
+        <td><p>Parse 'RAVE' Module Contents</p></td>
       </tr><tr>
         
         <td>
@@ -347,9 +392,21 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="get_path.html">get_path()</a></code> </p>
+        </td>
+        <td><p>Safe Way to Access Module Package Files Using Relative Path</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="get_projects.html">get_projects()</a></code> </p>
         </td>
         <td><p>Find all Available RAVE Projects</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="get_rave_theme.html">get_rave_theme()</a></code> </p>
+        </td>
+        <td><p>Get RAVE Theme from Package Settings</p></td>
       </tr><tr>
         
         <td>
@@ -359,9 +416,21 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="get_val.html">get_val()</a></code> </p>
+        </td>
+        <td><p>Get Value or Default</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="init_app.html">init_app()</a></code> </p>
         </td>
         <td><p>Initialize main application for debugging purpose</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="init_module.html">init_module()</a></code> </p>
+        </td>
+        <td><p>Initialize 'RAVE' module for debug purpose</p></td>
       </tr><tr>
         
         <td>
@@ -407,9 +476,27 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="load_rave_module_package.html">load_rave_module_package()</a></code> </p>
+        </td>
+        <td><p>Function to load RAVE module package with UI tools</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="load_scripts.html">load_scripts()</a></code> </p>
+        </td>
+        <td><p>Load scripts that cannot put into package R folder</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="module_analysis_names.html">module_analysis_names()</a></code> </p>
         </td>
         <td><p>Find module analysis names</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="mount_demo_subject.html">mount_demo_subject()</a></code> </p>
+        </td>
+        <td><p>Load Demo Subject According to Package Configuration File</p></td>
       </tr><tr>
         
         <td>
@@ -461,7 +548,7 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="rave-cache.html">cache()</a></code> <code><a href="rave-cache.html">clear_cache()</a></code> <code><a href="rave-cache.html">remove_cache()</a></code> <code><a href="rave-cache.html">has_cache()</a></code> </p>
+          <p><code><a href="rave-cache.html">cache()</a></code> <code><a href="rave-cache.html">cache_input()</a></code> <code><a href="rave-cache.html">clear_cache()</a></code> </p>
         </td>
         <td><p>Cache R Objects with Different levels</p></td>
       </tr><tr>
@@ -479,6 +566,18 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="rave_context.html">rave_context()</a></code> </p>
+        </td>
+        <td><p>'RAVE' Context: Read and Set Context of Environments</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="rave_context_generics.html">rave_context_generics()</a></code> </p>
+        </td>
+        <td><p>Create S3 Generics that Respects 'RAVE' Context</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="rave_failure.html">rave_failure()</a></code> </p>
         </td>
         <td><p>RAVE Failure Message</p></td>
@@ -488,6 +587,12 @@
           <p><code><a href="rave_ignore.html">rave_ignore()</a></code> </p>
         </td>
         <td><p>Functions for development use</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="rave_import_rawdata.html">rave_import_rawdata()</a></code> </p>
+        </td>
+        <td><p>Import Raw Signal from Non-standard Formats</p></td>
       </tr><tr>
         
         <td>
@@ -533,6 +638,12 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="reload_module_package.html">reload_module_package()</a></code> </p>
+        </td>
+        <td><p>Reload 'RAVE' module package without restarting 'RStudio'</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="safe_write_csv.html">safe_write_csv()</a></code> </p>
         </td>
         <td><p>Save data to "CSV", if file exists, rename old file</p></td>
@@ -554,6 +665,18 @@
           <p><code><a href="save_options.html">save_options()</a></code> </p>
         </td>
         <td><p>Function to locally save options (deprecated)</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="session-reactives.html">getDefaultReactiveInput()</a></code> <code><a href="session-reactives.html">getDefaultReactiveOutput()</a></code> </p>
+        </td>
+        <td><p>Get `shiny' "input" and "output" objects under current context</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="set_rave_theme.html">set_rave_theme()</a></code> </p>
+        </td>
+        <td><p>Set and Return RAVE theme</p></td>
       </tr><tr>
         
         <td>
@@ -590,6 +713,18 @@
           <p><code><a href="test_hdspeed.html">test_hdspeed()</a></code> </p>
         </td>
         <td><p>Function to test local disk speed</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="to_module.html">to_module()</a></code> </p>
+        </td>
+        <td><p>Parse 'RAVE' Module and Returns Parsed Content in Environments</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="view_layout.html">view_layout()</a></code> </p>
+        </td>
+        <td><p>Debug-use only, reload package, mount demo subject, and launch shiny app</p></td>
       </tr><tr>
         
         <td>
