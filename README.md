@@ -31,7 +31,7 @@ rave::arrange_modules(TRUE, TRUE)
 threeBrain::download_N27(make_default = TRUE)
 ```
 
-To update existing installations of RAVE, use Option 1 or run the following commands after making sure to update R and RStudio.
+To update existing installations of RAVE, use Option 1 or run the following commands after making sure to update R and RStudio. Start RAVE and verify that the newer version loads. If not, restart RStudio and retry the update.
 
 ```r
 devtools::install_github('beauchamplab/rave')
@@ -46,7 +46,7 @@ rave::check_dependencies()
 ```r
 rave::start_rave()
 ```
-* If installation has proceeded correctly, a new web browser window should open with the RAVE splash screen.
+* If installation has proceeded correctly, a new web browser window should open with the RAVE splash screen that shows the current version number (e.g. 1.0).
 
 ## Using RAVE
 
