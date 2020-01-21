@@ -31,7 +31,7 @@ rave::arrange_modules(TRUE, TRUE)
 threeBrain::download_N27(make_default = TRUE)
 ```
 
-To update existing installations of RAVE, use Option 1 or run the following commands after making sure to update R and RStudio. Start RAVE and verify that the newer version loads. If not, restart RStudio and retry the update.
+To update existing installations of RAVE, use Option 1 or run the following commands after making sure to update R and RStudio. Start RAVE and verify that the newer version loads. RStudio is unable to update packages that are in use, so it may be necessary to restart RStudio and retry the update. As an additional step, use the RStudio package manager to delete all RAVE packages and reinstall.
 
 ```r
 devtools::install_github('beauchamplab/rave')
