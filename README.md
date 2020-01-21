@@ -10,7 +10,7 @@ __R__ __A__*nalysis and* __V__*isualization of intracranial* __E__*lectroencepha
 * RAVE runs on Mac, Windows or Linux. [Click here for the prerequisite installation guide](./Installation.md) to install the latest versions of all required tools. RAVE requires the latest versions of the R and RStudio and trying to install RAVE on older versions will lead to unpredictable error messages. [Click here for suggested system configurations](./Requirements.md).
 
 * After completing the previous step, open the RStudio application using the desktop shortcut; in Mac OSX, RStudio can be found in the Applications folder. 
-* Option 1: Copy and paste the following command into the RStudio console to install the current version of RAVE. The script will check to make sure that you have the correct versions of R and RStudio and will prompt you to install them if not. The RStudio installer will periodically ask whether it is OK to install different libraries. Answer "Yes" to any questions that appear. 
+* Option 1: Copy and paste the following command into the RStudio console to install the current version of RAVE or update an existing installation. The script will check to make sure that you have the correct versions of R and RStudio and will prompt you to install them if not. The RStudio installer will periodically ask whether it is OK to install different libraries. Answer "Yes" to any questions that appear. 
 ```r
 source('https://raw.githubusercontent.com/dipterix/instrave/master/R/hello.R', echo = FALSE)
 ```
