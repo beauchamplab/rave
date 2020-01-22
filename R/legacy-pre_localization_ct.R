@@ -128,15 +128,17 @@ rave_pre_eleclocalct3 <- function(module_id = 'ELECLOCALCT_M', sidebar_width = 2
         'Template brain' = {
           scode = getOption('threeBrain.template_subject', 'N27')
           path = file.path(getOption('threeBrain.template_dir', '~/rave_data/others/three_brain'), scode)
-          local_env$brain = threeBrain::freesurfer_brain(path, scode, additional_surfaces = 'pial-outer-smoothed')
+          local_env$brain = threeBrain::freesurfer_brain2(
+            fs_subject_folder = path, subject_name = scode, 
+            surface_types = c('white', 'pial-outer-smoothed'))
         },
         'Local subject' = {
           dirs = utils$get_from_subject('dirs')
           sub_dir = dirs$subject_dir
           scode = utils$get_from_subject('subject_code')
-          local_env$brain = threeBrain::freesurfer_brain(
+          local_env$brain = threeBrain::freesurfer_brain2(
             fs_subject_folder = sub_dir, subject_name = scode,
-            additional_surfaces = 'pial-outer-smoothed', aligned_ct = NULL)
+            surface_types = c('white', 'pial-outer-smoothed'), aligned_ct = NULL)
         }, {
           dirs = utils$get_from_subject('dirs')
           sub_dir = dirs$subject_dir
@@ -150,7 +152,8 @@ rave_pre_eleclocalct3 <- function(module_id = 'ELECLOCALCT_M', sidebar_width = 2
           }
           local_env$brain = threeBrain::freesurfer_brain(
             fs_subject_folder = sub_dir, subject_name = scode,
-            additional_surfaces = 'pial-outer-smoothed', aligned_ct = local_data$ct_path)
+            additional_surfaces = c('white', 'pial-outer-smoothed'), 
+            aligned_ct = local_data$ct_path)
           # Load into memory
           tryCatch({
             group = local_env$brain$volumes$ct.aligned.t1$group

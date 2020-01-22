@@ -208,14 +208,20 @@ rave_pre_eleclocal3 <- function(module_id = 'ELECLOCAL_M', sidebar_width = 2, ..
           sub_dir = dirs$subject_dir
           path = sub_dir
           scode = utils$get_from_subject('subject_code')
-          brain = threeBrain::freesurfer_brain(path, scode, additional_surfaces = 'pial-outer-smoothed')
+          brain = threeBrain::freesurfer_brain2(
+            fs_subject_folder = path, 
+            subject_name = scode, 
+            surface_types = c('white', 'pial-outer-smoothed'))
         }, silent = TRUE )
         
       }
       if( is.null(brain) ){
         scode = getOption('threeBrain.template_subject', 'N27')
         path = file.path(getOption('threeBrain.template_dir', '~/rave_data/others/three_brain'), scode)
-        brain = threeBrain::freesurfer_brain(path, scode, additional_surfaces = 'pial-outer-smoothed')
+        brain = threeBrain::freesurfer_brain2(
+          fs_subject_folder = path,
+          subject_name = scode, 
+          surface_types = c('white', 'pial-outer-smoothed'))
       }
       
       height = min(ceiling((c(local_data$avail_height, 700)[[1]] - 100) /3), 300)

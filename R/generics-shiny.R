@@ -69,14 +69,18 @@
 NULL
 
 .get_rave_theme <- function(
-  packages = NULL, type = 'continuous', theme
+  packages = NULL, type = 'continuous', theme = NULL
 ){
-  if(missing(theme)){
-    theme = rave_options('default_theme')
-    if(is.null(theme)){
-      theme = 'light'
+  if(missing(theme) || !length(theme)){
+    theme = NULL
+    session = shiny::getDefaultReactiveDomain()
+    if(!is.null(session)){
+      theme = session$userData$rave_theme
     }
+    theme %?<-% rave_options('default_theme')
+    theme %?<-% 'light'
   }
+  
   stopifnot2(length(theme)==1 && theme %in% c('light', 'dark'),
              msg = 'theme must be either light or dark')
   stopifnot2(all(type %in% c('continuous', 'discrete')),
@@ -138,14 +142,8 @@ get_rave_theme.default <- .get_rave_theme
 
 #' @export
 get_rave_theme.rave_running <- function(packages = NULL, type = 'continuous',
-                                        theme){
+                                        theme = NULL){
   ctx = rave_context()
-  if(missing(theme)){
-    session = shiny::getDefaultReactiveDomain()
-    theme = session$userData$rave_theme
-    theme %?<-% rave_options('default_theme')
-    theme %?<-% 'light'
-  }
   packages = c(ctx$package, packages)
   .get_rave_theme(packages, type, theme)
 }
