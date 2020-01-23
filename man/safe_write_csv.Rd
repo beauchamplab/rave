@@ -4,7 +4,7 @@
 \alias{safe_write_csv}
 \title{Save data to "CSV", if file exists, rename old file}
 \usage{
-safe_write_csv(data, file, ..., quiet = F)
+safe_write_csv(data, file, ..., quiet = FALSE)
 }
 \arguments{
 \item{data}{data frame}

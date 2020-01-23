@@ -6,7 +6,7 @@
 #' @param file "CSV" file to save
 #' @param quiet suppress overwrite message
 #' @param ... pass to \code{\link[utils]{write.csv}}
-safe_write_csv <- function(data, file, ..., quiet = F){
+safe_write_csv <- function(data, file, ..., quiet = FALSE){
   if(file.exists(file)){
     oldfile = stringr::str_replace(file, '\\.[cC][sS][vV]$', strftime(Sys.time(), '_[%Y%m%d_%H%M%S].csv'))
     if(!quiet){
@@ -70,7 +70,7 @@ save_meta <- function(data, meta_type, project_name, subject_code){
   meta_dir = file.path(data_dir, sprintf('%s/%s', project_name, subject_code), 'rave', 'meta')
   
   if(!dir.exists(meta_dir)){
-    dir.create(meta_dir, recursive = T)
+    dir.create(meta_dir, recursive = TRUE)
   }
   
   if(meta_type == 'electrodes'){
@@ -83,20 +83,20 @@ save_meta <- function(data, meta_type, project_name, subject_code){
       data$Label = ''
     }
     
-    safe_write_csv(data, file = file.path(meta_dir, 'electrodes.csv'), row.names = F)
+    safe_write_csv(data, file = file.path(meta_dir, 'electrodes.csv'), row.names = FALSE)
   }else if(meta_type == 'time_points'){
     names(data) = c('Block', 'Time')
-    safe_write_csv(data, file = file.path(meta_dir, 'time_points.csv'), row.names = F)
+    safe_write_csv(data, file = file.path(meta_dir, 'time_points.csv'), row.names = FALSE)
   }else if(meta_type == 'frequencies'){
     names(data) = c('Frequency')
-    safe_write_csv(data, file = file.path(meta_dir, 'frequencies.csv'), row.names = F)
+    safe_write_csv(data, file = file.path(meta_dir, 'frequencies.csv'), row.names = FALSE)
   }else if(meta_type == 'time_excluded'){
     if(!is.data.frame(data)){
-      data = as.data.frame(data, stringsAsFactors = F)
+      data = as.data.frame(data, stringsAsFactors = FALSE)
     }
     if(nrow(data)){
       names(data) = c('Block', 'Start', 'End')
-      safe_write_csv(data, file = file.path(meta_dir, 'time_excluded.csv'), row.names = F)
+      safe_write_csv(data, file = file.path(meta_dir, 'time_excluded.csv'), row.names = FALSE)
     }
   }
   
@@ -113,15 +113,16 @@ save_meta <- function(data, meta_type, project_name, subject_code){
 load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_name){
   data_dir = rave_options('data_dir')
   if(missing(subject_id)){
-    meta_dir = file.path(data_dir, sprintf('%s/%s', project_name, subject_code), 'rave', 'meta')
+    subject_dir = file.path(data_dir, sprintf('%s/%s', project_name, subject_code), 'rave')
   }else{
-    meta_dir = file.path(data_dir, subject_id, 'rave', 'meta')
+    subject_dir = file.path(data_dir, subject_id, 'rave')
   }
+  meta_dir = file.path(subject_dir, 'meta')
   if(dir.exists(meta_dir)){
     if(meta_type == 'electrodes'){
       file = file.path(meta_dir, 'electrodes.csv')
       if(file.exists(file)){
-        tbl = utils::read.csv(file, stringsAsFactors = F)
+        tbl = utils::read.csv(file, stringsAsFactors = FALSE)
         if(!'Label' %in% names(tbl)){
           tbl$Label = NA
         }
@@ -138,7 +139,7 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
       if(file.exists(file)){
         return(utils::read.csv(
           file,
-          stringsAsFactors = F,
+          stringsAsFactors = FALSE,
           colClasses = c(Block = 'character')
         ))
         
@@ -150,7 +151,7 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
       if(file.exists(time_excluded_path)){
         return(utils::read.csv(
           time_excluded_path,
-          stringsAsFactors = F,
+          stringsAsFactors = FALSE,
           colClasses = c(Block = 'character')
         ))
       }else{
@@ -165,7 +166,7 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
     else if(meta_type == 'frequencies'){
       file = file.path(meta_dir, 'frequencies.csv')
       if(file.exists(file)){
-        return(utils::read.csv(file, stringsAsFactors = F))
+        return(utils::read.csv(file, stringsAsFactors = FALSE))
       }
     }
     else if(meta_type == 'epoch'){
@@ -175,8 +176,38 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
       }
       default_cols = c('Block', 'Time', 'Trial', 'Condition', 'Duration', 'ExcludedElectrodes')
       
-      epochs = utils::read.csv(epoch_file, header = T, stringsAsFactors = F,
+      epochs = utils::read.csv(epoch_file, header = TRUE, stringsAsFactors = FALSE,
                         colClasses = 'character')
+      
+      # check blocks
+      preprocess_yaml = file.path(meta_dir, '..', 'preprocess', 'rave.yaml')
+      if(file.exists(preprocess_yaml)){
+        preproc_info = yaml::read_yaml(preprocess_yaml)
+        if(length(preproc_info$blocks)){
+          pass_test = TRUE
+          # let's check block!
+          invalid_blocks = !epochs$Block %in% preproc_info$blocks
+          if(any(invalid_blocks)){
+            t1 = data.frame(idx = seq_along(epochs$Block), block = epochs$Block, stringsAsFactors = FALSE)
+            numeric_blocks = suppressWarnings({ as.numeric(preproc_info$blocks) })
+            t2 = data.frame(block = preproc_info$blocks, numblock = numeric_blocks, value = preproc_info$blocks, stringsAsFactors = FALSE)
+            t1 = merge(t1, t2, all.x = TRUE, by.x = 'block', by.y = 'block')
+            t1 = merge(t1[, c('block', 'idx', 'value')], t2, all.x = TRUE, by.x = 'block', by.y = 'numblock', suffixes = c('1', '2'))
+            sel = is.na(t1$value1)
+            t1$value1[sel] = t1$value2[sel]
+            
+            if(any(is.na(t1$value1))){
+              # block cannot find
+              # TODO
+            }
+            
+            epochs$Block = t1$value1[order(t1$idx)]
+          }
+        }
+      }
+      
+      
+      
       epochs$Time = as.numeric(epochs$Time)
       epochs$Trial = as.numeric(epochs$Trial)
       epochs$Duration %?<-% NA
@@ -203,7 +234,7 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
       if(!file.exists(file)){
         return(NULL)
       }
-      time_excluded = utils::read.csv(file, header = T, stringsAsFactors = F,
+      time_excluded = utils::read.csv(file, header = TRUE, stringsAsFactors = FALSE,
                                colClasses = c('character', 'numeric', 'numeric'))
       return(time_excluded)
     }
@@ -212,7 +243,7 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
       if(!length(file) || !file.exists(file)){
         return(NULL)
       }
-      ref_tbl = utils::read.csv(file, header = T, stringsAsFactors = F)
+      ref_tbl = utils::read.csv(file, header = TRUE, stringsAsFactors = FALSE)
       if(length(names(ref_tbl)) && names(ref_tbl)[1] != 'Electrode'){
         ref_tbl = ref_tbl[,-1]
       }
