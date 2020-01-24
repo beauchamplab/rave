@@ -4,7 +4,10 @@
 \alias{check_dependencies}
 \title{Check and Install RAVE Dependencies}
 \usage{
-check_dependencies()
+check_dependencies(update_rave = TRUE)
+}
+\arguments{
+\item{update_rave}{logical, whether to restart `RStudio` after installation}
 }
 \description{
 Check and Install RAVE Dependencies
