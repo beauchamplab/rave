@@ -54,9 +54,10 @@ rave_version <- function(){
 }
 
 #' @title Check and Install RAVE Dependencies
-#' @param update_rave logical, whether to restart `RStudio` after installation
+#' @param update_rave logical, whether to update RAVE
+#' @param restart logical, whether to restart `RStudio` after installation
 #' @export
-check_dependencies <- function(update_rave = TRUE){
+check_dependencies <- function(update_rave = TRUE, restart = TRUE){
   cat2('Check package rutabaga - Plot Helpers', level = 'DEFAULT')
   remotes::install_github('dipterix/rutabaga@develop', upgrade = FALSE, force = FALSE, quiet = TRUE)
   cat2('Check package threeBrain - 3D Viewer', level = 'DEFAULT')
@@ -68,15 +69,18 @@ check_dependencies <- function(update_rave = TRUE){
   if( update_rave ){
     cat2('Check update RAVE', level = 'DEFAULT')
     remotes::install_github('beauchamplab/rave', upgrade = FALSE, force = FALSE, quiet = TRUE)
-    cat2('Finished. Please restart session by \n\tRStudio > Session > Restart R',
+    cat2('Finished. If R does not restart correctly, please manually restart the session \n\tGo to task bar -> Session > Restart R',
          level = 'INFO')
   }
   
-  rm(list = ls(envir = globalenv()), envir = globalenv())
-  f = get0('.rs.restartR', envir = globalenv(), ifnotfound = NULL)
-  if(is.function(f)){
-    do.call(f, list('library("rave")'))
+  if(restart){
+    rm(list = ls(envir = globalenv()), envir = globalenv())
+    f = get0('.rs.restartR', envir = globalenv(), ifnotfound = NULL)
+    if(is.function(f)){
+      do.call(f, list('library("rave")'))
+    }
   }
+  
   invisible()
 }
 
