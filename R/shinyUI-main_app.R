@@ -900,3 +900,29 @@ app_server <- function(adapter, instance_id, token = NULL){
 #'
 #' @export
 start_rave <- app_controller
+
+
+
+
+
+
+#' @title Close a tab in RAVE main application
+#' @export
+#' @param module_id character, module ID
+#' @param tabname character, tab box title
+close_tab <- function(module_id, tabname){
+  session = shiny::getDefaultReactiveDomain()
+  if(!is.null(session)){
+    session$sendCustomMessage('rave_close_tab', list(
+      module_id = module_id,
+      title = tabname
+    ))
+  }
+}
+
+
+
+
+
+
+

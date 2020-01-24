@@ -594,7 +594,7 @@ shiny_data_selector <- function(module_id){
         }
       }else{
         # Subject should be valid, detect and preview
-        # 3. Brain-mesh
+        
         # How many trials
         fluidRow(
           column(
@@ -832,7 +832,7 @@ shiny_data_selector <- function(module_id){
       
       brain = rave_brain2( subject = subject, surfaces = 'pial', 
                            compute_template = FALSE, 
-                           usetemplateifmissing = TRUE )
+                           usetemplateifmissing = FALSE )
       
       if( is.null(brain) ){
         return(NULL)
