@@ -229,7 +229,8 @@ app_ui <- function(adapter, token = NULL){
           if(!adapter$get_option('simplify_header', FALSE)){
             tagList(
               tags$li(class = 'user user-menu', actionLink('curr_subj_details_btn', '')),
-              tags$li(class = 'user user-menu',actionLink('curr_subj_launch_suma', '')
+              # tags$li(class = 'user user-menu',actionLink('curr_subj_launch_suma', '')),
+              tags$li(class = 'user user-menu',actionLink('rave_reset', 'Reset GUI')
               )
             )
           }
@@ -708,6 +709,20 @@ app_server <- function(adapter, instance_id, token = NULL){
           root_dir = suma_dir
         )
       }
+    })
+    observeEvent(input$rave_reset, {
+      shiny::showModal(
+        shiny::modalDialog(
+          title = 'Reset RAVE GUI',
+          p('This action will reset GUI and input parameters for all modules. (The data will NOT reset)',br(),
+            'Click "Confirm" to proceed.'),
+          size = 's', footer = tagList(
+            tags$a(href = "#", class = "btn btn-default rave-app-btn rave-restart-btn", 
+                   shiny::icon('refresh'), 'Confirm'),
+            shiny::modalButton('Cancel')
+          )
+        )
+      )
     })
 
     observe({

@@ -51,9 +51,13 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
               class = 'user user-menu',
               actionLink('curr_subj_details_btn', '')
             ),
+            # tags$li(
+            #   class = 'user user-menu',
+            #   actionLink('curr_subj_launch_suma', '')
+            # ),
             tags$li(
               class = 'user user-menu',
-              actionLink('curr_subj_launch_suma', '')
+              actionLink('rave_reset', 'Reset State')
             )
           )
         }
@@ -371,6 +375,19 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
           root_dir = suma_dir
         )
       }
+    })
+    observeEvent(input$rave_reset, {
+      shiny::showModal(
+        shiny::modalDialog(
+          title = 'Confirmation',
+          p('This action will reset all input parameters. Click "Confirm" to proceed.'),
+          size = 's', footer = tagList(
+            tags$a(href = "#", class = "btn btn-default rave-restart-btn", 
+                   shiny::icon('refresh'), 'Confirm'),
+            shiny::modalButton('Cancel')
+          )
+        )
+      )
     })
     
     observe({

@@ -56,16 +56,26 @@ rave_version <- function(){
 #' @title Check and Install RAVE Dependencies
 #' @export
 check_dependencies <- function(){
-  cat2('Check package rutabaga - Plot Helpers')
+  cat2('Check package rutabaga - Plot Helpers', level = 'DEFAULT')
   remotes::install_github('dipterix/rutabaga@develop', upgrade = FALSE, force = FALSE, quiet = TRUE)
-  cat2('Check package threeBrain - 3D Viewer')
+  cat2('Check package threeBrain - 3D Viewer', level = 'DEFAULT')
   remotes::install_github('dipterix/threeBrain', upgrade = FALSE, force = FALSE, quiet = TRUE)
-  cat2('Check package ravebuiltins - Default RAVE modules')
+  cat2('Check package ravebuiltins - Default RAVE modules', level = 'DEFAULT')
   remotes::install_github('beauchamplab/ravebuiltins@migrate2', upgrade = FALSE, force = FALSE, quiet = TRUE)
-  cat2('Check package dipsaus - System Utils')
+  cat2('Check package dipsaus - System Utils', level = 'DEFAULT')
   remotes::install_github('dipterix/dipsaus', upgrade = FALSE, force = FALSE, quiet = TRUE)
+  cat2('Check update RAVE', level = 'DEFAULT')
+  remotes::install_github('beauchamplab/rave', upgrade = FALSE, force = FALSE, quiet = TRUE)
+  cat2('Finished. Please restart session by \n\tRStudio > Session > Restart R',
+       level = 'INFO')
+  rm(list = ls(envir = globalenv()), envir = globalenv())
+  f = get0('.rs.restartR', envir = globalenv(), ifnotfound = NULL)
+  if(is.function(f)){
+    do.call(f, list('library("rave")'))
+  }
   invisible()
 }
+
 
 
 .onAttach <- function(libname, pkgname){

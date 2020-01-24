@@ -25,6 +25,10 @@ $(document).ready(function(){
 	$(document).on('click', "[data-toggle='control-sidebar']", () => {
 	  $('body').toggleClass('rave-control-open');
 	});
+	
+	$(document).on('click', '.rave-app-btn.rave-restart-btn', () => {
+	  window.location.reload(true);
+	});
 
 
   // Zoom in panels
