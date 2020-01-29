@@ -7,7 +7,7 @@ __R__ __A__*nalysis and* __V__*isualization of intracranial* __E__*lectroencepha
 
 ## Installation
 
-* RAVE runs on Mac, Windows or Linux. [Click here for the prerequisite installation guide](./Installation.md) to install the latest versions of all required tools. RAVE requires the latest versions of the **<span style="color:black">[R (>= 3.6.0)](https://cran.r-project.org/)</span>** and **[RStudio](https://rstudio.com/products/rstudio/download/)** and trying to install RAVE on older versions will lead to unpredictable error messages. [Click here for suggested system configurations](./Requirements.md).
+* RAVE runs on Mac, Windows or Linux. [Click here for the prerequisite installation guide](./Installation.md) to install the latest versions of all required tools. RAVE requires the latest versions of the R (>= 3.6.0) and RStudio and trying to install RAVE on older versions will lead to unpredictable error messages. [Click here for suggested system configurations](./Requirements.md).
   + For Mac (>= El Captain) users, please download [installation script](https://github.com/dipterix/instrave/raw/master/rave-installer-macosx.command.zip), extract zip file, and right-click open to install
   + for Windows (>= 7) users, please save [batch script](https://raw.githubusercontent.com/dipterix/instrave/master/rave-installer-windows.bat) as \*.bat file, double-click on it to install
   + For Linux users, please use the alternative installation guide
