@@ -1,9 +1,6 @@
 <img src="inst/assets/images/logo-md.jpg" width="20%" align="right" />
 
-# RAVE
-
-__R__ __A__*nalysis and* __V__*isualization of intracranial* __E__*lectroencephalography*
-
+# RAVE __R__ __A__*nalysis and* __V__*isualization of intracranial* __E__*lectroencephalography*
 
 ## Install RAVE
 RAVE runs on Mac, Windows or Linux. For Mac and Windows, you can download a script that will automatically install all requirements for RAVE as well as the RAVE package.
@@ -14,7 +11,6 @@ RAVE runs on Mac, Windows or Linux. For Mac and Windows, you can download a scri
   + for Windows users, please save the [batch file](https://raw.githubusercontent.com/dipterix/instrave/master/rave-installer-windows.bat) to your desktop. Find the file on your desktop and double-click it. 
   
    + If these scripts do not work for any reason (or for Linux users) see the [Full installation guide](./alternative_installation.md).
-
 
 ## Start RAVE 
 
