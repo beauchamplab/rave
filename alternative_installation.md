@@ -1,4 +1,8 @@
-# RAVE Alternative installation guide
+# Full RAVE Alternative installation guide
+
+First, install all required prerequisites if they are not alreay installed.
+
+
 
 * Option 1: Copy and paste the following command into the RStudio console to install the current version of RAVE or update an existing installation. The script will check to make sure that you have the correct versions of R and RStudio and will prompt you to install them if not. The RStudio installer will ask questions, such as "What CRAN Mirror to use?" (picking a site that is nearby will speed installation) and whether it is OK to install various libraries and packages (answer "Yes"). 
 ```r
