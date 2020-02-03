@@ -11,7 +11,7 @@ Next, open the RStudio application using the desktop shortcut; in Mac OSX, RStud
 install.packages('devtools')
 devtools::install_github('beauchamplab/rave')
 
-# this step will grab other packages needed by RAVE. If asked to compile packages from source, you can safely so no
+# this step will grab other packages needed by RAVE. If asked to compile packages from source, you can say no
 rave::check_dependencies()
 
 # this step ensures all available RAVE modules are accessible
