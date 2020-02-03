@@ -3,31 +3,21 @@
 First, buy a computer! For best performance, we recommend a 4-core CPU (e.g. Intel i5) with 64GB RAM (at least 8 GB per core).
 RAVE displays results on a web browser, and is tested with Google Chrome. Apple and Microsoft browsers will run with reduced functionality (e.g. shaders will not render brain slices).
 
-Next, install all required prerequisites if they are not already installed.
- * This installation script will attempt to install the necessary pre-requisite software. For a list, see: *  [Click here for the prerequisite installation guide](./Installation.md) to install the latest versions of all required tools. RAVE requires the latest versions of the R (>= 3.6.0) and RStudio and trying to install RAVE on older versions will lead to unpredictable error messages. [Click here for suggested system configurations](./Requirements.md).
+Next, install all required prerequisites. RAVE requires the latest versions of R (>= 3.6.0) and RStudio. Trying to install RAVE on older versions of R and RStudio will lead to unpredictable error messages. [Click here for the prerequisite installation guide](./Installation.md).
 
-* After completing the previous step, open the RStudio application using the desktop shortcut; in Mac OSX, RStudio can be found in the Applications folder. 
-
-
-
-* Option 1: Copy and paste the following command into the RStudio console to install the current version of RAVE or update an existing installation. The script will check to make sure that you have the correct versions of R and RStudio and will prompt you to install them if not. The RStudio installer will ask questions, such as "What CRAN Mirror to use?" (picking a site that is nearby will speed installation) and whether it is OK to install various libraries and packages (answer "Yes"). 
+* After completing the previous step, open the RStudio application using the desktop shortcut; in Mac OSX, RStudio can be found in the Applications folder. Copy and paste the following commands (one at a time) into the RStudio console to install the current version of RAVE. Answer "Yes" to any questions that appear. In the case of errors, relaunch RStudio and repeat the commands. 
 ```r
-source('https://raw.githubusercontent.com/dipterix/instrave/master/R/hello.R', echo = FALSE)
-```
-* Option 2: Copy and paste the following commands (one at a time) into the RStudio console to install the current version of RAVE. Answer "Yes" to any questions that appear. In the case of errors, relaunch RStudio and repeat the commands or try Option 3. 
-```r
+# this step requires XCode on mac or RTools on Windows
 install.packages('devtools')
 devtools::install_github('beauchamplab/rave')
+
+# this step will grab other packages needed by RAVE. If asked to compile packages from source, you can safely so no
 rave::check_dependencies()
+
+# this step ensures all available RAVE modules are accessible
 rave::arrange_modules(TRUE, TRUE)
-threeBrain::download_N27(make_default = TRUE)
-```
-* Option 3: Copy and paste the following commands into the RStudio console, one at a time. Answer "Yes" to any questions that appear. 
-```r
-install.packages('pak')
-pak::pkg_install('beauchamplab/rave')
-rave::check_dependencies()
-rave::arrange_modules(TRUE, TRUE)
+
+# This step ensures you have a template brain already installed.
 threeBrain::download_N27(make_default = TRUE)
 ```
 
