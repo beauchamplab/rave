@@ -954,7 +954,15 @@ load_cached_voltage <- function(cache_dir, electrodes, time_range, srate_volt, t
 #' @param ... other parameters passed to \code{download_subject_data}
 #' @return Nothing
 #' @export
-download_sample_data <- function(subject = 'KC', version = 'v0.1.8-beta', ...){
+download_sample_data <- function(subject, version = 'v0.1.8-beta', ...){
+  
+  if(missing(subject)) {
+    sbj_names = c('KC', 'YAB', '_project_data')
+    sapply(sbj_names, download_sample_data, version=version, ...)
+    return (invisible())
+  }
+  
+  
   url = sprintf('https://github.com/beauchamplab/rave/releases/download/%s/demo_%s.zip', version, subject)
   download_subject_data(url, ...)
 }
