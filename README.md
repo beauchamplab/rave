@@ -14,11 +14,7 @@ For Mac and Windows, you can download a script that will install all requirement
   + for Windows (>= 7) users, please save [batch script](https://raw.githubusercontent.com/dipterix/instrave/master/rave-installer-windows.bat) as \*.bat file to your desktop. Find the file on your desktop and double-click it. 
   + For Linux users, please use the alternative installation guide [put link here]
   
-  * This installation script will attempt to install the necessary pre-requisite software. For a list, see: * RAVE runs on Mac, Windows or Linux. [Click here for the prerequisite installation guide](./Installation.md) to install the latest versions of all required tools. RAVE requires the latest versions of the R (>= 3.6.0) and RStudio and trying to install RAVE on older versions will lead to unpredictable error messages. [Click here for suggested system configurations](./Requirements.md).
-
-* After completing the previous step, open the RStudio application using the desktop shortcut; in Mac OSX, RStudio can be found in the Applications folder. 
-
-For more details about the installation process, see the [Alternative installation guide](./alternative_installation.md).
+ For more details about the installation process, see the [Alternative installation guide](./alternative_installation.md).
 
 ## Download Demo data 
 
