@@ -5,7 +5,7 @@ RAVE displays results on a web browser, and is tested with Google Chrome. Apple 
 
 Next, install all required prerequisites. RAVE requires the latest versions of R (>= 3.6.0) and RStudio. Trying to install RAVE on older versions of R and RStudio will lead to unpredictable error messages. [Click here for the prerequisite installation guide](./Installation.md).
 
-* After completing the previous step, open the RStudio application using the desktop shortcut; in Mac OSX, RStudio can be found in the Applications folder. Copy and paste the following commands (one at a time) into the RStudio console to install the current version of RAVE. Answer "Yes" to any questions that appear. In the case of errors, relaunch RStudio and repeat the commands. 
+Next, open the RStudio application using the desktop shortcut; in Mac OSX, RStudio can be found in the Applications folder. Copy and paste the following commands (one at a time) into the RStudio console to install the current version of RAVE. Answer "Yes" to any questions that appear. In the case of errors, relaunch RStudio and repeat the commands. 
 ```r
 # this step requires XCode on mac or RTools on Windows
 install.packages('devtools')
@@ -21,14 +21,14 @@ rave::arrange_modules(TRUE, TRUE)
 threeBrain::download_N27(make_default = TRUE)
 ```
 
-To update existing installations of RAVE, use Option 1 or run the following commands after making sure to update R and RStudio. Start RAVE and verify that the newer version loads. RStudio is unable to update packages that are in use, so it may be necessary to restart RStudio and retry the update. As an additional step, use the RStudio package manager to delete all RAVE packages and reinstall.
+To update existing installations of RAVE, run the following commands after making sure to update R and RStudio. Start RAVE and verify that the newer version loads. RStudio is unable to update packages that are in use, so it may be necessary to restart RStudio and retry the update. As an additional step, use the RStudio package manager to delete all RAVE packages and reinstall.
 
 ```r
 devtools::install_github('beauchamplab/rave')
 rave::check_dependencies()
 ```
 
-* After installing or updating RAVE, quit and restart RStudio before continuing (Option 1 does this automatically).
+* After installing or updating RAVE, quit and restart RStudio before continuing.
 
 ## Download Demo data 
 
