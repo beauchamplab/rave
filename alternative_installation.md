@@ -4,6 +4,9 @@ First, buy a computer! For best performance, we recommend a 4-core CPU (e.g. Int
 RAVE displays results on a web browser, and is tested with Google Chrome. Apple and Microsoft browsers will run with reduced functionality (e.g. shaders will not render brain slices).
 
 Next, install all required prerequisites if they are not already installed.
+ * This installation script will attempt to install the necessary pre-requisite software. For a list, see: *  [Click here for the prerequisite installation guide](./Installation.md) to install the latest versions of all required tools. RAVE requires the latest versions of the R (>= 3.6.0) and RStudio and trying to install RAVE on older versions will lead to unpredictable error messages. [Click here for suggested system configurations](./Requirements.md).
+
+* After completing the previous step, open the RStudio application using the desktop shortcut; in Mac OSX, RStudio can be found in the Applications folder. 
 
 
 
