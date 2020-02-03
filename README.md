@@ -1,6 +1,6 @@
 <img src="inst/assets/images/logo-md.jpg" width="20%" align="right" />
 
-# RAVE __R__ __A__*nalysis and* __V__*isualization of intracranial* __E__*lectroencephalography*
+# RAVE: __R__ __A__*nalysis and* __V__*isualization of intracranial* __E__*lectroencephalography*
 
 ## Install RAVE
 RAVE runs on Mac, Windows or Linux. For Mac and Windows, you can download a script that will automatically install all requirements for RAVE as well as the RAVE package.
