@@ -22,7 +22,7 @@ Open Terminal (in the Applications folder), enter
 xcode-select --install
 ```
 
-Click **yes** to proceed installing command-line tools.
+Click **yes** to proceed installing command-line tools. On first use, you will br required to read and accept the Apple license.  
 
 *Don't worry if the following error occurs. It just means you have already installed xcode command line tools.*
 
