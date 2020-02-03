@@ -5,12 +5,15 @@
 __R__ __A__*nalysis and* __V__*isualization of intracranial* __E__*lectroencephalography*
 
 
-## Installation
-
-* RAVE runs on Mac, Windows or Linux. [Click here for the prerequisite installation guide](./Installation.md) to install the latest versions of all required tools. RAVE requires the latest versions of the R (>= 3.6.0) and RStudio and trying to install RAVE on older versions will lead to unpredictable error messages. [Click here for suggested system configurations](./Requirements.md).
-  + For Mac (>= El Captain) users, please download [installation script](https://github.com/dipterix/instrave/raw/master/rave-installer-macosx.command.zip), extract zip file, and right-click open to install
+## Easy Installation
+For Mac and Windows, you can download a script that will install all requirements for RAVE as well as the RAVE package.
+  + For Mac users, click on this link to download the installation script.
+  [installation script](https://github.com/dipterix/instrave/raw/master/rave-installer-macosx.command.zip)
+  After installation, you will find a ZIP file in your "Downloads" folder. If it has not automatically been unzipped, double-click to extract the file named "rave-installer-macosx.command". To run the the commands in the script, right click on the file to bring up an actions menu and select "Open". You will receive a warning "rave-installer-macosx.command is from an unidentified developer. Are you sure you want to open it?". Choose "Open" to proceed.
   + for Windows (>= 7) users, please save [batch script](https://raw.githubusercontent.com/dipterix/instrave/master/rave-installer-windows.bat) as \*.bat file, double-click on it to install
-  + For Linux users, please use the alternative installation guide
+  + For Linux users, please use the alternative installation guide [put link here]
+  
+  * This installation script will attempt to install the necessary pre-requisite software. For a list, see: * RAVE runs on Mac, Windows or Linux. [Click here for the prerequisite installation guide](./Installation.md) to install the latest versions of all required tools. RAVE requires the latest versions of the R (>= 3.6.0) and RStudio and trying to install RAVE on older versions will lead to unpredictable error messages. [Click here for suggested system configurations](./Requirements.md).
 
 * After completing the previous step, open the RStudio application using the desktop shortcut; in Mac OSX, RStudio can be found in the Applications folder. 
 
