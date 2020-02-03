@@ -39,3 +39,33 @@ rave::check_dependencies()
 ```
 
 * After installing or updating RAVE, quit and restart RStudio before continuing (Option 1 does this automatically).
+
+## Download Demo data 
+
+* If you do not have any data in RAVE format, we recommend you download some sample data. Each RStudio command below downloads a dataset from a single subject.
+```r
+# 500MB ~ 1.5 GB per subject
+rave::download_sample_data('KC')
+rave::download_sample_data('YAB')
+rave::download_sample_data('YAD')
+rave::download_sample_data('YAF')
+rave::download_sample_data('YAH')
+rave::download_sample_data('YAI')
+rave::download_sample_data('YAJ')
+rave::download_sample_data('YAK')
+
+# download group analysis sample - 72 MB. Please download at least 1 subject above.
+rave::download_sample_data('_group_data')
+```
+
+Once you see the following message, the subject is downloaded. The directory (XXX) will vary depending on the machine. If a subject previously exists, RAVE will ask you to choose from replacing, creating new or abandon the downloaded subject. 
+
+```
+[ INFO ]: Expanding zip file
+[ INFO ]: Copy from tempdir to data repository
+[ INFO ]: Clean up
+[ INFO ]: Done. Subject [sub1] is now at 
+[Raw Data]: /XXX/rave_data/raw_dir/KC
+[RAVE Data]: /XXX/rave_data/data_dir/demo/KC
+```
+
