@@ -28,7 +28,11 @@ rave::start_rave()
 
 ## Using RAVE
 
-* To use RAVE, you will need to load data by clicking "Select Data". The installation process installs sample (demo) data. You can also create data in RAVE format by preprocessing your existing raw data. To preprocess data 
+* To use RAVE, you will need to load data by clicking "Select Data". The installation process installs sample (demo) data. For tutorials on how to use RAVE, including loading your own data into RAVE [click here](https://openwetware.org/wiki/Beauchamp:RAVE#Tutorials).
+
+
+
+You can also create data in RAVE format by preprocessing your existing raw data. To preprocess data 
 ```r
 rave::rave_preprocess()
 ```
@@ -36,7 +40,7 @@ rave::rave_preprocess()
 ```r
 rave::rave_options()
 ```
-* For tutorials on how to use RAVE, [click here](https://openwetware.org/wiki/Beauchamp:RAVE#Tutorials)
+* 
 
 
 
