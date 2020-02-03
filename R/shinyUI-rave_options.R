@@ -472,7 +472,7 @@ rave_options_gui <- local({
           ncores = future::availableCores()
           if(val >= ncores){
             msg = p(
-              tags$small(span(HTML(catgl("It is recommended that the number of CPU utilized is (the number of CPU cores) - 1 = {ncores-1}. This ensures good utilizations of your CPU while still leaving one core for the other tasks (such as watching videos?).", br(), "However, if you want highest speed, set this value to be ${{ncores}}"))))
+              tags$small(span(HTML(gl("It is recommended that the number of CPU utilized is (the number of CPU cores) - 1 = {ncores-1}. This ensures good utilizations of your CPU while still leaving one core for the other tasks."))))
             )
           }
           if(stringr::str_detect(stringr::str_to_lower(Sys.info()['sysname']), '^win')){
