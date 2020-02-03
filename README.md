@@ -26,21 +26,6 @@ rave::start_rave()
 ```
 * If installation has proceeded correctly, a new web browser window should open with the RAVE splash screen that shows the current version number (e.g. 1.0).
 
-## Using RAVE
-
-* To use RAVE, you will need to load data by clicking "Select Data". The installation process installs sample (demo) data. For tutorials on how to use RAVE, including loading your own data into RAVE [click here](https://openwetware.org/wiki/Beauchamp:RAVE#Tutorials).
-
-
-
-You can also create data in RAVE format by preprocessing your existing raw data. To preprocess data 
-```r
-rave::rave_preprocess()
-```
-* If you have RAVE format data on a server (or anywhere besides the default local directory), point RAVE to it with
-```r
-rave::rave_options()
-```
-* 
-
+* To use RAVE, you will need to load data by clicking "Select Data". The installation process installs sample (demo) data. For tutorials on how to use RAVE and how to load your own data into RAVE [click here](https://openwetware.org/wiki/Beauchamp:RAVE#Tutorials).
 
 
