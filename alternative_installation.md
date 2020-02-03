@@ -1,6 +1,9 @@
-# Full RAVE Alternative installation guide
+# Full RAVE installation guide
 
-First, install all required prerequisites if they are not alreay installed.
+First, buy a computer! For best performance, we recommend a 4-core CPU (e.g. Intel i5) with 64GB RAM (at least 8 GB per core).
+RAVE displays results on a web browser, and is tested with Google Chrome. Apple and Microsoft browsers will run with reduced functionality (e.g. shaders will not render brain slices).
+
+Next, install all required prerequisites if they are not already installed.
 
 
 
