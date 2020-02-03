@@ -18,6 +18,8 @@ For Mac and Windows, you can download a script that will install all requirement
 
 * After completing the previous step, open the RStudio application using the desktop shortcut; in Mac OSX, RStudio can be found in the Applications folder. 
 
+For more details about the installation process, see the [Alternative installation guide](./alternative_installation.md).
+
 ## Download Demo data 
 
 * If you do not have any data in RAVE format, we recommend you download some sample data. Each RStudio command below downloads a dataset from a single subject.
