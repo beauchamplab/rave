@@ -4,12 +4,14 @@
 \alias{check_dependencies}
 \title{Check and Install RAVE Dependencies}
 \usage{
-check_dependencies(update_rave = TRUE, restart = TRUE)
+check_dependencies(update_rave = TRUE, restart = TRUE, skip = 0)
 }
 \arguments{
 \item{update_rave}{logical, whether to update RAVE}
 
 \item{restart}{logical, whether to restart `RStudio` after installation}
+
+\item{skip}{numeric, to skip some updates}
 }
 \description{
 Check and Install RAVE Dependencies

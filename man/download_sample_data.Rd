@@ -4,7 +4,7 @@
 \alias{download_sample_data}
 \title{Function to download demo data to data repository}
 \usage{
-download_sample_data(subject = "KC", version = "v0.1.8-beta", ...)
+download_sample_data(subject, version = "v0.1.8-beta", ...)
 }
 \arguments{
 \item{subject}{demo subject}
