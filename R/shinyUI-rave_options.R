@@ -19,7 +19,7 @@ rave_options_gui <- local({
   
   ######## UI and observers
   comps = list()
-  ##### raw_data_dir
+  # ------------------------ raw_data_dir ------------------------
   {
     comps[[length(comps) + 1]] = list(
       type = 'Core Settings',
@@ -78,7 +78,7 @@ rave_options_gui <- local({
     )
   }
   
-  ##### data_dir
+  # ------------------------ data_dir ----------------------------
   {
     
     comps[[length(comps) + 1]] = list(
@@ -144,7 +144,7 @@ rave_options_gui <- local({
     )
   }
   
-  
+  # ------------------------ Depricated ------------------------
   ##### Crayon
   # {
   # 
@@ -173,219 +173,223 @@ rave_options_gui <- local({
   
   
   ##### suma_path
-  {
-    comps[[length(comps) + 1]] = list(
-      type = 'SUMA',
-      opt_name = 'suma_path',
-      observer = rlang::quo({
-        opt_id = 'suma_path'
-        output_uiid = paste0(opt_id, '_input')
-        resp_uiid = paste0(opt_id, '_ui')
-        set_btnid = paste0(opt_id, '_set')
-        notification_id = paste0(opt_id, '_noty')
-        
-        output[[output_uiid]] <- renderUI({
-          shiny::textInput(opt_id, opt_names[[opt_id]], value = local_data[[opt_id]])
-        })
-        
-        output[[resp_uiid]] <- renderUI({
-          local_data$refresh
-          val = input[[opt_id]]
-          val %?<-% rave_options(opt_id)
-          cat2(opt_id, ' - ', val)
-          if(val == rave_options(opt_id) && dir.exists(val)){
-            return()
-          }
-          if(!dir.exists(val)){
-            return(tags$small(span(style = 'color:red', 'Cannot find SUMA path. Make sure it exists and contains executable file "suma".')))
-          }
-          if(!file.info(val)$isdir){
-            return(tags$small(span(style = 'color:red', 'Please make sure this is a directory.')))
-          }
-          suma_file = file.path(val, 'suma')
-          if(!file.exists(suma_file) || file.info(suma_file)$isdir){
-            return(tags$small(span(style = 'color:red', 'Cannot find file "suma" within this directory.')))
-          }
-          return(tagList(
-            actionLink(set_btnid, 'Set AFNI-SUMA path')
-          ))
-        })
-        
-        observeEvent(input[[set_btnid]], {
-          val = input[[opt_id]]
-          if(length(val) && dir.exists(val) && file.exists(file.path(val, 'suma'))){
-            val = try_normalizePath(val)
-            set_opt(suma_path = val)
-            showNotification('SUMA path is found and set.', type = 'message', id = notification_id)
-            return()
-          }
-          showNotification('Failed while setting SUMA path. Make sure this is a directory and it contains file "suma"', type = 'error', id = notification_id)
-        })
-      })
-    )
-  }
+  # {
+  #   comps[[length(comps) + 1]] =
+  #     list(
+  #     type = 'SUMA',
+  #     opt_name = 'suma_path',
+  #     observer = rlang::quo({
+  #       opt_id = 'suma_path'
+  #       output_uiid = paste0(opt_id, '_input')
+  #       resp_uiid = paste0(opt_id, '_ui')
+  #       set_btnid = paste0(opt_id, '_set')
+  #       notification_id = paste0(opt_id, '_noty')
+  #       
+  #       output[[output_uiid]] <- renderUI({
+  #         shiny::textInput(opt_id, opt_names[[opt_id]], value = local_data[[opt_id]])
+  #       })
+  #       
+  #       output[[resp_uiid]] <- renderUI({
+  #         local_data$refresh
+  #         val = input[[opt_id]]
+  #         val %?<-% rave_options(opt_id)
+  #         cat2(opt_id, ' - ', val)
+  #         if(val == rave_options(opt_id) && dir.exists(val)){
+  #           return()
+  #         }
+  #         if(!dir.exists(val)){
+  #           return(tags$small(span(style = 'color:red', 'Cannot find SUMA path. Make sure it exists and contains executable file "suma".')))
+  #         }
+  #         if(!file.info(val)$isdir){
+  #           return(tags$small(span(style = 'color:red', 'Please make sure this is a directory.')))
+  #         }
+  #         suma_file = file.path(val, 'suma')
+  #         if(!file.exists(suma_file) || file.info(suma_file)$isdir){
+  #           return(tags$small(span(style = 'color:red', 'Cannot find file "suma" within this directory.')))
+  #         }
+  #         return(tagList(
+  #           actionLink(set_btnid, 'Set AFNI-SUMA path')
+  #         ))
+  #       })
+  #       
+  #       observeEvent(input[[set_btnid]], {
+  #         val = input[[opt_id]]
+  #         if(length(val) && dir.exists(val) && file.exists(file.path(val, 'suma'))){
+  #           val = try_normalizePath(val)
+  #           set_opt(suma_path = val)
+  #           showNotification('SUMA path is found and set.', type = 'message', id = notification_id)
+  #           return()
+  #         }
+  #         showNotification('Failed while setting SUMA path. Make sure this is a directory and it contains file "suma"', type = 'error', id = notification_id)
+  #       })
+  #     })
+  #   )
+  # }
   
   
   ##### suma_lib
-  {
-    comps[[length(comps) + 1]] = list(
-      type = 'SUMA',
-      opt_name = 'suma_lib',
-      observer = rlang::quo({
-        opt_id = 'suma_lib'
-        output_uiid = paste0(opt_id, '_input')
-        resp_uiid = paste0(opt_id, '_ui')
-        set_btnid = paste0(opt_id, '_set')
-        notification_id = paste0(opt_id, '_noty')
-        
-        output[[output_uiid]] <- renderUI({
-          val = local_data[[opt_id]]
-          val = paste(val, collapse = '\n')
-          shiny::textAreaInput(opt_id, opt_names[[opt_id]], value = val, resize = 'vertical', rows = 4L)
-        })
-        
-        output[[resp_uiid]] <- renderUI({
-          local_data$refresh
-          val = input[[opt_id]]
-          if(!length(val)){
-            return()
-          }
-          cat2(opt_id, ' - ', val)
-          if(val == paste(rave_options(opt_id), collapse = '\n')){
-            return()
-          }
-          return(tagList(
-            actionLink(set_btnid, 'Set SUMA library paths')
-          ))
-        })
-        
-        observeEvent(input[[set_btnid]], {
-          val = input[[opt_id]]
-          if(length(val)){
-            val = stringr::str_trim(unlist(stringr::str_split(val, '\\n')))
-            val = val[val != '']
-            if(!length(val)){
-              val = ''
-            }
-            set_opt(suma_lib = val)
-            showNotification('SUMA library paths are set.', type = 'message', id = notification_id)
-            return()
-          }
-          showNotification('Failed while setting SUMA library paths. Try it again?', type = 'error', id = notification_id)
-        })
-      })
-    )
-  }
+  # {
+  #   comps[[length(comps) + 1]] =
+  #     list(
+  #     type = 'SUMA',
+  #     opt_name = 'suma_lib',
+  #     observer = rlang::quo({
+  #       opt_id = 'suma_lib'
+  #       output_uiid = paste0(opt_id, '_input')
+  #       resp_uiid = paste0(opt_id, '_ui')
+  #       set_btnid = paste0(opt_id, '_set')
+  #       notification_id = paste0(opt_id, '_noty')
+  #       
+  #       output[[output_uiid]] <- renderUI({
+  #         val = local_data[[opt_id]]
+  #         val = paste(val, collapse = '\n')
+  #         shiny::textAreaInput(opt_id, opt_names[[opt_id]], value = val, resize = 'vertical', rows = 4L)
+  #       })
+  #       
+  #       output[[resp_uiid]] <- renderUI({
+  #         local_data$refresh
+  #         val = input[[opt_id]]
+  #         if(!length(val)){
+  #           return()
+  #         }
+  #         cat2(opt_id, ' - ', val)
+  #         if(val == paste(rave_options(opt_id), collapse = '\n')){
+  #           return()
+  #         }
+  #         return(tagList(
+  #           actionLink(set_btnid, 'Set SUMA library paths')
+  #         ))
+  #       })
+  #       
+  #       observeEvent(input[[set_btnid]], {
+  #         val = input[[opt_id]]
+  #         if(length(val)){
+  #           val = stringr::str_trim(unlist(stringr::str_split(val, '\\n')))
+  #           val = val[val != '']
+  #           if(!length(val)){
+  #             val = ''
+  #           }
+  #           set_opt(suma_lib = val)
+  #           showNotification('SUMA library paths are set.', type = 'message', id = notification_id)
+  #           return()
+  #         }
+  #         showNotification('Failed while setting SUMA library paths. Try it again?', type = 'error', id = notification_id)
+  #       })
+  #     })
+  #   )
+  # }
   
   ##### suma_nodes_per_electrodes
-  {
-    comps[[length(comps) + 1]] = list(
-      type = 'SUMA',
-      opt_name = 'suma_nodes_per_electrodes',
-      observer = rlang::quo({
-        opt_id = 'suma_nodes_per_electrodes'
-        output_uiid = paste0(opt_id, '_input')
-        resp_uiid = paste0(opt_id, '_ui')
-        set_btnid = paste0(opt_id, '_set')
-        notification_id = paste0(opt_id, '_noty')
-        
-        output[[output_uiid]] <- renderUI({
-          shiny::numericInput(opt_id, opt_names[[opt_id]], value = local_data[[opt_id]])
-        })
-        
-        output[[resp_uiid]] <- renderUI({
-          val = input[[opt_id]]
-          local_data$refresh
-          cat2(opt_id, ' - ', val)
-          if(length(val) != 1 || is.na(val)){
-            val = rave_options(opt_id)
-          }
-          if(val == rave_options(opt_id)){
-            return()
-          }
-          if(val <= 2){
-            return(tags$small(span(style = 'color:red',
-                                   'One face needs at least three vertices. This number is at least 3.')))
-          }
-          return(tagList(
-            actionLink(set_btnid, 'Set Number of Vertices')
-          ))
-        })
-        
-        observeEvent(input[[set_btnid]], {
-          val = input[[opt_id]]
-          if(length(val) && is.numeric(val) && val >= 3){
-            set_opt(suma_nodes_per_electrodes = val)
-            showNotification(catgl('Electrode mesh has {val} vertices'), type = 'message', id = notification_id)
-            return()
-          }
-          showNotification('Failed while setting # of vertices per electrodes', type = 'error', id = notification_id)
-        })
-      })
-    )
-  }
+  # {
+  #   comps[[length(comps) + 1]] =
+  #     list(
+  #     type = 'SUMA',
+  #     opt_name = 'suma_nodes_per_electrodes',
+  #     observer = rlang::quo({
+  #       opt_id = 'suma_nodes_per_electrodes'
+  #       output_uiid = paste0(opt_id, '_input')
+  #       resp_uiid = paste0(opt_id, '_ui')
+  #       set_btnid = paste0(opt_id, '_set')
+  #       notification_id = paste0(opt_id, '_noty')
+  #       
+  #       output[[output_uiid]] <- renderUI({
+  #         shiny::numericInput(opt_id, opt_names[[opt_id]], value = local_data[[opt_id]])
+  #       })
+  #       
+  #       output[[resp_uiid]] <- renderUI({
+  #         val = input[[opt_id]]
+  #         local_data$refresh
+  #         cat2(opt_id, ' - ', val)
+  #         if(length(val) != 1 || is.na(val)){
+  #           val = rave_options(opt_id)
+  #         }
+  #         if(val == rave_options(opt_id)){
+  #           return()
+  #         }
+  #         if(val <= 2){
+  #           return(tags$small(span(style = 'color:red',
+  #                                  'One face needs at least three vertices. This number is at least 3.')))
+  #         }
+  #         return(tagList(
+  #           actionLink(set_btnid, 'Set Number of Vertices')
+  #         ))
+  #       })
+  #       
+  #       observeEvent(input[[set_btnid]], {
+  #         val = input[[opt_id]]
+  #         if(length(val) && is.numeric(val) && val >= 3){
+  #           set_opt(suma_nodes_per_electrodes = val)
+  #           showNotification(catgl('Electrode mesh has {val} vertices'), type = 'message', id = notification_id)
+  #           return()
+  #         }
+  #         showNotification('Failed while setting # of vertices per electrodes', type = 'error', id = notification_id)
+  #       })
+  #     })
+  #   )
+  # }
   
   ##### suma_spec_file
-  {
-    comps[[length(comps) + 1]] = list(
-      type = 'SUMA',
-      opt_name = 'suma_spec_file',
-      observer = rlang::quo({
-        opt_id = 'suma_spec_file'
-        output_uiid = paste0(opt_id, '_input')
-        resp_uiid = paste0(opt_id, '_ui')
-        set_btnid = paste0(opt_id, '_set')
-        notification_id = paste0(opt_id, '_noty')
-        
-        output[[output_uiid]] <- renderUI({
-          shiny::textInput(opt_id, opt_names[[opt_id]], value = local_data[[opt_id]])
-        })
-        
-        output[[resp_uiid]] <- renderUI({
-          val = input[[opt_id]]
-          local_data$refresh
-          cat2(opt_id, ' - ', val)
-          if(length(val) != 1){
-            val = rave_options(opt_id)
-          }
-          val = stringr::str_trim(val)
-          if(val == rave_options(opt_id)){
-            return()
-          }
-          if(val == ''){
-            return(tags$small(span(style = 'color:red',
-                                   'Cannot be blank')))
-          }
-          msg = NULL
-          if(!stringr::str_detect(stringr::str_to_lower(val), '\\.spec$')){
-            msg = p(
-              tags$small(span(style = 'color:red',
-                              'WARNING: need to be a spec file in order to run (suma -spec [SPEC_FILE])'))
-            )
-          }
-          return(tagList(
-            msg,
-            actionLink(set_btnid, 'Set spec file')
-          ))
-        })
-        
-        observeEvent(input[[set_btnid]], {
-          val = input[[opt_id]]
-          if(length(val) == 1){
-            val = stringr::str_trim(val)
-            if(val != ''){
-              set_opt(suma_spec_file = val)
-            }
-            showNotification(catgl('Default SUMA spec file is set - {val}'), type = 'message', id = notification_id)
-            return()
-          }
-          showNotification('Failed: is it a valid spec file name?', type = 'error', id = notification_id)
-        })
-      })
-    )
-  }
+  # {
+  #   comps[[length(comps) + 1]] =
+  #     list(
+  #     type = 'SUMA',
+  #     opt_name = 'suma_spec_file',
+  #     observer = rlang::quo({
+  #       opt_id = 'suma_spec_file'
+  #       output_uiid = paste0(opt_id, '_input')
+  #       resp_uiid = paste0(opt_id, '_ui')
+  #       set_btnid = paste0(opt_id, '_set')
+  #       notification_id = paste0(opt_id, '_noty')
+  #       
+  #       output[[output_uiid]] <- renderUI({
+  #         shiny::textInput(opt_id, opt_names[[opt_id]], value = local_data[[opt_id]])
+  #       })
+  #       
+  #       output[[resp_uiid]] <- renderUI({
+  #         val = input[[opt_id]]
+  #         local_data$refresh
+  #         cat2(opt_id, ' - ', val)
+  #         if(length(val) != 1){
+  #           val = rave_options(opt_id)
+  #         }
+  #         val = stringr::str_trim(val)
+  #         if(val == rave_options(opt_id)){
+  #           return()
+  #         }
+  #         if(val == ''){
+  #           return(tags$small(span(style = 'color:red',
+  #                                  'Cannot be blank')))
+  #         }
+  #         msg = NULL
+  #         if(!stringr::str_detect(stringr::str_to_lower(val), '\\.spec$')){
+  #           msg = p(
+  #             tags$small(span(style = 'color:red',
+  #                             'WARNING: need to be a spec file in order to run (suma -spec [SPEC_FILE])'))
+  #           )
+  #         }
+  #         return(tagList(
+  #           msg,
+  #           actionLink(set_btnid, 'Set spec file')
+  #         ))
+  #       })
+  #       
+  #       observeEvent(input[[set_btnid]], {
+  #         val = input[[opt_id]]
+  #         if(length(val) == 1){
+  #           val = stringr::str_trim(val)
+  #           if(val != ''){
+  #             set_opt(suma_spec_file = val)
+  #           }
+  #           showNotification(catgl('Default SUMA spec file is set - {val}'), type = 'message', id = notification_id)
+  #           return()
+  #         }
+  #         showNotification('Failed: is it a valid spec file name?', type = 'error', id = notification_id)
+  #       })
+  #     })
+  #   )
+  # }
   
-  ##### max_mem
+  # ------------------------ max_mem ------------------------
   {
     comps[[length(comps) + 1]] = list(
       type = 'System',
@@ -439,7 +443,7 @@ rave_options_gui <- local({
     )
   }
   
-  ##### max_worker
+  # ------------------------ max_worker ------------------------
   {
     comps[[length(comps) + 1]] = list(
       type = 'System',
@@ -502,7 +506,7 @@ rave_options_gui <- local({
   
   
   
-  ##### Drive-Speed
+  # ------------------------ Drive-Speed ------------------------
   {
     
     comps[[length(comps) + 1]] = list(
@@ -537,12 +541,260 @@ rave_options_gui <- local({
         observeEvent(input[[opt_id]], {
           speed = test_hdspeed()
           set_opt(drive_speed = speed)
+          set_opt(check_updates_onstartup = FALSE)
         })
       })
     )
   }
   
-  ######## Module file
+  
+  # ------------------------ Template Brain --------------------
+  {
+    
+    comps[[length(comps) + 1]] = list(
+      type = '3D Viewer',
+      opt_name = 'template_brain',
+      observer = rlang::quo({
+        ns = session$ns
+        opt_id = 'template_brain'
+        output_uiid = paste0(opt_id, '_input')
+        resp_uiid = paste0(opt_id, '_ui')
+        output[[output_uiid]] <- renderUI({
+          local_data$refresh_3dviewer
+          # get current template 
+          old_sub = rave_options(opt_id)
+          tsub = isolate(local_data$current_sub)
+          tsub %?<-% old_sub
+          tsub %?<-% getOption('threeBrain.template_subject', 'N27')
+          
+          # TODO: get all possible subjects
+          template_subs = list.dirs('~/rave_data/others/three_brain/', full.names = FALSE, recursive = FALSE)
+          template_subs = unique(c(tsub, template_subs, '[import new]'))
+          template_subs = template_subs[!stringr::str_detect(template_subs, '^_')]
+          
+          tagList(
+            selectInput(ns('template_subname'), 'Select a template brain', 
+                        choices = template_subs, selected = tsub),
+            shiny::conditionalPanel(
+              condition = sprintf('input.%s === "[import new]"',
+                                  ns('template_subname')),
+              textInput(ns('template_newname'), 'New template name',
+                        placeholder = 'name cannot be blank'),
+              shinyFiles::shinyDirButton(
+                id = ns('template_subdir'), 
+                label = 'Select template FreeSurfer directory',
+                title = 'Target FreeSurfer Directory', buttonType = FALSE,
+                class = 'btn-link'
+              ),
+              uiOutput(ns('template_target')),
+              hr(),
+              dipsaus::actionButtonStyled(ns('template_import'), 'Import', type = 'primary')
+            )
+            
+          )
+        })
+        
+        roots = c('Current Path' = getwd(), 'Home' = '~', 'Root' = '/')
+        
+        shinyFiles::shinyDirChoose( input, ns('template_subdir'), 
+                                    roots = roots, defaultRoot = 'Home', filetypes = '')
+        
+        output$template_target <- renderUI({
+          path = get_fspath(quiet = TRUE)
+          passed = TRUE
+          if(is.null(path)){
+            path = span(style = 'color:red', 'not set')
+            passed = FALSE
+          } else if( isFALSE(path) ){
+            path = span(style = 'color:red', ' (not valid FreeSurfer directory)')
+            passed = FALSE
+          }
+          subname = input$template_newname
+          if(subname == ''){
+            subname = span(style = 'color:red', 'not set')
+            passed = FALSE
+          }else{
+            new_name2 = stringr::str_remove_all(subname, '[^0-9a-zA-Z_]')
+            new_name2 = stringr::str_remove_all(new_name2, '^[_]*')
+            if(new_name2 != subname){
+              subname = span(style = 'color:red', 'not valid. Please only enter letters, digits, and "_". ',
+                             'Avoid "_" in the first character.')
+              passed = FALSE
+            }
+          }
+          if(passed){
+            msg = tags$small(
+              'Please press ', span(style = 'color:red', 'import button'), ' to set & preview'
+            )
+          }else{
+            msg = NULL
+          }
+          p(
+            'Template subject code: ', subname, br(),
+            'Template path: ', path, br(),
+            msg
+          )
+        })
+        
+        get_fspath = function( quiet = FALSE ){
+          dir = as.list(input$template_subdir)
+          
+          if(!length(dir$root) || !(dir$root %in% names(roots))){ return() }
+          root = roots[[dir$root]]
+          paths = c(list(root), as.list(dir$path))
+          names(paths) = NULL
+          
+          path = normalizePath(do.call(file.path, paths), mustWork = FALSE)
+          if(!dir.exists(path)){
+            if( quiet ){ return(FALSE) }
+            stop('Cannot find path to template brain')
+          }
+          # check file name
+          paths = stringr::str_split(path, '/|\\\\', simplify = TRUE)
+          depth = length(paths)
+          if(paths[depth] %in% c('mri', 'label', 'surf', 'RAVE', 'SUMA')){
+            # this is not the root dir for subject
+            path = dirname(path)
+            paths = stringr::str_split(path, '/|\\\\', simplify = TRUE)
+            depth = length(paths)
+          }
+          
+          # check path
+          if(!threeBrain::check_freesurfer_path(path)){
+            if( quiet ){ return(FALSE) }
+            stop('This is not a valid FreeSurfer folder.')
+          }
+          
+          path
+        }
+        
+        observeEvent(input$template_subdir, {
+          get_fspath()
+        })
+        
+        observeEvent(input$template_subname, {
+          tsub = input$template_subname
+          rootdir = '~/rave_data/others/three_brain/'
+          tdir = file.path(rootdir, tsub)
+          if(length(tdir) && dir.exists(tdir)){
+            set_opt(threeBrain_template_subject = tsub)
+            set_opt(threeBrain_template_dir = rootdir)
+            options(
+              `threeBrain.template_subject` = tsub,
+              `threeBrain.template_dir` = rootdir
+            )
+          }
+        })
+        
+        
+        observeEvent(input$template_import, {
+          new_name = input$template_newname
+          if( !length(new_name) || new_name == '' ){
+            stop('Please enter name for new template brain')
+          }
+          new_name2 = stringr::str_remove_all(new_name, '[^0-9a-zA-Z_]')
+          new_name2 = stringr::str_remove_all(new_name2, '^[_]*')
+          if(new_name2 != new_name){
+            stop('Template name can only contains letters, digits and "_". "_" cannot be the first character.')
+          }
+          source_path = get_fspath()
+          # check if the path exists in three_brain, just ignore and override
+          target_dir = file.path('~/rave_data/others/three_brain/', new_name2)
+          dir_create(target_dir)
+          target_dir = normalizePath(target_dir)
+          
+          if(target_dir != source_path){
+            # override
+            fs = list.files(source_path, full.names = TRUE, all.files = FALSE, include.dirs = TRUE, recursive = FALSE)
+            prog = dipsaus::progress2('Copying files to home - rave_data - others - three_brain', max = length(fs)+1, shiny_auto_close = TRUE)
+            
+            lapply(fs, function(f){
+              prog$inc(detail = f)
+              file.copy(f, target_dir, overwrite = TRUE, recursive = TRUE)
+            })
+          }else{
+            prog = dipsaus::progress2('Re-cache brain', max = 1, shiny_auto_close = TRUE)
+          }
+          
+          # unlink cache
+          unlink(file.path(target_dir, 'RAVE'), recursive = TRUE)
+          
+          # cache the brain
+          prog$inc(detail = 'Creating cache')
+          threeBrain::import_from_freesurfer(
+            fs_path = file.path('~/rave_data/others/three_brain/', new_name2),
+            subject_name = new_name2
+          )
+          
+          # now update?
+          local_data$current_sub = new_name2
+          local_data$refresh_3dviewer = Sys.time()
+        })
+        
+        .env = environment()
+        
+        observeEvent(input$template_downloadn27, {
+          # print(input$template_downloadn27)
+          threeBrain::download_N27()
+          local_data$brain = threeBrain::merge_brain()
+          local_data$refresh_3dviewer2 = Sys.time()
+        })
+        
+        output[[resp_uiid]] <- renderUI({
+          local_data$refresh_3dviewer2
+          tsub = input$template_subname
+          if( length(tsub) && (tsub != '[import new]') ){
+            # check brain
+            tryCatch({
+              local_data$brain = threeBrain::freesurfer_brain2(
+                fs_subject_folder = file.path('~/rave_data/others/three_brain/', tsub),
+                subject_name = tsub,
+                surface_types = c('pial', 'white', 'smoothwm', 'pial-outer-smoothed')
+              )
+              return(
+                threeBrain::threejsBrainOutput(ns('template_viewer'))
+              )
+            }, error = function(e){
+              local_data$brain = NULL
+              # return method to download
+              
+              if(tsub == 'N27'){
+                return(
+                  div(
+                    style = 'text-align:center; min-height: 500px',
+                    p(style = 'padding-top: 10px', 
+                      'N27 brain needs download from internet. Click ',
+                      actionLink(ns('template_downloadn27'), 'here to download'), '.'))
+                )
+                
+              }else{
+                return(
+                  div(style = 'text-align:center; color: #d1d1d1; min-height: 500px; padding-top: 10px', 
+                      'This seems to be an invalid template folder. Please select others or import from your own repository.')
+                )
+              }
+              
+            })
+          }else{
+            div(style = 'text-align:center; color: #d1d1d1; min-height: 500px; padding-top: 10px', 
+                'Please finish import process')
+          }
+          
+        })
+        
+        output$template_viewer <- threeBrain::renderBrain({
+          # Check if the template is valid
+          if(length(local_data$brain)){
+            local_data$brain$plot(side_width = 150, side_display = FALSE)
+          }
+          
+        })
+        
+      })
+    )
+  }
+  
+  # ------------------------ Module file ------------------------
   load_module_table = function(){
     modules = arrange_modules(FALSE, FALSE, FALSE)
     modules = modules[, c("ID", "Name", "Group", "Package", "Active", "Notes")]
@@ -573,7 +825,7 @@ rave_options_gui <- local({
             ),
             
             column(
-              width = 6,
+              width = 3, 
               fluidRow(
                 box(
                   title = 'Core Settings',
@@ -601,7 +853,6 @@ rave_options_gui <- local({
                     )
                   )
                 ),
-                
                 box(
                   title = 'System',
                   width = 12L,
@@ -632,38 +883,72 @@ rave_options_gui <- local({
               )
             ),
             column(
-              width = 6,
+              width = 9L,
               fluidRow(
                 box(
-                  title = 'SUMA',
+                  title = '3D Viewer',
                   width = 12L,
                   fluidRow(
-                    ##### SUMA
-                    column(
-                      width = 12L,
-                      tagList(
-                        dipsaus::drop_nulls(
-                          lapply(comps, function(comp){
-                            if(comp$type == 'SUMA'){
-                              id = comp$opt_name
-                              tagList(
-                                uiOutput(paste0(id, '_input')),
-                                uiOutput(paste0(id, '_ui')),
-                                div(style = 'margin-bottom: 15px')
+                    ##### Viewer Settings
+                    tagList(
+                      dipsaus::drop_nulls(
+                        lapply(comps, function(comp){
+                          if(comp$type == '3D Viewer'){
+                            id = comp$opt_name
+                            tagList(
+                              column(
+                                width = 3L,
+                                uiOutput(paste0(id, '_input'))
+                              ),
+                              column(
+                                width = 9L,
+                                uiOutput(paste0(id, '_ui'))
                               )
-                            }else{
-                              NULL
-                            }
-                          })
-                        )
-                      ),
-                      hr(),
-                      div(style = 'float:right', actionButton('SUMA_test', 'Test SUMA'))
+                            )
+                          }else{
+                            NULL
+                          }
+                        })
+                      )
                     )
                   )
                 )
               )
             )
+            
+            # column(
+            #   width = 6,
+            #   fluidRow(
+            #     box(
+            #       title = 'SUMA',
+            #       width = 12L,
+            #       fluidRow(
+            #         ##### SUMA
+            #         column(
+            #           width = 12L,
+            #           tagList(
+            #             dipsaus::drop_nulls(
+            #               lapply(comps, function(comp){
+            #                 if(comp$type == 'SUMA'){
+            #                   id = comp$opt_name
+            #                   tagList(
+            #                     uiOutput(paste0(id, '_input')),
+            #                     uiOutput(paste0(id, '_ui')),
+            #                     div(style = 'margin-bottom: 15px')
+            #                   )
+            #                 }else{
+            #                   NULL
+            #                 }
+            #               })
+            #             )
+            #           ),
+            #           hr(),
+            #           div(style = 'float:right', actionButton('SUMA_test', 'Test SUMA'))
+            #         )
+            #       )
+            #     )
+            #   )
+            # )
             
             
             
