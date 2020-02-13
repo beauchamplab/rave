@@ -51,7 +51,7 @@ rave_options_gui <- local({
           }
           
           return(tagList(
-            p(tags$small(span(style = catgl('color:{col};'), msg))),
+            p(tags$small(span(style = gl('color:{col};'), msg))),
             div(
               class = ifelse(btn, '', 'hidden'),
               actionLink('raw_data_dir_reset', label)
@@ -408,7 +408,6 @@ rave_options_gui <- local({
         output[[resp_uiid]] <- renderUI({
           val = input[[opt_id]]
           local_data$refresh
-          cat2(opt_id, ' - ', val)
           if(length(val) != 1 || is.na(val)){
             val = rave_options(opt_id)
           }
@@ -434,7 +433,7 @@ rave_options_gui <- local({
           val = input[[opt_id]]
           if(length(val) == 1 && val >=2){
             set_opt(max_mem = val)
-            showNotification(catgl('Max RAM is set - {val}'), type = 'message', id = notification_id)
+            showNotification(gl('Max RAM is set - {val}'), type = 'message', id = notification_id)
             return()
           }
           showNotification('Failed: invalid RAM size or blank entry.', type = 'error', id = notification_id)
@@ -462,7 +461,6 @@ rave_options_gui <- local({
         output[[resp_uiid]] <- renderUI({
           val = input[[opt_id]]
           local_data$refresh
-          cat2(opt_id, ' - ', val)
           if(length(val) != 1 || is.na(val)){
             val = rave_options(opt_id)
           }
@@ -495,7 +493,7 @@ rave_options_gui <- local({
           if(length(val) == 1 && val >= 1){
             val = round(val)
             set_opt(max_worker = val)
-            showNotification(catgl('Max workers is set - {val}'), type = 'message', id = notification_id)
+            showNotification(gl('Max workers is set - {val}'), type = 'message', id = notification_id)
             return()
           }
           showNotification('Failed: invalid max workers or blank entry.', type = 'error', id = notification_id)
@@ -573,11 +571,14 @@ rave_options_gui <- local({
           template_subs = template_subs[!stringr::str_detect(template_subs, '^_')]
           
           tagList(
+            p(
+              'Template brain will be used when displaying electrodes across ',
+              'multiple subjects. '
+            ),
             selectInput(ns('template_subname'), 'Select a template brain', 
                         choices = template_subs, selected = tsub),
             shiny::conditionalPanel(
-              condition = sprintf('input.%s === "[import new]"',
-                                  ns('template_subname')),
+              condition = 'input.template_subname === "[import new]"',
               textInput(ns('template_newname'), 'New template name',
                         placeholder = 'name cannot be blank'),
               shinyFiles::shinyDirButton(
@@ -588,10 +589,39 @@ rave_options_gui <- local({
               ),
               uiOutput(ns('template_target')),
               hr(),
-              dipsaus::actionButtonStyled(ns('template_import'), 'Import', type = 'primary')
+              dipsaus::actionButtonStyled(ns('template_import'), 'Import', type = 'primary'),
+              ns = ns
+            ),
+            
+            shiny::conditionalPanel(
+              condition = 'input.template_subname !== "[import new]"',
+              ns = ns,
+              uiOutput(ns('template_snapshot'))
             )
             
           )
+        })
+        
+        output$template_snapshot <- renderUI({
+          tsub = input$template_subname
+          rootdir = '~/rave_data/others/three_brain/'
+          dir_create(rootdir, recursive = TRUE)
+          rootdir = normalizePath(rootdir)
+          tdir = file.path(rootdir, tsub)
+          if(length(tdir) && dir.exists(tdir)){
+            set_opt(threeBrain_template_subject = tsub)
+            set_opt(threeBrain_template_dir = rootdir)
+            options(
+              `threeBrain.template_subject` = tsub,
+              `threeBrain.template_dir` = rootdir
+            )
+            
+            tagList(
+              strong('Current template: '), br(), tsub, br(),
+              strong('Parent Directory: '), br(), rootdir
+              
+            )
+          } else{ NULL }
         })
         
         roots = c('Current Path' = getwd(), 'Home' = '~', 'Root' = '/')
@@ -672,19 +702,6 @@ rave_options_gui <- local({
           get_fspath()
         })
         
-        observeEvent(input$template_subname, {
-          tsub = input$template_subname
-          rootdir = '~/rave_data/others/three_brain/'
-          tdir = file.path(rootdir, tsub)
-          if(length(tdir) && dir.exists(tdir)){
-            set_opt(threeBrain_template_subject = tsub)
-            set_opt(threeBrain_template_dir = rootdir)
-            options(
-              `threeBrain.template_subject` = tsub,
-              `threeBrain.template_dir` = rootdir
-            )
-          }
-        })
         
         
         observeEvent(input$template_import, {
@@ -749,7 +766,7 @@ rave_options_gui <- local({
               local_data$brain = threeBrain::freesurfer_brain2(
                 fs_subject_folder = file.path('~/rave_data/others/three_brain/', tsub),
                 subject_name = tsub,
-                surface_types = c('pial', 'white', 'smoothwm', 'pial-outer-smoothed')
+                surface_types = c('pial')
               )
               return(
                 threeBrain::threejsBrainOutput(ns('template_viewer'))
@@ -973,6 +990,7 @@ rave_options_gui <- local({
           args = list(...)
           for(nm in names(args)){
             local_data[[nm]] = args[[nm]]
+            catgl('Setting option: {nm} => {args[[nm]]}')
           }
           local_data$refresh = Sys.time()
         }
@@ -985,7 +1003,7 @@ rave_options_gui <- local({
           suma_path = rave_options('suma_path')
           suma_lib = rave_options('suma_lib')
           system2('suma', env = c(
-            catgl('PATH=$PATH:"{suma_path}"'),
+            gl('PATH=$PATH:"{suma_path}"'),
             suma_lib
           ), wait = F)
           showModal(shiny::modalDialog(
@@ -996,7 +1014,7 @@ rave_options_gui <- local({
             hr(),
             p(
               strong('bash'), ' terminal:',
-              tags$pre(catgl(
+              tags$pre(gl(
                 'export PATH=$PATH:"{suma_path}"',
                 paste('export', suma_lib, collapse = '\n'),
                 'suma'
@@ -1005,7 +1023,7 @@ rave_options_gui <- local({
             hr(),
             p(
               strong('tcsh'), ' terminal:', br(), tags$small('we highly recommend you switching back to bash terminals because RAVE does not use tcsh. However, you can still use tcsh terminals to debug.'),
-              tags$pre(catgl(
+              tags$pre(gl(
                 'set path = ( $path "{suma_path}" )',
                 paste('setenv', stringr::str_replace_all(suma_lib, '\\=', ' '), collapse = '\n'),
                 'suma'
