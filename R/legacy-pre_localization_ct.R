@@ -150,10 +150,13 @@ rave_pre_eleclocalct3 <- function(module_id = 'ELECLOCALCT_M', sidebar_width = 2
               unlink(ct_cache)
             }
           }
-          local_env$brain = threeBrain::freesurfer_brain(
+          showNotification(p('Generating brain... It will take a while'), 
+                           duration = NULL, id = ns('ct_id'))
+          local_env$brain = threeBrain::freesurfer_brain2(
             fs_subject_folder = sub_dir, subject_name = scode,
             additional_surfaces = c('white', 'pial-outer-smoothed'), 
-            aligned_ct = local_data$ct_path)
+            ct_path = local_data$ct_path)
+          removeNotification(id = 'ct_id')
           # Load into memory
           tryCatch({
             group = local_env$brain$volumes$ct.aligned.t1$group
