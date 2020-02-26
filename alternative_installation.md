@@ -23,6 +23,11 @@ rave::arrange_modules(TRUE, TRUE)
 threeBrain::download_N27(make_default = TRUE)
 ```
 
+The command rave::check_dependencies() may give an error on Windows. If so, then instead run the following command:
+```r
+remotes::install_github("dipterix/dipsaus", upgrade = FALSE, force = FALSE, quiet = FALSE)
+```
+
 To update existing installations of RAVE, run the following commands after making sure to update R and RStudio. Start RAVE and verify that the newer version loads. RStudio is unable to update packages that are in use, so it may be necessary to restart RStudio and retry the update. As an additional step, use the RStudio package manager to delete all RAVE packages and reinstall.
 
 ```r
