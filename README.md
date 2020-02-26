@@ -9,6 +9,7 @@ RAVE runs on Mac, Windows or Linux.
   After installation, find the file "rave-installer-macosx.command.zip" in your "Downloads" folder. If it has not automatically been unzipped, double-click to extract the file named "rave-installer-macosx.command". To run the the commands in the script, right click (if you don't have a right mouse button, hold down the control key on the keyboard and click the mouse button or trackpad) on the file to bring up an actions menu and select the first choice, "Open". You will receive a warning "rave-installer-macosx.command is from an unidentified developer. Are you sure you want to open it?". Choose "Open" to proceed. If you do not see the "Open" option (only "OK") you probably left-clicked instead of right-clicked on the installer script. Select "OK" and try again. 
   
   + for Windows, please save the [batch file](https://raw.githubusercontent.com/dipterix/instrave/master/rave-installer-windows.bat) to your desktop. 
+  
   After download, find the batch file on your desktop and double-click it to execute the commands in the batch file. Windows may show a security alert. Click "More Info" and click "Run Anyway".   
   
    + For Linux (or if the above scripts do not work) see the [Full installation guide](./alternative_installation.md).
