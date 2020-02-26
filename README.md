@@ -10,7 +10,7 @@ RAVE runs on Mac, Windows or Linux.
   
   + for Windows, please save the [batch file](https://raw.githubusercontent.com/dipterix/instrave/master/rave-installer-windows.bat) to your desktop. 
   
-  After download, find the batch file on your desktop and double-click it to execute the commands in the batch file. Windows may show a security alert. Click "More Info" and click "Run Anyway".   
+  After download, find the batch file on your desktop and double-click it to execute the commands in the batch file. Windows may show a security alert. Click "More Info" and click "Run Anyway". The "Git" installer will ask many questions, select the defaults. 
   
    + For Linux (or if the above scripts do not work) see the [Full installation guide](./alternative_installation.md).
 
