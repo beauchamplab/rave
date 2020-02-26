@@ -3,7 +3,8 @@
 First, buy a computer! For best performance, we recommend a 4-core CPU (e.g. Intel i5) with 64GB RAM (at least 8 GB per core).
 RAVE displays results on a web browser, and is tested with Google Chrome. Apple and Microsoft browsers will run with reduced functionality (e.g. shaders will not render brain slices).
 
-Next, install all required prerequisites. RAVE requires the latest versions of R (>= 3.6.0) and RStudio. Trying to install RAVE on older versions of R and RStudio will lead to unpredictable error messages. [Click here for the prerequisite installation guide](./Installation.md).
+Next, install all required prerequisites. [Click here for the prerequisite installation guide](./Installation.md).
+RAVE requires the latest versions of R (>= 3.6.0) and RStudio. Trying to install RAVE on older versions of R and RStudio will lead to unpredictable error messages. 
 
 Next, open the RStudio application using the desktop shortcut; in Mac OSX, RStudio can be found in the Applications folder. Copy and paste the following commands (one at a time) into the RStudio console to install the current version of RAVE. Answer "Yes" to any questions that appear. In the case of errors, relaunch RStudio and repeat the commands. 
 ```r
