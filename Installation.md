@@ -36,6 +36,7 @@ Click **yes** to proceed installing command-line tools. On first use, you will b
 
 ## Windows
 
+You will be asked many questions by the installers; the default response is fine for all of them.
 1. Install the latest version of R
 
 [https://cran.r-project.org/bin/windows/base/](https://cran.r-project.org/bin/windows/base/)
