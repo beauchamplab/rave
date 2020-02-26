@@ -13,19 +13,16 @@ install.packages('devtools')
 devtools::install_github('beauchamplab/rave')
 
 # this step will install other packages needed by RAVE. If asked to compile packages from source, 
-# you can say safely say no. This step may fail on Windows, run alternate command below.
+# you can say safely say no. 
 rave::check_dependencies()
+# this step may fail on Windows. If so, run 
+remotes::install_github("dipterix/dipsaus", upgrade = FALSE, force = FALSE, quiet = FALSE)
 
 # this step ensures all available RAVE modules are accessible
 rave::arrange_modules(TRUE, TRUE)
 
 # This step ensures you have a template brain already installed.
 threeBrain::download_N27(make_default = TRUE)
-```
-
-The command rave::check_dependencies() may give an error on Windows. If so, then instead run the following command:
-```r
-remotes::install_github("dipterix/dipsaus", upgrade = FALSE, force = FALSE, quiet = FALSE)
 ```
 
 To update existing installations of RAVE, run the following commands after making sure to update R and RStudio. Start RAVE and verify that the newer version loads. RStudio is unable to update packages that are in use, so it may be necessary to restart RStudio and retry the update. As an additional step, use the RStudio package manager to delete all RAVE packages and reinstall.
