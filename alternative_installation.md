@@ -13,7 +13,7 @@ install.packages('devtools')
 devtools::install_github('beauchamplab/rave')
 
 # this step will install other packages needed by RAVE. If asked to compile packages from source, 
-# you can say safely say no
+# you can say safely say no. This step may fail on Windows, run alternate command below.
 rave::check_dependencies()
 
 # this step ensures all available RAVE modules are accessible
