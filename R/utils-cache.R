@@ -119,8 +119,7 @@ NULL
   }
   
   if(!global && is.null(instance)){
-    cat2('Module is not activated, temporary cached ', name, 
-         ' to global container', level = 'WARNING')
+    debug('Module is not activated, temporary cached {name} to global container. This warning only appears when developing modules.', level = 'WARNING')
     global = TRUE
   }
   

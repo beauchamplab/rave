@@ -252,6 +252,11 @@ body.rave-noscroll {
   min-height: 74px;
 }
 
+.rave-input-panel .multi>div.selectize-input {
+  max-height: 8em;
+  overflow-y: scroll;
+}
+
 
 .rave-grid-inputs>.rave-grid-inputs-legend {
     position: absolute;

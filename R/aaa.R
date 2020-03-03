@@ -8,6 +8,15 @@ NULL
 
 tags = htmltools::tags
 div = htmltools::div
+debug_mode = FALSE
+
+toggle_debug <- function(on){
+  if(missing(on)){
+    on = !debug_mode
+  }
+  debug_mode <<- on
+  on
+}
 
 ### For dev use only:
 gl <- function(..., .envir = parent.frame()){
@@ -22,9 +31,9 @@ catgl <- function(..., .envir = parent.frame(), level = 'DEBUG', .pal){
   }
 }
 
-debug <- function(..., .envir = parent.frame()){
-  if(TRUE){
-    catgl(..., .envir = .envir)
+debug <- function(..., .envir = parent.frame(), level = 'DEBUG'){
+  if( debug_mode ){
+    catgl(..., .envir = .envir, level = level)
   }
 }
 

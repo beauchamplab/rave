@@ -957,7 +957,8 @@ load_cached_voltage <- function(cache_dir, electrodes, time_range, srate_volt, t
 download_sample_data <- function(subject, version = 'v0.1.8-beta', ...){
   
   if(missing(subject)) {
-    sbj_names = c('KC', 'YAB', '_project_data')
+    sbj_names = c('KC', 'YAB', '_group_data')
+    version = 'v0.1.8-beta'
     sapply(sbj_names, download_sample_data, version=version, ...)
     return (invisible())
   }
