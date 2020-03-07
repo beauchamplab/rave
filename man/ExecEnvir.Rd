@@ -483,13 +483,15 @@ none, but \code{ExecEnvir$execute} will be generated.
 (experimental) cache R expression in browser 
 \code{localStorage}
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ExecEnvir$set_browser(expr)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{ExecEnvir$set_browser(expr, session = getDefaultReactiveDomain())}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{expr}}{R expression}
+
+\item{\code{session}}{shiny session instance}
 }
 \if{html}{\out{</div>}}
 }

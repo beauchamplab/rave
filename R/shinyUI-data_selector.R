@@ -1,5 +1,5 @@
 
-shiny_data_selector <- function(module_id){
+shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()){
   
   fband = list(
     'Delta' = c(0.5, 3),
@@ -960,8 +960,6 @@ shiny_data_selector <- function(module_id){
     ##### End of server #####
     
     # onload, check if data has been loaded into datarepo
-    data_env = getDefaultDataRepository()
-    on.exit({rm(data_env)})
     data_loaded = rlang::env_has(
       data_env,
       nms = c(

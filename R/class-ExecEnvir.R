@@ -1,5 +1,13 @@
 # Documented on 2019-11-21
 
+as_call2 <- function(..., .list = list(), .drop_nulls = TRUE){
+  call = c(list(...), .list)
+  if( .drop_nulls ){
+    call = call[!vapply(call, is.null, FUN.VALUE = FALSE)]
+  }
+  as.call(call)
+}
+
 #' @title Session-based Module Runtime Environment Class
 #' @author Zhengjia Wang
 #' @description where all the module functions are executed. It's rarely created
@@ -200,7 +208,9 @@ ExecEnvir <- R6::R6Class(
     #' or global environment
     initialize = function(session = getDefaultReactiveDomain(),
                           parent_env = NULL){
-      private$session = session
+      if(!is.null(session) && !inherits(session, c('ShinySession', 'session_proxy'))){
+        private$session = session
+      }
       self$ready_functions = list()
       self$internal_reactives = shiny::reactiveValues()
       self$cache_env = dipsaus::session_map()
@@ -277,41 +287,50 @@ ExecEnvir <- R6::R6Class(
       }
 
       # advanced usage
-      self$wrapper_env$getDefaultReactiveDomain = function(){
+      self$wrapper_env$getDefaultReactiveDomain = function(
+        session = shiny::getDefaultReactiveDomain()
+      ){
         id = self$module_env$module_id
-        private$session$makeScope(id)
+        if(is.null(session)){
+          session = private$session
+        }
+        if(inherits(session, 'ShinySession')){
+          return(session$makeScope(id))
+        }else{
+          return(session)
+        }
       }
 
-      self$wrapper_env$getDefaultReactiveInput = function(){
+      self$wrapper_env$getDefaultReactiveInput = function(
         session = self$wrapper_env$getDefaultReactiveDomain()
-        input = NULL
+      ){
         
         if(inherits(session, 'ShinySession')){
-          session = session$makeScope(self$module_env$module_id)
+          return(session$makeScope(self$module_env$module_id)$input)
         }
         
         if(inherits(session, 'session_proxy')){
-          input = session$input
+          return(session$input)
         }else{
           stop('No module detected, please run "self$register_module(...)" to register module.')
         }
-        return(input)
+        return(NULL)
       }
 
-      self$wrapper_env$getDefaultReactiveOutput = function(){
+      self$wrapper_env$getDefaultReactiveOutput = function(
         session = self$wrapper_env$getDefaultReactiveDomain()
-        output = NULL
+      ){
         
         if(inherits(session, 'ShinySession')){
-          session = session$makeScope(self$module_env$module_id)
+          return( session$makeScope(self$module_env$module_id)$output )
         }
         
         if(inherits(session, 'session_proxy')){
-          output = session$output
+          return( session$output )
         }else{
           stop('No module detected, please run "self$register_module(...)" to register module.')
         }
-        return(output)
+        return(NULL)
       }
 
 
@@ -545,9 +564,10 @@ ExecEnvir <- R6::R6Class(
       }) ->
         ui_inputs
 
-      rlang::quo({
+      ui_inputs = rlang::quo({
         do.call(shiny::fluidRow, args = !!ui_inputs)
-      }) -> ui_inputs
+      })
+      ui_inputs = rlang::quo_squash(ui_inputs)
 
       private$inputs = list(
         quos = ui_inputs,
@@ -588,6 +608,7 @@ ExecEnvir <- R6::R6Class(
       # 1. tabsets in .tabsets
       widths = .tabsets[['width']]
       .tabsets[['width']] = NULL
+      widths %?<-% 12L
 
       if(length(.tabsets)){
         names = names(.tabsets)
@@ -603,43 +624,80 @@ ExecEnvir <- R6::R6Class(
           quo_panels = lapply(seq_along(ids), function(ii){
             comp = ids[ii]
             title = names(comp)
-            rlang::quo({
-              shiny::tabPanel(
-                title = !!title,
+            
+            as_call2(
+              quote(shiny::tabPanel),
+              title = title,
+              quote(div(
+                class = 'rave-abs-right',
                 div(
-                  class = 'rave-abs-right',
-                  div(
-                    class = 'btn btn-box-tool force-recalculate',
-                    shiny::icon('refresh')
-                  ),
-                  div_elastic(css_selector = '.tab-pane')
+                  class = 'btn btn-box-tool force-recalculate',
+                  shiny::icon('refresh')
                 ),
-                do.call(shiny::fluidRow, args = !!{lapply(comp[[1]], function(output_id){
+                div_elastic(css_selector = '.tab-pane')
+              )),
+              as_call2(
+                quote(shiny::fluidRow),
+                .list = lapply(comp[[1]], function(output_id){
                   comp = x[[output_id]]
                   width = comp[['width']]; width %?<-% 12L
-                  expr = quote(shiny::column())
-                  expr = c(as.list(expr), list(
-                    shiny::h4(comp$label),
+                  as_call2(
+                    quote(shiny::column),
+                    as_call2(
+                      quote(shiny::h4),
+                      comp$label
+                    ),
                     comp$expr,
                     width = width
-                  ))
-                  as.call(expr)
-                })}
-                )
+                  )
+                })
               )
-            })
-          })
-
-          quo_box = rlang::quo({
-            do.call(shinydashboard::tabBox,
-                    args = c(
-                      list(title = !!nm, width = !!widths[[ii]]),
-                      !!quo_panels
-                    )
             )
+            
+            # rlang::quo_squash(rlang::quo({
+            #   shiny::tabPanel(
+            #     title = !!title,
+            #     div(
+            #       class = 'rave-abs-right',
+            #       div(
+            #         class = 'btn btn-box-tool force-recalculate',
+            #         shiny::icon('refresh')
+            #       ),
+            #       div_elastic(css_selector = '.tab-pane')
+            #     ),
+            #     do.call(shiny::fluidRow, args = !!{lapply(comp[[1]], function(output_id){
+            #       comp = x[[output_id]]
+            #       width = comp[['width']]; width %?<-% 12L
+            #       expr = quote(shiny::column())
+            #       expr = c(as.list(expr), list(
+            #         shiny::h4(comp$label),
+            #         comp$expr,
+            #         width = width
+            #       ))
+            #       as.call(expr)
+            #     })}
+            #     )
+            #   )
+            # }))
           })
-
-          quo_box
+          
+          as_call2(
+            quote(shinydashboard::tabBox),
+            title = nm,
+            width = widths[[ii]],
+            .list = quo_panels
+          )
+          
+          # quo_box = rlang::quo({
+          #   do.call(shinydashboard::tabBox,
+          #           args = c(
+          #             list(title = !!nm, width = !!widths[[ii]]),
+          #             !!quo_panels
+          #           )
+          #   )
+          # })
+          # quo_box
+          
         }) ->
           tab_boxes
       }else{
@@ -648,37 +706,59 @@ ExecEnvir <- R6::R6Class(
 
       left_ids = ids[!ids %in% unlist(.tabsets)]
 
-      lapply(left_ids, function(nm){
+      single_boxes = lapply(left_ids, function(nm){
         comp = x[[nm]]
         width = comp$width; width %?<-% 12L
         margin = comp$margin
         if( length(margin) && is.numeric(margin) ){
-          rlang::quo({
-            expand_box(
-              width = width,
-              title = comp$label,
-              collapsible = TRUE,
-              div(
-                style = sprintf('margin: %.0fpx;', !!margin),
-                !!comp$expr
-              )
+          as_call2(
+            expand_box,
+            width = width,
+            title = comp$label,
+            collapsible = TRUE,
+            as_call2(
+              quote(shiny::div),
+              style = sprintf('margin: %.0fpx;', margin),
+              comp$expr
             )
-          })
+          )
+          # rlang::quo({
+          #   expand_box(
+          #     width = width,
+          #     title = comp$label,
+          #     collapsible = TRUE,
+          #     div(
+          #       style = sprintf('margin: %.0fpx;', !!margin),
+          #       !!comp$expr
+          #     )
+          #   )
+          # })
         }else{
-          rlang::quo({
-            expand_box(
-              width = width,
-              title = comp$label,
-              collapsible = TRUE,
-              !!comp$expr
-            )
-          })
+          as_call2(
+            expand_box,
+            width = width,
+            title = comp$label,
+            collapsible = TRUE,
+            comp$expr
+          )
+          # rlang::quo({
+          #   expand_box(
+          #     width = width,
+          #     title = comp$label,
+          #     collapsible = TRUE,
+          #     !!comp$expr
+          #   )
+          # })
         }
         
-      }) ->
-        single_boxes
+      })
 
-      ui_comps = rlang::quo(do.call(shiny::fluidRow, args = c(!!tab_boxes, !!single_boxes)))
+      ui_comps = as_call2(
+        quote(shiny::fluidRow),
+        .list = c(tab_boxes, single_boxes)
+      )
+      # ui_comps = rlang::quo(do.call(shiny::fluidRow, args = c(!!tab_boxes, !!single_boxes)))
+      # ui_comps = rlang::quo_squash(ui_comps)
 
       #### Reactive functions
       private$outputs = list(
@@ -698,18 +778,21 @@ ExecEnvir <- R6::R6Class(
     #' @param .env for debug use
     rave_updates = function(..., .env = NULL){
       quos = rlang::quos(...)
+      quo_names = names(quos)
+      quos = lapply(quos, rlang::quo_squash)
+      names(quos) = quo_names
       private$update = quos
 
-      self$input_update = function(input, session = NULL, init = FALSE){
+      self$input_update = function(input, session = getDefaultReactiveDomain(), init = FALSE){
         start = Sys.time()
         input = dipsaus::drop_nulls(input)
         if(!init){
           # Deprecated, do nothing
           return(invisible())
         }
-        if(is.null(session)){
-          session = getDefaultReactiveDomain() #private$session
-        }
+        # if(is.null(session)){
+        #   session = getDefaultReactiveDomain() #private$session
+        # }
         var_names = names(private$update)
         n_errors = c(0,0)
         envir = environment()
@@ -790,6 +873,7 @@ ExecEnvir <- R6::R6Class(
     #' @return none, but \code{ExecEnvir$execute} will be generated.
     rave_execute = function(..., auto = TRUE, .env = NULL, async_vars = NULL){
       quos = rlang::quos_auto_name(rlang::quos(...))
+      quos = sapply(quos, rlang::quo_squash, simplify = FALSE, USE.NAMES = TRUE)
 
       normal_quos = quos[!names(quos) %in% 'async']
       private$executes = c(private$executes, normal_quos)
@@ -839,9 +923,13 @@ ExecEnvir <- R6::R6Class(
     #' @description (experimental) cache R expression in browser 
     #' \code{localStorage}
     #' @param expr R expression
-    set_browser = function(expr){
+    #' @param session shiny session instance
+    set_browser = function(expr, session = getDefaultReactiveDomain()){
+      if(is.null(session)){
+        session = private$session
+      }
 
-      current_key = add_to_session(private$session)
+      current_key = add_to_session(session)
 
       children_keys = add_to_session(session, 'rave_linked_by', NULL)
       children_keys = children_keys[!children_keys %in% current_key]
@@ -850,7 +938,7 @@ ExecEnvir <- R6::R6Class(
       module_id = self$module_env$module_id
 
       lapply(children_keys, function(storage_key){
-        private$session$sendCustomMessage('rave_set_storage', list(
+        session$sendCustomMessage('rave_set_storage', list(
           module_id = module_id,
           expr = expr,
           storage_key = storage_key,

@@ -4,7 +4,11 @@
 \alias{rave_module_tools}
 \title{Tools for module writers}
 \usage{
-rave_module_tools(env = NULL, data_env = NULL, quiet = FALSE)
+rave_module_tools(
+  env = NULL,
+  data_env = getDefaultDataRepository(),
+  quiet = FALSE
+)
 }
 \arguments{
 \item{env}{environment to save tools in}

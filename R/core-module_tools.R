@@ -3,7 +3,8 @@
 #' @param data_env rave data repository returned by rave_prepare, internally used
 #' @param quiet logical
 #' @export
-rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
+rave_module_tools <- function(env = NULL, data_env = getDefaultDataRepository(), 
+                              quiet = FALSE) {
   if(!is.environment(data_env)){
     data_env = getDefaultDataRepository()
   }

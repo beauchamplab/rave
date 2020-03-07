@@ -4,7 +4,11 @@
 \alias{set_rave_theme}
 \title{Set and Return RAVE theme}
 \usage{
-set_rave_theme(theme, .set_default = FALSE)
+set_rave_theme(
+  theme,
+  .set_default = FALSE,
+  session = shiny::getDefaultReactiveDomain()
+)
 }
 \arguments{
 \item{theme}{\code{"light"} or \code{"dark"}. See details if missing}

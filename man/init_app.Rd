@@ -11,7 +11,8 @@ init_app(
   theme = "red",
   disable_sidebar = FALSE,
   simplify_header = FALSE,
-  ...
+  ...,
+  data_repo = getDefaultDataRepository()
 )
 }
 \arguments{

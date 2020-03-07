@@ -24,6 +24,8 @@ token = NULL, ...)
 \item{token}{character vector, default is \code{NULL}. If specified, then
 a \code{?token=...} is needed in url to access to the application.}
 
+\item{data_repo}{internally used}
+
 \item{...}{other parameters. See details.}
 }
 \description{

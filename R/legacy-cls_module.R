@@ -5,8 +5,7 @@
 # This will help create a clean environment for modules.
 NULL
 
-getDefaultReactiveDomain <- function(){
-  session = shiny::getDefaultReactiveDomain()
+getDefaultReactiveDomain <- function(session = shiny::getDefaultReactiveDomain()){
   session %?<-% get0('session', envir = globalenv())
   return(session)
 }
@@ -42,13 +41,14 @@ getDefaultDataRepository <- local({
 
 #' Attach subject data
 #' @param unload TRUE if you want to detach
+#' @param rave_data internally used
 #' @export
-attachDefaultDataRepository <- function(unload = T){
+attachDefaultDataRepository <- function(
+  unload = TRUE, rave_data = getDefaultDataRepository()){
+  
   if(unload){
-    try({detach('rave_data')}, silent = T)
+    try({detach('rave_data')}, silent = TRUE)
   }
-
-  rave_data = getDefaultDataRepository()
 
   rave_idx = which(search() == "package:rave")
 

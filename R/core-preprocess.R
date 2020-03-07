@@ -20,8 +20,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
     WAVELETED = 3
     REFERENCED = 4  # Soft deprecated since the reference module is moved to main module
     ###### UI override ######
-    showNotification = function(msg, type = 'message'){
-      session = getDefaultReactiveDomain()
+    showNotification = function(msg, type = 'message', session = getDefaultReactiveDomain()){
       if(is.null(session)){
         level = switch (
           type,

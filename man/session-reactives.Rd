@@ -20,19 +20,22 @@ getDefaultReactiveInput()
 
 \method{getDefaultReactiveInput}{rave_module_debug}()
 
-\method{getDefaultReactiveInput}{rave_running}()
+\method{getDefaultReactiveInput}{rave_running}(session = shiny::getDefaultReactiveDomain())
 
 \method{getDefaultReactiveInput}{rave_running_local}()
 
-getDefaultReactiveOutput()
+getDefaultReactiveOutput(session = shiny::getDefaultReactiveDomain())
 
-\method{getDefaultReactiveOutput}{default}()
+\method{getDefaultReactiveOutput}{default}(session = shiny::getDefaultReactiveDomain())
 
-\method{getDefaultReactiveOutput}{rave_module_debug}()
+\method{getDefaultReactiveOutput}{rave_module_debug}(session = shiny::getDefaultReactiveDomain())
 
-\method{getDefaultReactiveOutput}{rave_running}()
+\method{getDefaultReactiveOutput}{rave_running}(session = shiny::getDefaultReactiveDomain())
 
-\method{getDefaultReactiveOutput}{rave_running_local}()
+\method{getDefaultReactiveOutput}{rave_running_local}(session = shiny::getDefaultReactiveDomain())
+}
+\arguments{
+\item{session}{shiny session instance}
 }
 \value{
 In shiny context, returns special \code{\link[shiny]{reactiveValues}}

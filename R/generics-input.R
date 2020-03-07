@@ -27,12 +27,15 @@ getDefaultReactiveInput.rave_module_debug <- function(){
 }
 
 #' @rdname session-reactives
+#' @param session shiny session instance
 #' @export
-getDefaultReactiveInput.rave_running <- function(){
-  ctx = rave_context()
+getDefaultReactiveInput.rave_running <- function(
   session = shiny::getDefaultReactiveDomain()
-  session = session$makeScope(ctx$module_id)
-  session$input
+){
+  ctx = rave_context()
+  # session = shiny::getDefaultReactiveDomain()
+  # session = session$makeScope(ctx$module_id)
+  session$makeScope(ctx$module_id)$input
 }
 
 #' @rdname session-reactives

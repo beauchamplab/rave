@@ -16,7 +16,8 @@ baseline(
   mem_optimize = TRUE,
   same_dimension = unit \%in\% c("\%", "dB"),
   preop = NULL,
-  op
+  op,
+  data_env = getDefaultDataRepository()
 )
 }
 \arguments{
@@ -43,6 +44,8 @@ baseline(
 \item{preop}{function before baseline}
 
 \item{op}{function for baseline}
+
+\item{data_env}{internally used}
 }
 \description{
 Baseline signals

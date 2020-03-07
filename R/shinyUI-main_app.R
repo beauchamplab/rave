@@ -1,7 +1,7 @@
 app_controller <- function(
   modules = NULL, active_module = NULL, launch.browser = T,
   theme = "purple", disable_sidebar = FALSE, simplify_header = FALSE,
-  token = NULL, ...
+  token = NULL, data_repo = getDefaultDataRepository(), ...
 ){
   options(shiny.maxRequestSize=1024^3)
 
@@ -101,7 +101,7 @@ app_controller <- function(
   })
 
   # Data selector
-  data_selector = shiny_data_selector('DATA_SELECTOR')
+  data_selector = shiny_data_selector('DATA_SELECTOR', data_env = data_repo)
   adapter = new.env()
   adapter$data_selector_header = data_selector$header
   adapter$data_selector_server = data_selector$server
@@ -165,7 +165,7 @@ app_controller <- function(
   ui_func = app_ui(adapter, token = token)
 
   instance_id = paste(sample(c(letters, LETTERS, 0:9), 22), collapse = '')
-  server_func = app_server(adapter, instance_id, token = token)
+  server_func = app_server(adapter, instance_id, token = token, data_repo = data_repo)
 
   reg.finalizer(
     controller_env,
@@ -395,7 +395,7 @@ app_server_3dviewer <- function(input, output, session, master_session, viewer_i
 }
 
 
-app_server <- function(adapter, instance_id, token = NULL){
+app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaultDataRepository()){
 
   this_env = environment()
 
@@ -409,6 +409,11 @@ app_server <- function(adapter, instance_id, token = NULL){
 
   #################################################################
   function(input, output, session){
+    if( test.mode ){
+      assign('..session', session, envir = globalenv())
+      
+    }
+    
     session_id = add_to_session(session)
     add_to_session(session, key = 'rave_instance', val = instance_id, override = TRUE)
     add_to_session(session, key = 'token', val = token, override = TRUE)
@@ -515,7 +520,7 @@ app_server <- function(adapter, instance_id, token = NULL){
         loaded = FALSE
         quo = rlang::quo({
           modules[[!!module_id]] = adapter$load_module(module_id = !!module_id, notification = TRUE)
-          m = shinirize(modules[[!!module_id]], test.mode = test.mode)
+          m = shinirize(modules[[!!module_id]], test.mode = test.mode, data_env = data_repo)
           shinirized_modules[[!!module_id]] = m
           callModule(m$server, id = m$id, session = session, global_reactives = global_reactives)
           module_ui_functions[[m$id]] = m$ui
@@ -622,12 +627,10 @@ app_server <- function(adapter, instance_id, token = NULL){
     observe({
       refresh = global_reactives$force_refresh_all
       if(global_reactives$has_data && check_data_repo('subject')){
-        data_repo = getDefaultDataRepository()
         subject_id = data_repo$subject$id
         epoch_name = data_repo$preload_info$epoch_name
         reference_name = data_repo$preload_info$reference_name
 
-        rm(data_repo)
         sub_label = (sprintf('[%s] - [%s] - [%s]', subject_id, epoch_name, reference_name))
         suma_label = 'Launch SUMA'
       }else{
@@ -653,7 +656,6 @@ app_server <- function(adapter, instance_id, token = NULL){
     }
 
     observeEvent(input$curr_subj_details_btn, {
-      data_repo = getDefaultDataRepository()
       subject = data_repo[['subject']]
       electrodes = data_repo$preload_info$electrodes
       if(!is.null(subject) && length(electrodes)){
@@ -666,7 +668,6 @@ app_server <- function(adapter, instance_id, token = NULL){
     output$curr_subj_elec_table <- shiny::renderTable({
       btn = input$curr_subj_details_btn
       if(global_reactives$has_data && check_data_repo('subject')){
-        data_repo = getDefaultDataRepository()
         subject = data_repo[['subject']]
         tbl = subject$electrodes
         cols = names(tbl)
@@ -683,7 +684,7 @@ app_server <- function(adapter, instance_id, token = NULL){
         return(NULL)
       }
       
-      subject = get0('subject', envir = getDefaultDataRepository(), ifnotfound = NULL)
+      subject = get0('subject', envir = data_repo, ifnotfound = NULL)
       if( is.null(subject) ){
         return(NULL)
       }
@@ -702,8 +703,7 @@ app_server <- function(adapter, instance_id, token = NULL){
     observeEvent(input$curr_subj_launch_suma, {
       # launch suma
       if(check_data_repo('subject')){
-        data_repo = getDefaultDataRepository()
-        subject = data_repo[['subject']]
+        subject = get0('subject', envir = data_repo)
         suma_dir = subject$dirs$suma_dir
         launch_suma(
           root_dir = suma_dir
@@ -911,6 +911,7 @@ app_server <- function(adapter, instance_id, token = NULL){
 #' @param simplify_header logical, whether to show simplified header.
 #' @param token character vector, default is \code{NULL}. If specified, then
 #' a \code{?token=...} is needed in url to access to the application.
+#' @param data_repo internally used
 #' @param ... other parameters. See details.
 #'
 #' @export

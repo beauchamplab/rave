@@ -3,7 +3,9 @@
 #' @param session shiny session, default is current shiny session
 #' @param test.mode passed by \code{\link[rave]{start_rave}} or
 #' \code{\link[rave]{init_app}}
-shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = TRUE){
+#' @param data_env internally used
+shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = TRUE,
+                      data_env = getDefaultDataRepository()){
   # assign variables
   MODULE_ID = module$module_id
   MODULE_LABEL = module$label_name
@@ -11,8 +13,6 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
   logger = function(...){
     cat2('[', MODULE_ID, '] ', ..., strftime(Sys.time(), ' - %M:%S', usetz = F))
   }
-
-  data_env = getDefaultDataRepository()
 
   # Runtime environment
   execenv = module$get_or_new_exec_env(session = session)
@@ -673,7 +673,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
               outputs = outputId,
               output_format = 'html_document',
               knit_root_dir = dirname(module$script_path),
-              envir = new.env(parent = getDefaultDataRepository())
+              envir = new.env(parent = data_env)
             )
             print(args)
             output_fpath = do.call(export_report, args = args)

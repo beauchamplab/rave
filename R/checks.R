@@ -2,10 +2,11 @@
 #' @param var variable name
 #' @param any whether all variables should be present of any variables should 
 #' exist
+#' @param data_repo internally used
 #' @return Logical \code{TRUE} or \code{FALSE} indicating the existence of the 
 #' variables 
-check_data_repo <- function(var = c('subject'), any = FALSE){
-  data_repo = getDefaultDataRepository()
+check_data_repo <- function(var = c('subject'), any = FALSE, 
+                            data_repo = getDefaultDataRepository()){
   sel = var %in% names(data_repo)
   if(any && sum(sel)){
     return(TRUE)
@@ -365,6 +366,7 @@ check_epoch <- function(subject, epoch_name){
 #' @param ... see details
 #' @param data same as \code{...}, but can be a vector
 #' @param .raise_error whether to raise error if data is missing
+#' @param rave_data internally used
 #' @details This function checks whether "ECoG" data is loaded. The format is: 
 #' \code{"DATA+(blankspace)+TYPE"}. \code{"DATA"} can be "power" (wavelet 
 #' transform amplitude), "phase" (complex angle), or "volt"/"voltage" (Before 
@@ -375,12 +377,12 @@ check_epoch <- function(subject, epoch_name){
 #' @export
 #' @name rave_checks
 NULL
-.rave_checks <- function(..., data = NULL, .raise_error = TRUE){
+.rave_checks <- function(..., data = NULL, .raise_error = TRUE,
+                         rave_data = getDefaultDataRepository()){
   data = unlist(c(data, list(...)))
   if(!length(data)){
     return()
   }
-  rave_data = getDefaultDataRepository()
   module_tools = rave_data$module_tools
   preload_info = rave_data$preload_info
   subject = rave_data$subject
@@ -427,9 +429,7 @@ NULL
       rm(dat)
     }else if('volt' %in% d || 'voltage' %in% d){
       if(full){
-        data_env = getDefaultDataRepository()
-        dat = data_env$.private[['volt_unblocked']]
-        rm(data_env)
+        dat = rave_data$.private[['volt_unblocked']]
         if(is.null(dat)){
           quos = c(quos, rlang::quo({
             module_tools$get_voltage2()

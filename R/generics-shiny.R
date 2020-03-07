@@ -69,11 +69,11 @@
 NULL
 
 .get_rave_theme <- function(
-  packages = NULL, type = 'continuous', theme = NULL
+  packages = NULL, type = 'continuous', theme = NULL,
+  session = shiny::getDefaultReactiveDomain()
 ){
   if(missing(theme) || !length(theme)){
     theme = NULL
-    session = shiny::getDefaultReactiveDomain()
     if(!is.null(session)){
       theme = session$userData$rave_theme
     }
@@ -141,11 +141,13 @@ get_rave_theme.default <- .get_rave_theme
 
 
 #' @export
-get_rave_theme.rave_running <- function(packages = NULL, type = 'continuous',
-                                        theme = NULL){
+get_rave_theme.rave_running <- function(
+  packages = NULL, type = 'continuous', theme = NULL, 
+  session = shiny::getDefaultReactiveDomain()){
+  
   ctx = rave_context()
   packages = c(ctx$package, packages)
-  .get_rave_theme(packages, type, theme)
+  .get_rave_theme(packages, type, theme, session)
 }
 
 #' @export
@@ -179,9 +181,10 @@ get_rave_theme.rave_running_local <- get_rave_theme.rave_running
 #' plot(1:10, main = 'test dark mode')
 #' 
 #' @export
-set_rave_theme <- function(theme, .set_default = FALSE){
+set_rave_theme <- function(theme, .set_default = FALSE, 
+                           session = shiny::getDefaultReactiveDomain()){
   rave_context()
-  session = shiny::getDefaultReactiveDomain()
+  
   if(!is.null(session)){
     default_theme = session$userData$rave_theme
   }

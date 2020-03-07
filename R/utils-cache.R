@@ -12,6 +12,7 @@
 #' @param levels levels when clear the cache
 #' @param temporary whether to use temporary map to cache, used internally.
 #' @param ... ignored
+#' @param session shiny session instance
 #' 
 #' @return Cached value, or \code{val}. If cache and \code{val} are both 
 #' missing, then return \code{NULL}.
@@ -198,10 +199,10 @@ cache.default <- cache.rave_running_local
 
 #' @rdname rave-cache
 #' @export
-cache_input <- function(inputId, val = NULL, read_only = TRUE, ... ){
+cache_input <- function(inputId, val = NULL, read_only = TRUE, ..., 
+                        session = getDefaultReactiveDomain()){
   ctx = rave_context(disallowed_context = 'default')
   module_id = ctx$module_id
-  session = getDefaultReactiveDomain()
   rave_id = add_to_session(session)
   
   key = list(

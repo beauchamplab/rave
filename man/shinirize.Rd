@@ -4,7 +4,12 @@
 \alias{shinirize}
 \title{Convert module to objects used in shiny}
 \usage{
-shinirize(module, session = getDefaultReactiveDomain(), test.mode = TRUE)
+shinirize(
+  module,
+  session = getDefaultReactiveDomain(),
+  test.mode = TRUE,
+  data_env = getDefaultDataRepository()
+)
 }
 \arguments{
 \item{module}{\code{\link[rave]{ModuleEnvir}} object}
@@ -13,6 +18,8 @@ shinirize(module, session = getDefaultReactiveDomain(), test.mode = TRUE)
 
 \item{test.mode}{passed by \code{\link[rave]{start_rave}} or
 \code{\link[rave]{init_app}}}
+
+\item{data_env}{internally used}
 }
 \description{
 Convert module to objects used in shiny

@@ -9,7 +9,8 @@ subject_tmpfile(
   fun_name = "",
   project_name,
   subject_code,
-  pattern = "file_"
+  pattern = "file_",
+  data_env = getDefaultDataRepository()
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ subject_tmpfile(
 \item{subject_code}{subject code}
 
 \item{pattern}{passed to \code{\link{tempfile}}}
+
+\item{data_env}{internally used}
 }
 \description{
 Create temp file in subject module folder

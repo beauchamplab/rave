@@ -4,7 +4,12 @@
 \alias{get_rave_theme}
 \title{Get RAVE Theme from Package Settings}
 \usage{
-get_rave_theme(packages = NULL, type = "continuous", theme = NULL)
+get_rave_theme(
+  packages = NULL,
+  type = "continuous",
+  theme = NULL,
+  session = shiny::getDefaultReactiveDomain()
+)
 }
 \arguments{
 \item{packages}{packages to check}

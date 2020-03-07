@@ -1359,13 +1359,14 @@ archive_subject <- function(project_name, subject_code,
 #' Find module analysis names
 #' @param module_id module id
 #' @param project_name project name
+#' @param data_env internally used
 #' @export
-module_analysis_names <- function(module_id, project_name){
+module_analysis_names <- function(
+  module_id, project_name, data_env = getDefaultDataRepository()){
+  
   soft_deprecated()
   # if missing project_name, get from current repository
   if(missing(project_name)){
-    data_env = getDefaultDataRepository()
-    on.exit(rm(data_env))
     project_name = data_env$subject$project_name
   }
   
@@ -1397,12 +1398,13 @@ module_analysis_names <- function(module_id, project_name){
 #' @param project_name project name
 #' @param subject_code subject code
 #' @param pattern passed to \code{\link{tempfile}}
+#' @param data_env internally used
 #' @export
-subject_tmpfile <- function(module_id, fun_name = '', project_name, subject_code, pattern = 'file_'){
+subject_tmpfile <- function(module_id, fun_name = '', project_name, 
+                            subject_code, pattern = 'file_',
+                            data_env = getDefaultDataRepository()){
   soft_deprecated()
   if(missing(project_name)){
-    data_env = getDefaultDataRepository()
-    on.exit(rm(data_env))
     project_name = data_env$subject$project_name
     subject_code = data_env$subject$subject_code
   }
@@ -1417,12 +1419,12 @@ subject_tmpfile <- function(module_id, fun_name = '', project_name, subject_code
   tempfile(tmpdir = tmpdir, pattern = pattern)
 }
 
-module_analysis_table <- function(project_name, module_id, analysis_name, check_valid = FALSE){
+module_analysis_table <- function(project_name, module_id, 
+                                  analysis_name, check_valid = FALSE, 
+                                  data_env = getDefaultDataRepository()){
   soft_deprecated()
   # if missing project_name, get from current repository
   if(missing(project_name)){
-    data_env = getDefaultDataRepository()
-    on.exit(rm(data_env))
     project_name = data_env$subject$project_name
   }
   module_id = stringr::str_to_upper(module_id)
@@ -1463,12 +1465,10 @@ module_analysis_table <- function(project_name, module_id, analysis_name, check_
 }
 
 
-module_analysis_save <- function(project_name, subject_code, module_id, analysis_name, file, meta = NULL){
+module_analysis_save <- function(project_name, subject_code, module_id, analysis_name, file, meta = NULL, data_env = getDefaultDataRepository()){
   soft_deprecated()
   # if missing project_name, get from current repository
   if(missing(project_name) || missing(subject_code)){
-    data_env = getDefaultDataRepository()
-    on.exit(rm(data_env))
     project_name = data_env$subject$project_name
     subject_code = data_env$subject$subject_code
   }

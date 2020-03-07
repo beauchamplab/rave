@@ -4,10 +4,15 @@
 \alias{attachDefaultDataRepository}
 \title{Attach subject data}
 \usage{
-attachDefaultDataRepository(unload = T)
+attachDefaultDataRepository(
+  unload = TRUE,
+  rave_data = getDefaultDataRepository()
+)
 }
 \arguments{
 \item{unload}{TRUE if you want to detach}
+
+\item{rave_data}{internally used}
 }
 \description{
 Attach subject data

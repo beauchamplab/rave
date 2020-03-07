@@ -4,12 +4,18 @@
 \alias{get_mem_usage}
 \title{Get RAM usage}
 \usage{
-get_mem_usage(modules, data_envir)
+get_mem_usage(
+  modules = list(),
+  data_envir = getDefaultDataRepository(),
+  session = getDefaultReactiveDomain()
+)
 }
 \arguments{
 \item{modules}{which module(s)}
 
 \item{data_envir}{default uses \code{\link[rave]{getDefaultDataRepository}}}
+
+\item{session}{shiny session instance}
 }
 \description{
 Get RAM usage

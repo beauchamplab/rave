@@ -8,7 +8,8 @@
 #' @param ... other parameters like \code{test.mode} for module debugging
 #' @export
 init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE,
-                     theme = "red", disable_sidebar = FALSE, simplify_header = FALSE, ...){
+                     theme = "red", disable_sidebar = FALSE, simplify_header = FALSE, 
+                     ..., data_repo = getDefaultDataRepository()){
   options(shiny.maxRequestSize=1024^3)
   # register_compoundInput()
   rave_setup_workers()
@@ -33,7 +34,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     modules = list("______" = list(modules))
   }
   
-  data_selector = shiny_data_selector('DATA_SELECTOR')
+  data_selector = shiny_data_selector('DATA_SELECTOR', data_env = data_repo)
   ui = dashboardPage(
     skin = theme,
     title = 'R Analysis and Visualization of ECoG/iEEG Data',
@@ -133,6 +134,10 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     #     span('- ', img_list$name)
     #   )
     # })
+    if( test.mode ){
+      assign('..session', session, envir = globalenv())
+      reg.finalizer(environment(), function(e) message("Finalizer: ", session$token))
+    }
     
     
     #################################################################
@@ -251,7 +256,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     .progress = progress(title = '', max = length(unlist(modules)))
     shinirized_modules = lapply(unlist(modules), function(m){
       .progress$inc(sprintf('Loading - %s', m$label_name))
-      shinirize(m, test.mode = test.mode)
+      shinirize(m, test.mode = test.mode, data_env = data_repo)
     })
     .progress$close()
     
@@ -285,12 +290,10 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     observe({
       refresh = global_reactives$force_refresh_all
       if(global_reactives$has_data && check_data_repo('subject')){
-        data_repo = getDefaultDataRepository()
         subject_id = data_repo$subject$id
         epoch_name = data_repo$preload_info$epoch_name
         reference_name = data_repo$preload_info$reference_name
         
-        rm(data_repo)
         sub_label = (sprintf('[%s] - [%s] - [%s]', subject_id, epoch_name, reference_name))
         suma_label = 'Launch SUMA'
       }else{
@@ -322,7 +325,6 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     }
     
     observeEvent(input$curr_subj_details_btn, {
-      data_repo = getDefaultDataRepository()
       subject = data_repo[['subject']]
       electrodes = data_repo$preload_info$electrodes
       if(!is.null(subject) && length(electrodes)){
@@ -335,7 +337,6 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     output$curr_subj_elec_table <- renderDataTable({
       btn = input$curr_subj_details_btn
       if(global_reactives$has_data && check_data_repo('subject')){
-        data_repo = getDefaultDataRepository()
         subject = data_repo[['subject']]
         tbl = subject$electrodes
         cols = names(tbl)
@@ -352,7 +353,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
         return(NULL)
       }
       
-      subject = get0('subject', envir = getDefaultDataRepository(), ifnotfound = NULL)
+      subject = get0('subject', envir = data_repo, ifnotfound = NULL)
       if( is.null(subject) ){
         return(NULL)
       }
@@ -368,7 +369,6 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     observeEvent(input$curr_subj_launch_suma, {
       # launch suma
       if(check_data_repo('subject')){
-        data_repo = getDefaultDataRepository()
         subject = data_repo[['subject']]
         suma_dir = subject$dirs$suma_dir
         launch_suma(
