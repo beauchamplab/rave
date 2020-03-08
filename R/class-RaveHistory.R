@@ -4,33 +4,32 @@ RAVEHistory <- R6::R6Class(
   private = list(
     save_path = NULL,
     env = NULL,
-    use_yaml = F
+    use_yaml = FALSE
   ),
   public = list(
     
-    initialize = function(path = '~/', name = '.rave.history.yaml', use_yaml = F){
+    initialize = function(path = '~/', name = '.rave.history.yaml', 
+                          use_yaml = FALSE){
       private$save_path = file.path(path, name)
       private$use_yaml = use_yaml
       if(!file.exists(private$save_path)){
-        dir.create(path, recursive = T, showWarnings = F)
-        private$env = new.env(hash = T)
+        dir.create(path, recursive = TRUE, showWarnings = FALSE)
+        private$env = fastmap::fastmap() #new.env(hash = TRUE)
         self$save()
       }else{
         self$load()
       }
     },
     save = function(...){
-      private$env$.save_time = Sys.time()
+      private$env$set('.save_time', Sys.time())
       args = list(...)
       for(nm in names(args)){
         if(nm != ''){
-          assign(nm, args[[nm]], envir = private$env)
+          private$env$set(nm, args[[nm]])
         }
       }
       if(private$use_yaml){
-        dat = as.list(private$env, all.names = T)
-        
-        yaml::write_yaml(dat,
+        yaml::write_yaml(private$env$as_list(),
                          file = private$save_path)
       }else{
         saveRDS(private$env, file = private$save_path)
@@ -40,35 +39,34 @@ RAVEHistory <- R6::R6Class(
     load = function(){
       if(private$use_yaml){
         re = yaml::read_yaml(file = private$save_path)
-        if(!is.environment(private$env)){
-          private$env = new.env()
+        if(length(private$env) < 10){
+          private$env = fastmap::fastmap()
         }
+        
         for(nm in names(re)){
-          assign(nm, re[[nm]], envir = private$env)
+          private$env$set(nm, re[[nm]])
         }
       }else{
         private$env = readRDS(file = private$save_path)
-        if(!is.environment(private$env)){
-          private$env = new.env()
+        if(length(private$env) < 10){
+          private$env = fastmap::fastmap()
         }
       }
       
     },
     get_or_save = function(key, val = NULL, save = TRUE, inherits = FALSE){
-      if(exists(key, envir = private$env, inherits = inherits)){
-        return(get(key, envir = private$env, inherits = inherits))
+      if(private$env$has(key)){
+        return(private$env$get(key = key))
       }else if (!is.null(val)){
         if(save){
-          args = list(`.ignored` = val)
-          names(args) = key
-          do.call(self$save, args = args)
+          do.call(self$save, args = structure(list(val), names = key))
         }
         return(val)
       }
       return(NULL)
     },
     clear = function(){
-      private$env = new.env()
+      private$env$reset()
       self$save()
     }
   )
@@ -85,9 +83,9 @@ rave_hist <- local({
 })
 
 
-last_entry <- function(key, default, save = F, group = 'customized'){
+last_entry <- function(key, default, save = FALSE, group = 'customized'){
   stopifnot2(is.character(key), msg = 'Key must be a string')
-  dict = rave_hist()$get_or_save(key = group, val = list(), save = F)
+  dict = rave_hist()$get_or_save(key = group, val = list(), save = FALSE)
   val = dict[[key]]
   val %?<-% default
   

@@ -102,66 +102,65 @@ app_controller <- function(
 
   # Data selector
   data_selector = shiny_data_selector('DATA_SELECTOR', data_env = data_repo)
-  adapter = new.env()
-  adapter$data_selector_header = data_selector$header
-  adapter$data_selector_server = data_selector$server
-  adapter$launch_selector = data_selector$launch
-  adapter$get_option = function(opt, default = NULL){
-    get0(opt, ifnotfound = default, envir = controller_env, inherits = FALSE)
-  }
-  adapter$get_module_ui = function(active_id = NULL){
-
-    module_ids = module_table$ID[module_table$Active]
-    active_id %?<-% module_ids[1]
-
-    load_module(active_id)
-
-    groups = names(module_list)
-
-    # Generate quos
-    quos = list()
-    for(g in groups[groups != '______']){
-      modules = module_list[[g]]
-      if(length(modules)){
-        quo_items = lapply(modules, function(m){
-          rlang::quo(shinydashboard::menuSubItem(
+  adapter = fastmap::fastmap()
+  adapter$mset(
+    data_selector_header = data_selector$header,
+    data_selector_server = data_selector$server,
+    launch_selector = data_selector$launch,
+    get_option = function(opt, default = NULL){
+      get0(opt, ifnotfound = default, envir = controller_env, inherits = FALSE)
+    },
+    get_module_ui = function(active_id = NULL){
+      
+      module_ids = module_table$ID[module_table$Active]
+      active_id %?<-% module_ids[1]
+      
+      load_module(active_id)
+      
+      groups = names(module_list)
+      
+      # Generate quos
+      quos = list()
+      for(g in groups[groups != '______']){
+        modules = module_list[[g]]
+        if(length(modules)){
+          quo_items = lapply(modules, function(m){
+            rlang::quo(shinydashboard::menuSubItem(
+              text = !!m$module_label,
+              tabName = !!stringr::str_to_upper(m$module_id),
+              selected = !!(m$module_id==active_id)
+            ))
+          })
+          
+          quos[[length(quos) + 1]] = rlang::quo(shinydashboard::menuItem(
+            text = !!g,
+            !!!quo_items,
+            startExpanded = !!(active_id %in% sapply(modules, '[[', 'module_id'))
+          ))
+        }
+      }
+      
+      for(m in module_list[['______']]){
+        quos[[length(quos) + 1]] = rlang::quo({
+          shinydashboard::menuItem(
             text = !!m$module_label,
             tabName = !!stringr::str_to_upper(m$module_id),
             selected = !!(m$module_id==active_id)
-          ))
+          )
         })
-
-        quos[[length(quos) + 1]] = rlang::quo(shinydashboard::menuItem(
-          text = !!g,
-          !!!quo_items,
-          startExpanded = !!(active_id %in% sapply(modules, '[[', 'module_id'))
-        ))
       }
-    }
-
-    for(m in module_list[['______']]){
-      quos[[length(quos) + 1]] = rlang::quo({
-        shinydashboard::menuItem(
-          text = !!m$module_label,
-          tabName = !!stringr::str_to_upper(m$module_id),
-          selected = !!(m$module_id==active_id)
-        )
-      })
-    }
-    quos
-  }
-  # adapter$all_modules = function(){
-  #   unlist(as.list(module_list), use.names = FALSE, recursive = TRUE)
-  # }
-  adapter$module_ids = function(loaded_only = FALSE){
-    if(loaded_only){
-      sapply(loaded_modules, '[[', 'module_id')
-    }else{
-      module_table$ID[module_table$Active]
-    }
-  }
-  adapter$load_module = load_module
-
+      quos
+    },
+    module_ids = function(loaded_only = FALSE){
+      if(loaded_only){
+        sapply(loaded_modules, '[[', 'module_id')
+      }else{
+        module_table$ID[module_table$Active]
+      }
+    },
+    load_module = load_module
+  )
+  
   ui_func = app_ui(adapter, token = token)
 
   instance_id = paste(sample(c(letters, LETTERS, 0:9), 22), collapse = '')
@@ -191,87 +190,91 @@ app_controller <- function(
 
 app_ui <- function(adapter, token = NULL){
 
-  ui_functions = list()
-
-  # Case 1 404
-  ui_functions[['404']] = function(...){
-    # 404
-    '404'
-  }
-
-  # Case 2 (3D viewer)
-  ui_functions[['3dviewer']] = function(global_id, session_id = NULL){
-    shiny::fillPage(
-      title = 'RAVE 3D Viewer',
-      padding = 0,
-      threeBrain::threejsBrainOutput(global_id, width = '100vw', height = '100vh')
-    )
-  }
-
-
-  # Case n (default, load ravebuiltins)
-
-  ui_functions[['default']] = function(active_id = NULL, has_modal = TRUE){
-    child_env = new.env()
-    title = 'R Analysis and Visualization of ECoG/iEEG Data'
-    version = local({
-      ver = utils::packageVersion('rave')
-      sprintf('RAVE (%s)', paste(unlist(ver), collapse = '.'))
-    })
-    ui_quos = adapter$get_module_ui(active_id = active_id)
-
-    quo = rlang::quo(dashboardPage(
-      skin = adapter$get_option('theme', 'purple'), title = !!title,
-      header = dashboardHeader(
-        title = !!version, btn_text_right = 'RAM Usage',
-        adapter$data_selector_header(),
-        .list = local({
-          if(!adapter$get_option('simplify_header', FALSE)){
-            tagList(
-              tags$li(class = 'user user-menu', actionLink('curr_subj_details_btn', '')),
-              # tags$li(class = 'user user-menu',actionLink('curr_subj_launch_suma', '')),
-              tags$li(class = 'user user-menu',actionLink('rave_reset', 'Reset GUI')
+  ui_functions = fastmap::fastmap(
+    # Case n (default, load ravebuiltins)
+    missing_default = function(active_id = NULL, has_modal = TRUE){
+      title = 'R Analysis and Visualization of ECoG/iEEG Data'
+      version = utils::packageVersion('rave')
+      version = sprintf('RAVE (%s)', paste(unlist(version), collapse = '.'))
+      simplify_header = adapter$get('get_option')('simplify_header', FALSE)
+      ui_quos = adapter$get('get_module_ui')(active_id = active_id)
+      
+      quo = as_call2(
+        quote(dashboardPage),
+        skin = adapter$get('get_option')('theme', 'purple'),
+        title = title,
+        header = as_call2(
+          quote(dashboardHeader),
+          title = version,
+          btn_text_right = 'RAM Usage',
+          quote(adapter$get('data_selector_header')()),
+          .list = if(simplify_header) NULL else list(
+            .list = quote(
+              tagList(
+                tags$li(class = 'user user-menu', 
+                        actionLink('curr_subj_details_btn', '')),
+                tags$li(class = 'user user-menu',
+                        actionLink('rave_reset', 'Reset GUI'))
               )
             )
-          }
-        })
-      ),
-      sidebar = shinydashboard::dashboardSidebar(
-        disable = adapter$get_option('disable_sidebar', FALSE),
-        shinydashboard::sidebarMenu(id = 'sidebar', !!!ui_quos)
-      ),
-      control = dashboardControl(
-        uiOutput('mem_usage'),
-        actionLink('control_panel_refresh', 'Click here to refresh!')
-      ),
-      body = shinydashboard::dashboardBody(
-        do.call(
-          shinydashboard::tabItems,
-          args = local({
-            re = lapply(adapter$module_ids(), function(module_id) {
-              # module_id = stringr::str_to_upper(module_id)
-              shinydashboard::tabItem(tabName = stringr::str_to_upper(module_id), uiOutput(stringr::str_c(module_id, '_UI')))
-            })
-            names(re) = NULL
-            re
-          })
-        )
-      ),
-      initial_mask = !!local({
-        if(has_modal){
-          tagList(
-            h2('R Analysis and Visualizations for iEEG/ECoG Data')
           )
-        }else{
-          NULL
-        }
-      })
+        ),
+        sidebar = as_call2(
+          quote(shinydashboard::dashboardSidebar),
+          disable = adapter$get('get_option')('disable_sidebar', FALSE),
+          as_call2(
+            quote(shinydashboard::sidebarMenu),
+            id = 'sidebar', 
+            .list = lapply(ui_quos, rlang::quo_squash)
+          )
+        ),
+        control = quote(dashboardControl(
+          uiOutput('mem_usage'),
+          actionLink('control_panel_refresh', 'Click here to refresh!')
+        )),
+        body = as_call2(
+          quote(shinydashboard::dashboardBody),
+          as_call2(
+            quote(shinydashboard::tabItems),
+            .list = unname(lapply(adapter$get('module_ids')(), function(module_id) {
+              # module_id = stringr::str_to_upper(module_id)
+              as_call2(
+                quote(shinydashboard::tabItem),
+                tabName = stringr::str_to_upper(module_id),
+                as_call2(
+                  uiOutput,
+                  stringr::str_c(module_id, '_UI')
+                )
+              )
+            }))
+          )
+        ),
+        initial_mask = if (has_modal) quote(h2('R Analysis and Visualizations for iEEG/ECoG Data')) else NULL
+      )
+      
+      dipsaus::eval_dirty(quo)
+    }
+    
+  )
 
-    ))
-
-    dipsaus::eval_dirty(quo, env = child_env)
-  }
-
+  ui_functions$mset(
+    # Case 1 404
+    '404' = function(...){
+      # 404
+      '404'
+    },
+    
+    # Case 2 (3D viewer)
+    '3dviewer' = function(global_id, session_id = NULL){
+      shiny::fillPage(
+        title = 'RAVE 3D Viewer',
+        padding = 0,
+        threeBrain::threejsBrainOutput(global_id, width = '100vw', height = '100vh')
+      )
+    }
+  )
+  
+  
 
   function(req){ #, parent_env = parent.frame()
     # First, get query string
@@ -285,21 +288,21 @@ app_ui <- function(adapter, token = NULL){
     if(!is.null(token)){
       if(!length(url_info$token) || !any(url_info$token %in% token)){
         # Return 404
-        return(ui_functions[['404']]())
+        return(ui_functions$get('404')())
       }
     }
 
     # ?type=3dviewer&globalId=...&sessionId=...
     if(length(url_info$type) == 1 && url_info$type == '3dviewer'){
-      return(ui_functions[['3dviewer']](url_info$globalId, url_info$sessionId))
+      return(ui_functions$get('3dviewer')(url_info$globalId, url_info$sessionId))
     }
 
     # Default, load main app
-    lapply(url_info$module_id, adapter$load_module)
+    lapply(url_info$module_id, adapter$get('load_module'))
     nomodal = url_info$nomodal
     nomodal %?<-% FALSE
     nomodal = nomodal == 'true'
-    quo = ui_functions[['default']](active_id = url_info$module_id, has_modal = !nomodal)
+    quo = ui_functions$get('default')(active_id = url_info$module_id, has_modal = !nomodal)
 
   }
 
@@ -399,7 +402,7 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
 
   this_env = environment()
 
-  test.mode = adapter$get_option('test.mode', FALSE)
+  test.mode = adapter$get('get_option')('test.mode', FALSE)
 
   session_list = list()
   rave_ids = NULL
@@ -519,7 +522,7 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
       if(!module_id %in% names(local_env$modules)){
         loaded = FALSE
         quo = rlang::quo({
-          modules[[!!module_id]] = adapter$load_module(module_id = !!module_id, notification = TRUE)
+          modules[[!!module_id]] = adapter$get('load_module')(module_id = !!module_id, notification = TRUE)
           m = shinirize(modules[[!!module_id]], test.mode = test.mode, data_env = data_repo)
           shinirized_modules[[!!module_id]] = m
           callModule(m$server, id = m$id, session = session, global_reactives = global_reactives)
@@ -544,7 +547,7 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
       module_info = global_reactives$switch_module
 
       if(!is.null(module_info)){
-        module_ids = adapter$module_ids()
+        module_ids = adapter$get('module_ids')()
         mid = module_info$module_id = stringr::str_to_upper(module_info$module_id)
         # print(mid)
         load_module(mid)
@@ -570,7 +573,7 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
 
     ##################################################################
     # Module to load data
-    callModule(module = adapter$data_selector_server, id = 'DATA_SELECTOR', session = session, global_reactives = global_reactives)
+    callModule(module = adapter$get('data_selector_server'), id = 'DATA_SELECTOR', session = session, global_reactives = global_reactives)
     #            , clear_cache = function(){
     #   lapply(shinirized_modules, function(m){
     #     try({
@@ -585,7 +588,7 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
     # message
 
     observeEvent(global_reactives$launch_selector, {
-      adapter$launch_selector()
+      adapter$get('launch_selector')()
     })
 
     observe({
@@ -610,7 +613,7 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
       # output[[stringr::str_c(m$id, '_UI')]] <- renderUI(m$ui())
     })
 
-    lapply(adapter$module_ids(), function(module_id){
+    lapply(adapter$get('module_ids')(), function(module_id){
       output[[paste0(module_id, '_UI')]] <- renderUI({
 
         if(!is.function(module_ui_functions[[module_id]])){

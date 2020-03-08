@@ -2,8 +2,8 @@
 #' Function to make an environment printable
 #' @param env environment to be converted
 #' @export
-as_printable = function(env){
-  stopifnot2(is.environment(env), msg = 'env MUST be an environment.')
+as_printable = function(env = fastmap::fastmap()){
+  # stopifnot2(is.environment(env), msg = 'env MUST be an environment.')
   cls = c('rave_printable', class(env))
   cls = unique(cls[!cls %in% ''])
   class(env) = cls
@@ -15,11 +15,11 @@ as_printable = function(env){
 #' @param ... passed from or to other methods
 #' @export
 print.rave_printable = function(x, ...){
-  stopifnot2(is.environment(x), msg = 'x MUST be an environment.')
+  # stopifnot2(is.environment(x), msg = 'x MUST be an environment.')
   print.default(
-    paste0('<environment key=[', paste(ls(x), collapse = ', '), ']>'), ...
+    paste0('<Map key=[', paste(x$keys(), collapse = ', '), ']>'), ...
   )
-  return(x)
+  return(invisible(x))
 }
 
 

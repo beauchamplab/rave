@@ -445,7 +445,7 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
       
       time = round(row$Time * srate_wave)
       
-      as.vector(elec$raw_power[[row$Block]][, time + time_pts_wave, drop = F])
+      as.vector(elec$raw_power$get(row$Block)[, time + time_pts_wave, drop = F])
     })
     
     dims = dim(power)
@@ -458,7 +458,7 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
       
       time = round(row$Time * srate_wave)
       
-      as.vector(elec$raw_phase[[row$Block]][, time + time_pts_wave, drop = F])
+      as.vector(elec$raw_phase$get(row$Block)[, time + time_pts_wave, drop = F])
     })
     
     dims = dim(phase)
@@ -484,7 +484,7 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
       
       time = round(row$Time * srate_volt)
       
-      as.vector(elec$raw_volt[[row$Block]][time + time_pts_volt])
+      as.vector(elec$raw_volt$get(row$Block)[time + time_pts_volt])
     })
     volt = data.frame(volt = as.vector(t(volt)))
     fst_file = file.path(subject_cache_dir, 'voltage', sprintf('%d.fst', e))

@@ -96,6 +96,9 @@ ExecEnvir <- R6::R6Class(
     #' to this environment. The parent environment is \code{param_env}
     runtime_env = NULL,
     
+    #' @field async_env where async codes run
+    async_env = NULL,
+    
     #' @field parse_env environment where modules are parsed. The parent 
     #' environment is \code{runtime_env}. Once all functions are evaluated, 
     #' this environment is not used. However, module creators don't directly 
@@ -195,6 +198,7 @@ ExecEnvir <- R6::R6Class(
       clear_env(self$parse_env)
       clear_env(self$param_env)
       clear_env(self$runtime_env)
+      clear_env(self$async_env)
       # clear_env(self$static_env)
       if(!is.null(self$cache_env)){
         self$cache_env$reset()
@@ -246,6 +250,8 @@ ExecEnvir <- R6::R6Class(
       self$static_env$..runtime_env = self$runtime_env
       self$static_env$.env = self$runtime_env
       self$static_env$..param_env = self$param_env
+      
+      self$async_env = new.env(parent = self$runtime_env)
 
       # Environment for parsers. All source file will be parsed here
       # it can get access to runtime_env.
@@ -887,12 +893,13 @@ ExecEnvir <- R6::R6Class(
         }
         self$runtime_env$.is_async = async
         async_future = NULL
+        
 
         if(async){
           if(self$async_module){
-            async_env = new.env(parent = self$runtime_env)
-            async_env[['..async_quo']] = async_quo
-            async_env[['..async_var']] = async_vars
+            clear_env(self$async_env)
+            self$async_env[['..async_quo']] = async_quo
+            self$async_env[['..async_var']] = async_vars
 
             packages = stringr::str_match(search(), '^package:(.+)$')[,2] 
             packages = packages[!is.na(packages)]
@@ -907,7 +914,8 @@ ExecEnvir <- R6::R6Class(
                   re = sapply(..async_var, get0, simplify = F, USE.NAMES = T)
                   re
                 }
-              }, packages = packages, evaluator = future::multiprocess, envir = async_env,
+              }, packages = packages, evaluator = future::multiprocess, 
+              envir = self$async_env,
               gc = FALSE)
           }
         }else{

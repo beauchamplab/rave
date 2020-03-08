@@ -4,7 +4,7 @@
 \alias{as_printable}
 \title{Function to make an environment printable}
 \usage{
-as_printable(env)
+as_printable(env = fastmap::fastmap())
 }
 \arguments{
 \item{env}{environment to be converted}
