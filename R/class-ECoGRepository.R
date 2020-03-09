@@ -192,7 +192,9 @@ ECoGRepository <- R6::R6Class(
       ref_table = self$reference$get('ref_table')
       
       if(length(electrodes) > 0){
-        progress = progress(title = 'Loading reference...', max = length(electrodes))
+        progress = progress(title = 'Loading reference', 
+                            max = length(electrodes),
+                            shiny_auto_close = TRUE)
         
         subject_obj = self$subject
         
@@ -221,8 +223,6 @@ ECoGRepository <- R6::R6Class(
         #   nworkers = rave_options('max_worker'),
         #   assign.env = self$raw$private$env
         # )
-        cat2('Loaded.')
-        progress$close()
       }
       invisible()
     },
@@ -274,8 +274,10 @@ ECoGRepository <- R6::R6Class(
         freq_subset[which.min(abs(freqs$Frequency - frequency_range[1]))] = T
       }
       
-      progress = progress(title = 'Loading data...', max = (length(electrodes) + 1) * length(data_type) + 1, quiet = quiet)
-      on.exit({progress$close()})
+      # progress = progress(title = 'Loading data...', 
+      #                     max = length(data_type), 
+      #                     shiny_auto_close = TRUE,
+      #                     quiet = quiet)
       
       epoch_data = self$epochs$get('epoch_data')
       
@@ -285,7 +287,6 @@ ECoGRepository <- R6::R6Class(
       raws = self$raw
       base::print(pryr::object_size(raws))
       
-      progress$inc('Starting...')
       # Get dimension names
       # 1. Trial
       epochs = load_meta(
@@ -356,8 +357,8 @@ ECoGRepository <- R6::R6Class(
             }
             gc()
             power
-          }, callback = function(e, i){
-            progress$inc(sprintf('Step %d (of %d) electrode %d (power)', count, n_dt, e))
+          }, callback = function(e){
+            sprintf('Loading power| - electrode %d', e)
           }, plan = FALSE)
           
           power = join_tensors(results)
@@ -378,7 +379,8 @@ ECoGRepository <- R6::R6Class(
         
         if('phase' %in% data_type){
           
-          results = lapply_async(electrodes, function(e){
+          rave_setup_workers()
+          results = dipsaus::lapply_async2(electrodes, function(e){
             electrode = raws$get(as.character(e))
             elc = electrode$epoch(epoch_name = epoch_name, pre = pre, post = post,
                                   types = 'phase', raw = !referenced)
@@ -400,9 +402,9 @@ ECoGRepository <- R6::R6Class(
             # rm(elc)
             # phase = as.vector(phase)
             return(phase)
-          }, .call_back = function(i){
-            progress$inc(sprintf('Step %d (of %d) electrode %d (phase)', count, n_dt, electrodes[i]))
-          })
+          }, callback = function(e){
+            sprintf('Loading phase| - electrode %d', e)
+          }, plan = FALSE)
           phase = join_tensors(results)
           count = count + 1
           # gc()
@@ -439,7 +441,8 @@ ECoGRepository <- R6::R6Class(
         
         if('volt' %in% data_type){
           
-          results = lapply_async(electrodes, function(e){
+          rave_setup_workers()
+          results = dipsaus::lapply_async2(electrodes, function(e){
             electrode = raws$get(as.character(e))
             elc = electrode$epoch( epoch_name = epoch_name, pre = pre, post = post,
                                    types = 'volt', raw = !referenced )
@@ -448,9 +451,9 @@ ECoGRepository <- R6::R6Class(
             # volt = as.vector(volt)
             volt = elc$volt
             return(volt)
-          }, .call_back = function(i){
-            progress$inc(sprintf('Step %d (of %d) electrode %d (voltage)', count, n_dt, electrodes[i]))
-          })
+          }, callback = function(e){
+            sprintf('Loading voltage| - electrode %d', e)
+          }, plan = FALSE)
           
           volt = join_tensors(results)
           count = count + 1
@@ -489,7 +492,7 @@ ECoGRepository <- R6::R6Class(
         return(invisible())
       }else{
         
-        lapply_async(electrodes, function(e){
+        results <- dipsaus::lapply_async2(electrodes, function(e){
           electrode = raws$get(as.character(e))
           electrode$epoch(
             epoch_name = epoch_name,
@@ -505,11 +508,9 @@ ECoGRepository <- R6::R6Class(
           
           elc = func(elc)
           return(elc)
-        }, .call_back = function(i){
-          progress$inc(sprintf('Preparing electrode - %d', electrodes[i]))
-        }, .globals = c('electrodes', 'e', 'raws', 'epoch_name', 'pre', 'post', 
-                        'referenced', 'freq_subset', 'data_type', 'func')) ->
-          results
+        }, call_back = function(e){
+          sprintf('Preparing electrode - %d', e)
+        }) 
         gc()
         
         return(results)
@@ -561,8 +562,8 @@ ECoGRepository <- R6::R6Class(
       # ref_env = self$reference$private$env
       unique_refs = unique(ref_table$Reference)
       
-      progress = progress(title = 'Loading reference...', max = length(unique_refs) + 1)
-      progress$inc('Initializing')
+      progress = progress(title = 'Loading reference', 
+                          max = length(unique_refs), shiny_auto_close = TRUE)
       lapply(unique_refs, function(ref){
         progress$inc(ref)
         # delayedAssign(ref, {
@@ -571,7 +572,6 @@ ECoGRepository <- R6::R6Class(
         self$reference$set(ref, Electrode$new(
           subject = self$subject, electrode = ref, is_reference = TRUE))
       })
-      progress$close()
       invisible()
     },
     
