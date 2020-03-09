@@ -139,6 +139,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
       execenv$local_reactives = local_data
 
+      # TODO: remove this environment
       local_static = new.env()
       local({
         activated = FALSE
@@ -407,37 +408,9 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       # What we know:
       # 1. Initialized, has data, module activated,
       # 2. Some input changed
-      junk = new.env()
       observe({
         run_script_signal = run_script()
         if( shiny::isTruthy(run_script_signal) ){
-          # local_data$run_script = FALSE
-          # cat2('checked')
-          # if( !is.null(junk$junk) ){
-          #   for(nm in names(junk$junk)){
-          #     
-          #     
-          #     if(!identical(junk$junk[[nm]], isolate(local_data[[nm]]))){
-          #       base::print(paste0('------------ ', nm))
-          #       if(!is.list(junk$junk[[nm]])){
-          #         base::print(junk$junk[[nm]])
-          #         base::print('???')
-          #         base::print(isolate(local_data[[nm]]))
-          #       }else{
-          #         for(mm in names(junk$junk[[nm]])){
-          #           if(!identical(junk$junk[[nm]][[mm]], isolate(local_data[[nm]][[mm]]))){
-          #             base::print(junk$junk[[nm]][[mm]])
-          #             base::print('???')
-          #             base::print(isolate(local_data[[nm]][[mm]]))
-          #           }
-          #         }
-          #       }
-          #       
-          #     }
-          #     
-          #   }
-          # }
-          # junk$junk = shiny::isolate(shiny::reactiveValuesToList(local_data, all.names = TRUE))
           exec_script()
         }
       })
