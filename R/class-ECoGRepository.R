@@ -319,27 +319,46 @@ ECoGRepository <- R6::R6Class(
         
         if('power' %in% data_type){
           
-          results = lapply_async(electrodes, function(e){
+          # results = lapply_async(electrodes, function(e){
+          #   # progress$inc(sprintf('Step %d (of %d) electrode %d (power)', count, n_dt, e))
+          #   electrode = raws$get(as.character(e))
+          #   elc = electrode$epoch( epoch_name = epoch_name, pre = pre, post = post,
+          #                          types = 'power', raw = !referenced )
+          # 
+          #   power = elc$power; rm(elc)
+          #   if(!all(freq_subset)){
+          #     power$temporary = TRUE
+          #     power = power$subset(Frequency = freq_subset, drop = F, data_only = F)
+          #     power$to_swap_now(use_index = FALSE)
+          #     power$temporary = FALSE
+          #   }
+          #   gc()
+          #   power
+          # }, .call_back = function(i){
+          #   progress$inc(sprintf('Step %d (of %d) electrode %d (power)', count, n_dt, electrodes[i]))
+          # })
+          
+          # future::plan(future::sequential)
+          rave_setup_workers()
+          results = dipsaus::lapply_async2(electrodes, function(e){
             # progress$inc(sprintf('Step %d (of %d) electrode %d (power)', count, n_dt, e))
             electrode = raws$get(as.character(e))
             elc = electrode$epoch( epoch_name = epoch_name, pre = pre, post = post,
                                    types = 'power', raw = !referenced )
-
+            
             power = elc$power; rm(elc)
             if(!all(freq_subset)){
               power$temporary = TRUE
-              power = power$subset(Frequency = freq_subset, drop = F, data_only = F)
+              power = power$subset(Frequency = freq_subset, 
+                                   drop = FALSE, data_only = FALSE)
               power$to_swap_now(use_index = FALSE)
               power$temporary = FALSE
             }
             gc()
             power
-          }, .call_back = function(i){
-            progress$inc(sprintf('Step %d (of %d) electrode %d (power)', count, n_dt, electrodes[i]))
-          }
-          # , .globals = c('electrodes', 'count', 'n_dt', 'e', 'epoch_name', 'pre', 'post',
-          #                 'referenced', 'freq_subset', 'raws')
-          )
+          }, callback = function(e, i){
+            progress$inc(sprintf('Step %d (of %d) electrode %d (power)', count, n_dt, e))
+          }, plan = FALSE)
           
           power = join_tensors(results)
           
