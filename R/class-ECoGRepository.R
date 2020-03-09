@@ -193,10 +193,9 @@ ECoGRepository <- R6::R6Class(
       
       if(length(electrodes) > 0){
         progress = progress(title = 'Loading reference', 
-                            max = length(electrodes),
-                            shiny_auto_close = TRUE)
+                            max = length(electrodes))
         
-        subject_obj = self$subject
+        # subject_obj = self$subject
         
         lapply(electrodes, function(e){
           e_str = paste(e)
@@ -209,6 +208,7 @@ ECoGRepository <- R6::R6Class(
                                 reference_by = ref, is_reference = FALSE)
           self$raw$set(key = e_str, value = e_obj)
         })
+        progress$close()
         # self_ref = self$reference
         # self_sub = self$subject
         # rave:::future_assign_lapply(
@@ -563,7 +563,7 @@ ECoGRepository <- R6::R6Class(
       unique_refs = unique(ref_table$Reference)
       
       progress = progress(title = 'Loading reference', 
-                          max = length(unique_refs), shiny_auto_close = TRUE)
+                          max = length(unique_refs))
       lapply(unique_refs, function(ref){
         progress$inc(ref)
         # delayedAssign(ref, {
@@ -572,6 +572,7 @@ ECoGRepository <- R6::R6Class(
         self$reference$set(ref, Electrode$new(
           subject = self$subject, electrode = ref, is_reference = TRUE))
       })
+      progress$close()
       invisible()
     },
     
