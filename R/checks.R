@@ -565,7 +565,7 @@ check_subject <- function(subject, stop_on_error = FALSE){
         }, error = function(e){
           FALSE
         })
-      }))
+      }, plan = FALSE))
       if(!all(validity)){
         mis = paste(fs[!validity], collapse = '\n')
         raise('The following HDF5 files might be broken:\n', mis)
