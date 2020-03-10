@@ -14,6 +14,8 @@ set_rave_theme(
 \item{theme}{\code{"light"} or \code{"dark"}. See details if missing}
 
 \item{.set_default}{whether to save current theme as default, default is no.}
+
+\item{session}{shiny session}
 }
 \value{
 \code{theme} under current context.

@@ -2,6 +2,7 @@
 #' @importFrom dipsaus %?<-%
 #' @importFrom dipsaus collapse
 #' @importFrom graphics axis par points rect
+#' @importFrom utils read.csv
 NULL
 
 

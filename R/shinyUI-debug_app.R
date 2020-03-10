@@ -5,6 +5,7 @@
 #' @param theme color theme for the website
 #' @param disable_sidebar hide sidebar at startup?
 #' @param simplify_header hide header at startup?
+#' @param data_repo internally used
 #' @param ... other parameters like \code{test.mode} for module debugging
 #' @export
 init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE,
@@ -135,7 +136,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     #   )
     # })
     if( test.mode ){
-      assign('..session', session, envir = globalenv())
+      # assign('..session', session, envir = globalenv())
       reg.finalizer(environment(), function(e) message("Finalizer: ", session$token))
     }
     

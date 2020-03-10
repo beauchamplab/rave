@@ -38,6 +38,7 @@ Imports:
     grid,
     crayon,
     cli,
+    fastmap (>= 1.0.1),
     signal (>= 0.7-6),
     dipsaus (>= 0.0.3),
     hdf5r (>= 1.0.0),

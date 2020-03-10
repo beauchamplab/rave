@@ -26,7 +26,8 @@ read_fst <- function(path, ..., as.data.table = TRUE){
 #' @param ram read to ram?
 #'
 load_fst_or_h5 <- function(
-  fst_path, h5_path, h5_name, fst_need_transpose = F, fst_need_drop = F, ram = F
+  fst_path, h5_path, h5_name, fst_need_transpose = FALSE, 
+  fst_need_drop = FALSE, ram = FALSE
 ){
   # check if fst_path exists
   if(file.exists(fst_path)){
@@ -45,7 +46,7 @@ load_fst_or_h5 <- function(
       return(re)
     }
   }else{
-    re = load_h5(file = h5_path, name = h5_name, read_only = T, ram = ram)
+    re = load_h5(file = h5_path, name = h5_name, read_only = TRUE, ram = ram)
     return(re)
   }
 }

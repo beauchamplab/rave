@@ -29,6 +29,8 @@ init_app(
 \item{simplify_header}{hide header at startup?}
 
 \item{...}{other parameters like \code{test.mode} for module debugging}
+
+\item{data_repo}{internally used}
 }
 \description{
 Initialize main application for debugging purpose

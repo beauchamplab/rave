@@ -408,10 +408,10 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
   
   
   # TODO: check data
-  check_results = check_subjects2(project_name = project_name, subject_code = subject_code, quiet = T)
+  check_results = check_subjects2(project_name = project_name, subject_code = subject_code, quiet = TRUE)
   
   # 1. get directories
-  subject = Subject$new(subject_code = subject_code, project_name = project_name, strict = F)
+  subject = Subject$new(subject_code = subject_code, project_name = project_name, strict = FALSE)
   dirs = subject$dirs
   subject_cache_dir = file.path(cache_dir, project_name, subject_code, epoch)
   

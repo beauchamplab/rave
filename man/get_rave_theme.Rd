@@ -3,14 +3,6 @@
 \name{get_rave_theme}
 \alias{get_rave_theme}
 \title{Get RAVE Theme from Package Settings}
-\usage{
-get_rave_theme(
-  packages = NULL,
-  type = "continuous",
-  theme = NULL,
-  session = shiny::getDefaultReactiveDomain()
-)
-}
 \arguments{
 \item{packages}{packages to check}
 
@@ -18,14 +10,14 @@ get_rave_theme(
 
 \item{theme}{\code{"light"} or \code{"dark"}; default is current 
 theme saved in \code{rave_options('current_theme')}}
+
+\item{session}{shiny session}
 }
 \value{
 A list contains all palettes found in the packages.
 }
 \description{
 Get RAVE Theme from Package Settings
-
-Get and Set 'RAVE' Themes
 }
 \examples{
 pal = get_rave_theme('rave', type = c('continuous', 'discrete'), theme='light')

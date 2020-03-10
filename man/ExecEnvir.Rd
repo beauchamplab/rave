@@ -71,7 +71,7 @@ redirected to this environment by default (unless using
 \code{shiny::observe}). All functions in \code{static_env} have access 
 to this environment. The parent environment is \code{param_env}}
 
-\item{\code{async_env}}{where async codes run}
+\item{\code{async_env}}{where asynchronous codes run}
 
 \item{\code{parse_env}}{environment where modules are parsed. The parent 
 environment is \code{runtime_env}. Once all functions are evaluated, 

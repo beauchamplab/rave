@@ -57,6 +57,7 @@
 #' @param type characters, \code{"continuous"}, \code{"discrete"}, or both
 #' @param theme \code{"light"} or \code{"dark"}; default is current 
 #' theme saved in \code{rave_options('current_theme')}
+#' @param session shiny session
 #' @return A list contains all palettes found in the packages.
 #' @name get_rave_theme
 #' @examples 
@@ -132,7 +133,6 @@ NULL
   re
 }
 
-#' @title Get and Set 'RAVE' Themes
 #' @export
 get_rave_theme <- rave_context_generics('get_rave_theme', .get_rave_theme)
 
@@ -157,6 +157,7 @@ get_rave_theme.rave_running_local <- get_rave_theme.rave_running
 #' @title Set and Return RAVE theme
 #' @param theme \code{"light"} or \code{"dark"}. See details if missing
 #' @param .set_default whether to save current theme as default, default is no.
+#' @param session shiny session
 #' @details RAVE support two themes: "light" mode and "dark" mode. In "light"
 #' mode, the web application background will be light gray and white. In "dark"
 #' mode, the application background will be gray and foreground will be white.

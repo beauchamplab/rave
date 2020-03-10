@@ -96,7 +96,7 @@ ExecEnvir <- R6::R6Class(
     #' to this environment. The parent environment is \code{param_env}
     runtime_env = NULL,
     
-    #' @field async_env where async codes run
+    #' @field async_env where asynchronous codes run
     async_env = NULL,
     
     #' @field parse_env environment where modules are parsed. The parent 

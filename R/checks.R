@@ -182,6 +182,660 @@ check_subjects2 <- function(
   list(check = re, log = log_data, epochs = epochs, references = references)
 }
 
+#' @title Complete validity check a RAVE subject
+#' @param subject character, must be \code{"project/subject"} format
+#' @param stop_on_error logical, whether stop when error occurs
+#' @return None
+check_subject <- function(subject, stop_on_error = FALSE){
+  stopifnot2(is.character(subject), msg = '`subject` MUST be characters')
+  rave_setup_workers()
+  
+  raise <- function(..., level = 'WARNING'){
+    if(stop_on_error){ stop(gl(...)) }
+    cat2(gl(..., .envir = parent.frame()), level = level)
+  }
+  msg <- function(..., level = 'INFO'){
+    catgl(gl(..., .envir = parent.frame()), level = level)
+  }
+  
+  
+  tmp = strsplit(subject, '/')[[1]]
+  project_name = tmp[1]
+  subject_code = tmp[2]
+  data_dir = normalizePath(rave_options('data_dir'))
+  raw_dir = normalizePath(rave_options('raw_data_dir'))
+  msg('----------------',
+        ' Project [{project_name}] - Subject [{subject_code}] ',
+        '----------------')
+  # ------------------ 1. Check file structure ------------------------
+  msg('1. Check folder existence', level='DEFAULT')
+  # raw folder
+  raw_subdir = file.path(raw_dir, subject_code)
+  if(dir.exists(raw_subdir)){
+    msg('Check raw file directory - Exist')
+  } else{
+    raise('Raw folder is missing - {raw_subdir}\n',
+          '-     If you have imported subject, create an empty',
+          ' folder will fix.')
+  }
+  
+  # data folder
+  sub_dir = file.path(data_dir, project_name, subject_code)
+  if(dir.exists(sub_dir)){
+    msg('Check RAVE file directory - Exist')
+  } else{
+    raise('RAVE folder is missing - {sub_dir}')
+  }
+  
+  # ------ Check subject data folder - sub folders ------
+  res = check_subjects2(project_name = project_name, 
+                  subject_code = subject_code, quiet = TRUE)
+  if(!res$check$power_dir){
+    raise('Power directory missing - ',
+             '{file.path(sub_dir, "rave", "data", "power")}')
+  }
+  if(!res$check$phase_dir){
+    raise('Phase directory missing - ',
+             '{file.path(sub_dir, "rave", "data", "phase")}')
+  }
+  if(!res$check$volt_dir){
+    raise('Voltage directory missing - ',
+             '{file.path(sub_dir, "rave", "data", "voltage")}')
+  }
+  
+  
+  msg('2. Check preprocess steps', level='DEFAULT')
+  if( !res$check$started_preprocess ){
+    raise('Proprocess not started!')
+  }
+  if( !res$check$notch_filter ){
+    raise('No Notch filters applied')
+  }
+  if( !res$check$wavelet ){
+    raise('No power-frequency decomposition applied (wavelet/hilbert/multitaper)')
+  }
+  if( !res$check$reference ){
+    raise('You might want to reference electrodes?')
+  }
+  if( !res$check$meta_dir ){
+    raise('No meta folder detected - {file.path(sub_dir, "rave", "meta")}', 
+          level = 'ERROR')
+  }
+  
+  if( !res$check$meta_electrode ){
+    raise('No {sQuote("electrodes.csv")} detected\n',
+          '-     Please provide electrode label & coordinate file\n',
+          '-     {file.path(sub_dir, "rave", "meta", "electrodes.csv")}\n',
+          '-     Run preprocess (wavelet) should fix',
+          level='ERROR')
+  }
+  if( !res$check$meta_time ){
+    raise('No {sQuote("time_points.csv")} detected - Run preprocess (wavelet) should fix',
+          level = 'ERROR')
+  }
+  if( !res$check$meta_epoch ){
+    raise('No epoch {sQuote("epoch_***.csv")} detected\n',
+          '-     Please provide at least one epoch file, for example:\n',
+          '-     {file.path(sub_dir, "rave", "meta", "epoch_default.csv")}',
+          level = 'ERROR')
+  }
+  if( !res$check$meta_reference ){
+    raise('No reference {sQuote("reference_***.csv")} detected\n',
+          '-     Please provide at least one reference file, for example:\n',
+          '-     {file.path(sub_dir, "rave", "meta", "reference_default.csv")}\n',
+          '-     Run preprocess (wavelet) should fix this problem',
+          level = 'ERROR')
+  }
+  
+  blocks = res$log$preprocess$blocks
+  channels = res$log$preprocess$channels
+  volt_srate = res$log$preprocess$srate
+  
+  if( !length(blocks) ){
+    raise('No block/session found! (FATAL ERROR)', level = 'FATAL')
+  }
+  if( !length(channels) ){
+    raise('No channels/electrode found! (FATAL ERROR)', level = 'FATAL')
+  }
+  if( length(volt_srate) != 1 || volt_srate <= 1 ){
+    raise('iEEG/ECoG data has no sample rate detected', level = 'FATAL')
+  }
+  
+  msg('Blocks - {paste(blocks, collapse = ", ")}')
+  msg('Electrodes - {dipsaus::deparse_svec(channels)}')
+  msg('Original sample rate - {volt_srate} Hz')
+  
+  if( volt_srate < 50 ){
+    raise('Analogtraces has sample rate lower than 50Hz?')
+  }
+  
+  # ------------------ Check raw folder ------------------
+  msg('3. Check raw files', level='DEFAULT')
+  # raw files
+  
+  if( dir.exists(raw_subdir) && length(list.dirs(raw_subdir, recursive = FALSE)) > 0){
+    if(all(file.exists(file.path(raw_subdir, blocks)))){
+      pt = 'ch([0-9]+)\\.[mM][aA][Tt]$'
+      mis = sapply(blocks, function(b){
+        fs = list.files(file.path(raw_subdir, b), pattern = pt)
+        if(length(fs)){
+          fs = stringr::str_match(fs, pt)[,2]
+          fs = as.integer(fs)
+          return(setdiff(channels, fs))
+        }
+        return(NULL)
+      }, simplify = FALSE, USE.NAMES = TRUE)
+      mis = dipsaus::drop_nulls(mis)
+      if(length(mis)){
+        mis = sapply(names(mis), function(nm){
+          sprintf('-     Block %s has missing file(s) - electrode %s',
+                  nm, dipsaus::deparse_svec(mis[[nm]]))
+        })
+        raise('Electrode files are missing\n', paste(mis, collapse = '\n'))
+      }
+    }else{
+      raise('Raw block folders are missing. Check existence of folders:\n',
+            paste('-     ', file.path(file.path(raw_subdir, blocks)), collapse = '\n'))
+    }
+  }else{
+    msg('-     skipped because raw folder is empty or format is non-standard', level = 'DEFAULT')
+  }
+  
+  # ------------------ preprocess/voltage ------------------------
+  msg('4. Validate - rave/preprocess/voltage/...', level='DEFAULT')
+  dirs = get_dir(subject_code = subject_code, project_name = project_name)
+  pre_dir = dirs$preprocess_dir
+  
+  pre_elecs = file.path(pre_dir, 'voltage', sprintf('electrode_%d.h5', channels))
+  fe = file.exists(pre_elecs)
+  if(!all(fe)){
+    mis = dipsaus::deparse_svec(channels[!fe])
+    raise('Electrode(s) {mis} not properly imported (FATAL ERROR)', level = 'FATAL')
+  }
+  
+  validity = dipsaus::lapply_async2(
+    channels, function(e){
+    pre_elec = file.path(pre_dir, 'voltage', sprintf('electrode_%d.h5', e))
+    
+    validity = sapply(blocks, function(b){
+      # -1 : error loading 
+      # 0: missing ot length not match
+      raw_len = tryCatch({
+        d = load_h5(pre_elec, name = sprintf('/raw/%s', b), ram = FALSE)
+        length(d)
+      }, error = function(e){-1})
+      
+      if( raw_len <= 0 ){
+        return(raw_len)
+      }
+      
+      if(res$check$notch_filter){
+        notch_len = tryCatch({
+          d = load_h5(pre_elec, name = sprintf('/notch/%s', b), ram = FALSE)
+          length(d)
+        }, error = function(e){-1})
+      }else{
+        notch_len = raw_len
+      }
+      if( raw_len != notch_len ){
+        return(0)
+      }
+      return(raw_len)
+      
+    })
+    
+    return(validity)
+    
+  }, 
+    callback = function(e){sprintf('Checking electrode %d', e)},
+    plan = FALSE)
+  
+  validity = do.call(rbind, validity)
+  
+  # check corrupted file - raw preprocess
+  corrupted = rowSums(validity < 0) > 0
+  unequallen = rowSums(validity == 0) > 0
+  
+  if(any(corrupted)){
+    raise("Preprocess files corrupted at {file.path(pre_dir, 'voltage', 'electrode_xxx.h5')}:",
+          '-     Electrodes are {dipsaus::deparse_svec(channels[corrupted])}')
+  }else if(any(unequallen)){
+    raise("Notch filter produces different length than original signals\n',
+          '-     Check electrode ({dipsaus::deparse_svec(channels[corrupted])}) at\n',
+          '-     {file.path(pre_dir, 'voltage', 'electrode_xxx.h5')}\n",
+          '-     Details: HDF5 dataset /raw/block has different lengths than /notch/block')
+  }else{
+    msg('Subject data imported and passed initial validity check')
+  }
+  
+  
+  # ------------------ data/voltage files ------------------
+  
+  signal_length = apply(validity, 2, max)
+  
+  if(any(signal_length <= 0)){
+    raise('Invalid analogtrace(s) found', level = 'FATAL')
+  }
+  
+  msg('5. Validate - rave/data/voltage/...', level='DEFAULT')
+  volt_dir = file.path(dirs$channel_dir, 'voltage')
+  if(dir.exists(volt_dir)){
+    # voltage directory
+    
+    fs = file.path(volt_dir, sprintf('%d.h5', channels))
+    fe = file.exists(fs)
+    if(!all(fe)){
+      mis = dipsaus::deparse_svec(channels[!fe])
+      raise('Missing electrode(s) {mis}. Please check folder rave/data/voltage/')
+    } else{
+      # check validity
+      
+      validity = do.call('rbind', dipsaus::lapply_async2(channels, function(e){
+        f = file.path(volt_dir, sprintf('%d.h5', e))
+        
+        # check length
+        raw_lens = sapply(blocks, function(b){
+          l = 0
+          l = try({
+            raw = load_h5(f, sprintf('/raw/voltage/%s', b), ram = FALSE)
+            length(raw)
+          }, silent = TRUE)
+          l
+        })
+        ref_lens = sapply(blocks, function(b){
+          l = 0
+          l = try({
+            raw = load_h5(f, sprintf('/ref/voltage/%s', b), ram = FALSE)
+            length(raw)
+          }, silent = TRUE)
+          l
+        })
+        
+        
+        c(all(raw_lens > 0), all(raw_lens == signal_length), 
+          all(ref_lens == signal_length))
+      }, 
+      callback = function(e){sprintf('Checking electrode %d', e)},plan = FALSE))
+      
+      if(!all(validity[,1])){
+        raise('Possible corrupted files found in folder\n',
+              '-     {volt_dir}\n',
+              '-     Electrodes: {dipsaus::deparse_svec(channels[!validity[,1]])}')
+      } else if(!all(validity[,2])){
+        raise('Voltage data (raw) lengths not match with preprocess in folder\n',
+              '-     {volt_dir}\n',
+              '-     Electrodes: {dipsaus::deparse_svec(channels[!validity[,2]])}')
+      } else if (!all(validity[,3])){
+        raise('Voltage data (ref) lengths not match with (raw) in folder\n',
+              '-     {volt_dir}\n',
+              '-     Electrodes: {dipsaus::deparse_svec(channels[!validity[,3]])}')
+      } else{
+        msg('Subject has valid voltage data')
+      }
+      
+    }
+    
+  }
+  
+  # ------------------ data/power, phase files ------------------
+  # check wavelet files
+  if(res$check$wavelet){
+    wave_log = res$log$preprocess$wavelet_log
+    wave_log = wave_log[[length(wave_log)]]
+    
+    n_freq = length(wave_log$frequencies)
+    wave_srate = wave_log$target_srate
+    
+    expected_length = floor(signal_length / volt_srate * wave_srate) + 1
+    
+    
+    for(dtype in c('power', 'phase')){
+      
+      dpath = file.path(dirs$rave_dir, 'data', dtype)
+      
+      fs = file.path(dpath, sprintf('%d.h5', channels))
+      fe = file.exists(fs)
+      if(!all(fe)){
+        mis = dipsaus::deparse_svec(channels[!fe])
+        raise('Missing electrode(s) {mis}. Please check folder rave/data/{dtype}/')
+      } else{
+        # check validity
+        
+        validity = do.call('rbind', dipsaus::lapply_async2(channels, function(e){
+          f = file.path(dpath, sprintf('%d.h5', e))
+          
+          # check length
+          raw_lens = sapply(blocks, function(b){
+            l = 0
+            l = try({
+              raw = load_h5(f, sprintf('/raw/%s/%s', dtype, b), ram = FALSE)
+              raw = dim(raw)
+              if(raw[1] != n_freq){return(0)}
+              raw[2]
+            }, silent = TRUE)
+            l
+          })
+          ref_lens = sapply(blocks, function(b){
+            l = 0
+            l = try({
+              raw = load_h5(f, sprintf('/ref/%s/%s', dtype, b), ram = FALSE)
+              raw = dim(raw)
+              if(raw[1] != n_freq){return(0)}
+              raw[2]
+            }, silent = TRUE)
+            l
+          })
+          
+          c(all(raw_lens > 0), all(abs(raw_lens - expected_length) < 10), 
+            all(ref_lens == raw_lens))
+        }, 
+        callback = function(e){sprintf('Checking electrode %d', e)},plan = FALSE))
+        
+        if(!all(validity[,1])){
+          raise('Possible corrupted files found in folder\n',
+                '-     {dpath}\n',
+                '-     Electrodes: {dipsaus::deparse_svec(channels[!validity[,1]])}')
+        } else if(!all(validity[,2])){
+          raise('Voltage data (raw) lengths not match with preprocess in folder\n',
+                '-     {dpath}\n',
+                '-     Electrodes: {dipsaus::deparse_svec(channels[!validity[,2]])}')
+        } else if (!all(validity[,3])){
+          raise('Voltage data (ref) lengths not match with (raw) in folder\n',
+                '-     {dpath}\n',
+                '-     Electrodes: {dipsaus::deparse_svec(channels[!validity[,3]])}')
+        } else{
+          msg('Subject has valid {dtype} data')
+        }
+        
+      }
+      
+      
+      
+    }
+    
+  } else{
+    fs = list.files(file.path(dirs$cache_dir, c('power', 'phase')), 
+                    pattern = '\\.h5$', all.files = TRUE, full.names = TRUE, recursive = TRUE)
+    if(length(fs)){
+      validity = unlist(dipsaus::lapply_async2(fs, function(f){
+        tryCatch({
+          f = hdf5r::H5File$new(filename = f, mode = 'r')
+          f$close_all()
+          TRUE
+        }, error = function(e){
+          FALSE
+        })
+      }))
+      if(!all(validity)){
+        mis = paste(fs[!validity], collapse = '\n')
+        raise('The following HDF5 files might be broken:\n', mis)
+      }
+    }else{
+      msg('Skipped power & phase data checks because no data found', level = 'DEBUG')
+    }
+  }
+  # ------------------ reference content ------------------
+  msg('7 Validate - rave/data/reference', level = 'DEFAULT)')
+  ref_dir = file.path(dirs$cache_dir, 'reference')
+  refs = list.files(ref_dir, '\\.h5$')
+  if(length(refs)){
+    lapply(refs, function(ref){
+      f = file.path(ref_dir, ref)
+      p = hdf5r::H5File$new(f, mode = 'r')
+      
+      vlen = sapply(blocks, function(b){
+        tryCatch({
+          length(load_h5(f, sprintf('/voltage/%s', b), ram = FALSE))
+        }, error = function(e){
+          0
+        })
+      })
+      
+      if(!all(vlen == signal_length)){
+        raise('Reference file rave/data/reference/{f} has invalid data length')
+        return()
+      }
+      
+      if(res$check$wavelet){
+        vlen = sapply(blocks, function(b){
+          tryCatch({
+            dim = dim(load_h5(f, sprintf('/wavelet/coef/%s', b), ram = FALSE))
+            stopifnot(dim[[1]] == n_freq, dim[3] == 2)
+            dim[[2]]
+          }, error = function(e){
+            0
+          })
+        })
+        
+        if(!all(abs(vlen - expected_length) < 10)){
+          raise('Reference file rave/data/reference/{f} has invalid data length')
+          return()
+        }
+      }
+    })
+  }
+  
+  
+  # ------------------ epoch files ------------------
+  msg('8. Validate epoch files - rave/meta/epoch_***.csv', level = 'DEFAULT)')
+  # epoch
+  if(res$check$meta_epoch){
+    lapply(res$epochs, function(epoch){
+      f = sprintf('epoch_%s.csv', epoch)
+      dat = read.csv(file.path(dirs$meta_dir, f), colClasses = 'character')
+      # 1. check required names
+      headers = c('Block', 'Time', 'Trial', 'Condition')
+      mis = !headers %in% names(dat)
+      pass = TRUE
+      if(any(mis)){
+        raise('Epoch {sQuote(f)} - misses headers: {paste(sQuote(headers[mis]), collapse=",")}')
+        pass = FALSE
+      } else{
+        # check if blocks are valid
+        if(!setequal(unique(dat$Block), blocks)){
+          raise('Mis-matches found in {sQuote(f)} in column {sQuote("Block")}\n',
+                '-     Blocks registered: {paste(sQuote(blocks), collapse=",")}\n',
+                '-     Blocks found in epoch: {paste(sQuote(unique(dat$Block)), collapse=",")}')
+          pass = FALSE
+        }
+        
+        # check if time is valid
+        time_cap = signal_length / volt_srate
+        time = as.numeric(dat$Time)
+        if(any(is.na(time))){
+          mis = dipsaus::deparse_svec(which(is.na(time)))
+          raise('Epoch {sQuote(f)} - NA found in column {sQuote("Time")}, row {mis}. Please remove.')
+          pass = FALSE
+        }
+        
+        time[is.na(time)] = 1
+        
+        validity = unlist(sapply(seq_along(blocks), function(ii){
+          b = blocks[ii]
+          sel = dat$Block == b
+          validity = time < time_cap[ii] & time > 0 & sel
+          which(sel & !validity)
+        }))
+        
+        if(length(validity)){
+          mis = dipsaus::deparse_svec(validity)
+          raise('Epoch {sQuote(f)}: Invalid onset time found at row {mis}')
+          pass = FALSE
+        }
+        
+      }
+      
+      if(pass){
+        msg('Epoch {sQuote(f)} - passed')
+      }
+    })
+  }else{
+    msg('Skipped because no epoch files found', level = 'DEBUG')
+  }
+  
+  
+  # ------------------ electrodes files ------------------
+  msg('9. Validate - rave/meta/electrodes.csv', level = 'DEFAULT)')
+  electrodes = load_meta('electrodes', project_name, subject_code)
+  msg('Skipped - (Validation not yet implemented)', level = 'DEBUG')
+  
+  # ------------------ reference files ------------------
+  msg('10. Validate - rave/meta/reference_***.csv', level = 'DEFAULT)')
+  if(res$check$meta_reference){
+    lapply(res$references, function(ref){
+      f = sprintf('reference_%s.csv', ref)
+      dat = read.csv(file.path(dirs$meta_dir, f), stringsAsFactors = FALSE)
+      # 1. check required names
+      headers = c('Electrode', 'Group', 'Reference', 'Type')
+      mis = !headers %in% names(dat)
+      pass = TRUE
+      if(any(mis)){
+        raise('Reference {sQuote(f)} - misses headers: {paste(sQuote(headers[mis]), collapse=",")}')
+        pass = FALSE
+      } else{
+        # check if electrodes are valid
+        if(!setequal(dat$Electrode, electrodes$Electrode)){
+          raise('Reference {sQuote(f)}: electrodes not match with {sQuote("electroddes.csv")}')
+          pass = FALSE
+        }
+        # check reference existence
+        refs = stringr::str_match(dat$Reference, '^ref_([0-9,\\-]+)$')[,2]
+        refs = unique(refs[refs != 'noref'])
+        
+        ref1 = sapply(refs, function(x){length(dipsaus::parse_svec(x)) > 1})
+        ref2 = refs[!ref1]
+        ref1 = refs[ref1]
+        
+        if(length(ref1)){
+          # check ref folder
+          fs = sprintf('ref_%s.h5', ref1)
+          fe = file.exists(file.path(dirs$reference_dir, fs))
+          if(!all(fe)){
+            raise('Reference {sQuote(f)}: file(s) claimed but miss from rave/data/reference/\n',
+                  paste('-     ', fs[!fe], collapse = '\n'))
+            pass = FALSE
+          }
+        }
+        if(length(ref2)){
+          fs = sprintf('%s.h5', ref2)
+          fe = sapply(ref2, function(e){
+            b = blocks[1]
+            # check existence
+            tryCatch({
+              for(dtype in c('voltage', 'power', 'phase')){
+                dat = load_fst_or_h5(
+                  fst_path = file.path(dirs$cache_dir, 'cache', dtype, 'raw', b, 
+                                       sprintf('%s.fst', e)),
+                  h5_path = file.path(dirs$cache_dir, dtype, sprintf('%s.h5', e)), 
+                  h5_name = sprintf('/raw/%s/%s', dtype, b), ram = FALSE
+                )
+              }
+              TRUE
+            }, error = function(e){
+              FALSE
+            })
+            
+          })
+          
+          if(!all(fe)){
+            raise('Reference {sQuote(f)}: Electrode required but missing or broken\n',
+                  paste('-     ', fs[!fe], collapse = '\n'))
+            pass = FALSE
+          }
+        }
+        
+      }
+      if(pass){
+        msg('Reference {sQuote(f)} - passed')
+      }
+    })
+    
+  }else{
+    msg('Skipped because no reference files found', level = 'DEBUG')
+  }
+  
+  # ------------------ Redundancy check ------------------
+  msg('11. Redundancy check - rave/data/cache/', level = 'DEFAULT)')
+  cache_dir = file.path(dirs$cache_dir, 'cache')
+  if(!dir.exists(cache_dir)){
+    msg('Skipped - No cache found', level = 'DEBUG')
+  }else{
+    # test whether we can open fst files, do not check dimension
+    fs = list.files(cache_dir, pattern = '\\.fst$', 
+                    full.names = FALSE, recursive = TRUE, all.files = TRUE)
+    if(length(fs)){
+      fe = unlist(dipsaus::lapply_async2(fs, function(f){
+        tryCatch({
+          LazyFST$new(file_path = file.path(cache_dir, f), transpose = FALSE)
+          TRUE
+        }, error = function(e){
+          FALSE
+        })
+      }, plan = FALSE, callback = function(f){
+        'checking...'
+      }))
+      
+      if(!all(fe)){
+        mis = fs[!fe]
+        if(length(mis) > 10){
+          mis = c(mis[1:5], '...', mis[length(mis) - c(4:1)])
+        }
+        mis = paste('-     ', mis, collapse = '\n')
+        raise('Cannot open cache files\n', mis)
+      } else{
+        msg('Cached data files are valid')
+      }
+    }
+    
+    cache_ref = file.path(cache_dir, 'cached_reference.csv')
+    if(file.exists(cache_ref)){
+      cache_ref = read.csv(cache_ref)
+      validity = dipsaus::lapply_async2(seq_len(nrow(cache_ref)), function(ii){
+        row = cache_ref[ii,]
+        e = row$Electrode
+        ref = row$Reference
+        
+        # 1. check whether reference match with H5 files
+        for(dtype in c('voltage', 'power', 'phase')){
+          validity = tryCatch({
+            f = file.path(dirs$cache_dir, dtype, sprintf('%d.h5', e))
+            ref_orig = load_h5(f, 'reference', ram = TRUE)
+            if(ref_orig != ref){
+              FALSE
+            }
+            TRUE
+          }, error = function(e){
+            FALSE
+          })
+          
+          if(!validity){
+            return(FALSE)
+          }
+        }
+        return(TRUE)
+        
+      }, plan = FALSE, callback = function(ii){
+        'Checking cached references..'
+      })
+      
+      validity = unlist(validity)
+      if(!all(validity)){
+        mis = cache_ref$Electrode[!validity]
+        mis = dipsaus::deparse_svec(mis)
+        raise('Cached references mismatch with data files: Electrode(s) ', mis)
+      }else{
+        msg('Cached references match with data files')
+      }
+    }
+    
+    
+  }
+  
+  # ------------------ end ------------------
+  msg('Done')
+  invisible()
+  
+}
 
 
 #' check subject validity tools (use check_subjects2)
@@ -191,7 +845,7 @@ check_subjects2 <- function(
 #' @param folders folders to check
 #' @param preprocess preprocess to check
 #' @param Meta Meta to check
-check_subjects <- function(
+check_subjects_old <- function(
   project_name, subject_code, check = TRUE,
   folders = c('Subject Folder', 'RAVE Folder', 'Preprocessing Folder', 'Meta Folder', 'Channel Folder'),
   preprocess = c('Started Preprocess', 'Notch Filter', 'Wavelet'),

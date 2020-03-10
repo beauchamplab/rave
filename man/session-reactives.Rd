@@ -14,15 +14,15 @@
 \alias{getDefaultReactiveOutput.rave_running_local}
 \title{Get `shiny' "input" and "output" objects under current context}
 \usage{
-getDefaultReactiveInput()
+getDefaultReactiveInput(session)
 
-\method{getDefaultReactiveInput}{default}()
+\method{getDefaultReactiveInput}{default}(session)
 
-\method{getDefaultReactiveInput}{rave_module_debug}()
+\method{getDefaultReactiveInput}{rave_module_debug}(session)
 
 \method{getDefaultReactiveInput}{rave_running}(session = shiny::getDefaultReactiveDomain())
 
-\method{getDefaultReactiveInput}{rave_running_local}()
+\method{getDefaultReactiveInput}{rave_running_local}(session)
 
 getDefaultReactiveOutput(session = shiny::getDefaultReactiveDomain())
 

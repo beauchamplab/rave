@@ -45,7 +45,7 @@ test_that('Checkers - checks.R', {
     # check is all logical
     expect_true(all(sapply(res$check, function(x){ length(x) == 1 && is.logical(x) })))
     
-    res = check_subjects(project_name = 'demo', subject_code = 'YAB')
+    res = check_subjects_old(project_name = 'demo', subject_code = 'YAB')
     expect_true(is.environment(res$adapter))
     
     expect_false(res$error)
@@ -114,7 +114,7 @@ test_that('Class Electrode with demo/YAB', {
     dm = c(nrow(ep), nrow(fq), sub$sample_rate * 3 + 1, 1)
     
     expect_equivalent(dim(d$power$.__enclos_env__$private$.data), dm)
-    expect_equivalent(names(e$raw_power), sub$preprocess_info('blocks'))
+    expect_true(setequal(e$raw_power$keys(), sub$preprocess_info('blocks')))
     
     # Check phase
     d = e$epoch(epoch_name = epoch, pre = 1, post = 2, types = 'phase', raw = FALSE, hybrid = FALSE)
@@ -132,11 +132,10 @@ test_that('Class Electrode with demo/YAB', {
       'power', 'phase', 'volt',
       'raw_power', 'raw_phase', 'raw_volt'
     ), force = TRUE)
-    expect_length(names(e$phase), 0)
-    expect_length(names(e$raw_power), 0)
+    expect_equal(e$phase$size(), 0)
+    expect_equal(e$raw_power$size(), 0)
     
   })
-  
   
   
 })
