@@ -186,6 +186,7 @@ check_subjects2 <- function(
 #' @param subject character, must be \code{"project/subject"} format
 #' @param stop_on_error logical, whether stop when error occurs
 #' @return None
+#' @export
 check_subject <- function(subject, stop_on_error = FALSE){
   stopifnot2(is.character(subject), msg = '`subject` MUST be characters')
   rave_setup_workers()

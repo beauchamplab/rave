@@ -52,6 +52,7 @@ Zhengjia Wang
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-finalize"></a>}}
+\if{latex}{\out{\hypertarget{method-finalize}{}}}
 \subsection{Method \code{finalize()}}{
 garbage collection method
 \subsection{Usage}{
@@ -64,6 +65,7 @@ none
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-print"></a>}}
+\if{latex}{\out{\hypertarget{method-print}{}}}
 \subsection{Method \code{print()}}{
 overrides print method
 \subsection{Usage}{
@@ -76,6 +78,7 @@ self instance
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
+\if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
 constructor
 \subsection{Usage}{
@@ -101,6 +104,7 @@ self instance
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-save"></a>}}
+\if{latex}{\out{\hypertarget{method-save}{}}}
 \subsection{Method \code{save()}}{
 save data to a 'HDF5' file
 \subsection{Usage}{
@@ -146,6 +150,7 @@ of \code{x}. Try \code{mode(x)} or \code{storage.mode(x)} as hints.}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-open"></a>}}
+\if{latex}{\out{\hypertarget{method-open}{}}}
 \subsection{Method \code{open()}}{
 open connection
 \subsection{Usage}{
@@ -167,6 +172,7 @@ to write the data}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-close"></a>}}
+\if{latex}{\out{\hypertarget{method-close}{}}}
 \subsection{Method \code{close()}}{
 close connection
 \subsection{Usage}{
@@ -185,6 +191,7 @@ will be closed}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-subset"></a>}}
+\if{latex}{\out{\hypertarget{method-subset}{}}}
 \subsection{Method \code{subset()}}{
 subset data
 \subsection{Usage}{
@@ -211,6 +218,7 @@ subset of data
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-get_dims"></a>}}
+\if{latex}{\out{\hypertarget{method-get_dims}{}}}
 \subsection{Method \code{get_dims()}}{
 get data dimension
 \subsection{Usage}{
@@ -230,6 +238,7 @@ dimension of the array
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

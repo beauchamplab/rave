@@ -65,6 +65,7 @@ package. This value is required to be true since \code{"rave-0.1.9"}.}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-info"></a>}}
+\if{latex}{\out{\hypertarget{method-info}{}}}
 \subsection{Method \code{info()}}{
 print module information
 \subsection{Usage}{
@@ -77,6 +78,7 @@ none
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-print"></a>}}
+\if{latex}{\out{\hypertarget{method-print}{}}}
 \subsection{Method \code{print()}}{
 print module information and returns memory address
 \subsection{Usage}{
@@ -93,6 +95,7 @@ print module information and returns memory address
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
+\if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
 constructor
 \subsection{Usage}{
@@ -123,6 +126,7 @@ constructor
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-get_or_new_exec_env"></a>}}
+\if{latex}{\out{\hypertarget{method-get_or_new_exec_env}{}}}
 \subsection{Method \code{get_or_new_exec_env()}}{
 get the corresponding \code{\link[rave]{ExecEnvir}} with 
 shiny session
@@ -153,6 +157,7 @@ current module and given session
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-load_script"></a>}}
+\if{latex}{\out{\hypertarget{method-load_script}{}}}
 \subsection{Method \code{load_script()}}{
 load and compile script into registered 
 \code{\link[rave]{ExecEnvir}}
@@ -173,6 +178,7 @@ none
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-render_ui"></a>}}
+\if{latex}{\out{\hypertarget{method-render_ui}{}}}
 \subsection{Method \code{render_ui()}}{
 generate 'HTML' tags
 \subsection{Usage}{
@@ -192,6 +198,7 @@ generate 'HTML' tags
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clean"></a>}}
+\if{latex}{\out{\hypertarget{method-clean}{}}}
 \subsection{Method \code{clean()}}{
 clean the module environment
 \subsection{Usage}{

@@ -40,6 +40,7 @@ Zhengjia Wang
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-flatten"></a>}}
+\if{latex}{\out{\hypertarget{method-flatten}{}}}
 \subsection{Method \code{flatten()}}{
 converts tensor (array) to a table (data frame)
 \subsection{Usage}{
@@ -62,6 +63,7 @@ a data frame with the dimension names as index columns and
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
+\if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
 constructor
 \subsection{Usage}{
@@ -113,6 +115,7 @@ an \code{ECoGTensor} instance
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{
