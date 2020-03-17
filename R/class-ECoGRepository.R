@@ -359,7 +359,7 @@ ECoGRepository <- R6::R6Class(
             power
           }, callback = function(e){
             sprintf('Loading power| - electrode %d', e)
-          }, plan = FALSE)
+          }, plan = FALSE, future.chunk.size = 1)
           
           power = join_tensors(results)
           
@@ -404,7 +404,7 @@ ECoGRepository <- R6::R6Class(
             return(phase)
           }, callback = function(e){
             sprintf('Loading phase| - electrode %d', e)
-          }, plan = FALSE)
+          }, plan = FALSE, future.chunk.size = 1)
           phase = join_tensors(results)
           count = count + 1
           # gc()
@@ -453,7 +453,7 @@ ECoGRepository <- R6::R6Class(
             return(volt)
           }, callback = function(e){
             sprintf('Loading voltage| - electrode %d', e)
-          }, plan = FALSE)
+          }, plan = FALSE, future.chunk.size = 1)
           
           volt = join_tensors(results)
           count = count + 1
@@ -510,7 +510,7 @@ ECoGRepository <- R6::R6Class(
           return(elc)
         }, call_back = function(e){
           sprintf('Preparing electrode - %d', e)
-        }) 
+        }, future.chunk.size = 1) 
         gc()
         
         return(results)
