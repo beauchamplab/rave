@@ -79,7 +79,9 @@ restart_r <- function(){
 #' @title Check and Install RAVE Dependencies
 #' @param update_rave logical, whether to update RAVE
 #' @param restart logical, whether to restart `RStudio` after installation
-#' @param skip numeric, to skip some updates
+#' @param nightly logical, whether to install develop version
+#' @param demo_data logical, whether to check demo data
+#' @param ... for compatibility purpose, ignored
 #' @export
 check_dependencies <- function(update_rave = TRUE, restart = TRUE, 
                                nightly = FALSE, demo_data = TRUE, ...){

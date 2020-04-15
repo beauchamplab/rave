@@ -17,7 +17,11 @@ check_dependencies(
 
 \item{restart}{logical, whether to restart `RStudio` after installation}
 
-\item{skip}{numeric, to skip some updates}
+\item{nightly}{logical, whether to install develop version}
+
+\item{demo_data}{logical, whether to check demo data}
+
+\item{...}{for compatibility purpose, ignored}
 }
 \description{
 Check and Install RAVE Dependencies

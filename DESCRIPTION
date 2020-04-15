@@ -40,7 +40,7 @@ Imports:
     cli,
     fastmap (>= 1.0.1),
     signal (>= 0.7-6),
-    dipsaus (>= 0.0.3),
+    dipsaus (>= 0.0.6),
     hdf5r (>= 1.0.0),
     R.matlab (>= 3.6.1),
     R6 (>= 2.2.2),
