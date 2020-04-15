@@ -225,7 +225,7 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
       )
     }
     update_txt = c(update_txt,
-                   "  remotes::install_github('beauchamplab/rave@dev-1.0.0', upgrade = FALSE, force = FALSE, quiet = TRUE)")
+                   "  remotes::install_github('beauchamplab/rave@dev-1.0', upgrade = FALSE, force = FALSE, quiet = TRUE)")
     
     ss <- c(
       "try({",
