@@ -432,7 +432,12 @@ check_subject <- function(subject, stop_on_error = FALSE){
       # check validity
       
       validity = do.call('rbind', dipsaus::lapply_async2(channels, function(e){
+        
         f = file.path(volt_dir, sprintf('%d.h5', e))
+        
+        if(!file.exists(f)){
+          return(c(FALSE, FALSE, FALSE))
+        }
         
         # check length
         raw_lens = sapply(blocks, function(b){
@@ -505,6 +510,10 @@ check_subject <- function(subject, stop_on_error = FALSE){
         validity = do.call('rbind', dipsaus::lapply_async2(channels, function(e){
           f = file.path(dpath, sprintf('%d.h5', e))
           
+          if(!file.exists(f)){
+            return(c(FALSE, FALSE, FALSE))
+          }
+          
           # check length
           raw_lens = sapply(blocks, function(b){
             l = 0
@@ -527,8 +536,12 @@ check_subject <- function(subject, stop_on_error = FALSE){
             l
           })
           
-          c(all(raw_lens > 0), all(abs(raw_lens - expected_length) < 10), 
-            all(ref_lens == raw_lens))
+          tryCatch({
+            c(all(raw_lens > 0), all(abs(raw_lens - expected_length) < 10), 
+              all(ref_lens == raw_lens))
+          }, error = function(e){
+            c(FALSE,FALSE,FALSE)
+          })
         }, 
         callback = function(e){sprintf('Checking electrode %d', e)},plan = FALSE))
         
