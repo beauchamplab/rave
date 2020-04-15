@@ -222,11 +222,12 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
     update_txt = NULL
     if(update_rave){
       update_txt <- c(
-        "remotes::install_github('dipterix/dipsaus', upgrade = FALSE, force = FALSE, quiet = TRUE)"
+        "  remotes::install_github('beauchamplab/rave@dev-1.0', upgrade = FALSE, force = FALSE, quiet = TRUE)"
       )
     }
-    update_txt = c(update_txt,
-                   "  remotes::install_github('beauchamplab/rave@dev-1.0', upgrade = FALSE, force = FALSE, quiet = TRUE)")
+    update_txt = c(
+      "try({remotes::install_github('dipterix/dipsaus', upgrade = FALSE, force = FALSE, quiet = TRUE)})",
+      update_txt)
     
     ss <- c(
       "try({",
