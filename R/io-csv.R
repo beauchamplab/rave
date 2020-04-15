@@ -14,7 +14,23 @@ safe_write_csv <- function(data, file, ..., quiet = FALSE){
     }
     file.rename(file, oldfile)
   }
-  utils::write.csv(data, file, ...)
+  
+  tryCatch({
+    utils::write.csv(data, file, ...)
+  }, error = function(e){
+    args = list(...)
+    
+    rn <- args$row.names
+    
+    call_args <- list(x = quote(data), file = file)
+    call_args$col.names <- if (is.logical(rn) && !rn) TRUE else NA
+    call_args$sep <- ","
+    call_args$dec <- "."
+    call_args$qmethod <- "double"
+    
+    do.call(utils::write.table, call_args)
+  })
+  
 }
 
 
