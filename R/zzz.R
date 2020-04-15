@@ -63,81 +63,185 @@ rave_version <- function(){
 
 }
 
+
+restart_r <- function(){
+  f <- get0(".rs.restartR")
+  if (is.function(f)) {
+    message("Restarting RStudio rsession. Might take a while. Please wait...")
+    f()
+    return(invisible())
+  }
+  message("Using startup::restart()")
+  startup::restart()
+  return(invisible())
+}
+
 #' @title Check and Install RAVE Dependencies
 #' @param update_rave logical, whether to update RAVE
 #' @param restart logical, whether to restart `RStudio` after installation
 #' @param skip numeric, to skip some updates
 #' @export
-check_dependencies <- function(update_rave = TRUE, restart = TRUE, skip = 0){
-  threshold = 2
+check_dependencies <- function(update_rave = TRUE, restart = TRUE, 
+                               nightly = FALSE, demo_data = TRUE, ...){
   
-  cat2 <- dipsaus::cat2
+  # Check N27 brain
+  dipsaus::cat2('Checking N27 brain', level = 'DEFAULT', end = '\n')
+  threeBrain::merge_brain()
+  dipsaus::cat2('   - Done', level = 'INFO', end = '\n')
   
-  if( skip <= 0 ){
-    cat2('Checking package rutabaga - Plot Helpers', level = 'INFO', end = '\n')
-    if('rutabaga' %in% loadedNamespaces()){ devtools::unload('rutabaga', quiet = TRUE) }
-    t1 = Sys.time()
-    remotes::install_github('dipterix/rutabaga@develop', upgrade = FALSE, force = FALSE, quiet = TRUE)
-    if(as.numeric(Sys.time() - t1, units = 'secs') < threshold){
-      cat2('  - Already up to date', level = 'DEFAULT', end = '\n')
-    }else{
-      cat2('  - Updated', level = 'DEFAULT', end = '\n')
+  
+  # Check demo subjects
+  if( demo_data ){
+    dipsaus::cat2('Checking RAVE data repository', level = 'DEFAULT', end = '\n')
+    p = get_projects()
+    has_demo = FALSE
+    if('demo' %in% p){
+      subs = get_subjects('demo')
+      if(length(subs)){
+        has_demo = TRUE
+      }
+    }
+    if(!has_demo){
+      # install demo subjects
+      download_sample_data('_group_data', replace_if_exists = TRUE)
+      download_sample_data('KC')
+      download_sample_data('YAB')
+    }
+    dipsaus::cat2('   - Done', level = 'INFO', end = '\n')
+  }
+  
+  
+  
+  lazy_install <- NULL
+  lazy_github <- NULL
+  
+  # check if Rcpp version is 1.0.4 and os is macosx
+  if(stringr::str_detect(R.version$os, "^darwin")){
+    rcpp_version <- utils::packageVersion('Rcpp')
+    if(utils::compareVersion(as.character(rcpp_version), '1.0.4') == 0){
+      # you need to install
+      lazy_install <- c(lazy_install, 'Rcpp')
     }
   }
   
-  if( skip <= 1 ){
-    cat2('Checking package threeBrain - 3D Viewer', level = 'INFO', end = '\n')
-    if('threeBrain' %in% loadedNamespaces()){ devtools::unload('threeBrain', quiet = TRUE) }
-    t1 = Sys.time()
-    remotes::install_github('dipterix/threeBrain', upgrade = FALSE, force = FALSE, quiet = TRUE)
-    if(as.numeric(Sys.time() - t1, units = 'secs') < threshold){
-      cat2('  - Already up to date', level = 'DEFAULT', end = '\n')
-    }else{
-      cat2('  - Updated', level = 'DEFAULT', end = '\n')
+  # Case 1: nightly is false, then use prebuilt version
+  if(!nightly){
+    
+    if(update_rave){
+      lazy_install <- c(lazy_install, 'rave')
     }
-  }
-  
-  if( skip <= 2 ){
-    cat2('Checking package ravebuiltins - Default RAVE modules', level = 'INFO', end = '\n')
-    if('ravebuiltins' %in% loadedNamespaces()){ devtools::unload('ravebuiltins', quiet = TRUE) }
-    t1 = Sys.time()
-    remotes::install_github('beauchamplab/ravebuiltins@migrate2', upgrade = FALSE, force = FALSE, quiet = TRUE)
-    if(as.numeric(Sys.time() - t1, units = 'secs') < threshold){
-      cat2('  - Already up to date', level = 'DEFAULT', end = '\n')
-    }else{
-      cat2('  - Updated', level = 'DEFAULT', end = '\n')
+    
+    dipsaus::prepare_install(
+      c(lazy_install, 'rave', 'ravebuiltins', 'dipsaus', 
+        'threeBrain', 'rutabaga'),
+      restart = FALSE
+    )
+    
+    profile <- startup::find_rprofile()
+    if (!length(profile)) {
+      startup::install()
     }
-  }
-  
-  if( skip <= 3 ){
-    cat2('Checking package dipsaus - System Utils', level = 'INFO', end = '\n')
-    if('dipsaus' %in% loadedNamespaces()){ devtools::unload('dipsaus', quiet = TRUE) }
-    t1 = Sys.time()
-    remotes::install_github('dipterix/dipsaus', upgrade = FALSE, force = FALSE, quiet = TRUE)
-    if(as.numeric(Sys.time() - t1, units = 'secs') < threshold){
-      cat2('  - Already up to date', level = 'DEFAULT', end = '\n')
-    }else{
-      cat2('  - Updated', level = 'DEFAULT', end = '\n')
+    profile <- startup::find_rprofile()
+    s <- readLines(profile)
+    
+    # find line
+    sel <- s == "# --- dipsaus temporary startup (END)---"
+    if(any(sel)){
+      idx <- which(sel)
+      idx <- idx[[length(idx)]] - 1
+      # insert arrangement
+      
+      ss <- c(
+        "try({",
+        "  dipsaus::cat2('Arranging all existing RAVE modules', level = 'DEFAULT', end = '\\n')",
+        "  rave::arrange_modules(refresh = TRUE, reset = FALSE, quiet = TRUE)",
+        "})"
+      )
+      s = c(s[seq_len(idx)], ss, s[-seq_len(idx)])
+      writeLines(s, profile)
     }
+    
+    if(restart){
+      restart_r()
+    }
+    
+    return(invisible())
   }
   
   
-  if( update_rave && skip <= 4 ){
-    cat2('Update RAVE', level = 'DEFAULT', end = '\n')
-    remotes::install_github('beauchamplab/rave', upgrade = FALSE, force = FALSE, quiet = TRUE)
-    cat2('Finished. If R does not restart correctly, please manually restart the session \n\tGo to task bar -> Session > Restart R',
-         level = 'INFO', end = '\n')
+  # Case 2: nighly version
+  deps <- list(
+    list(
+      name = 'rutabaga',
+      note = 'Plot Helpers',
+      repo = 'dipterix/rutabaga@develop'
+    ),
+    list(
+      name = 'threeBrain',
+      note = '3D Viewer',
+      repo = 'dipterix/threeBrain'
+    ),
+    list(
+      name = 'ravebuiltins',
+      note = 'Default RAVE modules',
+      repo = 'beauchamplab/ravebuiltins@migrate2'
+    )
+  )
+  
+  
+  for(pinfo in deps){
+    catgl('Checking {pinfo$name} - {pinfo$note} (github: {pinfo$repo})',
+         level = 'DEFAULT', end = '\n')
+    tryCatch({
+      if(pinfo$name %in% loadedNamespaces()){ devtools::unload(pinfo$name, quiet = TRUE) }
+      remotes::install_github(pinfo$repo, upgrade = FALSE, force = FALSE, quiet = TRUE)
+      message('  - Done', end = '\n')
+    }, error = function(e){
+      lazy_github <<- c(lazy_github, pinfo$repo)
+    })
   }
   
+  # Now it's critical as dipsaus and rave cannot be updated here, register startup code
+  lazy_install <- c(lazy_install, 'dipsaus')
+  dipsaus::prepare_install(lazy_install, restart = FALSE)
+  
+  profile <- startup::find_rprofile()
+  if (!length(profile)) {
+    startup::install()
+  }
+  profile <- startup::find_rprofile()
+  s <- readLines(profile)
+  
+  # find line
+  sel <- s == "# --- dipsaus temporary startup (END)---"
+  if(any(sel)){
+    idx <- which(sel)
+    idx <- idx[[length(idx)]] - 1
+    # insert arrangement
+    update_txt = NULL
+    if(update_rave){
+      update_txt <- c(
+        "remotes::install_github('dipterix/dipsaus', upgrade = FALSE, force = FALSE, quiet = TRUE)"
+      )
+    }
+    update_txt = c(update_txt,
+                   "  remotes::install_github('beauchamplab/rave@dev-1.0.0', upgrade = FALSE, force = FALSE, quiet = TRUE)")
+    
+    ss <- c(
+      "try({",
+      update_txt,
+      "  dipsaus::cat2('Arranging all existing RAVE modules', level = 'DEFAULT', end = '\\n')",
+      "  rave::arrange_modules(refresh = TRUE, reset = FALSE, quiet = TRUE)",
+      "})"
+    )
+    s = c(s[seq_len(idx)], ss, s[-seq_len(idx)])
+    writeLines(s, profile)
+  }
   
   if(restart){
-    rm(list = ls(envir = globalenv()), envir = globalenv())
-    f = get0('.rs.restartR', envir = globalenv(), ifnotfound = NULL)
-    if(is.function(f)){
-      do.call(f, list('library("rave"); rave:::check_dependencies2()'))
-      invisible()
-    }
+    restart_r()
   }
+  
   
   return(invisible())
   
@@ -145,8 +249,7 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE, skip = 0){
 
 check_dependencies2 <- function(){
   # 
-  dipsaus::cat2('Checking N27 brain', level = 'INFO', end = '\n')
-  threeBrain::merge_brain()
+  
   
   dipsaus::cat2('Arranging all existing RAVE modules', level = 'INFO', end = '\n')
   arrange_modules(refresh = TRUE, reset = FALSE, quiet = TRUE)

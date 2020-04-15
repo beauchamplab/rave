@@ -4,7 +4,13 @@
 \alias{check_dependencies}
 \title{Check and Install RAVE Dependencies}
 \usage{
-check_dependencies(update_rave = TRUE, restart = TRUE, skip = 0)
+check_dependencies(
+  update_rave = TRUE,
+  restart = TRUE,
+  nightly = FALSE,
+  demo_data = TRUE,
+  ...
+)
 }
 \arguments{
 \item{update_rave}{logical, whether to update RAVE}
