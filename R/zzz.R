@@ -155,6 +155,7 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
         "try({",
         "  dipsaus::cat2('Arranging all existing RAVE modules', level = 'DEFAULT', end = '\\n')",
         "  rave::arrange_modules(refresh = TRUE, reset = FALSE, quiet = TRUE)",
+        "  message('   - Done.')",
         "})"
       )
       s = c(s[seq_len(idx)], ss, s[-seq_len(idx)])
