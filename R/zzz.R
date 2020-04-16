@@ -155,6 +155,8 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
       
       ss <- c(
         "try({",
+        "  userlib <- Sys.getenv('R_LIBS_USER')",
+        "  if(!dir.exists(userlib)){ try({ dir.create(userlib, recursive = TRUE) }) }",
         "  dipsaus::cat2('Arranging all existing RAVE modules', level = 'DEFAULT', end = '\\n')",
         "  rave::arrange_modules(refresh = TRUE, reset = FALSE, quiet = TRUE)",
         "  message('   - Done.')",
@@ -233,6 +235,8 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
     
     ss <- c(
       "try({",
+      "  userlib <- Sys.getenv('R_LIBS_USER')",
+      "  if(!dir.exists(userlib)){ try({ dir.create(userlib, recursive = TRUE) }) }",
       update_txt,
       "  dipsaus::cat2('Arranging all existing RAVE modules', level = 'DEFAULT', end = '\\n')",
       "  rave::arrange_modules(refresh = TRUE, reset = FALSE, quiet = TRUE)",
