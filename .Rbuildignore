@@ -18,3 +18,5 @@
 ^README\.md$
 ^alternative_installation\.md$
 ^Installation\.md$
+^docker/
+^api/

@@ -134,8 +134,8 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
     }
     
     dipsaus::prepare_install(
-      c(lazy_install, 'rave', 'ravebuiltins', 'dipsaus', 
-        'threeBrain', 'rutabaga'),
+      unique(c(lazy_install, 'ravebuiltins', 'dipsaus', 
+               'threeBrain', 'rutabaga')),
       restart = FALSE
     )
     
@@ -208,7 +208,7 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
   
   # Now it's critical as dipsaus and rave cannot be updated here, register startup code
   lazy_install <- c(lazy_install, 'dipsaus')
-  dipsaus::prepare_install(lazy_install, restart = FALSE)
+  dipsaus::prepare_install(unique(lazy_install), restart = FALSE)
   
   profile <- startup::find_rprofile()
   if (!length(profile)) {
