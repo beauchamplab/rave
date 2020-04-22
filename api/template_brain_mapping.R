@@ -31,6 +31,10 @@ tbls = dipsaus::lapply_async2(subjects, function(sub){
   brain$electrodes$raw_table$SurfaceElectrode = TRUE
   brain$electrodes$raw_table$SurfaceType = surf_type
   
+  brain$electrodes$raw_table$MNI305_x = 0
+  brain$electrodes$raw_table$MNI305_y = 0
+  brain$electrodes$raw_table$MNI305_z = 0
+  
   # Other not important
   brain$electrodes$raw_table$Radius = 2
   brain$electrodes$raw_table$VertexNumber = -1
