@@ -12,7 +12,7 @@ RAVE runs on Mac, Windows or Linux.
 
  + For any platform, install the [RAVE docker image](https://hub.docker.com/r/dipterix/rave)
  
- + For cloud-based RAVE or other use cases where multiple users will run RAVE at once on a single server consider RStudio Server
+ + For cloud-based RAVE or other use cases where multiple users will run RAVE on a single server consider RStudio Server
  
 ## Start RAVE 
 
