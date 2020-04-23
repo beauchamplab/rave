@@ -1,6 +1,6 @@
 # Full RAVE installation guide
 
-First, buy a computer! For best performance, we recommend a 4-core CPU (e.g. Intel i5) with 64GB RAM (at least 8 GB per core).
+For best performance, we recommend a 4-core CPU (e.g. Intel i5) with 64GB RAM (at least 8 GB per core).
 RAVE displays results on a web browser, and is tested with Google Chrome. Apple and Microsoft browsers will run with reduced functionality (e.g. shaders will not render brain slices). Mac and UNIX offers better multicore tools than Windows, so multithreaded operation will be better on these platforms.  For cloud-based RAVE or other use cases where multiple users will run RAVE on a single server consider RStudio Server instead of RStudio.
 
 Next, [install all required prerequisites](./Installation.md).
