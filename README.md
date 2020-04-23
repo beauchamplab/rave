@@ -10,7 +10,7 @@ RAVE runs on Mac, Windows or Linux.
    
    + For Windows or Linux (or if the Mac installation script does not work) see the [Full installation guide](./alternative_installation.md).
 
- + For any platform, a RAVE docker image can be found [here](https://hub.docker.com/r/dipterix/rave)
+ + For any platform, install the [RAVE docker image](https://hub.docker.com/r/dipterix/rave)
  
 ## Start RAVE 
 
