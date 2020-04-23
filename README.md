@@ -10,6 +10,8 @@ RAVE runs on Mac, Windows or Linux.
    
    + For Windows or Linux (or if the Mac installation script does not work) see the [Full installation guide](./alternative_installation.md).
 
+ + For any platform, a RAVE docker image can be found [here](https://hub.docker.com/r/dipterix/rave)
+ 
 ## Start RAVE 
 
 * To start RAVE, type (or copy and paste) the following command into the RStudio console:
