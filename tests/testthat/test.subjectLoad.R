@@ -114,7 +114,7 @@ test_that('Class Electrode with demo/YAB', {
     dm = c(nrow(ep), nrow(fq), sub$sample_rate * 3 + 1, 1)
     
     expect_equivalent(dim(d$power$.__enclos_env__$private$.data), dm)
-    expect_true(setequal(e$raw_power$keys(), sub$preprocess_info('blocks')))
+    expect_true(setequal(names(e$raw_power), sub$preprocess_info('blocks')))
     
     # Check phase
     d = e$epoch(epoch_name = epoch, pre = 1, post = 2, types = 'phase', raw = FALSE, hybrid = FALSE)
@@ -132,8 +132,8 @@ test_that('Class Electrode with demo/YAB', {
       'power', 'phase', 'volt',
       'raw_power', 'raw_phase', 'raw_volt'
     ), force = TRUE)
-    expect_equal(e$phase$size(), 0)
-    expect_equal(e$raw_power$size(), 0)
+    expect_equal(length(e$phase), 0)
+    expect_equal(length(e$raw_power), 0)
     
   })
   
@@ -157,6 +157,9 @@ test_that('Class ECoGRepository with demo/YAB', {
     # Epoch data
     repo$epoch(epoch_name = epoch, pre = 1, post = 2, electrodes = 14:15, 
                data_type = 'power', referenced = TRUE)
+    
+    # list2env(list(epoch_name = epoch, pre = 1, post = 2, electrodes = 14:15, 
+    #               data_type = 'power', referenced = TRUE), envir = .GlobalEnv)
     
     # Check if power exists
     expect_is(repo$power, 'ECoGTensor')

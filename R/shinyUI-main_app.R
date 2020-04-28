@@ -102,8 +102,8 @@ app_controller <- function(
 
   # Data selector
   data_selector = shiny_data_selector('DATA_SELECTOR', data_env = data_repo)
-  adapter = fastmap::fastmap()
-  adapter$mset(
+  adapter = dipsaus::fastmap2()
+  .subset2(adapter, 'mset')(
     data_selector_header = data_selector$header,
     data_selector_server = data_selector$server,
     launch_selector = data_selector$launch,
@@ -190,24 +190,24 @@ app_controller <- function(
 
 app_ui <- function(adapter, token = NULL){
 
-  ui_functions = fastmap::fastmap(
+  ui_functions = dipsaus::fastmap2(
     # Case n (default, load ravebuiltins)
     missing_default = function(active_id = NULL, has_modal = TRUE){
       title = 'R Analysis and Visualization of ECoG/iEEG Data'
       version = utils::packageVersion('rave')
       version = sprintf('RAVE (%s)', paste(unlist(version), collapse = '.'))
-      simplify_header = adapter$get('get_option')('simplify_header', FALSE)
-      ui_quos = adapter$get('get_module_ui')(active_id = active_id)
+      simplify_header = adapter$get_option('simplify_header', FALSE)
+      ui_quos = adapter$get_module_ui(active_id = active_id)
       
       quo = as_call2(
         quote(dashboardPage),
-        skin = adapter$get('get_option')('theme', 'purple'),
+        skin = adapter$get_option('theme', 'purple'),
         title = title,
         header = as_call2(
           quote(dashboardHeader),
           title = version,
           btn_text_right = 'RAM Usage',
-          quote(adapter$get('data_selector_header')()),
+          quote(adapter$data_selector_header()),
           .list = if(simplify_header) NULL else list(
             .list = quote(
               tagList(
@@ -221,7 +221,7 @@ app_ui <- function(adapter, token = NULL){
         ),
         sidebar = as_call2(
           quote(shinydashboard::dashboardSidebar),
-          disable = adapter$get('get_option')('disable_sidebar', FALSE),
+          disable = adapter$get_option('disable_sidebar', FALSE),
           as_call2(
             quote(shinydashboard::sidebarMenu),
             id = 'sidebar', 
@@ -236,7 +236,7 @@ app_ui <- function(adapter, token = NULL){
           quote(shinydashboard::dashboardBody),
           as_call2(
             quote(shinydashboard::tabItems),
-            .list = unname(lapply(adapter$get('module_ids')(), function(module_id) {
+            .list = unname(lapply(adapter$module_ids(), function(module_id) {
               # module_id = stringr::str_to_upper(module_id)
               as_call2(
                 quote(shinydashboard::tabItem),
@@ -256,25 +256,20 @@ app_ui <- function(adapter, token = NULL){
     }
     
   )
+  
+  ui_functions[['404']] = function(...){
+    # 404
+    '404'
+  }
+  
+  ui_functions[['3dviewer']] = function(global_id, session_id = NULL){
+    shiny::fillPage(
+      title = 'RAVE 3D Viewer',
+      padding = 0,
+      threeBrain::threejsBrainOutput(global_id, width = '100vw', height = '100vh')
+    )
+  }
 
-  ui_functions$mset(
-    # Case 1 404
-    '404' = function(...){
-      # 404
-      '404'
-    },
-    
-    # Case 2 (3D viewer)
-    '3dviewer' = function(global_id, session_id = NULL){
-      shiny::fillPage(
-        title = 'RAVE 3D Viewer',
-        padding = 0,
-        threeBrain::threejsBrainOutput(global_id, width = '100vw', height = '100vh')
-      )
-    }
-  )
-  
-  
 
   function(req){ #, parent_env = parent.frame()
     # First, get query string
@@ -288,21 +283,21 @@ app_ui <- function(adapter, token = NULL){
     if(!is.null(token)){
       if(!length(url_info$token) || !any(url_info$token %in% token)){
         # Return 404
-        return(ui_functions$get('404')())
+        return(ui_functions[['404']]())
       }
     }
 
     # ?type=3dviewer&globalId=...&sessionId=...
     if(length(url_info$type) == 1 && url_info$type == '3dviewer'){
-      return(ui_functions$get('3dviewer')(url_info$globalId, url_info$sessionId))
+      return(ui_functions[['3dviewer']](url_info$globalId, url_info$sessionId))
     }
 
     # Default, load main app
-    lapply(url_info$module_id, adapter$get('load_module'))
+    lapply(url_info$module_id, adapter$load_module)
     nomodal = url_info$nomodal
     nomodal %?<-% FALSE
     nomodal = nomodal == 'true'
-    quo = ui_functions$get('default')(active_id = url_info$module_id, has_modal = !nomodal)
+    quo = ui_functions$default(active_id = url_info$module_id, has_modal = !nomodal)
 
   }
 
@@ -402,7 +397,7 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
 
   this_env = environment()
 
-  test.mode = adapter$get('get_option')('test.mode', FALSE)
+  test.mode = adapter$get_option('test.mode', FALSE)
 
   session_list = list()
   rave_ids = NULL
@@ -522,7 +517,7 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
       if(!module_id %in% names(local_env$modules)){
         loaded = FALSE
         quo = rlang::quo({
-          modules[[!!module_id]] = adapter$get('load_module')(module_id = !!module_id, notification = TRUE)
+          modules[[!!module_id]] = adapter$load_module(module_id = !!module_id, notification = TRUE)
           m = shinirize(modules[[!!module_id]], test.mode = test.mode, data_env = data_repo)
           shinirized_modules[[!!module_id]] = m
           callModule(m$server, id = m$id, session = session, global_reactives = global_reactives)
@@ -547,7 +542,7 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
       module_info = global_reactives$switch_module
 
       if(!is.null(module_info)){
-        module_ids = adapter$get('module_ids')()
+        module_ids = adapter$module_ids()
         mid = module_info$module_id = stringr::str_to_upper(module_info$module_id)
         # print(mid)
         load_module(mid)
@@ -573,7 +568,7 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
 
     ##################################################################
     # Module to load data
-    callModule(module = adapter$get('data_selector_server'), id = 'DATA_SELECTOR', session = session, global_reactives = global_reactives)
+    callModule(module = adapter$data_selector_server, id = 'DATA_SELECTOR', session = session, global_reactives = global_reactives)
     #            , clear_cache = function(){
     #   lapply(shinirized_modules, function(m){
     #     try({
@@ -588,7 +583,7 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
     # message
 
     observeEvent(global_reactives$launch_selector, {
-      adapter$get('launch_selector')()
+      adapter$launch_selector()
     })
 
     observe({
@@ -613,7 +608,7 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
       # output[[stringr::str_c(m$id, '_UI')]] <- renderUI(m$ui())
     })
 
-    lapply(adapter$get('module_ids')(), function(module_id){
+    lapply(adapter$module_ids(), function(module_id){
       output[[paste0(module_id, '_UI')]] <- renderUI({
 
         if(!is.function(module_ui_functions[[module_id]])){

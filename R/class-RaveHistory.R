@@ -25,7 +25,7 @@ RAVEHistory <- R6::R6Class(
       args = c(list(...), .list)
       for(nm in names(args)){
         if(nm != ''){
-          private$env$.save_time[[nm]] = args[[nm]]
+          private$env[[nm]] = args[[nm]]
         }
       }
       if(private$use_yaml){

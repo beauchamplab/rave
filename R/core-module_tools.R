@@ -299,7 +299,7 @@ rave_module_tools <- function(env = NULL, data_env = getDefaultDataRepository(),
     get_loaded_electrodes = function() {
       repo = data_env$.private$repo
       on.exit(rm(repo))
-      e = repo$raw$keys()
+      e = names(repo$raw)
       e = as.numeric(e)
       e = e[!is.na(e)]
       sort(e)

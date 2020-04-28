@@ -43,6 +43,7 @@
 #' @export
 Tensor <- R6::R6Class(
   classname = 'Tensor',
+  parent_env = asNamespace('rave'),
   private = list(
     .data = NULL,
     fst_locked = FALSE,

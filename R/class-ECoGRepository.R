@@ -78,24 +78,24 @@ ECoGRepository <- R6::R6Class(
     #' @return character of the information
     info = function(print = TRUE){
       id = self$subject$subject_id
-      epoch_info = self$epochs$get('epoch_name')
+      epoch_info = self$epochs$epoch_name
       if(length(epoch_info)){
-        epoch_param = self$epochs$get('epoch_params');
+        epoch_param = self$epochs$epoch_params;
         
         epoch_info = paste0(
           'Epoch: ' , epoch_info , '\n' ,
-          ' - Electrodes: ' , deparse_selections(self$epochs$get('electrodes')) , '\n' ,
+          ' - Electrodes: ' , deparse_selections(self$epochs$electrodes) , '\n' ,
           sprintf(' - From %.2f to %.2f (sec)\n', -epoch_param[1], epoch_param[2])
         )
       }else{
         epoch_info = '(Not epoched yet.)\n'
       }
       
-      ref_name = self$reference$get('.reference_name')
+      ref_name = self$reference$.reference_name
       ref_name %?<-% '(No reference table)'
       ref_name = paste0('Reference table: ' , ref_name)
       
-      refed = self$reference$get('.is_referenced')
+      refed = self$reference$.is_referenced
       if(!is.null(self$coef)){
         wave_info = sprintf('Wavelet coefficients: Loaded (%s)', ifelse(refed$spectrum, 'Referenced', 'Raw'))
       }else{
@@ -137,9 +137,9 @@ ECoGRepository <- R6::R6Class(
       
       cat2('Initializing a Data Repository')
       
-      self$raw = fastmap::fastmap()
-      self$reference = fastmap::fastmap()
-      self$epochs = fastmap::fastmap()
+      self$raw = dipsaus::fastmap2()
+      self$reference = dipsaus::fastmap2()
+      self$epochs = dipsaus::fastmap2()
       if(R6::is.R6(subject) && 'Subject' %in% class(subject)){
         self$subject = subject
       }else{
@@ -187,9 +187,9 @@ ECoGRepository <- R6::R6Class(
       # Set up reference
       self$load_reference(reference, electrodes = electrodes)
       
-      electrodes = electrodes[!paste(electrodes) %in% self$raw$keys()]
+      electrodes = electrodes[!paste(electrodes) %in% names(self$raw)]
       
-      ref_table = self$reference$get('ref_table')
+      ref_table = self$reference$ref_table
       
       if(length(electrodes) > 0){
         progress = progress(title = 'Loading reference', 
@@ -202,11 +202,11 @@ ECoGRepository <- R6::R6Class(
           progress$inc(sprintf('Electrode - %s', e_str))
           # get reference
           ref = ref_table$Reference[ref_table$Electrode == e]
-          ref = self$reference$get(ref, ref)
-          
+          ref = .subset2(self$reference, 'get')(ref, ref)
+
           e_obj = Electrode$new(subject = self$subject, electrode = e, 
                                 reference_by = ref, is_reference = FALSE)
-          self$raw$set(key = e_str, value = e_obj)
+          self$raw[[e_str]] = e_obj
         })
         progress$close()
         # self_ref = self$reference
@@ -254,18 +254,18 @@ ECoGRepository <- R6::R6Class(
       }else{
         electrodes = self$subject$filter_valid_electrodes(electrodes)
       }
-      electrodes = electrodes[paste(electrodes) %in% self$raw$keys()]
+      electrodes = electrodes[paste(electrodes) %in% names(self$raw)]
       stopifnot2(length(electrodes) > 0, msg = 'No electrode loaded.')
       
-      self$epochs$set('epoch_name', epoch_name)
-      self$epochs$set('epoch_params', c(pre, post))
-      self$epochs$set('epoch_data', load_meta(
+      self$epochs$epoch_name = epoch_name
+      self$epochs$epoch_params = c(pre, post)
+      self$epochs$epoch_data = load_meta(
         meta_type = 'epoch',
         subject_id = self$subject$subject_id,
         meta_name = epoch_name
-      ))
-      self$epochs$set('electrodes', electrodes)
-      self$epochs$set('frequency_range', frequency_range)
+      )
+      self$epochs$electrodes = electrodes
+      self$epochs$frequency_range = frequency_range
       freqs = load_meta(subject_id = self$subject$subject_id, meta_type = 'frequencies')
       frequency_range %?<-% range(freqs$Frequency)
       freq_subset = freqs$Frequency %within% frequency_range
@@ -279,7 +279,7 @@ ECoGRepository <- R6::R6Class(
       #                     shiny_auto_close = TRUE,
       #                     quiet = quiet)
       
-      epoch_data = self$epochs$get('epoch_data')
+      epoch_data = self$epochs$epoch_data
       
       re = list()
       subject_id = self$subject$id
@@ -322,7 +322,7 @@ ECoGRepository <- R6::R6Class(
           
           # results = lapply_async(electrodes, function(e){
           #   # progress$inc(sprintf('Step %d (of %d) electrode %d (power)', count, n_dt, e))
-          #   electrode = raws$get(as.character(e))
+          #   electrode = raws[[as.character(e)]]
           #   elc = electrode$epoch( epoch_name = epoch_name, pre = pre, post = post,
           #                          types = 'power', raw = !referenced )
           # 
@@ -343,7 +343,7 @@ ECoGRepository <- R6::R6Class(
           rave_setup_workers()
           results = dipsaus::lapply_async2(electrodes, function(e){
             # progress$inc(sprintf('Step %d (of %d) electrode %d (power)', count, n_dt, e))
-            electrode = raws$get(as.character(e))
+            electrode = raws[[as.character(e)]]
             elc = electrode$epoch( epoch_name = epoch_name, pre = pre, post = post,
                                    types = 'power', raw = !referenced )
             
@@ -381,7 +381,7 @@ ECoGRepository <- R6::R6Class(
           
           rave_setup_workers()
           results = dipsaus::lapply_async2(electrodes, function(e){
-            electrode = raws$get(as.character(e))
+            electrode = raws[[as.character(e)]]
             elc = electrode$epoch(epoch_name = epoch_name, pre = pre, post = post,
                                   types = 'phase', raw = !referenced)
             phase = elc$phase; rm(elc)
@@ -443,7 +443,7 @@ ECoGRepository <- R6::R6Class(
           
           rave_setup_workers()
           results = dipsaus::lapply_async2(electrodes, function(e){
-            electrode = raws$get(as.character(e))
+            electrode = raws[[as.character(e)]]
             elc = electrode$epoch( epoch_name = epoch_name, pre = pre, post = post,
                                    types = 'volt', raw = !referenced )
             # volt = elc$volt$get_data()
@@ -493,17 +493,17 @@ ECoGRepository <- R6::R6Class(
       }else{
         
         results <- dipsaus::lapply_async2(electrodes, function(e){
-          electrode = raws$get(as.character(e))
+          electrode = raws[[as.character(e)]]
           electrode$epoch(
             epoch_name = epoch_name,
             pre = pre, post = post, types = data_type, raw = !referenced
           ) -> elc;
           
-          if(is(elc$power, 'ECoGTensor')){
-            elc$power = elc$power$subset(Frequency = freq_subset, drop = F)
+          if(inherits(elc$power, 'ECoGTensor')){
+            elc$power = elc$power$subset(Frequency = freq_subset, drop = FALSE)
           }
-          if(is(elc$phase, 'ECoGTensor')){
-            elc$phase = elc$phase$subset(Frequency = freq_subset, drop = F)
+          if(inherits(elc$phase, 'ECoGTensor')){
+            elc$phase = elc$phase$subset(Frequency = freq_subset, drop = FALSE)
           }
           
           elc = func(elc)
@@ -540,7 +540,7 @@ ECoGRepository <- R6::R6Class(
         subject_code = self$subject$subject_code,
         meta_name = ref_name
       )
-      self$reference$set('ref_table', ref_table)
+      self$reference$ref_table = ref_table
       
       # load partial references, also avoid invalid electrodes
       ref_table = ref_table[ref_table$Electrode %in% electrodes, ]
@@ -569,8 +569,8 @@ ECoGRepository <- R6::R6Class(
         # delayedAssign(ref, {
         #   Electrode$new(subject = self$subject, electrode = ref, is_reference = T)
         # }, assign.env = ref_env)
-        self$reference$set(ref, Electrode$new(
-          subject = self$subject, electrode = ref, is_reference = TRUE))
+        self$reference[[ref]] = Electrode$new(
+          subject = self$subject, electrode = ref, is_reference = TRUE)
       })
       progress$close()
       invisible()
