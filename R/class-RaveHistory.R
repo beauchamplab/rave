@@ -14,22 +14,22 @@ RAVEHistory <- R6::R6Class(
       private$use_yaml = use_yaml
       if(!file.exists(private$save_path)){
         dir.create(path, recursive = TRUE, showWarnings = FALSE)
-        private$env = fastmap::fastmap() #new.env(hash = TRUE)
+        private$env = dipsaus::fastmap2() #new.env(hash = TRUE)
         self$save()
       }else{
         self$load()
       }
     },
-    save = function(...){
-      private$env$set('.save_time', Sys.time())
-      args = list(...)
+    save = function(..., .list = NULL){
+      private$env$.save_time = Sys.time()
+      args = c(list(...), .list)
       for(nm in names(args)){
         if(nm != ''){
-          private$env$set(nm, args[[nm]])
+          private$env$.save_time[[nm]] = args[[nm]]
         }
       }
       if(private$use_yaml){
-        yaml::write_yaml(private$env$as_list(),
+        yaml::write_yaml(as.list(private$env),
                          file = private$save_path)
       }else{
         saveRDS(private$env, file = private$save_path)
@@ -40,33 +40,33 @@ RAVEHistory <- R6::R6Class(
       if(private$use_yaml){
         re = yaml::read_yaml(file = private$save_path)
         if(length(private$env) < 10){
-          private$env = fastmap::fastmap()
+          private$env = dipsaus::fastmap2()
         }
         
         for(nm in names(re)){
-          private$env$set(nm, re[[nm]])
+          private$env[[nm]] = re[[nm]]
         }
       }else{
         private$env = readRDS(file = private$save_path)
         if(length(private$env) < 10){
-          private$env = fastmap::fastmap()
+          private$env = dipsaus::fastmap2()
         }
       }
       
     },
     get_or_save = function(key, val = NULL, save = TRUE, inherits = FALSE){
-      if(private$env$has(key)){
-        return(private$env$get(key = key))
+      if(.subset2(private$env, 'has')(key)){
+        return(private$env[[key]])
       }else if (!is.null(val)){
         if(save){
-          do.call(self$save, args = structure(list(val), names = key))
+          self$save(.list = structure(list(val), names = key))
         }
         return(val)
       }
       return(NULL)
     },
     clear = function(){
-      private$env$reset()
+      .subset2(private$env, 'reset')()
       self$save()
     }
   )
