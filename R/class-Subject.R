@@ -51,9 +51,10 @@ Subject <- R6::R6Class(
     },
     
     #' @description override of default print method
+    #' @param ... ignored
     #' @return default memory address of the environment
-    print = function(){
-      env_address(self)
+    print = function(...){
+      self$info()
     },
     
     #' @description called when garbage collected
@@ -267,7 +268,11 @@ as.character.Subject <- function(x, ...){
   x$id
 }
 
-# Function that always returns a subject (if exists)
+#' @title Make new subject object from character
+#' @param subject characters in format \code{"project/subject"}
+#' @param strict logical indication whether proprocess folder is needed
+#' @param reference what reference file the subject is using
+#' @export
 as_subject <- function(subject, strict = TRUE, reference = 'default'){
   if(is.character(subject)){
     

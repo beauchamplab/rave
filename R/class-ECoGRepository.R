@@ -285,7 +285,6 @@ ECoGRepository <- R6::R6Class(
       subject_id = self$subject$id
       
       raws = self$raw
-      base::print(pryr::object_size(raws))
       
       # Get dimension names
       # 1. Trial

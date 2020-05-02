@@ -102,9 +102,16 @@ none
 \subsection{Method \code{print()}}{
 override of default print method
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Subject$print()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Subject$print(...)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{ignored}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 default memory address of the environment
 }

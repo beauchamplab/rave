@@ -391,10 +391,10 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
       )
     })
     
-    observe({
-      input$control_panel_refresh
-      local_data$mem_usage = get_mem_usage(modules)
-    })
+    # observe({
+    #   input$control_panel_refresh
+    #   local_data$mem_usage = get_mem_usage(modules)
+    # })
     
     output$mem_usage <- renderUI({
       mem_usage = local_data$mem_usage

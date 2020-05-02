@@ -229,8 +229,8 @@ app_ui <- function(adapter, token = NULL){
           )
         ),
         control = quote(dashboardControl(
-          uiOutput('mem_usage'),
-          actionLink('control_panel_refresh', 'Click here to refresh!')
+          # uiOutput('mem_usage'),
+          # actionLink('control_panel_refresh', 'Click here to refresh!')
         )),
         body = as_call2(
           quote(shinydashboard::dashboardBody),
@@ -723,77 +723,77 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
       )
     })
 
-    observe({
-      input$control_panel_refresh
-      local_data$mem_usage = get_mem_usage(modules)
-    })
+    # observe({
+    #   input$control_panel_refresh
+    #   local_data$mem_usage = get_mem_usage(modules)
+    # })
 
-    output$mem_usage <- renderUI({
-      mem_usage = local_data$mem_usage
-      if(is.null(mem_usage)){
-        return()
-      }
-
-      name = c(
-        'Total Usage',
-        'Shared Data Usage',
-        sapply(mem_usage$module_usage, '[[', 'Name')
-      )
-
-      usage = c(
-        mem_usage$total_mem,
-        mem_usage$data_usage + mem_usage$other_usage,
-        sapply(mem_usage$module_usage, '[[', 'usage')
-      )
-      usage = as.numeric(unlist(usage))
-
-      perc = usage / max(usage, na.rm = TRUE)
-
-
-      tagList(
-        h3(class = 'control-sidebar-heading', 'Memory Usage'),
-        tags$ul(
-          class="control-sidebar-menu",
-          style = 'padding:15px;',
-          tagList(
-            lapply(seq_along(name), function(ii){
-              nm = name[[ii]]
-              us = usage[[ii]]
-              pc = perc[[ii]]
-              status = switch (nm,
-                               'Total Usage' = {
-                                 max_ram = rave_options('max_mem') * 1000^3
-                                 pc_total = us / max_ram
-                                 ind = (pc_total < 0.75) + (pc_total < 0.9) + 1
-                                 c('danger', 'warning', 'success')[ind]
-                               },
-                               'Shared Data Usage' = 'primary',
-                               'Misc & Others Sessions' = 'primary',
-                               {
-                                 ind = (pc < 0.5) + 1
-                                 c('warning', 'primary')[ind]
-                               }
-              )
-              txt_size = as.character(dipsaus::to_ram_size(us))
-              txt_perc = sprintf('%d%%', as.integer(pc*100))
-              if(stringr::str_length(nm) > 22){
-                nm_alt = paste0(stringr::str_sub(nm, end = 19), '...')
-              }else{
-                nm_alt = nm
-              }
-
-              tags$li(
-                h4(class = 'control-sidebar-subheading', nm_alt, span(class=sprintf('label label-%s pull-right', status), txt_size)),
-                div(class = 'progress progress-xxs',
-                    div(class = sprintf("progress-bar progress-bar-%s", status), style = sprintf('width: %s', txt_perc)))
-              )
-            })
-          )
-        ),
-        div(style = 'margin-bottom:20px')
-      )
-
-    })
+    # output$mem_usage <- renderUI({
+    #   mem_usage = local_data$mem_usage
+    #   if(is.null(mem_usage)){
+    #     return()
+    #   }
+    # 
+    #   name = c(
+    #     'Total Usage',
+    #     'Shared Data Usage',
+    #     sapply(mem_usage$module_usage, '[[', 'Name')
+    #   )
+    # 
+    #   usage = c(
+    #     mem_usage$total_mem,
+    #     mem_usage$data_usage + mem_usage$other_usage,
+    #     sapply(mem_usage$module_usage, '[[', 'usage')
+    #   )
+    #   usage = as.numeric(unlist(usage))
+    # 
+    #   perc = usage / max(usage, na.rm = TRUE)
+    # 
+    # 
+    #   tagList(
+    #     h3(class = 'control-sidebar-heading', 'Memory Usage'),
+    #     tags$ul(
+    #       class="control-sidebar-menu",
+    #       style = 'padding:15px;',
+    #       tagList(
+    #         lapply(seq_along(name), function(ii){
+    #           nm = name[[ii]]
+    #           us = usage[[ii]]
+    #           pc = perc[[ii]]
+    #           status = switch (nm,
+    #                            'Total Usage' = {
+    #                              max_ram = rave_options('max_mem') * 1000^3
+    #                              pc_total = us / max_ram
+    #                              ind = (pc_total < 0.75) + (pc_total < 0.9) + 1
+    #                              c('danger', 'warning', 'success')[ind]
+    #                            },
+    #                            'Shared Data Usage' = 'primary',
+    #                            'Misc & Others Sessions' = 'primary',
+    #                            {
+    #                              ind = (pc < 0.5) + 1
+    #                              c('warning', 'primary')[ind]
+    #                            }
+    #           )
+    #           txt_size = as.character(dipsaus::to_ram_size(us))
+    #           txt_perc = sprintf('%d%%', as.integer(pc*100))
+    #           if(stringr::str_length(nm) > 22){
+    #             nm_alt = paste0(stringr::str_sub(nm, end = 19), '...')
+    #           }else{
+    #             nm_alt = nm
+    #           }
+    # 
+    #           tags$li(
+    #             h4(class = 'control-sidebar-subheading', nm_alt, span(class=sprintf('label label-%s pull-right', status), txt_size)),
+    #             div(class = 'progress progress-xxs',
+    #                 div(class = sprintf("progress-bar progress-bar-%s", status), style = sprintf('width: %s', txt_perc)))
+    #           )
+    #         })
+    #       )
+    #     ),
+    #     div(style = 'margin-bottom:20px')
+    #   )
+    # 
+    # })
 
 
     #################################################################

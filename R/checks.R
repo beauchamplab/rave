@@ -1155,6 +1155,7 @@ rave_checks.default <- function(...){
 rave_checks.rave_running_local <- function(...){}
 #' @export
 rave_checks.rave_module_debug <- function(...){
+  warning('function rave_checks is to be depricated. Please see rave_validate for details.')
   rave_context()
   mount_demo_subject()
   .rave_checks(...)
@@ -1174,4 +1175,5 @@ rave_checks.rave_running <- function(..., .raise_error = FALSE){
     ctx$instance$internal_reactives$miss_data = FALSE
   }
 }
+
 
