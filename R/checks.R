@@ -247,7 +247,7 @@ check_subject <- function(subject, stop_on_error = FALSE){
   
   msg('2. Check preprocess steps', level='DEFAULT')
   if( !res$check$started_preprocess ){
-    raise('Proprocess not started!')
+    raise('Preprocess not started!')
   }
   if( !res$check$notch_filter ){
     raise('No Notch filters applied')

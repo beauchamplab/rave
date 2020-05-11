@@ -170,7 +170,8 @@ rave_prepare <- function(
     cat2('Check ?rave_prepare for details.', level = 'INFO')
 
     if(dev_env == 'python'){
-      py_console(py3 = (dev_ver == 'py3'))
+      stop('dev_env == python is depricated')
+      # py_console(py3 = (dev_ver == 'py3'))
     }
   }
   re = data_env

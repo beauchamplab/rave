@@ -63,6 +63,10 @@ rave_version <- function(){
 
 }
 
+.onUnload <- function(libpath){
+  clear_env(data_repository)
+}
+
 
 restart_r <- function(){
   f <- get0(".rs.restartR")
@@ -96,20 +100,29 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
   if( demo_data ){
     dipsaus::cat2('Checking RAVE data repository', level = 'DEFAULT', end = '\n')
     p = get_projects()
-    has_demo = FALSE
-    if('demo' %in% p){
-      subs = get_subjects('demo')
-      if(length(subs)){
-        has_demo = TRUE
+    if(!length(p)){
+      has_demo = FALSE
+      if('demo' %in% p){
+        subs = get_subjects('demo')
+        if(length(subs)){
+          has_demo = TRUE
+        }
       }
+      if(!has_demo){
+        if(interactive()){
+          ans <- dipsaus::ask_yesno("There is no project found in data repository. Install demo subjects?")
+        } else {
+          ans <- TRUE
+        }
+        if(isTRUE(ans)){
+          # install demo subjects
+          download_sample_data('_group_data', replace_if_exists = TRUE)
+          download_sample_data('KC')
+          download_sample_data('YAB')
+        }
+      }
+      dipsaus::cat2('   - Done', level = 'INFO', end = '\n')
     }
-    if(!has_demo){
-      # install demo subjects
-      download_sample_data('_group_data', replace_if_exists = TRUE)
-      download_sample_data('KC')
-      download_sample_data('YAB')
-    }
-    dipsaus::cat2('   - Done', level = 'INFO', end = '\n')
   }
   
   
@@ -199,7 +212,7 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
          level = 'DEFAULT', end = '\n')
     tryCatch({
       if(pinfo$name %in% loadedNamespaces()){ devtools::unload(pinfo$name, quiet = TRUE) }
-      remotes::install_github(pinfo$repo, upgrade = FALSE, force = FALSE, quiet = TRUE)
+      devtools::install_github(pinfo$repo, upgrade = FALSE, force = FALSE, quiet = TRUE)
       message('  - Done', end = '\n')
     }, error = function(e){
       lazy_github <<- c(lazy_github, pinfo$repo)
@@ -226,11 +239,11 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
     update_txt = NULL
     if(update_rave){
       update_txt <- c(
-        "  remotes::install_github('beauchamplab/rave@dev-1.0', upgrade = FALSE, force = FALSE, quiet = TRUE)"
+        "  devtools::install_github('beauchamplab/rave@dev-1.0', upgrade = FALSE, force = FALSE, quiet = TRUE)"
       )
     }
     update_txt = c(
-      "try({remotes::install_github('dipterix/dipsaus', upgrade = FALSE, force = FALSE, quiet = TRUE)})",
+      "try({devtools::install_github('dipterix/dipsaus', upgrade = FALSE, force = FALSE, quiet = TRUE)})",
       update_txt)
     
     ss <- c(

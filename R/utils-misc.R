@@ -36,13 +36,6 @@ dir_create <- function(x, showWarnings = FALSE, recursive = TRUE, check = TRUE, 
   invisible(normalizePath(x))
 }
 
-to_datauri <- function(file, mime = ''){
-  info = file.info(file)
-  ss = jsonlite::base64_enc(input = readBin(file, what = 'raw', n = info$size))
-  ss = sprintf('data:%s;base64,%s', mime, ss)
-  ss
-}
-
 
 is.blank <- function(x){
   x == ''

@@ -9,7 +9,7 @@ as_subject(subject, strict = TRUE, reference = "default")
 \arguments{
 \item{subject}{characters in format \code{"project/subject"}}
 
-\item{strict}{logical indication whether proprocess folder is needed}
+\item{strict}{logical indication whether preprocess folder is needed}
 
 \item{reference}{what reference file the subject is using}
 }

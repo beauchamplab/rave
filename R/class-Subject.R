@@ -250,16 +250,16 @@ r_to_py.Subject <- function(obj, convert = FALSE){
 
 # Conver subject to JSON format
 # Preserved for jsonlite
-asJSON.Subject <- function(obj){
-  list(
-    subject_id = obj$id,
-    electrodes = obj$electrodes,
-    frequencies = obj$frequencies,
-    sample_rate = obj$meta$sample_rate,
-    valid_electrodes = obj$valid_electrodes
-    # dirs = obj$dirs[c('rave_dir', 'meta_dir', 'cache_dir', 'suma_dir', 'suma_out_dir')]
-  )
-}
+# asJSON.Subject <- function(obj){
+#   list(
+#     subject_id = obj$id,
+#     electrodes = obj$electrodes,
+#     frequencies = obj$frequencies,
+#     sample_rate = obj$meta$sample_rate,
+#     valid_electrodes = obj$valid_electrodes
+#     # dirs = obj$dirs[c('rave_dir', 'meta_dir', 'cache_dir', 'suma_dir', 'suma_out_dir')]
+#   )
+# }
 
 
 
@@ -270,7 +270,7 @@ as.character.Subject <- function(x, ...){
 
 #' @title Make new subject object from character
 #' @param subject characters in format \code{"project/subject"}
-#' @param strict logical indication whether proprocess folder is needed
+#' @param strict logical indication whether preprocess folder is needed
 #' @param reference what reference file the subject is using
 #' @export
 as_subject <- function(subject, strict = TRUE, reference = 'default'){

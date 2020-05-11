@@ -11,33 +11,20 @@ getDefaultReactiveDomain <- function(session = shiny::getDefaultReactiveDomain()
 }
 
 
+data_repository <- new.env(parent = baseenv())
 
 #' Get environment where subject data is loaded
 #' @param session shiny session, default is NULL
 #' @param session_id internal use
 #' @param session_based internal use
 #' @export
-getDefaultDataRepository <- local({
-  data_repository <- new.env(parent = baseenv())
-  
-  initialized <- FALSE
-  
-  function(
-    session = getDefaultReactiveDomain(),
-    session_id,
-    session_based = NULL
-  ){
-    if(!initialized){
-      initialized <<- TRUE
-      RaveFinalizer$new(function(...){
-        try({
-          clear_env(data_repository)
-        })
-      })
-    }
-    data_repository
-  }
-})
+getDefaultDataRepository <- function(
+  session = getDefaultReactiveDomain(),
+  session_id,
+  session_based = NULL
+){
+  data_repository
+}
 
 #' Attach subject data
 #' @param unload TRUE if you want to detach

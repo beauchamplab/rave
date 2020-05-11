@@ -11,11 +11,11 @@ load_modules <- function(legacy = FALSE){
   
   if(!legacy){
     if(!dipsaus::package_installed('ravebuiltins')){
-      if( requireNamespace('remotes') ){
+      if( requireNamespace('devtools') ){
         tryCatch({
-          remotes::install_github('beauchamplab/ravebuiltins', upgrade = 'never', force = FALSE)
+          devtools::install_github('beauchamplab/ravebuiltins', upgrade = 'never', force = FALSE)
         }, error = function(e){
-          stop('Fail to install RAVE builtin modules. Please install it manually via the following command!\n\tremotes::install_github("beauchamplab/ravebuiltins")')
+          stop('Fail to install RAVE builtin modules. Please install it manually via the following command!\n\tdevtools::install_github("beauchamplab/ravebuiltins")')
         })
       }
     }
