@@ -37,27 +37,38 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
       # prevent will be set to false only when modal expanded
       prevent_dblclick = TRUE
     )
+    local_env = dipsaus::fastmap2()
     
     ##### Show modal when 'data_select' is clicked
-    observeEvent(input$data_select, {
+    open_modal <- function(){
       shinyjs::addClass(selector = 'body', class = "rave-noscroll")
+      local_env$is_open = TRUE
       shiny::showModal(
         shiny::modalDialog(
-          title = 'Data Selection', size = 'l', easyClose = F, fade = F,
+          title = 'Data Selection', size = 'l', easyClose = FALSE, fade = FALSE,
           footer = tagList(
             actionButton(ns('dismiss'), 'Cancel'),
-            dipsaus::actionButtonStyled(ns('import'), 'Import', type = 'primary', icon = shiny::icon('angle-right'))
+            dipsaus::actionButtonStyled(ns('import'), 'Load Data', type = 'primary', icon = shiny::icon('angle-right'))
           ),
           # Style to make this modal bigger
           tags$style('.modal-lg { min-width: 80vw; }'),
           data_modal()
         )
       )
+    }
+    
+    dismiss_modal <- function(){
+      shinyjs::removeClass(selector = 'body', class = "rave-noscroll");
+      removeModal()
+      local_env$is_open = FALSE
+    }
+    
+    observeEvent(input$data_select, {
+      open_modal()
     })
     
     observeEvent(input$dismiss, {
-      shinyjs::removeClass(selector = 'body', class = "rave-noscroll");
-      removeModal()
+      dismiss_modal()
     })
     
     ##### Modal layout
@@ -88,7 +99,8 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
             ),
             div(
               style="flex-basis: 50%;",
-              selectInput(ns('project_name'), 'Project', choices = projects, selected = last_project)
+              selectInput(ns('project_name'), 'Project', choices = projects, selected = last_project),
+              checkboxInput(ns('group_module'), 'Load for group analysis'),
             ),
             div(
               style="flex-basis: 50%;",
@@ -438,7 +450,12 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
       ne = length(es)
       txt = dipsaus::deparse_svec(es)
       if(ne){
-        sprintf('%d electrodes selected (%s)', ne, txt)
+        if(isTRUE(input$group_module)){
+          sprintf('For group analysis, only *one* electrode is required to be loaded')
+        } else {
+          sprintf('%d electrodes selected (%s)', ne, txt)
+        }
+        
       }else{
         'No electrode selected'
       }
@@ -926,13 +943,16 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
       
       # register
       
-      last_entry('project_name', project_name, save = T, group = group)
-      last_entry('subject_code', subject_code, save = T, group = group)
-      last_entry('electrodes', dipsaus::deparse_svec(electrodes), save = T, group = group)
-      last_entry('epoch_name', epoch, save = T, group = group)
-      last_entry('time_range', epoch_range, save = T, group = group)
-      last_entry('reference_name', reference, save = T, group = group)
+      last_entry('project_name', project_name, save = TRUE, group = group)
+      last_entry('subject_code', subject_code, save = TRUE, group = group)
+      last_entry('electrodes', dipsaus::deparse_svec(electrodes), save = TRUE, group = group)
+      last_entry('epoch_name', epoch, save = TRUE, group = group)
+      last_entry('time_range', epoch_range, save = TRUE, group = group)
+      last_entry('reference_name', reference, save = TRUE, group = group)
       clear_cache(levels = 1)
+      if(isTRUE(input$group_module)){
+        electrodes = electrodes[1]
+      }
       gc()
       rave_prepare(
         subject = subject_id,
@@ -941,7 +961,7 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
         time_range = epoch_range,
         frequency_range = frequencies,
         reference = reference,
-        attach = F,
+        attach = FALSE,
         data_types = NULL
       )
       
@@ -969,11 +989,13 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
         "preload_info",
         "subject"
       ),
-      inherit = F
+      inherit = FALSE
     )
     if(all(data_loaded)){
       global_reactives$force_refresh_all = Sys.time()
       global_reactives$has_data = Sys.time()
+    } else {
+      open_modal()
     }
     
   }
