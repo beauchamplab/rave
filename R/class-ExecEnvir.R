@@ -476,7 +476,7 @@ ExecEnvir <- R6::R6Class(
       if( !is.list(.tabsets) ){
         .tabsets = list()
       }
-      
+      package_name = rave::get_package_name()
       self$manual_inputIds = .manual_inputs
       self$rendering_inputIds = .render_inputs
       
@@ -521,12 +521,13 @@ ExecEnvir <- R6::R6Class(
 
       lapply(seq_along(.tabsets), function(ii){
         tabName = names(.tabsets)[ii]
-
+        url = openwetware_url(tabName, type = 'input')
         rlang::quo({
           do.call(box, args = c(
             list(width = 12,
                  title = !!tabName,
-                 collapsible = T),
+                 collapsible = TRUE,
+                 box_link = !!url),
             !!.tabsetParams[[tabName]],
             !!lapply(.tabsets[[tabName]], function(inputIds){
               if(length(inputIds) == 1){
@@ -688,9 +689,10 @@ ExecEnvir <- R6::R6Class(
           })
           
           as_call2(
-            quote(shinydashboard::tabBox),
+            quote(tabBox),
             title = nm,
             width = widths[[ii]],
+            box_link = openwetware_url(nm, type = 'output'),
             .list = quo_panels
           )
           
@@ -716,12 +718,14 @@ ExecEnvir <- R6::R6Class(
         comp = x[[nm]]
         width = comp$width; width %?<-% 12L
         margin = comp$margin
+        url = openwetware_url(comp$label, type = 'output')
         if( length(margin) && is.numeric(margin) ){
           as_call2(
             expand_box,
             width = width,
             title = comp$label,
             collapsible = TRUE,
+            box_link = url,
             as_call2(
               quote(shiny::div),
               style = sprintf('margin: %.0fpx;', margin),
@@ -744,6 +748,7 @@ ExecEnvir <- R6::R6Class(
             expand_box,
             width = width,
             title = comp$label,
+            box_link = url,
             collapsible = TRUE,
             comp$expr
           )

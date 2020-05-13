@@ -246,8 +246,8 @@ div_elastic <- function(css_selector, any = TRUE){
 
 expand_box <- function(
   ..., title = NULL, footer = NULL, status = NULL, solidHeader = FALSE,
-  background = NULL, width = 12L, height = NULL, collapsible = T,
-  collapsed = FALSE
+  background = NULL, width = 12L, height = NULL, collapsible = TRUE,
+  collapsed = FALSE, box_link = NULL
 ){
   boxClass <- "box"
   boxId = paste0(sample(c(LETTERS, letters, 0:9), 16), collapse = '')
@@ -280,6 +280,12 @@ expand_box <- function(
     else "minus"
     collapseTag <-
       div(class = "box-tools pull-right",
+          if (is.null(box_link)) NULL else tags$a(
+            class = paste0("btn btn-box-tool"),
+            href = box_link,
+            target = "_blank",
+            shiny::icon('question-circle')
+          ),
           tags$button(
             class = "btn btn-box-tool force-recalculate",
             shiny::icon('refresh')
