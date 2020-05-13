@@ -475,7 +475,7 @@ ModuleEnvir <- R6::R6Class(
       
       
       if(!is.environment(parent_env) || identical(parent_env, globalenv())){
-        parent_env = new.env(parent = globalenv(), hash = T)
+        parent_env = new.env(parent = globalenv(), hash = TRUE)
       }
       self$parent_env = parent_env
       

@@ -48,10 +48,12 @@ CMD ["/init"]
 
 
 ## build docker
-# docker build --tag rave:0.1 .   
-# docker run --publish 8787:8787 --detach --name rave -e ROOT=TRUE -e PASSWORD=science rave:0.1
+# docker build --tag rave:latest .
+# docker run --publish 8787:8787 --detach --name rave -e ROOT=TRUE -e PASSWORD=password rave:20200512
 
-# docker tag local-image:tagname new-repo:tagname
-# docker push new-repo:tagname
-# docker run -p 8787:8787 -d --name rave --mount type=bind,source="/Volumes/OneDrive/data",target=/data/ext -e ROOT=TRUE -e PASSWORD=science dipterix/rave:firsttry
+# docker tag rave:latest dipterix/rave:20200512
+# docker push dipterix/rave:20200512
+# docker tag dipterix/rave:latest dipterix/rave:latest
+# docker push dipterix/rave:latest
+# docker run -p 8787:8787 -d --name rave --mount type=bind,source="/Volumes/OneDrive/data",target=/data/ext -e ROOT=TRUE -e PASSWORD=password dipterix/rave:latest
 # docker exec -ti rave addraveuser beauchamplab ...

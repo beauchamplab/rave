@@ -16,6 +16,22 @@ if(!length(rave::get_projects()) && file.exists('/data/init/YAB.zip')){
   rave::rave_brain2('demo/YAB', surfaces = c('pial', 'white', 'smoothwm'))
 }
 
+# check the maximum cores. Default to max of 8 cores
 
+ncores <- rave::rave_options('max_worker')
+if(ncores > 8){
+  ncores = 8L
+}
+if(ncores < 1){
+  ncores = 1L
+}
+rave::rave_options('max_worker' = ncores)
+
+try({
+  
+  rave:::test_hdspeed()
+  rave::rave_options(disable_startup_speed_check = TRUE)
+  
+})
 
 

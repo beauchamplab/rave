@@ -11,3 +11,9 @@ print.rave_bytes <- function(x, digit=1, ...){
   cat(re)
   invisible(re)
 }
+
+
+lower_letters_only <- function(s){
+  stringr::str_to_lower(s)
+  stringr::str_remove_all(s, '[^a-zA-Z0-9]')
+}

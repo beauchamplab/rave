@@ -60,7 +60,8 @@ if [ $add -gt 0 ]; then
   ln -s /data/shared/others "/home/$username/rave_data/"
   
   # initialize N27
-  extractraveinit
+  su -c "/usr/local/bin/extractraveinit" - $username
+  # extractraveinit
   chmod -R 777 /data/shared/
   
   # create r profile
