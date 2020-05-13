@@ -476,7 +476,7 @@ ExecEnvir <- R6::R6Class(
       if( !is.list(.tabsets) ){
         .tabsets = list()
       }
-      package_name = rave::get_package_name()
+      package_name = get_package_name()
       self$manual_inputIds = .manual_inputs
       self$rendering_inputIds = .render_inputs
       
