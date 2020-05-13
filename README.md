@@ -18,6 +18,6 @@ RAVE runs on Mac, Windows or Linux.
 ```r
 rave::start_rave()
 ```
-* A new web browser window should open showing the RAVE splash screen and the current version number (e.g. 1.0). For tutorials on how to use RAVE and how to load your own data into RAVE [click here](https://openwetware.org/wiki/Beauchamp:RAVE#Tutorials).
+* A new web browser window should open showing the RAVE splash screen and the current version number (e.g. 1.0). For tutorials on how to use RAVE and how to load your own data into RAVE [click here](https://openwetware.org/wiki/RAVE#Tutorials).
 
 
