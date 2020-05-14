@@ -391,7 +391,7 @@ ECoGRepository <- R6::R6Class(
             # phase
             if(!all(freq_subset)){
               phase$temporary = TRUE
-              phase = phase$subset(Frequency = freq_subset, drop = F, data_only = F)
+              phase = phase$subset(Frequency = freq_subset, drop = FALSE, data_only = FALSE)
               phase$to_swap_now(use_index = FALSE)
               phase$temporary = FALSE
             }

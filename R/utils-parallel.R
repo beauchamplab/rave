@@ -228,7 +228,7 @@ lapply_async <- function(
 setup_async_evaluator <- local({
   id = rand_string()
   initialized = FALSE
-  eval_path = file.path('~/rave_data/cache_dir/EVALUATOR', id)
+  eval_path = file.path(subject_cache_dir(), 'EVALUATOR', id)
   nworkers = 0
   evaluator = NULL
   

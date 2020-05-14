@@ -81,6 +81,17 @@ Tensor <- R6::R6Class(
         f$files = self$swap_file
       }
     },
+    
+    #' @description release resource now
+    #' @param force whether to force remove the data even the data is 
+    #' not temporary
+    remove_data = function(force = FALSE){
+      # remove now
+      if(self$temporary || force){
+        lapply(self$swap_file, unlink)
+      }
+      invisible()
+    },
 
     #' @description print out the data dimensions and snapshot
     #' @param ... ignored

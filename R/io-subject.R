@@ -404,7 +404,7 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
   
   soft_deprecated()
   
-  cache_dir = '~/rave_data/cache_dir'
+  cache_dir = subject_cache_dir()
   
   
   # TODO: check data
@@ -590,7 +590,7 @@ load_local_cache <- function(project_name, subject_code, epoch, time_range,
   # time_range = c(1,2)
   
   # first, check if cache exists
-  cache_dir = file.path('~/rave_data/cache_dir', project_name, subject_code, epoch)
+  cache_dir = file.path(subject_cache_dir(), project_name, subject_code, epoch)
   if(!dir.exists(cache_dir)){
     # cache missing
     return(invisible())
@@ -1414,7 +1414,7 @@ subject_tmpfile <- function(module_id, fun_name = '', project_name,
   tmpdir = get_dir(subject_code = subject_code, project_name = project_name)$module_data_dir
   tmpdir = file.path(tmpdir, module_id, fun_name)
   if(!dir.exists(tmpdir)){
-    dir.create(tmpdir, recursive = T, showWarnings = F)
+    dir.create(tmpdir, recursive = TRUE, showWarnings = FALSE)
   }
   tempfile(tmpdir = tmpdir, pattern = pattern)
 }

@@ -169,7 +169,7 @@ app_controller <- function(
   reg.finalizer(
     controller_env,
     function(e){
-      dir_path = file.path('~/rave_data/cache_dir/', .subset2(e, 'instance_id'))
+      dir_path = file.path(subject_cache_dir(), .subset2(e, 'instance_id'))
       if(dir.exists(dir_path)){
         unlink(dir_path, recursive = TRUE, FALSE)
       }
@@ -178,7 +178,7 @@ app_controller <- function(
   )
 
   RaveFinalizer$new(function(){
-    dir_path = file.path('~/rave_data/cache_dir/', instance_id)
+    dir_path = file.path(subject_cache_dir(), instance_id)
     if(dir.exists(dir_path)){
       unlink(dir_path, recursive = TRUE, force = FALSE)
     }

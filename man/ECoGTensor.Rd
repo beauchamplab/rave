@@ -31,6 +31,7 @@ Zhengjia Wang
 \item \out{<span class="pkg-link" data-pkg="rave" data-topic="Tensor" data-id="get_data">}\href{../../rave/html/Tensor.html#method-get_data}{\code{rave::Tensor$get_data()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="rave" data-topic="Tensor" data-id="operate">}\href{../../rave/html/Tensor.html#method-operate}{\code{rave::Tensor$operate()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="rave" data-topic="Tensor" data-id="print">}\href{../../rave/html/Tensor.html#method-print}{\code{rave::Tensor$print()}}\out{</span>}
+\item \out{<span class="pkg-link" data-pkg="rave" data-topic="Tensor" data-id="remove_data">}\href{../../rave/html/Tensor.html#method-remove_data}{\code{rave::Tensor$remove_data()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="rave" data-topic="Tensor" data-id="set_data">}\href{../../rave/html/Tensor.html#method-set_data}{\code{rave::Tensor$set_data()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="rave" data-topic="Tensor" data-id="subset">}\href{../../rave/html/Tensor.html#method-subset}{\code{rave::Tensor$subset()}}\out{</span>}
 \item \out{<span class="pkg-link" data-pkg="rave" data-topic="Tensor" data-id="to_swap">}\href{../../rave/html/Tensor.html#method-to_swap}{\code{rave::Tensor$to_swap()}}\out{</span>}

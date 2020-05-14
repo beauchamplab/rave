@@ -53,6 +53,15 @@ hard_deprecated <- function(){
   catgl('Function {call[[1]]} is soft-Deprecated. Details: \n{deparse(call)}', level = 'FATAL')
 }
 
+
+# override tempfile
+subject_cache_dir <- function(){
+  re = rave_options('subject_cache_dir')
+  re %?<-% '~/rave_data/cache_dir'
+  dir_create(re)
+  normalizePath(re)
+}
+
 do_nothing <- function(...){}
 
 ### Stores internal settings (session-based)

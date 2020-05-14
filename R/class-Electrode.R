@@ -560,7 +560,7 @@ Electrode <- R6::R6Class(
       
       instance_id = add_to_session(getDefaultReactiveDomain(), key = 'rave_instance', val = 'TEMP', override = FALSE)
       instance_id %?<-% 'TEMP'
-      cache_root_dir = file.path('~/rave_data/cache_dir/', instance_id)
+      cache_root_dir = file.path(subject_cache_dir(), instance_id)
       # prepare data
       epochs = load_meta(meta_type = 'epoch', meta_name = epoch_name, project_name = private$subject$project_name, subject_code = private$subject$subject_code)
       freqs = private$subject$frequencies

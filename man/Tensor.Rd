@@ -79,6 +79,7 @@ as multiple files}
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-finalize}{\code{Tensor$finalize()}}
+\item \href{#method-remove_data}{\code{Tensor$remove_data()}}
 \item \href{#method-print}{\code{Tensor$print()}}
 \item \href{#method-.use_multi_files}{\code{Tensor$.use_multi_files()}}
 \item \href{#method-new}{\code{Tensor$new()}}
@@ -102,6 +103,24 @@ release resource and remove files for temporary instances
 \if{html}{\out{<div class="r">}}\preformatted{Tensor$finalize()}\if{html}{\out{</div>}}
 }
 
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-remove_data"></a>}}
+\if{latex}{\out{\hypertarget{method-remove_data}{}}}
+\subsection{Method \code{remove_data()}}{
+release resource now
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Tensor$remove_data(force = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{force}}{whether to force remove the data even the data is 
+not temporary}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-print"></a>}}
