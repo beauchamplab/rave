@@ -2,6 +2,9 @@
 
 # RAVE: __R__ __A__*nalysis and* __V__*isualization of intracranial* __E__*lectroencephalography*
 
+
+For all RAVE info, including installation instructions, visit (https://openwetware.org/wiki/RAVE).
+
 ## Install RAVE
 RAVE runs on Mac, Windows or Linux. 
   + For Mac, click here to download the [installation script](https://github.com/dipterix/instrave/raw/master/rave-installer-macosx.command.zip)
