@@ -193,7 +193,7 @@ app_ui <- function(adapter, token = NULL){
   ui_functions = dipsaus::fastmap2(
     # Case n (default, load ravebuiltins)
     missing_default = function(active_id = NULL, has_modal = TRUE){
-      title = 'R Analysis and Visualization of ECoG/iEEG Data'
+      title = 'RAVE'
       version = utils::packageVersion('rave')
       version = sprintf('RAVE (%s)', paste(unlist(version), collapse = '.'))
       simplify_header = adapter$get_option('simplify_header', FALSE)

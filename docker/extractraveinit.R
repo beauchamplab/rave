@@ -9,7 +9,7 @@ if (isTRUE(pass_check))  {
   threeBrain::merge_brain(template_dir = '/data/shared/others/three_brain/')
 }
 
-rave::rave_options(data_dir = '/data/shared/rave_data/data_dir', raw_data_dir = '/data/shared/rave_data/raw_dir')
+rave::rave_options(data_dir = '/data/ext/rave_data/data_dir', raw_data_dir = '/data/ext/rave_data/raw_dir')
 
 if(!length(rave::get_projects()) && file.exists('/data/init/YAB.zip')){
   rave::download_subject_data(con = '/data/init/YAB.zip', replace_if_exists = TRUE, remove_zipfile = FALSE)
