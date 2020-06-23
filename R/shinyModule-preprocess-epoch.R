@@ -1,10 +1,13 @@
-pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, ...){
+pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'ravepreprocessepoch', ...){
   ns = shiny::NS(module_id)
+  
+  url_format = sprintf('https://openwetware.org/wiki/RAVE:ravepreprocess:%s:%%s_%%s', doc_prefix)
+  
   default_epoch = data.frame(
     Block = NULL,
     Trial = NULL,
     Onset = NULL,
-    stringsAsFactors = F,
+    stringsAsFactors = FALSE,
     staged = list()
   )
 
@@ -12,14 +15,17 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, ...){
     box(
       width = sidebar_width,
       title = 'Trial Epoch',
+      box_link = sprintf(url_format, 'input', 'trialepoch'),
       uiOutput(ns('inner_ui')), # need notch to be applied
       uiOutput(ns('inner_ui2')),
       uiOutput(ns('inner_ui3')),
       uiOutput(ns('inner_ui4'))
     ),
-    shinydashboard::tabBox(
+    tabBox(
       id = ns('main'),
       width = 12 - sidebar_width,
+      title = 'Inspection Panel',
+      box_link = sprintf(url_format, 'output', 'inspectionpanel'),
       shiny::tabPanel(
         title = 'Select',
         fluidRow(

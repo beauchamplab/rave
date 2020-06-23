@@ -1,5 +1,7 @@
-rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, ...){
+rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_prefix = 'ravepreprocesswavelet', ...){
   ns = shiny::NS(module_id)
+  
+  url_format = sprintf('https://openwetware.org/wiki/RAVE:ravepreprocess:%s:%%s_%%s', doc_prefix)
   
   body = fluidRow(
     shiny::column(
@@ -12,6 +14,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, ...){
       collapsible = TRUE,
       width = 12 - sidebar_width,
       title = 'Wavelet Kernels',
+      box_link = sprintf(url_format, 'output', 'waveletkernels'),
       plotOutput(ns('wave_windows_plot'), height = '80vh')
     )
   )
@@ -53,6 +56,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, ...){
       
       box(
         collapsible = TRUE,
+        box_link = sprintf(url_format, 'input', 'generalsettings'),
         title = 'General Settings', width = 12L,
         textInput(ns('wave_electrodes'), 'Electrodes:', value = vc_txt, placeholder = 'Select at least one electrode.'),
         numericInput(ns('target_srate'), 'Target Sample Rate', value = target_srate, min = 10L, max = srate, step = 1L),
@@ -117,6 +121,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, ...){
       box(
         collapsible = TRUE,
         title = 'Wavelet Settings', width = 12L,
+        box_link = sprintf(url_format, 'input', 'waveletsettings'),
         div(
           class = 'rave-grid-inputs',
           div(
@@ -158,13 +163,14 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, ...){
       }else{
         # read from config name
         local_data$refresh_wavelet
-        tbl = utils::read.csv(path, header = T)
+        tbl = utils::read.csv(path, header = TRUE)
         set_wave_param(tbl$Frequency, tbl$WaveCycle, as_is = TRUE)
       }
       
       box(
         collapsible = TRUE,
         title = 'Details', width = 12L,
+        box_link = sprintf(url_format, 'input', 'details'),
         additional_ui,
         p(
           downloadLink(ns('wave_conf_save'), label = 'Download Current Setting')

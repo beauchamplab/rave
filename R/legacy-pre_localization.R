@@ -1,16 +1,20 @@
-rave_pre_eleclocal3 <- function(module_id = 'ELECLOCAL_M', sidebar_width = 2, ...){
+rave_pre_eleclocal3 <- function(module_id = 'ELECLOCAL_M', sidebar_width = 2, doc_prefix = 'ravepreprocesseleclocalization', ...){
   sidebar_width = max(sidebar_width, 4)
   ns = shiny::NS(module_id)
+  
+  url_format = sprintf('https://openwetware.org/wiki/RAVE:ravepreprocess:%s:%%s_%%s', doc_prefix)
   
   body = fluidRow(
     box(
       title = 'Viewer',
       width = 12 - sidebar_width,
+      box_link = sprintf(url_format, 'output', 'viewer'),
       uiOutput(ns('eloc_outputs1'))
     ),
     box(
       width = sidebar_width,
       title = 'Electrode Table',
+      box_link = sprintf(url_format, 'input', 'electrodetable'),
       uiOutput(ns('eloc_inputs1')),
       uiOutput(ns('eloc_inputs2'))
     )

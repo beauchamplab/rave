@@ -1,16 +1,21 @@
-rave_pre_eleclocalct3 <- function(module_id = 'ELECLOCALCT_M', sidebar_width = 2, ...){
+rave_pre_eleclocalct3 <- function(module_id = 'ELECLOCALCT_M', sidebar_width = 2, doc_prefix = 'ravepreprocesseleclocalizationct', ...){
   sidebar_width = max(sidebar_width, 4)
   ns = shiny::NS(module_id)
   REGEX_POS = '^[ ]*([-]{0,1}[0-9]+[.]{0,1}[0-9]*)[ ]*,[ ]*([-]{0,1}[0-9]+[.]{0,1}[0-9]*)[ ]*,[ ]*([-]{0,1}[0-9]+[.]{0,1}[0-9]*)[ ]*$'
+  
+  url_format = sprintf('https://openwetware.org/wiki/RAVE:ravepreprocess:%s:%%s_%%s', doc_prefix)
   
   body = fluidRow(
     box(
       title = 'Viewer',
       width = 12 - sidebar_width,
+      box_link = sprintf(url_format, 'output', 'viewer'),
       uiOutput(ns('eloc_outputs1'))
     ),
-    shinydashboard::tabBox(
+    tabBox(
       width = sidebar_width,
+      title = 'Controls',
+      box_link = sprintf(url_format, 'input', 'controls'),
       tabPanel(
         title = 'Localization Method',
         div(

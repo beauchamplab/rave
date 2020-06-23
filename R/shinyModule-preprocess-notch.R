@@ -1,5 +1,7 @@
-rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2, ...){
+rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2, doc_prefix = 'ravepreprocessnotch', ...){
   ns = shiny::NS(module_id)
+  
+  url_format = sprintf('https://openwetware.org/wiki/RAVE:ravepreprocess:%s:%%s_%%s', doc_prefix)
   
   body = fluidRow(
     column(
@@ -11,6 +13,7 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2, ...){
     box(
       width = 12 - sidebar_width,
       title = 'Notch - Inspect Signals',
+      box_link = sprintf(url_format, 'output', 'notchinspectsignals'),
       plotOutput(ns('plot_signal'), height = '75vh')
     )
     
@@ -95,7 +98,8 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2, ...){
         box(
           width = 12,
           title = 'Notch Filter',
-          collapsible = T, collapsed = local_data$has_notch,
+          box_link = sprintf(url_format, 'input', 'notchfilter'),
+          collapsible = TRUE, collapsed = local_data$has_notch,
           numericInput(ns('notch_freq'), 'Base Frequency, (Hz)', value = last),
           textInput(ns('notch_freq_x'), 'X (Times)', value = notch_freq_x),
           textInput(ns('notch_freq_bw'), '+- (Band Width, Hz)', value = notch_freq_bw),
@@ -106,6 +110,7 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2, ...){
         box(
           width = 12,
           title = 'Inspection',
+          box_link = sprintf(url_format, 'input', 'inspection'),
           downloadLink(ns('pwelch_download'), 'Download as PDF'),
           hr(),
           div(
