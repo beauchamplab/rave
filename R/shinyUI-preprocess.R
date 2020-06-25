@@ -4,6 +4,7 @@
 #' @param host default is \code{"localhost"}
 #' @param port integer port of the app
 #' @param quiet soft deprecated
+#' @param beta whether to load experimental modules, default is false
 #' @param test.mode passed to \code{\link[shiny]{shinyApp}}
 #' @param ver internally used please don't change
 #' @param theme color theme
@@ -12,11 +13,12 @@
 #' @export
 rave_preprocess <- function(
   sidebar_width = 3,
-  launch.browser = T,
+  launch.browser = TRUE,
   host = '127.0.0.1',
   port = NULL,
-  quiet = T,
-  test.mode = F,
+  quiet = TRUE,
+  beta = FALSE,
+  test.mode = FALSE,
   modules,
   ver = '3',
   theme = 'purple',
@@ -35,40 +37,51 @@ rave_preprocess <- function(
       ID = 'OVERVIEW',
       name = 'Overview',
       checklevel = 0,
+      doc_prefix = 'ravepreprocessoverview',
       ..func = 'rave_pre_overview3'
     ),
     list(
       ID = 'NOTCH',
       name = 'Step 1. Notch Filter',
       checklevel = 1,
+      doc_prefix = 'ravepreprocessnotch',
       ..func = 'rave_pre_notch3'
     ),
     list(
       ID = 'WAVELET',
       name = 'Step 2. Wavelet',
       checklevel = 2,
+      doc_prefix = 'ravepreprocesswavelet',
       ..func = 'rave_pre_wavelet3'
-    ),
-    list(
-      ID = 'EPOCH',
-      name = 'Step 3. Trial Epoch',
-      checklevel = 1,
-      ..func = 'pre_epoch3'
-    ),
-    list(
-      ID = 'ELECLOCAL',
-      name = 'E-Localization (Beta)',
-      checklevel = 1,
-      ..func = 'rave_pre_eleclocal3'
-    )
-    ,
-    list(
-      ID = 'ELECLOCALCT',
-      name = 'E-Localization w/ CT (Beta)',
-      checklevel = 1,
-      ..func = 'rave_pre_eleclocalct3'
     )
   )
+  
+  if( beta ){
+    modules <- c(modules, list(
+      list(
+        ID = 'EPOCH',
+        name = 'Step 3. Trial Epoch',
+        checklevel = 1,
+        doc_prefix = 'ravepreprocessepoch',
+        ..func = 'pre_epoch3'
+      ),
+      list(
+        ID = 'ELECLOCAL',
+        name = 'E-Localization (Beta)',
+        checklevel = 1,
+        doc_prefix = 'ravepreprocesseleclocalization',
+        ..func = 'rave_pre_eleclocal3'
+      )
+      ,
+      list(
+        ID = 'ELECLOCALCT',
+        name = 'E-Localization w/ CT (Beta)',
+        checklevel = 1,
+        doc_prefix = 'ravepreprocesseleclocalizationct',
+        ..func = 'rave_pre_eleclocalct3'
+      )
+    ))
+  }
 
   # Step 2: initialize models
 
@@ -86,7 +99,8 @@ rave_preprocess <- function(
         call = ..func,
         UI = instance$body,
         server = instance$server,
-        checklevel = checklevel
+        checklevel = checklevel,
+        doc_prefix = doc_prefix
       )
     })
   })
@@ -178,7 +192,7 @@ rave_preprocess <- function(
 
     lapply(model_instances, function(x){
       cat2(x$ID)
-      callModule(x$server, id = paste0(x$ID , '_M'), user_data = user_data, utils = utils, ...)
+      callModule(x$server, id = paste0(x$ID , '_M'), user_data = user_data, utils = utils, doc_prefix = doc_prefix, ...)
     })
 
   }

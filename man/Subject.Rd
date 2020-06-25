@@ -85,6 +85,7 @@ initializing the instance}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-info"></a>}}
+\if{latex}{\out{\hypertarget{method-info}{}}}
 \subsection{Method \code{info()}}{
 print the information of the subject
 \subsection{Usage}{
@@ -97,18 +98,27 @@ none
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-print"></a>}}
+\if{latex}{\out{\hypertarget{method-print}{}}}
 \subsection{Method \code{print()}}{
 override of default print method
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Subject$print()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Subject$print(...)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{ignored}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 default memory address of the environment
 }
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-finalize"></a>}}
+\if{latex}{\out{\hypertarget{method-finalize}{}}}
 \subsection{Method \code{finalize()}}{
 called when garbage collected
 \subsection{Usage}{
@@ -118,6 +128,7 @@ called when garbage collected
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
+\if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
 constructor
 \subsection{Usage}{
@@ -142,6 +153,7 @@ subject meta folder}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-preprocess_info"></a>}}
+\if{latex}{\out{\hypertarget{method-preprocess_info}{}}}
 \subsection{Method \code{preprocess_info()}}{
 Obtain preprocessing information.
 This methods is rarely directly called, I wrap up most commonly used 
@@ -170,6 +182,7 @@ the preprocess information correspond to the key
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-filter_all_electrodes"></a>}}
+\if{latex}{\out{\hypertarget{method-filter_all_electrodes}{}}}
 \subsection{Method \code{filter_all_electrodes()}}{
 filter, and returns existing electrodes
 \subsection{Usage}{
@@ -190,6 +203,7 @@ electrodes.
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-filter_valid_electrodes"></a>}}
+\if{latex}{\out{\hypertarget{method-filter_valid_electrodes}{}}}
 \subsection{Method \code{filter_valid_electrodes()}}{
 filter, and returns valid electrodes
 \subsection{Usage}{
@@ -211,6 +225,7 @@ column is blank in the reference file, then the electrode is invalid.
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-has_bad_time_point"></a>}}
+\if{latex}{\out{\hypertarget{method-has_bad_time_point}{}}}
 \subsection{Method \code{has_bad_time_point()}}{
 (deprecated) check whether the selected time is excluded
 \subsection{Usage}{
@@ -233,6 +248,7 @@ column is blank in the reference file, then the electrode is invalid.
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

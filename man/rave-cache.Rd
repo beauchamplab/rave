@@ -38,7 +38,13 @@ cache(
 
 \method{cache}{default}(..., global = TRUE)
 
-cache_input(inputId, val = NULL, read_only = TRUE, ...)
+cache_input(
+  inputId,
+  val = NULL,
+  read_only = TRUE,
+  ...,
+  session = getDefaultReactiveDomain()
+)
 
 clear_cache(levels = 1)
 }
@@ -62,6 +68,8 @@ then the variable will be accessible from other instances and modules.}
 \item{temporary}{whether to use temporary map to cache, used internally.}
 
 \item{...}{ignored}
+
+\item{session}{shiny session instance}
 
 \item{levels}{levels when clear the cache}
 }

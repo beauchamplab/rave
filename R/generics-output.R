@@ -1,17 +1,21 @@
 
 #' @rdname session-reactives
 #' @export
-getDefaultReactiveOutput <- rave_context_generics('getDefaultReactiveOutput', function(){})
+getDefaultReactiveOutput <- rave_context_generics(
+  'getDefaultReactiveOutput', 
+  function(session = shiny::getDefaultReactiveDomain()){
+    
+  })
 
 #' @rdname session-reactives
 #' @export
-getDefaultReactiveOutput.default <- function(){
+getDefaultReactiveOutput.default <- function(session = shiny::getDefaultReactiveDomain()){
   stop('Please enable debug mode to test this function.')
 }
 
 #' @rdname session-reactives
 #' @export
-getDefaultReactiveOutput.rave_module_debug <- function(){
+getDefaultReactiveOutput.rave_module_debug <- function(session = shiny::getDefaultReactiveDomain()){
   env = new.env(parent = emptyenv())
   env$..warn = TRUE
   class(env) = c('ravedev_ReactiveOutput', 'environment')
@@ -20,11 +24,9 @@ getDefaultReactiveOutput.rave_module_debug <- function(){
 
 #' @rdname session-reactives
 #' @export
-getDefaultReactiveOutput.rave_running <- function(){
+getDefaultReactiveOutput.rave_running <- function(session = shiny::getDefaultReactiveDomain()){
   ctx = rave_context()
-  session = shiny::getDefaultReactiveDomain()
-  session = session$makeScope(ctx$module_id)
-  session$output
+  session$rootScope()$makeScope(ctx$module_id)$output
 }
 
 #' @rdname session-reactives

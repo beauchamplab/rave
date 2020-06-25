@@ -24,7 +24,7 @@ Description: R Analysis and Visualization of 'ECOG/iEEG' Data
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 Depends: R (>= 3.6.0)
 Imports:
     utils,
@@ -32,18 +32,16 @@ Imports:
     graphics,
     grDevices,
     glue,
-    remotes,
+    crayon,
+    cli,
     htmltools (>= 0.3.6),
     devtools,
     grid,
-    crayon,
-    cli,
     signal (>= 0.7-6),
-    dipsaus (>= 0.0.3),
+    dipsaus (>= 0.0.6),
     hdf5r (>= 1.0.0),
     R.matlab (>= 3.6.1),
     R6 (>= 2.2.2),
-    jsonlite (>= 1.5),
     future (>= 1.10.0),
     shiny (>= 1.0.5),
     stringr (>= 1.2.0),

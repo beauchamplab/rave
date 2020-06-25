@@ -404,14 +404,14 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
   
   soft_deprecated()
   
-  cache_dir = '~/rave_data/cache_dir'
+  cache_dir = subject_cache_dir()
   
   
   # TODO: check data
-  check_results = check_subjects2(project_name = project_name, subject_code = subject_code, quiet = T)
+  check_results = check_subjects2(project_name = project_name, subject_code = subject_code, quiet = TRUE)
   
   # 1. get directories
-  subject = Subject$new(subject_code = subject_code, project_name = project_name, strict = F)
+  subject = Subject$new(subject_code = subject_code, project_name = project_name, strict = FALSE)
   dirs = subject$dirs
   subject_cache_dir = file.path(cache_dir, project_name, subject_code, epoch)
   
@@ -590,7 +590,7 @@ load_local_cache <- function(project_name, subject_code, epoch, time_range,
   # time_range = c(1,2)
   
   # first, check if cache exists
-  cache_dir = file.path('~/rave_data/cache_dir', project_name, subject_code, epoch)
+  cache_dir = file.path(subject_cache_dir(), project_name, subject_code, epoch)
   if(!dir.exists(cache_dir)){
     # cache missing
     return(invisible())
@@ -1359,13 +1359,14 @@ archive_subject <- function(project_name, subject_code,
 #' Find module analysis names
 #' @param module_id module id
 #' @param project_name project name
+#' @param data_env internally used
 #' @export
-module_analysis_names <- function(module_id, project_name){
+module_analysis_names <- function(
+  module_id, project_name, data_env = getDefaultDataRepository()){
+  
   soft_deprecated()
   # if missing project_name, get from current repository
   if(missing(project_name)){
-    data_env = getDefaultDataRepository()
-    on.exit(rm(data_env))
     project_name = data_env$subject$project_name
   }
   
@@ -1397,12 +1398,13 @@ module_analysis_names <- function(module_id, project_name){
 #' @param project_name project name
 #' @param subject_code subject code
 #' @param pattern passed to \code{\link{tempfile}}
+#' @param data_env internally used
 #' @export
-subject_tmpfile <- function(module_id, fun_name = '', project_name, subject_code, pattern = 'file_'){
+subject_tmpfile <- function(module_id, fun_name = '', project_name, 
+                            subject_code, pattern = 'file_',
+                            data_env = getDefaultDataRepository()){
   soft_deprecated()
   if(missing(project_name)){
-    data_env = getDefaultDataRepository()
-    on.exit(rm(data_env))
     project_name = data_env$subject$project_name
     subject_code = data_env$subject$subject_code
   }
@@ -1412,17 +1414,17 @@ subject_tmpfile <- function(module_id, fun_name = '', project_name, subject_code
   tmpdir = get_dir(subject_code = subject_code, project_name = project_name)$module_data_dir
   tmpdir = file.path(tmpdir, module_id, fun_name)
   if(!dir.exists(tmpdir)){
-    dir.create(tmpdir, recursive = T, showWarnings = F)
+    dir.create(tmpdir, recursive = TRUE, showWarnings = FALSE)
   }
   tempfile(tmpdir = tmpdir, pattern = pattern)
 }
 
-module_analysis_table <- function(project_name, module_id, analysis_name, check_valid = FALSE){
+module_analysis_table <- function(project_name, module_id, 
+                                  analysis_name, check_valid = FALSE, 
+                                  data_env = getDefaultDataRepository()){
   soft_deprecated()
   # if missing project_name, get from current repository
   if(missing(project_name)){
-    data_env = getDefaultDataRepository()
-    on.exit(rm(data_env))
     project_name = data_env$subject$project_name
   }
   module_id = stringr::str_to_upper(module_id)
@@ -1463,12 +1465,10 @@ module_analysis_table <- function(project_name, module_id, analysis_name, check_
 }
 
 
-module_analysis_save <- function(project_name, subject_code, module_id, analysis_name, file, meta = NULL){
+module_analysis_save <- function(project_name, subject_code, module_id, analysis_name, file, meta = NULL, data_env = getDefaultDataRepository()){
   soft_deprecated()
   # if missing project_name, get from current repository
   if(missing(project_name) || missing(subject_code)){
-    data_env = getDefaultDataRepository()
-    on.exit(rm(data_env))
     project_name = data_env$subject$project_name
     subject_code = data_env$subject$subject_code
   }

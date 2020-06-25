@@ -79,6 +79,7 @@ as multiple files}
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-finalize}{\code{Tensor$finalize()}}
+\item \href{#method-remove_data}{\code{Tensor$remove_data()}}
 \item \href{#method-print}{\code{Tensor$print()}}
 \item \href{#method-.use_multi_files}{\code{Tensor$.use_multi_files()}}
 \item \href{#method-new}{\code{Tensor$new()}}
@@ -95,6 +96,7 @@ as multiple files}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-finalize"></a>}}
+\if{latex}{\out{\hypertarget{method-finalize}{}}}
 \subsection{Method \code{finalize()}}{
 release resource and remove files for temporary instances
 \subsection{Usage}{
@@ -103,7 +105,26 @@ release resource and remove files for temporary instances
 
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-remove_data"></a>}}
+\if{latex}{\out{\hypertarget{method-remove_data}{}}}
+\subsection{Method \code{remove_data()}}{
+release resource now
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Tensor$remove_data(force = FALSE)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{force}}{whether to force remove the data even the data is 
+not temporary}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-print"></a>}}
+\if{latex}{\out{\hypertarget{method-print}{}}}
 \subsection{Method \code{print()}}{
 print out the data dimensions and snapshot
 \subsection{Usage}{
@@ -123,6 +144,7 @@ self
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-.use_multi_files"></a>}}
+\if{latex}{\out{\hypertarget{method-.use_multi_files}{}}}
 \subsection{Method \code{.use_multi_files()}}{
 Internally used, whether to use multiple files to cache 
 data instead of one
@@ -140,6 +162,7 @@ data instead of one
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
+\if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
 constructor
 \subsection{Usage}{
@@ -183,6 +206,7 @@ files to save data by index}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-subset"></a>}}
+\if{latex}{\out{\hypertarget{method-subset}{}}}
 \subsection{Method \code{subset()}}{
 subset tensor
 \subsection{Usage}{
@@ -209,6 +233,7 @@ the sliced data
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-flatten"></a>}}
+\if{latex}{\out{\hypertarget{method-flatten}{}}}
 \subsection{Method \code{flatten()}}{
 converts tensor (array) to a table (data frame)
 \subsection{Usage}{
@@ -231,6 +256,7 @@ a data frame with the dimension names as index columns and
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-to_swap"></a>}}
+\if{latex}{\out{\hypertarget{method-to_swap}{}}}
 \subsection{Method \code{to_swap()}}{
 Serialize tensor to a file and store it via 
 \code{\link[fst]{write_fst}}
@@ -253,6 +279,7 @@ greater than \code{delay} in seconds, then swap immediately.}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-to_swap_now"></a>}}
+\if{latex}{\out{\hypertarget{method-to_swap_now}{}}}
 \subsection{Method \code{to_swap_now()}}{
 Serialize tensor to a file and store it via 
 \code{\link[fst]{write_fst}} immediately
@@ -271,6 +298,7 @@ loading}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-get_data"></a>}}
+\if{latex}{\out{\hypertarget{method-get_data}{}}}
 \subsection{Method \code{get_data()}}{
 restore data from hard drive to memory
 \subsection{Usage}{
@@ -292,6 +320,7 @@ original array
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-set_data"></a>}}
+\if{latex}{\out{\hypertarget{method-set_data}{}}}
 \subsection{Method \code{set_data()}}{
 set/replace data with given array
 \subsection{Usage}{
@@ -311,6 +340,7 @@ the data from all other places will change. So use it carefully.}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-collapse"></a>}}
+\if{latex}{\out{\hypertarget{method-collapse}{}}}
 \subsection{Method \code{collapse()}}{
 apply mean, sum, or median to collapse data
 \subsection{Usage}{
@@ -332,6 +362,7 @@ the collapsed data
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-operate"></a>}}
+\if{latex}{\out{\hypertarget{method-operate}{}}}
 \subsection{Method \code{operate()}}{
 apply the tensor by anything along given dimension
 \subsection{Usage}{
@@ -363,6 +394,7 @@ the original instance}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

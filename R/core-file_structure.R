@@ -93,7 +93,7 @@ arrange_modules <- function(refresh = FALSE, reset = FALSE, quiet = FALSE){
     #
     
     if(!nrow(tbl)){
-      catgl('No modules can be found. Installing builtin modules using \n\tremotes::install_github("beauchamplab/ravebuiltins@dev")', level = 'ERROR')
+      catgl('No modules can be found. Installing builtin modules using \n\tdevtools::install_github("beauchamplab/ravebuiltins@dev")', level = 'ERROR')
       devtools::install_github("beauchamplab/ravebuiltins@dev", upgrade = 'never')
       
       tbl = detect_modules(as_module = FALSE)

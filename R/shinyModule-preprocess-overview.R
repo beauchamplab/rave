@@ -1,5 +1,7 @@
-rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
+rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_prefix = 'ravepreprocessoverview'){
   ns = shiny::NS(module_id)
+  
+  url_format = sprintf('https://openwetware.org/wiki/RAVE:ravepreprocess:%s:%%s_%%s', doc_prefix)
 
   body = fluidRow(
     box(
@@ -7,11 +9,10 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
       width = sidebar_width,
       # shiny::tabPanel(
       title = 'Overview',
+      box_link = sprintf(url_format, 'input', 'overview'),
       fluidRow(
         column(
           width = 12,
-          a(href = 'https://openwetware.org/wiki/Beauchamp:RAVE:Data_Formats', target = '_blank',
-            'Please check this to import data to RAVE', shiny::icon('external-link')),
           div(
             class = 'rave-grouped-inputs rave-grid-inputs margin-top-20',
             div(class='rave-grid-inputs-legend', 'Step 1'),
@@ -46,7 +47,8 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2){
     ),
     box(
       width = 12 - sidebar_width,
-      title = 'Overview',
+      title = 'Information',
+      box_link = sprintf(url_format, 'output', 'information'),
       fluidRow(
         column(
           width = 6,

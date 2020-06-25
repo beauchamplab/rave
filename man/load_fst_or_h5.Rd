@@ -8,9 +8,9 @@ load_fst_or_h5(
   fst_path,
   h5_path,
   h5_name,
-  fst_need_transpose = F,
-  fst_need_drop = F,
-  ram = F
+  fst_need_transpose = FALSE,
+  fst_need_drop = FALSE,
+  ram = FALSE
 )
 }
 \arguments{

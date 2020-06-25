@@ -33,7 +33,7 @@
 #' @export
 LazyH5 <- R6::R6Class(
   classname = 'LazyH5',
-  portable = F,
+  portable = TRUE,
   private = list(
     file = NULL,
     name = NULL,
@@ -57,7 +57,8 @@ LazyH5 <- R6::R6Class(
         if(private$data_ptr$is_valid){
           base::print(private$data_ptr)
         }else{
-          base::cat('Pointer closed. Information since last open:\nDim: ', paste(private$last_dim, collapse = 'x'), ' \tRank: ', length(private$last_dim))
+          base::cat('Pointer closed. Information since last open:\nDim: ', 
+                    paste(private$last_dim, collapse = 'x'), ' \tRank: ', length(private$last_dim))
         }
       }
       invisible(self)

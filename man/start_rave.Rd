@@ -4,9 +4,17 @@
 \alias{start_rave}
 \title{Start RAVE main application}
 \usage{
-start_rave(modules = NULL, active_module = NULL, launch.browser = T,
-theme = "purple", disable_sidebar = FALSE, simplify_header = FALSE,
-token = NULL, ...)
+start_rave(
+  modules = NULL,
+  active_module = NULL,
+  launch.browser = TRUE,
+  theme = "purple",
+  disable_sidebar = FALSE,
+  simplify_header = FALSE,
+  token = NULL,
+  data_repo = getDefaultDataRepository(),
+  ...
+)
 }
 \arguments{
 \item{modules}{character vector, modules modules to load before starting application.}
@@ -23,6 +31,8 @@ token = NULL, ...)
 
 \item{token}{character vector, default is \code{NULL}. If specified, then
 a \code{?token=...} is needed in url to access to the application.}
+
+\item{data_repo}{internally used.}
 
 \item{...}{other parameters. See details.}
 }

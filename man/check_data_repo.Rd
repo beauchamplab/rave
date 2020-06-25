@@ -4,13 +4,19 @@
 \alias{check_data_repo}
 \title{Check if default data environment has object}
 \usage{
-check_data_repo(var = c("subject"), any = FALSE)
+check_data_repo(
+  var = c("subject"),
+  any = FALSE,
+  data_repo = getDefaultDataRepository()
+)
 }
 \arguments{
 \item{var}{variable name}
 
 \item{any}{whether all variables should be present of any variables should 
 exist}
+
+\item{data_repo}{internally used}
 }
 \value{
 Logical \code{TRUE} or \code{FALSE} indicating the existence of the 

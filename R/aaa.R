@@ -1,7 +1,9 @@
 #' @import shiny
 #' @importFrom dipsaus %?<-%
 #' @importFrom dipsaus collapse
+#' @importFrom dipsaus to_datauri
 #' @importFrom graphics axis par points rect
+#' @importFrom utils read.csv
 NULL
 
 
@@ -51,6 +53,15 @@ hard_deprecated <- function(){
   catgl('Function {call[[1]]} is soft-Deprecated. Details: \n{deparse(call)}', level = 'FATAL')
 }
 
+
+# override tempfile
+subject_cache_dir <- function(){
+  re = rave_options('subject_cache_dir')
+  re %?<-% '~/rave_data/cache_dir'
+  dir_create(re)
+  normalizePath(re)
+}
+
 do_nothing <- function(...){}
 
 ### Stores internal settings (session-based)
@@ -87,18 +98,6 @@ stopifnot2 <- function(..., msg = 'Condition not satisfied'){
 `%within%` <- function(a, b){
   (a >= min(b)) & (a <= max(b))
 }
-
-
-# ---------------- Deprecated functions ------------------
-
-py_console <- function(...){
-  hard_deprecated()
-}
-
-register_compoundInput <- function(...){
-  soft_deprecated()
-}
-
 
 
 rave_context_list <- list(
@@ -433,35 +432,6 @@ rave_context <- function(context, require_contexts, disallowed_context,
     target_env = tenv
   ))
 }
-
-# @rdname rave_context
-# @export
-# rave_context <- function(..., senv, tenv){
-#   if(missing(senv)){
-#     sys_parents = rev(sys.parents())
-#     idx = which(sys_parents == 0)
-#     if(length(idx)){
-#       sys_parents = sys_parents[seq_len(idx[[1]])]
-#     }
-#     senv = parent.frame()
-#     for(n in sys_parents){
-#       if(exists('.__rave_context__.', frame = n)){
-#         senv = sys.frame(n)
-#         break()
-#       }
-#     }
-#   }
-#   if(missing(tenv)){
-#     tenv = parent.frame()
-#   }
-#   
-#   call = match.call()
-#   call[[1]] = quote(.rave_context)
-#   call[['senv']] = quote(senv)
-#   call[['tenv']] = quote(tenv)
-#   eval(call)
-# }
-
 
 
 #' @title Create S3 Generics that Respects 'RAVE' Context

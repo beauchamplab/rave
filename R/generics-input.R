@@ -4,22 +4,23 @@
 #' that refers to the inputs and outputs of shiny applications. In non-shiny 
 #' contexts, returns a fake environment related to current fake session, 
 #' for debug purpose.
+#' @param session shiny session instance
 #' @name session-reactives
 NULL
 
 #' @rdname session-reactives
 #' @export
 getDefaultReactiveInput <- rave_context_generics('getDefaultReactiveInput', 
-                                                 function(){})
+                                                 function(session){})
 #' @rdname session-reactives
 #' @export
-getDefaultReactiveInput.default <- function(){
+getDefaultReactiveInput.default <- function(session){
   stop('Please enable debug mode to test this function.')
 }
 
 #' @rdname session-reactives
 #' @export
-getDefaultReactiveInput.rave_module_debug <- function(){
+getDefaultReactiveInput.rave_module_debug <- function(session){
   env = new.env(parent = emptyenv())
   env$..warn = TRUE
   class(env) = c('ravedev_ReactiveInput', 'environment')
@@ -28,11 +29,13 @@ getDefaultReactiveInput.rave_module_debug <- function(){
 
 #' @rdname session-reactives
 #' @export
-getDefaultReactiveInput.rave_running <- function(){
-  ctx = rave_context()
+getDefaultReactiveInput.rave_running <- function(
   session = shiny::getDefaultReactiveDomain()
-  session = session$makeScope(ctx$module_id)
-  session$input
+){
+  ctx = rave_context()
+  # session = shiny::getDefaultReactiveDomain()
+  # session = session$makeScope(ctx$module_id)
+  session$makeScope(ctx$module_id)$input
 }
 
 #' @rdname session-reactives

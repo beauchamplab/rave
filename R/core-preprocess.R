@@ -20,8 +20,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
     WAVELETED = 3
     REFERENCED = 4  # Soft deprecated since the reference module is moved to main module
     ###### UI override ######
-    showNotification = function(msg, type = 'message'){
-      session = getDefaultReactiveDomain()
+    showNotification = function(msg, type = 'message', session = getDefaultReactiveDomain()){
       if(is.null(session)){
         level = switch (
           type,
@@ -61,20 +60,20 @@ rave_preprocess_tools <- function(env = new.env(), ...){
         )
         names(l) = check_names[[nm]]
         l
-      }, simplify = T, USE.NAMES = F) ->
+      }, simplify = TRUE, USE.NAMES = FALSE) ->
         l
       checklist[['Folders']] = l
       
       # step 2: Check if subject has preprocessed yet
       l = list(
-        'Started Proprocess' = F,
-        'Notch Filter' = F,
-        'Wavelet' = F,
-        'Referenced' = F
+        'Started Preprocess' = FALSE,
+        'Notch Filter' = FALSE,
+        'Wavelet' = FALSE,
+        'Referenced' = FALSE
       )
       try({
         utils$load_subject(subject_code = subject_code, project_name = project_name, strict = strict)
-        l[seq_len(utils$get_check_level())] = T
+        l[seq_len(utils$get_check_level())] = TRUE
       }, silent = TRUE)
       
       checklist[['Preprocess']] = l

@@ -147,8 +147,9 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
     return('')
   }
   
-  w$get_brain = function(surfaces = 'pial', multiple_subject = FALSE){
-    subject = get0('subject', envir = rave::getDefaultDataRepository(), ifnotfound = NULL)
+  w$get_brain = function(surfaces = 'pial', multiple_subject = FALSE,
+                         data_repo = rave::getDefaultDataRepository()){
+    subject = get0('subject', envir = data_repo, ifnotfound = NULL)
     brain = NULL
     if( !is.null(subject) ){
       brain = rave_brain2(subject = subject, surfaces = surfaces, compute_template = FALSE)
@@ -474,7 +475,7 @@ ModuleEnvir <- R6::R6Class(
       
       
       if(!is.environment(parent_env) || identical(parent_env, globalenv())){
-        parent_env = new.env(parent = globalenv(), hash = T)
+        parent_env = new.env(parent = globalenv(), hash = TRUE)
       }
       self$parent_env = parent_env
       
@@ -601,9 +602,8 @@ ModuleEnvir <- R6::R6Class(
       }
       if(is.character(session_id)){
         # Clear runtime_env
-        exec_env = private$exec_env[[session_id]]
-        if('ExecEnvir' %in% class(exec_env)){
-          exec_env$clean()
+        if( inherits(private$exec_env[[session_id]], 'ExecEnvir') ){
+          private$exec_env[[session_id]]$clean()
         }
         private$exec_env[[session_id]] = NULL
       }

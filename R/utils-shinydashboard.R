@@ -206,11 +206,12 @@ dashboardPage <- function (
 }
 
 
-
-box = function (..., title = NULL, footer = NULL, status = NULL, solidHeader = FALSE,
-                background = NULL, width = 12, height = NULL, collapsible = FALSE,
-                collapsed = FALSE, headerColor = '#f4f4f4')
+box <- function (..., title = NULL, footer = NULL, status = NULL, solidHeader = FALSE,
+                background = NULL, width = 12, height = NULL, collapsible = TRUE,
+                collapsed = FALSE, headerColor = '#f4f4f4', box_link = NULL)
 {
+  # Always collapsible
+  collapsible <- TRUE
   boxClass <- "box"
   if (solidHeader || !is.null(background)) {
     boxClass <- paste(boxClass, "box-solid")
@@ -239,8 +240,16 @@ box = function (..., title = NULL, footer = NULL, status = NULL, solidHeader = F
     collapseIcon <- if (collapsed)
       "plus"
     else "minus"
-    collapseTag <- div(class = "box-tools pull-right", tags$button(class = paste0("btn btn-box-tool"),
-                                                                   `data-widget` = "collapse", shiny::icon(collapseIcon)))
+    collapseTag <- div(
+      class = "box-tools pull-right", 
+      if (is.null(box_link)) NULL else tags$a(
+        class = paste0("btn btn-box-tool"),
+        href = box_link,
+        target = "_blank",
+        shiny::icon('question-circle')
+      ),
+      tags$button(class = paste0("btn btn-box-tool"),
+                  `data-widget` = "collapse", shiny::icon(collapseIcon)))
   }
   headerTag <- NULL
   if (!is.null(titleTag) || !is.null(collapseTag)) {
@@ -250,4 +259,37 @@ box = function (..., title = NULL, footer = NULL, status = NULL, solidHeader = F
     paste0("col-sm-", width), div(class = boxClass, style = if (!is.null(style))
       style, headerTag, div(class = "box-body", ...), if (!is.null(footer))
         div(class = "box-footer", footer)))
+}
+
+
+tabBox <- function (..., id = NULL, selected = NULL, title = NULL, width = 6, 
+                    height = NULL, side = c("left", "right"), box_link = NULL) 
+{
+  side <- match.arg(side)
+  content <- shiny::tabsetPanel(..., id = id, selected = selected)
+  content$attribs$class <- "nav-tabs-custom"
+  if (!is.null(height)) {
+    content <- shiny::tagAppendAttributes(
+      content, style = paste0("height: ", shiny::validateCssUnit(height)))
+  }
+  if (side == "right") {
+    content$children[[1]] <- shiny::tagAppendAttributes(content$children[[1]], 
+                                                 class = "pull-right")
+  }
+  if (!is.null(title)) {
+    title = shiny::span(
+      title, if (is.null(box_link)) NULL else tags$a(
+        class = paste0("btn btn-box-tool"),
+        href = box_link,
+        target = "_blank",
+        shiny::icon('question-circle')
+      )
+    )
+    if (side == "left") 
+      titleClass <- "pull-right"
+    else titleClass <- "pull-left"
+    content$children[[1]] <- shiny::tagAppendChild(content$children[[1]], 
+                                                   shiny::tags$li(class = paste("header", titleClass), title))
+  }
+  div(class = paste0("col-sm-", width), content)
 }

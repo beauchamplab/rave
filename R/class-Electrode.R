@@ -45,10 +45,11 @@
 Electrode <- R6::R6Class(
   classname = 'Electrode',
   portable = FALSE,
-  cloneable = FALSE,
+  cloneable = FALSE, 
+  parent_env = asNamespace('rave'),
   private = list(
     subject = NULL,
-    is_reference = F
+    is_reference = FALSE
   ),
   public = list(
     
@@ -107,12 +108,12 @@ Electrode <- R6::R6Class(
     #' @param new_reference An electrode instance
     #' @return none
     switch_reference = function(new_reference){
-      stopifnot2(is(new_reference, 'Electrode'), msg = 'new_reference MUST be a reference electrode instance.')
+      stopifnot2(inherits(new_reference, 'Electrode'), msg = 'new_reference MUST be a reference electrode instance.')
       self$reference = new_reference
       self$preload = NULL
-      rm(list = ls(self$power, all.names = T), envir = self$power)
-      rm(list = ls(self$phase, all.names = T), envir = self$phase)
-      rm(list = ls(self$volt, all.names = T), envir = self$volt)
+      .subset2(self$power, 'reset')()
+      .subset2(self$phase, 'reset')()
+      .subset2(self$volt, 'reset')()
       invisible()
     },
     
@@ -127,11 +128,11 @@ Electrode <- R6::R6Class(
     referenced = function(type = 'power', ram = TRUE){
       
       if(is.character(self$reference) || setequal(names(self[[type]]), self$blocks)){
-        env = self[[type]]
+        env = as.list(self[[type]])
         if(ram){
           sapply(self$blocks, function(b){
             env[[b]][]
-          }, simplify = F, USE.NAMES = T) ->
+          }, simplify = FALSE, USE.NAMES = TRUE) ->
             env
         }
         return(env)
@@ -142,17 +143,16 @@ Electrode <- R6::R6Class(
       raw_type = paste0('raw_', type)
       if('Electrode' %in% class(self$reference) && self$reference$electrode == 'noref'){
         # not very usual, basically cached as referenced but need to load noref version
-        env = self[[type]]
         
-        lapply(self$blocks, function(b){
+        for( b in self$blocks ){
           self[[type]][[b]] = self[[raw_type]][[b]]
-          NULL
-        })
+        }
+        env = as.list(self[[type]])
         
         if(ram){
           sapply(self$blocks, function(b){
             env[[b]][]
-          }, simplify = F, USE.NAMES = T) ->
+          }, simplify = FALSE, USE.NAMES = TRUE) ->
             env
         }
         
@@ -162,20 +162,21 @@ Electrode <- R6::R6Class(
               'volt' = {
                 lapply(self$blocks, function(b){
                   self$volt[[b]] = self$raw_volt[[b]][] - self$reference$raw_volt[[b]][]
+                  # self$volt[[b]] = self$raw_volt[[b]][] - self$reference$raw_volt[[b]][]
                 })
-                return(self$volt)
+                return(as.list(self$volt))
               },
               # default need to have power and phase
               {
                 lapply(self$blocks, function(b){
                   coef = (sqrt(self$raw_power[[b]][]) * exp(1i * self$raw_phase[[b]][])) -
-                    sqrt(self$reference$raw_power[[b]]) * exp(1i * self$reference$raw_phase[[b]])
-                  self$power[[b]] = Mod(coef)^2
+                    (sqrt(self$reference$raw_power[[b]]) * exp(1i * self$reference$raw_phase[[b]]))
+                  self$power[[b]] =  Mod(coef)^2
                   self$phase[[b]] = Arg(coef)
                   rm(coef)
                   invisible()
                 })
-                return(self[[type]])
+                return(as.list(self[[type]]))
               }
       )
       
@@ -194,8 +195,7 @@ Electrode <- R6::R6Class(
         }
         
         for(type in types){
-          env = self[[type]]
-          rm(list = ls(env, all.names = T), envir = env)
+          .subset2(self[[type]], 'reset')()
         }
       }
       invisible()
@@ -225,19 +225,19 @@ Electrode <- R6::R6Class(
       
       # Initialize data
       self$electrode = electrode
-      self$raw_power = as_printable(new.env())
-      self$raw_phase = as_printable(new.env())
-      self$raw_volt = as_printable(new.env())
-      self$phase = as_printable(new.env())
-      self$power = as_printable(new.env())
-      self$volt = as_printable(new.env())
+      self$raw_power = dipsaus::fastmap2()
+      self$raw_phase = dipsaus::fastmap2()
+      self$raw_volt = dipsaus::fastmap2()
+      self$phase = dipsaus::fastmap2()
+      self$power = dipsaus::fastmap2()
+      self$volt = dipsaus::fastmap2()
       self$preload = preload
       
       
       private$is_reference = is_reference
       cache_dir = subject$dirs$cache_dir
       
-      blocks = subject$preprocess_info('blocks', customized = F)
+      blocks = subject$preprocess_info('blocks', customized = FALSE)
       
       # Get reference info
       if(!is_reference){
@@ -246,7 +246,7 @@ Electrode <- R6::R6Class(
         file = file.path(cache_dir, 'cache', 'cached_reference.csv')
         ref = NULL
         if(file.exists(file)){
-          tbl = read.csv(file, stringsAsFactors = F)
+          tbl = read.csv(file, stringsAsFactors = FALSE)
           if(electrode %in% tbl$Electrode){
             ref = tbl$Reference[tbl$Electrode == electrode]
           }
@@ -261,13 +261,13 @@ Electrode <- R6::R6Class(
           if(!file.exists(file)){
             file = file.path(cache_dir, 'voltage', sprintf("%d.h5", electrode))
           }
-          ref = load_h5(file, '/reference', ram = T)
+          ref = load_h5(file, '/reference', ram = TRUE)
         }
         
         
-        need_ref = F
+        need_ref = FALSE
         if(is.character(reference_by) && reference_by != ref){
-          reference_by = Electrode$new(subject, electrode = reference_by, reference_by = NULL, is_reference = T)
+          reference_by = Electrode$new(subject, electrode = reference_by, reference_by = NULL, is_reference = TRUE)
         }
         if(inherits(reference_by, 'Electrode')){
           stopifnot2(reference_by$reference_electrode, msg = 'This is not a reference signal.')
@@ -289,14 +289,14 @@ Electrode <- R6::R6Class(
       load_data_ = function(t, b, e){
         if(t == 'voltage'){
           ts = 'volt'
-          fst_need_transpose = F
-          fst_need_drop = T
+          fst_need_transpose = FALSE
+          fst_need_drop = TRUE
           ram_raw = any(sprintf('raw_%s', c(ts, t)) %in% preload)
           ram_ref = any(c(ts, t) %in% preload)
         }else{
           ts = t
-          fst_need_transpose = T
-          fst_need_drop = F
+          fst_need_transpose = TRUE
+          fst_need_drop = FALSE
           ram_raw = (sprintf('raw_%s', ts) %in% preload)
           ram_ref = (ts %in% preload)
         }
@@ -437,8 +437,8 @@ Electrode <- R6::R6Class(
               coef = sqrt(self$raw_power[[b]][]) * exp(1i * self$raw_phase[[b]][])
               ref_coef = sqrt(reference_by$raw_power[[b]][]) * exp(1i * reference_by$raw_phase[[b]][])
               coef = coef - ref_coef
-              if('phase' %in% preload)  self$phase[[b]] = force(Arg(coef))
-              if('power' %in% preload)  self$power[[b]] = force((Mod(coef))^2)
+              if('phase' %in% preload)  self$phase[[b]] = Arg(coef)
+              if('power' %in% preload)  self$power[[b]] = (Mod(coef))^2
               rm(list = c('coef', 'ref_coef'))
             }
           }
@@ -458,7 +458,7 @@ Electrode <- R6::R6Class(
               # range(self$raw_power[[b]] - (coef[,,1])^2)
               # range(self$raw_phase[[b]] - (coef[,,2]))
             }else{
-              coef = load_h5(file, name = paste0('/wavelet/coef/', b), ram = T)
+              coef = load_h5(file, name = paste0('/wavelet/coef/', b), ram = TRUE)
               self$raw_power[[b]] = (coef[,,1])^2
               self$raw_phase[[b]] = (coef[,,2])
             }
@@ -468,9 +468,9 @@ Electrode <- R6::R6Class(
               fst_path = file.path(cache_dir, 'cache', 'reference', 'voltage', b, sprintf("%s.fst", electrode)),
               h5_path = file,
               h5_name = paste0('/voltage/', b),
-              fst_need_transpose = F,
-              fst_need_drop = T,
-              ram = T
+              fst_need_transpose = FALSE,
+              fst_need_drop = TRUE,
+              ram = TRUE
             )
             # test
             # range(self$raw_volt[[b]] - load_h5(file, name = '/voltage/' %&% b, ram = T))
@@ -489,9 +489,9 @@ Electrode <- R6::R6Class(
                 fst_path = file.path(cache_dir, 'cache', 'power', 'raw', b, fst_path),
                 h5_path = file.path(cache_dir, 'power', h5_path),
                 h5_name = paste0('/raw/power/', b),
-                fst_need_transpose = T,
-                fst_need_drop = F,
-                ram = T
+                fst_need_transpose = TRUE,
+                fst_need_drop = FALSE,
+                ram = TRUE
               )
               # test: should be 0 0
               # range(self$raw_power[[b]] - load_h5(file.path(cache_dir, 'power', h5_path), '/raw/power/' %&% b, ram = T))
@@ -504,9 +504,9 @@ Electrode <- R6::R6Class(
                 fst_path = file.path(cache_dir, 'cache', 'phase', 'raw', b, fst_path),
                 h5_path = file.path(cache_dir, 'phase', h5_path),
                 h5_name = paste0('/raw/phase/', b),
-                fst_need_transpose = T,
-                fst_need_drop = F,
-                ram = T
+                fst_need_transpose = TRUE,
+                fst_need_drop = FALSE,
+                ram = TRUE
               )
               # test: should be 0 0
               # range(self$raw_phase[[b]] - load_h5(file.path(cache_dir, 'phase', h5_path), '/raw/phase/' %&% b, ram = T))
@@ -519,9 +519,9 @@ Electrode <- R6::R6Class(
                 fst_path = file.path(cache_dir, 'cache', 'voltage', 'raw', b, fst_path),
                 h5_path = file.path(cache_dir, 'voltage', h5_path),
                 h5_name = paste0('/raw/voltage/', b),
-                fst_need_transpose = F,
-                fst_need_drop = T,
-                ram = T
+                fst_need_transpose = FALSE,
+                fst_need_drop = TRUE,
+                ram = TRUE
               )
               
               # test: should be 0 0
@@ -560,28 +560,24 @@ Electrode <- R6::R6Class(
       
       instance_id = add_to_session(getDefaultReactiveDomain(), key = 'rave_instance', val = 'TEMP', override = FALSE)
       instance_id %?<-% 'TEMP'
-      cache_root_dir = file.path('~/rave_data/cache_dir/', instance_id)
+      cache_root_dir = file.path(subject_cache_dir(), instance_id)
       # prepare data
       epochs = load_meta(meta_type = 'epoch', meta_name = epoch_name, project_name = private$subject$project_name, subject_code = private$subject$subject_code)
       freqs = private$subject$frequencies
       trial_order = order(epochs$Trial)
-      lapply(1:nrow(epochs), function(i){
+      ep = lapply(seq_len(nrow(epochs)), function(i){
         epochs[i,]
-      }) ->
-        ep
+      }) 
       
       re = list()
-      params = list(
-        pre = pre,
-        post = post
-      )
+      params = list( pre = pre, post = post )
       
       electrode = self$electrode
       
       if(!raw){
         # reference first
         lapply(types, function(type){
-          self$referenced(type = type, ram = F)
+          self$referenced(type = type, ram = FALSE)
           NULL
         })
         on.exit({self$clean(types = types)})
@@ -645,7 +641,7 @@ Electrode <- R6::R6Class(
         # reorder
         order = do.call(c, lapply(unique(bvec), function(b){ which(bvec == b) }))
         if(is.unsorted(order)){
-          placehold = placehold[order,,drop = F]
+          placehold = placehold[order,,drop = FALSE]
         }
         
         if(self$reference_electrode){

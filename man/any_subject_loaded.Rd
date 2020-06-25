@@ -4,7 +4,10 @@
 \alias{any_subject_loaded}
 \title{Function to check if data repository has data}
 \usage{
-any_subject_loaded()
+any_subject_loaded(rave_data = getDefaultDataRepository())
+}
+\arguments{
+\item{rave_data}{internally used}
 }
 \description{
 Function to check if data repository has data

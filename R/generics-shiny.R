@@ -57,6 +57,7 @@
 #' @param type characters, \code{"continuous"}, \code{"discrete"}, or both
 #' @param theme \code{"light"} or \code{"dark"}; default is current 
 #' theme saved in \code{rave_options('current_theme')}
+#' @param session shiny session
 #' @return A list contains all palettes found in the packages.
 #' @name get_rave_theme
 #' @examples 
@@ -69,11 +70,11 @@
 NULL
 
 .get_rave_theme <- function(
-  packages = NULL, type = 'continuous', theme = NULL
+  packages = NULL, type = 'continuous', theme = NULL,
+  session = shiny::getDefaultReactiveDomain()
 ){
   if(missing(theme) || !length(theme)){
     theme = NULL
-    session = shiny::getDefaultReactiveDomain()
     if(!is.null(session)){
       theme = session$userData$rave_theme
     }
@@ -132,7 +133,6 @@ NULL
   re
 }
 
-#' @title Get and Set 'RAVE' Themes
 #' @export
 get_rave_theme <- rave_context_generics('get_rave_theme', .get_rave_theme)
 
@@ -141,11 +141,13 @@ get_rave_theme.default <- .get_rave_theme
 
 
 #' @export
-get_rave_theme.rave_running <- function(packages = NULL, type = 'continuous',
-                                        theme = NULL){
+get_rave_theme.rave_running <- function(
+  packages = NULL, type = 'continuous', theme = NULL, 
+  session = shiny::getDefaultReactiveDomain()){
+  
   ctx = rave_context()
   packages = c(ctx$package, packages)
-  .get_rave_theme(packages, type, theme)
+  .get_rave_theme(packages, type, theme, session)
 }
 
 #' @export
@@ -155,6 +157,7 @@ get_rave_theme.rave_running_local <- get_rave_theme.rave_running
 #' @title Set and Return RAVE theme
 #' @param theme \code{"light"} or \code{"dark"}. See details if missing
 #' @param .set_default whether to save current theme as default, default is no.
+#' @param session shiny session
 #' @details RAVE support two themes: "light" mode and "dark" mode. In "light"
 #' mode, the web application background will be light gray and white. In "dark"
 #' mode, the application background will be gray and foreground will be white.
@@ -179,9 +182,10 @@ get_rave_theme.rave_running_local <- get_rave_theme.rave_running
 #' plot(1:10, main = 'test dark mode')
 #' 
 #' @export
-set_rave_theme <- function(theme, .set_default = FALSE){
+set_rave_theme <- function(theme, .set_default = FALSE, 
+                           session = shiny::getDefaultReactiveDomain()){
   rave_context()
-  session = shiny::getDefaultReactiveDomain()
+  
   if(!is.null(session)){
     default_theme = session$userData$rave_theme
   }

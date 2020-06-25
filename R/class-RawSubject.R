@@ -105,7 +105,7 @@ SubjectInfo2 <- R6::R6Class(
         Message = sprintf('Subject folder created - %s', base::normalizePath(self$dirs$subject_dir)),
         stringsAsFactors = F
       )
-      history = self$logger$get_or_save('log', defaults, save = T, inherits = FALSE)
+      history = self$logger$get_or_save('log', defaults, save = TRUE, inherits = FALSE)
       # if(!is.data.frame(history)){
       #   history = defaults
       # }

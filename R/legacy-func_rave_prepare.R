@@ -35,7 +35,7 @@ rave_prepare <- function(
   strict = FALSE,
   ...
 ){
-  # subject = 'congruency/YAB'; electrodes = 14:15; epoch = 'YABa'; time_range = c(1,2); data_types = NULL; reference = 'default'
+  # subject = 'demo/YAB'; electrodes = 14:15; epoch = 'YABaOutlier'; time_range = c(1,2); data_types = NULL; reference = 'default'
   if(missing(subject)){
     # detach enironment
     if('rave_data' %in% search()){
@@ -61,8 +61,7 @@ rave_prepare <- function(
   }
   if(is.character(subject)){
     subject_split = unlist(strsplit(subject, '/|\\\\'))
-    subject = Subject$new(project_name = subject_split[[1]], subject_code = subject_split[[2]],
-                          reference = reference, strict = strict)
+    subject = Subject$new(project_name = subject_split[[1]], subject_code = subject_split[[2]], reference = reference, strict = strict)
   }
 
   subject$is_strict = strict
@@ -79,7 +78,7 @@ rave_prepare <- function(
     electrodes = electrodes,
     frequency_range = frequency_range,
     data_type = tmp,
-    referenced = T,
+    referenced = TRUE,
     func = NULL
   )
 
@@ -98,7 +97,7 @@ rave_prepare <- function(
   if(!is.null(frequency_range)){
     freq_subset = freqs %within% frequency_range
     if(!sum(freq_subset)){
-      freq_subset[which.min(abs(freqs - frequency_range[1]))] = T
+      freq_subset[which.min(abs(freqs - frequency_range[1]))] = TRUE
     }
     freqs = freqs[freq_subset]
   }
@@ -171,7 +170,8 @@ rave_prepare <- function(
     cat2('Check ?rave_prepare for details.', level = 'INFO')
 
     if(dev_env == 'python'){
-      py_console(py3 = (dev_ver == 'py3'))
+      stop('dev_env == python is depricated')
+      # py_console(py3 = (dev_ver == 'py3'))
     }
   }
   re = data_env

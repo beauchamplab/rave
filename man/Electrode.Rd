@@ -102,6 +102,7 @@ data exist in file system before and after reference}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-info"></a>}}
+\if{latex}{\out{\hypertarget{method-info}{}}}
 \subsection{Method \code{info()}}{
 print electrode information
 \subsection{Usage}{
@@ -114,6 +115,7 @@ none
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-print"></a>}}
+\if{latex}{\out{\hypertarget{method-print}{}}}
 \subsection{Method \code{print()}}{
 overrides default print method
 \subsection{Usage}{
@@ -133,6 +135,7 @@ none
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-switch_reference"></a>}}
+\if{latex}{\out{\hypertarget{method-switch_reference}{}}}
 \subsection{Method \code{switch_reference()}}{
 switch reference (experimental)
 \subsection{Usage}{
@@ -152,6 +155,7 @@ none
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-referenced"></a>}}
+\if{latex}{\out{\hypertarget{method-referenced}{}}}
 \subsection{Method \code{referenced()}}{
 get referenced data
 \subsection{Usage}{
@@ -177,6 +181,7 @@ environment with each element a \code{\link[rave]{LazyH5}} or
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-clean"></a>}}
+\if{latex}{\out{\hypertarget{method-clean}{}}}
 \subsection{Method \code{clean()}}{
 remove data from memory
 \subsection{Usage}{
@@ -198,6 +203,7 @@ none
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
+\if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
 constructor
 \subsection{Usage}{
@@ -234,6 +240,7 @@ An \code{\link[rave]{Electrode}} instance
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-epoch"></a>}}
+\if{latex}{\out{\hypertarget{method-epoch}{}}}
 \subsection{Method \code{epoch()}}{
 epoch electrode
 \subsection{Usage}{

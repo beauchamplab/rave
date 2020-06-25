@@ -1,28 +1,4 @@
 
-#' Function to make an environment printable
-#' @param env environment to be converted
-#' @export
-as_printable = function(env){
-  stopifnot2(is.environment(env), msg = 'env MUST be an environment.')
-  cls = c('rave_printable', class(env))
-  cls = unique(cls[!cls %in% ''])
-  class(env) = cls
-  return(env)
-}
-
-#' Override print method for printable environment
-#' @param x an rave_printable environment
-#' @param ... passed from or to other methods
-#' @export
-print.rave_printable = function(x, ...){
-  stopifnot2(is.environment(x), msg = 'x MUST be an environment.')
-  print.default(
-    paste0('<environment key=[', paste(ls(x), collapse = ', '), ']>'), ...
-  )
-  return(x)
-}
-
-
 
 #' @export
 as.character.rave_bytes <- function(x, digit=1, ...){
@@ -34,4 +10,24 @@ print.rave_bytes <- function(x, digit=1, ...){
   re = as.character(x, digit = digit, ...)
   cat(re)
   invisible(re)
+}
+
+
+lower_letters_only <- function(s){
+  s <- stringr::str_to_lower(s)
+  stringr::str_remove_all(s, '[^a-zA-Z0-9]')
+}
+
+openwetware_url <- function(title, module_label, package, type = 'input'){
+  ctx <- rave_context()
+  if(ctx$context %in% c('rave_running', 'rave_running_local')){
+    package %?<-% ctx$package
+    module_label %?<-% ctx$instance$module_env$label_name
+  }
+  
+  package <- lower_letters_only(package)
+  module_label <- lower_letters_only(module_label)
+  title <- lower_letters_only(title)
+  sprintf('https://openwetware.org/wiki/RAVE:%s:%s:%s_%s', package, module_label, type, title)
+  
 }

@@ -81,6 +81,7 @@ Zhengjia Wang
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-info"></a>}}
+\if{latex}{\out{\hypertarget{method-info}{}}}
 \subsection{Method \code{info()}}{
 obtain the information
 \subsection{Usage}{
@@ -100,6 +101,7 @@ character of the information
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-print"></a>}}
+\if{latex}{\out{\hypertarget{method-print}{}}}
 \subsection{Method \code{print()}}{
 print memory address
 \subsection{Usage}{
@@ -119,6 +121,7 @@ none
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-new"></a>}}
+\if{latex}{\out{\hypertarget{method-new}{}}}
 \subsection{Method \code{new()}}{
 constructor
 \subsection{Usage}{
@@ -145,6 +148,7 @@ An \code{ECoGRepository} instance
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-get_electrode"></a>}}
+\if{latex}{\out{\hypertarget{method-get_electrode}{}}}
 \subsection{Method \code{get_electrode()}}{
 get \code{\link[rave]{Electrode}} instances
 \subsection{Usage}{
@@ -167,6 +171,7 @@ list of environments containing electrode instances
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-load_electrodes"></a>}}
+\if{latex}{\out{\hypertarget{method-load_electrodes}{}}}
 \subsection{Method \code{load_electrodes()}}{
 load electrodes; usually don't need to directly call this 
 method if \code{autoload} is true when initializing the repository
@@ -189,6 +194,7 @@ none
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-epoch"></a>}}
+\if{latex}{\out{\hypertarget{method-epoch}{}}}
 \subsection{Method \code{epoch()}}{
 slice the data according to epoch table
 \subsection{Usage}{
@@ -239,6 +245,7 @@ none. However the results are stored in public fields.
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-load_reference"></a>}}
+\if{latex}{\out{\hypertarget{method-load_reference}{}}}
 \subsection{Method \code{load_reference()}}{
 load references
 \subsection{Usage}{
@@ -260,6 +267,7 @@ none
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-baseline"></a>}}
+\if{latex}{\out{\hypertarget{method-baseline}{}}}
 \subsection{Method \code{baseline()}}{
 baseline signals (deprecated)
 \subsection{Usage}{

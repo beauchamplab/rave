@@ -6,11 +6,12 @@
 \usage{
 rave_preprocess(
   sidebar_width = 3,
-  launch.browser = T,
+  launch.browser = TRUE,
   host = "127.0.0.1",
   port = NULL,
-  quiet = T,
-  test.mode = F,
+  quiet = TRUE,
+  beta = FALSE,
+  test.mode = FALSE,
   modules,
   ver = "3",
   theme = "purple",
@@ -27,6 +28,8 @@ rave_preprocess(
 \item{port}{integer port of the app}
 
 \item{quiet}{soft deprecated}
+
+\item{beta}{whether to load experimental modules, default is false}
 
 \item{test.mode}{passed to \code{\link[shiny]{shinyApp}}}
 

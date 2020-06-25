@@ -3,7 +3,8 @@
 #' @param data_env rave data repository returned by rave_prepare, internally used
 #' @param quiet logical
 #' @export
-rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
+rave_module_tools <- function(env = NULL, data_env = getDefaultDataRepository(), 
+                              quiet = FALSE) {
   if(!is.environment(data_env)){
     data_env = getDefaultDataRepository()
   }
@@ -298,7 +299,7 @@ rave_module_tools <- function(env = NULL, data_env = NULL, quiet = FALSE) {
     get_loaded_electrodes = function() {
       repo = data_env$.private$repo
       on.exit(rm(repo))
-      e = repo$raw$keys()
+      e = names(repo$raw)
       e = as.numeric(e)
       e = e[!is.na(e)]
       sort(e)

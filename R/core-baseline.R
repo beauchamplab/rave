@@ -11,14 +11,16 @@
 #' @param same_dimension logical, true if \code{op} is element-wise operator
 #' @param preop function before baseline
 #' @param op function for baseline
+#' @param data_env internally used
 #' @export
 baseline <- function(el, from, to, method = 'mean', unit = '%',
                      data_only = F, hybrid = TRUE, swap_file = tempfile(),
-                     mem_optimize = TRUE, same_dimension = unit %in% c('%', 'dB'), preop = NULL, op){
+                     mem_optimize = TRUE, same_dimension = unit %in% c('%', 'dB'), preop = NULL, op, data_env = getDefaultDataRepository()){
+  soft_deprecated()
   if(missing(el)){
     cat2('baseline(el...) is changed now. Please update.', level = 'WARNING')
     
-    module_tools = get('module_tools', envir = getDefaultDataRepository())
+    module_tools = get('module_tools', envir = data_env)
     el = module_tools$get_power()
   }
   stopifnot2(any(c('Tensor') %in% class(el)), msg = 'el must be an Tensor object.')

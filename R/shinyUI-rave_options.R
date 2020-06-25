@@ -553,7 +553,6 @@ rave_options_gui <- local({
       type = '3D Viewer',
       opt_name = 'template_brain',
       observer = rlang::quo({
-        ns = session$ns
         opt_id = 'template_brain'
         output_uiid = paste0(opt_id, '_input')
         resp_uiid = paste0(opt_id, '_ui')
@@ -575,28 +574,28 @@ rave_options_gui <- local({
               'Template brain will be used when displaying electrodes across ',
               'multiple subjects. '
             ),
-            selectInput(ns('template_subname'), 'Select a template brain', 
+            selectInput(session$ns('template_subname'), 'Select a template brain', 
                         choices = template_subs, selected = tsub),
             shiny::conditionalPanel(
               condition = 'input.template_subname === "[import new]"',
-              textInput(ns('template_newname'), 'New template name',
+              textInput(session$ns('template_newname'), 'New template name',
                         placeholder = 'name cannot be blank'),
               shinyFiles::shinyDirButton(
-                id = ns('template_subdir'), 
+                id = session$ns('template_subdir'), 
                 label = 'Select template FreeSurfer directory',
                 title = 'Target FreeSurfer Directory', buttonType = FALSE,
                 class = 'btn-link'
               ),
-              uiOutput(ns('template_target')),
+              uiOutput(session$ns('template_target')),
               hr(),
-              dipsaus::actionButtonStyled(ns('template_import'), 'Import', type = 'primary'),
-              ns = ns
+              dipsaus::actionButtonStyled(session$ns('template_import'), 'Import', type = 'primary'),
+              ns = session$ns
             ),
             
             shiny::conditionalPanel(
               condition = 'input.template_subname !== "[import new]"',
-              ns = ns,
-              uiOutput(ns('template_snapshot'))
+              ns = session$ns,
+              uiOutput(session$ns('template_snapshot'))
             )
             
           )
@@ -626,7 +625,7 @@ rave_options_gui <- local({
         
         roots = c('Current Path' = getwd(), 'Home' = '~', 'Root' = '/')
         
-        shinyFiles::shinyDirChoose( input, ns('template_subdir'), 
+        shinyFiles::shinyDirChoose( input, session$ns('template_subdir'), 
                                     roots = roots, defaultRoot = 'Home', filetypes = '')
         
         output$template_target <- renderUI({
@@ -769,7 +768,7 @@ rave_options_gui <- local({
                 surface_types = c('pial')
               )
               return(
-                threeBrain::threejsBrainOutput(ns('template_viewer'))
+                threeBrain::threejsBrainOutput(session$ns('template_viewer'))
               )
             }, error = function(e){
               local_data$brain = NULL
@@ -781,7 +780,7 @@ rave_options_gui <- local({
                     style = 'text-align:center; min-height: 500px',
                     p(style = 'padding-top: 10px', 
                       'N27 brain needs download from internet. Click ',
-                      actionLink(ns('template_downloadn27'), 'here to download'), '.'))
+                      actionLink(session$ns('template_downloadn27'), 'here to download'), '.'))
                 )
                 
               }else{

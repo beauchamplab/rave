@@ -1,7 +1,7 @@
 app_controller <- function(
-  modules = NULL, active_module = NULL, launch.browser = T,
+  modules = NULL, active_module = NULL, launch.browser = TRUE,
   theme = "purple", disable_sidebar = FALSE, simplify_header = FALSE,
-  token = NULL, ...
+  token = NULL, data_repo = getDefaultDataRepository(), ...
 ){
   options(shiny.maxRequestSize=1024^3)
 
@@ -101,76 +101,75 @@ app_controller <- function(
   })
 
   # Data selector
-  data_selector = shiny_data_selector('DATA_SELECTOR')
-  adapter = new.env()
-  adapter$data_selector_header = data_selector$header
-  adapter$data_selector_server = data_selector$server
-  adapter$launch_selector = data_selector$launch
-  adapter$get_option = function(opt, default = NULL){
-    get0(opt, ifnotfound = default, envir = controller_env, inherits = FALSE)
-  }
-  adapter$get_module_ui = function(active_id = NULL){
-
-    module_ids = module_table$ID[module_table$Active]
-    active_id %?<-% module_ids[1]
-
-    load_module(active_id)
-
-    groups = names(module_list)
-
-    # Generate quos
-    quos = list()
-    for(g in groups[groups != '______']){
-      modules = module_list[[g]]
-      if(length(modules)){
-        quo_items = lapply(modules, function(m){
-          rlang::quo(shinydashboard::menuSubItem(
+  data_selector = shiny_data_selector('DATA_SELECTOR', data_env = data_repo)
+  adapter = dipsaus::fastmap2()
+  .subset2(adapter, 'mset')(
+    data_selector_header = data_selector$header,
+    data_selector_server = data_selector$server,
+    launch_selector = data_selector$launch,
+    get_option = function(opt, default = NULL){
+      get0(opt, ifnotfound = default, envir = controller_env, inherits = FALSE)
+    },
+    get_module_ui = function(active_id = NULL){
+      
+      module_ids = module_table$ID[module_table$Active]
+      active_id %?<-% module_ids[1]
+      
+      load_module(active_id)
+      
+      groups = names(module_list)
+      
+      # Generate quos
+      quos = list()
+      for(g in groups[groups != '______']){
+        modules = module_list[[g]]
+        if(length(modules)){
+          quo_items = lapply(modules, function(m){
+            rlang::quo(shinydashboard::menuSubItem(
+              text = !!m$module_label,
+              tabName = !!stringr::str_to_upper(m$module_id),
+              selected = !!(m$module_id==active_id)
+            ))
+          })
+          
+          quos[[length(quos) + 1]] = rlang::quo(shinydashboard::menuItem(
+            text = !!g,
+            !!!quo_items,
+            startExpanded = !!(active_id %in% sapply(modules, '[[', 'module_id'))
+          ))
+        }
+      }
+      
+      for(m in module_list[['______']]){
+        quos[[length(quos) + 1]] = rlang::quo({
+          shinydashboard::menuItem(
             text = !!m$module_label,
             tabName = !!stringr::str_to_upper(m$module_id),
             selected = !!(m$module_id==active_id)
-          ))
+          )
         })
-
-        quos[[length(quos) + 1]] = rlang::quo(shinydashboard::menuItem(
-          text = !!g,
-          !!!quo_items,
-          startExpanded = !!(active_id %in% sapply(modules, '[[', 'module_id'))
-        ))
       }
-    }
-
-    for(m in module_list[['______']]){
-      quos[[length(quos) + 1]] = rlang::quo({
-        shinydashboard::menuItem(
-          text = !!m$module_label,
-          tabName = !!stringr::str_to_upper(m$module_id),
-          selected = !!(m$module_id==active_id)
-        )
-      })
-    }
-    quos
-  }
-  # adapter$all_modules = function(){
-  #   unlist(as.list(module_list), use.names = FALSE, recursive = TRUE)
-  # }
-  adapter$module_ids = function(loaded_only = FALSE){
-    if(loaded_only){
-      sapply(loaded_modules, '[[', 'module_id')
-    }else{
-      module_table$ID[module_table$Active]
-    }
-  }
-  adapter$load_module = load_module
-
+      quos
+    },
+    module_ids = function(loaded_only = FALSE){
+      if(loaded_only){
+        sapply(loaded_modules, '[[', 'module_id')
+      }else{
+        module_table$ID[module_table$Active]
+      }
+    },
+    load_module = load_module
+  )
+  
   ui_func = app_ui(adapter, token = token)
 
   instance_id = paste(sample(c(letters, LETTERS, 0:9), 22), collapse = '')
-  server_func = app_server(adapter, instance_id, token = token)
+  server_func = app_server(adapter, instance_id, token = token, data_repo = data_repo)
 
   reg.finalizer(
     controller_env,
     function(e){
-      dir_path = file.path('~/rave_data/cache_dir/', .subset2(e, 'instance_id'))
+      dir_path = file.path(subject_cache_dir(), .subset2(e, 'instance_id'))
       if(dir.exists(dir_path)){
         unlink(dir_path, recursive = TRUE, FALSE)
       }
@@ -179,7 +178,7 @@ app_controller <- function(
   )
 
   RaveFinalizer$new(function(){
-    dir_path = file.path('~/rave_data/cache_dir/', instance_id)
+    dir_path = file.path(subject_cache_dir(), instance_id)
     if(dir.exists(dir_path)){
       unlink(dir_path, recursive = TRUE, force = FALSE)
     }
@@ -191,85 +190,84 @@ app_controller <- function(
 
 app_ui <- function(adapter, token = NULL){
 
-  ui_functions = list()
-
-  # Case 1 404
+  ui_functions = dipsaus::fastmap2(
+    # Case n (default, load ravebuiltins)
+    missing_default = function(active_id = NULL, has_modal = TRUE){
+      title = 'RAVE'
+      version = utils::packageVersion('rave')
+      version = sprintf('RAVE (%s)', paste(unlist(version), collapse = '.'))
+      simplify_header = adapter$get_option('simplify_header', FALSE)
+      ui_quos = adapter$get_module_ui(active_id = active_id)
+      
+      quo = as_call2(
+        quote(dashboardPage),
+        skin = adapter$get_option('theme', 'purple'),
+        title = title,
+        header = as_call2(
+          quote(dashboardHeader),
+          title = version,
+          btn_text_right = 'RAM Usage',
+          quote(adapter$data_selector_header()),
+          .list = if(simplify_header) NULL else list(
+            .list = quote(
+              tagList(
+                tags$li(class = 'user user-menu', 
+                        actionLink('curr_subj_details_btn', '')),
+                tags$li(class = 'user user-menu',
+                        actionLink('rave_reset', 'Reset GUI'))
+              )
+            )
+          )
+        ),
+        sidebar = as_call2(
+          quote(shinydashboard::dashboardSidebar),
+          disable = adapter$get_option('disable_sidebar', FALSE),
+          as_call2(
+            quote(shinydashboard::sidebarMenu),
+            id = 'sidebar', 
+            .list = lapply(ui_quos, rlang::quo_squash)
+          )
+        ),
+        control = quote(dashboardControl(
+          # uiOutput('mem_usage'),
+          # actionLink('control_panel_refresh', 'Click here to refresh!')
+        )),
+        body = as_call2(
+          quote(shinydashboard::dashboardBody),
+          as_call2(
+            quote(shinydashboard::tabItems),
+            .list = unname(lapply(adapter$module_ids(), function(module_id) {
+              # module_id = stringr::str_to_upper(module_id)
+              as_call2(
+                quote(shinydashboard::tabItem),
+                tabName = stringr::str_to_upper(module_id),
+                as_call2(
+                  uiOutput,
+                  stringr::str_c(module_id, '_UI')
+                )
+              )
+            }))
+          )
+        ),
+        initial_mask = if (has_modal) quote(h2('R Analysis and Visualizations for iEEG/ECoG Data')) else NULL
+      )
+      
+      dipsaus::eval_dirty(quo)
+    }
+    
+  )
+  
   ui_functions[['404']] = function(...){
     # 404
     '404'
   }
-
-  # Case 2 (3D viewer)
+  
   ui_functions[['3dviewer']] = function(global_id, session_id = NULL){
     shiny::fillPage(
       title = 'RAVE 3D Viewer',
       padding = 0,
       threeBrain::threejsBrainOutput(global_id, width = '100vw', height = '100vh')
     )
-  }
-
-
-  # Case n (default, load ravebuiltins)
-
-  ui_functions[['default']] = function(active_id = NULL, has_modal = TRUE){
-    child_env = new.env()
-    title = 'R Analysis and Visualization of ECoG/iEEG Data'
-    version = local({
-      ver = utils::packageVersion('rave')
-      sprintf('RAVE (%s)', paste(unlist(ver), collapse = '.'))
-    })
-    ui_quos = adapter$get_module_ui(active_id = active_id)
-
-    quo = rlang::quo(dashboardPage(
-      skin = adapter$get_option('theme', 'purple'), title = !!title,
-      header = dashboardHeader(
-        title = !!version, btn_text_right = 'RAM Usage',
-        adapter$data_selector_header(),
-        .list = local({
-          if(!adapter$get_option('simplify_header', FALSE)){
-            tagList(
-              tags$li(class = 'user user-menu', actionLink('curr_subj_details_btn', '')),
-              # tags$li(class = 'user user-menu',actionLink('curr_subj_launch_suma', '')),
-              tags$li(class = 'user user-menu',actionLink('rave_reset', 'Reset GUI')
-              )
-            )
-          }
-        })
-      ),
-      sidebar = shinydashboard::dashboardSidebar(
-        disable = adapter$get_option('disable_sidebar', FALSE),
-        shinydashboard::sidebarMenu(id = 'sidebar', !!!ui_quos)
-      ),
-      control = dashboardControl(
-        uiOutput('mem_usage'),
-        actionLink('control_panel_refresh', 'Click here to refresh!')
-      ),
-      body = shinydashboard::dashboardBody(
-        do.call(
-          shinydashboard::tabItems,
-          args = local({
-            re = lapply(adapter$module_ids(), function(module_id) {
-              # module_id = stringr::str_to_upper(module_id)
-              shinydashboard::tabItem(tabName = stringr::str_to_upper(module_id), uiOutput(stringr::str_c(module_id, '_UI')))
-            })
-            names(re) = NULL
-            re
-          })
-        )
-      ),
-      initial_mask = !!local({
-        if(has_modal){
-          tagList(
-            h2('R Analysis and Visualizations for iEEG/ECoG Data')
-          )
-        }else{
-          NULL
-        }
-      })
-
-    ))
-
-    dipsaus::eval_dirty(quo, env = child_env)
   }
 
 
@@ -299,7 +297,7 @@ app_ui <- function(adapter, token = NULL){
     nomodal = url_info$nomodal
     nomodal %?<-% FALSE
     nomodal = nomodal == 'true'
-    quo = ui_functions[['default']](active_id = url_info$module_id, has_modal = !nomodal)
+    quo = ui_functions$default(active_id = url_info$module_id, has_modal = !nomodal)
 
   }
 
@@ -395,7 +393,7 @@ app_server_3dviewer <- function(input, output, session, master_session, viewer_i
 }
 
 
-app_server <- function(adapter, instance_id, token = NULL){
+app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaultDataRepository()){
 
   this_env = environment()
 
@@ -409,6 +407,11 @@ app_server <- function(adapter, instance_id, token = NULL){
 
   #################################################################
   function(input, output, session){
+    if( test.mode ){
+      # assign('..session', session, envir = globalenv())
+      
+    }
+    
     session_id = add_to_session(session)
     add_to_session(session, key = 'rave_instance', val = instance_id, override = TRUE)
     add_to_session(session, key = 'token', val = token, override = TRUE)
@@ -515,7 +518,7 @@ app_server <- function(adapter, instance_id, token = NULL){
         loaded = FALSE
         quo = rlang::quo({
           modules[[!!module_id]] = adapter$load_module(module_id = !!module_id, notification = TRUE)
-          m = shinirize(modules[[!!module_id]], test.mode = test.mode)
+          m = shinirize(modules[[!!module_id]], test.mode = test.mode, data_env = data_repo)
           shinirized_modules[[!!module_id]] = m
           callModule(m$server, id = m$id, session = session, global_reactives = global_reactives)
           module_ui_functions[[m$id]] = m$ui
@@ -622,12 +625,10 @@ app_server <- function(adapter, instance_id, token = NULL){
     observe({
       refresh = global_reactives$force_refresh_all
       if(global_reactives$has_data && check_data_repo('subject')){
-        data_repo = getDefaultDataRepository()
         subject_id = data_repo$subject$id
         epoch_name = data_repo$preload_info$epoch_name
         reference_name = data_repo$preload_info$reference_name
 
-        rm(data_repo)
         sub_label = (sprintf('[%s] - [%s] - [%s]', subject_id, epoch_name, reference_name))
         suma_label = 'Launch SUMA'
       }else{
@@ -653,7 +654,6 @@ app_server <- function(adapter, instance_id, token = NULL){
     }
 
     observeEvent(input$curr_subj_details_btn, {
-      data_repo = getDefaultDataRepository()
       subject = data_repo[['subject']]
       electrodes = data_repo$preload_info$electrodes
       if(!is.null(subject) && length(electrodes)){
@@ -666,7 +666,6 @@ app_server <- function(adapter, instance_id, token = NULL){
     output$curr_subj_elec_table <- shiny::renderTable({
       btn = input$curr_subj_details_btn
       if(global_reactives$has_data && check_data_repo('subject')){
-        data_repo = getDefaultDataRepository()
         subject = data_repo[['subject']]
         tbl = subject$electrodes
         cols = names(tbl)
@@ -683,7 +682,7 @@ app_server <- function(adapter, instance_id, token = NULL){
         return(NULL)
       }
       
-      subject = get0('subject', envir = getDefaultDataRepository(), ifnotfound = NULL)
+      subject = get0('subject', envir = data_repo, ifnotfound = NULL)
       if( is.null(subject) ){
         return(NULL)
       }
@@ -702,8 +701,7 @@ app_server <- function(adapter, instance_id, token = NULL){
     observeEvent(input$curr_subj_launch_suma, {
       # launch suma
       if(check_data_repo('subject')){
-        data_repo = getDefaultDataRepository()
-        subject = data_repo[['subject']]
+        subject = get0('subject', envir = data_repo)
         suma_dir = subject$dirs$suma_dir
         launch_suma(
           root_dir = suma_dir
@@ -725,77 +723,77 @@ app_server <- function(adapter, instance_id, token = NULL){
       )
     })
 
-    observe({
-      input$control_panel_refresh
-      local_data$mem_usage = get_mem_usage(modules)
-    })
+    # observe({
+    #   input$control_panel_refresh
+    #   local_data$mem_usage = get_mem_usage(modules)
+    # })
 
-    output$mem_usage <- renderUI({
-      mem_usage = local_data$mem_usage
-      if(is.null(mem_usage)){
-        return()
-      }
-
-      name = c(
-        'Total Usage',
-        'Shared Data Usage',
-        sapply(mem_usage$module_usage, '[[', 'Name')
-      )
-
-      usage = c(
-        mem_usage$total_mem,
-        mem_usage$data_usage + mem_usage$other_usage,
-        sapply(mem_usage$module_usage, '[[', 'usage')
-      )
-      usage = as.numeric(unlist(usage))
-
-      perc = usage / max(usage, na.rm = TRUE)
-
-
-      tagList(
-        h3(class = 'control-sidebar-heading', 'Memory Usage'),
-        tags$ul(
-          class="control-sidebar-menu",
-          style = 'padding:15px;',
-          tagList(
-            lapply(seq_along(name), function(ii){
-              nm = name[[ii]]
-              us = usage[[ii]]
-              pc = perc[[ii]]
-              status = switch (nm,
-                               'Total Usage' = {
-                                 max_ram = rave_options('max_mem') * 1000^3
-                                 pc_total = us / max_ram
-                                 ind = (pc_total < 0.75) + (pc_total < 0.9) + 1
-                                 c('danger', 'warning', 'success')[ind]
-                               },
-                               'Shared Data Usage' = 'primary',
-                               'Misc & Others Sessions' = 'primary',
-                               {
-                                 ind = (pc < 0.5) + 1
-                                 c('warning', 'primary')[ind]
-                               }
-              )
-              txt_size = as.character(dipsaus::to_ram_size(us))
-              txt_perc = sprintf('%d%%', as.integer(pc*100))
-              if(stringr::str_length(nm) > 22){
-                nm_alt = paste0(stringr::str_sub(nm, end = 19), '...')
-              }else{
-                nm_alt = nm
-              }
-
-              tags$li(
-                h4(class = 'control-sidebar-subheading', nm_alt, span(class=sprintf('label label-%s pull-right', status), txt_size)),
-                div(class = 'progress progress-xxs',
-                    div(class = sprintf("progress-bar progress-bar-%s", status), style = sprintf('width: %s', txt_perc)))
-              )
-            })
-          )
-        ),
-        div(style = 'margin-bottom:20px')
-      )
-
-    })
+    # output$mem_usage <- renderUI({
+    #   mem_usage = local_data$mem_usage
+    #   if(is.null(mem_usage)){
+    #     return()
+    #   }
+    # 
+    #   name = c(
+    #     'Total Usage',
+    #     'Shared Data Usage',
+    #     sapply(mem_usage$module_usage, '[[', 'Name')
+    #   )
+    # 
+    #   usage = c(
+    #     mem_usage$total_mem,
+    #     mem_usage$data_usage + mem_usage$other_usage,
+    #     sapply(mem_usage$module_usage, '[[', 'usage')
+    #   )
+    #   usage = as.numeric(unlist(usage))
+    # 
+    #   perc = usage / max(usage, na.rm = TRUE)
+    # 
+    # 
+    #   tagList(
+    #     h3(class = 'control-sidebar-heading', 'Memory Usage'),
+    #     tags$ul(
+    #       class="control-sidebar-menu",
+    #       style = 'padding:15px;',
+    #       tagList(
+    #         lapply(seq_along(name), function(ii){
+    #           nm = name[[ii]]
+    #           us = usage[[ii]]
+    #           pc = perc[[ii]]
+    #           status = switch (nm,
+    #                            'Total Usage' = {
+    #                              max_ram = rave_options('max_mem') * 1000^3
+    #                              pc_total = us / max_ram
+    #                              ind = (pc_total < 0.75) + (pc_total < 0.9) + 1
+    #                              c('danger', 'warning', 'success')[ind]
+    #                            },
+    #                            'Shared Data Usage' = 'primary',
+    #                            'Misc & Others Sessions' = 'primary',
+    #                            {
+    #                              ind = (pc < 0.5) + 1
+    #                              c('warning', 'primary')[ind]
+    #                            }
+    #           )
+    #           txt_size = as.character(dipsaus::to_ram_size(us))
+    #           txt_perc = sprintf('%d%%', as.integer(pc*100))
+    #           if(stringr::str_length(nm) > 22){
+    #             nm_alt = paste0(stringr::str_sub(nm, end = 19), '...')
+    #           }else{
+    #             nm_alt = nm
+    #           }
+    # 
+    #           tags$li(
+    #             h4(class = 'control-sidebar-subheading', nm_alt, span(class=sprintf('label label-%s pull-right', status), txt_size)),
+    #             div(class = 'progress progress-xxs',
+    #                 div(class = sprintf("progress-bar progress-bar-%s", status), style = sprintf('width: %s', txt_perc)))
+    #           )
+    #         })
+    #       )
+    #     ),
+    #     div(style = 'margin-bottom:20px')
+    #   )
+    # 
+    # })
 
 
     #################################################################
@@ -900,15 +898,13 @@ app_server <- function(adapter, instance_id, token = NULL){
 
 #' @name start_rave
 #' @title Start RAVE main application
-#' @usage start_rave(modules = NULL, active_module = NULL, launch.browser = T,
-#' theme = "purple", disable_sidebar = FALSE, simplify_header = FALSE,
-#' token = NULL, ...)
 #' @param modules character vector, modules modules to load before starting application.
 #' @param active_module character, which module to show as default.
 #' @param launch.browser logical, whether to launch browser.
 #' @param theme character, color theme, default is \code{'purple'}.
 #' @param disable_sidebar logical, whether to hide sidebar.
 #' @param simplify_header logical, whether to show simplified header.
+#' @param data_repo internally used.
 #' @param token character vector, default is \code{NULL}. If specified, then
 #' a \code{?token=...} is needed in url to access to the application.
 #' @param ... other parameters. See details.

@@ -3,7 +3,9 @@
 #' @param session shiny session, default is current shiny session
 #' @param test.mode passed by \code{\link[rave]{start_rave}} or
 #' \code{\link[rave]{init_app}}
-shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = TRUE){
+#' @param data_env internally used
+shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = TRUE,
+                      data_env = getDefaultDataRepository()){
   # assign variables
   MODULE_ID = module$module_id
   MODULE_LABEL = module$label_name
@@ -11,8 +13,6 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
   logger = function(...){
     cat2('[', MODULE_ID, '] ', ..., strftime(Sys.time(), ' - %M:%S', usetz = F))
   }
-
-  data_env = getDefaultDataRepository()
 
   # Runtime environment
   execenv = module$get_or_new_exec_env(session = session)
@@ -139,6 +139,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
       execenv$local_reactives = local_data
 
+      # TODO: remove this environment
       local_static = new.env()
       local({
         activated = FALSE
@@ -407,37 +408,9 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       # What we know:
       # 1. Initialized, has data, module activated,
       # 2. Some input changed
-      junk = new.env()
       observe({
         run_script_signal = run_script()
         if( shiny::isTruthy(run_script_signal) ){
-          # local_data$run_script = FALSE
-          # cat2('checked')
-          # if( !is.null(junk$junk) ){
-          #   for(nm in names(junk$junk)){
-          #     
-          #     
-          #     if(!identical(junk$junk[[nm]], isolate(local_data[[nm]]))){
-          #       base::print(paste0('------------ ', nm))
-          #       if(!is.list(junk$junk[[nm]])){
-          #         base::print(junk$junk[[nm]])
-          #         base::print('???')
-          #         base::print(isolate(local_data[[nm]]))
-          #       }else{
-          #         for(mm in names(junk$junk[[nm]])){
-          #           if(!identical(junk$junk[[nm]][[mm]], isolate(local_data[[nm]][[mm]]))){
-          #             base::print(junk$junk[[nm]][[mm]])
-          #             base::print('???')
-          #             base::print(isolate(local_data[[nm]][[mm]]))
-          #           }
-          #         }
-          #       }
-          #       
-          #     }
-          #     
-          #   }
-          # }
-          # junk$junk = shiny::isolate(shiny::reactiveValuesToList(local_data, all.names = TRUE))
           exec_script()
         }
       })
@@ -673,7 +646,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
               outputs = outputId,
               output_format = 'html_document',
               knit_root_dir = dirname(module$script_path),
-              envir = new.env(parent = getDefaultDataRepository())
+              envir = new.env(parent = data_env)
             )
             print(args)
             output_fpath = do.call(export_report, args = args)

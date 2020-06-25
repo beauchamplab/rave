@@ -7,7 +7,8 @@
 #' \code{Frequency}, \code{Time}, and \code{Electrode}. 
 #' @export
 ECoGTensor <- R6::R6Class(
-  classname = 'ECoGTensor',
+  classname = 'ECoGTensor', 
+  parent_env = asNamespace('rave'),
   inherit = Tensor,
   public = list(
     
