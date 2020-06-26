@@ -269,6 +269,16 @@ parse_components <- function(module_id, parse_context = c("rave_running_local", 
           get0(key, envir = ._current_env, ifnotfound = ifNotFound)
         }
         
+        ._env$get_variables <- function(level = 2, env = ._current_env){
+          res <- names(env)
+          if( level > 0 ){
+            res <- c(res, ._env$get_variables(level - 1, env = parent.env(env)))
+          } else {
+            warning('results$get_variables is for debug use only')
+          }
+          unique(res)
+        }
+        
         ._env$async_value = function(key){
           ..param_env = get0('..param_env', envir = ._current_env)
           if(is.environment(..param_env)){

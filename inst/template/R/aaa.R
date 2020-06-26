@@ -165,6 +165,15 @@ debug_module <- function(module_id, interactive = FALSE, check_dependencies = TR
       envir = ..tmp, gc = T)
     }
 
+    ..env$results$get_variables <- function(level = 2, env = results){
+      res <- names(env)
+      if( level > 0 ){
+        res <- c(res, ..env$results$get_variables(level - 1, env = parent.env(env)))
+      } else {
+        warning('results$get_variables is for debug use only')
+      }
+      unique(res)
+    }
 
     ..env$results$get_value = function(key, ifNotFound = NULL){
       get0(key, envir = results, ifnotfound = ifNotFound)
