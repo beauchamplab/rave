@@ -394,6 +394,16 @@ module_as_function <- function(package = package, module_id = module_id, reload 
       
     }
     
+    ..env$results$get_variables <- function(level = 2, env = results){
+      res <- names(env)
+      if( level > 0 ){
+        res <- c(res, ..env$results$get_variables(level - 1, env = parent.env(env)))
+      } else {
+        warning('results$get_variables is for debug use only')
+      }
+      unique(res)
+    }
+    
     ..re = sapply(!!outputIds, function(nm){
       ..f = get0(nm, envir = results, inherits = TRUE, ifnotfound = NULL)
       if(!is.function(..f)){
