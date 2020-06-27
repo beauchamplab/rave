@@ -140,17 +140,17 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
   }
   
   if(nightly){
-    lazy_install <- c(lazy_install, 'beauchamplab/ravebuiltins@migrate2')
+    lazy_install <- c(lazy_install, 'beauchamplab/ravebuiltins@migrate2', 'dipterix/rutabaga@develop')
     if(update_rave){
       lazy_install <- c(lazy_install, 'beauchamplab/rave@dev-1.1')
     }
-    lazy_install <- c(lazy_install, c('dipterix/rutabaga@develop', 'dipterix/threeBrain', 'dipterix/dipsaus'))
+    lazy_install <- c(lazy_install, c('dipterix/threeBrain', 'dipterix/dipsaus'))
   } else {
-    lazy_install <- c(lazy_install, 'ravebuiltins')
+    lazy_install <- c(lazy_install, 'ravebuiltins', 'rutabaga')
     if(update_rave){
       lazy_install <- c(lazy_install, 'rave')
     }
-    lazy_install <- c(lazy_install, c('rutabaga', 'threeBrain', 'dipterix/dipsaus'))
+    lazy_install <- c(lazy_install, c('threeBrain', 'dipterix/dipsaus'))
   }
   
   dipsaus::prepare_install2(unique(lazy_install), restart = FALSE)
