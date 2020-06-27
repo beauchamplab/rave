@@ -369,9 +369,17 @@ ModuleEnvir <- R6::R6Class(
       self$rmd_path = rmd_path
       
       # Persist light version of module settings
-      self$cache_env = dipsaus::text_map(path = file.path(
-        '~/rave_modules/settings/', module_id
-      ))
+      setting_file <- file.path('~/rave_modules/settings/', module_id)
+      
+      if(dir.exists(setting_file)){
+        fs <- list.files(setting_file, all.files = TRUE, recursive = TRUE, full.names = TRUE)
+        # only allow max of 1MB settings
+        if(sum(file.size(fs)) > 4*1024^2){
+          warning("Module settings `", setting_file, "` is larger than 4MB. Reset settings as it will impact performance")
+          unlink(setting_file, recursive = TRUE, force = TRUE)
+        }
+      }
+      self$cache_env = dipsaus::rds_map(path = setting_file)
       
       # Note as of 11/11/2018:
       # The structure of module is parent_env -> wrapper -> static -> param -> runtime -> (parser)

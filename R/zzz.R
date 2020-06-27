@@ -88,7 +88,7 @@ restart_r <- function(){
 #' @param ... for compatibility purpose, ignored
 #' @export
 check_dependencies <- function(update_rave = TRUE, restart = TRUE, 
-                               nightly = FALSE, demo_data = TRUE, ...){
+                               nightly = FALSE, demo_data = FALSE, ...){
   
   # Check N27 brain
   dipsaus::cat2('Checking N27 brain', level = 'DEFAULT', end = '\n')
@@ -139,130 +139,31 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
     }
   }
   
-  # Case 1: nightly is false, then use prebuilt version
-  if(!nightly){
-    
+  if(nightly){
+    lazy_install <- c(lazy_install, 'beauchamplab/ravebuiltins@migrate2')
+    if(update_rave){
+      lazy_install <- c(lazy_install, 'beauchamplab/rave@dev-1.1')
+    }
+    lazy_install <- c(lazy_install, c('dipterix/rutabaga@develop', 'dipterix/threeBrain', 'dipterix/dipsaus'))
+  } else {
+    lazy_install <- c(lazy_install, 'ravebuiltins')
     if(update_rave){
       lazy_install <- c(lazy_install, 'rave')
     }
-    
-    dipsaus::prepare_install(
-      unique(c(lazy_install, 'ravebuiltins', 'dipsaus', 
-               'threeBrain', 'rutabaga')),
-      restart = FALSE
-    )
-    
-    profile <- startup::find_rprofile()
-    if (!length(profile)) {
-      startup::install()
-    }
-    profile <- startup::find_rprofile()
-    s <- readLines(profile)
-    
-    # find line
-    sel <- s == "# --- dipsaus temporary startup (END)---"
-    if(any(sel)){
-      idx <- which(sel)
-      idx <- idx[[length(idx)]] - 1
-      # insert arrangement
-      
-      ss <- c(
-        "try({",
-        "  userlib <- Sys.getenv('R_LIBS_USER')",
-        "  if(!dir.exists(userlib)){ try({ dir.create(userlib, recursive = TRUE) }) }",
-        "  dipsaus::cat2('Arranging all existing RAVE modules', level = 'DEFAULT', end = '\\n')",
-        "  rave::arrange_modules(refresh = TRUE, reset = FALSE, quiet = TRUE)",
-        "  message('   - Done.')",
-        "})"
-      )
-      s = c(s[seq_len(idx)], ss, s[-seq_len(idx)])
-      writeLines(s, profile)
-    }
-    
-    if(restart){
-      restart_r()
-    }
-    
-    return(invisible())
+    lazy_install <- c(lazy_install, c('rutabaga', 'threeBrain', 'dipterix/dipsaus'))
   }
   
+  dipsaus::prepare_install2(unique(lazy_install), restart = FALSE)
   
-  # Case 2: nighly version
-  deps <- list(
-    list(
-      name = 'rutabaga',
-      note = 'Plot Helpers',
-      repo = 'dipterix/rutabaga@develop'
-    ),
-    list(
-      name = 'threeBrain',
-      note = '3D Viewer',
-      repo = 'dipterix/threeBrain'
-    ),
-    list(
-      name = 'ravebuiltins',
-      note = 'Default RAVE modules',
-      repo = 'beauchamplab/ravebuiltins@migrate2'
-    )
-  )
+  dipsaus::rs_exec({
+    # check rave modules
+    ns <- asNamespace('rave')
+    ns$arrange_modules(refresh = TRUE)
+  }, rs = FALSE)
   
-  
-  for(pinfo in deps){
-    catgl('Checking {pinfo$name} - {pinfo$note} (github: {pinfo$repo})',
-         level = 'DEFAULT', end = '\n')
-    tryCatch({
-      if(pinfo$name %in% loadedNamespaces()){ devtools::unload(pinfo$name, quiet = TRUE) }
-      devtools::install_github(pinfo$repo, upgrade = FALSE, force = FALSE, quiet = TRUE)
-      message('  - Done', end = '\n')
-    }, error = function(e){
-      lazy_github <<- c(lazy_github, pinfo$repo)
-    })
-  }
-  
-  # Now it's critical as dipsaus and rave cannot be updated here, register startup code
-  lazy_install <- c(lazy_install, 'dipsaus')
-  dipsaus::prepare_install(unique(lazy_install), restart = FALSE)
-  
-  profile <- startup::find_rprofile()
-  if (!length(profile)) {
-    startup::install()
-  }
-  profile <- startup::find_rprofile()
-  s <- readLines(profile)
-  
-  # find line
-  sel <- s == "# --- dipsaus temporary startup (END)---"
-  if(any(sel)){
-    idx <- which(sel)
-    idx <- idx[[length(idx)]] - 1
-    # insert arrangement
-    update_txt = NULL
-    if(update_rave){
-      update_txt <- c(
-        "  devtools::install_github('beauchamplab/rave@dev-1.0', upgrade = FALSE, force = FALSE, quiet = TRUE)"
-      )
-    }
-    update_txt = c(
-      "try({devtools::install_github('dipterix/dipsaus', upgrade = FALSE, force = FALSE, quiet = TRUE)})",
-      update_txt)
-    
-    ss <- c(
-      "try({",
-      "  userlib <- Sys.getenv('R_LIBS_USER')",
-      "  if(!dir.exists(userlib)){ try({ dir.create(userlib, recursive = TRUE) }) }",
-      update_txt,
-      "  dipsaus::cat2('Arranging all existing RAVE modules', level = 'DEFAULT', end = '\\n')",
-      "  rave::arrange_modules(refresh = TRUE, reset = FALSE, quiet = TRUE)",
-      "})"
-    )
-    s = c(s[seq_len(idx)], ss, s[-seq_len(idx)])
-    writeLines(s, profile)
-  }
-  
-  if(restart){
+  if( restart ){
     restart_r()
   }
-  
   
   return(invisible())
   

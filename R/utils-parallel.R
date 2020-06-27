@@ -285,8 +285,11 @@ setup_async_evaluator <- local({
 async <- function(expr, varname, success = NULL, failure = NULL, 
                   quoted = FALSE, assign_env = new.env(parent = emptyenv()), 
                   eval_env = parent.frame(), ..., .list = list(), 
-                  ...map = dipsaus::text_map(), ...debug = FALSE,
+                  ...map = NULL, ...debug = FALSE,
                   evaluator = NULL){
+  if(is.null(map)){
+    map <- dipsaus::rds_map()
+  }
   s = Sys.time()
   if(!quoted){
     expr <- rlang::enquo(expr)
