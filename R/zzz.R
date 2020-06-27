@@ -155,15 +155,7 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
   
   dipsaus::prepare_install2(unique(lazy_install), restart = FALSE)
   
-  dipsaus::rs_exec({
-    # check rave modules
-    ns <- asNamespace('rave')
-    ns$arrange_modules(refresh = TRUE)
-  }, rs = FALSE)
-  
-  if( restart ){
-    restart_r()
-  }
+  arrange_modules(refresh = TRUE)
   
   return(invisible())
   
