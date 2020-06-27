@@ -90,6 +90,18 @@ restart_r <- function(){
 check_dependencies <- function(update_rave = TRUE, restart = TRUE, 
                                nightly = FALSE, demo_data = FALSE, ...){
   
+  # check if dipsaus is > 0.0.8
+  dv <- as.character(utils::packageVersion('dipsaus'))
+  if(utils::compareVersion(dv, '0.0.8.9000') < 0){
+    # update dipsaus
+    devtools::unload('dipsaus')
+    devtools::install_github('dipterix/dipsaus', upgrade = 'never', force = TRUE)
+    message("Restarting R. Please run 'check_dependencies()' again to finalize update.")
+    restart_r()
+    message("Please run 'check_dependencies()' again to finalize update.")
+    return(invisible())
+  }
+  
   # Check N27 brain
   dipsaus::cat2('Checking N27 brain', level = 'DEFAULT', end = '\n')
   threeBrain::merge_brain()
