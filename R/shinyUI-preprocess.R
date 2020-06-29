@@ -192,7 +192,7 @@ rave_preprocess <- function(
 
     lapply(model_instances, function(x){
       cat2(x$ID)
-      callModule(x$server, id = paste0(x$ID , '_M'), user_data = user_data, utils = utils, doc_prefix = doc_prefix, ...)
+      shiny::callModule(x$server, id = paste0(x$ID , '_M'), user_data = user_data, utils = utils, doc_prefix = x$doc_prefix, ...)
     })
 
   }
