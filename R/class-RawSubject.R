@@ -55,11 +55,11 @@ SubjectInfo2 <- R6::R6Class(
       
       self$logger = RAVEHistory$new(
         path = self$dirs$preprocess_dir,
-        name = 'rave.yaml', use_yaml = T
+        name = 'rave.yaml', use_yaml = TRUE
       )
       self$cacher = RAVEHistory$new(
         path = self$dirs$preprocess_dir,
-        name = 'rave.RData', use_yaml = F
+        name = 'rave.RData', use_yaml = FALSE
       )
       
       self$blocks = self$logger$get_or_save('blocks')

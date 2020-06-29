@@ -199,6 +199,143 @@ check_dependencies2 <- function(){
 }
 
 
+finalize_installation_internal_demo <- function(upgrade = c('ask', 'always', 'never')){
+  upgrade <- match.arg(upgrade)
+  # check demo data
+  has_demo <- FALSE
+  installed_subs <- NULL
+  if('demo' %in% get_projects()){
+    has_demo <- TRUE
+    if( upgrade %in% c('never') ){ return() }
+    
+    installed_subs <- get_subjects('demo')
+  }
+  
+  opt <- c('None', 'Only missing demos', 'All', 'First two subjects')
+  
+  missing_subs <- c('KC', 'YAB', 'YAD', 'YAF', 'YAH', 'YAI', 'YAJ', 'YAK')
+  
+  if( upgrade == 'always' ){
+    missing_subs <- c('KC', 'YAB')
+  }
+  
+  missing_subs <- missing_subs[!missing_subs %in% installed_subs]
+  
+  if( upgrade == 'ask' ){
+    default_opt <- 1
+    default_opt <- dipsaus::ask_or_default(
+      'Choose an option to install demo subjects:\n',
+      paste0(seq_along(opt), '. ', opt, collapse = '\n'),
+      '\n\nEnter the option number',
+      default = default_opt
+    )
+    default_opt <- dipsaus::parse_svec(default_opt)
+    
+    if(1 %in% default_opt || !any(seq_len(4) %in% default_opt)){
+      # no data installed
+      dipsaus::cat2('No demo data will be installed', level = 'DEFAULT')
+      return()
+    } else if(2 %in% default_opt){
+    } else if(3 %in% default_opt){
+      missing_subs <- c('KC', 'YAB', 'YAD', 'YAF', 'YAH', 'YAI', 'YAJ', 'YAK')
+    } else {
+      missing_subs <- c('KC', 'YAB')
+    }
+    dipsaus::cat2(paste(missing_subs, collapse = ', '), ' will be installed', level = 'DEFAULT')
+    
+  }
+  
+  if(length(missing_subs)){
+    quo <- rlang::quo({
+      dipsaus::rs_focus_console()
+      for(sub in !!missing_subs){
+        dipsaus::cat2('Launching download process - ', sub)
+        rave::download_sample_data(sub)
+      }
+    })
+    
+    dipsaus::rs_exec(rlang::quo_squash(quo), quoted = TRUE, name = 'Download rave-base demo subjects')
+  }
+  
+  return()
+  
+}
+
+#' Finalize installation
+#' @description download demo data
+#' @param packages package name to finalize. 'rave' to only update base demo 
+#' data, or \code{c('threeBrain', 'ravebuiltins')} to upgrade built-in data, 
+#' or leave it blank to upgrade all.
+#' @param upgrade whether to ask. Default is 'always' to receive default 
+#' settings Other choices are 'ask' or 'never'.
+#' 
+#' @export
+finalize_installation <- function(packages, upgrade = c('always', 'ask', 'never')){
+  upgrade <- match.arg(upgrade)
+  
+  if(missing(packages)){
+    packages <- NULL
+  }
+  
+  if(!length(packages) || 'rave' %in% packages){
+    # Check RAVE demo subjects
+    finalize_installation_internal_demo(upgrade)
+  }
+  
+  if(!length(packages) || 'threeBrain' %in% packages){
+    # Check N27 brain
+    # To be backward compatible, we need to check threeBrain files
+    tmp <- system.file('rave.yaml', package = 'threeBrain')
+    if(tmp == ''){
+      threeBrain::download_N27()
+      threeBrain::merge_brain()
+    }
+  }
+  
+  # Get all packages with rave.yaml
+  lib_path = .libPaths()
+  
+  allpackages = unlist(sapply(lib_path, function(lp){
+    list.dirs(lp, recursive = FALSE, full.names = FALSE)
+  }, simplify = FALSE))
+  allpackages = unique(allpackages)
+  
+  yaml_path = sapply(allpackages, function(p){
+    system.file('rave.yaml', package = p)
+  })
+  sel = yaml_path != ''
+  
+  if(length(packages)){
+    sel <- sel & (allpackages %in% packages)
+  }
+  packages <- allpackages[sel]
+  
+  for(pkg in packages){
+    tryCatch({
+      
+      # load yaml
+      conf <- yaml::read_yaml(system.file('rave.yaml', package = pkg))
+      
+      fname <- conf$finalize_installation
+      
+      if(is.character(fname) && length(fname) == 1){
+        ns <- asNamespace(pkg)
+        fun <- ns[[fname]]
+        if(is.function(fun)){
+          fun(upgrade)
+        }
+      }
+      
+    }, error = function(e){
+      dipsaus::cat2('Error found while finalize installation of [', pkg, ']. Reason:\n',
+                    e$message, '\nSkipping...\n', level = 'WARNING')
+    })
+    
+  }
+  
+  dipsaus::cat2('Scheduled. There might be some job running in the background. Please wait for them to finish.')
+  invisible()
+}
 
 
 .onAttach <- function(libname, pkgname){
