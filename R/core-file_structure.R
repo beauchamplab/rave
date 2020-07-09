@@ -31,7 +31,7 @@ arrange_data_dir <- function(first_time = FALSE, reset = FALSE){
     catgl('Cannot find data directory for RAVE. Please make sure that these folder exists', level = 'ERROR')
     catgl(data_dir, level = 'ERROR')
     catgl(raw_dir, level = 'ERROR')
-    catgl('Check existence of these folders, or reset default data repository by typing arrange_data_dir(reset = T)', level = 'ERROR')
+    catgl('Check existence of these folders, or reset default data repository by typing arrange_data_dir(reset = TRUE)', level = 'ERROR')
     return(F)
   }else{
     rave_options(data_dir = base::normalizePath(data_dir))
@@ -39,7 +39,7 @@ arrange_data_dir <- function(first_time = FALSE, reset = FALSE){
     
     # Test speed
     if(!isTRUE(rave_options('disable_startup_speed_check'))){
-      speed = test_hdspeed(quiet = T)
+      speed = test_hdspeed(quiet = TRUE)
       rave_options(drive_speed = speed)
     }
     
@@ -105,7 +105,7 @@ arrange_modules <- function(refresh = FALSE, reset = FALSE, quiet = FALSE){
     
     # join
     if(is.data.frame(old_table) && !reset){
-      tbl = merge(tbl, old_table, by = names(tbl), all.x = TRUE, no.dups = T)
+      tbl = merge(tbl, old_table, by = names(tbl), all.x = TRUE, no.dups = TRUE)
       tbl$Active[is.na(tbl$Active)] = TRUE
       tbl$Notes[is.na(tbl$Notes)] = ''
     }else{

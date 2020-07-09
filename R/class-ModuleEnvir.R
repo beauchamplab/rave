@@ -196,7 +196,7 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
     shiny::observe(
       x = x,
       env = env,
-      quoted = T,
+      quoted = TRUE,
       priority = priority - 1L,
       domain = domain,
       ...
@@ -234,7 +234,7 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
     
     shiny::observeEvent(
       eventExpr = eventExpr, handlerExpr = handlerExpr, event.env = event.env,
-      event.quoted = T, handler.env = handler.env, handler.quoted = T,
+      event.quoted = TRUE, handler.env = handler.env, handler.quoted = TRUE,
       priority = priority - 1L, domain = domain, ...
     )
   }
@@ -407,9 +407,9 @@ ModuleEnvir <- R6::R6Class(
       # Either scenarios will need
       # 1. parent_env is unlocked.
       #    If parent_env is locked package environment. RAVE will try to unload this environment
-      #    and load it with partial - loadNamespace(..., partial = T)
+      #    and load it with partial - loadNamespace(..., partial = TRUE)
       # 2. RAVE needs to be one of the parent envs (search path). If parent_env is created via
-      #    loadNamespace(..., partial = T), this is automatically true as the search path will be
+      #    loadNamespace(..., partial = TRUE), this is automatically true as the search path will be
       #    package << base << globalenv << ... << rave. For non-package environment, easiest case
       #    would be using new.env(parent = globalenv()). However, non-package environment is not
       #    recommended unless you know what I'm doing. Best practice would be using rave built-in
@@ -569,7 +569,7 @@ ModuleEnvir <- R6::R6Class(
       clear_env(runtime_env)
       
       # re-direct function environment to runtime-env where rave_execute take place.
-      # for(nm in ls(static_env, all.names = T)){
+      # for(nm in ls(static_env, all.names = TRUE)){
       #   if(is.function(static_env[[nm]])){
       #     environment(static_env[[nm]]) <- runtime_env
       #   }

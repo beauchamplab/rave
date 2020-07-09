@@ -34,7 +34,7 @@ try_save_file <- function(data, ..., fpath, name, append = F) {
       if (length(nms)) {
         nms = unique(nms)
         for (nm in nms) {
-          env[[nm]] = get(nm, envir = environment(), inherits = T)
+          env[[nm]] = get(nm, envir = environment(), inherits = TRUE)
         }
         base::save(list = nms,
                    envir = env,
@@ -56,7 +56,7 @@ try_save_file <- function(data, ..., fpath, name, append = F) {
   )
 }
 
-try_load_file <- function(fpath, name, ..., env = new.env(parent = emptyenv()), simplify = T) {
+try_load_file <- function(fpath, name, ..., env = new.env(parent = emptyenv()), simplify = TRUE) {
   if (!file.exists(fpath)) {
     return(NULL)
   }
@@ -93,7 +93,7 @@ try_load_file <- function(fpath, name, ..., env = new.env(parent = emptyenv()), 
     }
   )
   
-  data = as.list(env, all.names = T)
+  data = as.list(env, all.names = TRUE)
   
   if(simplify){
     if(length(data) == 1){

@@ -454,7 +454,7 @@ write.niml <- function(values_matrix, electrode_numbers=NULL, value_labels=NULL,
   
   # write out the values and indicies files
   if(!dir.exists(work_dir)){
-    dir.create(work_dir, recursive = T)
+    dir.create(work_dir, recursive = TRUE)
   }
   work_dir = try_normalizePath(work_dir)
   value_file = file.path(work_dir, value_file)

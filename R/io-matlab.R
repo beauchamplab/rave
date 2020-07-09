@@ -24,7 +24,7 @@ pre_import_matlab <- function(subject_code, project_name, block_num, chl, name =
   if(!file.exists(fpath)){
     # file not exists, no strict mode, need to guess file name
     # use _chXX.mat as key word
-    fs = list.files(dir$block_dir, sprintf('ch%d.[mM][aA][tT]', chl), full.names = T, recursive = F)
+    fs = list.files(dir$block_dir, sprintf('ch%d.[mM][aA][tT]', chl), full.names = TRUE, recursive = FALSE)
     if(length(fs)){
       fpath = fs[1]
     }

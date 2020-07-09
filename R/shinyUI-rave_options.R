@@ -61,7 +61,7 @@ rave_options_gui <- local({
         observeEvent(input$raw_data_dir_reset, {
           dir = input[[opt_id]]
           if(!dir.exists(dir)){
-            dir.create(dir, recursive = T, showWarnings = F)
+            dir.create(dir, recursive = TRUE, showWarnings = FALSE)
           }
           # Make sure it exists, otherwise error notification
           if(dir.exists(dir)){
@@ -122,7 +122,7 @@ rave_options_gui <- local({
         observeEvent(input[[set_btnid]], {
           dir = input[[opt_id]]
           if(!dir.exists(dir)){
-            dir.create(dir, recursive = T, showWarnings = F)
+            dir.create(dir, recursive = TRUE, showWarnings = FALSE)
           }
           # Make sure it exists, otherwise error notification
           if(dir.exists(dir)){
@@ -985,7 +985,7 @@ rave_options_gui <- local({
         }
         
         set_opt = function(...){
-          rave_options(..., launch_gui = F, .save = T)
+          rave_options(..., launch_gui = FALSE, .save = TRUE)
           args = list(...)
           for(nm in names(args)){
             local_data[[nm]] = args[[nm]]
@@ -1042,11 +1042,11 @@ rave_options_gui <- local({
           DT::datatable(
             class = 'compact nowrap',
             envir$modules,
-            editable = T,
-            rownames = F,
+            editable = TRUE,
+            rownames = FALSE,
             selection = list(mode = 'single', target = 'cell'),
-            options = list(ordering = FALSE, pageLength = 50, nowrap = T),
-            escape = F
+            options = list(ordering = FALSE, pageLength = 50, nowrap = TRUE),
+            escape = FALSE
           )
         })
         

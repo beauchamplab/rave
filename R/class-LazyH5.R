@@ -168,7 +168,7 @@ LazyH5 <- R6::R6Class(
         
         if(!private$read_only && (new_dataset || ! has_data)){
           # need to create new dataset
-          g = stringr::str_split(private$name, '/', simplify = T)
+          g = stringr::str_split(private$name, '/', simplify = TRUE)
           g = g[stringr::str_trim(g) != '']
           
           ptr = private$file_ptr
@@ -345,7 +345,7 @@ LazyH5 <- R6::R6Class(
 
 #' @export
 `[.LazyH5` <- function(obj, ...){
-  on.exit({obj$close()}, add = T)
+  on.exit({obj$close()}, add = TRUE)
   obj$subset(..., envir = parent.frame())
 }
 

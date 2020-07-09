@@ -266,10 +266,10 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
         current_module_id = input$sidebar
         global_reactives$execute_module = current_module_id
         session$userData$rave_current_module_id = current_module_id
-        shinyjs::hide(id = '__rave__mask__', anim = T, animType = 'slide')
+        shinyjs::hide(id = '__rave__mask__', anim = TRUE, animType = 'slide')
         shinyjs::removeClass(selector = 'body', class = "rave-noscroll")
       }else{
-        shinyjs::show(id = '__rave__mask__', anim = T, animType = 'slide')
+        shinyjs::show(id = '__rave__mask__', anim = TRUE, animType = 'slide')
         shinyjs::addClass(selector = 'body', class = "rave-noscroll")
       }
     })
@@ -308,7 +308,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     subject_modal = function(subject, current_electrodes = NULL){
       modalDialog(
         title = subject$id,
-        easyClose = T,
+        easyClose = TRUE,
         size = 'l',
         shinydashboard::tabBox(
           width = 12,

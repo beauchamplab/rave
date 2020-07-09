@@ -76,7 +76,7 @@ observe <- function(x, env = NULL, quoted = FALSE, priority = 0, domain = NULL, 
   shiny::observe(
     x = x,
     env = env,
-    quoted = T,
+    quoted = TRUE,
     priority = priority - 1L,
     domain = domain,
     ...
@@ -118,7 +118,7 @@ observeEvent = function(
   
   shiny::observeEvent(
     eventExpr = eventExpr, handlerExpr = handlerExpr, event.env = event.env,
-    event.quoted = T, handler.env = handler.env, handler.quoted = T,
+    event.quoted = TRUE, handler.env = handler.env, handler.quoted = TRUE,
     priority = priority - 1L, domain = domain, ...
   )
 }
@@ -816,7 +816,7 @@ parsers[['rave']] = list(
   #     updates = updates,
   #     initial_value = list(sapply(sub_comps, function(co) {
   #       co$initial_value
-  #     }, simplify = F, USE.NAMES = T))
+  #     }, simplify = FALSE, USE.NAMES = TRUE))
   #   )
   # }
 )

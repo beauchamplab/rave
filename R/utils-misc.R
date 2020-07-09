@@ -88,7 +88,7 @@ get_val <- function(x, key = NULL, ..., .invalids = c('null', 'na')){
   return(val)
 }
 
-zero_length <- function(..., any = T, na.rm = F){
+zero_length <- function(..., any = TRUE, na.rm = FALSE){
   parent_env = parent.frame()
   args = as.list(match.call())[-1]
   len = length(args)
@@ -159,7 +159,7 @@ test_hdspeed <- function(file_size = 1e7, quiet = FALSE){
   
   progress = progress(title = 'Testing read/write speed', max = 2, quiet = quiet)
   on.exit({
-    unlink(test_dir, recursive = T)
+    unlink(test_dir, recursive = TRUE)
     progress$close()
   })
   
@@ -167,8 +167,8 @@ test_hdspeed <- function(file_size = 1e7, quiet = FALSE){
   
   # generate 10M file, tested
   file = tempfile(tmpdir = test_dir)
-  dat = paste0(sample(LETTERS, file_size - 1, replace = T), collapse = '')
-  upload = system.time(writeLines(dat, file, useBytes = T))
+  dat = paste0(sample(LETTERS, file_size - 1, replace = TRUE), collapse = '')
+  upload = system.time(writeLines(dat, file, useBytes = TRUE))
   
   progress$inc('Read from disk...')
   download = system.time({dat_c = readLines(file)})

@@ -592,10 +592,10 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
         current_module_id = input$sidebar
         global_reactives$execute_module = current_module_id
         session$userData$rave_current_module_id = current_module_id
-        shinyjs::hide(id = '__rave__mask__', anim = F)
+        shinyjs::hide(id = '__rave__mask__', anim = FALSE)
         shinyjs::removeClass(selector = 'body', class = "rave-noscroll")
       }else{
-        shinyjs::show(id = '__rave__mask__', anim = T, animType = 'slide')
+        shinyjs::show(id = '__rave__mask__', anim = TRUE, animType = 'slide')
         shinyjs::addClass(selector = 'body', class = "rave-noscroll")
       }
     })
@@ -642,7 +642,7 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
     subject_modal = function(subject, current_electrodes = NULL){
       modalDialog(
         title = subject$id,
-        easyClose = T,
+        easyClose = TRUE,
         size = 'l',
         tags$style('.modal-lg { min-width: 80vw; }'),
         h4('Electrode Table'),

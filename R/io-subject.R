@@ -26,9 +26,9 @@ cache_raw_voltage <- function(project_name, subject_code, blocks, electrodes, ..
     sapply(blocks, function(block_num){
       s = pre_import_matlab(subject_code, project_name, block_num, e)
       # save s to cfile - /raw/block_num
-      save_h5(as.vector(s), cfile, name = sprintf('/raw/%s', block_num), chunk = 1024, replace = T)
+      save_h5(as.vector(s), cfile, name = sprintf('/raw/%s', block_num), chunk = 1024, replace = TRUE)
       NULL
-    }, simplify = F, USE.NAMES = T) ->
+    }, simplify = FALSE, USE.NAMES = TRUE) ->
       re
     return(re)
   }, .call_back = function(i){
@@ -266,7 +266,7 @@ rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = 
           cfile = file.path(dirs$preprocess_dir, 'voltage', sprintf('electrode_%d.h5', e))
           # if(file.exists(cfile)){ unlink(cfile) }
           
-          save_h5(as.vector(src[ii,]), cfile, name = sprintf('/raw/%s', block), chunk = 1024, replace = T)
+          save_h5(as.vector(src[ii,]), cfile, name = sprintf('/raw/%s', block), chunk = 1024, replace = TRUE)
           NULL
         })
         NULL
@@ -360,7 +360,7 @@ rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = 
           # if(file.exists(cfile)){ unlink(cfile) }
           s = as.numeric(src[[ii]])
           s[is.na(s)] = 0
-          save_h5(s, cfile, name = sprintf('/raw/%s', block), chunk = 1024, replace = T)
+          save_h5(s, cfile, name = sprintf('/raw/%s', block), chunk = 1024, replace = TRUE)
           NULL
         })
         NULL
@@ -504,7 +504,7 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
     for(f in ref_files){
       progress$inc(f)
       fpath = file.path(ref_dir, f)
-      volt_h5 = load_h5(fpath, '/voltage/008', ram = T)
+      volt_h5 = load_h5(fpath, '/voltage/008', ram = TRUE)
       
       # get voltage
       volt = sapply(seq_len(nrow(epoch_tbl)), function(ii){
@@ -518,8 +518,8 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
       rm(volt)
       
       
-      coef = load_h5(fpath, '/wavelet/coef/008', ram = T)
-      coef = coef[,,1, drop = F] * exp(1i * coef[,,2, drop = F])
+      coef = load_h5(fpath, '/wavelet/coef/008', ram = TRUE)
+      coef = coef[,,1, drop = F] * exp(1i * coef[,,2, drop = FALSE])
       coef = sapply(seq_len(nrow(epoch_tbl)), function(ii){
         row = epoch_tbl[ii, ]
         time = round(row$Time * srate_wave)
@@ -673,7 +673,7 @@ load_local_cache <- function(project_name, subject_code, epoch, time_range,
       
       dims = volt$dims
       
-      el = Tensor$new(0, dim = c(1,1,1), varnames = c('Trial', 'Time', 'Electrode'), hybrid = F)
+      el = Tensor$new(0, dim = c(1,1,1), varnames = c('Trial', 'Time', 'Electrode'), hybrid = FALSE)
       el$dim = dims
       el$dimnames = list(
         Trial = epoch_cached$Trial,
@@ -724,7 +724,7 @@ load_local_cache <- function(project_name, subject_code, epoch, time_range,
       
       
       if(all(c('power', 'phase') %in% data_type)){
-        el2 = el$clone(deep = T)
+        el2 = el$clone(deep = TRUE)
         el2$swap_file = tempfile()
         
         power = data.table::data.table(V1 = coef$data[[1]])
@@ -1043,9 +1043,9 @@ download_subject_data <- function(
   dir_create(extract_dir)
   on.exit({
     # clean up
-    unlink(extract_dir, recursive = T)
+    unlink(extract_dir, recursive = TRUE)
     if(remove_zipfile){
-      unlink(temp_file, recursive = T)
+      unlink(temp_file, recursive = TRUE)
     }else{
       cat2('Please manually remove zip file by running:\n',
              sprintf('unlink("%s")', temp_file), level = 'INFO')
@@ -1055,12 +1055,12 @@ download_subject_data <- function(
   
   # Extract
   cat2('Unzip the folder', level = 'INFO')
-  utils::unzip(temp_file, exdir = extract_dir, overwrite = T)
+  utils::unzip(temp_file, exdir = extract_dir, overwrite = TRUE)
   
   # Check folder
   # look for meta.yaml
   if(is.null(subject_settings)){
-    yaml_files = list.files(extract_dir, pattern = 'subjects.yaml$', recursive = T, full.names = T)
+    yaml_files = list.files(extract_dir, pattern = 'subjects.yaml$', recursive = TRUE, full.names = TRUE)
     
     if(length(yaml_files)){
       depth = stringr::str_count(yaml_files, '(/|\\\\)')
@@ -1212,8 +1212,8 @@ download_subject_data <- function(
     to_dir = file.path(rave_raw_dir, subject_code)
     if(length(raw_dir)){
       dir_create(to_dir)
-      lapply(list.files(raw_dir, all.files = T, full.names = T, recursive = F), function(d){
-        file.copy(d, to_dir, overwrite = T, recursive = T)
+      lapply(list.files(raw_dir, all.files = TRUE, full.names = TRUE, recursive = FALSE), function(d){
+        file.copy(d, to_dir, overwrite = TRUE, recursive = TRUE)
       })
       cat2('[New raw dir] ', to_dir, level = 'INFO')
     }else{
@@ -1225,8 +1225,8 @@ download_subject_data <- function(
     to_dir = file.path(rave_data_dir, project_name, subject_code)
     if(length(data_dir)){
       dir_create(to_dir)
-      lapply(list.files(data_dir, all.files = T, full.names = T, recursive = F), function(d){
-        file.copy(d, to_dir, overwrite = T, recursive = T)
+      lapply(list.files(data_dir, all.files = TRUE, full.names = TRUE, recursive = FALSE), function(d){
+        file.copy(d, to_dir, overwrite = TRUE, recursive = TRUE)
       })
       cat2('[New data dir] ', to_dir, level = 'INFO')
     }else{
@@ -1374,7 +1374,7 @@ module_analysis_names <- function(
   lookup_dir = get_dir('_export_lookup', project_name = project_name)$subject_dir
   
   if(!dir.exists(lookup_dir)){
-    dir.create(lookup_dir, recursive = T, showWarnings = F)
+    dir.create(lookup_dir, recursive = TRUE, showWarnings = FALSE)
   }
   
   if(!missing(module_id)){
@@ -1477,11 +1477,11 @@ module_analysis_save <- function(project_name, subject_code, module_id, analysis
   lookup_dir = get_dir('_export_lookup', project_name = project_name)$subject_dir
   
   if(!dir.exists(lookup_dir)){
-    dir.create(lookup_dir, recursive = T, showWarnings = F)
+    dir.create(lookup_dir, recursive = TRUE, showWarnings = FALSE)
   }
   
   module_id = stringr::str_to_upper(module_id)
-  analysis_name = stringr::str_extract_all(analysis_name, '[a-zA-Z0-9_]', simplify = T)
+  analysis_name = stringr::str_extract_all(analysis_name, '[a-zA-Z0-9_]', simplify = TRUE)
   analysis_name = paste(analysis_name, collapse = '')
   analysis_name = stringr::str_to_upper(analysis_name)
   

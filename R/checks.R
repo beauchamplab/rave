@@ -99,9 +99,9 @@ check_subjects2 <- function(
       log_data_old = yaml::read_yaml(yaml_file)
       if(!is.null(log_data[['preprocess']])){
         # compare
-        if(identical(log_data_old[['preprocess']], log_data[['preprocess']], num.eq = T, ignore.environment = T, ignore.bytecode = T)){
+        if(identical(log_data_old[['preprocess']], log_data[['preprocess']], num.eq = TRUE, ignore.environment = TRUE, ignore.bytecode = TRUE)){
           cat2('Cached log.yaml shares the same information with preprocess log file. No need to re-cache')
-          save_log = F
+          save_log = FALSE
         }else{
           log_data_old[['preprocess']] = log_data[['preprocess']]
         }
@@ -904,8 +904,8 @@ check_subjects_old <- function(
       }
       
       errs
-    }, simplify = F, USE.NAMES = T)
-  }, simplify = F, USE.NAMES = T) ->
+    }, simplify = FALSE, USE.NAMES = TRUE)
+  }, simplify = FALSE, USE.NAMES = TRUE) ->
     re
   if(!miss_project_name && !miss_subject_code){
     if(length(re[[1]][[1]])){
@@ -1058,8 +1058,8 @@ NULL
   n2 = length(preload_info$frequencies)
   n3 = length(preload_info$time_points)
   n4 = length(preload_info$electrodes)
-  srate_wave = module_tools$get_sample_rate(original = F)
-  srate_volt = module_tools$get_sample_rate(original = T)
+  srate_wave = module_tools$get_sample_rate(original = FALSE)
+  srate_volt = module_tools$get_sample_rate(original = TRUE)
   
   data = unlist(stringr::str_split(data, ','))
   data = stringr::str_to_lower(data)

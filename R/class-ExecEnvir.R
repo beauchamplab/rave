@@ -223,7 +223,7 @@ ExecEnvir <- R6::R6Class(
 
       # parent_env should be an unlocked environment that can be active binded
       if(!is.environment(parent_env)){
-        parent_env = new.env(parent = globalenv(), hash = T)
+        parent_env = new.env(parent = globalenv(), hash = TRUE)
       }
       self$parent_env = parent_env
 
@@ -264,7 +264,7 @@ ExecEnvir <- R6::R6Class(
 
       bind_wrapper_env(self, self$wrapper_env)
 
-      self$wrapper_env$source = function(file, local = T, ...){
+      self$wrapper_env$source = function(file, local = TRUE, ...){
         if(environmentIsLocked(self$static_env)){
           return()
         }
@@ -275,11 +275,11 @@ ExecEnvir <- R6::R6Class(
         if(file.exists(tmp_file)){
           cat2('Try to source from [', tmp_file, ']')
           self$runtime_env$.__tmp_file = tmp_file
-          eval(quote(base::source(.__tmp_file, local = T)), self$runtime_env)
+          eval(quote(base::source(.__tmp_file, local = TRUE)), self$runtime_env)
         }else if(file.exists(file)){
           # cat2('File [', tmp_file, '] does not exists, try to look for it.', level = 'INFO')
           self$runtime_env$.__tmp_file = file
-          eval(quote(base::source(.__tmp_file, local = T)), self$runtime_env)
+          eval(quote(base::source(.__tmp_file, local = TRUE)), self$runtime_env)
         }else{
           cat2('File [', file, '] does not exists.', level = 'ERROR')
           return()
@@ -916,7 +916,7 @@ ExecEnvir <- R6::R6Class(
                 if(is.null(..async_var)){
                   return(environment())
                 }else{
-                  re = sapply(..async_var, get0, simplify = F, USE.NAMES = T)
+                  re = sapply(..async_var, get0, simplify = FALSE, USE.NAMES = TRUE)
                   re
                 }
               }, packages = packages, evaluator = future::multiprocess, 
