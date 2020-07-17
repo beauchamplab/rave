@@ -44,7 +44,7 @@ create_template <- function(path, ...){
   for(f in fs){
     s = readLines(file.path(template_dir, f))
     s = paste(s, collapse = '\n')
-    s = glue::glue(s, .open = "${{", .close = "}}")
+    s = raveio::glue(s, .open = "${{", .close = "}}")
     f = stringr::str_replace(f, 'first_example', MODULEID)
     writeLines(s, con = file.path(path, f))
   }

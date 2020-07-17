@@ -1,7 +1,7 @@
 
 #' Lazy Load "HDF5" File via \code{\link[hdf5r]{hdf5r-package}}
 #'
-#' @description Wrapper for class \code{\link[rave]{LazyH5}}, which load data with 
+#' @description Wrapper for class \code{\link[raveio]{LazyH5}}, which load data with 
 #' "lazy" mode - only read part of dataset when needed.
 #' 
 #' @param file "HDF5" file

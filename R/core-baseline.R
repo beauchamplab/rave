@@ -1,5 +1,5 @@
 #' Baseline signals
-#' @param el \code{\link[rave]{Tensor}} or \code{\link[rave]{ECoGTensor}} object
+#' @param el \code{\link[raveio]{Tensor}} or \code{\link[raveio]{ECoGTensor}} object
 #' @param from baseline start time
 #' @param to baseline end time
 #' @param method mean or median, default is mean

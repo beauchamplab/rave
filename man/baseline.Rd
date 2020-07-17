@@ -21,7 +21,7 @@ baseline(
 )
 }
 \arguments{
-\item{el}{\code{\link[rave]{Tensor}} or \code{\link[rave]{ECoGTensor}} object}
+\item{el}{\code{\link[raveio]{Tensor}} or \code{\link[raveio]{ECoGTensor}} object}
 
 \item{from}{baseline start time}
 

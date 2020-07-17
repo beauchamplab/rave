@@ -1,5 +1,7 @@
 
-
+.shiny-notification-close {
+  display: none !important;
+}
 
 
 .sidebar-separator {

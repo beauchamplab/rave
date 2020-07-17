@@ -557,14 +557,14 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
   config$epoch_signatures = digest::digest(epoch_tbl[, c('Block', 'Time', 'Trial')]) # sorted by trial!
   
   
-  yaml::write_yaml(config, file.path(subject_cache_dir, 'config.yaml'), fileEncoding = 'utf-8')
+  raveio::save_yaml(config, file.path(subject_cache_dir, 'config.yaml'), fileEncoding = 'utf-8')
   
-  utils::write.csv(epoch_tbl, file.path(subject_cache_dir, 'epoch.csv'), row.names = F)
+  utils::write.csv(epoch_tbl, file.path(subject_cache_dir, 'epoch.csv'), row.names = FALSE)
   
   # save all references
   sapply(check_results$references, function(ref){
     tbl = load_meta('references', project_name = project_name, subject_code = subject_code, meta_name = ref)
-    utils::write.csv(tbl, file.path(subject_cache_dir, 'ref', sprintf('reference_%s.csv', ref)), row.names = F)
+    utils::write.csv(tbl, file.path(subject_cache_dir, 'ref', sprintf('reference_%s.csv', ref)), row.names = FALSE)
   })
   
   invisible()

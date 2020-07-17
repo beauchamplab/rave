@@ -1,7 +1,15 @@
 rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_prefix = 'ravepreprocessoverview'){
   ns = shiny::NS(module_id)
   
+  HAS_CACHE = 1L
+  
   url_format = sprintf('https://openwetware.org/wiki/RAVE:ravepreprocess:%s:%%s_%%s', doc_prefix)
+  
+  file_formats <- c(
+    '.mat/.h5 file per electrode',
+    'Single .mat/.h5 file per block',
+    'EDF(+) file per block'
+  )
 
   body = fluidRow(
     box(
@@ -45,25 +53,36 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
         # )
       )
     ),
-    box(
+    column(
       width = 12 - sidebar_width,
-      title = 'Information',
-      box_link = sprintf(url_format, 'output', 'information'),
       fluidRow(
-        column(
-          width = 6,
-          h2('Basic Information'),
-          tableOutput(ns('overview_table'))
-        ),
-        column(
-          width = 6,
-          h2('Electrode Settings'),
-          tableOutput(ns('channel_table'))
-        ),
-        column(
+        box(
           width = 12,
-          h2('Log'),
-          tableOutput(ns('subject_log_table'))
+          title = 'Information',
+          box_link = sprintf(url_format, 'output', 'information'),
+          fluidRow(
+            column(
+              width = 6,
+              h2('Basic Information'),
+              tableOutput(ns('overview_table'))
+            ),
+            column(
+              width = 6,
+              h2('Electrode Settings'),
+              tableOutput(ns('channel_table'))
+            ),
+            column(
+              width = 12,
+              h2('Log'),
+              tableOutput(ns('subject_log_table'))
+            )
+          )
+        ),
+        box(
+          width = 6,
+          title = 'Import widgets',
+          box_link = sprintf(url_format, 'output', 'importwidgets'),
+          uiOutput(ns('lfp_import'))
         )
       )
     )
@@ -95,18 +114,27 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       local_data$subject_code = last_inputs$last_subject_code
     }
     
+    observeEvent(input$project_name, {
+      print(input$project_name)
+    })
     
 
     # Reactives
     observe({
       local_data$reset = Sys.time()
+      
       # project_name_sel = get_val(input, 'project_name_sel', default = 'New Project...')
       # if( project_name_sel == 'New Project...' ){
       #   utils$clear_subject()
       #   return()
       # }
-      project_name = get_val(input, 'project_name', default = '')
+      project_name = get_val(local_data, 'project_name', default = '')
       subject_code = get_val(input, 'subject_code', default = '')
+      
+      dipsaus::cat2(sprintf(
+        'Check whether subject has been imported: %s/%s',
+        project_name, subject_code
+      ))
       
       if(!is.blank(subject_code) && !is.blank(project_name)){
         # check if subject dir exists
@@ -115,7 +143,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
         if(dir.exists(dirs$preprocess_dir)){
           # subject exists, load subject data
           utils$load_subject(subject_code = subject_code, project_name = project_name)
-          local_data$project_name = project_name
+          # local_data$project_name = project_name
           local_data$subject_code = subject_code
           showNotification(p('Subject ', subject_code, '(', project_name, ')', ' loaded!'), type = 'message')
           return()
@@ -132,7 +160,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       input$save
       input$save1
     }, {
-      project_name = get_val(input, 'project_name', default = '')
+      project_name = get_val(local_data, 'project_name', default = '')
       subject_code = get_val(input, 'subject_code', default = '')
       if(!is.blank(subject_code) && !is.blank(project_name)){
         dirs = get_dir(subject_code = subject_code, project_name = project_name)
@@ -169,26 +197,26 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
               electrodes = utils$get_electrodes()
               blocks = utils$get_blocks()
               pre_dir = utils$get_from_subject('dirs')$pre_subject_dir
-              # check if block maches
-              wrong_blocks = blocks[!blocks %in% list.dirs(pre_dir, recursive = F, full.names = F)]
-              if(length(wrong_blocks)){
-                showNotification(p('Subject ', subject_code, '(', project_name, ')', ' has invalid block(s) - ', paste(wrong_blocks, collapse = ', '), '!'), type = 'error')
-                return()
-              }
-              for(b in blocks){
-                f = list.files(file.path(pre_dir, b), pattern = '_ch[0-9]+.[mM][aA][tT]$')
-                f = stringr::str_match(f, '_ch([0-9]+).[mM][aA][tT]$')[,2]
-                f = as.integer(f)
-                w_e = electrodes[!electrodes %in% f]
-                if(length(w_e)){
-                  showNotification(p('Subject ', subject_code, '(', project_name, ')', ' missing file for electrode(s) - ',
-                                     dipsaus::deparse_svec(w_e), '! Please check.'), type = 'error')
-                  return()
-                }
-              }
-
-
-              utils$collect_raw_voltage()
+              # # check if block maches
+              # wrong_blocks = blocks[!blocks %in% list.dirs(pre_dir, recursive = F, full.names = F)]
+              # if(length(wrong_blocks)){
+              #   showNotification(p('Subject ', subject_code, '(', project_name, ')', ' has invalid block(s) - ', paste(wrong_blocks, collapse = ', '), '!'), type = 'error')
+              #   return()
+              # }
+              # for(b in blocks){
+              #   f = list.files(file.path(pre_dir, b), pattern = '_ch[0-9]+.[mM][aA][tT]$')
+              #   f = stringr::str_match(f, '_ch([0-9]+).[mM][aA][tT]$')[,2]
+              #   f = as.integer(f)
+              #   w_e = electrodes[!electrodes %in% f]
+              #   if(length(w_e)){
+              #     showNotification(p('Subject ', subject_code, '(', project_name, ')', ' missing file for electrode(s) - ',
+              #                        dipsaus::deparse_svec(w_e), '! Please check.'), type = 'error')
+              #     return()
+              #   }
+              # }
+              # 
+              # 
+              # utils$collect_raw_voltage()
             }
 
             if(n_changes){
@@ -238,26 +266,51 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
     })
     
     output$overview_inputs2 <- renderUI({
-      selectInput(ns('project_name_sel'), 'Project', choices = c(
-        'New Project...', local_data$all_projects
-      ), selected = isolate(local_data$project_name))
+      tagList(
+        selectInput(ns('project_name_sel'), 'Project', choices = c(
+          'New Project...', local_data$all_projects
+        ), selected = isolate(local_data$project_name)),
+        conditionalPanel(
+          sprintf('input[["%s"]] === "New Project..."', ns('project_name_sel')),
+          textInput(ns('project_name'), 'Project Name')
+        )
+      )
     })
     output$overview_inputs3 <- renderUI({
-      # reset = user_data$reset
-      if(is.null(input$project_name_sel) || input$project_name_sel == 'New Project...'){
-        re = textInput(ns('project_name'), 'Project Name', value = '')
-      }else{
-        re = div(
-          class = 'hidden',
-          textInput(ns('project_name'), 'Project Name', value = input$project_name_sel)
-        )
-      }
-      re
+      # # reset = user_data$reset
+      # if(is.null(input$project_name_sel) || input$project_name_sel == 'New Project...'){
+      #   re = textInput(ns('project_name'), 'Project Name', value = '')
+      # }else{
+      #   re = div(
+      #     class = 'hidden',
+      #     textInput(ns('project_name'), 'Project Name', value = input$project_name_sel)
+      #   )
+      # }
+      # re
     })
     
+    observeEvent(input$project_name, {
+      if(length(input$project_name) && input$project_name != ''){
+        local_data$project_name <- input$project_name
+      }
+    })
+    
+    observeEvent(input$project_name_sel, {
+      if(input$project_name_sel != 'New Project...'){
+        local_data$project_name <- input$project_name_sel
+      }
+    })
+    
+    
     output$step_2_msg <- renderUI({
-      project_name = get_val(input, 'project_name', default = '')
+      project_name = get_val(local_data, 'project_name', default = '')
       subject_code = get_val(input, 'subject_code', default = '')
+      
+      dipsaus::cat2(sprintf(
+        'Check subject path: %s/%s',
+        project_name, subject_code
+      ))
+      
       data_dir = normalizePath(rave_options('data_dir'), mustWork = FALSE)
       if( subject_code == '' ){
         if( project_name != '' ){
@@ -321,18 +374,25 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       elec_label = 'Electrodes'
       srate_label = 'Sample Rate'
       save_label = 'Update Changes'
+      file_format_ui = NULL
 
       save_type = 'primary';
       btn_cls = ''
+      save_id = 'save2'
       if(!utils$has_subject()){
         save_label = 'Create Subject'
+        save_id = 'save'
       }else{
         if(utils$has_raw_cache()){
           block_label = 'Blocks (read-only)'
           elec_label = 'Electrodes (read-only)'
           save_type = 'warning'
         }else{
-          save_label = 'Import Subject'
+          save_label = 'Check Subject'
+          file_format_ui = tagList(
+            selectInput(ns('file_format'), 'File format', choices = file_formats),
+            uiOutput(ns('format_demo'))
+          )
         }
         if(utils$notch_filtered()){
           srate_label = 'Sample Rate (read-only)'
@@ -347,11 +407,66 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
         shiny::selectInput(ns('blocks'), block_label, selected = block_selected, choices = block_choices, multiple = T),
         shiny::textInput(ns('channels'), elec_label, placeholder = 'E.g. 1-84', value = channels),
         shiny::numericInput(ns('srate'), srate_label, value = srate, step = 1L, min = 1L),
-        dipsaus::actionButtonStyled(ns('save'), save_label, type = save_type, 
+        file_format_ui,
+        dipsaus::actionButtonStyled(ns(save_id), save_label, type = save_type, 
                                     width = '100%', class = btn_cls)
       )
 
 
+    })
+    
+    output$format_demo <- renderUI({
+      fmt <- input$file_format
+      
+      if(fmt == file_formats[[1]]){
+        div(
+          p("In each block folder, one Matlab/HDF5 file stands for one electrode. ", 
+            "File name should match with format XXX1.h5 or xxx2.mat. ", 
+            "Each file only contains a one-dimensional vector. ",
+            "The vector lengths stand for total time points and they must be the same across all electrode files. ",
+            "For example:"),
+          tags$pre(
+            dipsaus::print_directory_tree(
+              c('block1', 'block2'),
+              root = '<subject folder>',
+              child = c(
+                'datafile_e1.mat <vector of time>',
+                'datafile_e2.mat <same length>',
+                'datafile_e3.mat',
+                '...'
+              ),
+              collapse = '\n'
+            )
+          )
+        )
+      } else if(fmt == file_formats[[2]]){
+        div(p("A single Matlab/HDF5 file containing all electrode information. ",
+              "Data must be a matrix. One of the dimension must be electrodes, ",
+              "the other dimension must be time points. ",
+              "ALL blocks must share the same file & data name; for example:"),
+            tags$pre(
+              dipsaus::print_directory_tree(
+                c('block1', 'block2'),
+                root = '<subject folder>',
+                child = c(
+                  'datafile.mat <one big matrix>'
+                ),
+                collapse = '\n'
+              )
+            ))
+      }else{
+        div(p("In each block folder, one EDF(+) file containing all electrode data; for example:"),
+            tags$pre(
+              dipsaus::print_directory_tree(
+                c('block1', 'block2'),
+                root = '<subject folder>',
+                child = c(
+                  'datafile.edf <ONLY one EDF file per block>'
+                ),
+                collapse = '\n'
+              )
+            ))
+      }
     })
 
     output$overview_table <- renderTable({
@@ -375,6 +490,301 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       log
 
     })
+    
+    
+    # Check and import subject
+    observeEvent(input$save2, {
+      local_data$import_valid = TRUE
+      local_data$import_checks = NULL
+      
+      electrodes <- dipsaus::parse_svec(input$channels)
+      srate <- input$srate
+      blocks <- input$blocks
+      file_format <- which(file_formats == input$file_format)
+      project_name = get_val(local_data, 'project_name', default = '')
+      subject_code = get_val(input, 'subject_code', default = '')
+      
+      if(!length(blocks)){
+        showNotification(p('No block is chosen. At least one block is needed'), type = 'error')
+        local_data$import_valid = FALSE
+      }
+      if(!length(electrodes)){
+        showNotification(p('Please enter electrodes to be imported'), type = 'error')
+        local_data$import_valid = FALSE
+      }
+      if(srate <= 0){
+        showNotification(p('Sample rate is invalid: must be positive'), type = 'error')
+        local_data$import_valid = FALSE
+      }
+      if(isFALSE(local_data$import_valid)){
+        return()
+      }
+      
+      # project_name = 'test'; subject_code = 'YAB'
+      utils$check_load_subject(subject_code = subject_code, project_name = project_name)
+      
+      if(utils$has_raw_cache()){
+        showNotification(p('Subject has been imported, please proceed to other modules'), type = 'message')
+        local_data$import_valid = FALSE
+        return()
+      }
+      
+      utils$set_blocks(blocks, notification = FALSE)
+      utils$set_electrodes(electrodes, notification = FALSE)
+      utils$set_sample_rate(srate, notification = FALSE)
+      
+      subject <- Subject$new(subject_code = subject_code, project_name = project_name)
+      # subject$.__enclos_env__$private$subjectinfo$available_blocks
+      all_blocks <- subject$preprocess_info('available_blocks')
+      
+      
+      lfp_valid <-
+        validate_raw_file_lfp(
+          subject_code = subject_code,
+          blocks = blocks,
+          electrodes = electrodes,
+          format = file_format,
+          check_content = TRUE
+        )
+      
+      import_checks <- dipsaus::list_to_fastmap2(list(
+        blocks = blocks,
+        fmt = file_format,
+        lfp_file_format = file_format,
+        lfp_electrodes = electrodes,
+        lfp_sample_rate = srate,
+        lfp_valid = lfp_valid,
+        freeze_lfp = utils$has_raw_cache()
+      ))
+      
+      local_data$import_checks = import_checks
+    }, ignoreInit = TRUE, ignoreNULL = TRUE)
+    
+    
+    # Import widgets
+    output$lfp_import <- renderUI({
+      main_results <- local_data$import_checks
+      inp <- reactiveValuesToList(input)
+      lod <- reactiveValuesToList(local_data)
+      if(!inherits(main_results, 'fastmap2')){
+        return(shiny::div(
+          'Please validate data first. If you have imported subject, please proceed to Notch filter',
+          class = 'shiny-bound-output shiny-output-error shiny-output-error-shiny.silent.error shiny-output-error-validation'
+        ))
+      }
+      if(!isTRUE(local_data$import_valid)){
+        return(shiny::div(
+          'Please enter valid blocks, electrodes, and sample rate to check & validate first.',
+          class = 'shiny-bound-output shiny-output-error shiny-output-error-shiny.silent.error shiny-output-error-validation'
+        ))
+      }
+      
+      project_name = get_val(lod, 'project_name', default = '')
+      subject_code = get_val(inp, 'subject_code', default = '')
+      utils$check_load_subject(subject_code = subject_code, project_name = project_name)
+      
+      if(main_results$freeze_lfp){
+        return('Subject has been imported.')
+      }
+      
+      lfp_valid <- main_results$lfp_valid
+      if( !lfp_valid && inherits(lfp_valid, 'validate_failure') ){
+        reason <- attr(lfp_valid, 'reason')
+        reason_name <- names(reason)
+        error_ui <- lapply(seq_along(reason_name), function(ii){
+          shiny::tagList(
+            shiny::hr(),
+            reason_name[[ii]],
+            shiny::tags$ul(
+              lapply(reason[[ii]], function(item){
+                shiny::tags$li(item)
+              })
+            )
+          )
+        })
+        return(shiny::p(
+          shiny::h5('Issue(s) found while checking raw data:'),
+          shiny::tags$small(
+            'Please make sure ', 
+            shiny::strong('File format'), 
+            'option is proper and resolve the following potential issues.'
+          ),
+          error_ui
+        ))
+      }
+      
+      # Show import widgets
+      main_results$lfp_sample_rate
+      main_results$lfp_electrodes
+      main_results$fmt
+      blocks <- utils$get_blocks()
+      
+      rawfiles_info <- attr(lfp_valid, 'info')
+      snapshot <- attr(lfp_valid, 'snapshot')
+      tmp <- rawfiles_info[[blocks[[1]]]]$files
+      if(length(tmp) > 4){
+        tmp <- c(tmp[1:3], '...', tmp[length(tmp)])
+      }
+      
+      info <- rawfiles_info[[1]]
+      
+      abs_path <- file.path(info$path, info$files[[1]])
+      
+      if(stringr::str_ends(abs_path, '\\.(mat|h5)')){
+        dat <- read_mat(abs_path)
+      }
+      
+      if(length(snapshot)){
+        snapshot <- sprintf('Snapshot of the first file: %s', snapshot[[1]])
+      }
+      
+      if(main_results$lfp_file_format == 3){
+        # Ask for convertion
+        snapshot <- shiny::tagList(
+          snapshot,
+          shiny::br(),
+          shiny::selectInput(ns('edf_lfp_unit'), 'Physical unit convertion',
+                             choices = c('mV (recommended for iEEG)', 'V', 'uV', 'as-is (no change)'),
+                             selected = isolate(input$edf_lfp_unit))
+        )
+      }
+      
+      
+      shiny::p(
+        shiny::h5('Passed validation'),
+        'Press ', shiny::strong("Start import"), ' to import raw files into RAVE folders',
+        shiny::hr(),
+        shiny::strong('Import configuration:'),
+        sprintf('Data to be imported: %d block(s) x %d electrode(s) at sample rate %.1f Hz.',
+                length(blocks), length(main_results$lfp_electrodes), main_results$lfp_sample_rate),
+        shiny::br(),
+        shiny::strong('File structure:'),
+        shiny::pre(
+          dipsaus::print_directory_tree(
+            blocks,
+            sprintf('%s <raw folder>', subject_code),
+            tmp, collapse = '\n'
+          )
+        ),
+        snapshot,
+        shiny::hr(),
+        dipsaus::actionButtonStyled(ns('btn_import_lfp'), 'Start import'),
+      )
+    })
+    
+    observeEvent(input$btn_import_lfp, {
+      main_results <- local_data$import_checks
+      if(!inherits(main_results, 'fastmap2') || !isTRUE(local_data$import_valid)){
+        showNotification(p('Some information changed. Please perform validation again.'), type = 'error')
+      }
+      lfp_valid <- main_results$lfp_valid
+      if(!lfp_valid){
+        showNotification(p('Failed validation. Please check your raw data'), type = 'error')
+      }
+      
+      project_name = get_val(local_data, 'project_name', default = '')
+      subject_code = get_val(input, 'subject_code', default = '')
+      utils$check_load_subject(subject_code = subject_code, project_name = project_name)
+      
+      if(utils$has_raw_cache()){
+        showNotification(p('Data was imported. Cannot import again'), type = 'error')
+        return()
+      }
+      
+      electrodes <- dipsaus::parse_svec(input$channels)
+      srate <- input$srate
+      blocks <- input$blocks
+      fmt <- input$file_format
+      
+      utils$set_blocks(blocks)
+      utils$set_electrodes(electrodes)
+      utils$set_sample_rate(srate)
+      dirs = utils$get_from_subject('dirs', list(), customized = FALSE)
+      file = file.path(dirs$preprocess_dir, 'raw_voltage.h5')
+      
+      if(file.exists(file)){
+        unlink(file)
+      }
+      
+      if( fmt == file_formats[[1]] ){
+        
+        finfo <- attr(lfp_valid, 'info')
+        # load raw data
+        dipsaus::lapply_async2(electrodes, function(e){
+          cfile = file.path(dirs$preprocess_dir, 'voltage', sprintf('electrode_%d.h5', e))
+          if(file.exists(cfile)){ unlink(cfile) }
+          sapply(blocks, function(block_num){
+            
+            info <- finfo[[block_num]]
+            sel <- stringr::str_detect(stringr::str_to_lower(info$files), 
+                                sprintf('([^0-9]|^)%d\\.(mat|h5)', e))
+            src <- file.path(info$path, info$files[sel][[1]])
+            
+            s <- read_mat(src)
+            nm <- guess_raw_trace(s, electrodes = electrodes, matrix = FALSE)
+            s <- as.vector(s[[nm]])
+            save_h5(s, cfile, name = sprintf('/raw/%s', block_num), 
+                    chunk = 1024, replace = TRUE)
+          }, simplify = FALSE, USE.NAMES = TRUE)
+          return()
+        }, callback = function(e){
+          sprintf('Collecting electrode %d', e)
+        })
+        
+        utils$save_to_subject(checklevel = HAS_CACHE)
+        
+      } else if( fmt == file_formats[[3]] ){
+        finfo <- attr(lfp_valid, 'info')
+        # load raw data from EDF format
+        electrodes = sort(electrodes)
+        progress <- dipsaus::progress2('Importing from EDF files', 
+                                       max = length(blocks) * (length(electrodes) + 1),
+                                       shiny_auto_close = TRUE)
+        edf_lfp_unit <- input$edf_lfp_unit
+        if(!length(edf_lfp_unit)){
+          showNotification(p('Please select physical unit to convert to.'), type = 'error')
+          return()
+        }
+        lfp_unit <- list(
+          'mV (recommended for iEEG)' = 'mV',
+          'V' = 'V', 'uV' = 'uV', 'as-is (no change)' = NA)[[edf_lfp_unit]]
+        
+        
+        lapply(blocks, function(b){
+          
+          progress$inc(sprintf('Importing block %s', b))
+          
+          info <- finfo[[b]]
+          src <- file.path(info$path, info$files)
+          
+          dat <- raveio::read_edf_signal(src, signal_numbers = electrodes, convert_volt = lfp_unit)
+          
+          for(ii in seq_along(electrodes)){
+            e <- electrodes[[ii]]
+            s <- dat$get_signal(ii)
+            s <- as.vector(s$signal)
+            
+            progress$inc(sprintf('Writing electrode %s', e))
+            
+            cfile = file.path(dirs$preprocess_dir, 'voltage', sprintf('electrode_%d.h5', e))
+            save_h5(s, cfile, name = sprintf('/raw/%s', b), 
+                    chunk = 1024, replace = TRUE)
+          }
+          
+          NULL
+        })
+        
+        utils$save_to_subject(checklevel = HAS_CACHE)
+        
+      }
+      
+      utils$reset()
+      msg = 'Raw voltage signals are cached.'
+      type = 'message'
+      utils$showNotification(msg, type = type)
+      
+    })
+    
   }
 
   return(list(

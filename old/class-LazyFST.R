@@ -43,7 +43,7 @@ LazyFST <- R6::R6Class(
   ),
   public = list(
     
-    #' @description to be compatible with \code{\link[rave]{LazyH5}}
+    #' @description to be compatible with \code{\link[raveio]{LazyH5}}
     #' @param ... ignored
     #' @return none
     open = function(...){},
@@ -58,7 +58,7 @@ LazyFST <- R6::R6Class(
       }
     },
     
-    #' @description to be compatible with \code{\link[rave]{LazyH5}}
+    #' @description to be compatible with \code{\link[raveio]{LazyH5}}
     #' @param ... ignored
     #' @return none
     save = function(...){

@@ -125,7 +125,7 @@ Options <- R6::R6Class(
       if(length(conf_path) != 1 || is.na(conf_path) || !is.character(conf_path) || !file.exists(conf_path)){
         return(FALSE)
       }
-      v = yaml::read_yaml(conf_path)
+      v = as.list(raveio::load_yaml(conf_path))
       
       do.call(self$set_options, args = v)
       self$set_options(conf_path = conf_path)
@@ -136,7 +136,7 @@ Options <- R6::R6Class(
       if(!dir.exists(dname)){
         dir.create(dname, showWarnings = FALSE, recursive = TRUE)
       }
-      yaml::write_yaml(private$opts, file = path, fileEncoding = 'UTF-8')
+      raveio::save_yaml(private$opts, file = path, fileEncoding = 'UTF-8')
     }
   )
 )

@@ -1,4 +1,5 @@
 #' @import shiny
+#' @import raveio
 #' @importFrom dipsaus %?<-%
 #' @importFrom dipsaus collapse
 #' @importFrom dipsaus to_datauri
@@ -7,9 +8,6 @@
 NULL
 
 
-
-tags = htmltools::tags
-div = htmltools::div
 debug_mode = FALSE
 
 toggle_debug <- function(on){
@@ -22,7 +20,7 @@ toggle_debug <- function(on){
 
 ### For dev use only:
 gl <- function(..., .envir = parent.frame()){
-  glue::glue(..., .envir = .envir)
+  raveio::glue(..., .envir = .envir)
 }
 
 catgl <- function(..., .envir = parent.frame(), level = 'DEBUG', .pal){

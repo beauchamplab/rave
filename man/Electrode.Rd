@@ -176,7 +176,7 @@ If \code{ram} is true, then returns a list of matrices. The
 length of the list equals the number of blocks, and each matrix is 
 frequency by time points. If \code{ram} is false, then returns an 
 environment with each element a \code{\link[rave]{LazyH5}} or 
-\code{\link[rave]{LazyFST}} instance.
+\code{\link[raveio]{LazyFST}} instance.
 }
 }
 \if{html}{\out{<hr>}}
@@ -270,7 +270,7 @@ refers to epoch file \code{"epoch_default.csv"} in subject meta folder}
 \item{\code{raw}}{whether epoch pre-referenced data?}
 
 \item{\code{hybrid}}{whether to fast-cache the data on hard-drive? See also 
-\code{\link[rave]{Tensor}}}
+\code{\link[raveio]{Tensor}}}
 }
 \if{html}{\out{</div>}}
 }
