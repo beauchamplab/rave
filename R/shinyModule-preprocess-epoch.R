@@ -120,7 +120,7 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
 
         fpath = file.path(dirs$meta_dir, epoch_name)
         if(file.exists(fpath)){
-          cat2('Loading epoch from file.')
+          catgl('Loading epoch from file.')
           tbl = safe_read_csv(fpath, colClasses = c('character', 'numeric'))
           local_data$staged = sapply(utils$get_blocks(), function(b){
             sub = tbl[tbl$Block == b,]

@@ -71,9 +71,11 @@ SubjectInfo2 <- R6::R6Class(
       
       self$valid = TRUE
     },
-    set_blocks = function(blocks){
+    set_blocks = function(blocks, force = FALSE){
       is_changed = FALSE
-      blocks = blocks[blocks %in% self$available_blocks]
+      if(!force){
+        blocks = blocks[blocks %in% self$available_blocks]
+      }
       if(!base::setequal(self$blocks, blocks)){
         self$blocks = blocks
         is_changed = TRUE

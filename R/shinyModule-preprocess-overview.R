@@ -5,11 +5,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
   
   url_format = sprintf('https://openwetware.org/wiki/RAVE:ravepreprocess:%s:%%s_%%s', doc_prefix)
   
-  file_formats <- c(
-    '.mat/.h5 file per electrode',
-    'Single .mat/.h5 file per block',
-    'EDF(+) file per block'
-  )
+  file_formats <- names(raveio::LFP_FORMATS)
 
   body = fluidRow(
     box(
@@ -131,7 +127,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       project_name = get_val(local_data, 'project_name', default = '')
       subject_code = get_val(input, 'subject_code', default = '')
       
-      dipsaus::cat2(sprintf(
+      catgl(sprintf(
         'Check whether subject has been imported: %s/%s',
         project_name, subject_code
       ))
@@ -139,7 +135,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       if(!is.blank(subject_code) && !is.blank(project_name)){
         # check if subject dir exists
         dirs = get_dir(subject_code = subject_code, project_name = project_name)
-        cat2(dirs$preprocess_dir)
+        catgl(dirs$preprocess_dir)
         if(dir.exists(dirs$preprocess_dir)){
           # subject exists, load subject data
           utils$load_subject(subject_code = subject_code, project_name = project_name)
@@ -151,7 +147,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       }
       utils$clear_subject()
       # Update
-      updateSelectInput(session, 'blocks', label = 'Block', selected = NULL, choices = '')
+      updateSelectInput(session, 'blocks', label = 'Block or Session', selected = NULL, choices = '')
       updateTextInput(session, 'channels', label = 'Electrodes', value = '')
       updateNumericInput(session, 'srate', label = 'Sample Rate', value = 0)
     })
@@ -164,8 +160,31 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       subject_code = get_val(input, 'subject_code', default = '')
       if(!is.blank(subject_code) && !is.blank(project_name)){
         dirs = get_dir(subject_code = subject_code, project_name = project_name)
+        
+        if(isTRUE(local_data$is_bids)){
+          target_bids <- normalizePath(raveio::raveio_getopt('bids_data_dir'), mustWork = FALSE)
+          target_bids <- file.path(target_bids, project_name, sprintf('sub-%s', subject_code))
+          dirs$bids_subject_dir <- target_bids
+          if(dir.exists(dirs$bids_subject_dir)){
+            if(!dir.exists(dirs$pre_subject_dir)){
+              linked <- file.link(dirs$bids_subject_dir, dirs$pre_subject_dir)
+              if(!linked){
+                # osx or linux, create symlink
+                linked <- file.symlink(dirs$bids_subject_dir, dirs$pre_subject_dir)
+              }
+              if(!linked){
+                showNotification(p('Cannot create sym/hard link from BIDS folder to rave raw folder. Please manually copy subject folder from BIDS path to rave raw path'), type = 'error')
+                return()
+              }
+            }
+          }else{
+            showNotification(p('Subject ', subject_code, ' NOT found!'), type = 'error')
+            return()
+          }
+        }
+        
         if(dir.exists(dirs$pre_subject_dir)){
-
+          
           if(utils$has_subject() &&
              utils$get_from_subject('project_name', '') == project_name &&
              utils$get_from_subject('subject_code', '') == subject_code
@@ -177,19 +196,19 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
               updateSelectInput(session, inputId = 'blocks', selected = blocks)
               n_changes = n_changes - 1
             }
-
+            
             if(!utils$set_electrodes(input$channels, name = 'channels')){
               channels = dipsaus::deparse_svec(utils$get_from_subject('channels', NULL))
               updateTextInput(session, inputId = 'channels', value = channels)
               n_changes = n_changes - 1
             }
-
+            
             if(!utils$set_srate(input$srate)){
               srate = utils$get_from_subject('srate', 0)
               updateNumericInput(session, 'srate', value = srate)
               n_changes = n_changes - 1
             }
-
+            
             # Check if subject has been imported or not
             if(!utils$has_raw_cache() && length(utils$get_blocks()) && length(utils$get_electrodes())){
               # Subject is created but not imported
@@ -218,7 +237,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
               # 
               # utils$collect_raw_voltage()
             }
-
+            
             if(n_changes){
               utils$reset()
               showNotification(p('Subject ', subject_code, '(', project_name, ')', ' saved! ', br(),
@@ -230,17 +249,18 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
             utils$save_subject(subject_code = subject_code, project_name = project_name)
             showNotification(p('Subject ', subject_code, '(', project_name, ')', ' created/switched!'), type = 'message')
           }
-
+          
           local_data$project_name = project_name
           local_data$subject_code = subject_code
         }else{
           showNotification(p('Subject ', subject_code, ' NOT found!'), type = 'error')
-        }
+        }        
       }
     })
 
     output$step_1_msg <- renderUI({
       scode = input$subject_code
+      project_name <- local_data$project_name
       raw_dir = normalizePath(rave_options('raw_data_dir'), mustWork = FALSE)
       target_dir = file.path(raw_dir, scode)
       has_scode = length(scode) && scode != ''
@@ -253,12 +273,27 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
                     'Invalid subject code. Only letters (A-Z), numbers (0-9) and "_" are allowed. (Do not start with "_")'))
       }
       has_dir = dir.exists(target_dir)
-      if( !has_dir ){
+      if( has_dir ){
+        local_data$has_dir = TRUE
+        local_data$is_bids = FALSE
+        return(p(style='color:green;word-break: break-word;',sprintf('%s (found!)', target_dir)))
+      } else {
+        
+        # check BIDS
+        target_bids <- normalizePath(raveio::raveio_getopt('bids_data_dir'), mustWork = FALSE)
+        target_bids <- file.path(target_bids, project_name, sprintf('sub-%s', scode))
+        if(dir.exists(target_bids)){
+          local_data$has_dir = TRUE
+          local_data$is_bids = TRUE
+          return(p(style='color:green;word-break: break-word;',sprintf('%s (found!)', target_bids)))
+        }
+        local_data$is_bids = NULL
         local_data$has_dir = FALSE
-        return(p(style='color:red;word-break: break-word;',sprintf('%s (NOT found)', target_dir)))
+        return(p(style='color:red;word-break: break-word;',
+                 sprintf('%s (NOT found)', target_dir),
+                 sprintf('%s (NOT found)', target_bids)))
       }
-      local_data$has_dir = TRUE
-      return(p(style='color:green;word-break: break-word;',sprintf('%s (found!)', target_dir)))
+      
     })
 
     output$overview_inputs1 <- renderUI({
@@ -306,7 +341,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       project_name = get_val(local_data, 'project_name', default = '')
       subject_code = get_val(input, 'subject_code', default = '')
       
-      dipsaus::cat2(sprintf(
+      catgl(sprintf(
         'Check subject path: %s/%s',
         project_name, subject_code
       ))
@@ -367,7 +402,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       # exclchan = dipsaus::deparse_svec(utils$get_from_subject('exclchan', NULL))
       # badchan = dipsaus::deparse_svec(utils$get_from_subject('badchan', NULL))
       # epichan = dipsaus::deparse_svec(utils$get_from_subject('epichan', NULL))
-      # cat2('gen UI')
+      # catgl('gen UI')
 
 
       block_label = 'Blocks'
@@ -404,7 +439,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
 
 
       re = shiny::tagList(
-        shiny::selectInput(ns('blocks'), block_label, selected = block_selected, choices = block_choices, multiple = T),
+        shiny::selectInput(ns('blocks'), block_label, selected = block_selected, choices = block_choices, multiple = TRUE),
         shiny::textInput(ns('channels'), elec_label, placeholder = 'E.g. 1-84', value = channels),
         shiny::numericInput(ns('srate'), srate_label, value = srate, step = 1L, min = 1L),
         file_format_ui,
@@ -500,7 +535,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       electrodes <- dipsaus::parse_svec(input$channels)
       srate <- input$srate
       blocks <- input$blocks
-      file_format <- which(file_formats == input$file_format)
+      file_format <- input$file_format
       project_name = get_val(local_data, 'project_name', default = '')
       subject_code = get_val(input, 'subject_code', default = '')
       
@@ -537,20 +572,21 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       # subject$.__enclos_env__$private$subjectinfo$available_blocks
       all_blocks <- subject$preprocess_info('available_blocks')
       
-      
-      lfp_valid <-
-        validate_raw_file_lfp(
-          subject_code = subject_code,
-          blocks = blocks,
-          electrodes = electrodes,
-          format = file_format,
-          check_content = TRUE
-        )
+      # list2env(as.list(environment()), envir = .GlobalEnv)
+      lfp_valid <- raveio::validate_raw_file(
+        subject_code = subject_code,
+        blocks = blocks,
+        electrodes = electrodes,
+        format = file_format,
+        check_content = TRUE,
+        project_name = project_name, 
+        data_type = 'lfp'
+      )
       
       import_checks <- dipsaus::list_to_fastmap2(list(
         blocks = blocks,
         fmt = file_format,
-        lfp_file_format = file_format,
+        lfp_file_format = which(file_formats == file_format),
         lfp_electrodes = electrodes,
         lfp_sample_rate = srate,
         lfp_valid = lfp_valid,
@@ -564,8 +600,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
     # Import widgets
     output$lfp_import <- renderUI({
       main_results <- local_data$import_checks
-      inp <- reactiveValuesToList(input)
-      lod <- reactiveValuesToList(local_data)
+      # assign('main_results', main_results, envir = globalenv())
       if(!inherits(main_results, 'fastmap2')){
         return(shiny::div(
           'Please validate data first. If you have imported subject, please proceed to Notch filter',
@@ -579,11 +614,13 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
         ))
       }
       
-      project_name = get_val(lod, 'project_name', default = '')
-      subject_code = get_val(inp, 'subject_code', default = '')
+      project_name = local_data$project_name
+      project_name %?<-% ''
+      subject_code = input$subject_code
+      subject_code %?<-% ''
       utils$check_load_subject(subject_code = subject_code, project_name = project_name)
       
-      if(main_results$freeze_lfp){
+      if(isTRUE(main_results$freeze_lfp)){
         return('Subject has been imported.')
       }
       
@@ -616,60 +653,78 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       # Show import widgets
       main_results$lfp_sample_rate
       main_results$lfp_electrodes
-      main_results$fmt
+      
       blocks <- utils$get_blocks()
-      
-      rawfiles_info <- attr(lfp_valid, 'info')
       snapshot <- attr(lfp_valid, 'snapshot')
-      tmp <- rawfiles_info[[blocks[[1]]]]$files
-      if(length(tmp) > 4){
-        tmp <- c(tmp[1:3], '...', tmp[length(tmp)])
-      }
       
-      info <- rawfiles_info[[1]]
+      first_block <- blocks[[1]]
       
-      abs_path <- file.path(info$path, info$files[[1]])
-      
-      if(stringr::str_ends(abs_path, '\\.(mat|h5)')){
-        dat <- read_mat(abs_path)
-      }
-      
-      if(length(snapshot)){
-        snapshot <- sprintf('Snapshot of the first file: %s', snapshot[[1]])
-      }
-      
-      if(main_results$lfp_file_format == 3){
-        # Ask for convertion
-        snapshot <- shiny::tagList(
-          snapshot,
-          shiny::br(),
-          shiny::selectInput(ns('edf_lfp_unit'), 'Physical unit convertion',
-                             choices = c('mV (recommended for iEEG)', 'V', 'uV', 'as-is (no change)'),
-                             selected = isolate(input$edf_lfp_unit))
-        )
-      }
-      
-      
-      shiny::p(
-        shiny::h5('Passed validation'),
-        'Press ', shiny::strong("Start import"), ' to import raw files into RAVE folders',
-        shiny::hr(),
-        shiny::strong('Import configuration:'),
-        sprintf('Data to be imported: %d block(s) x %d electrode(s) at sample rate %.1f Hz.',
-                length(blocks), length(main_results$lfp_electrodes), main_results$lfp_sample_rate),
-        shiny::br(),
-        shiny::strong('File structure:'),
-        shiny::pre(
-          dipsaus::print_directory_tree(
-            blocks,
-            sprintf('%s <raw folder>', subject_code),
-            tmp, collapse = '\n'
+      if(main_results$lfp_file_format %in% 1:4){
+        rawfiles_info <- attr(lfp_valid, 'info')
+        tmp <- rawfiles_info[[first_block]]$files
+        if(length(tmp) > 4){
+          tmp <- c(tmp[1:3], '...', tmp[length(tmp)])
+        }
+        
+        info <- rawfiles_info[[first_block]]
+        
+        if(length(snapshot)){
+          snapshot <- sprintf('Snapshot of the first file: %s', snapshot[[1]])
+        }
+        
+        if(main_results$lfp_file_format == 3){
+          # Ask for convertion
+          snapshot <- shiny::tagList(
+            snapshot,
+            shiny::br(),
+            shiny::selectInput(ns('edf_lfp_unit'), 'Physical unit convertion',
+                               choices = c('as-is (no change)', 'uV', 'mV', 'V'),
+                               selected = isolate(input$edf_lfp_unit))
           )
-        ),
-        snapshot,
-        shiny::hr(),
-        dipsaus::actionButtonStyled(ns('btn_import_lfp'), 'Start import'),
-      )
+        }
+        
+        return(shiny::p(
+          shiny::h5('Passed validation'),
+          'Press ', shiny::strong("Start import"), ' to import raw files into RAVE folders',
+          shiny::hr(),
+          shiny::strong('Import configuration:'),
+          sprintf('Data to be imported: %d block(s) x %d electrode(s) at sample rate %.1f Hz.',
+                  length(blocks), length(main_results$lfp_electrodes), main_results$lfp_sample_rate),
+          shiny::br(),
+          shiny::strong('File structure:'),
+          shiny::pre(
+            dipsaus::print_directory_tree(
+              blocks,
+              sprintf('%s <raw folder>', subject_code),
+              tmp, collapse = '\n'
+            )
+          ),
+          snapshot,
+          shiny::hr(),
+          dipsaus::actionButtonStyled(ns('btn_import_lfp'), 'Start import'),
+        ))
+      } else {
+        # BIDS format
+        valid_runs <- attr(lfp_valid, 'valid_run_names')
+        print(1213)
+        
+        return(shiny::p(
+          shiny::h5('Passed rave-BIDS validation'),
+          'Press ', shiny::strong("Start import"), ' to import raw files into RAVE folders',
+          shiny::hr(),
+          shiny::strong('Import configuration:'),
+          sprintf('Data to be imported: %d block(s) x %d electrode(s) at sample rate %.1f Hz.',
+                  length(blocks), length(main_results$lfp_electrodes), main_results$lfp_sample_rate),
+          shiny::hr(),
+          shiny::strong('Original BIDS header information:'),
+          snapshot,
+          shiny::hr(),
+          shiny::selectInput(ns('bids_runs'), 'Please select session+task+run combination to import',
+                             choices = valid_runs, multiple = TRUE, selected = valid_runs),
+          dipsaus::actionButtonStyled(ns('btn_import_lfp'), 'Start import'),
+        ))
+      }
+      
     })
     
     observeEvent(input$btn_import_lfp, {
@@ -706,78 +761,37 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
         unlink(file)
       }
       
-      if( fmt == file_formats[[1]] ){
-        
-        finfo <- attr(lfp_valid, 'info')
-        # load raw data
-        dipsaus::lapply_async2(electrodes, function(e){
-          cfile = file.path(dirs$preprocess_dir, 'voltage', sprintf('electrode_%d.h5', e))
-          if(file.exists(cfile)){ unlink(cfile) }
-          sapply(blocks, function(block_num){
-            
-            info <- finfo[[block_num]]
-            sel <- stringr::str_detect(stringr::str_to_lower(info$files), 
-                                sprintf('([^0-9]|^)%d\\.(mat|h5)', e))
-            src <- file.path(info$path, info$files[sel][[1]])
-            
-            s <- read_mat(src)
-            nm <- guess_raw_trace(s, electrodes = electrodes, matrix = FALSE)
-            s <- as.vector(s[[nm]])
-            save_h5(s, cfile, name = sprintf('/raw/%s', block_num), 
-                    chunk = 1024, replace = TRUE)
-          }, simplify = FALSE, USE.NAMES = TRUE)
-          return()
-        }, callback = function(e){
-          sprintf('Collecting electrode %d', e)
-        })
-        
-        utils$save_to_subject(checklevel = HAS_CACHE)
-        
-      } else if( fmt == file_formats[[3]] ){
-        finfo <- attr(lfp_valid, 'info')
-        # load raw data from EDF format
-        electrodes = sort(electrodes)
-        progress <- dipsaus::progress2('Importing from EDF files', 
-                                       max = length(blocks) * (length(electrodes) + 1),
-                                       shiny_auto_close = TRUE)
-        edf_lfp_unit <- input$edf_lfp_unit
-        if(!length(edf_lfp_unit)){
-          showNotification(p('Please select physical unit to convert to.'), type = 'error')
-          return()
+      edf_lfp_unit <- input$edf_lfp_unit
+      if(length(edf_lfp_unit) == 1){
+        lfp_unit <- list('mV' = 'mV', 'V' = 'V', 'uV' = 'uV', 
+                         'as-is (no change)' = 'NA')[[edf_lfp_unit]]
+        if(!isTRUE(lfp_unit %in% c('NA', 'V', 'mV', 'uV'))){
+          lfp_unit <- 'NA'
         }
-        lfp_unit <- list(
-          'mV (recommended for iEEG)' = 'mV',
-          'V' = 'V', 'uV' = 'uV', 'as-is (no change)' = NA)[[edf_lfp_unit]]
-        
-        
-        lapply(blocks, function(b){
-          
-          progress$inc(sprintf('Importing block %s', b))
-          
-          info <- finfo[[b]]
-          src <- file.path(info$path, info$files)
-          
-          dat <- raveio::read_edf_signal(src, signal_numbers = electrodes, convert_volt = lfp_unit)
-          
-          for(ii in seq_along(electrodes)){
-            e <- electrodes[[ii]]
-            s <- dat$get_signal(ii)
-            s <- as.vector(s$signal)
-            
-            progress$inc(sprintf('Writing electrode %s', e))
-            
-            cfile = file.path(dirs$preprocess_dir, 'voltage', sprintf('electrode_%d.h5', e))
-            save_h5(s, cfile, name = sprintf('/raw/%s', b), 
-                    chunk = 1024, replace = TRUE)
-          }
-          
-          NULL
-        })
-        
-        utils$save_to_subject(checklevel = HAS_CACHE)
-        
+      } else {
+        lfp_unit <- 'NA'
       }
       
+      
+      
+      bids_runs <- input$bids_runs
+      
+      # BIDS?
+      if(fmt %in% file_formats[5:6]){
+        if(!length(bids_runs)){
+          showNotification(p('Must specify runs to import from BIDS format'), type = 'error')
+          return()
+        }
+        # force set blocksbecause the structure is BIDS not native rave
+        utils$set_blocks(bids_runs, force = TRUE)
+      } else {
+        bids_runs <- NULL
+      }
+      
+      raveio::rave_import(project_name = project_name, subject_code = subject_code,
+                          blocks, electrodes, format = fmt, 
+                          sample_rate = srate, convertion = lfp_unit, task_runs = bids_runs)
+      utils$save_to_subject(checklevel = HAS_CACHE)
       utils$reset()
       msg = 'Raw voltage signals are cached.'
       type = 'message'

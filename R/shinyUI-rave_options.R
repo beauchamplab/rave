@@ -6,8 +6,11 @@ rave_options_gui <- local({
     'drive_speed' = 'Hard drive speed',
     
     # Core Option
-    'raw_data_dir' = 'Raw subject data path',
+    'raw_data_dir' = 'Native RAVE raw folder',
+    'bids_data_dir' = 'BIDS data root (optional)',
     'data_dir' = 'RAVE subject data path',
+    'subject_cache_dir' = 'Path to cache large data files',
+    
     # 'crayon_enabled' = 'Color console',
     
     # SUMA
@@ -78,6 +81,67 @@ rave_options_gui <- local({
     )
   }
   
+  # ------------------------ bids_data_dir ------------------------
+  {
+    comps[[length(comps) + 1]] = list(
+      type = 'Core Settings',
+      opt_name = 'bids_data_dir',
+      observer = rlang::quo({
+        opt_id = 'bids_data_dir'
+        output$bids_data_dir_input <- renderUI({
+          shiny::textInput(opt_id, opt_names[[opt_id]], value = local_data[[opt_id]])
+        })
+        output$bids_data_dir_ui <- renderUI({
+          val = input[[opt_id]]
+          val %?<-% rave_options(opt_id)
+          msg = ''
+          col = 'red'
+          btn = TRUE
+          label = "Set Directory"
+          if(dir.exists(val)){
+            finfo = file.info(val)
+            if(!finfo$isdir){
+              msg = 'This is not a valid "directory" path'
+              btn = FALSE
+            }else if(val == rave_options(opt_id)){
+              btn = FALSE
+            }
+          }else{
+            msg = 'Path not exists, click "Create & Set Directory" to create'
+            col = 'black'
+            label = "Create & Set Directory"
+          }
+          
+          return(tagList(
+            p(tags$small(span(style = gl('color:{col};'), msg))),
+            div(
+              class = ifelse(btn, '', 'hidden'),
+              actionLink('bids_data_dir_reset', label)
+            )
+          ))
+        })
+        observeEvent(input$bids_data_dir_reset, {
+          dir = input[[opt_id]]
+          if(!dir.exists(dir)){
+            dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+          }
+          # Make sure it exists, otherwise error notification
+          if(dir.exists(dir)){
+            dir = try_normalizePath(path = dir)
+            arg = list(dir)
+            names(arg) = opt_id
+            do.call(set_opt, arg)
+            showNotification('Raw data directory is set.', type = 'message', id = paste0(opt_id, '_noty'))
+          }else{
+            showNotification('Failed while setting raw data directory: Cannot create directory', type = 'error', id = paste0(opt_id, '_noty'))
+          }
+        })
+      })
+    )
+  }
+  
+  
+  
   # ------------------------ data_dir ----------------------------
   {
     
@@ -138,6 +202,65 @@ rave_options_gui <- local({
             
           }else{
             showNotification('Failed while setting RAVE data directory: Cannot create directory', type = 'error', id = paste0(opt_id, '_noty'))
+          }
+        })
+      })
+    )
+  }
+  
+  # ------------------------ subject_cache_dir ------------------------
+  {
+    comps[[length(comps) + 1]] = list(
+      type = 'Core Settings',
+      opt_name = 'subject_cache_dir',
+      observer = rlang::quo({
+        opt_id = 'subject_cache_dir'
+        output$subject_cache_dir_input <- renderUI({
+          shiny::textInput(opt_id, opt_names[[opt_id]], value = local_data[[opt_id]])
+        })
+        output$subject_cache_dir_ui <- renderUI({
+          val = input[[opt_id]]
+          val %?<-% rave_options(opt_id)
+          msg = ''
+          col = 'red'
+          btn = TRUE
+          label = "Set Directory"
+          if(dir.exists(val)){
+            finfo = file.info(val)
+            if(!finfo$isdir){
+              msg = 'This is not a valid "directory" path'
+              btn = FALSE
+            }else if(val == rave_options(opt_id)){
+              btn = FALSE
+            }
+          }else{
+            msg = 'Path not exists, click "Create & Set Directory" to create'
+            col = 'black'
+            label = "Create & Set Directory"
+          }
+          
+          return(tagList(
+            p(tags$small(span(style = gl('color:{col};'), msg))),
+            div(
+              class = ifelse(btn, '', 'hidden'),
+              actionLink('subject_cache_dir_reset', label)
+            )
+          ))
+        })
+        observeEvent(input$subject_cache_dir_reset, {
+          dir = input[[opt_id]]
+          if(!dir.exists(dir)){
+            dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+          }
+          # Make sure it exists, otherwise error notification
+          if(dir.exists(dir)){
+            dir = try_normalizePath(path = dir)
+            arg = list(dir)
+            names(arg) = opt_id
+            do.call(set_opt, arg)
+            showNotification('Raw data directory is set.', type = 'message', id = paste0(opt_id, '_noty'))
+          }else{
+            showNotification('Failed while setting raw data directory: Cannot create directory', type = 'error', id = paste0(opt_id, '_noty'))
           }
         })
       })
@@ -1097,14 +1220,14 @@ rave_options_gui <- local({
           
           
           if(!is.null(val)){
-            cat2(tbl[row, col], ' >> ', val)
+            catgl(tbl[row, col], ' >> ', val)
             envir$modules[row, col] <- val
-            DT::replaceData(proxy, envir$modules, resetPaging = FALSE, rownames = F)
+            DT::replaceData(proxy, envir$modules, resetPaging = FALSE, rownames = FALSE)
             
             if(has_copy){
-              utils::write.csv(envir$modules, rave_options('module_lookup_file'), row.names = F)
+              utils::write.csv(envir$modules, rave_options('module_lookup_file'), row.names = FALSE)
             }else{
-              safe_write_csv(envir$modules, rave_options('module_lookup_file'), row.names = F)
+              safe_write_csv(envir$modules, rave_options('module_lookup_file'), row.names = FALSE)
               envir$has_copy = TRUE
             }
             

@@ -103,14 +103,14 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
   }
   
   # Check N27 brain
-  dipsaus::cat2('Checking N27 brain', level = 'DEFAULT', end = '\n')
+  catgl('Checking N27 brain', level = 'DEFAULT', end = '\n')
   threeBrain::merge_brain()
-  dipsaus::cat2('   - Done', level = 'INFO', end = '\n')
+  catgl('   - Done', level = 'INFO', end = '\n')
   
   
   # Check demo subjects
   if( demo_data ){
-    dipsaus::cat2('Checking RAVE data repository', level = 'DEFAULT', end = '\n')
+    catgl('Checking RAVE data repository', level = 'DEFAULT', end = '\n')
     p = get_projects()
     if(!length(p)){
       has_demo = FALSE
@@ -133,7 +133,7 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
           download_sample_data('YAB')
         }
       }
-      dipsaus::cat2('   - Done', level = 'INFO', end = '\n')
+      catgl('   - Done', level = 'INFO', end = '\n')
     }
   }
   
@@ -177,11 +177,11 @@ check_dependencies2 <- function(){
   # 
   
   
-  dipsaus::cat2('Arranging all existing RAVE modules', level = 'INFO', end = '\n')
+  catgl('Arranging all existing RAVE modules', level = 'INFO', end = '\n')
   arrange_modules(refresh = TRUE, reset = FALSE, quiet = TRUE)
   
   # check if any demo data exists
-  dipsaus::cat2('Checking RAVE data repository', level = 'INFO', end = '\n')
+  catgl('Checking RAVE data repository', level = 'INFO', end = '\n')
   p = get_projects()
   if('demo' %in% p){
     subs = get_subjects('demo')
@@ -233,7 +233,7 @@ finalize_installation_internal_demo <- function(upgrade = c('ask', 'always', 'ne
     
     if(1 %in% default_opt || !any(seq_len(4) %in% default_opt)){
       # no data installed
-      dipsaus::cat2('No demo data will be installed', level = 'DEFAULT')
+      catgl('No demo data will be installed', level = 'DEFAULT')
       return()
     } else if(2 %in% default_opt){
     } else if(3 %in% default_opt){
@@ -241,7 +241,7 @@ finalize_installation_internal_demo <- function(upgrade = c('ask', 'always', 'ne
     } else {
       missing_subs <- c('KC', 'YAB')
     }
-    dipsaus::cat2(paste(missing_subs, collapse = ', '), ' will be installed', level = 'DEFAULT')
+    catgl(paste(missing_subs, collapse = ', '), ' will be installed', level = 'DEFAULT')
     
   }
   
@@ -249,7 +249,7 @@ finalize_installation_internal_demo <- function(upgrade = c('ask', 'always', 'ne
     quo <- rlang::quo({
       dipsaus::rs_focus_console()
       for(sub in !!missing_subs){
-        dipsaus::cat2('Launching download process - ', sub)
+        catgl('Launching download process - ', sub)
         rave::download_sample_data(sub)
       }
     })
@@ -314,7 +314,7 @@ finalize_installation <- function(packages, upgrade = c('always', 'ask', 'never'
     tryCatch({
       
       # load yaml
-      conf <- yaml::read_yaml(system.file('rave.yaml', package = pkg))
+      conf <- raveio::load_yaml(system.file('rave.yaml', package = pkg))
       
       fname <- conf$finalize_installation
       
@@ -327,13 +327,13 @@ finalize_installation <- function(packages, upgrade = c('always', 'ask', 'never'
       }
       
     }, error = function(e){
-      dipsaus::cat2('Error found while finalize installation of [', pkg, ']. Reason:\n',
+      catgl('Error found while finalize installation of [', pkg, ']. Reason:\n',
                     e$message, '\nSkipping...\n', level = 'WARNING')
     })
     
   }
   
-  dipsaus::cat2('Scheduled. There might be some job running in the background. Please wait for them to finish.')
+  catgl('Scheduled. There might be some job running in the background. Please wait for them to finish.')
   invisible()
 }
 

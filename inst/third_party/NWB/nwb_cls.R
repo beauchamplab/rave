@@ -127,7 +127,7 @@ NWBContainer <- R6::R6Class(
 
 NWB_add_namespace <- function(yaml_path){
   root_dir = dirname(yaml_path)
-  conf = yaml::read_yaml(yaml_path)
+  conf = as.list(raveio::load_yaml(yaml_path))
 
 
   lapply(conf$namespaces, function(nsconf){
@@ -140,7 +140,7 @@ NWB_add_namespace <- function(yaml_path){
     lapply(schema, function(s){
       src = file.path(root_dir, s$source)
       if(length(src) && file.exists(src)){
-        cont_sonf = yaml::read_yaml(src)
+        cont_sonf = as.list(raveio::load_yaml(src))
         this_env$new_conf$datasets = c(this_env$new_conf$datasets, cont_sonf$datasets)
         this_env$new_conf$groups = c(this_env$new_conf$groups, cont_sonf$groups)
       }

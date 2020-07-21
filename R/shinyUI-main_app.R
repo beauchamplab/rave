@@ -52,7 +52,7 @@ app_controller <- function(
         shiny::removeNotification(id = 'load_module_notif')
       })
     }
-    cat2('Loading module - ', module_id)
+    catgl('Loading module - ', module_id)
     ms = detect_modules(packages = pkg, as_module = TRUE)
     ms = unlist(ms)
 
@@ -504,8 +504,8 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
           e$input_update(input = list(), init = TRUE)
         }
       }, error = function(e){
-        cat2('Cannot update variable ', variable_name, ' in module ', module_id, level = 'WARNING')
-        cat2(e, level = 'WARNING')
+        catgl('Cannot update variable ', variable_name, ' in module ', module_id, level = 'WARNING')
+        catgl(e, level = 'WARNING')
       })
     }
 
@@ -546,7 +546,7 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
         mid = module_info$module_id = stringr::str_to_upper(module_info$module_id)
         # print(mid)
         load_module(mid)
-        cat2('Switching to module - ', mid, level = 'INFO')
+        catgl('Switching to module - ', mid, level = 'INFO')
         do.call(update_variable, module_info)
         session$sendCustomMessage('rave_sidebar_switch', module_info)
       }
@@ -823,7 +823,7 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
 
           for(inputId in names(inputs)){
             
-            cat2('Updating ', inputId, ' - ', session_id)
+            catgl('Updating ', inputId, ' - ', session_id)
             global = execenv$is_global(inputId)
 
             new_v = inputs[[inputId]]
@@ -847,7 +847,7 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
       }
 
       if(length(changed) && any(changed)){
-        cat2('Sync sessions...')
+        catgl('Sync sessions...')
         # execenv$reload
         global_reactives$force_refresh_all = Sys.time()
         global_reactives$has_data = Sys.time()
@@ -869,7 +869,7 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
 
     if(!test.mode){
       session$onSessionEnded(function() {
-        cat2('Clean up environment.')
+        catgl('Clean up environment.')
 
         this_env$rave_ids = this_env$rave_ids[!this_env$rave_ids == session_id]
         lapply(unlist(modules), function(x){

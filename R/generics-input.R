@@ -45,18 +45,18 @@ getDefaultReactiveInput.rave_running_local <- getDefaultReactiveInput.rave_modul
 
 #' @export
 print.ravedev_ReactiveInput <- function(x, ...){
-  cat2('<Reactive Input> (Read-only)', level = 'INFO')
+  catgl('<Reactive Input> (Read-only)', level = 'INFO')
   for(k in ls(x, all.names = FALSE)){
-    cat2(' ', k, '= ', level = 'INFO', pal = list('INFO' = 'orangered'), end = '')
+    catgl(' ', k, '= ', level = 'INFO', pal = list('INFO' = 'orangered'), end = '')
     s = paste(deparse(x[[k]]), sep = '\n\t')
-    cat2(s, level = 'INFO', pal = list('INFO' = 'dodgerblue3'), sep = '\n\t')
+    catgl(s, level = 'INFO', pal = list('INFO' = 'dodgerblue3'), sep = '\n\t')
   }
   invisible(x)
 }
 .ravedev_ReactiveInput_assign <- function(x, i, value){
   if(isTRUE(x$..warn)){
     assign('..warn', FALSE, envir = x)
-    cat2('$<-, or [[<- type of assignment only works for debug purpose.\n  (This warning only display once for this object)', level = 'WARNING')
+    catgl('$<-, or [[<- type of assignment only works for debug purpose.\n  (This warning only display once for this object)', level = 'WARNING')
   }
   
   assign(i, value, envir = x)

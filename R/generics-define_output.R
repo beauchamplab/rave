@@ -23,7 +23,7 @@ NULL
   definition = dipsaus::match_calls(definition, quoted = TRUE, envir = parent.frame())
   
   if(!shiny_is_running()){
-    cat2(deparse(definition[[1]]), ' is defined as an output with title ', sQuote(title))
+    catgl(deparse(definition[[1]]), ' is defined as an output with title ', sQuote(title))
   }
   
   definition = dipsaus::match_calls(
@@ -60,20 +60,20 @@ define_output.rave_module_debug <- function(
   env_name = environmentName(environment(f))
   if(env_name == ''){env_name = '<No Name>'}
   
-  cat2('Title - \t\t', level = 'INFO', end = '')
-  cat2(title, level = 'INFO', pal = list('INFO' = 'dodgerblue3'))
+  catgl('Title - \t\t', level = 'INFO', end = '')
+  catgl(title, level = 'INFO', pal = list('INFO' = 'dodgerblue3'))
   
-  cat2('Definition - \t\t', level = 'INFO', end = '')
-  cat2(paste(deparse(comp$expr), collapse = '\n  '), level = 'INFO', pal = list('INFO' = 'dodgerblue3'))
+  catgl('Definition - \t\t', level = 'INFO', end = '')
+  catgl(paste(deparse(comp$expr), collapse = '\n  '), level = 'INFO', pal = list('INFO' = 'dodgerblue3'))
   
-  cat2('Package/Environment - \t', level = 'INFO', end = '')
-  cat2(env_name, level = 'INFO', pal = list('INFO' = 'dodgerblue3'))
+  catgl('Package/Environment - \t', level = 'INFO', end = '')
+  catgl(env_name, level = 'INFO', pal = list('INFO' = 'dodgerblue3'))
   
-  cat2('Width - \t\t', level = 'INFO', end = '')
-  cat2(sprintf('%d (%.1f%% of output panel width)', width, width/12*100), level = 'INFO', pal = list('INFO' = 'dodgerblue3'))
+  catgl('Width - \t\t', level = 'INFO', end = '')
+  catgl(sprintf('%d (%.1f%% of output panel width)', width, width/12*100), level = 'INFO', pal = list('INFO' = 'dodgerblue3'))
   
-  cat2('Order - \t\t', level = 'INFO', end = '')
-  cat2(order, level = 'INFO', pal = list('INFO' = 'dodgerblue3'))
+  catgl('Order - \t\t', level = 'INFO', end = '')
+  catgl(order, level = 'INFO', pal = list('INFO' = 'dodgerblue3'))
   
   # try to locate function
   
@@ -86,21 +86,21 @@ define_output.rave_module_debug <- function(
   
   if(is.function(f)){
     if(length(formals(f))){
-      cat2('Output function `', output_id, '` found in package ', pname, '.', level = 'INFO', sep = '')
+      catgl('Output function `', output_id, '` found in package ', pname, '.', level = 'INFO', sep = '')
     }else{
-      cat2('Output function `', output_id, '` MUST take in at least one argument(s)!', level = 'ERROR', sep = '')
+      catgl('Output function `', output_id, '` MUST take in at least one argument(s)!', level = 'ERROR', sep = '')
     }
   }else{
     fn_found = FALSE
     if(stringr::str_detect(deparse(definition[[1]]), '(customizedUI)|(uiOutput)|(htmlOutput)')){
       f = get0(output_id, envir = globalenv(), ifnotfound = NULL, inherits = FALSE)
       if(is.function(f) && length(formals(f))){
-        cat2('Output function `', output_id, '` found in global environment. (Shiny-RAVE Customized UI)', level = 'INFO', sep = '')
+        catgl('Output function `', output_id, '` found in global environment. (Shiny-RAVE Customized UI)', level = 'INFO', sep = '')
         fn_found = TRUE
       }
     }
     if(!fn_found){
-      cat2('Cannot find output function `', output_id, '` in package ', pname, '!', level = 'ERROR', sep = '')
+      catgl('Cannot find output function `', output_id, '` in package ', pname, '!', level = 'ERROR', sep = '')
     }
   }
   

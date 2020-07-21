@@ -28,10 +28,10 @@ check_subjects2 <- function(
 ){
   if(quiet){
     # do not print
-    cat2 = function(...){}
+    catgl = function(...){}
   }
   
-  cat2('Checking: Project - ', project_name, ', Subject - ', subject_code)
+  catgl('Checking: Project - ', project_name, ', Subject - ', subject_code)
   dirs = get_dir(subject_code = subject_code, project_name = project_name)
   re = list()
   # 1. Check folders
@@ -87,7 +87,7 @@ check_subjects2 <- function(
     if(re[['preprocess_dir']]){
       pre_yaml_file = file.path(dirs$preprocess_dir, 'rave.yaml')
       if(file.exists(pre_yaml_file)){
-        pre_hist = yaml::read_yaml(pre_yaml_file)
+        pre_hist = as.list(raveio::load_yaml(pre_yaml_file))
         log_data[['preprocess']] = pre_hist
       }
     }
@@ -96,11 +96,11 @@ check_subjects2 <- function(
     save_log = T
     yaml_file = file.path(dirs$rave_dir, 'log.yaml')
     if(file.exists(yaml_file)){
-      log_data_old = yaml::read_yaml(yaml_file)
+      log_data_old = as.list(raveio::load_yaml(yaml_file))
       if(!is.null(log_data[['preprocess']])){
         # compare
         if(identical(log_data_old[['preprocess']], log_data[['preprocess']], num.eq = TRUE, ignore.environment = TRUE, ignore.bytecode = TRUE)){
-          cat2('Cached log.yaml shares the same information with preprocess log file. No need to re-cache')
+          catgl('Cached log.yaml shares the same information with preprocess log file. No need to re-cache')
           save_log = FALSE
         }else{
           log_data_old[['preprocess']] = log_data[['preprocess']]
@@ -111,8 +111,8 @@ check_subjects2 <- function(
     
     # save to log.yaml
     if(save_log){
-      cat2('Creating/replacing log.yaml...')
-      yaml::write_yaml(log_data, yaml_file, fileEncoding = 'utf-8')
+      catgl('Creating/replacing log.yaml...')
+      raveio::save_yaml(log_data, yaml_file, fileEncoding = 'utf-8')
     }
     
   }
@@ -193,7 +193,7 @@ check_subject <- function(subject, stop_on_error = FALSE){
   
   raise <- function(..., level = 'WARNING'){
     if(stop_on_error){ stop(gl(...)) }
-    cat2(gl(..., .envir = parent.frame()), level = level)
+    catgl(gl(..., .envir = parent.frame()), level = level)
   }
   msg <- function(..., level = 'INFO'){
     catgl(gl(..., .envir = parent.frame()), level = level)
@@ -1129,9 +1129,9 @@ NULL
     quos = quos[order]
     
     if( .raise_error ){
-      cat2('Data is not loaded: \n\t', paste(msg, collapse = '\n\t'), level = 'FATAL')
+      catgl('Data is not loaded: \n\t', paste(msg, collapse = '\n\t'), level = 'FATAL')
     }else{
-      cat2('Data is not loaded: \n\t', paste(msg, collapse = '\n\t'), level = 'ERROR')
+      catgl('Data is not loaded: \n\t', paste(msg, collapse = '\n\t'), level = 'ERROR')
     }
   }
   

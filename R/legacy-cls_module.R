@@ -54,7 +54,7 @@ attachDefaultDataRepository <- function(
 rave_ignore <- function(...){
   quos = rlang::quos(...)
   for(i in 1:length(quos)){
-    cat2('> ', rlang::quo_squash(quos[[i]]), level = 'INFO')
+    catgl('> ', rlang::quo_squash(quos[[i]]), level = 'INFO')
     dipsaus::eval_dirty(quos[[i]], globalenv())
   }
 }
@@ -122,7 +122,7 @@ rave_execute <- function(..., auto = TRUE, .env = globalenv()){
   quos = rlang::quos(...)
 
   for( quo in quos ){
-    cat2('> ', rlang::quo_squash(quo), level = 'INFO')
+    catgl('> ', rlang::quo_squash(quo), level = 'INFO')
     dipsaus::eval_dirty(quo, .env)
   }
 

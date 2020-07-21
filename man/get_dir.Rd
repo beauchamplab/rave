@@ -10,7 +10,7 @@ get_dir(
   block_num,
   mkdirs = NULL,
   subject_id,
-  relative = F
+  relative = FALSE
 )
 }
 \arguments{

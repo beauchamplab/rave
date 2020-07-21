@@ -973,7 +973,7 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
       removeModal()
       # Remove
       local_data$prevent_dblclick = TRUE
-      cat2('Subject loaded, trigger module to refresh...')
+      catgl('Subject loaded, trigger module to refresh...')
     })
     
     

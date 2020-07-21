@@ -318,7 +318,7 @@ async <- function(expr, varname, success = NULL, failure = NULL,
   
   # TODO: wrap this into a internal function
   if(...debug){
-    cat2('Obtain evaluator')
+    catgl('Obtain evaluator')
   }
   base::print(Sys.time() - s)
   
@@ -329,7 +329,7 @@ async <- function(expr, varname, success = NULL, failure = NULL,
   base::print(Sys.time() - s)
   
   if(...debug){
-    cat2('Schedule task - ', varname)
+    catgl('Schedule task - ', varname)
   }
   
   evaluator$run(
@@ -338,7 +338,7 @@ async <- function(expr, varname, success = NULL, failure = NULL,
       base::print(Sys.time() - s)
       if(...map$get(varname, 0) == 1){
         if(...debug){
-          cat2('Captured - ', varname)
+          catgl('Captured - ', varname)
         }
         assign_env[[varname]] <- res
         if(is.function(success)){
@@ -346,7 +346,7 @@ async <- function(expr, varname, success = NULL, failure = NULL,
         }
       }else{
         if(...debug){
-          cat2('Value already calculated, skipping assignment - ', varname)
+          catgl('Value already calculated, skipping assignment - ', varname)
         }
       }
     },

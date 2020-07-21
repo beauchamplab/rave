@@ -30,7 +30,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
           'success' = 'INFO',
           type
         )
-        cat2(msg, level = level)
+        catgl(msg, level = level)
       }else{
         shiny::showNotification(p(HTML(paste(msg, collapse = '<br/>'))), type = type)
       }
@@ -96,16 +96,16 @@ rave_preprocess_tools <- function(env = new.env(), ...){
       checklist
     }
     load_subject = function(subject_code, project_name, strict = TRUE){
-      cat2('Loading Subject')
+      catgl('Loading Subject')
       dirs = get_dir(subject_code = subject_code, project_name = project_name)
       stopifnot2(dir.exists(dirs$preprocess_dir), msg = paste0('Subject ' , subject_code , ' has no project folder ' , project_name))
       s = SubjectInfo2$new(project_name = project_name, subject_code = subject_code, strict = strict)
       env[['subject']] = s
       
-      cat2('Loaded Subject: ', utils$get_subject_id())
+      catgl('Loaded Subject: ', utils$get_subject_id())
     }
     save_subject = function(subject_code, project_name){
-      cat2('Saving Subject')
+      catgl('Saving Subject')
       dirs = get_dir(subject_code = subject_code, project_name = project_name)
       is_created = FALSE
       if(!dir.exists(dirs$preprocess_dir)){
@@ -124,7 +124,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
       # call to load subject
       utils$load_subject(subject_code, project_name)
       
-      cat2('saved Subject')
+      catgl('saved Subject')
       return(is_created)
     }
     
@@ -186,7 +186,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
     get_blocks = function(){
       utils$get_from_subject('blocks', NULL)
     }
-    set_blocks = function(blocks, notification = T){
+    set_blocks = function(blocks, notification = TRUE, force = FALSE){
       msg = 'Blocks set'
       type = 'message'
       on.exit({
@@ -210,13 +210,13 @@ rave_preprocess_tools <- function(env = new.env(), ...){
           return(FALSE)
         }
         # now set blocks
-        env$subject$set_blocks(blocks = blocks)
+        env$subject$set_blocks(blocks = blocks, force = force)
         env$subject$save(action = 'Set Blocks', message = paste(blocks, collapse = ', '))
         msg = 'Blocks set'
         type = 'message'
         return(TRUE)
       }
-      notification = F
+      notification = FALSE
       return(FALSE)
     }
     get_electrodes = function(name){
@@ -695,7 +695,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
         if(!is.null(progress)){
           progress$inc(m, amount = 0.5 / length(type))
         }else{
-          cat2(m)
+          catgl(m)
         }
       }
       

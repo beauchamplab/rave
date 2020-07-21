@@ -61,14 +61,14 @@ get_path <- function(..., mustWork = FALSE, is_directory = FALSE){
   }
   
   if(mustWork){
-    cat2('Cannot find path: ', path_bak, ' (try to locate it manually)',
+    catgl('Cannot find path: ', path_bak, ' (try to locate it manually)',
          level = 'ERROR')
     
     path = select_path(is_directory)
     
     if(!is.null(path)){
       path = normalizePath(path)
-      cat2('Found it! - ', path, level = 'INFO')
+      catgl('Found it! - ', path, level = 'INFO')
       return(path)
     }
   }
@@ -86,7 +86,7 @@ get_path <- function(..., mustWork = FALSE, is_directory = FALSE){
 load_rave_yaml <- function(){
   rave_context(disallowed_context = 'default')
   path = get_path('inst', 'rave.yaml', mustWork = TRUE)
-  conf = yaml::read_yaml(path)
+  conf = as.list(raveio::load_yaml(path))
   conf
 }
 
@@ -103,7 +103,7 @@ load_pkg_description <- function(check_dependencies = c('cran', 'Remotes'),
                                   force_update_remote = FALSE){
   rave_context(disallowed_context = 'default')
   path = get_path('DESCRIPTION', mustWork = TRUE)
-  desc = yaml::read_yaml(path)
+  desc = as.list(raveio::load_yaml(path))
   
   if('cran' %in% check_dependencies){
     devtools::install_dev_deps(get_root_dir(), dependencies = TRUE)
@@ -247,7 +247,7 @@ NULL
                         subject_code = env$subject_code,
                         reference = env$reference)
   
-  cat2('Loading subject. Please wait...', level = 'INFO')
+  catgl('Loading subject. Please wait...', level = 'INFO')
   
   rave_prepare(
     subject = subject, electrodes = env$electrodes, epoch = env$epoch,

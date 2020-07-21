@@ -73,7 +73,7 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2, doc_prefix
           local_data$filtered_signal = utils$load_voltage(electrodes = electrode, blocks = block, raw = F)[[1]]
         }
       }
-      cat2('Voltage signal loaded.')
+      catgl('Voltage signal loaded.')
     })
     
     # input panel
@@ -228,7 +228,7 @@ rave_pre_notch3 <- function(module_id = 'NOTCH_M', sidebar_width = 2, doc_prefix
           main = sprintf('Raw Voltage Signal - Block: %s, Electrode: %d', block, electrode)
         }
         
-        cat2('Rendering signal plot')
+        catgl('Rendering signal plot')
         diagnose_signal(
           s1 = s1, s2 = s2, col = col,
           name = name,

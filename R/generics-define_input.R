@@ -77,17 +77,17 @@ define_input.rave_module_debug <- function(definition, init_args, init_expr, ...
   env_name = environmentName(environment(f))
   if(env_name == ''){env_name = '<No Name>'}
   
-  cat2('Input Definition - ', level = 'INFO')
-  cat2(' ', def_text, level = 'INFO', pal = list('INFO' = 'dodgerblue3'))
+  catgl('Input Definition - ', level = 'INFO')
+  catgl(' ', def_text, level = 'INFO', pal = list('INFO' = 'dodgerblue3'))
   
-  cat2('Package/Environment - \t', level = 'INFO', end = '')
-  cat2(env_name, level = 'INFO', pal = list('INFO' = 'dodgerblue3'))
+  catgl('Package/Environment - \t', level = 'INFO', end = '')
+  catgl(env_name, level = 'INFO', pal = list('INFO' = 'dodgerblue3'))
   
   val = comp$initial_value
   
   # Update info
   if(!missing(init_args)){
-    cat2('Updating Input Parameter(s) - ', level = 'INFO')
+    catgl('Updating Input Parameter(s) - ', level = 'INFO')
     
     env = new.env(parent = parent.frame())
     eval(init_expr, envir = env)
@@ -95,8 +95,8 @@ define_input.rave_module_debug <- function(definition, init_args, init_expr, ...
       v = env[[arg]]
       v = paste(deparse(v), collapse = '\n  ')
       
-      cat2(' ', arg, '- ', level = 'INFO', pal = list('INFO' = 'orangered'), end = '')
-      cat2(v, level = 'INFO', pal = list('INFO' = 'dodgerblue3'))
+      catgl(' ', arg, '- ', level = 'INFO', pal = list('INFO' = 'orangered'), end = '')
+      catgl(v, level = 'INFO', pal = list('INFO' = 'dodgerblue3'))
     }
     
     if('value' %in% init_args){
@@ -109,9 +109,9 @@ define_input.rave_module_debug <- function(definition, init_args, init_expr, ...
   
   v = paste(deparse(val), collapse = '\n  ')
   
-  cat2('Input Value - \t', level = 'INFO', end = '')
-  cat2(input_id, '= ', level = 'INFO', pal = list('INFO' = 'orangered'), end = '')
-  cat2(v, level = 'INFO', pal = list('INFO' = 'dodgerblue3'))
+  catgl('Input Value - \t', level = 'INFO', end = '')
+  catgl(input_id, '= ', level = 'INFO', pal = list('INFO' = 'orangered'), end = '')
+  catgl(v, level = 'INFO', pal = list('INFO' = 'dodgerblue3'))
   
   assign(input_id, val, envir = parent.frame())
   invisible(val)

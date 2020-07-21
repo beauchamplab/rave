@@ -1,13 +1,13 @@
 # Function to create a RAVE module template
 create_template <- function(path, ...){
   this_call = match.call()
-  dipsaus::cat2(deparse(this_call))
+  catgl(deparse(this_call))
   args = list(...)
   
   # step 1: get package name
   # path = normalizePath(path)
   
-  dipsaus::cat2('Creating RAVE Module -', path)
+  catgl('Creating RAVE Module -', path)
   
   PACKAGE = utils::tail(strsplit(path, '\\\\|/')[[1]],1)
   MODULEID = args[['module_id']]
@@ -27,14 +27,14 @@ create_template <- function(path, ...){
   if(MODULEID == ''){
     MODULEID = 'module_id'
   }
-  dipsaus::cat2('First Module ID -', MODULEID)
+  catgl('First Module ID -', MODULEID)
   
   MODULELABEL = args[['module_label']]
   MODULELABEL = gsub('(^[\\ ]*)|([\\ ]$)', '', MODULELABEL)
   if(MODULELABEL == ''){
     MODULELABEL = 'Missing Label'
   }
-  dipsaus::cat2('First Module Label -', MODULELABEL)
+  catgl('First Module Label -', MODULELABEL)
   
   # migrate template
   template_dir = system.file('template', package = 'rave')

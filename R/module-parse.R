@@ -400,7 +400,7 @@ get_main_function <- function(module_id, parse_context = c("rave_running", "rave
       value = eval(value)
       param_env[[inputId]] = value
       
-      cat2(inputId, '<- ', paste(utils::capture.output(cat2(value)), collapse = '\n'))
+      catgl(inputId, '<- ', paste(utils::capture.output(cat2(value)), collapse = '\n'))
       
     }
   })

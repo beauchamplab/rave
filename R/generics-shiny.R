@@ -95,7 +95,7 @@ NULL
     .__rave_package__. = pkg
     pal_yaml = get_path('inst/palettes.yaml')
     if(length(pal_yaml) && file.exists(pal_yaml)){
-      pal = yaml::read_yaml(pal_yaml)
+      pal = as.list(raveio::load_yaml(pal_yaml))
       re = lapply(pal, function(p){
         p = as.list(p)
         if(any(type %in% p$type) && 

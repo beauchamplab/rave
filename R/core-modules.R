@@ -123,7 +123,7 @@ detect_modules <- function(packages, as_module = TRUE, ...){
     ypath = x[2]
     
     tryCatch({
-      conf = yaml::read_yaml(ypath)
+      conf = raveio::load_yaml(ypath)
       do.call('rbind', lapply(conf$modules, function(m){
         module_id = m$module_id
         label_name = m$module_label
@@ -160,8 +160,8 @@ detect_modules <- function(packages, as_module = TRUE, ...){
         tryCatch({
           get_module(package = x[4], module_id = x[1])
         }, error = function(e){
-          cat2(e, level = 'WARNING')
-          cat2('Error found! Please check dependencies. Will not import module ', x[1], level = 'INFO')
+          catgl(e, level = 'WARNING')
+          catgl('Error found! Please check dependencies. Will not import module ', x[1], level = 'INFO')
         })
       })
       
@@ -199,7 +199,7 @@ get_module <- function(package, module_id, local = FALSE, ...){
   
   if(local){
     if(missing(module_id)){
-      cat2('You are running module locally. Please specify module ID.', level = 'ERROR')
+      catgl('You are running module locally. Please specify module ID.', level = 'ERROR')
       return(invisible())
     }else{
       # FIXME
@@ -214,7 +214,7 @@ get_module <- function(package, module_id, local = FALSE, ...){
   conf = tryCatch({
     load_rave_yaml()
   }, error = function(e){
-    cat2('Package ', package, ' has no RAVE modules.', level = 'WARNING')
+    catgl('Package ', package, ' has no RAVE modules.', level = 'WARNING')
   })
   if(!length(conf)){
     return(invisible())
@@ -224,19 +224,19 @@ get_module <- function(package, module_id, local = FALSE, ...){
   if(missing(module_id)){
     module_id = ids
   }else if(any(!module_id %in% ids)){
-    cat2('Cannot find module ', paste(module_id[!module_id %in% ids], collapse = ', '), ' in package ', package, ' - Terminate.', level = 'ERROR')
+    catgl('Cannot find module ', paste(module_id[!module_id %in% ids], collapse = ', '), ' in package ', package, ' - Terminate.', level = 'ERROR')
     return(invisible())
   }
   
   if(length(module_id) == 1){
-    cat2('Compile module ', module_id)
+    catgl('Compile module ', module_id)
     
     .__rave_context__. = 'rave_running_local'
     .__rave_module__. = module_id
     
     module = to_module(module_id = module_id, sidebar_width = 3L, 
                        parse_context = 'rave_running_local')
-    cat2('Compiled module ', module_id, '; path: - ',
+    catgl('Compiled module ', module_id, '; path: - ',
          module$script_path)
     
     return(module)
@@ -249,7 +249,7 @@ get_module <- function(package, module_id, local = FALSE, ...){
       tryCatch({
         to_module(module_id = mid, sidebar_width = 3L, parse_context = 'rave_running_local')
       }, error = function(e){
-        cat2('An error occurred during parsing module ', mid, ' (', package, '). Please check source code if you are module developer. [Ignored]', level = 'WARNING')
+        catgl('An error occurred during parsing module ', mid, ' (', package, '). Please check source code if you are module developer. [Ignored]', level = 'WARNING')
         NULL
       })
       
@@ -291,7 +291,7 @@ module_as_function <- function(package = package, module_id = module_id, reload 
   has_subject = any_subject_loaded()
   
   if(!has_subject){
-    cat2('Error: No subject found! Please load subject first', level = 'ERROR')
+    catgl('Error: No subject found! Please load subject first', level = 'ERROR')
     return(invisible())
   }
   
@@ -408,7 +408,7 @@ module_as_function <- function(package = package, module_id = module_id, reload 
       ..f = get0(nm, envir = results, inherits = TRUE, ifnotfound = NULL)
       if(!is.function(..f)){
         return(function(...){
-          cat2('Function ', nm, ' is not available.', level = 'ERROR')
+          catgl('Function ', nm, ' is not available.', level = 'ERROR')
         })
       }else{
         fm = formals(..f)

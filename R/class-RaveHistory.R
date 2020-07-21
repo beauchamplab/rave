@@ -29,7 +29,7 @@ RAVEHistory <- R6::R6Class(
         }
       }
       if(private$use_yaml){
-        yaml::write_yaml(as.list(private$env),
+        raveio::save_yaml(as.list(private$env),
                          file = private$save_path)
       }else{
         saveRDS(private$env, file = private$save_path)
@@ -38,7 +38,7 @@ RAVEHistory <- R6::R6Class(
     },
     load = function(){
       if(private$use_yaml){
-        re = yaml::read_yaml(file = private$save_path)
+        re = raveio::load_yaml(file = private$save_path)
         if(length(private$env) < 10){
           private$env = dipsaus::fastmap2()
         }

@@ -30,10 +30,10 @@ load_scripts.rave_module_debug <- function(..., asis = FALSE){
   
   for(s in src){
     if(rlang::is_quosure(s)){
-      cat2('Executing a dynamic script...\n', level = 'INFO', sep = '')
+      catgl('Executing a dynamic script...\n', level = 'INFO', sep = '')
       dipsaus::eval_dirty(s, globalenv())
     }else{
-      cat2('Loading source - ', s, '\n', level = 'INFO', sep = '')
+      catgl('Loading source - ', s, '\n', level = 'INFO', sep = '')
       source(get_path(s), local = FALSE)
     }
   }

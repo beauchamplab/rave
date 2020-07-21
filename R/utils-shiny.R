@@ -23,21 +23,21 @@ safe_wrap_expr <- function(expr, onFailure = NULL, onError = NULL, finally = {})
     }, finally = finally)
     
   }, `rave-info` = function(e){
-    dipsaus::cat2(e$message, level = 'INFO')
+    catgl(e$message, level = 'INFO')
     
   }, `rave-warning` = function(e){
-    dipsaus::cat2(e$message, level = 'WARNING')
+    catgl(e$message, level = 'WARNING')
     invokeRestart('rave-notification', e)
     
   }, `rave-error` = function(e){
-    dipsaus::cat2(e$message, level = 'ERROR')
+    catgl(e$message, level = 'ERROR')
     if(is.function(onError)){
       onError(e)
     }
     invokeRestart('rave-notification', e)
     
   }, `rave-fatal` = function(e){
-    dipsaus::cat2(e$message, level = 'ERROR')
+    catgl(e$message, level = 'ERROR')
     if(is.function(onError)){
       onError(e)
     }
@@ -373,7 +373,7 @@ parsers[['.default_parser']] = function(expr, env = environment()){
     updates = function(session, ..., .args = list()){
       args = c(list(...), .args)
       if(length(args) == 0){
-        cat2('Nothing to update')
+        catgl('Nothing to update')
         return()
       }
       fun_name = utils::tail(unlist(stringr::str_split(as.character(expr[[1]]), ':')), 1)
@@ -701,7 +701,7 @@ parsers[['rave']] = list(
             }
           }, error = function(e){
             lapply(utils::capture.output(traceback(e)), function(x){
-              cat2(x, level = 'ERROR')
+              catgl(x, level = 'ERROR')
             })
           })
         }

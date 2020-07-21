@@ -109,7 +109,7 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
       if(!missing(on)){
         temporary_on <<- FALSE
         auto <<- !isFALSE(on)
-        cat2('Auto Re-calculate is set to ', auto)
+        catgl('Auto Re-calculate is set to ', auto)
       }
       if( include_temporary ){
         re = auto || temporary_on
@@ -164,7 +164,7 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
     p = as.character(substitute(package))
     if(!dipsaus::package_installed(p)){
       try({
-        cat2("Installing Package ", p, level = 'WARNING')
+        catgl("Installing Package ", p, level = 'WARNING')
         utils::install.packages(p, type = 'binary')
       })
     }
@@ -558,8 +558,8 @@ ModuleEnvir <- R6::R6Class(
         tryCatch({
           dipsaus::eval_dirty(parsed[i], env = runtime_env)
         }, error = function(e){
-          cat2('[Ignored]: ', as.character(parsed[i]), level = 'INFO')
-          cat2(paste(e, sep = '\n'), level = 'WARNING')
+          catgl('[Ignored]: ', as.character(parsed[i]), level = 'INFO')
+          catgl(paste(e, sep = '\n'), level = 'WARNING')
         })
         
       }

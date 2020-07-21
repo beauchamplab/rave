@@ -376,7 +376,7 @@ read.rosa <- function(path){
   ))
   is_traj = rowSums(!is.na(trajectory)) == 8
   if(sum(is_traj) != n_trajectory){
-    cat2(sprintf('Trajectory number does not match: expected %s, found %s', n_trajectory, sum(is_traj)), level = 'WARNING')
+    catgl(sprintf('Trajectory number does not match: expected %s, found %s', n_trajectory, sum(is_traj)), level = 'WARNING')
   }
   anchors = trajectory[is_traj,3:8,drop=FALSE]
   anchors = as.numeric(anchors)
@@ -473,7 +473,7 @@ write.niml <- function(values_matrix, electrode_numbers=NULL, value_labels=NULL,
   
   attr(cmd, which = 'path') <- niml_fname
   
-  cat2('For full cleanup, AFTER running the ConvertDset command, delete: ', value_file, ' and ', index_file)
+  catgl('For full cleanup, AFTER running the ConvertDset command, delete: ', value_file, ' and ', index_file)
   
   print(list(
     args = c(

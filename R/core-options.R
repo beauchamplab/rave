@@ -22,6 +22,8 @@ default_opts <- function(...){
   data_dir = '~/rave_data/data_dir/'
   module_root_dir = '~/rave_modules/'
   module_lookup_file = '~/rave_modules/modules.csv'
+  subject_cache_dir = '~/rave_data/cache_dir'
+  bids_data_dir = '~/rave_data/bids_dir'
   
   # Shiny settings
   # input update firing speed (20ms default)
@@ -105,7 +107,20 @@ Options <- R6::R6Class(
       
     },
     get_options = function(...){
-      re <- private$opts[...]
+      # nms <- c(...)
+      # re <- list()
+      # for(nm in nms){
+      #   re[[nm]] <- raveio::raveio_getopt(nm, default = private$opts[[nm]])
+      # }
+      nms <- c(...)
+      re <- sapply(nms, function(nm){
+        o <- private$opts[[nm]]
+        if(is.null(o)){
+          o <- raveio::raveio_getopt(nm, default = NULL)
+        }
+        o
+      }, simplify = FALSE, USE.NAMES = TRUE)
+      # re <- private$opts[nms]
       if(length(re) == 1){
         re = unlist(re)
       }
@@ -114,7 +129,27 @@ Options <- R6::R6Class(
     set_options = function(...){
       o = list(...)
       for(n in names(o)){
-        private$opts[[n]] = o[[n]]
+        val <- o[[n]]
+        
+        if(isTRUE(n == 'subject_cache_dir')){
+          val <- raveio::raveio_setopt('subject_cache_dir', val)
+          raveio::raveio_setopt('tensor_temp_path', file.path(val, 'raveio'))
+        }
+        
+        if(isTRUE(n == 'data_dir')){
+          val <- raveio::raveio_setopt('data_dir', val)
+        }
+        
+        if(isTRUE(n == 'raw_data_dir')){
+          val <- raveio::raveio_setopt('raw_data_dir', val)
+        }
+        
+        if(isTRUE(n == 'bids_data_dir')){
+          val <- raveio::raveio_setopt('bids_data_dir', val)
+        }
+        
+        
+        private$opts[[n]] = val
       }
       return(invisible(self$get_options(names(o))))
     },

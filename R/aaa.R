@@ -1,11 +1,47 @@
 #' @import shiny
 #' @import raveio
-#' @importFrom dipsaus %?<-%
-#' @importFrom dipsaus collapse
-#' @importFrom dipsaus to_datauri
+#' @import dipsaus
 #' @importFrom graphics axis par points rect
 #' @importFrom utils read.csv
 NULL
+
+# ------- Re-export
+
+#' @export
+raveio::LazyFST
+
+#' @export
+raveio::load_fst_or_h5
+
+#' @export
+raveio::LazyH5
+
+#' @export
+raveio::load_h5
+
+#' @export
+raveio::save_h5
+
+#' @export
+raveio::read_mat
+
+#' @export
+raveio::lazyarray_to_tensor
+
+#' @export
+raveio::Tensor
+
+#' @export
+raveio::ECoGTensor
+
+#' @export
+raveio::catgl
+
+#' @export
+dipsaus::clear_env
+
+# ------ 
+
 
 
 debug_mode = FALSE
@@ -23,21 +59,11 @@ gl <- function(..., .envir = parent.frame()){
   raveio::glue(..., .envir = .envir)
 }
 
-catgl <- function(..., .envir = parent.frame(), level = 'DEBUG', .pal){
-  if(missing(.pal)){
-    dipsaus::cat2(gl(..., .envir = .envir), level = level)
-  }else{
-    dipsaus::cat2(gl(..., .envir = .envir), level = level, pal = .pal)
-  }
-}
-
 debug <- function(..., .envir = parent.frame(), level = 'DEBUG'){
   if( debug_mode ){
     catgl(..., .envir = .envir, level = level)
   }
 }
-
-cat2 <- dipsaus::cat2
 
 soft_deprecated <- function(){
   env = parent.frame()
@@ -55,9 +81,12 @@ hard_deprecated <- function(){
 # override tempfile
 subject_cache_dir <- function(){
   re = rave_options('subject_cache_dir')
-  re %?<-% '~/rave_data/cache_dir'
+  if(length(re) != 1 || !is.character(re) || re %in% c('', '/', '~')){
+    re <-  '~/rave_data/cache_dir'
+  }
   dir_create(re)
-  normalizePath(re)
+  re <- normalizePath(re)
+  re
 }
 
 do_nothing <- function(...){}
@@ -388,7 +417,7 @@ rave_context <- function(context, require_contexts, disallowed_context,
   }
   
   if(!all(context %in% rave_context_c)){
-    cat2("Context doesn't exists: ", paste(context[!context %in% rave_context_c], collapse = ', '), level = 'FATAL')
+    catgl("Context doesn't exists: ", paste(context[!context %in% rave_context_c], collapse = ', '), level = 'FATAL')
   }
   # if(!context %in% rave_context_c[-1]){
   #   call = paste(deparse(do.call(sys.call, list(), envir = parent.frame())), collapse = '')
@@ -411,7 +440,7 @@ rave_context <- function(context, require_contexts, disallowed_context,
     tenv$.__rave_package__. = package
     tenv$.__rave_module__. = moduleid
     if(!get_running_instance(senv)){
-      cat2('RAVE is running but no instance is found', level = 'INFO')
+      catgl('RAVE is running but no instance is found', level = 'WARNING')
     }
     instance = get_running_instance(senv, test = FALSE)
     tenv$.__rave_module_instance__. = instance

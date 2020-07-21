@@ -179,7 +179,7 @@ get_subjects <- function(project_name, check_subfolders = TRUE, check_rawdata = 
 #' \code{project_name} are provided
 #' @param relative whether to return relative path or absolute to root directory
 #' @export
-get_dir <- function(subject_code, project_name, block_num, mkdirs = NULL, subject_id, relative = F){
+get_dir <- function(subject_code, project_name, block_num, mkdirs = NULL, subject_id, relative = FALSE){
   re = list()
   
   re$data_dir = rave_options('data_dir')

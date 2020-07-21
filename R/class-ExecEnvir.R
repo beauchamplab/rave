@@ -168,7 +168,7 @@ ExecEnvir <- R6::R6Class(
     #' @return none
     finalize = function(){
       self$clean()
-      cat2(sprintf('[%s] Runtime Environment Removed.', self$module_env$module_id))
+      catgl(sprintf('[%s] Runtime Environment Removed.', self$module_env$module_id))
     },
     
     #' @description print variables in different layers (environment)
@@ -273,7 +273,7 @@ ExecEnvir <- R6::R6Class(
         dir = dirname(self$module_env$script_path)
         tmp_file = file.path(dir, file)
         if(file.exists(tmp_file)){
-          cat2('Try to source from [', tmp_file, ']')
+          catgl('Try to source from [', tmp_file, ']')
           self$runtime_env$.__tmp_file = tmp_file
           eval(quote(base::source(.__tmp_file, local = TRUE)), self$runtime_env)
         }else if(file.exists(file)){
@@ -281,7 +281,7 @@ ExecEnvir <- R6::R6Class(
           self$runtime_env$.__tmp_file = file
           eval(quote(base::source(.__tmp_file, local = TRUE)), self$runtime_env)
         }else{
-          cat2('File [', file, '] does not exists.', level = 'ERROR')
+          catgl('File [', file, '] does not exists.', level = 'ERROR')
           return()
         }
 
@@ -394,7 +394,7 @@ ExecEnvir <- R6::R6Class(
       })
       res = self$execute(async = async)
       if(async){
-        cat2('Execute_with async not implemented.')
+        catgl('Execute_with async not implemented.')
       }
       return(invisible(self$runtime_env))
     },
@@ -423,7 +423,7 @@ ExecEnvir <- R6::R6Class(
     register_module = function(module_env){
       
       if(!is.null(self$module_env)){
-        cat2('Overriding Module Environment.', level = 'WARNING')
+        catgl('Overriding Module Environment.', level = 'WARNING')
       }
       
       self$module_env = module_env
@@ -433,7 +433,7 @@ ExecEnvir <- R6::R6Class(
       if( module_env$from_package ){
         self$.__rave_package__. = module_env$package_name
       }else{
-        cat2('Module is not from a known package, try to read from current context...', level = 'INFO')
+        catgl('Module is not from a known package, try to read from current context...', level = 'INFO')
         ctx = rave_context(disallowed_context = 'default')
         self$.__rave_package__. = ctx$package
       }
@@ -813,9 +813,9 @@ ExecEnvir <- R6::R6Class(
           tryCatch({
             dipsaus::eval_dirty( quo, env = self$param_env )
           },error = function(e){
-            cat2('Error in updating input (initialization)', level = 'ERROR')
+            catgl('Error in updating input (initialization)', level = 'ERROR')
             s = capture.output(traceback(e))
-            lapply(s, cat2, level = 'ERROR')
+            lapply(s, catgl, level = 'ERROR')
             envir$n_errors[1] = envir$n_errors[1] + 1
             envir$errors = c(envir$errors, as.character(e))
             # envir$passed = FALSE
@@ -843,9 +843,9 @@ ExecEnvir <- R6::R6Class(
 
             comp$updates(session = session, .args = new_args)
           },error = function(e){
-            cat2('Error in updating input ', varname, level = 'ERROR')
+            catgl('Error in updating input ', varname, level = 'ERROR')
             s = capture.output(traceback(e))
-            lapply(s, cat2, level = 'ERROR')
+            lapply(s, catgl, level = 'ERROR')
             envir$n_errors[2] = envir$n_errors[2] + 1
             envir$passed = FALSE
           })
@@ -854,7 +854,7 @@ ExecEnvir <- R6::R6Class(
 
         end = Sys.time()
         delta = time_diff(start, end)
-        cat2(sprintf('Updating inputs takes %.2f %s. Total errors: %d + %d', delta$delta, delta$units, n_errors[1], n_errors[2]))
+        catgl(sprintf('Updating inputs takes %.2f %s. Total errors: %d + %d', delta$delta, delta$units, n_errors[1], n_errors[2]))
 
 
         # Activate this module if no error occurred during input-update phase

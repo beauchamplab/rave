@@ -18,7 +18,7 @@ baseline <- function(el, from, to, method = 'mean', unit = '%',
                      mem_optimize = TRUE, same_dimension = unit %in% c('%', 'dB'), preop = NULL, op, data_env = getDefaultDataRepository()){
   soft_deprecated()
   if(missing(el)){
-    cat2('baseline(el...) is changed now. Please update.', level = 'WARNING')
+    catgl('baseline(el...) is changed now. Please update.', level = 'WARNING')
     
     module_tools = get('module_tools', envir = data_env)
     el = module_tools$get_power()

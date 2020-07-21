@@ -48,16 +48,16 @@ rave_prepare <- function(
     gc()
   }
   
-  cat2('Preparing subject [', as.character(subject), ']')
-  cat2('# of electrodes to be loaded: ', length(electrodes))
-  cat2('Data type(s): ', paste(data_types, collapse = ', '))
-  cat2('Epoch name: ', epoch)
-  cat2('From: ', -(time_range[1]), ' sec - to: ', time_range[2], ' sec.')
+  catgl('Preparing subject [', as.character(subject), ']')
+  catgl('# of electrodes to be loaded: ', length(electrodes))
+  catgl('Data type(s): ', paste(data_types, collapse = ', '))
+  catgl('Epoch name: ', epoch)
+  catgl('From: ', -(time_range[1]), ' sec - to: ', time_range[2], ' sec.')
   if(!missing(frequency_range)){
-    cat2('Frequencies: ', (frequency_range[1]), ' Hz - to: ', frequency_range[2], ' Hz.')
+    catgl('Frequencies: ', (frequency_range[1]), ' Hz - to: ', frequency_range[2], ' Hz.')
   }else{
     frequency_range = NULL
-    cat2('Frequencies: All')
+    catgl('Frequencies: All')
   }
   if(is.character(subject)){
     subject_split = unlist(strsplit(subject, '/|\\\\'))
@@ -162,12 +162,12 @@ rave_prepare <- function(
       dev_ver = stringr::str_to_lower(attach)
     }
 
-    cat2('Environment for subject [', subject$id, '] has been created!',
+    catgl('Environment for subject [', subject$id, '] has been created!',
            ' Here are some variables that can be used directly: ', level = 'INFO')
     for(nm in ls(envir = data_env, all.names = F)){
       cat('- ', prefix, nm, '\n', sep = '')
     }
-    cat2('Check ?rave_prepare for details.', level = 'INFO')
+    catgl('Check ?rave_prepare for details.', level = 'INFO')
 
     if(dev_env == 'python'){
       stop('dev_env == python is depricated')
