@@ -201,7 +201,7 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
         need(length(efile) && length(dirs) && file.exists(efile_path <- file.path(dirs$pre_subject_dir, block, efile)), '')
       )
 
-      local_data$raw_data = raw_data = R.matlab::readMat(efile_path)
+      local_data$raw_data = raw_data = raveio::read_mat(efile_path)
       dnames = names(raw_data)
       dnames %?<-% 'Default...'
       dname_sel = ifelse('analogTraces' %in% dnames, 'analogTraces', dnames[1])

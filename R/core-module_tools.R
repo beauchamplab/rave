@@ -258,43 +258,6 @@ rave_module_tools <- function(env = NULL, data_env = getDefaultDataRepository(),
       data_env$subject$dirs
     }
     
-    get_subject_data = function(
-      name,
-      path = 'common',
-      ...,
-      default = NULL,
-      try_open = T,
-      check_cache = T
-    ) {
-      
-      if(check_cache){
-        val = data_env$.module_data[[path]][[name]]
-        if(!is.null(val)){
-          return(val)
-        }
-      }
-      
-      root_dir = data_env$subject$dirs$module_data_dir
-      path = file.path(root_dir, path)
-      if (!dir.exists(path)) {
-        dir.create(path, recursive = T, showWarnings = F)
-      }
-      file = list.files(path,
-                        pattern = sprintf('^%s\\.', name),
-                        full.names = T)
-      if(try_open){
-        if (length(file)) {
-          data = default
-          try({
-            data = try_load_file(file[[1]], name, ..., simplify = T)
-            return(data)
-          })
-        }
-        return(NULL)
-      }else{
-        return(file)
-      }
-    }
     
     get_loaded_electrodes = function() {
       repo = data_env$.private$repo
@@ -305,39 +268,6 @@ rave_module_tools <- function(env = NULL, data_env = getDefaultDataRepository(),
       sort(e)
     }
     
-    save_subject_data = function(data,
-                                 name,
-                                 ...,
-                                 path = 'common',
-                                 format = 'rds') {
-      format = stringr::str_to_lower(format)
-      stopifnot2(format %in% c('rds', 'h5', 'rdata', 'csv', 'mat'),
-                  msg = 'Unsupported format: MUST be rds, h5, rdata, csv, or mat')
-      root_dir = data_env$subject$dirs[['rave_dir']]
-      path = file.path(root_dir, 'module_data', path)
-      if (!dir.exists(path)) {
-        dir.create(path, recursive = T, showWarnings = F)
-      }
-      file = list.files(path,
-                        pattern = sprintf('^%s\\.', name),
-                        full.names = T)
-      if (length(file)) {
-        append = list(...)[['append']]
-        append %?<-% FALSE
-        if (!append) {
-          lapply(file, function(f) {
-            unlink(x = f)
-          })
-        }
-      }
-      
-      file = file.path(path, sprintf('%s.%s', name, format))
-      
-      try_save_file(data = data,
-                    name = name,
-                    fpath = file,
-                    ...)
-    }
     
     
     get_sample_rate = function(original = F){

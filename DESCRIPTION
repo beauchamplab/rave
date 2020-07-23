@@ -8,10 +8,6 @@ Authors@R: c(
     person("Michael S.", "Beauchamp", role = c("aut", "fnd")),
     person("Beauchamp lab", email = "beauchamplab@gmail.com", role = c("cph", "fnd"))
     )
-Maintainer@R: c(
-    person("Zhengjia", "Wang", email = "dipterix.wang@gmail.com", role = c("aut", "cre")),
-    person("Beauchamplab", email = "beauchamplab@gmail.com", role = c("cph", "fnd"))
-    )
 Description: R Analysis and Visualization of 'ECOG/iEEG' Data 
     RAVE provides cross-platform analysis and visualizations for neuroscience 
     'ECoG/iEEG' data by "just clicking buttons". This package include: (a) pre-processing 
@@ -30,15 +26,12 @@ Imports:
     stats,
     graphics,
     grDevices,
-    crayon,
     raveio,
     htmltools (>= 0.3.6),
     devtools,
     grid,
     signal (>= 0.7-6),
     dipsaus (>= 0.0.6),
-    hdf5r (>= 1.0.0),
-    R.matlab (>= 3.6.1),
     R6 (>= 2.2.2),
     future (>= 1.10.0),
     shiny (>= 1.0.5),
@@ -52,7 +45,6 @@ Imports:
     DT (>= 0.4),
     reticulate (>= 1.6),
     servr (>= 0.13),
-    later (>= 0.8.0),
     startup (>= 0.12.0),
     threeBrain (>= 0.1.4),
     data.table (>= 1.11.8),
@@ -64,7 +56,8 @@ Suggests:
     spelling,
     roxygen2,
     testthat,
-    rstudioapi
+    rstudioapi,
+    servr
 Remotes:
     github::dipterix/rutabaga
 VignetteBuilder: knitr

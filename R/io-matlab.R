@@ -1,20 +1,3 @@
-read_mat <- function(file){
-  
-  # Check if the file is HDF5 format
-  if( hdf5r::is_hdf5(file) ){
-    
-    f = hdf5r::H5File$new(filename = file, mode = 'r')
-    on.exit(f$close())
-    dset_names = hdf5r::list.datasets(f)
-    re = sapply(dset_names, function(nm){
-      f[[nm]][]
-    }, simplify = FALSE, USE.NAMES = TRUE)
-    
-  }else{
-    re = R.matlab::readMat(file)
-  }
-  re
-}
 
 pre_import_matlab <- function(subject_code, project_name, block_num, chl, name = 'analogTraces'){
   dir = get_dir(subject_code = subject_code, project_name = project_name, block_num = block_num)

@@ -572,13 +572,7 @@ check_subject <- function(subject, stop_on_error = FALSE){
                     pattern = '\\.h5$', all.files = TRUE, full.names = TRUE, recursive = TRUE)
     if(length(fs)){
       validity = unlist(dipsaus::lapply_async2(fs, function(f){
-        tryCatch({
-          f = hdf5r::H5File$new(filename = f, mode = 'r')
-          f$close_all()
-          TRUE
-        }, error = function(e){
-          FALSE
-        })
+        raveio::h5_valid(f, 'r', close_all = TRUE)
       }, plan = FALSE))
       if(!all(validity)){
         mis = paste(fs[!validity], collapse = '\n')
@@ -595,7 +589,7 @@ check_subject <- function(subject, stop_on_error = FALSE){
   if(length(refs)){
     lapply(refs, function(ref){
       f = file.path(ref_dir, ref)
-      p = hdf5r::H5File$new(f, mode = 'r')
+      # p = hdf5r::H5File$new(f, mode = 'r')
       
       vlen = sapply(blocks, function(b){
         tryCatch({
@@ -713,8 +707,9 @@ check_subject <- function(subject, stop_on_error = FALSE){
           pass = FALSE
         }
         # check reference existence
-        refs = stringr::str_match(dat$Reference, '^ref_([0-9,\\-]+)$')[,2]
+        refs <- dat$Reference
         refs = unique(refs[refs != 'noref'])
+        refs = stringr::str_match(refs, '^ref_([0-9,\\-]+)$')[,2]
         
         ref1 = sapply(refs, function(x){length(dipsaus::parse_svec(x)) > 1})
         ref2 = refs[!ref1]

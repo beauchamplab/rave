@@ -75,7 +75,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
           )
         ),
         box(
-          width = 6,
+          width = 12L,
           title = 'Import widgets',
           box_link = sprintf(url_format, 'output', 'importwidgets'),
           uiOutput(ns('lfp_import'))
@@ -147,7 +147,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       }
       utils$clear_subject()
       # Update
-      updateSelectInput(session, 'blocks', label = 'Block or Session', selected = NULL, choices = '')
+      updateSelectInput(session, 'blocks', label = 'Folders (sessions or blocks)', selected = NULL, choices = '')
       updateTextInput(session, 'channels', label = 'Electrodes', value = '')
       updateNumericInput(session, 'srate', label = 'Sample Rate', value = 0)
     })
@@ -405,9 +405,10 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       # catgl('gen UI')
 
 
-      block_label = 'Blocks'
+      block_label = 'Folders (sessions or blocks)'
       elec_label = 'Electrodes'
       srate_label = 'Sample Rate'
+      unit_label = 'Physical unit'
       save_label = 'Update Changes'
       file_format_ui = NULL
 
@@ -419,7 +420,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
         save_id = 'save'
       }else{
         if(utils$has_raw_cache()){
-          block_label = 'Blocks (read-only)'
+          block_label = 'Folders (sessions or blocks, read-only)'
           elec_label = 'Electrodes (read-only)'
           save_type = 'warning'
         }else{
@@ -441,7 +442,10 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       re = shiny::tagList(
         shiny::selectInput(ns('blocks'), block_label, selected = block_selected, choices = block_choices, multiple = TRUE),
         shiny::textInput(ns('channels'), elec_label, placeholder = 'E.g. 1-84', value = channels),
-        shiny::numericInput(ns('srate'), srate_label, value = srate, step = 1L, min = 1L),
+        shiny::fluidRow(
+          shiny::column(6, shiny::numericInput(ns('srate'), srate_label, value = srate, step = 1L, min = 1L)),
+          shiny::column(6, shiny::selectInput(ns('edf_lfp_unit'), unit_label, choices = c('as-is (no change)', 'uV', 'mV', 'V')))
+        ),
         file_format_ui,
         dipsaus::actionButtonStyled(ns(save_id), save_label, type = save_type, 
                                     width = '100%', class = btn_cls)
@@ -594,12 +598,30 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       ))
       
       local_data$import_checks = import_checks
+      local_data$input_changed_import <- TRUE
+      local_data$input_changed_import2 <- TRUE
     }, ignoreInit = TRUE, ignoreNULL = TRUE)
+    
+    observeEvent({
+      list(
+        local_data$project_name,
+        input$subject_code,
+        input$blocks,
+        input$channels,
+        input$srate,
+        input$edf_lfp_unit,
+        input$file_format
+      )
+    }, {
+      local_data$input_changed_import <- Sys.time()
+    })
     
     
     # Import widgets
     output$lfp_import <- renderUI({
       main_results <- local_data$import_checks
+      last_time <- local_data$input_changed_import
+      last_time2 <- local_data$input_changed_import2
       # assign('main_results', main_results, envir = globalenv())
       if(!inherits(main_results, 'fastmap2')){
         return(shiny::div(
@@ -656,75 +678,68 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       
       blocks <- utils$get_blocks()
       snapshot <- attr(lfp_valid, 'snapshot')
+      if(!is.null(snapshot)){
+        snapshot <- shiny::HTML(snapshot)
+      }
       
       first_block <- blocks[[1]]
       
-      if(main_results$lfp_file_format %in% 1:4){
-        rawfiles_info <- attr(lfp_valid, 'info')
-        tmp <- rawfiles_info[[first_block]]$files
-        if(length(tmp) > 4){
-          tmp <- c(tmp[1:3], '...', tmp[length(tmp)])
-        }
-        
-        info <- rawfiles_info[[first_block]]
-        
-        if(length(snapshot)){
-          snapshot <- sprintf('Snapshot of the first file: %s', snapshot[[1]])
-        }
-        
-        if(main_results$lfp_file_format == 3){
-          # Ask for convertion
-          snapshot <- shiny::tagList(
-            snapshot,
-            shiny::br(),
-            shiny::selectInput(ns('edf_lfp_unit'), 'Physical unit convertion',
-                               choices = c('as-is (no change)', 'uV', 'mV', 'V'),
-                               selected = isolate(input$edf_lfp_unit))
-          )
-        }
-        
-        return(shiny::p(
-          shiny::h5('Passed validation'),
-          'Press ', shiny::strong("Start import"), ' to import raw files into RAVE folders',
-          shiny::hr(),
-          shiny::strong('Import configuration:'),
-          sprintf('Data to be imported: %d block(s) x %d electrode(s) at sample rate %.1f Hz.',
-                  length(blocks), length(main_results$lfp_electrodes), main_results$lfp_sample_rate),
-          shiny::br(),
-          shiny::strong('File structure:'),
-          shiny::pre(
-            dipsaus::print_directory_tree(
-              blocks,
-              sprintf('%s <raw folder>', subject_code),
-              tmp, collapse = '\n'
-            )
-          ),
-          snapshot,
-          shiny::hr(),
-          dipsaus::actionButtonStyled(ns('btn_import_lfp'), 'Start import'),
-        ))
-      } else {
+      run_ui <- NULL
+      if(!main_results$lfp_file_format %in% 1:4) {
         # BIDS format
         valid_runs <- attr(lfp_valid, 'valid_run_names')
-        print(1213)
-        
-        return(shiny::p(
-          shiny::h5('Passed rave-BIDS validation'),
-          'Press ', shiny::strong("Start import"), ' to import raw files into RAVE folders',
-          shiny::hr(),
-          shiny::strong('Import configuration:'),
-          sprintf('Data to be imported: %d block(s) x %d electrode(s) at sample rate %.1f Hz.',
-                  length(blocks), length(main_results$lfp_electrodes), main_results$lfp_sample_rate),
-          shiny::hr(),
-          shiny::strong('Original BIDS header information:'),
-          snapshot,
-          shiny::hr(),
-          shiny::selectInput(ns('bids_runs'), 'Please select session+task+run combination to import',
-                             choices = valid_runs, multiple = TRUE, selected = valid_runs),
-          dipsaus::actionButtonStyled(ns('btn_import_lfp'), 'Start import'),
-        ))
+        selected <- isolate(input$bids_runs)
+        selected <- selected[selected %in% valid_runs]
+        if(!length(selected)){
+          selected <- valid_runs
+        }
+        run_ui <- shiny::tagList(
+          hr(),
+          HTML('Choose BIDS <strong>session+task+runs</strong> to include'),
+          shiny::selectInput(ns('bids_runs'), 'Please select to import',
+                             choices = valid_runs, multiple = TRUE, selected = selected),
+        )
       }
       
+      
+      if(main_results$lfp_file_format %in% c(3:6)){
+        color <- 'color: red;'
+      } else {
+        color = ''
+      }
+      
+      if(isTRUE(last_time == last_time2)){
+        btn <- dipsaus::actionButtonStyled(ns('btn_import_lfp_btn'), 'Start import')
+      } else{
+        btn <- span(style = 'color:grey', 'Input changed, please redo validation.')
+      }
+      
+      shiny::p(
+        shiny::span(style = sprintf("font-weight: 900; %s", color), 
+                    'Please check the following information and make sure your configuration is consistent.'),
+        shiny::hr(),
+        'Meta information obtained from the first data file:',
+        br(),
+        snapshot,
+        run_ui,
+        shiny::hr(),
+        sprintf('Data to be imported: %d block(s) x %d electrode(s) at sample rate %.1f Hz.',
+                length(blocks), length(main_results$lfp_electrodes), main_results$lfp_sample_rate),
+        br(),
+        btn
+      )
+      
+    })
+    
+    observeEvent(input$btn_import_lfp_btn, {
+      shiny::showModal(shiny::modalDialog(
+        title = 'Confirm importing data',
+        shiny::p('Please comfirm importing data. This procedure cannot be undone.'),
+        size = 's', footer = tagList(
+          shiny::modalButton("I'll double check"),
+          dipsaus::actionButtonStyled(ns('btn_import_lfp'), "Let's go!")
+        )
+      ))
     })
     
     observeEvent(input$btn_import_lfp, {
@@ -790,12 +805,13 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       
       raveio::rave_import(project_name = project_name, subject_code = subject_code,
                           blocks, electrodes, format = fmt, 
-                          sample_rate = srate, convertion = lfp_unit, task_runs = bids_runs)
+                          sample_rate = srate, conversion = lfp_unit, task_runs = bids_runs)
       utils$save_to_subject(checklevel = HAS_CACHE)
       utils$reset()
       msg = 'Raw voltage signals are cached.'
       type = 'message'
       utils$showNotification(msg, type = type)
+      shiny::removeModal()
       
     })
     
