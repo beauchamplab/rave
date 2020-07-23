@@ -475,7 +475,7 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
     )
     
     fst_file = file.path(subject_cache_dir, 'coef', sprintf('%d.fst', e))
-    write_fst(coef, fst_file, compress = 100)
+    raveio::save_fst(coef, fst_file, compress = 100)
     rm(coef)
     
     # get voltage
@@ -488,7 +488,7 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
     })
     volt = data.frame(volt = as.vector(t(volt)))
     fst_file = file.path(subject_cache_dir, 'voltage', sprintf('%d.fst', e))
-    write_fst(volt, fst_file, compress = 100)
+    raveio::save_fst(volt, fst_file, compress = 100)
     rm(volt)
     
   }, .call_back = function(ii){
@@ -514,7 +514,7 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
       })
       volt = data.frame(Volt = as.vector(t(volt)))
       fst_file = file.path(subject_cache_dir, 'ref', sprintf('%s.volt.fst', f))
-      write_fst(volt, fst_file, compress = 100)
+      raveio::save_fst(volt, fst_file, compress = 100)
       rm(volt)
       
       
@@ -535,7 +535,7 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
       )
       
       fst_file = file.path(subject_cache_dir, 'ref', sprintf('%s.coef.fst', f))
-      write_fst(coef, fst_file, compress = 100)
+      raveio::save_fst(coef, fst_file, compress = 100)
       rm(coef)
     }
   }
@@ -689,7 +689,7 @@ load_local_cache <- function(project_name, subject_code, epoch, time_range,
       el$hybrid = TRUE
       volt$data = data.frame(volt$data)
       names(volt$data) = paste0('V', seq_len(ncol(volt$data)))
-      write_fst(volt$data, el$swap_file)
+      raveio::save_fst(volt$data, el$swap_file)
       
       rm(volt)
       
@@ -731,19 +731,19 @@ load_local_cache <- function(project_name, subject_code, epoch, time_range,
         el2 = el$clone(deep = TRUE)
         el2$swap_file = tempfile()
         
-        power = data.table::data.table(V1 = coef$data[[1]])
+        power = data.frame(V1 = coef$data[[1]])
         for(ii in seq_len(length(coef$data))){
           power[[paste0('V', ii)]] = Mod(coef$data[[ii]])^2
         }
-        write_fst(power, el$swap_file)
+        raveio::save_fst(power, el$swap_file)
         rm(power)
         
-        phase = data.table::data.table(V1 = coef$data[[1]])
+        phase = data.frame(V1 = coef$data[[1]])
         for(ii in seq_len(length(coef$data))){
           phase[[ii]] = Arg(coef$data[[ii]])
         }
         
-        write_fst(phase, el2$swap_file)
+        raveio::save_fst(phase, el2$swap_file)
         rm(coef)
         rm(phase)
         
@@ -751,7 +751,7 @@ load_local_cache <- function(project_name, subject_code, epoch, time_range,
         re[['power']] = el
       }else{
         
-        write_fst(as.data.frame(coef$data, col.names = paste0('V', seq_len(length(coef$data)))), el$swap_file)
+        raveio::save_fst(as.data.frame(coef$data, col.names = paste0('V', seq_len(length(coef$data)))), el$swap_file)
         if('power' %in% data_type){
           re[['power']] = el
         }else{
@@ -818,14 +818,14 @@ load_cached_wave = function(cache_dir, electrodes, time_range,
       ref_e = dipsaus::parse_svec(f)
       if(length(ref_e) == 1){
         # this is bipolar-ish reference
-        d = read_fst(file.path(coef_dir, sprintf('%d.fst', ref_e)),
+        d = raveio::load_fst(file.path(coef_dir, sprintf('%d.fst', ref_e)),
                      from = idx_range[1], to = idx_range[2])
         ref_data[[f]] = d[idx, ]
         rm(d)
       }
       if(length(ref_e) > 1){
         # this is car-ish reference
-        d = read_fst(file.path(ref_dir, sprintf('%s.h5.coef.fst', f)),
+        d = raveio::load_fst(file.path(ref_dir, sprintf('%s.h5.coef.fst', f)),
                      from = idx_range[1], to = idx_range[2])
         ref_data[[f]] = d[idx, ]
         rm(d)
@@ -845,7 +845,7 @@ load_cached_wave = function(cache_dir, electrodes, time_range,
   data = lapply_async(electrodes, function(e){
     fst_file = file.path(coef_dir, sprintf('%d.fst', e))
     
-    d = read_fst(fst_file, from = idx_range[1], to = idx_range[2])[idx, ]
+    d = raveio::load_fst(fst_file, from = idx_range[1], to = idx_range[2])[idx, ]
     # d = d[idx, ]
     
     # trial x freq x time
@@ -912,12 +912,12 @@ load_cached_voltage <- function(cache_dir, electrodes, time_range, srate_volt, t
       ref_e = dipsaus::parse_svec(f)
       if(length(ref_e) == 1){
         # this is bipolar-ish reference
-        d = read_fst(file.path(volt_dir, sprintf('%d.fst', ref_e)), from = idx[1], to = idx[2])[,1]
+        d = raveio::load_fst(file.path(volt_dir, sprintf('%d.fst', ref_e)), from = idx[1], to = idx[2])[,1]
         ref_data[[f]] = d
       }
       if(length(ref_e) > 1){
         # this is car-ish reference
-        d = read_fst(file.path(ref_dir, sprintf('%s.h5.volt.fst', f)), from = idx[1], to = idx[2])[,1]
+        d = raveio::load_fst(file.path(ref_dir, sprintf('%s.h5.volt.fst', f)), from = idx[1], to = idx[2])[,1]
         ref_data[[f]] = d
       }
     }
@@ -931,7 +931,7 @@ load_cached_voltage <- function(cache_dir, electrodes, time_range, srate_volt, t
   data = sapply(electrodes, function(e){
     progress$inc(sprintf('Loading electrode %d', e))
     fst_file = file.path(volt_dir, sprintf('%d.fst', e))
-    d = read_fst(fst_file, from = idx[1], to = idx[2])[,1]
+    d = raveio::load_fst(fst_file, from = idx[1], to = idx[2])[,1]
     
     if(need_reference){
       f = ref_table$Reference[ref_table$Electrode == e]

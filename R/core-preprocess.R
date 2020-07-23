@@ -563,7 +563,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
             # write
             cache_file = file.path(dirs$channel_dir, 'cache', 'power', 'raw', block, sprintf('%d.fst', e))
             
-            write_fst(power, cache_file, compress = 100)
+            raveio::save_fst(power, cache_file, compress = 100)
           }
           
           
@@ -597,7 +597,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
             # write
             cache_file = file.path(dirs$channel_dir, 'cache', 'phase', 'raw', block, sprintf('%d.fst', e))
             
-            write_fst(phase, cache_file, compress = 100)
+            raveio::save_fst(phase, cache_file, compress = 100)
           }
           
           # voltage
@@ -629,7 +629,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
             # write
             cache_file = file.path(dirs$channel_dir, 'cache', 'voltage', 'raw', block, sprintf('%d.fst', e))
             
-            write_fst(s, cache_file, compress = 100)
+            raveio::save_fst(s, cache_file, compress = 100)
           }
           
           # # Raw complex coefficient
@@ -718,7 +718,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
           e = v$e
           inc(sprintf('Caching electrode %d %s', e, this_env$data_type))
           v = do.call('rbind', v$v)
-          write_fst(v, sprintf(this_env$target_file, e), compress = 100)
+          raveio::save_fst(v, sprintf(this_env$target_file, e), compress = 100)
           this_env$future_list[[1]] = NULL
         }
         NULL

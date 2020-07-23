@@ -272,11 +272,5 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
 
 
 read_csv_no_header <- function(file, nrows = Inf, drop = NULL){
-  header = data.table::fread(file = file, nrows = 1, header = FALSE)
-  if(is.numeric(header[[1]])){
-    header = FALSE
-  }else{
-    header = TRUE
-  }
-  header = data.table::fread(file = file, header = header, nrows = nrows, drop = drop, fill = TRUE)
+  raveio::read_csv_ieeg(file = file, nrows = nrows, drop = drop)
 }

@@ -422,7 +422,7 @@ ECoGRepository <- R6::R6Class(
           #
           # # generate local cache for phase
           # file = tempfile()
-          # write_fst(results, file, compress = 20)
+          # raveio::save_fst(results, file, compress = 20)
           # rm(results)
           # gc()
           #
@@ -472,7 +472,7 @@ ECoGRepository <- R6::R6Class(
           #
           # # generate local cache for volt
           # file = tempfile()
-          # write_fst(results, file, compress = 20)
+          # raveio::save_fst(results, file, compress = 20)
           # rm(results)
           # gc()
           #
