@@ -18,12 +18,8 @@ default_opts <- function(...){
   # --------------------- RAVE settings ---------------------
   
   # Repositories
-  raw_data_dir = '~/rave_data/raw_dir/'
-  data_dir = '~/rave_data/data_dir/'
   module_root_dir = '~/rave_modules/'
   module_lookup_file = '~/rave_modules/modules.csv'
-  subject_cache_dir = '~/rave_data/cache_dir'
-  bids_data_dir = '~/rave_data/bids_dir'
   
   # Shiny settings
   # input update firing speed (20ms default)
@@ -97,7 +93,7 @@ Options <- R6::R6Class(
     opts = list()
   ),
   public = list(
-    initialize = function(conf_path = '~/.rave.yaml', save_default = F){
+    initialize = function(conf_path = '~/.rave.yaml', save_default = FALSE){
       self$reset()
       loaded = self$load_settings( conf_path )
       
