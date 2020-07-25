@@ -22,7 +22,13 @@ rave_options <- function(..., .save = TRUE, launch_gui = TRUE,
     # get options
     args = c(...)
     re <- sapply(args, function(nm){
-      raveio::raveio_getopt(nm, default = NULL)
+      val <- raveio::raveio_getopt(nm, default = NULL)
+      if(nm %in% c('delay_input', 'image_width', 'image_height', 'drive_speed', 'max_worker', 'max_mem')){
+        val <- as.numeric(val)
+      } else if (nm %in% c('test_mode', 'fast_cache')){
+        val <- as.logical(val)
+      }
+      val
     }, simplify = FALSE, USE.NAMES = TRUE)
     if(length(re) == 1){
       re <- unlist(re)
