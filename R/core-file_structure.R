@@ -32,7 +32,7 @@ arrange_data_dir <- function(first_time = FALSE, reset = FALSE){
     catgl(data_dir, level = 'ERROR')
     catgl(raw_dir, level = 'ERROR')
     catgl('Check existence of these folders, or reset default data repository by typing arrange_data_dir(reset = TRUE)', level = 'ERROR')
-    return(F)
+    return(FALSE)
   }else{
     rave_options(data_dir = base::normalizePath(data_dir))
     rave_options(raw_data_dir = base::normalizePath(raw_dir))

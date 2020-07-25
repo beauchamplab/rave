@@ -45,7 +45,7 @@ rave_version <- function(){
       )
       
     }else{
-      has_data = arrange_data_dir(F)
+      # has_data = arrange_data_dir(FALSE)
     }
     
     save_options()

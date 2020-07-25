@@ -9,7 +9,7 @@ rave_options_gui <- local({
     'raw_data_dir' = 'Native RAVE raw folder',
     'bids_data_dir' = 'BIDS data root (optional)',
     'data_dir' = 'RAVE subject data path',
-    'subject_cache_dir' = 'Path to cache large data files',
+    'tensor_temp_path' = 'Path to cache large data files',
     
     # 'crayon_enabled' = 'Color console',
     
@@ -208,17 +208,17 @@ rave_options_gui <- local({
     )
   }
   
-  # ------------------------ subject_cache_dir ------------------------
+  # ------------------------ tensor_temp_path ------------------------
   {
     comps[[length(comps) + 1]] = list(
       type = 'Core Settings',
-      opt_name = 'subject_cache_dir',
+      opt_name = 'tensor_temp_path',
       observer = rlang::quo({
-        opt_id = 'subject_cache_dir'
-        output$subject_cache_dir_input <- renderUI({
+        opt_id = 'tensor_temp_path'
+        output$tensor_temp_path_input <- renderUI({
           shiny::textInput(opt_id, opt_names[[opt_id]], value = local_data[[opt_id]])
         })
-        output$subject_cache_dir_ui <- renderUI({
+        output$tensor_temp_path_ui <- renderUI({
           val = input[[opt_id]]
           val %?<-% rave_options(opt_id)
           msg = ''
@@ -243,11 +243,11 @@ rave_options_gui <- local({
             p(tags$small(span(style = gl('color:{col};'), msg))),
             div(
               class = ifelse(btn, '', 'hidden'),
-              actionLink('subject_cache_dir_reset', label)
+              actionLink('tensor_temp_path_reset', label)
             )
           ))
         })
-        observeEvent(input$subject_cache_dir_reset, {
+        observeEvent(input$tensor_temp_path_reset, {
           dir = input[[opt_id]]
           if(!dir.exists(dir)){
             dir.create(dir, recursive = TRUE, showWarnings = FALSE)

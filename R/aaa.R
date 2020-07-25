@@ -80,7 +80,7 @@ hard_deprecated <- function(){
 
 # override tempfile
 subject_cache_dir <- function(){
-  re = rave_options('subject_cache_dir')
+  re = rave_options('tensor_temp_path')
   if(length(re) != 1 || !is.character(re) || re %in% c('', '/', '~')){
     re <-  '~/rave_data/cache_dir'
   }
