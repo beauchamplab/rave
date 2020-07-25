@@ -249,7 +249,7 @@ finalize_installation_internal_demo <- function(upgrade = c('ask', 'always', 'ne
     quo <- rlang::quo({
       dipsaus::rs_focus_console()
       for(sub in !!missing_subs){
-        catgl('Launching download process - ', sub)
+        raveio::catgl('Launching download process - ', sub)
         rave::download_sample_data(sub)
       }
     })
@@ -275,11 +275,6 @@ finalize_installation <- function(packages, upgrade = c('always', 'ask', 'never'
   
   if(missing(packages)){
     packages <- NULL
-  }
-  
-  if(!length(packages) || 'rave' %in% packages){
-    # Check RAVE demo subjects
-    finalize_installation_internal_demo(upgrade)
   }
   
   if(!length(packages) || 'threeBrain' %in% packages){
