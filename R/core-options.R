@@ -150,6 +150,7 @@ Options <- R6::R6Class(
         
         
         private$opts[[n]] = val
+        base::packageStartupMessage(n, ' << ', paste(deparse(val), collapse = ' '), '\n')
       }
       return(invisible(self$get_options(names(o))))
     },

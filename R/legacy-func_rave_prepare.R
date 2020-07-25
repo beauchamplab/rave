@@ -66,7 +66,7 @@ rave_prepare <- function(
 
   subject$is_strict = strict
 
-  repo = ECoGRepository$new(subject = subject, autoload = F, reference = reference)
+  repo = ECoGRepository$new(subject = subject, autoload = FALSE, reference = reference)
   repo$load_electrodes(electrodes = electrodes, reference = reference)
 
   # Set epoch information

@@ -89,7 +89,7 @@ subject_cache_dir <- function(){
   re
 }
 
-do_nothing <- function(...){}
+do_nothing <- dipsaus::do_nothing
 
 ### Stores internal settings (session-based)
 ..setup_env <- new.env(parent = baseenv())
