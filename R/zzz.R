@@ -276,16 +276,16 @@ finalize_installation <- function(packages, upgrade = c('always', 'ask', 'never'
   if(missing(packages)){
     packages <- NULL
   }
-  
-  if(!length(packages) || 'threeBrain' %in% packages){
-    # Check N27 brain
-    # To be backward compatible, we need to check threeBrain files
-    tmp <- system.file('rave.yaml', package = 'threeBrain')
-    if(tmp == ''){
-      threeBrain::download_N27()
-      threeBrain::merge_brain()
-    }
-  }
+  # 
+  # if(!length(packages) || 'threeBrain' %in% packages){
+  #   # Check N27 brain
+  #   # To be backward compatible, we need to check threeBrain files
+  #   tmp <- system.file('rave.yaml', package = 'threeBrain')
+  #   if(tmp == ''){
+  #     threeBrain::download_N27()
+  #     threeBrain::merge_brain()
+  #   }
+  # }
   
   # Get all packages with rave.yaml
   lib_path = .libPaths()
