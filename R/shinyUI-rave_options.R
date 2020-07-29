@@ -648,14 +648,11 @@ rave_options_gui <- local({
             }
           }
           
-          speed = 1 / speed * 1000000
-          
-          # Upload speed
-          upload_speed = dipsaus::to_ram_size(speed[1])
-          download_speed = dipsaus::to_ram_size(speed[2])
+          upload_speed = speed[1]
+          download_speed = speed[2]
           
           tagList(
-            span(strong(opt_names[[opt_id]]), sprintf(': Write - %s/sec, Read - %s/sec ', upload_speed, download_speed),
+            span(strong(opt_names[[opt_id]]), sprintf(': Write - %.1f MB/sec, Read - %.1f MB/sec ', upload_speed, download_speed),
                  actionLink(opt_id, 're-test speed'))
           )
         })

@@ -778,9 +778,9 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
                                                          dipsaus::to_ram_size(max(s_volt, s_power))), br(),
         strong('Estimated Loading time: '), sprintf(
           'Power (%.0f sec), Phase (%.0f sec), Voltage(%.0f sec)',
-          s_power * drive_speed / 1000^2 * 2,
-          s_power * drive_speed / 1000^2 * 2,
-          s_volt * drive_speed / 1000^2 * 2
+          s_power / drive_speed / 1000^2 * 2,
+          s_power / drive_speed / 1000^2 * 2,
+          s_volt / drive_speed / 1000^2 * 2
         )
       )
     })
