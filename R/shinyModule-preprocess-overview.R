@@ -5,7 +5,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
   
   url_format = sprintf('https://openwetware.org/wiki/RAVE:ravepreprocess:%s:%%s_%%s', doc_prefix)
   
-  file_formats <- names(raveio::LFP_FORMATS)
+  file_formats <- names(raveio::IMPORT_FORMATS)
 
   body = fluidRow(
     box(
@@ -563,7 +563,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       utils$check_load_subject(subject_code = subject_code, project_name = project_name)
       
       if(utils$has_raw_cache()){
-        showNotification(p('Subject has been imported, please proceed to other modules'), type = 'message')
+        showNotification(p('Subject has been imported, please proceed to other modules'), type = 'error')
         local_data$import_valid = FALSE
         return()
       }
@@ -584,7 +584,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
         format = file_format,
         check_content = TRUE,
         project_name = project_name, 
-        data_type = 'lfp'
+        data_type = 'continuous'
       )
       
       import_checks <- dipsaus::list_to_fastmap2(list(
