@@ -169,6 +169,8 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
   
   arrange_modules(refresh = TRUE)
   
+  dipsaus::restart_session()
+  
   return(invisible())
   
 }
