@@ -247,11 +247,11 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
           ),
           div(
             style="flex-basis: 25%;",
-            numericInput(ns('epoch_pre'), 'Pre', min = 0, value = last_time_range[1])
+            numericInput(ns('epoch_pre'), 'Pre', min = 0, value = last_time_range[1], step = 0.1)
           ),
           div(
             style="flex-basis: 25%;",
-            numericInput(ns('epoch_post'), 'Post', min = 0, value = last_time_range[2])
+            numericInput(ns('epoch_post'), 'Post', min = 0, value = last_time_range[2], step = 0.1)
           ),
           div(
             style="flex-basis: 100%;",
