@@ -26,9 +26,9 @@ cache_raw_voltage <- function(project_name, subject_code, blocks, electrodes, ..
     sapply(blocks, function(block_num){
       s = pre_import_matlab(subject_code, project_name, block_num, e)
       # save s to cfile - /raw/block_num
-      save_h5(as.vector(s), cfile, name = sprintf('/raw/%s', block_num), chunk = 1024, replace = T)
+      save_h5(as.vector(s), cfile, name = sprintf('/raw/%s', block_num), chunk = 1024, replace = TRUE)
       NULL
-    }, simplify = F, USE.NAMES = T) ->
+    }, simplify = FALSE, USE.NAMES = TRUE) ->
       re
     return(re)
   }, .call_back = function(i){
@@ -52,7 +52,7 @@ rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = 
   utils = rave_preprocess_tools()
   utils$create_subject(subject_code = subject, project_name = project_name)
   if(utils$has_raw_cache()){
-    dipsaus::cat2('Subject already imported. If you want to re-import the data, please remove subject folder first',
+    catgl('Subject already imported. If you want to re-import the data, please remove subject folder first',
          level = 'ERROR')
     return(invisible())
   }
@@ -60,7 +60,7 @@ rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = 
   srate = dipsaus::ask_or_default('Please enter the sampling rate in Hz.\n', default = as.character(srate))
   srate = as.numeric(srate)
   if(is.na(srate) || srate < 0){
-    dipsaus::cat2('Invalid sample rate, setting it to ', sQuote('0'), 
+    catgl('Invalid sample rate, setting it to ', sQuote('0'), 
          '\n   Please enter it in rave pre-process module', level = 'WARNING')
     srate = 0
   }
@@ -79,17 +79,17 @@ rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = 
   
   nblocks = length(blocks)
   if(nblocks == 0){
-    dipsaus::cat2(sprintf('No folder (block) found under directory - %s', subject_dir), level = 'ERROR')
+    catgl(sprintf('No folder (block) found under directory - %s', subject_dir), level = 'ERROR')
     return(invisible())
   }
-  dipsaus::cat2(sprintf('%d folders (blocks) found in raw directory - %s:', length(blocks), subject_dir), level = 'DEFAULT', pal = default_pal)
+  catgl(sprintf('%d folders (blocks) found in raw directory - %s:', length(blocks), subject_dir), level = 'DEFAULT', pal = default_pal)
   
   # Check file structures within blocks
   fs = sapply(seq_along(blocks), function(ii){
     b = blocks[ii]
     files = list.files(file.path(subject_dir, b))
     nfiles = length(files)
-    dipsaus::cat2(sprintf('  [%d] %s (%d files)', ii, b, nfiles), level = 'DEFAULT', pal = default_pal)
+    catgl(sprintf('  [%d] %s (%d files)', ii, b, nfiles), level = 'DEFAULT', pal = default_pal)
     files
   })
   
@@ -100,7 +100,7 @@ rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = 
   choice = choice[choice %in% seq_len(nblocks)]
   nchoices = length(choice)
   if(nchoices == 0){
-    dipsaus::cat2('Cannot find the blocks entered', level = 'ERROR')
+    catgl('Cannot find the blocks entered', level = 'ERROR')
     return(invisible())
   }
   
@@ -150,11 +150,11 @@ rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = 
       ans = dipsaus::parse_svec(ans)
       sel = ans %in% elecs
       if( !all(sel) ){
-        dipsaus::cat2(sprintf('Not all electrodes are found... Electrode(s) %s missing', dipsaus::deparse_svec(ans[!sel])), level = 'WARNING')
+        catgl(sprintf('Not all electrodes are found... Electrode(s) %s missing', dipsaus::deparse_svec(ans[!sel])), level = 'WARNING')
       }
       sel_elec = ans[sel]
       if( !length(sel_elec) ){
-        dipsaus::cat2('No electrode is selected!', level = 'ERROR')
+        catgl('No electrode is selected!', level = 'ERROR')
         return(invisible())
       }
       ans = dipsaus::ask_yesno(sprintf('Import electrodes %s from block %s?', dipsaus::deparse_svec(sel_elec), paste(sel_blocks, collapse = ', ')))
@@ -168,7 +168,7 @@ rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = 
       if(launch_preprocess){
         return(rave_preprocess(project_name = project_name, subject_code = subject_code))
       }else{
-        dipsaus::cat2('Loaded. Please launch preprocess:\n    rave::rave_preprocess()', level = 'INFO')
+        catgl('Loaded. Please launch preprocess:\n    rave::rave_preprocess()', level = 'INFO')
         return(ptype)
       }
       
@@ -196,7 +196,7 @@ rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = 
                                     paste(opt, collapse = ', '), '\n', default = opt[[1]])
       
       if( sum(files == ans) != nchoices ){
-        dipsaus::cat2(sprintf('Cannot find file %s in all blocks', sQuote(ans)), level = 'ERROR')
+        catgl(sprintf('Cannot find file %s in all blocks', sQuote(ans)), level = 'ERROR')
         return(invisible())
       }
       
@@ -205,7 +205,7 @@ rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = 
       
       mat_paths = file.path(subject_dir, sel_blocks, mat_file)
       
-      dipsaus::cat2('Trying to read from ', mat_paths[1], level = 'DEFAULT', pal = default_pal)
+      catgl('Trying to read from ', mat_paths[1], level = 'DEFAULT', pal = default_pal)
       
       sample = read_mat(mat_paths[1])
       dnames = names(sample)
@@ -237,7 +237,7 @@ rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = 
       
       if(length(sel_elec) != n_elecs){
         sel_elec = seq_len(n_elecs)
-        dipsaus::cat2('Length of electrodes does not match with the data dimensions. Ignore the user input ', 
+        catgl('Length of electrodes does not match with the data dimensions. Ignore the user input ', 
              ans, ' and reset to ', dipsaus::deparse_svec(sel_elec), level = 'WARNING')
       }
       
@@ -266,7 +266,7 @@ rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = 
           cfile = file.path(dirs$preprocess_dir, 'voltage', sprintf('electrode_%d.h5', e))
           # if(file.exists(cfile)){ unlink(cfile) }
           
-          save_h5(as.vector(src[ii,]), cfile, name = sprintf('/raw/%s', block), chunk = 1024, replace = T)
+          save_h5(as.vector(src[ii,]), cfile, name = sprintf('/raw/%s', block), chunk = 1024, replace = TRUE)
           NULL
         })
         NULL
@@ -276,7 +276,7 @@ rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = 
       if(launch_preprocess){
         return(rave_preprocess())
       }else{
-        dipsaus::cat2('Loaded. Please launch preprocess:\n    rave::rave_preprocess()', level = 'INFO')
+        catgl('Loaded. Please launch preprocess:\n    rave::rave_preprocess()', level = 'INFO')
         return(ptype)
       }
     }
@@ -301,7 +301,7 @@ rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = 
                               paste(opt, collapse = ', '), '\n', default = opt[[1]])
       
       if( sum(files == ans) != nchoices ){
-        dipsaus::cat2(sprintf('Cannot find file %s in all blocks', sQuote(ans)), level = 'ERROR')
+        catgl(sprintf('Cannot find file %s in all blocks', sQuote(ans)), level = 'ERROR')
         return(invisible())
       }
       
@@ -311,16 +311,16 @@ rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = 
       
       txt_paths = file.path(subject_dir, sel_blocks, plain_file)
       
-      dipsaus::cat2('Trying to read from ', txt_paths[1], level = 'DEFAULT', pal = default_pal)
+      catgl('Trying to read from ', txt_paths[1], level = 'DEFAULT', pal = default_pal)
       
       sample = read_csv_no_header(txt_paths[1])
       ncols = ncol(sample)
       
-      dipsaus::cat2('-------------------- Print the first 3 rows --------------------', level = 'DEFAULT', pal = default_pal)
+      catgl('-------------------- Print the first 3 rows --------------------', level = 'DEFAULT', pal = default_pal)
       print(utils::head(sample, 3))
-      dipsaus::cat2('-------------------- Print the last 3 rows --------------------', level = 'DEFAULT', pal = default_pal)
+      catgl('-------------------- Print the last 3 rows --------------------', level = 'DEFAULT', pal = default_pal)
       print(utils::tail(sample, 3))
-      dipsaus::cat2('-------------------- Print headers --------------------', level = 'DEFAULT', pal = default_pal)
+      catgl('-------------------- Print headers --------------------', level = 'DEFAULT', pal = default_pal)
       print(matrix(names(sample), nrow = 1), quote = FALSE)
       
       ans = dipsaus::ask_or_default('Dataset has ', ncols, ' columns. Please enter the column indices to import',
@@ -329,7 +329,7 @@ rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = 
       ans = dipsaus::parse_svec(ans)
       sel = ans %in% seq_len(ncols)
       if(!all(sel)){ 
-        dipsaus::cat2('You entered column numbers that do not exist, column(s) ', dipsaus::deparse_svec(ans[!sel]),
+        catgl('You entered column numbers that do not exist, column(s) ', dipsaus::deparse_svec(ans[!sel]),
              ' Reset to all columns', level = 'WARNING')
       }else{
         ans = ans[sel]
@@ -360,7 +360,7 @@ rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = 
           # if(file.exists(cfile)){ unlink(cfile) }
           s = as.numeric(src[[ii]])
           s[is.na(s)] = 0
-          save_h5(s, cfile, name = sprintf('/raw/%s', block), chunk = 1024, replace = T)
+          save_h5(s, cfile, name = sprintf('/raw/%s', block), chunk = 1024, replace = TRUE)
           NULL
         })
         NULL
@@ -370,7 +370,7 @@ rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = 
       if(launch_preprocess){
         return(rave_preprocess())
       }else{
-        dipsaus::cat2('Loaded. Please launch preprocess:\n    rave::rave_preprocess()', level = 'INFO')
+        catgl('Loaded. Please launch preprocess:\n    rave::rave_preprocess()', level = 'INFO')
         return(ptype)
       }
       
@@ -378,8 +378,8 @@ rave_import_rawdata <- function(subject_code, project_name, launch_preprocess = 
     }
   }
   
-  dipsaus::cat2('Cannot find valid raw data files. All selected blocks MUST use the same data format.', level = 'ERROR')
-  dipsaus::cat2('Acceptable data formats are:',
+  catgl('Cannot find valid raw data files. All selected blocks MUST use the same data format.', level = 'ERROR')
+  catgl('Acceptable data formats are:',
        '\n\t1. One file per electrode per block',
        '\n\t2. One file containing all electrodes per block in Matlab or HDF5 format',
        '\n\t3. One text/csv file containing all electrodes per block. One electrode per column with or without column names.',
@@ -475,7 +475,7 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
     )
     
     fst_file = file.path(subject_cache_dir, 'coef', sprintf('%d.fst', e))
-    write_fst(coef, fst_file, compress = 100)
+    raveio::save_fst(coef, fst_file, compress = 100)
     rm(coef)
     
     # get voltage
@@ -488,7 +488,7 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
     })
     volt = data.frame(volt = as.vector(t(volt)))
     fst_file = file.path(subject_cache_dir, 'voltage', sprintf('%d.fst', e))
-    write_fst(volt, fst_file, compress = 100)
+    raveio::save_fst(volt, fst_file, compress = 100)
     rm(volt)
     
   }, .call_back = function(ii){
@@ -504,7 +504,7 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
     for(f in ref_files){
       progress$inc(f)
       fpath = file.path(ref_dir, f)
-      volt_h5 = load_h5(fpath, '/voltage/008', ram = T)
+      volt_h5 = load_h5(fpath, '/voltage/008', ram = TRUE)
       
       # get voltage
       volt = sapply(seq_len(nrow(epoch_tbl)), function(ii){
@@ -514,12 +514,12 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
       })
       volt = data.frame(Volt = as.vector(t(volt)))
       fst_file = file.path(subject_cache_dir, 'ref', sprintf('%s.volt.fst', f))
-      write_fst(volt, fst_file, compress = 100)
+      raveio::save_fst(volt, fst_file, compress = 100)
       rm(volt)
       
       
-      coef = load_h5(fpath, '/wavelet/coef/008', ram = T)
-      coef = coef[,,1, drop = F] * exp(1i * coef[,,2, drop = F])
+      coef = load_h5(fpath, '/wavelet/coef/008', ram = TRUE)
+      coef = coef[,,1, drop = F] * exp(1i * coef[,,2, drop = FALSE])
       coef = sapply(seq_len(nrow(epoch_tbl)), function(ii){
         row = epoch_tbl[ii, ]
         time = round(row$Time * srate_wave)
@@ -535,7 +535,7 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
       )
       
       fst_file = file.path(subject_cache_dir, 'ref', sprintf('%s.coef.fst', f))
-      write_fst(coef, fst_file, compress = 100)
+      raveio::save_fst(coef, fst_file, compress = 100)
       rm(coef)
     }
   }
@@ -557,14 +557,14 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
   config$epoch_signatures = digest::digest(epoch_tbl[, c('Block', 'Time', 'Trial')]) # sorted by trial!
   
   
-  yaml::write_yaml(config, file.path(subject_cache_dir, 'config.yaml'), fileEncoding = 'utf-8')
+  raveio::save_yaml(config, file.path(subject_cache_dir, 'config.yaml'), fileEncoding = 'utf-8')
   
-  utils::write.csv(epoch_tbl, file.path(subject_cache_dir, 'epoch.csv'), row.names = F)
+  utils::write.csv(epoch_tbl, file.path(subject_cache_dir, 'epoch.csv'), row.names = FALSE)
   
   # save all references
   sapply(check_results$references, function(ref){
     tbl = load_meta('references', project_name = project_name, subject_code = subject_code, meta_name = ref)
-    utils::write.csv(tbl, file.path(subject_cache_dir, 'ref', sprintf('reference_%s.csv', ref)), row.names = F)
+    utils::write.csv(tbl, file.path(subject_cache_dir, 'ref', sprintf('reference_%s.csv', ref)), row.names = FALSE)
   })
   
   invisible()
@@ -598,9 +598,13 @@ load_local_cache <- function(project_name, subject_code, epoch, time_range,
   
   # 2, load cached configs
   tryCatch({
-    config = yaml::read_yaml(file.path(cache_dir, 'config.yaml'))
+    config = raveio::load_yaml(file.path(cache_dir, 'config.yaml'))
     
-    epoch_cached = utils::read.csv(file.path(cache_dir, 'epoch.csv'), colClasses = 'character', stringsAsFactors = F)[, c('Block', 'Time', 'Trial')]
+    epoch_cached = utils::read.csv(
+      file.path(cache_dir, 'epoch.csv'),
+      colClasses = 'character',
+      stringsAsFactors = FALSE
+    )[, c('Block', 'Time', 'Trial')]
     epoch_cached$Time = as.numeric(epoch_cached$Time)
     epoch_cached$Trial = as.numeric(epoch_cached$Trial)
     
@@ -612,7 +616,7 @@ load_local_cache <- function(project_name, subject_code, epoch, time_range,
       epoch_tbl = load_meta('epoch', project_name = project_name, subject_code = subject_code, meta_name = epoch)
       epoch_tbl = epoch_tbl[order(epoch_tbl$Trial), c('Block', 'Time', 'Trial')]
       
-      subject = Subject$new(project_name = project_name, subject_code = subject_code, strict = F)
+      subject = Subject$new(project_name = project_name, subject_code = subject_code, strict = FALSE)
     })
     
     if(!is.null(subject)){
@@ -673,7 +677,7 @@ load_local_cache <- function(project_name, subject_code, epoch, time_range,
       
       dims = volt$dims
       
-      el = Tensor$new(0, dim = c(1,1,1), varnames = c('Trial', 'Time', 'Electrode'), hybrid = F)
+      el = Tensor$new(0, dim = c(1,1,1), varnames = c('Trial', 'Time', 'Electrode'), hybrid = FALSE)
       el$dim = dims
       el$dimnames = list(
         Trial = epoch_cached$Trial,
@@ -681,11 +685,11 @@ load_local_cache <- function(project_name, subject_code, epoch, time_range,
         Electrode = electrodes
       )
       el$set_data(NULL)
-      el$use_index = T
-      el$hybrid = T
+      el$use_index = TRUE
+      el$hybrid = TRUE
       volt$data = data.frame(volt$data)
       names(volt$data) = paste0('V', seq_len(ncol(volt$data)))
-      write_fst(volt$data, el$swap_file)
+      raveio::save_fst(volt$data, el$swap_file)
       
       rm(volt)
       
@@ -708,7 +712,7 @@ load_local_cache <- function(project_name, subject_code, epoch, time_range,
       dims = coef$dims
       frequency_range %?<-% config$frequecies
       
-      el = ECoGTensor$new(0, dim = c(1,1,1,1), varnames = c('Trial', 'Frequency', 'Time', 'Electrode'), hybrid = F)
+      el = ECoGTensor$new(0, dim = c(1,1,1,1), varnames = c('Trial', 'Frequency', 'Time', 'Electrode'), hybrid = FALSE)
       el$dim = dims
       el$dimnames = list(
         Trial = epoch_cached$Trial,
@@ -717,29 +721,29 @@ load_local_cache <- function(project_name, subject_code, epoch, time_range,
         Electrode = electrodes
       )
       el$set_data(NULL)
-      el$use_index = T
-      el$hybrid = T
+      el$use_index = TRUE
+      el$hybrid = TRUE
       
       # colnames(coef$data) = paste0('V', seq_len(ncol(coef$data)))
       
       
       if(all(c('power', 'phase') %in% data_type)){
-        el2 = el$clone(deep = T)
+        el2 = el$clone(deep = TRUE)
         el2$swap_file = tempfile()
         
-        power = data.table::data.table(V1 = coef$data[[1]])
+        power = data.frame(V1 = coef$data[[1]])
         for(ii in seq_len(length(coef$data))){
           power[[paste0('V', ii)]] = Mod(coef$data[[ii]])^2
         }
-        write_fst(power, el$swap_file)
+        raveio::save_fst(power, el$swap_file)
         rm(power)
         
-        phase = data.table::data.table(V1 = coef$data[[1]])
+        phase = data.frame(V1 = coef$data[[1]])
         for(ii in seq_len(length(coef$data))){
           phase[[ii]] = Arg(coef$data[[ii]])
         }
         
-        write_fst(phase, el2$swap_file)
+        raveio::save_fst(phase, el2$swap_file)
         rm(coef)
         rm(phase)
         
@@ -747,7 +751,7 @@ load_local_cache <- function(project_name, subject_code, epoch, time_range,
         re[['power']] = el
       }else{
         
-        write_fst(as.data.frame(coef$data, col.names = paste0('V', seq_len(length(coef$data)))), el$swap_file)
+        raveio::save_fst(as.data.frame(coef$data, col.names = paste0('V', seq_len(length(coef$data)))), el$swap_file)
         if('power' %in% data_type){
           re[['power']] = el
         }else{
@@ -814,14 +818,14 @@ load_cached_wave = function(cache_dir, electrodes, time_range,
       ref_e = dipsaus::parse_svec(f)
       if(length(ref_e) == 1){
         # this is bipolar-ish reference
-        d = read_fst(file.path(coef_dir, sprintf('%d.fst', ref_e)),
+        d = raveio::load_fst(file.path(coef_dir, sprintf('%d.fst', ref_e)),
                      from = idx_range[1], to = idx_range[2])
         ref_data[[f]] = d[idx, ]
         rm(d)
       }
       if(length(ref_e) > 1){
         # this is car-ish reference
-        d = read_fst(file.path(ref_dir, sprintf('%s.h5.coef.fst', f)),
+        d = raveio::load_fst(file.path(ref_dir, sprintf('%s.h5.coef.fst', f)),
                      from = idx_range[1], to = idx_range[2])
         ref_data[[f]] = d[idx, ]
         rm(d)
@@ -841,7 +845,7 @@ load_cached_wave = function(cache_dir, electrodes, time_range,
   data = lapply_async(electrodes, function(e){
     fst_file = file.path(coef_dir, sprintf('%d.fst', e))
     
-    d = read_fst(fst_file, from = idx_range[1], to = idx_range[2])[idx, ]
+    d = raveio::load_fst(fst_file, from = idx_range[1], to = idx_range[2])[idx, ]
     # d = d[idx, ]
     
     # trial x freq x time
@@ -908,12 +912,12 @@ load_cached_voltage <- function(cache_dir, electrodes, time_range, srate_volt, t
       ref_e = dipsaus::parse_svec(f)
       if(length(ref_e) == 1){
         # this is bipolar-ish reference
-        d = read_fst(file.path(volt_dir, sprintf('%d.fst', ref_e)), from = idx[1], to = idx[2])[,1]
+        d = raveio::load_fst(file.path(volt_dir, sprintf('%d.fst', ref_e)), from = idx[1], to = idx[2])[,1]
         ref_data[[f]] = d
       }
       if(length(ref_e) > 1){
         # this is car-ish reference
-        d = read_fst(file.path(ref_dir, sprintf('%s.h5.volt.fst', f)), from = idx[1], to = idx[2])[,1]
+        d = raveio::load_fst(file.path(ref_dir, sprintf('%s.h5.volt.fst', f)), from = idx[1], to = idx[2])[,1]
         ref_data[[f]] = d
       }
     }
@@ -927,7 +931,7 @@ load_cached_voltage <- function(cache_dir, electrodes, time_range, srate_volt, t
   data = sapply(electrodes, function(e){
     progress$inc(sprintf('Loading electrode %d', e))
     fst_file = file.path(volt_dir, sprintf('%d.fst', e))
-    d = read_fst(fst_file, from = idx[1], to = idx[2])[,1]
+    d = raveio::load_fst(fst_file, from = idx[1], to = idx[2])[,1]
     
     if(need_reference){
       f = ref_table$Reference[ref_table$Electrode == e]
@@ -1028,7 +1032,7 @@ download_subject_data <- function(
     # this is not a local file, download
     
     # First, try to download subject data
-    cat2('Download from - ', url, level = 'INFO')
+    catgl('Download from - ', url, level = 'INFO')
     
     # prepare files
     temp_file = tempfile(pattern = 'junk_', temp_dir, fileext = '.zip')
@@ -1043,31 +1047,31 @@ download_subject_data <- function(
   dir_create(extract_dir)
   on.exit({
     # clean up
-    unlink(extract_dir, recursive = T)
+    unlink(extract_dir, recursive = TRUE)
     if(remove_zipfile){
-      unlink(temp_file, recursive = T)
+      unlink(temp_file, recursive = TRUE)
     }else{
-      cat2('Please manually remove zip file by running:\n',
+      catgl('Please manually remove zip file by running:\n',
              sprintf('unlink("%s")', temp_file), level = 'INFO')
     }
   })
   
   
   # Extract
-  cat2('Unzip the folder', level = 'INFO')
-  utils::unzip(temp_file, exdir = extract_dir, overwrite = T)
+  catgl('Unzip the folder', level = 'INFO')
+  utils::unzip(temp_file, exdir = extract_dir, overwrite = TRUE)
   
   # Check folder
   # look for meta.yaml
   if(is.null(subject_settings)){
-    yaml_files = list.files(extract_dir, pattern = 'subjects.yaml$', recursive = T, full.names = T)
+    yaml_files = list.files(extract_dir, pattern = 'subjects.yaml$', recursive = TRUE, full.names = TRUE)
     
     if(length(yaml_files)){
       depth = stringr::str_count(yaml_files, '(/|\\\\)')
       file = yaml_files[which.min(depth)[1]]
-      meta = yaml::read_yaml(file)
+      meta = as.list(raveio::load_yaml(file))
     }else{
-      cat2('No subjects.yaml found! Please use "subject_settings" argument to specify subject settings', level = 'FATAL')
+      catgl('No subjects.yaml found! Please use "subject_settings" argument to specify subject settings', level = 'FATAL')
     }
   }else{
     meta = subject_settings
@@ -1076,7 +1080,7 @@ download_subject_data <- function(
   
   # check data
   for(ii in seq_along(meta)){
-    cat2('----------------------------', level = 'INFO')
+    catgl('----------------------------', level = 'INFO')
     subject_id = names(meta)[[ii]]
     subject_id %?<-% ''
     
@@ -1085,7 +1089,7 @@ download_subject_data <- function(
     
     s = s[s!='']
     if(length(s) < 2){
-      cat2('Invalid subject ID - ', subject_id, ' (abort)', level = 'ERROR')
+      catgl('Invalid subject ID - ', subject_id, ' (abort)', level = 'ERROR')
       next()
     }
     if(is.null(override_project)){
@@ -1099,7 +1103,7 @@ download_subject_data <- function(
     }else{
       subject_code = override_subject
     }
-    cat2('Project Name: [', project_name, ']; Subject Code: [', subject_code, '] (checking)', level = 'INFO')
+    catgl('Project Name: [', project_name, ']; Subject Code: [', subject_code, '] (checking)', level = 'INFO')
     
     
     
@@ -1121,14 +1125,14 @@ download_subject_data <- function(
       # try to find dir
       data_dir = file.path(rdir, data_dir)
       if(!dir.exists(data_dir)){
-        cat2('\n\tdata_dir not exists\n',
+        catgl('\n\tdata_dir not exists\n',
                '\tPlease check existence of data_dir: \n', data_dir, level = 'WARNING')
       }else{
-        cat2('\tdata directory found! - \n', data_dir, level = 'INFO')
+        catgl('\tdata directory found! - \n', data_dir, level = 'INFO')
       }
     }else{
       data_dir = NULL
-      cat2('No "data_dir" in subject settings', level = 'WARNING')
+      catgl('No "data_dir" in subject settings', level = 'WARNING')
     }
     
     
@@ -1136,14 +1140,14 @@ download_subject_data <- function(
       # try to find dir
       raw_dir = file.path(rdir, raw_dir)
       if(!dir.exists(raw_dir)){
-        cat2('\n\traw_dir not exists\n',
+        catgl('\n\traw_dir not exists\n',
                '\tPlease check existence of raw_dir: \n', raw_dir, level = 'WARNING')
       }else{
-        cat2('\traw directory found! - \n', raw_dir, level = 'INFO')
+        catgl('\traw directory found! - \n', raw_dir, level = 'INFO')
       }
     }else{
       raw_dir = NULL
-      cat2('No "raw_dir" in subject settings, abort this one', level = 'WARNING')
+      catgl('No "raw_dir" in subject settings, abort this one', level = 'WARNING')
     }
     
     
@@ -1172,7 +1176,7 @@ download_subject_data <- function(
       choice = subject_code
       while(count > 0){
         count = count - 1
-        cat2('\nSubject [', choice, '] already exists. Replace? or enter new subject code here:\n',
+        catgl('\nSubject [', choice, '] already exists. Replace? or enter new subject code here:\n',
                '\t- yes, or Y(y) to overwrite\n',
                '\t- any other characters for new subject code\n',
                '\t- or leave it blank to cancel importing this subject', level = 'WARNING')
@@ -1181,19 +1185,19 @@ download_subject_data <- function(
         if(!stringr::str_detect(stringr::str_to_lower(choice), '^(y$)|(yes$)')){
           # rename
           if(choice == ''){
-            cat2('Cancel importing ', subject_code, level = 'INFO')
+            catgl('Cancel importing ', subject_code, level = 'INFO')
             subject_code = ''
             break
           }
           if(!any(check_existence(choice))){
-            cat2('Rename subject to ', choice, level = 'INFO')
-            cat2('Renaming subjects might cause some problems for SUMA', level = 'WARNING')
+            catgl('Rename subject to ', choice, level = 'INFO')
+            catgl('Renaming subjects might cause some problems for SUMA', level = 'WARNING')
             subject_code = choice
             
             break()
           }
         }else{
-          cat2('Overwrite subject ', subject_code, level = 'INFO')
+          catgl('Overwrite subject ', subject_code, level = 'INFO')
           break()
         }
       }
@@ -1207,17 +1211,17 @@ download_subject_data <- function(
     }
     
     # importing subject
-    cat2('Copy files:', level = 'INFO')
+    catgl('Copy files:', level = 'INFO')
     # raw dir
     to_dir = file.path(rave_raw_dir, subject_code)
     if(length(raw_dir)){
       dir_create(to_dir)
-      lapply(list.files(raw_dir, all.files = T, full.names = T, recursive = F), function(d){
-        file.copy(d, to_dir, overwrite = T, recursive = T)
+      lapply(list.files(raw_dir, all.files = TRUE, full.names = TRUE, recursive = FALSE), function(d){
+        file.copy(d, to_dir, overwrite = TRUE, recursive = TRUE)
       })
-      cat2('[New raw dir] ', to_dir, level = 'INFO')
+      catgl('[New raw dir] ', to_dir, level = 'INFO')
     }else{
-      cat2('Raw data is not imported.')
+      catgl('Raw data is not imported.')
     }
     
     
@@ -1225,18 +1229,18 @@ download_subject_data <- function(
     to_dir = file.path(rave_data_dir, project_name, subject_code)
     if(length(data_dir)){
       dir_create(to_dir)
-      lapply(list.files(data_dir, all.files = T, full.names = T, recursive = F), function(d){
-        file.copy(d, to_dir, overwrite = T, recursive = T)
+      lapply(list.files(data_dir, all.files = TRUE, full.names = TRUE, recursive = FALSE), function(d){
+        file.copy(d, to_dir, overwrite = TRUE, recursive = TRUE)
       })
-      cat2('[New data dir] ', to_dir, level = 'INFO')
+      catgl('[New data dir] ', to_dir, level = 'INFO')
     }else{
-      cat2('RAVE data is not imported.')
+      catgl('RAVE data is not imported.')
     }
     
-    cat2('\n\t[', project_name, '/', subject_code, '] Done.\n', level = 'INFO')
+    catgl('\n\t[', project_name, '/', subject_code, '] Done.\n', level = 'INFO')
   }
   
-  cat2('\n----------------------------', level = 'INFO')
+  catgl('\n----------------------------', level = 'INFO')
   
 }
 
@@ -1339,14 +1343,14 @@ archive_subject <- function(project_name, subject_code,
   ))
   names(conf) = subject$id
   
-  yaml::write_yaml(conf, file = file.path(root_dir, 'subjects.yaml'), fileEncoding = 'utf-8')
+  raveio::save_yaml(conf, file = file.path(root_dir, 'subjects.yaml'), fileEncoding = 'utf-8')
   dir_create(save_to)
   save_to = file.path(normalizePath(save_to), sprintf('%s_%s.zip', project_name, subject_code))
   setwd(root_dir)
   utils::zip(zipfile = save_to, files = '.')
   setwd(wd)
   
-  cat2('Please check zip file at ', save_to, level = 'INFO')
+  catgl('Please check zip file at ', save_to, level = 'INFO')
 }
 
 
@@ -1374,7 +1378,7 @@ module_analysis_names <- function(
   lookup_dir = get_dir('_export_lookup', project_name = project_name)$subject_dir
   
   if(!dir.exists(lookup_dir)){
-    dir.create(lookup_dir, recursive = T, showWarnings = F)
+    dir.create(lookup_dir, recursive = TRUE, showWarnings = FALSE)
   }
   
   if(!missing(module_id)){
@@ -1477,11 +1481,11 @@ module_analysis_save <- function(project_name, subject_code, module_id, analysis
   lookup_dir = get_dir('_export_lookup', project_name = project_name)$subject_dir
   
   if(!dir.exists(lookup_dir)){
-    dir.create(lookup_dir, recursive = T, showWarnings = F)
+    dir.create(lookup_dir, recursive = TRUE, showWarnings = FALSE)
   }
   
   module_id = stringr::str_to_upper(module_id)
-  analysis_name = stringr::str_extract_all(analysis_name, '[a-zA-Z0-9_]', simplify = T)
+  analysis_name = stringr::str_extract_all(analysis_name, '[a-zA-Z0-9_]', simplify = TRUE)
   analysis_name = paste(analysis_name, collapse = '')
   analysis_name = stringr::str_to_upper(analysis_name)
   
@@ -1495,11 +1499,11 @@ module_analysis_save <- function(project_name, subject_code, module_id, analysis
   
   valid = FALSE
   if(file.exists(file)){
-    cat2('File detected, export meta info')
+    catgl('File detected, export meta info')
     file = normalizePath(file)
     valid = TRUE
   }else{
-    cat2('File not detected, meta info will be ignored')
+    catgl('File not detected, meta info will be ignored')
     return()
   }
   

@@ -31,15 +31,15 @@ arrange_data_dir <- function(first_time = FALSE, reset = FALSE){
     catgl('Cannot find data directory for RAVE. Please make sure that these folder exists', level = 'ERROR')
     catgl(data_dir, level = 'ERROR')
     catgl(raw_dir, level = 'ERROR')
-    catgl('Check existence of these folders, or reset default data repository by typing arrange_data_dir(reset = T)', level = 'ERROR')
-    return(F)
+    catgl('Check existence of these folders, or reset default data repository by typing arrange_data_dir(reset = TRUE)', level = 'ERROR')
+    return(FALSE)
   }else{
     rave_options(data_dir = base::normalizePath(data_dir))
     rave_options(raw_data_dir = base::normalizePath(raw_dir))
     
     # Test speed
     if(!isTRUE(rave_options('disable_startup_speed_check'))){
-      speed = test_hdspeed(quiet = T)
+      speed = test_hdspeed(quiet = TRUE)
       rave_options(drive_speed = speed)
     }
     
@@ -105,7 +105,7 @@ arrange_modules <- function(refresh = FALSE, reset = FALSE, quiet = FALSE){
     
     # join
     if(is.data.frame(old_table) && !reset){
-      tbl = merge(tbl, old_table, by = names(tbl), all.x = TRUE, no.dups = T)
+      tbl = merge(tbl, old_table, by = names(tbl), all.x = TRUE, no.dups = TRUE)
       tbl$Active[is.na(tbl$Active)] = TRUE
       tbl$Notes[is.na(tbl$Notes)] = ''
     }else{
@@ -179,7 +179,7 @@ get_subjects <- function(project_name, check_subfolders = TRUE, check_rawdata = 
 #' \code{project_name} are provided
 #' @param relative whether to return relative path or absolute to root directory
 #' @export
-get_dir <- function(subject_code, project_name, block_num, mkdirs = NULL, subject_id, relative = F){
+get_dir <- function(subject_code, project_name, block_num, mkdirs = NULL, subject_id, relative = FALSE){
   re = list()
   
   re$data_dir = rave_options('data_dir')

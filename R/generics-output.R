@@ -36,11 +36,11 @@ getDefaultReactiveOutput.rave_running_local <- getDefaultReactiveOutput.rave_mod
 
 #' @export
 print.ravedev_ReactiveOutput <- function(x, ...){
-  cat2('<Reactive Output> (Write-only)', level = 'INFO')
+  catgl('<Reactive Output> (Write-only)', level = 'INFO')
   for(k in ls(x, all.names = FALSE)){
-    cat2(' ', k, '= ', level = 'INFO', pal = list('INFO' = 'orangered'), end = '')
+    catgl(' ', k, '= ', level = 'INFO', pal = list('INFO' = 'orangered'), end = '')
     s = paste(deparse(x[[k]]), sep = '\n\t')
-    cat2(s, level = 'INFO', pal = list('INFO' = 'dodgerblue3'), sep = '\n\t')
+    catgl(s, level = 'INFO', pal = list('INFO' = 'dodgerblue3'), sep = '\n\t')
   }
   invisible(x)
 }

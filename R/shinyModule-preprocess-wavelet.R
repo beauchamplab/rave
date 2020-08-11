@@ -379,7 +379,7 @@ rave_pre_wavelet3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_p
       
       showNotification(p('Wavelet start!'), type = 'message')
       
-      cat2('[WAVELET] Number of electrodes: ', length(w_e))
+      catgl('[WAVELET] Number of electrodes: ', length(w_e))
       
       utils$apply_wavelet(
         electrodes = w_e,

@@ -23,21 +23,21 @@ safe_wrap_expr <- function(expr, onFailure = NULL, onError = NULL, finally = {})
     }, finally = finally)
     
   }, `rave-info` = function(e){
-    dipsaus::cat2(e$message, level = 'INFO')
+    catgl(e$message, level = 'INFO')
     
   }, `rave-warning` = function(e){
-    dipsaus::cat2(e$message, level = 'WARNING')
+    catgl(e$message, level = 'WARNING')
     invokeRestart('rave-notification', e)
     
   }, `rave-error` = function(e){
-    dipsaus::cat2(e$message, level = 'ERROR')
+    catgl(e$message, level = 'ERROR')
     if(is.function(onError)){
       onError(e)
     }
     invokeRestart('rave-notification', e)
     
   }, `rave-fatal` = function(e){
-    dipsaus::cat2(e$message, level = 'ERROR')
+    catgl(e$message, level = 'ERROR')
     if(is.function(onError)){
       onError(e)
     }
@@ -76,7 +76,7 @@ observe <- function(x, env = NULL, quoted = FALSE, priority = 0, domain = NULL, 
   shiny::observe(
     x = x,
     env = env,
-    quoted = T,
+    quoted = TRUE,
     priority = priority - 1L,
     domain = domain,
     ...
@@ -118,7 +118,7 @@ observeEvent = function(
   
   shiny::observeEvent(
     eventExpr = eventExpr, handlerExpr = handlerExpr, event.env = event.env,
-    event.quoted = T, handler.env = handler.env, handler.quoted = T,
+    event.quoted = TRUE, handler.env = handler.env, handler.quoted = TRUE,
     priority = priority - 1L, domain = domain, ...
   )
 }
@@ -373,7 +373,7 @@ parsers[['.default_parser']] = function(expr, env = environment()){
     updates = function(session, ..., .args = list()){
       args = c(list(...), .args)
       if(length(args) == 0){
-        cat2('Nothing to update')
+        catgl('Nothing to update')
         return()
       }
       fun_name = utils::tail(unlist(stringr::str_split(as.character(expr[[1]]), ':')), 1)
@@ -701,7 +701,7 @@ parsers[['rave']] = list(
             }
           }, error = function(e){
             lapply(utils::capture.output(traceback(e)), function(x){
-              cat2(x, level = 'ERROR')
+              catgl(x, level = 'ERROR')
             })
           })
         }
@@ -719,106 +719,6 @@ parsers[['rave']] = list(
       updates = do_nothing
     )
   }
-  # 'compoundInput' = function(expr, env = environment()){
-  #   expr = match.call(compoundInput, expr)
-  #   inputId = expr[['inputId']]
-  #   expr[['inputId']] = as.call(list(quote(ns), inputId))
-  #   args = as.list(expr)[-1]
-  #   max_ncomp = eval(expr[['max_ncomp']])
-  #   max_ncomp %?<-% formals(compoundInput)$max_ncomp
-  #   # parse components
-  #   components = expr[['components']]
-  #   if(as.character(components[[1]])[[1]] == '{'){
-  #     components = as.list(components)[-1]
-  #   }else{
-  #     components = list(components)
-  #   }
-  #   
-  #   
-  #   
-  #   lapply(components, function(sub_expr){
-  #     quo = rlang::as_quosure(sub_expr, env = env)
-  #     comp_parsers$parse_quo(quo)
-  #   }) ->
-  #     sub_comps
-  #   
-  #   names(sub_comps) = sapply(sub_comps, function(x){x$inputId})
-  #   sub_names = names(sub_comps)
-  #   
-  #   observers = function(input, output, session, local_data, exec_env){
-  #     
-  #     observe({
-  #       val = input[[inputId]]
-  #       if(isolate(local_data$has_data)){
-  #         
-  #         t = Sys.time()
-  #         exec_env$param_env[[inputId]] = val
-  #         exec_env$runtime_env[[inputId]] = val
-  #         
-  #         if( inputId %in% exec_env$rendering_inputIds ){
-  #           # this input only updates renderings, skip main
-  #           local_data$has_results = t
-  #         }else if( !inputId %in% exec_env$manual_inputIds ){
-  #           # need to run rave_execute
-  #           local_data$last_input = t
-  #         }
-  #       }
-  #       
-  #     })
-  #   }
-  #   
-  #   updates = function(session, ..., .args = list()){
-  #     args = c(list(...), .args)
-  #     base_args = args$initialize
-  #     
-  #     to = args[['to']]
-  #     if(is.null(to)){
-  #       to = length(args$value)
-  #     }
-  #     
-  #     if(!is.null(to)){
-  #       args[['to']] = NULL
-  #       if(to > 0){
-  #         updateCompoundInput(session, inputId, to = to)
-  #       }
-  #     }
-  #     
-  #     lapply(seq_len(max_ncomp), function(ii){
-  #       base_args
-  #       if(ii <= length(args$value)){
-  #         more_args = args$value[[ii]]
-  #         for(ma in names(more_args)){
-  #           val = more_args[[ma]]
-  #           if(is.list(val)){
-  #             tmp = c(val[['value']], val[['selected']])
-  #             if(!length(tmp) && length(val)){
-  #               tmp = val[[1]]
-  #             }
-  #             val = tmp
-  #           }
-  #           base_args[[ma]] = c(base_args[[ma]], list(val))
-  #         }
-  #       }
-  #       lapply(sub_names, function(nm){
-  #         sub_id = sprintf('%s_%s_%d', inputId, nm, ii)
-  #         value = base_args[[nm]]
-  #         sub_comps[[nm]]$updates(session = session, inputId = sub_id, .args = value)
-  #       })
-  #     })
-  #     
-  #   }
-  #   
-  #   list(
-  #     expr = expr,
-  #     inputId = inputId,
-  #     args = args,
-  #     observers = observers,
-  #     updates = updates,
-  #     initial_value = list(sapply(sub_comps, function(co) {
-  #       co$initial_value
-  #     }, simplify = F, USE.NAMES = T))
-  #   )
-  # }
 )
 
 parsers[['threeBrain']] = list(
@@ -844,6 +744,104 @@ parsers[['threeBrain']] = list(
   }
 )
 
+comp_parser_template <- function(expr, update_fun, env = environment(), keyword = 'selected'){
+  re = parsers[['.default_parser']](expr, env)
+  inputId = re$inputId
+  
+  re$initial_value = re$args[[keyword]]
+  
+  re$updates = function(session, ..., .args = list()){
+    args = c(list(...), .args)
+    if(length(args) == 0){
+      return()
+    }
+    
+    args[['inputId']] %?<-% inputId
+    args[['session']] = session
+    
+    sel = '' == names(args)
+    if(any(sel)){
+      nms = names(args)
+      sel1 = nms == keyword
+      nms[sel] = keyword
+      names(args) = nms
+      if(sum(sel1)){
+        args = args[!sel1]
+      }
+    }
+    
+    
+    do.call(update_fun, args = args)
+  }
+}
+
+parsers[['shinyWidgets']] = list(
+  'actionBttn' = function(expr, env = environment()){
+    re = parsers[['.default_parser']](expr, env)
+    inputId = re$inputId
+    re$updates = function(session, ..., .args = list()){
+      args = c(list(...), .args)
+      
+      if(length(args) == 0){
+        return()
+      }
+      args[['session']] = session
+      args[['inputId']] %?<-% inputId
+      
+      do.call(shiny::updateActionButton, args = args)
+    }
+    
+    return(re)
+  },
+  'checkboxGroupButtons' = function(expr, env = environment()){
+    comp_parser_template(expr, shinyWidgets::updateCheckboxGroupButtons,
+                         env = env, keyword = 'selected')
+  },
+  'awesomeCheckboxGroup' = function(expr, env = environment()){
+    comp_parser_template(expr, shinyWidgets::updateAwesomeCheckboxGroup,
+                         env = env, keyword = 'selected')      
+  },
+  'prettyCheckboxGroup' = function(expr, env = environment()){
+    comp_parser_template(expr, shinyWidgets::updatePrettyCheckboxGroup,
+                         env = env, keyword = 'selected')      
+  },
+  'radioGroupButtons' = function(expr, env = environment()){
+    comp_parser_template(expr, shinyWidgets::updateRadioGroupButtons,
+                         env = env, keyword = 'selected')      
+  },
+  'awesomeRadio' = function(expr, env = environment()){
+    comp_parser_template(expr, shinyWidgets::updateAwesomeRadio,
+                         env = env, keyword = 'selected')      
+  },
+  'prettyRadioButtons' = function(expr, env = environment()){
+    comp_parser_template(expr, shinyWidgets::updatePrettyRadioButtons,
+                         env = env, keyword = 'selected')      
+  },
+  'pickerInput' = function(expr, env = environment()){
+    comp_parser_template(expr, shinyWidgets::updatePickerInput,
+                         env = env, keyword = 'selected')      
+  },
+  'sliderTextInput' = function(expr, env = environment()){
+    comp_parser_template(expr, shinyWidgets::updateSliderTextInput,
+                         env = env, keyword = 'selected')      
+  },
+  'colorSelectorDrop' = function(expr, env = environment()){
+    comp_parser_template(expr, do_nothing,
+                         env = env, keyword = 'selected')      
+  },
+  'multiInput' = function(expr, env = environment()){
+    comp_parser_template(expr, shinyWidgets::updateMultiInput,
+                         env = env, keyword = 'selected')      
+  },
+  'spectrumInput' = function(expr, env = environment()){
+    comp_parser_template(expr, shinyWidgets::updateSpectrumInput,
+                         env = env, keyword = 'selected')      
+  },
+  'verticalTabsetPanel' = function(expr, env = environment()){
+    comp_parser_template(expr, shinyWidgets::updateVerticalTabsetPanel,
+                         env = env, keyword = 'selected')      
+  }
+)
 
 
 comp_parser <- function(){

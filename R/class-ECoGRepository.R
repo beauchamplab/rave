@@ -135,7 +135,7 @@ ECoGRepository <- R6::R6Class(
     #' @return An \code{ECoGRepository} instance
     initialize = function(subject, reference = 'default', autoload = TRUE){
       
-      cat2('Initializing a Data Repository')
+      catgl('Initializing a Data Repository')
       
       self$raw = dipsaus::fastmap2()
       self$reference = dipsaus::fastmap2()
@@ -270,7 +270,7 @@ ECoGRepository <- R6::R6Class(
       frequency_range %?<-% range(freqs$Frequency)
       freq_subset = freqs$Frequency %within% frequency_range
       if(!sum(freq_subset)){
-        cat2('Frequency range is invalid, looking for the nearest frequency', level = 'WARNING')
+        catgl('Frequency range is invalid, looking for the nearest frequency', level = 'WARNING')
         freq_subset[which.min(abs(freqs$Frequency - frequency_range[1]))] = T
       }
       
@@ -422,7 +422,7 @@ ECoGRepository <- R6::R6Class(
           #
           # # generate local cache for phase
           # file = tempfile()
-          # write_fst(results, file, compress = 20)
+          # raveio::save_fst(results, file, compress = 20)
           # rm(results)
           # gc()
           #
@@ -472,7 +472,7 @@ ECoGRepository <- R6::R6Class(
           #
           # # generate local cache for volt
           # file = tempfile()
-          # write_fst(results, file, compress = 20)
+          # raveio::save_fst(results, file, compress = 20)
           # rm(results)
           # gc()
           #
@@ -615,7 +615,7 @@ ECoGRepository <- R6::R6Class(
       
       end = Sys.time()
       if(print.time){
-        cat2(sprintf('Baseline calculation - %.0f ms', as.numeric(end-start) * 1000))
+        catgl(sprintf('Baseline calculation - %.0f ms', as.numeric(end-start) * 1000))
       }
       return(re)
     }

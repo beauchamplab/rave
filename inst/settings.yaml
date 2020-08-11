@@ -1,6 +1,4 @@
 debug: FALSE
-raw_data_dir: ~/rave_data/raw_dir
-data_dir: ~/rave_data/data_dir
 big_object_size: 500000
 server_time_zone: America/Chicago
 module_export: ./export

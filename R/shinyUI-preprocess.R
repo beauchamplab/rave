@@ -170,7 +170,7 @@ rave_preprocess <- function(
 
     # Load subject
     utils$load_subject = function(subject_code, project_name){
-      cat2('Loading Subject')
+      catgl('Loading Subject')
       dirs = get_dir(subject_code = subject_code, project_name = project_name)
       stopifnot2(dir.exists(dirs$preprocess_dir), msg = paste0(
         'Subject ' , subject_code , ' has no project folder ' , project_name
@@ -187,12 +187,12 @@ rave_preprocess <- function(
         env$subject = s
       }
       utils$reset()
-      cat2('Loaded Subject')
+      catgl('Loaded Subject')
     }
 
     lapply(model_instances, function(x){
-      cat2(x$ID)
-      callModule(x$server, id = paste0(x$ID , '_M'), user_data = user_data, utils = utils, doc_prefix = doc_prefix, ...)
+      catgl(x$ID)
+      shiny::callModule(x$server, id = paste0(x$ID , '_M'), user_data = user_data, utils = utils, doc_prefix = x$doc_prefix, ...)
     })
 
   }

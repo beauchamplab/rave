@@ -197,7 +197,7 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
       # check blocks
       preprocess_yaml = file.path(meta_dir, '..', 'preprocess', 'rave.yaml')
       if(file.exists(preprocess_yaml)){
-        preproc_info = yaml::read_yaml(preprocess_yaml)
+        preproc_info = raveio::load_yaml(preprocess_yaml)
         if(length(preproc_info$blocks)){
           pass_test = TRUE
           # let's check block!
@@ -241,7 +241,7 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
     }
     else if(meta_type == 'info'){
       info_file = file.path(meta_dir, 'info.yaml')
-      info = yaml::yaml.load_file(info_file)
+      info = as.list(raveio::load_yaml(info_file))
       return(info)
     }
     else if(meta_type == 'time_excluded'){
@@ -272,11 +272,5 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
 
 
 read_csv_no_header <- function(file, nrows = Inf, drop = NULL){
-  header = data.table::fread(file = file, nrows = 1, header = FALSE)
-  if(is.numeric(header[[1]])){
-    header = FALSE
-  }else{
-    header = TRUE
-  }
-  header = data.table::fread(file = file, header = header, nrows = nrows, drop = drop, fill = TRUE)
+  raveio::read_csv_ieeg(file = file, nrows = nrows, drop = drop)
 }

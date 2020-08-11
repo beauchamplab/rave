@@ -123,8 +123,8 @@ Electrode <- R6::R6Class(
     #' @return If \code{ram} is true, then returns a list of matrices. The 
     #' length of the list equals the number of blocks, and each matrix is 
     #' frequency by time points. If \code{ram} is false, then returns an 
-    #' environment with each element a \code{\link[rave]{LazyH5}} or 
-    #' \code{\link[rave]{LazyFST}} instance.
+    #' environment with each element a \code{\link[raveio]{LazyH5}} or 
+    #' \code{\link[raveio]{LazyFST}} instance.
     referenced = function(type = 'power', ram = TRUE){
       
       if(is.character(self$reference) || setequal(names(self[[type]]), self$blocks)){
@@ -451,8 +451,8 @@ Electrode <- R6::R6Class(
             fst_phase = file.path(cache_dir, 'cache', 'reference', 'phase', b, sprintf("%s.fst", electrode))
             if(file.exists(fst_coef) && file.exists(fst_phase)){
               # load from cached reference
-              self$raw_power[[b]] = t(as.matrix(read_fst(fst_coef)))^2
-              self$raw_phase[[b]] = t(as.matrix(read_fst(fst_phase)))
+              self$raw_power[[b]] = t(as.matrix(raveio::load_fst(fst_coef)))^2
+              self$raw_phase[[b]] = t(as.matrix(raveio::load_fst(fst_phase)))
               # test, result should be 0 0
               # coef = load_h5(file, name = paste0('/wavelet/coef/', b), ram = T)
               # range(self$raw_power[[b]] - (coef[,,1])^2)
@@ -551,7 +551,7 @@ Electrode <- R6::R6Class(
     #' \code{"power"}, and \code{"phase"}
     #' @param raw whether epoch pre-referenced data?
     #' @param hybrid whether to fast-cache the data on hard-drive? See also 
-    #' \code{\link[rave]{Tensor}}
+    #' \code{\link[raveio]{Tensor}}
     #' @return list of data after epoch
     epoch = function(epoch_name, pre, post, types = c('volt', 'power', 'phase'),
                      raw = FALSE, hybrid = TRUE){

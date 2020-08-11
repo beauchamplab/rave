@@ -1,0 +1,43 @@
+citHeader("To cite rave in publications use:")
+
+citEntry(entry = "Article",
+         title        = "{RAVE}: Comprehensive open-source software for reproducible analysis and visualization of intracranial EEG data",
+         author       = personList(as.person("John F. Magnotti"),
+                                   as.person("Zhengjia Wang"),
+                                   as.person("Michael S. Beauchamp")),
+         journal      = "bioRxiv",
+         year         = "2020",
+         doi          = "10.1101/2020.06.02.129676",
+         textVersion  = "Magnotti, JF, Wang, Z, Beauchamp, MS. RAVE: comprehensive open-source software for reproducible analysis and visualization of intracranial EEG data."
+)
+
+
+citEntry(entry = "Article",
+         title       = "Responses to visual speech in human Posterior Superior Temporal Gyrus examined with iEEG deconvolution",
+         author      = personList(as.person("Brian A. Metzger"),
+                                  as.person("John F. Magnotti"),
+                                  as.person("Zhengjia Wang"),
+                                  as.person("Elizabeth Nesbitt"),
+                                  as.person("Patrick J. Karas"),
+                                  as.person("Daniel Yoshor"),
+                                  as.person("Michael S. Beauchamp")),
+         journal     = "Journal of Neuroscience",
+         year        = "2020",
+         doi         = "10.1523/JNEUROSCI.0279-20.2020",
+         textVersion = "Metzger BA, Magnotti JF, Wang Z, Nesbitt E, Karas PJ, Yoshor D, Beauchamp MS. Responses to Visual Speech in Human Posterior Superior Temporal Gyrus Examined with iEEG Deconvolution. Journal of Neuroscience"
+)
+
+citEntry(entry = "Article",
+         title       = "The visual speech head start improves perception and reduces superior temporal cortex responses to auditory speech",
+         author      = personList(as.person("Patrick J. Karas"),
+                                  as.person("John F. Magnotti"),
+                                  as.person("Brian A. Metzger"),
+                                  as.person("Lin L. Zhu"),
+                                  as.person("Kristen B. Smith"),
+                                  as.person("Daniel Yoshor"),
+                                  as.person("Michael S. Beauchamp")),
+         journal     = "eLife",
+         year        = "2019",
+         doi         = "10.7554/eLife.48116",
+         textVersion = "Karas PJ, Magnotti JF, Metzger BA, Zhu LL, Smith KB, Yoshor D, Beauchamp MS. The visual speech head start improves perception and reduces superior temporal cortex responses to auditory speech. eLife 2019;8:e48116"
+)

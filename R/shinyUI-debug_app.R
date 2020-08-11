@@ -218,8 +218,8 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
           }
         }
       }, error = function(e){
-        cat2('Cannot update variable ', variable_name, ' in module ', module_id, level = 'WARNING')
-        cat2(e, level = 'WARNING')
+        catgl('Cannot update variable ', variable_name, ' in module ', module_id, level = 'WARNING')
+        catgl(e, level = 'WARNING')
       })
     }
     
@@ -229,7 +229,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
       if(!is.null(module_info)){
         mid = module_info$module_id = stringr::str_to_upper(module_info$module_id)
         if(mid %in% module_ids){
-          cat2('Switching to module - ', mid, level = 'INFO')
+          catgl('Switching to module - ', mid, level = 'INFO')
           do.call(update_variable, module_info)
           session$sendCustomMessage('rave_sidebar_switch', module_info)
         }
@@ -266,10 +266,10 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
         current_module_id = input$sidebar
         global_reactives$execute_module = current_module_id
         session$userData$rave_current_module_id = current_module_id
-        shinyjs::hide(id = '__rave__mask__', anim = T, animType = 'slide')
+        shinyjs::hide(id = '__rave__mask__', anim = TRUE, animType = 'slide')
         shinyjs::removeClass(selector = 'body', class = "rave-noscroll")
       }else{
-        shinyjs::show(id = '__rave__mask__', anim = T, animType = 'slide')
+        shinyjs::show(id = '__rave__mask__', anim = TRUE, animType = 'slide')
         shinyjs::addClass(selector = 'body', class = "rave-noscroll")
       }
     })
@@ -308,7 +308,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     subject_modal = function(subject, current_electrodes = NULL){
       modalDialog(
         title = subject$id,
-        easyClose = T,
+        easyClose = TRUE,
         size = 'l',
         shinydashboard::tabBox(
           width = 12,
@@ -472,7 +472,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     
     if(!test.mode){
       session$onSessionEnded(function() {
-        cat2('Clean up environment.')
+        catgl('Clean up environment.')
         
         lapply(unlist(modules), function(x){
           x$clean(session_id = session_id)

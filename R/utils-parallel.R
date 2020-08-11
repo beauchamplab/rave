@@ -8,7 +8,7 @@
 #' @param .globals Automatically detect variables. See ?future::future
 #' @param .gc Clean up environment after each iterations? Recommended for large datasets.
 #' @param .envir internally used
-#' @param .as_datatable logical, return result as \code{data.table}. Experimental.
+#' @param .as_datatable logical, return result as \code{data.frame}. Experimental.
 #' @param .nrows integer, if \code{.as_datatable=TRUE}, number of rows expected.
 #' @examples
 #' \dontrun{
@@ -66,9 +66,9 @@ lapply_async <- function(
   .future_list = list()
   
   if(.as_datatable){
-    .future_values = data.table::data.table(
+    .future_values = data.frame(
       V1 = rep(NA, .nrows),
-      keep.rownames = F, stringsAsFactors = F
+      keep.rownames = FALSE, stringsAsFactors = FALSE
     )
   }else{
     .future_values = list()
@@ -285,8 +285,11 @@ setup_async_evaluator <- local({
 async <- function(expr, varname, success = NULL, failure = NULL, 
                   quoted = FALSE, assign_env = new.env(parent = emptyenv()), 
                   eval_env = parent.frame(), ..., .list = list(), 
-                  ...map = dipsaus::text_map(), ...debug = FALSE,
+                  ...map = NULL, ...debug = FALSE,
                   evaluator = NULL){
+  if(is.null(map)){
+    map <- dipsaus::rds_map()
+  }
   s = Sys.time()
   if(!quoted){
     expr <- rlang::enquo(expr)
@@ -315,7 +318,7 @@ async <- function(expr, varname, success = NULL, failure = NULL,
   
   # TODO: wrap this into a internal function
   if(...debug){
-    cat2('Obtain evaluator')
+    catgl('Obtain evaluator')
   }
   base::print(Sys.time() - s)
   
@@ -326,7 +329,7 @@ async <- function(expr, varname, success = NULL, failure = NULL,
   base::print(Sys.time() - s)
   
   if(...debug){
-    cat2('Schedule task - ', varname)
+    catgl('Schedule task - ', varname)
   }
   
   evaluator$run(
@@ -335,7 +338,7 @@ async <- function(expr, varname, success = NULL, failure = NULL,
       base::print(Sys.time() - s)
       if(...map$get(varname, 0) == 1){
         if(...debug){
-          cat2('Captured - ', varname)
+          catgl('Captured - ', varname)
         }
         assign_env[[varname]] <- res
         if(is.function(success)){
@@ -343,7 +346,7 @@ async <- function(expr, varname, success = NULL, failure = NULL,
         }
       }else{
         if(...debug){
-          cat2('Value already calculated, skipping assignment - ', varname)
+          catgl('Value already calculated, skipping assignment - ', varname)
         }
       }
     },

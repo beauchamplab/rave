@@ -9,7 +9,7 @@ r_to_py.Subject(obj, convert = FALSE)
 \arguments{
 \item{obj}{Subject class}
 
-\item{convert}{pass to \code{\link[reticulate]{r_to_py}}}
+\item{convert}{pass to \code{r_to_py} in \code{reticulate} package}
 }
 \description{
 Convert subject to python object

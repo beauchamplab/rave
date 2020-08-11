@@ -33,7 +33,7 @@ output[['.__rave_modal__.']] <- renderUI({
   }
   speed = rave_options('drive_speed')
   if(!is.numeric(speed) || length(speed) != 2){
-    speed = 0.01
+    speed = 100
   }else{
     speed = speed[2]
   }
@@ -58,7 +58,7 @@ output[['.__rave_modal__.']] <- renderUI({
       style = 'margin-left:15px;',
       "Load Data"
     )
-    data_msg = sprintf('Estimated size: %s, (%.1f seconds)', dipsaus::to_ram_size(total_size), total_size * 3 * speed / 1e6)
+    data_msg = sprintf('Estimated size: %s, (%.1f seconds)', dipsaus::to_ram_size(total_size), total_size * 3 / speed / 1e6)
   }
 
   div(

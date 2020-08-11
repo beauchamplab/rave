@@ -35,7 +35,7 @@ automatically. Otherwise you have to specify the packages that you want to load.
 
 \item{.gc}{Clean up environment after each iterations? Recommended for large datasets.}
 
-\item{.as_datatable}{logical, return result as \code{data.table}. Experimental.}
+\item{.as_datatable}{logical, return result as \code{data.frame}. Experimental.}
 
 \item{.nrows}{integer, if \code{.as_datatable=TRUE}, number of rows expected.}
 }

@@ -231,6 +231,7 @@ test_that('Function rave_prepare with demo/YAB', {
     expect_true(env$module_tools$is_loaded(data_type = 'raw_power'))
     
     # Because env is not default data repo, rave_checks will just raise errors
+    # TODO: fix this
     expect_error(rave:::rave_checks('raw power', 'referenced power'))
     
     # Transfer items to default repo. The trick is to save the items in env and 

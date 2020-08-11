@@ -247,11 +247,11 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
           ),
           div(
             style="flex-basis: 25%;",
-            numericInput(ns('epoch_pre'), 'Pre', min = 0, value = last_time_range[1])
+            numericInput(ns('epoch_pre'), 'Pre', min = 0, value = last_time_range[1], step = 0.1)
           ),
           div(
             style="flex-basis: 25%;",
-            numericInput(ns('epoch_post'), 'Post', min = 0, value = last_time_range[2])
+            numericInput(ns('epoch_post'), 'Post', min = 0, value = last_time_range[2], step = 0.1)
           ),
           div(
             style="flex-basis: 100%;",
@@ -778,9 +778,9 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
                                                          dipsaus::to_ram_size(max(s_volt, s_power))), br(),
         strong('Estimated Loading time: '), sprintf(
           'Power (%.0f sec), Phase (%.0f sec), Voltage(%.0f sec)',
-          s_power * drive_speed / 1000^2 * 2,
-          s_power * drive_speed / 1000^2 * 2,
-          s_volt * drive_speed / 1000^2 * 2
+          s_power / drive_speed / 1000^2 * 2,
+          s_power / drive_speed / 1000^2 * 2,
+          s_volt / drive_speed / 1000^2 * 2
         )
       )
     })
@@ -973,7 +973,7 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
       removeModal()
       # Remove
       local_data$prevent_dblclick = TRUE
-      cat2('Subject loaded, trigger module to refresh...')
+      catgl('Subject loaded, trigger module to refresh...')
     })
     
     

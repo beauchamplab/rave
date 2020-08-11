@@ -10,7 +10,7 @@ to_module <- function(module_id, sidebar_width = 3, parse_context = c(
   ctx = rave_context(disallowed_context = 'default')
   pkg_name = ctx$package
   .__rave_module__. = module_id
-  cat2('parsing module ', module_id, ' in the following context: ', parse_context, level = 'INFO')
+  catgl('parsing module ', module_id, ' in the following context: ', parse_context, level = 'INFO')
   
   quos = parse_components(module_id, parse_context)
   
@@ -36,7 +36,7 @@ to_module <- function(module_id, sidebar_width = 3, parse_context = c(
         fpath = file.path(tempdir, fname)
         file.copy(f, fpath, overwrite = TRUE)
         
-        cat2("Copying ", f, ' >> ', fpath)
+        catgl("Copying ", f, ' >> ', fpath)
         
         # if the file ends with .R, source it
         if(stringr::str_detect(fname, pattern = '\\.[Rr]$')){
@@ -54,7 +54,7 @@ to_module <- function(module_id, sidebar_width = 3, parse_context = c(
       
       
     }else{
-      cat2("Cannot find path to ", f, level = 'ERROR')
+      catgl("Cannot find path to ", f, level = 'ERROR')
     }
     return(NULL)
   })

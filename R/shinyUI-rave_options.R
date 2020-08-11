@@ -6,8 +6,11 @@ rave_options_gui <- local({
     'drive_speed' = 'Hard drive speed',
     
     # Core Option
-    'raw_data_dir' = 'Raw subject data path',
+    'raw_data_dir' = 'Native RAVE raw folder',
+    'bids_data_dir' = 'BIDS data root (optional)',
     'data_dir' = 'RAVE subject data path',
+    'tensor_temp_path' = 'Path to cache large data files',
+    
     # 'crayon_enabled' = 'Color console',
     
     # SUMA
@@ -61,7 +64,7 @@ rave_options_gui <- local({
         observeEvent(input$raw_data_dir_reset, {
           dir = input[[opt_id]]
           if(!dir.exists(dir)){
-            dir.create(dir, recursive = T, showWarnings = F)
+            dir.create(dir, recursive = TRUE, showWarnings = FALSE)
           }
           # Make sure it exists, otherwise error notification
           if(dir.exists(dir)){
@@ -77,6 +80,67 @@ rave_options_gui <- local({
       })
     )
   }
+  
+  # ------------------------ bids_data_dir ------------------------
+  {
+    comps[[length(comps) + 1]] = list(
+      type = 'Core Settings',
+      opt_name = 'bids_data_dir',
+      observer = rlang::quo({
+        opt_id = 'bids_data_dir'
+        output$bids_data_dir_input <- renderUI({
+          shiny::textInput(opt_id, opt_names[[opt_id]], value = local_data[[opt_id]])
+        })
+        output$bids_data_dir_ui <- renderUI({
+          val = input[[opt_id]]
+          val %?<-% rave_options(opt_id)
+          msg = ''
+          col = 'red'
+          btn = TRUE
+          label = "Set Directory"
+          if(dir.exists(val)){
+            finfo = file.info(val)
+            if(!finfo$isdir){
+              msg = 'This is not a valid "directory" path'
+              btn = FALSE
+            }else if(val == rave_options(opt_id)){
+              btn = FALSE
+            }
+          }else{
+            msg = 'Path not exists, click "Create & Set Directory" to create'
+            col = 'black'
+            label = "Create & Set Directory"
+          }
+          
+          return(tagList(
+            p(tags$small(span(style = gl('color:{col};'), msg))),
+            div(
+              class = ifelse(btn, '', 'hidden'),
+              actionLink('bids_data_dir_reset', label)
+            )
+          ))
+        })
+        observeEvent(input$bids_data_dir_reset, {
+          dir = input[[opt_id]]
+          if(!dir.exists(dir)){
+            dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+          }
+          # Make sure it exists, otherwise error notification
+          if(dir.exists(dir)){
+            dir = try_normalizePath(path = dir)
+            arg = list(dir)
+            names(arg) = opt_id
+            do.call(set_opt, arg)
+            showNotification('Raw data directory is set.', type = 'message', id = paste0(opt_id, '_noty'))
+          }else{
+            showNotification('Failed while setting raw data directory: Cannot create directory', type = 'error', id = paste0(opt_id, '_noty'))
+          }
+        })
+      })
+    )
+  }
+  
+  
   
   # ------------------------ data_dir ----------------------------
   {
@@ -122,7 +186,7 @@ rave_options_gui <- local({
         observeEvent(input[[set_btnid]], {
           dir = input[[opt_id]]
           if(!dir.exists(dir)){
-            dir.create(dir, recursive = T, showWarnings = F)
+            dir.create(dir, recursive = TRUE, showWarnings = FALSE)
           }
           # Make sure it exists, otherwise error notification
           if(dir.exists(dir)){
@@ -138,6 +202,65 @@ rave_options_gui <- local({
             
           }else{
             showNotification('Failed while setting RAVE data directory: Cannot create directory', type = 'error', id = paste0(opt_id, '_noty'))
+          }
+        })
+      })
+    )
+  }
+  
+  # ------------------------ tensor_temp_path ------------------------
+  {
+    comps[[length(comps) + 1]] = list(
+      type = 'Core Settings',
+      opt_name = 'tensor_temp_path',
+      observer = rlang::quo({
+        opt_id = 'tensor_temp_path'
+        output$tensor_temp_path_input <- renderUI({
+          shiny::textInput(opt_id, opt_names[[opt_id]], value = local_data[[opt_id]])
+        })
+        output$tensor_temp_path_ui <- renderUI({
+          val = input[[opt_id]]
+          val %?<-% rave_options(opt_id)
+          msg = ''
+          col = 'red'
+          btn = TRUE
+          label = "Set Directory"
+          if(dir.exists(val)){
+            finfo = file.info(val)
+            if(!finfo$isdir){
+              msg = 'This is not a valid "directory" path'
+              btn = FALSE
+            }else if(val == rave_options(opt_id)){
+              btn = FALSE
+            }
+          }else{
+            msg = 'Path not exists, click "Create & Set Directory" to create'
+            col = 'black'
+            label = "Create & Set Directory"
+          }
+          
+          return(tagList(
+            p(tags$small(span(style = gl('color:{col};'), msg))),
+            div(
+              class = ifelse(btn, '', 'hidden'),
+              actionLink('tensor_temp_path_reset', label)
+            )
+          ))
+        })
+        observeEvent(input$tensor_temp_path_reset, {
+          dir = input[[opt_id]]
+          if(!dir.exists(dir)){
+            dir.create(dir, recursive = TRUE, showWarnings = FALSE)
+          }
+          # Make sure it exists, otherwise error notification
+          if(dir.exists(dir)){
+            dir = try_normalizePath(path = dir)
+            arg = list(dir)
+            names(arg) = opt_id
+            do.call(set_opt, arg)
+            showNotification('Raw data directory is set.', type = 'message', id = paste0(opt_id, '_noty'))
+          }else{
+            showNotification('Failed while setting raw data directory: Cannot create directory', type = 'error', id = paste0(opt_id, '_noty'))
           }
         })
       })
@@ -525,14 +648,11 @@ rave_options_gui <- local({
             }
           }
           
-          speed = 1 / speed * 1000000
-          
-          # Upload speed
-          upload_speed = dipsaus::to_ram_size(speed[1])
-          download_speed = dipsaus::to_ram_size(speed[2])
+          upload_speed = speed[1]
+          download_speed = speed[2]
           
           tagList(
-            span(strong(opt_names[[opt_id]]), sprintf(': Write - %s/sec, Read - %s/sec ', upload_speed, download_speed),
+            span(strong(opt_names[[opt_id]]), sprintf(': Write - %.1f MB/sec, Read - %.1f MB/sec ', upload_speed, download_speed),
                  actionLink(opt_id, 're-test speed'))
           )
         })
@@ -985,7 +1105,7 @@ rave_options_gui <- local({
         }
         
         set_opt = function(...){
-          rave_options(..., launch_gui = F, .save = T)
+          rave_options(..., launch_gui = FALSE, .save = TRUE)
           args = list(...)
           for(nm in names(args)){
             local_data[[nm]] = args[[nm]]
@@ -1042,11 +1162,11 @@ rave_options_gui <- local({
           DT::datatable(
             class = 'compact nowrap',
             envir$modules,
-            editable = T,
-            rownames = F,
+            editable = TRUE,
+            rownames = FALSE,
             selection = list(mode = 'single', target = 'cell'),
-            options = list(ordering = FALSE, pageLength = 50, nowrap = T),
-            escape = F
+            options = list(ordering = FALSE, pageLength = 50, nowrap = TRUE),
+            escape = FALSE
           )
         })
         
@@ -1097,14 +1217,14 @@ rave_options_gui <- local({
           
           
           if(!is.null(val)){
-            cat2(tbl[row, col], ' >> ', val)
+            catgl(tbl[row, col], ' >> ', val)
             envir$modules[row, col] <- val
-            DT::replaceData(proxy, envir$modules, resetPaging = FALSE, rownames = F)
+            DT::replaceData(proxy, envir$modules, resetPaging = FALSE, rownames = FALSE)
             
             if(has_copy){
-              utils::write.csv(envir$modules, rave_options('module_lookup_file'), row.names = F)
+              utils::write.csv(envir$modules, rave_options('module_lookup_file'), row.names = FALSE)
             }else{
-              safe_write_csv(envir$modules, rave_options('module_lookup_file'), row.names = F)
+              safe_write_csv(envir$modules, rave_options('module_lookup_file'), row.names = FALSE)
               envir$has_copy = TRUE
             }
             

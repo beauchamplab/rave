@@ -8,7 +8,7 @@ check_dependencies(
   update_rave = TRUE,
   restart = TRUE,
   nightly = FALSE,
-  demo_data = TRUE,
+  demo_data = FALSE,
   ...
 )
 }

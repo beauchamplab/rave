@@ -1,29 +1,3 @@
-#' Literally does nothing
-#' @param ... nothing
-#' @export
-do_nothing <- function(...){
-  
-}
-
-# Try to find path if not exists
-find_path <- function(path, root_dir){
-  if(file.exists(path)){
-    return(path)
-  }
-  root_dir %?<-% rave_options('data_dir')
-  path = unlist(stringr::str_split(path, '(/)|(\\\\)|(\\~)'))
-  path = path[path != '']
-  
-  for(ii in 1:length(path)){
-    tmp_path = do.call(file.path, as.list(c(root_dir, path[ii:length(path)])))
-    if(file.exists(tmp_path)){
-      return(tmp_path)
-    }
-  }
-  
-  # No path found
-  return(NULL)
-}
 
 
 dir_create <- function(x, showWarnings = FALSE, recursive = TRUE, check = TRUE, ...) {
@@ -31,7 +5,7 @@ dir_create <- function(x, showWarnings = FALSE, recursive = TRUE, check = TRUE, 
     dir.create(x, showWarnings = showWarnings, recursive = recursive, ...)
   }
   if (check && !dir.exists(x)) {
-    dipsaus::cat2('Cannot create directory at ', shQuote(x), level = 'FATAL')
+    catgl('Cannot create directory at ', shQuote(x), level = 'FATAL')
   }
   invisible(normalizePath(x))
 }
@@ -88,7 +62,7 @@ get_val <- function(x, key = NULL, ..., .invalids = c('null', 'na')){
   return(val)
 }
 
-zero_length <- function(..., any = T, na.rm = F){
+zero_length <- function(..., any = TRUE, na.rm = FALSE){
   parent_env = parent.frame()
   args = as.list(match.call())[-1]
   len = length(args)
@@ -142,47 +116,6 @@ try_normalizePath <- function(path, sep = c('/', '\\\\')){
 }
 
 
-#' Function to test local disk speed
-#' @param file_size in bytes, default is 10 MB
-#' @param quiet should verbose messages be suppressed?
-test_hdspeed <- function(file_size = 1e7, quiet = FALSE){
-  data_dir = rave_options('data_dir')
-  
-  if(!dir.exists(data_dir)){
-    catgl('RAVE data directory is missing, please make sure the following directory exists: {data_dir}', level = 'ERROR')
-    return(c(NA, NA))
-  }
-  
-  # create tempdir for testing
-  test_dir = file.path(data_dir, '.rave_hd_test', paste(sample(LETTERS, 8), collapse = ''))
-  dir_create(test_dir)
-  
-  progress = progress(title = 'Testing read/write speed', max = 2, quiet = quiet)
-  on.exit({
-    unlink(test_dir, recursive = T)
-    progress$close()
-  })
-  
-  progress$inc('Write to disk...')
-  
-  # generate 10M file, tested
-  file = tempfile(tmpdir = test_dir)
-  dat = paste0(sample(LETTERS, file_size - 1, replace = T), collapse = '')
-  upload = system.time(writeLines(dat, file, useBytes = T))
-  
-  progress$inc('Read from disk...')
-  download = system.time({dat_c = readLines(file)})
-  
-  if(exists('dat_c') && dat_c != dat){
-    catgl('Uploaded data is broken...', level = 'WARNING')
-  }
-  
-  ratio = file.info(file)$size / 1000000
-  
-  speed = c(upload[3], download[3]) / ratio
-  names(speed) = NULL
-  return(speed)
-}
 
 
 
@@ -257,35 +190,6 @@ get_mem_usage <- function(modules = list(),
 }
 
 
-#' Function to clear all elements within environment
-#'
-#' @param env environment to clean
-#' @param ... ignored
-#'
-#' @examples
-#' \dontrun{
-#' env = new.env()
-#' env$a = 1
-#' print(as.list(env))
-#'
-#' clear_env(env)
-#' print(as.list(env))
-#' }
-#' @export
-clear_env <- function(env, ...){
-  if(is.environment(env)){
-    if(environmentIsLocked(env)){
-      return(invisible())
-    }
-    nms = names(env)
-    nms = nms[!stringr::str_detect(nms, '^\\.__rave')]
-    if(isNamespace(env)){
-      nms = nms[!nms %in% c(".__NAMESPACE__.", ".__S3MethodsTable__.")]
-    }
-    rm(list = nms, envir = env)
-  }
-  return(invisible())
-}
 
 rand_string <- function (length = 10) {
   paste(sample(c(letters, LETTERS, 0:9), length, replace = TRUE), 

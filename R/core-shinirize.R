@@ -11,7 +11,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
   MODULE_LABEL = module$label_name
   
   logger = function(...){
-    cat2('[', MODULE_ID, '] ', ..., strftime(Sys.time(), ' - %M:%S', usetz = F))
+    catgl('[', MODULE_ID, '] ', ..., strftime(Sys.time(), ' - %M:%S', usetz = FALSE))
   }
 
   # Runtime environment
@@ -83,7 +83,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       #
       # # Code Start
       # reactive({
-      #   cat2('Input changed')
+      #   catgl('Input changed')
       #   local_data$last_input
       # }) %>%
       #   debounce(50) ->
@@ -151,7 +151,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         reactive({
           re = local_data$last_input
           if(check_active()){
-            # cat2('Input changed')
+            # catgl('Input changed')
             return(re)
           }
           return(FALSE)
@@ -162,7 +162,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       # last_input <- reactive({
       #   re = local_data$last_input
       #   if(check_active()){
-      #     cat2('Input changed')
+      #     catgl('Input changed')
       #     return(re)
       #   }
       #   return(FALSE)
@@ -176,9 +176,9 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       run_script <- debounce(
         reactive({
           re = local_data$run_script
-          # cat2('Cheking')
+          # catgl('Cheking')
           if( check_active(reactive = FALSE) && length(re) && !isFALSE(re) ){
-            cat2('Ready, prepared to execute scripts.')
+            catgl('Ready, prepared to execute scripts.')
             return(re)
           }
           return(FALSE)
@@ -189,7 +189,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       # run_script <- reactive({
       #   re = local_data$run_script
       #   if(check_active()){
-      #     cat2('Ready, prepared to execute scripts.')
+      #     catgl('Ready, prepared to execute scripts.')
       #     return(re)
       #   }
       #   return(FALSE)
@@ -198,7 +198,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       reactive({
         re = local_data$has_results
         if(check_active()){
-          cat2('Rendering')
+          catgl('Rendering')
           return(re)
         }
         return(FALSE)
@@ -224,11 +224,11 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         focused = isTRUE(focused)
 
         if(has_data && focused && initialized){
-          # cat2('Pass active check', level = 'INFO')
+          # catgl('Pass active check', level = 'INFO')
           return(TRUE)
         }else{
           if(focused){
-            cat2('Check active: has_data - [', has_data, '], initialized - [', initialized, ']', level = 'WARNING')
+            catgl('Check active: has_data - [', has_data, '], initialized - [', initialized, ']', level = 'WARNING')
           }
           return(FALSE)
         }
@@ -264,7 +264,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
       # Signal to force deactivate module
       observeEvent(global_reactives$force_refresh_all, {
-        cat2('Force refresh all - reset: ', stringr::str_to_upper(MODULE_ID))
+        catgl('Force refresh all - reset: ', stringr::str_to_upper(MODULE_ID))
         # terminate all current running process
         local_data$suspended = TRUE
         local_data$initialized = FALSE
@@ -279,7 +279,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       observe({
         m = global_reactives$execute_module
         if(length(m) && m == stringr::str_to_upper(MODULE_ID)){
-          cat2('Sidebar switched to ', m)
+          catgl('Sidebar switched to ', m)
           local_data$focused = T
 
           # Add to global_reactives current module ID
@@ -318,11 +318,11 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       #
       # What will happen: inputs will be updated, initialized will be T and last_input() will be triggered
       update_input = function(){
-        cat2('Initializing/Updating inputs')
+        catgl('Initializing/Updating inputs')
         # step 1: get updated inputs
-        params = cache_all_inputs(save = F)
+        params = cache_all_inputs(save = FALSE)
 
-        # step 2: set initializa = T
+        # step 2: set initializa = TRUE
         local_data$initialized = TRUE
 
         # step 3: update UI
@@ -337,7 +337,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         # because the module might encounter fatal error (lack of data or code error)
         n_errors = err_info$n_errors
         if(n_errors[1] > 0){
-          cat2('Terminate the process due to initialization failures. Data not loaded? or code error? See the following information', level = 'INFO')
+          catgl('Terminate the process due to initialization failures. Data not loaded? or code error? See the following information', level = 'INFO')
           sapply(err_info$init_error_msgs, logger, level = 'ERROR')
         }else{
           local_data$last_input = Sys.time()
@@ -351,7 +351,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       observe({
         last_input_updated = last_input()
         if(!isFALSE(last_input_updated)){
-          # cat2('Last input updated')
+          # catgl('Last input updated')
           local_data$run_script = Sys.time()
         }
       })
@@ -364,7 +364,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
           # Do not execute
           return()
         }
-        cat2('Executing Script')
+        catgl('Executing Script')
         showNotification(p(MODULE_LABEL, 'is running. Please wait...'), id = '.rave_main', duration = NULL)
         safe_wrap_expr({
         # tryCatch({
@@ -378,7 +378,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
             local_data$has_results = Sys.time()
             end_time = Sys.time()
             dta = time_diff(start_time, end_time)
-            cat2(MODULE_LABEL, ' - Exec time: ', sprintf('%.3f (%s)', dta$delta, dta$units), level = 'INFO')
+            catgl(MODULE_LABEL, ' - Exec time: ', sprintf('%.3f (%s)', dta$delta, dta$units), level = 'INFO')
           }
 
           local_data$last_executed = TRUE
@@ -431,7 +431,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       observeEvent(local_data$run_async, {
         is_run = !is.null(local_data$run_async)
         if(is_run){
-          cat2('Running the script with async')
+          catgl('Running the script with async')
           exec_script(async = TRUE, force = TRUE)
         }
       })
@@ -439,15 +439,15 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
       observeEvent(global_reactives$check_results, {
         if(!isolate(local_data$suspended)){
-          cat2('Checking futures')
+          catgl('Checking futures')
           f = execenv$param_env[['..rave_future_obj']]
           if(!is.null(f) && inherits(f, 'Future')){
             if(future::resolved(f)){
               execenv$param_env[['..rave_future_env']] = tryCatch({
                 future::value(f)
               }, error = function(e){
-                cat2('[ASYNC]: ', MODULE_LABEL, ' got an error during async evaluation:', level = 'ERROR')
-                cat2(paste(utils::capture.output(traceback(e)), collapse = '\n'), level = 'ERROR')
+                catgl('[ASYNC]: ', MODULE_LABEL, ' got an error during async evaluation:', level = 'ERROR')
+                catgl(paste(utils::capture.output(traceback(e)), collapse = '\n'), level = 'ERROR')
                 return(NULL)
               })
               local_data$suspended = TRUE
@@ -472,7 +472,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
       # observeEvent(local_data$force_render, {
       #   if(global_reactives$has_data){
-      #     cat2('Force Render Results')
+      #     catgl('Force Render Results')
       #     local_data$has_results = Sys.time()
       #   }
       # })
@@ -482,7 +482,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       # observeEvent(global_reactives$execute_module, {
       #
       #   if(local_data$has_data && global_reactives$execute_module == stringr::str_to_upper(MODULE_ID)){
-      #     cat2('Sidebar switched to ', global_reactives$execute_module)
+      #     catgl('Sidebar switched to ', global_reactives$execute_module)
       #     local_data$last_input = Sys.time()
       #   }
       # })
@@ -566,7 +566,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
           res = f(con, analysis_name, dirname(con))
           # Save to group analysis
-          cat2('Saving to group analysis tables...')
+          catgl('Saving to group analysis tables...')
           module_analysis_save(module_id = MODULE_ID, analysis_name = analysis_name, file = con, meta = res)
           showNotification(p('Module ID: ', MODULE_ID, ' exported!'), type = 'message')
         }, error = function(e){
@@ -689,11 +689,11 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       })
 
       observeEvent(input[['..force_execute_1']], {
-        # cat2('Force execute script')
+        # catgl('Force execute script')
         exec_script(async = FALSE, force = TRUE)
       })
       observeEvent(input[['..force_execute']], {
-        # cat2('Force execute script')
+        # catgl('Force execute script')
         exec_script(async = FALSE, force = TRUE)
       })
 
@@ -701,7 +701,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         if(local_data$focused){
           e = global_reactives$keyboard_event
           if(length(e) && length(e$enter_hit) && length(e$ctrl_hit) && e$enter_hit && e$ctrl_hit){
-            # cat2('Keyboard Signal Received.')
+            # catgl('Keyboard Signal Received.')
             exec_script(async = e$shift_hit, force = TRUE)
           }
         }

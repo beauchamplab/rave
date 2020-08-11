@@ -45,7 +45,7 @@ rave_version <- function(){
       )
       
     }else{
-      has_data = arrange_data_dir(F)
+      # has_data = arrange_data_dir(FALSE)
     }
     
     save_options()
@@ -88,17 +88,29 @@ restart_r <- function(){
 #' @param ... for compatibility purpose, ignored
 #' @export
 check_dependencies <- function(update_rave = TRUE, restart = TRUE, 
-                               nightly = FALSE, demo_data = TRUE, ...){
+                               nightly = FALSE, demo_data = FALSE, ...){
+  
+  # check if dipsaus is > 0.0.8
+  dv <- as.character(utils::packageVersion('dipsaus'))
+  if(utils::compareVersion(dv, '0.0.8.9000') < 0){
+    # update dipsaus
+    devtools::unload('dipsaus')
+    devtools::install_github('dipterix/dipsaus', upgrade = 'never', force = TRUE)
+    message("Restarting R. Please run 'check_dependencies()' again to finalize update.")
+    restart_r()
+    message("Please run 'check_dependencies()' again to finalize update.")
+    return(invisible())
+  }
   
   # Check N27 brain
-  dipsaus::cat2('Checking N27 brain', level = 'DEFAULT', end = '\n')
+  catgl('Checking N27 brain', level = 'DEFAULT', end = '\n')
   threeBrain::merge_brain()
-  dipsaus::cat2('   - Done', level = 'INFO', end = '\n')
+  catgl('   - Done', level = 'INFO', end = '\n')
   
   
   # Check demo subjects
   if( demo_data ){
-    dipsaus::cat2('Checking RAVE data repository', level = 'DEFAULT', end = '\n')
+    catgl('Checking RAVE data repository', level = 'DEFAULT', end = '\n')
     p = get_projects()
     if(!length(p)){
       has_demo = FALSE
@@ -121,7 +133,7 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
           download_sample_data('YAB')
         }
       }
-      dipsaus::cat2('   - Done', level = 'INFO', end = '\n')
+      catgl('   - Done', level = 'INFO', end = '\n')
     }
   }
   
@@ -139,130 +151,25 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
     }
   }
   
-  # Case 1: nightly is false, then use prebuilt version
-  if(!nightly){
-    
+  if(nightly){
+    lazy_install <- c(lazy_install, 'beauchamplab/ravebuiltins@migrate2', 'dipterix/rutabaga@develop')
+    if(update_rave){
+      lazy_install <- c(lazy_install, 'beauchamplab/rave@dev-1.1')
+    }
+    lazy_install <- c(lazy_install, c('dipterix/threeBrain', 'dipterix/dipsaus'))
+  } else {
+    lazy_install <- c(lazy_install, 'ravebuiltins', 'rutabaga')
     if(update_rave){
       lazy_install <- c(lazy_install, 'rave')
     }
-    
-    dipsaus::prepare_install(
-      unique(c(lazy_install, 'ravebuiltins', 'dipsaus', 
-               'threeBrain', 'rutabaga')),
-      restart = FALSE
-    )
-    
-    profile <- startup::find_rprofile()
-    if (!length(profile)) {
-      startup::install()
-    }
-    profile <- startup::find_rprofile()
-    s <- readLines(profile)
-    
-    # find line
-    sel <- s == "# --- dipsaus temporary startup (END)---"
-    if(any(sel)){
-      idx <- which(sel)
-      idx <- idx[[length(idx)]] - 1
-      # insert arrangement
-      
-      ss <- c(
-        "try({",
-        "  userlib <- Sys.getenv('R_LIBS_USER')",
-        "  if(!dir.exists(userlib)){ try({ dir.create(userlib, recursive = TRUE) }) }",
-        "  dipsaus::cat2('Arranging all existing RAVE modules', level = 'DEFAULT', end = '\\n')",
-        "  rave::arrange_modules(refresh = TRUE, reset = FALSE, quiet = TRUE)",
-        "  message('   - Done.')",
-        "})"
-      )
-      s = c(s[seq_len(idx)], ss, s[-seq_len(idx)])
-      writeLines(s, profile)
-    }
-    
-    if(restart){
-      restart_r()
-    }
-    
-    return(invisible())
+    lazy_install <- c(lazy_install, c('threeBrain', 'dipterix/dipsaus'))
   }
   
+  dipsaus::prepare_install2(unique(lazy_install), restart = FALSE)
   
-  # Case 2: nighly version
-  deps <- list(
-    list(
-      name = 'rutabaga',
-      note = 'Plot Helpers',
-      repo = 'dipterix/rutabaga@develop'
-    ),
-    list(
-      name = 'threeBrain',
-      note = '3D Viewer',
-      repo = 'dipterix/threeBrain'
-    ),
-    list(
-      name = 'ravebuiltins',
-      note = 'Default RAVE modules',
-      repo = 'beauchamplab/ravebuiltins@migrate2'
-    )
-  )
+  arrange_modules(refresh = TRUE)
   
-  
-  for(pinfo in deps){
-    catgl('Checking {pinfo$name} - {pinfo$note} (github: {pinfo$repo})',
-         level = 'DEFAULT', end = '\n')
-    tryCatch({
-      if(pinfo$name %in% loadedNamespaces()){ devtools::unload(pinfo$name, quiet = TRUE) }
-      devtools::install_github(pinfo$repo, upgrade = FALSE, force = FALSE, quiet = TRUE)
-      message('  - Done', end = '\n')
-    }, error = function(e){
-      lazy_github <<- c(lazy_github, pinfo$repo)
-    })
-  }
-  
-  # Now it's critical as dipsaus and rave cannot be updated here, register startup code
-  lazy_install <- c(lazy_install, 'dipsaus')
-  dipsaus::prepare_install(unique(lazy_install), restart = FALSE)
-  
-  profile <- startup::find_rprofile()
-  if (!length(profile)) {
-    startup::install()
-  }
-  profile <- startup::find_rprofile()
-  s <- readLines(profile)
-  
-  # find line
-  sel <- s == "# --- dipsaus temporary startup (END)---"
-  if(any(sel)){
-    idx <- which(sel)
-    idx <- idx[[length(idx)]] - 1
-    # insert arrangement
-    update_txt = NULL
-    if(update_rave){
-      update_txt <- c(
-        "  devtools::install_github('beauchamplab/rave@dev-1.0', upgrade = FALSE, force = FALSE, quiet = TRUE)"
-      )
-    }
-    update_txt = c(
-      "try({devtools::install_github('dipterix/dipsaus', upgrade = FALSE, force = FALSE, quiet = TRUE)})",
-      update_txt)
-    
-    ss <- c(
-      "try({",
-      "  userlib <- Sys.getenv('R_LIBS_USER')",
-      "  if(!dir.exists(userlib)){ try({ dir.create(userlib, recursive = TRUE) }) }",
-      update_txt,
-      "  dipsaus::cat2('Arranging all existing RAVE modules', level = 'DEFAULT', end = '\\n')",
-      "  rave::arrange_modules(refresh = TRUE, reset = FALSE, quiet = TRUE)",
-      "})"
-    )
-    s = c(s[seq_len(idx)], ss, s[-seq_len(idx)])
-    writeLines(s, profile)
-  }
-  
-  if(restart){
-    restart_r()
-  }
-  
+  dipsaus::restart_session()
   
   return(invisible())
   
@@ -272,11 +179,11 @@ check_dependencies2 <- function(){
   # 
   
   
-  dipsaus::cat2('Arranging all existing RAVE modules', level = 'INFO', end = '\n')
+  catgl('Arranging all existing RAVE modules', level = 'INFO', end = '\n')
   arrange_modules(refresh = TRUE, reset = FALSE, quiet = TRUE)
   
   # check if any demo data exists
-  dipsaus::cat2('Checking RAVE data repository', level = 'INFO', end = '\n')
+  catgl('Checking RAVE data repository', level = 'INFO', end = '\n')
   p = get_projects()
   if('demo' %in% p){
     subs = get_subjects('demo')
@@ -294,6 +201,138 @@ check_dependencies2 <- function(){
 }
 
 
+finalize_installation_internal_demo <- function(upgrade = c('ask', 'always', 'never')){
+  upgrade <- match.arg(upgrade)
+  # check demo data
+  has_demo <- FALSE
+  installed_subs <- NULL
+  if('demo' %in% get_projects()){
+    has_demo <- TRUE
+    if( upgrade %in% c('never') ){ return() }
+    
+    installed_subs <- get_subjects('demo')
+  }
+  
+  opt <- c('None', 'Only missing demos', 'All', 'First two subjects')
+  
+  missing_subs <- c('KC', 'YAB', 'YAD', 'YAF', 'YAH', 'YAI', 'YAJ', 'YAK')
+  
+  if( upgrade == 'always' ){
+    missing_subs <- c('KC', 'YAB')
+  }
+  
+  missing_subs <- missing_subs[!missing_subs %in% installed_subs]
+  
+  if( upgrade == 'ask' ){
+    default_opt <- 1
+    default_opt <- dipsaus::ask_or_default(
+      'Choose an option to install demo subjects:\n',
+      paste0(seq_along(opt), '. ', opt, collapse = '\n'),
+      '\n\nEnter the option number',
+      default = default_opt
+    )
+    default_opt <- dipsaus::parse_svec(default_opt)
+    
+    if(1 %in% default_opt || !any(seq_len(4) %in% default_opt)){
+      # no data installed
+      catgl('No demo data will be installed', level = 'DEFAULT')
+      return()
+    } else if(2 %in% default_opt){
+    } else if(3 %in% default_opt){
+      missing_subs <- c('KC', 'YAB', 'YAD', 'YAF', 'YAH', 'YAI', 'YAJ', 'YAK')
+    } else {
+      missing_subs <- c('KC', 'YAB')
+    }
+    catgl(paste(missing_subs, collapse = ', '), ' will be installed', level = 'DEFAULT')
+    
+  }
+  
+  if(length(missing_subs)){
+    quo <- rlang::quo({
+      dipsaus::rs_focus_console()
+      for(sub in !!missing_subs){
+        raveio::catgl('Launching download process - ', sub)
+        rave::download_sample_data(sub)
+      }
+    })
+    
+    dipsaus::rs_exec(rlang::quo_squash(quo), quoted = TRUE, name = 'Download rave-base demo subjects')
+  }
+  
+  return()
+  
+}
+
+#' Finalize installation
+#' @description download demo data
+#' @param packages package name to finalize. 'rave' to only update base demo 
+#' data, or \code{c('threeBrain', 'ravebuiltins')} to upgrade built-in data, 
+#' or leave it blank to upgrade all.
+#' @param upgrade whether to ask. Default is 'always' to receive default 
+#' settings Other choices are 'ask' or 'never'.
+#' 
+#' @export
+finalize_installation <- function(packages, upgrade = c('always', 'ask', 'never')){
+  upgrade <- match.arg(upgrade)
+  
+  if(missing(packages)){
+    packages <- NULL
+  }
+  # 
+  # if(!length(packages) || 'threeBrain' %in% packages){
+  #   # Check N27 brain
+  #   # To be backward compatible, we need to check threeBrain files
+  #   tmp <- system.file('rave.yaml', package = 'threeBrain')
+  #   if(tmp == ''){
+  #     threeBrain::download_N27()
+  #     threeBrain::merge_brain()
+  #   }
+  # }
+  
+  # Get all packages with rave.yaml
+  lib_path = .libPaths()
+  
+  allpackages = unlist(sapply(lib_path, function(lp){
+    list.dirs(lp, recursive = FALSE, full.names = FALSE)
+  }, simplify = FALSE))
+  allpackages = unique(allpackages)
+  
+  yaml_path = sapply(allpackages, function(p){
+    system.file('rave.yaml', package = p)
+  })
+  sel = yaml_path != ''
+  
+  if(length(packages)){
+    sel <- sel & (allpackages %in% packages)
+  }
+  packages <- allpackages[sel]
+  
+  for(pkg in packages){
+    tryCatch({
+      
+      # load yaml
+      conf <- raveio::load_yaml(system.file('rave.yaml', package = pkg))
+      
+      fname <- conf$finalize_installation
+      
+      if(is.character(fname) && length(fname) == 1){
+        ns <- asNamespace(pkg)
+        fun <- ns[[fname]]
+        if(is.function(fun)){
+          fun(upgrade)
+        }
+      }
+      
+    }, error = function(e){
+      catgl('Error found while finalize installation of [', pkg, ']. Reason:\n',
+                    e$message, '\nSkipping...\n', level = 'WARNING')
+    })
+    
+  }
+  
+  catgl('Scheduled. There might be some job running in the background. Please wait for them to finish.')
+  invisible()
+}
 
 
 .onAttach <- function(libname, pkgname){
