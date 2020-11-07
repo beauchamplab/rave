@@ -7,7 +7,7 @@ citEntry(entry = "Article",
                                    as.person("Michael S. Beauchamp")),
          journal      = "bioRxiv",
          year         = "2020",
-         doi          = "10.1101/2020.06.02.129676",
+         doi          = "10.1016/j.neuroimage.2020.117341",
          textVersion  = "Magnotti, JF, Wang, Z, Beauchamp, MS. RAVE: comprehensive open-source software for reproducible analysis and visualization of intracranial EEG data."
 )
 
