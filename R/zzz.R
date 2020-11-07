@@ -152,9 +152,17 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
   }
   
   if(nightly){
-    lazy_install <- c(lazy_install, 'beauchamplab/ravebuiltins@migrate2', 'dipterix/rutabaga@develop')
+    # get repos from Github
+    git_repos <- tryCatch({
+      readLines("https://raw.githubusercontent.com/beauchamplab/rave/master/DEVREPO")[1:3]
+    }, error = function(e){
+      c("beauchamplab/rave", "beauchamplab/ravebuiltins@migrate2",  "dipterix/rutabaga@develop")
+    })
+    # lazy_install <- c(lazy_install, 'beauchamplab/ravebuiltins@migrate2', 'dipterix/rutabaga@develop')
+    lazy_install <- c(lazy_install, git_repos[2], git_repos[3])
     if(update_rave){
-      lazy_install <- c(lazy_install, 'beauchamplab/rave@dev-1.1')
+      # get directly from DEVREPO
+      lazy_install <- c(lazy_install, git_repos[1])
     }
     lazy_install <- c(lazy_install, c('dipterix/threeBrain', 'dipterix/dipsaus'))
   } else {
