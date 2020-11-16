@@ -10,23 +10,27 @@
 
 
 <!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
 
 <!-- headroom.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -37,7 +41,6 @@
 
 <meta property="og:title" content="R6 Class for Electrode — Electrode" />
 <meta property="og:description" content="Stores single electrode or reference signals" />
-<meta name="twitter:card" content="summary" />
 
 
 
@@ -55,7 +58,7 @@
 
   </head>
 
-  <body>
+  <body data-spy="scroll" data-target="#toc">
     <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -69,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.2</span>
       </span>
     </div>
 
@@ -111,9 +114,12 @@
 
 
 
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Zhengjia Wang</p>
     <h2 class="hasAnchor" id="public-fields"><a class="anchor" href="#public-fields"></a>Public fields</h2>
 
-    <p><div class="r6-fields"></p><dl class='dl-horizontal'>
+    <p><div class="r6-fields"></p><dl>
 <dt><code>electrode</code></dt><dd><p>electrode number in integer</p></dd>
 
 <dt><code>raw_power</code></dt><dd><p>stores pre-epoch power spectrum with no reference</p></dd>
@@ -139,7 +145,7 @@ data exist in file system before and after reference</p></dd>
 </dl><p></div></p>
     <h2 class="hasAnchor" id="active-bindings"><a class="anchor" href="#active-bindings"></a>Active bindings</h2>
 
-    <p><div class="r6-active-bindings"></p><dl class='dl-horizontal'>
+    <p><div class="r6-active-bindings"></p><dl>
 <dt><code>has_power, has_phase, has_volt</code></dt><dd><p>whether power, phase, or voltage
 data exist in file system before and after reference</p></dd>
 
@@ -153,7 +159,7 @@ data exist in file system before and after reference</p></dd>
     <h2 class="hasAnchor" id="methods"><a class="anchor" href="#methods"></a>Methods</h2>
 
     
-<h3>Public methods</h3>
+<h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Public methods</h3>
 
 <ul>
 <li><p><a href='#method-info'><code>Electrode$info()</code></a></p></li>
@@ -165,81 +171,81 @@ data exist in file system before and after reference</p></dd>
 <li><p><a href='#method-epoch'><code>Electrode$epoch()</code></a></p></li>
 </ul>
 <p><hr>
-<a id="method-info"></a></p><h3>Method <code>info()</code></h3>
-<p>print electrode information</p><h3>Usage</h3>
-<p><div class="r"></p><pre>Electrode$info()</pre><p></div></p>
+<a id="method-info"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code>info()</code></h3>
+<p>print electrode information</p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>Electrode</span><span class='op'>$</span><span class='fu'>info</span><span class='op'>(</span><span class='op'>)</span></pre><p></div></p>
 
-<h3>Returns</h3>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Returns</h4>
 <p>none</p>
 <p><hr>
-<a id="method-print"></a></p><h3>Method <code><a href='https://rdrr.io/r/base/print.html'>print()</a></code></h3>
-<p>overrides default print method</p><h3>Usage</h3>
-<p><div class="r"></p><pre>Electrode$print(...)</pre><p></div></p>
+<a id="method-print"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code><a href='https://rdrr.io/r/base/print.html'>print()</a></code></h3>
+<p>overrides default print method</p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>Electrode</span><span class='op'>$</span><span class='fu'>print</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span></pre><p></div></p>
 
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Arguments</h4>
+<p><div class="arguments"></p><dl>
 <dt><code>...</code></dt><dd><p>ignored</p></dd>
 
 </dl><p></div></p>
-<h3>Returns</h3>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Returns</h4>
 <p>none</p>
 <p><hr>
-<a id="method-switch_reference"></a></p><h3>Method <code>switch_reference()</code></h3>
-<p>switch reference (experimental)</p><h3>Usage</h3>
-<p><div class="r"></p><pre>Electrode$switch_reference(new_reference)</pre><p></div></p>
+<a id="method-switch_reference"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code>switch_reference()</code></h3>
+<p>switch reference (experimental)</p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>Electrode</span><span class='op'>$</span><span class='fu'>switch_reference</span><span class='op'>(</span><span class='va'>new_reference</span><span class='op'>)</span></pre><p></div></p>
 
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Arguments</h4>
+<p><div class="arguments"></p><dl>
 <dt><code>new_reference</code></dt><dd><p>An electrode instance</p></dd>
 
 </dl><p></div></p>
-<h3>Returns</h3>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Returns</h4>
 <p>none</p>
 <p><hr>
-<a id="method-referenced"></a></p><h3>Method <code>referenced()</code></h3>
-<p>get referenced data</p><h3>Usage</h3>
-<p><div class="r"></p><pre>Electrode$referenced(type = "power", ram = TRUE)</pre><p></div></p>
+<a id="method-referenced"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code>referenced()</code></h3>
+<p>get referenced data</p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>Electrode</span><span class='op'>$</span><span class='fu'>referenced</span><span class='op'>(</span>type <span class='op'>=</span> <span class='st'>"power"</span>, ram <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></pre><p></div></p>
 
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Arguments</h4>
+<p><div class="arguments"></p><dl>
 <dt><code>type</code></dt><dd><p>which data to reference, default is power</p></dd>
 
 <dt><code>ram</code></dt><dd><p>whether to load data to memory</p></dd>
 
 </dl><p></div></p>
-<h3>Returns</h3>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Returns</h4>
 <p>If <code>ram</code> is true, then returns a list of matrices. The 
 length of the list equals the number of blocks, and each matrix is 
 frequency by time points. If <code>ram</code> is false, then returns an 
-environment with each element a <code><a href='LazyH5.html'>LazyH5</a></code> or 
-<code><a href='LazyFST.html'>LazyFST</a></code> instance.</p>
+environment with each element a <code><a href='https://beauchamplab.github.io/raveio/reference/LazyH5.html'>LazyH5</a></code> or 
+<code><a href='https://beauchamplab.github.io/raveio/reference/LazyFST.html'>LazyFST</a></code> instance.</p>
 <p><hr>
-<a id="method-clean"></a></p><h3>Method <code>clean()</code></h3>
-<p>remove data from memory</p><h3>Usage</h3>
-<p><div class="r"></p><pre>Electrode$clean(types = c("power", "phase", "volt"), force = FALSE)</pre><p></div></p>
+<a id="method-clean"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code>clean()</code></h3>
+<p>remove data from memory</p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>Electrode</span><span class='op'>$</span><span class='fu'>clean</span><span class='op'>(</span>types <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"power"</span>, <span class='st'>"phase"</span>, <span class='st'>"volt"</span><span class='op'>)</span>, force <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span></pre><p></div></p>
 
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Arguments</h4>
+<p><div class="arguments"></p><dl>
 <dt><code>types</code></dt><dd><p>data types to clean</p></dd>
 
 <dt><code>force</code></dt><dd><p>whether to remove pre-loaded data types</p></dd>
 
 </dl><p></div></p>
-<h3>Returns</h3>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Returns</h4>
 <p>none</p>
 <p><hr>
-<a id="method-new"></a></p><h3>Method <code>new()</code></h3>
-<p>constructor</p><h3>Usage</h3>
-<p><div class="r"></p><pre>Electrode$new(
-  subject,
-  electrode,
-  reference_by = "noref",
-  preload = NULL,
-  is_reference = FALSE
-)</pre><p></div></p>
+<a id="method-new"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code>new()</code></h3>
+<p>constructor</p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>Electrode</span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>
+  <span class='va'>subject</span>,
+  <span class='va'>electrode</span>,
+  reference_by <span class='op'>=</span> <span class='st'>"noref"</span>,
+  preload <span class='op'>=</span> <span class='cn'>NULL</span>,
+  is_reference <span class='op'>=</span> <span class='cn'>FALSE</span>
+<span class='op'>)</span></pre><p></div></p>
 
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Arguments</h4>
+<p><div class="arguments"></p><dl>
 <dt><code>subject</code></dt><dd><p><code><a href='Subject.html'>Subject</a></code> instance or characters like 
 <code>"proj/sub"</code></p></dd>
 
@@ -254,22 +260,22 @@ meaning no reference to the electrode</p></dd>
 <dt><code>is_reference</code></dt><dd><p>is current instance a reference?</p></dd>
 
 </dl><p></div></p>
-<h3>Returns</h3>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Returns</h4>
 <p>An <code>Electrode</code> instance</p>
 <p><hr>
-<a id="method-epoch"></a></p><h3>Method <code>epoch()</code></h3>
-<p>epoch electrode</p><h3>Usage</h3>
-<p><div class="r"></p><pre>Electrode$epoch(
-  epoch_name,
-  pre,
-  post,
-  types = c("volt", "power", "phase"),
-  raw = FALSE,
-  hybrid = TRUE
-)</pre><p></div></p>
+<a id="method-epoch"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code>epoch()</code></h3>
+<p>epoch electrode</p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>Electrode</span><span class='op'>$</span><span class='fu'>epoch</span><span class='op'>(</span>
+  <span class='va'>epoch_name</span>,
+  <span class='va'>pre</span>,
+  <span class='va'>post</span>,
+  types <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"volt"</span>, <span class='st'>"power"</span>, <span class='st'>"phase"</span><span class='op'>)</span>,
+  raw <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  hybrid <span class='op'>=</span> <span class='cn'>TRUE</span>
+<span class='op'>)</span></pre><p></div></p>
 
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Arguments</h4>
+<p><div class="arguments"></p><dl>
 <dt><code>epoch_name</code></dt><dd><p>epoch name, for example, <code>epoch_name="default"</code>
 refers to epoch file <code>"epoch_default.csv"</code> in subject meta folder</p></dd>
 
@@ -283,63 +289,57 @@ refers to epoch file <code>"epoch_default.csv"</code> in subject meta folder</p>
 <dt><code>raw</code></dt><dd><p>whether epoch pre-referenced data?</p></dd>
 
 <dt><code>hybrid</code></dt><dd><p>whether to fast-cache the data on hard-drive? See also 
-<code><a href='Tensor.html'>Tensor</a></code></p></dd>
+<code><a href='https://beauchamplab.github.io/raveio/reference/Tensor.html'>Tensor</a></code></p></dd>
 
 </dl><p></div></p>
-<h3>Returns</h3>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Returns</h4>
 <p>list of data after epoch</p>
 
 
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
 <span class='co'># Electrode with no reference</span>
-<span class='no'>e1</span> <span class='kw'>&lt;-</span> <span class='no'>Electrode</span>$<span class='fu'>new</span>(<span class='st'>'demo/YAB'</span>, <span class='kw'>electrode</span> <span class='kw'>=</span> <span class='fl'>14</span>, <span class='kw'>reference_by</span> <span class='kw'>=</span> <span class='st'>'noref'</span>)
-<span class='no'>e1</span>$<span class='no'>reference</span>
+<span class='va'>e1</span> <span class='op'>&lt;-</span> <span class='va'>Electrode</span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>'demo/YAB'</span>, electrode <span class='op'>=</span> <span class='fl'>14</span>, reference_by <span class='op'>=</span> <span class='st'>'noref'</span><span class='op'>)</span>
+<span class='va'>e1</span><span class='op'>$</span><span class='va'>reference</span>
 <span class='co'>#&gt; Subject: demo/YAB</span>
 <span class='co'>#&gt; Electrode: noref (Reference)</span>
 
 <span class='co'># Add Common Average Reference in rave/data/reference/ref_13-63,65-84.h5</span>
-<span class='no'>e2</span> <span class='kw'>&lt;-</span> <span class='no'>Electrode</span>$<span class='fu'>new</span>(<span class='st'>'demo/YAB'</span>, <span class='kw'>electrode</span> <span class='kw'>=</span> <span class='fl'>14</span>,
-                    <span class='kw'>reference_by</span> <span class='kw'>=</span> <span class='st'>'ref_13-63,65-84'</span>)
+<span class='va'>e2</span> <span class='op'>&lt;-</span> <span class='va'>Electrode</span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>'demo/YAB'</span>, electrode <span class='op'>=</span> <span class='fl'>14</span>, 
+                    reference_by <span class='op'>=</span> <span class='st'>'ref_13-63,65-84'</span><span class='op'>)</span>
 
 <span class='co'># Electrode with bipolar reference by another electrode</span>
-<span class='no'>e3</span> <span class='kw'>&lt;-</span> <span class='no'>Electrode</span>$<span class='fu'>new</span>(<span class='st'>'demo/YAB'</span>, <span class='kw'>electrode</span> <span class='kw'>=</span> <span class='fl'>14</span>, <span class='kw'>reference_by</span> <span class='kw'>=</span> <span class='st'>'ref_15'</span>)
+<span class='va'>e3</span> <span class='op'>&lt;-</span> <span class='va'>Electrode</span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>'demo/YAB'</span>, electrode <span class='op'>=</span> <span class='fl'>14</span>, reference_by <span class='op'>=</span> <span class='st'>'ref_15'</span><span class='op'>)</span>
 
 <span class='co'># Alternative way</span>
-<span class='no'>reference</span> <span class='kw'>&lt;-</span> <span class='no'>Electrode</span>$<span class='fu'>new</span>(<span class='st'>'demo/YAB'</span>, <span class='kw'>electrode</span> <span class='kw'>=</span> <span class='fl'>15</span>, <span class='kw'>is_reference</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
-<span class='no'>e4</span> <span class='kw'>&lt;-</span> <span class='no'>Electrode</span>$<span class='fu'>new</span>(<span class='st'>'demo/YAB'</span>, <span class='kw'>electrode</span> <span class='kw'>=</span> <span class='fl'>14</span>, <span class='kw'>reference_by</span> <span class='kw'>=</span> <span class='no'>reference</span>)
+<span class='va'>reference</span> <span class='op'>&lt;-</span> <span class='va'>Electrode</span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>'demo/YAB'</span>, electrode <span class='op'>=</span> <span class='fl'>15</span>, is_reference <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+<span class='va'>e4</span> <span class='op'>&lt;-</span> <span class='va'>Electrode</span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>'demo/YAB'</span>, electrode <span class='op'>=</span> <span class='fl'>14</span>, reference_by <span class='op'>=</span> <span class='va'>reference</span><span class='op'>)</span>
 
 <span class='co'># e3, e4 are the same in scientific meaning. To test it, epoch them</span>
-<span class='no'>power3</span> <span class='kw'>&lt;-</span> <span class='no'>e3</span>$<span class='fu'>epoch</span>(<span class='st'>'YABaOutlier'</span>, <span class='fl'>1</span>, <span class='fl'>2</span>, <span class='st'>'power'</span>,
-                   <span class='kw'>raw</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>hybrid</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)$<span class='no'>power</span>
-<span class='no'>power4</span> <span class='kw'>&lt;-</span> <span class='no'>e4</span>$<span class='fu'>epoch</span>(<span class='st'>'YABaOutlier'</span>, <span class='fl'>1</span>, <span class='fl'>2</span>, <span class='st'>'power'</span>,
-                   <span class='kw'>raw</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>hybrid</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)$<span class='no'>power</span>
+<span class='va'>power3</span> <span class='op'>&lt;-</span> <span class='va'>e3</span><span class='op'>$</span><span class='fu'>epoch</span><span class='op'>(</span><span class='st'>'YABaOutlier'</span>, <span class='fl'>1</span>, <span class='fl'>2</span>, <span class='st'>'power'</span>, 
+                   raw <span class='op'>=</span> <span class='cn'>FALSE</span>, hybrid <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span><span class='op'>$</span><span class='va'>power</span>
+<span class='va'>power4</span> <span class='op'>&lt;-</span> <span class='va'>e4</span><span class='op'>$</span><span class='fu'>epoch</span><span class='op'>(</span><span class='st'>'YABaOutlier'</span>, <span class='fl'>1</span>, <span class='fl'>2</span>, <span class='st'>'power'</span>,
+                   raw <span class='op'>=</span> <span class='cn'>FALSE</span>, hybrid <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>$</span><span class='va'>power</span>
 
 <span class='co'># Compare e3 and e4, result difference should be 0</span>
-<span class='fu'><a href='https://rdrr.io/r/base/range.html'>range</a></span>(<span class='no'>power3</span>$<span class='fu'>get_data</span>() - <span class='no'>power4</span>$<span class='fu'>get_data</span>())
+<span class='fu'><a href='https://rdrr.io/r/base/range.html'>range</a></span><span class='op'>(</span><span class='va'>power3</span><span class='op'>$</span><span class='fu'>get_data</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>-</span> <span class='va'>power4</span><span class='op'>$</span><span class='fu'>get_data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
 <span class='co'>#&gt; 0</span>
 
 <span class='co'># With or without hybrid, the size will be different</span>
 <span class='co'># No hybrid, totally in memory</span>
-<span class='kw pkg'>pryr</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/pryr/man/object_size.html'>object_size</a></span>(<span class='no'>power3</span>)
+<span class='fu'>pryr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/pryr/man/object_size.html'>object_size</a></span><span class='op'>(</span><span class='va'>power3</span><span class='op'>)</span>
 <span class='co'>#&gt; 12 MB</span>
 <span class='co'># Hybrid, data is swapped to hard-drive</span>
-<span class='kw pkg'>pryr</span><span class='kw ns'>::</span><span class='fu'><a href='https://rdrr.io/pkg/pryr/man/object_size.html'>object_size</a></span>(<span class='no'>power4</span>)
+<span class='fu'>pryr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/pryr/man/object_size.html'>object_size</a></span><span class='op'>(</span><span class='va'>power4</span><span class='op'>)</span>
 <span class='co'>#&gt; 908 kB</span>
-}</div></pre>
+<span class='op'>}</span>
+</div></pre>
   </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="#public-fields">Public fields</a></li>
-      <li><a href="#active-bindings">Active bindings</a></li>
-      <li><a href="#methods">Methods</a></li>
-      <li><a href="#examples">Examples</a></li>
-    </ul>
-
-    <h2>Author</h2>
-    <p>Zhengjia Wang</p>
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
 
@@ -350,7 +350,7 @@ refers to epoch file <code>"epoch_default.csv"</code> in subject meta folder</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

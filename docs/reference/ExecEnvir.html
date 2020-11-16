@@ -10,23 +10,27 @@
 
 
 <!-- jquery -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" integrity="sha256-bZLfwXAP04zRMK2BjiO8iu9pf4FbLqX6zitd+tIvLhE=" crossorigin="anonymous" />
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script>
+
+<!-- bootstrap-toc -->
+<link rel="stylesheet" href="../bootstrap-toc.css">
+<script src="../bootstrap-toc.js"></script>
 
 <!-- Font Awesome icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous" />
 
 <!-- clipboard.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script>
 
 <!-- headroom.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script>
 
 <!-- pkgdown -->
 <link href="../pkgdown.css" rel="stylesheet">
@@ -39,7 +43,6 @@
 <meta property="og:description" content="where all the module functions are executed. It's rarely created
 manually, use get_module to create module, run with 
 start_app(m, test.mode=TRUE), and then inspect modules." />
-<meta name="twitter:card" content="summary" />
 
 
 
@@ -57,7 +60,7 @@ start_app(m, test.mode=TRUE), and then inspect modules." />
 
   </head>
 
-  <body>
+  <body data-spy="scroll" data-target="#toc">
     <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -71,7 +74,7 @@ start_app(m, test.mode=TRUE), and then inspect modules." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">1.0.2</span>
       </span>
     </div>
 
@@ -115,9 +118,12 @@ manually, use <code><a href='get_module.html'>get_module</a></code> to create mo
 
 
 
+    <h2 class="hasAnchor" id="author"><a class="anchor" href="#author"></a>Author</h2>
+
+    <p>Zhengjia Wang</p>
     <h2 class="hasAnchor" id="public-fields"><a class="anchor" href="#public-fields"></a>Public fields</h2>
 
-    <p><div class="r6-fields"></p><dl class='dl-horizontal'>
+    <p><div class="r6-fields"></p><dl>
 <dt><code>.__rave_context__.</code></dt><dd><p>context string for current instance, indicating
 whether the module is running locally (public, but internally used)</p></dd>
 
@@ -138,7 +144,7 @@ global environment or some name-space if the module is implemented as
 an R package</p></dd>
 
 <dt><code>wrapper_env</code></dt><dd><p>stores all the utility functions. Some functions are 
-overridden there such as <code><a href='https://rdrr.io/pkg/shiny/man/observe.html'>observe</a></code>, 
+overridden there such as <code><a href='https://shiny.rstudio.com/reference/shiny/latest/observe.html'>observe</a></code>, 
 <code>rave_checks</code>, or <code>eval_when_ready</code>. These functions behave 
 differently inside or outside of shiny context, and with or without data 
 loaded. The environment will be locked once the module is initialized. 
@@ -156,10 +162,12 @@ have access to this environment directly. The parent environment is
 <code>static_env</code></p></dd>
 
 <dt><code>runtime_env</code></dt><dd><p>where the main part of module is running. All shiny
-<code><a href='https://rdrr.io/pkg/shiny/man/observe.html'>observe</a></code> and <code><a href='https://rdrr.io/pkg/shiny/man/observeEvent.html'>observeEvent</a></code> are 
+<code><a href='https://shiny.rstudio.com/reference/shiny/latest/observe.html'>observe</a></code> and <code><a href='https://shiny.rstudio.com/reference/shiny/latest/observeEvent.html'>observeEvent</a></code> are 
 redirected to this environment by default (unless using 
-<code><a href='https://rdrr.io/pkg/shiny/man/observe.html'>shiny::observe</a></code>). All functions in <code>static_env</code> have access 
+<code><a href='https://shiny.rstudio.com/reference/shiny/latest/observe.html'>shiny::observe</a></code>). All functions in <code>static_env</code> have access 
 to this environment. The parent environment is <code>param_env</code></p></dd>
+
+<dt><code>async_env</code></dt><dd><p>where asynchronous codes run</p></dd>
 
 <dt><code>parse_env</code></dt><dd><p>environment where modules are parsed. The parent 
 environment is <code>runtime_env</code>. Once all functions are evaluated, 
@@ -167,7 +175,7 @@ this environment is not used. However, module creators don't directly
 access this environment once the module is initialized.</p></dd>
 
 <dt><code>ns</code></dt><dd><p>shiny name-space functions, is equivalent to 
-<code><a href='https://rdrr.io/pkg/shiny/man/NS.html'>shiny::NS(module_id)</a></code>. The goal is to add prefixes to module inputs
+<code><a href='https://shiny.rstudio.com/reference/shiny/latest/NS.html'>shiny::NS(module_id)</a></code>. The goal is to add prefixes to module inputs
 so that two modules with the same input ID are named differently</p></dd>
 
 <dt><code>auto_execute</code></dt><dd><p>(Deprecated) whether to auto-calculate results</p></dd>
@@ -207,7 +215,7 @@ before functions calls</p></dd>
 </dl><p></div></p>
     <h2 class="hasAnchor" id="active-bindings"><a class="anchor" href="#active-bindings"></a>Active bindings</h2>
 
-    <p><div class="r6-active-bindings"></p><dl class='dl-horizontal'>
+    <p><div class="r6-active-bindings"></p><dl>
 <dt><code>input_ids</code></dt><dd><p>vector of input IDs (read-only)</p></dd>
 
 <dt><code>input_labels</code></dt><dd><p>vector of input labels (read-only)</p></dd>
@@ -220,7 +228,7 @@ before functions calls</p></dd>
     <h2 class="hasAnchor" id="methods"><a class="anchor" href="#methods"></a>Methods</h2>
 
     
-<h3>Public methods</h3>
+<h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Public methods</h3>
 
 <ul>
 <li><p><a href='#method-reload'><code>ExecEnvir$reload()</code></a></p></li>
@@ -246,52 +254,52 @@ before functions calls</p></dd>
 <li><p><a href='#method-clone'><code>ExecEnvir$clone()</code></a></p></li>
 </ul>
 <p><hr>
-<a id="method-reload"></a></p><h3>Method <code>reload()</code></h3>
-<p>(experimental) signal the modules to reload</p><h3>Usage</h3>
-<p><div class="r"></p><pre>ExecEnvir$reload()</pre><p></div></p>
+<a id="method-reload"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code>reload()</code></h3>
+<p>(experimental) signal the modules to reload</p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>ExecEnvir</span><span class='op'>$</span><span class='fu'>reload</span><span class='op'>(</span><span class='op'>)</span></pre><p></div></p>
 
-<h3>Returns</h3>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Returns</h4>
 <p>none</p>
 <p><hr>
-<a id="method-finalize"></a></p><h3>Method <code>finalize()</code></h3>
-<p>garbage collection</p><h3>Usage</h3>
-<p><div class="r"></p><pre>ExecEnvir$finalize()</pre><p></div></p>
+<a id="method-finalize"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code>finalize()</code></h3>
+<p>garbage collection</p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>ExecEnvir</span><span class='op'>$</span><span class='fu'>finalize</span><span class='op'>(</span><span class='op'>)</span></pre><p></div></p>
 
-<h3>Returns</h3>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Returns</h4>
 <p>none</p>
 <p><hr>
-<a id="method-info"></a></p><h3>Method <code>info()</code></h3>
-<p>print variables in different layers (environment)</p><h3>Usage</h3>
-<p><div class="r"></p><pre>ExecEnvir$info()</pre><p></div></p>
+<a id="method-info"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code>info()</code></h3>
+<p>print variables in different layers (environment)</p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>ExecEnvir</span><span class='op'>$</span><span class='fu'>info</span><span class='op'>(</span><span class='op'>)</span></pre><p></div></p>
 
-<h3>Returns</h3>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Returns</h4>
 <p>none</p>
 <p><hr>
-<a id="method-print"></a></p><h3>Method <code><a href='https://rdrr.io/r/base/print.html'>print()</a></code></h3>
-<p>print the memory address</p><h3>Usage</h3>
-<p><div class="r"></p><pre>ExecEnvir$print(...)</pre><p></div></p>
+<a id="method-print"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code><a href='https://rdrr.io/r/base/print.html'>print()</a></code></h3>
+<p>print the memory address</p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>ExecEnvir</span><span class='op'>$</span><span class='fu'>print</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span></pre><p></div></p>
 
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Arguments</h4>
+<p><div class="arguments"></p><dl>
 <dt><code>...</code></dt><dd><p>ignored</p></dd>
 
 </dl><p></div></p>
-<h3>Returns</h3>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Returns</h4>
 <p>memory address</p>
 <p><hr>
-<a id="method-clean"></a></p><h3>Method <code>clean()</code></h3>
-<p>clean the environments to release the resource</p><h3>Usage</h3>
-<p><div class="r"></p><pre>ExecEnvir$clean()</pre><p></div></p>
+<a id="method-clean"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code>clean()</code></h3>
+<p>clean the environments to release the resource</p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>ExecEnvir</span><span class='op'>$</span><span class='fu'>clean</span><span class='op'>(</span><span class='op'>)</span></pre><p></div></p>
 
-<h3>Returns</h3>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Returns</h4>
 <p>none</p>
 <p><hr>
-<a id="method-new"></a></p><h3>Method <code>new()</code></h3>
-<p>constructor</p><h3>Usage</h3>
-<p><div class="r"></p><pre>ExecEnvir$new(session = getDefaultReactiveDomain(), parent_env = NULL)</pre><p></div></p>
+<a id="method-new"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code>new()</code></h3>
+<p>constructor</p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>ExecEnvir</span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span>session <span class='op'>=</span> <span class='fu'>getDefaultReactiveDomain</span><span class='op'>(</span><span class='op'>)</span>, parent_env <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre><p></div></p>
 
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Arguments</h4>
+<p><div class="arguments"></p><dl>
 <dt><code>session</code></dt><dd><p>shiny session instance</p></dd>
 
 <dt><code>parent_env</code></dt><dd><p>parent environment of this instance: package name space
@@ -299,42 +307,42 @@ or global environment</p></dd>
 
 </dl><p></div></p>
 <p><hr>
-<a id="method-reset"></a></p><h3>Method <code>reset()</code></h3>
-<p>reset the runtime environment, rarely used</p><h3>Usage</h3>
-<p><div class="r"></p><pre>ExecEnvir$reset(inputs)</pre><p></div></p>
+<a id="method-reset"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code>reset()</code></h3>
+<p>reset the runtime environment, rarely used</p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>ExecEnvir</span><span class='op'>$</span><span class='fu'>reset</span><span class='op'>(</span><span class='va'>inputs</span><span class='op'>)</span></pre><p></div></p>
 
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Arguments</h4>
+<p><div class="arguments"></p><dl>
 <dt><code>inputs</code></dt><dd><p>reactive value list</p></dd>
 
 </dl><p></div></p>
-<h3>Returns</h3>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Returns</h4>
 <p>none</p>
 <p><hr>
-<a id="method-copy"></a></p><h3>Method <code>copy()</code></h3>
-<p>(deprecated) copy the instance locally</p><h3>Usage</h3>
-<p><div class="r"></p><pre>ExecEnvir$copy(
-  session_id = "__fake_runtime_env__",
-  data_env = getDefaultDataRepository()
-)</pre><p></div></p>
+<a id="method-copy"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code>copy()</code></h3>
+<p>(deprecated) copy the instance locally</p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>ExecEnvir</span><span class='op'>$</span><span class='fu'>copy</span><span class='op'>(</span>
+  session_id <span class='op'>=</span> <span class='st'>"__fake_runtime_env__"</span>,
+  data_env <span class='op'>=</span> <span class='fu'><a href='getDefaultDataRepository.html'>getDefaultDataRepository</a></span><span class='op'>(</span><span class='op'>)</span>
+<span class='op'>)</span></pre><p></div></p>
 
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Arguments</h4>
+<p><div class="arguments"></p><dl>
 <dt><code>session_id</code></dt><dd><p>character</p></dd>
 
 <dt><code>data_env</code></dt><dd><p>where the data is stored, default is the environment 
 returned by <code><a href='getDefaultDataRepository.html'>getDefaultDataRepository</a></code></p></dd>
 
 </dl><p></div></p>
-<h3>Returns</h3>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Returns</h4>
 <p>a copied instance</p>
 <p><hr>
-<a id="method-execute_with"></a></p><h3>Method <code>execute_with()</code></h3>
-<p>(deprecated) execute module with given parameter</p><h3>Usage</h3>
-<p><div class="r"></p><pre>ExecEnvir$execute_with(param, async = FALSE, plan = NULL)</pre><p></div></p>
+<a id="method-execute_with"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code>execute_with()</code></h3>
+<p>(deprecated) execute module with given parameter</p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>ExecEnvir</span><span class='op'>$</span><span class='fu'>execute_with</span><span class='op'>(</span><span class='va'>param</span>, async <span class='op'>=</span> <span class='cn'>FALSE</span>, plan <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre><p></div></p>
 
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Arguments</h4>
+<p><div class="arguments"></p><dl>
 <dt><code>param</code></dt><dd><p>named list</p></dd>
 
 <dt><code>async</code></dt><dd><p>whether to run the whole module</p></dd>
@@ -342,63 +350,63 @@ returned by <code><a href='getDefaultDataRepository.html'>getDefaultDataReposito
 <dt><code>plan</code></dt><dd><p>future plan</p></dd>
 
 </dl><p></div></p>
-<h3>Returns</h3>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Returns</h4>
 <p>runtime environment</p>
 <p><hr>
-<a id="method-names"></a></p><h3>Method <code><a href='https://rdrr.io/r/base/names.html'>names()</a></code></h3>
+<a id="method-names"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code><a href='https://rdrr.io/r/base/names.html'>names()</a></code></h3>
 <p>returns names of a list, if names are null, 
-returns blank characters</p><h3>Usage</h3>
-<p><div class="r"></p><pre>ExecEnvir$names(x)</pre><p></div></p>
+returns blank characters</p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>ExecEnvir</span><span class='op'>$</span><span class='fu'>names</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span></pre><p></div></p>
 
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Arguments</h4>
+<p><div class="arguments"></p><dl>
 <dt><code>x</code></dt><dd><p>a list</p></dd>
 
 </dl><p></div></p>
-<h3>Returns</h3>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Returns</h4>
 <p>the names of the list</p>
 <p><hr>
-<a id="method-register_module"></a></p><h3>Method <code>register_module()</code></h3>
-<p>register <code><a href='ModuleEnvir.html'>ModuleEnvir</a></code> instance</p><h3>Usage</h3>
-<p><div class="r"></p><pre>ExecEnvir$register_module(module_env)</pre><p></div></p>
+<a id="method-register_module"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code>register_module()</code></h3>
+<p>register <code><a href='ModuleEnvir.html'>ModuleEnvir</a></code> instance</p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>ExecEnvir</span><span class='op'>$</span><span class='fu'>register_module</span><span class='op'>(</span><span class='va'>module_env</span><span class='op'>)</span></pre><p></div></p>
 
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Arguments</h4>
+<p><div class="arguments"></p><dl>
 <dt><code>module_env</code></dt><dd><p><code><a href='ModuleEnvir.html'>ModuleEnvir</a></code> instance. The modules
 are shared across different sessions, but to run the module, we need 
 to create runtime environment, which is <code>ExecEnvir</code></p></dd>
 
 </dl><p></div></p>
-<h3>Returns</h3>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Returns</h4>
 <p>none</p>
 <p><hr>
-<a id="method-register_context"></a></p><h3>Method <code>register_context()</code></h3>
+<a id="method-register_context"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code>register_context()</code></h3>
 <p>Register 'RAVE' context for current environment 
-(internally used)</p><h3>Usage</h3>
-<p><div class="r"></p><pre>ExecEnvir$register_context(context = c("rave_running", "rave_running_local"))</pre><p></div></p>
+(internally used)</p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>ExecEnvir</span><span class='op'>$</span><span class='fu'>register_context</span><span class='op'>(</span>context <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"rave_running"</span>, <span class='st'>"rave_running_local"</span><span class='op'>)</span><span class='op'>)</span></pre><p></div></p>
 
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Arguments</h4>
+<p><div class="arguments"></p><dl>
 <dt><code>context</code></dt><dd><p>context string to indicate whether the module is running 
 locally</p></dd>
 
 </dl><p></div></p>
-<h3>Returns</h3>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Returns</h4>
 <p>None</p>
 <p><hr>
-<a id="method-rave_inputs"></a></p><h3>Method <code>rave_inputs()</code></h3>
-<p>parse input components</p><h3>Usage</h3>
-<p><div class="r"></p><pre>ExecEnvir$rave_inputs(
-  ...,
-  .input_panels = list(),
-  .tabsets = list(),
-  .env = NULL,
-  .manual_inputs = NULL,
-  .render_inputs = NULL
-)</pre><p></div></p>
+<a id="method-rave_inputs"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code>rave_inputs()</code></h3>
+<p>parse input components</p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>ExecEnvir</span><span class='op'>$</span><span class='fu'>rave_inputs</span><span class='op'>(</span>
+  <span class='va'>...</span>,
+  .input_panels <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
+  .tabsets <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
+  .env <span class='op'>=</span> <span class='cn'>NULL</span>,
+  .manual_inputs <span class='op'>=</span> <span class='cn'>NULL</span>,
+  .render_inputs <span class='op'>=</span> <span class='cn'>NULL</span>
+<span class='op'>)</span></pre><p></div></p>
 
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Arguments</h4>
+<p><div class="arguments"></p><dl>
 <dt><code>...</code></dt><dd><p>shiny input calls, such as <code>textInput('id', 'Name', ...)</code></p></dd>
 
 <dt><code>.input_panels, .tabsets</code></dt><dd><p>together define the input layouts</p></dd>
@@ -412,20 +420,20 @@ when inputs are updated</p></dd>
 updated</p></dd>
 
 </dl><p></div></p>
-<h3>Returns</h3>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Returns</h4>
 <p>none</p>
 <p><hr>
-<a id="method-rave_outputs"></a></p><h3>Method <code>rave_outputs()</code></h3>
-<p>parse output components</p><h3>Usage</h3>
-<p><div class="r"></p><pre>ExecEnvir$rave_outputs(
-  ...,
-  .output_tabsets = list(),
-  .tabsets = list(),
-  .env = NULL
-)</pre><p></div></p>
+<a id="method-rave_outputs"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code>rave_outputs()</code></h3>
+<p>parse output components</p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>ExecEnvir</span><span class='op'>$</span><span class='fu'>rave_outputs</span><span class='op'>(</span>
+  <span class='va'>...</span>,
+  .output_tabsets <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
+  .tabsets <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='op'>)</span>,
+  .env <span class='op'>=</span> <span class='cn'>NULL</span>
+<span class='op'>)</span></pre><p></div></p>
 
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Arguments</h4>
+<p><div class="arguments"></p><dl>
 <dt><code>...</code></dt><dd><p>shiny output calls, such as <code>plotOutput('id', 'Title')</code></p></dd>
 
 <dt><code>.output_tabsets, .tabsets</code></dt><dd><p>together define the output layouts</p></dd>
@@ -433,27 +441,27 @@ updated</p></dd>
 <dt><code>.env</code></dt><dd><p>debug use</p></dd>
 
 </dl><p></div></p>
-<h3>Returns</h3>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Returns</h4>
 <p>none</p>
 <p><hr>
-<a id="method-rave_updates"></a></p><h3>Method <code>rave_updates()</code></h3>
-<p>input initialization when <code>iEEG/ECoG</code> data are imported</p><h3>Usage</h3>
-<p><div class="r"></p><pre>ExecEnvir$rave_updates(..., .env = NULL)</pre><p></div></p>
+<a id="method-rave_updates"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code>rave_updates()</code></h3>
+<p>input initialization when <code>iEEG/ECoG</code> data are imported</p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>ExecEnvir</span><span class='op'>$</span><span class='fu'>rave_updates</span><span class='op'>(</span><span class='va'>...</span>, .env <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre><p></div></p>
 
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Arguments</h4>
+<p><div class="arguments"></p><dl>
 <dt><code>...</code></dt><dd><p>R expressions</p></dd>
 
 <dt><code>.env</code></dt><dd><p>for debug use</p></dd>
 
 </dl><p></div></p>
 <p><hr>
-<a id="method-rave_execute"></a></p><h3>Method <code>rave_execute()</code></h3>
-<p>parse, and compile to main function</p><h3>Usage</h3>
-<p><div class="r"></p><pre>ExecEnvir$rave_execute(..., auto = TRUE, .env = NULL, async_vars = NULL)</pre><p></div></p>
+<a id="method-rave_execute"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code>rave_execute()</code></h3>
+<p>parse, and compile to main function</p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>ExecEnvir</span><span class='op'>$</span><span class='fu'>rave_execute</span><span class='op'>(</span><span class='va'>...</span>, auto <span class='op'>=</span> <span class='cn'>TRUE</span>, .env <span class='op'>=</span> <span class='cn'>NULL</span>, async_vars <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre><p></div></p>
 
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Arguments</h4>
+<p><div class="arguments"></p><dl>
 <dt><code>...</code></dt><dd><p>R expressions</p></dd>
 
 <dt><code>auto</code></dt><dd><p>whether the module should run automatically</p></dd>
@@ -463,63 +471,65 @@ updated</p></dd>
 <dt><code>async_vars</code></dt><dd><p>variables further passed to <code>async</code> module</p></dd>
 
 </dl><p></div></p>
-<h3>Returns</h3>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Returns</h4>
 <p>none, but <code>ExecEnvir$execute</code> will be generated.</p>
 <p><hr>
-<a id="method-set_browser"></a></p><h3>Method <code>set_browser()</code></h3>
+<a id="method-set_browser"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code>set_browser()</code></h3>
 <p>(experimental) cache R expression in browser 
-<code>localStorage</code></p><h3>Usage</h3>
-<p><div class="r"></p><pre>ExecEnvir$set_browser(expr)</pre><p></div></p>
+<code>localStorage</code></p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>ExecEnvir</span><span class='op'>$</span><span class='fu'>set_browser</span><span class='op'>(</span><span class='va'>expr</span>, session <span class='op'>=</span> <span class='fu'>getDefaultReactiveDomain</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span></pre><p></div></p>
 
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Arguments</h4>
+<p><div class="arguments"></p><dl>
 <dt><code>expr</code></dt><dd><p>R expression</p></dd>
+
+<dt><code>session</code></dt><dd><p>shiny session instance</p></dd>
 
 </dl><p></div></p>
 <p><hr>
-<a id="method-generate_input_ui"></a></p><h3>Method <code>generate_input_ui()</code></h3>
-<p>generate input panels according to parsed <code>rave_inputs</code></p><h3>Usage</h3>
-<p><div class="r"></p><pre>ExecEnvir$generate_input_ui(sidebar_width = 3L)</pre><p></div></p>
+<a id="method-generate_input_ui"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code>generate_input_ui()</code></h3>
+<p>generate input panels according to parsed <code>rave_inputs</code></p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>ExecEnvir</span><span class='op'>$</span><span class='fu'>generate_input_ui</span><span class='op'>(</span>sidebar_width <span class='op'>=</span> <span class='fl'>3L</span><span class='op'>)</span></pre><p></div></p>
 
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Arguments</h4>
+<p><div class="arguments"></p><dl>
 <dt><code>sidebar_width</code></dt><dd><p>integer from 1 to 11, the width of the input panels</p></dd>
 
 </dl><p></div></p>
-<h3>Returns</h3>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Returns</h4>
 <p>HTML tags</p>
 <p><hr>
-<a id="method-generate_output_ui"></a></p><h3>Method <code>generate_output_ui()</code></h3>
+<a id="method-generate_output_ui"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code>generate_output_ui()</code></h3>
 <p>generate outputs labels according to parsed 
-<code>rave_outputs</code></p><h3>Usage</h3>
-<p><div class="r"></p><pre>ExecEnvir$generate_output_ui(sidebar_width = 3L)</pre><p></div></p>
+<code>rave_outputs</code></p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>ExecEnvir</span><span class='op'>$</span><span class='fu'>generate_output_ui</span><span class='op'>(</span>sidebar_width <span class='op'>=</span> <span class='fl'>3L</span><span class='op'>)</span></pre><p></div></p>
 
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Arguments</h4>
+<p><div class="arguments"></p><dl>
 <dt><code>sidebar_width</code></dt><dd><p>integer from 1 to 11, the width of the input panels,
 the output panel width is calculated as <code>12-sidebar_width</code></p></dd>
 
 </dl><p></div></p>
-<h3>Returns</h3>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Returns</h4>
 <p>HTML tags</p>
 <p><hr>
-<a id="method-is_global"></a></p><h3>Method <code>is_global()</code></h3>
+<a id="method-is_global"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code>is_global()</code></h3>
 <p>(deprecated) check if variable is shared across modules.
-Please use <code>cache_input</code> instead to get variable values.</p><h3>Usage</h3>
-<p><div class="r"></p><pre>ExecEnvir$is_global(inputId)</pre><p></div></p>
+Please use <code>cache_input</code> instead to get variable values.</p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>ExecEnvir</span><span class='op'>$</span><span class='fu'>is_global</span><span class='op'>(</span><span class='va'>inputId</span><span class='op'>)</span></pre><p></div></p>
 
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Arguments</h4>
+<p><div class="arguments"></p><dl>
 <dt><code>inputId</code></dt><dd><p>input ID</p></dd>
 
 </dl><p></div></p>
 <p><hr>
-<a id="method-clone"></a></p><h3>Method <code>clone()</code></h3>
-<p>The objects of this class are cloneable with this method.</p><h3>Usage</h3>
-<p><div class="r"></p><pre>ExecEnvir$clone(deep = FALSE)</pre><p></div></p>
+<a id="method-clone"></a></p><h3 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Method <code>clone()</code></h3>
+<p>The objects of this class are cloneable with this method.</p><h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Usage</h4>
+<p><div class="r"></p><pre><span class='va'>ExecEnvir</span><span class='op'>$</span><span class='fu'>clone</span><span class='op'>(</span>deep <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span></pre><p></div></p>
 
-<h3>Arguments</h3>
-<p><div class="arguments"></p><dl class='dl-horizontal'>
+<h4 class='hasAnchor' id='arguments'><a class='anchor' href='#arguments'></a>Arguments</h4>
+<p><div class="arguments"></p><dl>
 <dt><code>deep</code></dt><dd><p>Whether to make a deep clone.</p></dd>
 
 </dl><p></div></p>
@@ -528,28 +538,23 @@ Please use <code>cache_input</code> instead to get variable values.</p><h3>Usage
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'>
-<span class='kw'>if</span> (<span class='fl'>FALSE</span>) {
+<span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
 
 <span class='co'># Load module</span>
-<span class='no'>module</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='get_module.html'>get_module</a></span>(<span class='st'>'ravebuiltins'</span>, <span class='st'>'power_explorer'</span>)
+<span class='va'>module</span> <span class='op'>&lt;-</span> <span class='fu'><a href='get_module.html'>get_module</a></span><span class='op'>(</span><span class='st'>'ravebuiltins'</span>, <span class='st'>'power_explorer'</span><span class='op'>)</span>
 
 <span class='co'># Create execute environmen</span>
-<span class='no'>execenv</span> <span class='kw'>&lt;-</span> <span class='no'>module</span>$<span class='fu'>get_or_new_exec_env</span>()
-<span class='no'>execenv</span>$<span class='fu'>info</span>()
+<span class='va'>execenv</span> <span class='op'>&lt;-</span> <span class='va'>module</span><span class='op'>$</span><span class='fu'>get_or_new_exec_env</span><span class='op'>(</span><span class='op'>)</span>
+<span class='va'>execenv</span><span class='op'>$</span><span class='fu'>info</span><span class='op'>(</span><span class='op'>)</span>
 
-}</div></pre>
+<span class='op'>}</span>
+
+</div></pre>
   </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
-    <h2>Contents</h2>
-    <ul class="nav nav-pills nav-stacked">
-      <li><a href="#public-fields">Public fields</a></li>
-      <li><a href="#active-bindings">Active bindings</a></li>
-      <li><a href="#methods">Methods</a></li>
-      <li><a href="#examples">Examples</a></li>
-    </ul>
-
-    <h2>Author</h2>
-    <p>Zhengjia Wang</p>
+  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
+    <nav id="toc" data-toggle="toc" class="sticky-top">
+      <h2 data-toc-skip>Contents</h2>
+    </nav>
   </div>
 </div>
 
@@ -560,7 +565,7 @@ Please use <code>cache_input</code> instead to get variable values.</p><h3>Usage
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>
