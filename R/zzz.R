@@ -90,18 +90,6 @@ restart_r <- function(){
 check_dependencies <- function(update_rave = TRUE, restart = TRUE, 
                                nightly = FALSE, demo_data = FALSE, ...){
   
-  # check if dipsaus is > 0.0.8
-  dv <- as.character(utils::packageVersion('dipsaus'))
-  if(utils::compareVersion(dv, '0.0.8.9000') < 0){
-    # update dipsaus
-    devtools::unload('dipsaus')
-    devtools::install_github('dipterix/dipsaus', upgrade = 'never', force = TRUE)
-    message("Restarting R. Please run 'check_dependencies()' again to finalize update.")
-    restart_r()
-    message("Please run 'check_dependencies()' again to finalize update.")
-    return(invisible())
-  }
-  
   # Check N27 brain
   catgl('Checking N27 brain', level = 'DEFAULT', end = '\n')
   threeBrain::merge_brain()
@@ -137,34 +125,22 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
     }
   }
   
-  
-  
   lazy_install <- NULL
   lazy_github <- NULL
-  
-  # check if Rcpp version is 1.0.4 and os is macosx
-  if(stringr::str_detect(R.version$os, "^darwin")){
-    rcpp_version <- utils::packageVersion('Rcpp')
-    if(utils::compareVersion(as.character(rcpp_version), '1.0.4') == 0){
-      # you need to install
-      lazy_install <- c(lazy_install, 'Rcpp')
-    }
-  }
   
   if(nightly){
     # get repos from Github
     git_repos <- tryCatch({
       readLines("https://raw.githubusercontent.com/beauchamplab/rave/master/DEVREPO")[1:3]
     }, error = function(e){
-      c("beauchamplab/rave", "beauchamplab/ravebuiltins@migrate2",  "dipterix/rutabaga@develop")
+      c("beauchamplab/rave", "beauchamplab/ravebuiltins@migrate2",  "dipterix/rutabaga@develop", 'dipterix/threeBrain', 'dipterix/dipsaus')
     })
     # lazy_install <- c(lazy_install, 'beauchamplab/ravebuiltins@migrate2', 'dipterix/rutabaga@develop')
-    lazy_install <- c(lazy_install, git_repos[2], git_repos[3])
+    lazy_install <- c(lazy_install, git_repos[-1])
     if(update_rave){
       # get directly from DEVREPO
       lazy_install <- c(lazy_install, git_repos[1])
     }
-    lazy_install <- c(lazy_install, c('dipterix/threeBrain', 'dipterix/dipsaus'))
   } else {
     lazy_install <- c(lazy_install, 'ravebuiltins', 'rutabaga')
     if(update_rave){
