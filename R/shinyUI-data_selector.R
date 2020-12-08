@@ -693,7 +693,8 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
         }
         
         return(p(
-          'An error found in the epoch file. Message: ', br(),
+          'Warning: block numbers do not match exactly, verify that this is OK (for instance, it is OK if a leading zero is missing).',
+          br(), 'To continue loading data anyway, click the "Load Data" button ', br(),
           strong(msg), br(), 'Here is an example of epoch file:', br(),
           tags$pre(
             paste(examp, collapse = '\n')
