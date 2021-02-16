@@ -26,9 +26,6 @@ raveio::save_h5
 raveio::read_mat
 
 #' @export
-raveio::lazyarray_to_tensor
-
-#' @export
 raveio::Tensor
 
 #' @export

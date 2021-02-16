@@ -26,6 +26,7 @@ Imports:
     stats,
     graphics,
     grDevices,
+    lazyarray,
     raveio (>= 0.0.3),
     htmltools (>= 0.3.6),
     devtools,

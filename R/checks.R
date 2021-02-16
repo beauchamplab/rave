@@ -938,6 +938,7 @@ check_epoch <- function(subject, epoch_name){
     
     subject = as_subject(subject, strict = FALSE)
   }
+  # subject2 <- raveio::as_rave_subject(subject$id, strict = FALSE)
   
   file_path = sprintf('%s/epoch_%s.csv', subject$dirs$meta_dir, epoch_name)
   

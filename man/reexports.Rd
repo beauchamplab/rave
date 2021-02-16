@@ -9,7 +9,6 @@
 \alias{load_h5}
 \alias{save_h5}
 \alias{read_mat}
-\alias{lazyarray_to_tensor}
 \alias{Tensor}
 \alias{ECoGTensor}
 \alias{catgl}
@@ -23,6 +22,6 @@ below to see their documentation.
 \describe{
   \item{dipsaus}{\code{\link[dipsaus]{clear_env}}}
 
-  \item{raveio}{\code{\link[raveio]{ECoGTensor}}, \code{\link[raveio]{LazyFST}}, \code{\link[raveio]{LazyH5}}, \code{\link[raveio]{Tensor}}, \code{\link[raveio]{catgl}}, \code{\link[raveio]{lazyarray_to_tensor}}, \code{\link[raveio]{load_fst_or_h5}}, \code{\link[raveio]{load_h5}}, \code{\link[raveio]{read_mat}}, \code{\link[raveio]{save_h5}}}
+  \item{raveio}{\code{\link[raveio]{ECoGTensor}}, \code{\link[raveio]{LazyFST}}, \code{\link[raveio]{LazyH5}}, \code{\link[raveio]{Tensor}}, \code{\link[raveio]{catgl}}, \code{\link[raveio]{load_fst_or_h5}}, \code{\link[raveio]{load_h5}}, \code{\link[raveio]{read_mat}}, \code{\link[raveio]{save_h5}}}
 }}
 
