@@ -95,8 +95,21 @@ save_meta <- function(data, meta_type, project_name, subject_code){
       data$Coord_x = 0
       data$Coord_y = 0
       data$Coord_z = 0
-      data$Label = ''
     }
+    if(is.null(data$Label)){
+      data$Label <- "NoLabel"
+    }
+    if(is.null(data$FreeSurferLabel)){
+      data$FreeSurferLabel <- "Unknown"
+    }
+    if(is.null(data$Group)){
+      data$Group <- ""
+    }
+    
+    if(is.null(data$Radius)){
+      data$Radius <- 2
+    }
+    
     
     safe_write_csv(data, file = file.path(meta_dir, 'electrodes.csv'), row.names = FALSE)
   }else if(meta_type == 'time_points'){
@@ -143,7 +156,14 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
         }
         na_labels = is.na(tbl$Label)
         if(any(na_labels)){
-          tbl$Label[na_labels] = paste0('Unlabeled', seq_len(sum(na_labels)))
+          tbl$Label[na_labels] = paste0('NoLabel', seq_len(sum(na_labels)))
+        }
+        
+        if(is.null(tbl$FreeSurferLabel)){
+          tbl$FreeSurferLabel <- "Unknown"
+        }
+        if(is.null(tbl$Group)){
+          tbl$Group <- ""
         }
         
         return(tbl)
