@@ -1024,6 +1024,16 @@ download_subject_data <- function(
   con, replace_if_exists = FALSE, override_project = NULL, override_subject = NULL,
   temp_dir = tempdir(), remove_zipfile = TRUE, subject_settings = NULL,
   ...){
+  
+  # Large files, need long time to download
+  opt_timeout <- getOption('timeout', 1e10)
+  on.exit({
+    options('timeout' = opt_timeout)
+  }, add = TRUE, after = TRUE)
+  options('timeout' = 1e10)
+  
+  
+  
   url = con
   # url = 'https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/data-large.zip'
   # url = "/var/folders/rh/4bkfl5z50wgbbjd85xvc695c0000gn/T//RtmpmUoaTy/junk_45d3370d10d.zip"

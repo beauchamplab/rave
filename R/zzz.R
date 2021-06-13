@@ -256,9 +256,10 @@ finalize_installation_internal_demo <- function(upgrade = c('ask', 'always', 'ne
 #' or leave it blank to upgrade all.
 #' @param upgrade whether to ask. Default is 'always' to receive default 
 #' settings Other choices are 'ask' or 'never'.
+#' @param async whether to run scripts in parallel; default is true.
 #' 
 #' @export
-finalize_installation <- function(packages, upgrade = c('always', 'ask', 'never')){
+finalize_installation <- function(packages, upgrade = c('always', 'ask', 'never'), async = TRUE){
   upgrade <- match.arg(upgrade)
   
   if(missing(packages)){
@@ -305,7 +306,11 @@ finalize_installation <- function(packages, upgrade = c('always', 'ask', 'never'
         ns <- asNamespace(pkg)
         fun <- ns[[fname]]
         if(is.function(fun)){
-          fun(upgrade)
+          if('async' %in% names(formals(fun))){
+            fun(upgrade, async)
+          } else {
+            fun(upgrade)
+          }
         }
       }
       
