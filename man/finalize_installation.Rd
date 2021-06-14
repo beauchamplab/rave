@@ -4,7 +4,11 @@
 \alias{finalize_installation}
 \title{Finalize installation}
 \usage{
-finalize_installation(packages, upgrade = c("always", "ask", "never"))
+finalize_installation(
+  packages,
+  upgrade = c("always", "ask", "never"),
+  async = TRUE
+)
 }
 \arguments{
 \item{packages}{package name to finalize. 'rave' to only update base demo 
@@ -13,6 +17,8 @@ or leave it blank to upgrade all.}
 
 \item{upgrade}{whether to ask. Default is 'always' to receive default 
 settings Other choices are 'ask' or 'never'.}
+
+\item{async}{whether to run scripts in parallel; default is true.}
 }
 \description{
 download demo data

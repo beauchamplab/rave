@@ -12,6 +12,7 @@ download_subject_data(
   temp_dir = tempdir(),
   remove_zipfile = TRUE,
   subject_settings = NULL,
+  mode = "wb",
   ...
 )
 }
@@ -33,7 +34,7 @@ file, this will be forced to FALSE}
 
 \item{subject_settings}{override \code{"subject.yaml"} see details}
 
-\item{...}{passed to \code{\link[utils]{download.file}}}
+\item{mode, ...}{passed to \code{\link[utils]{download.file}}}
 }
 \description{
 Function to download subjects from internet/local
@@ -50,7 +51,7 @@ If you want to override subject settings, you need to implement your own
 # Normal example
 download.file(
   'https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/data-large.zip',
-  destfile = "~/rave_data/data-small.zip")
+  destfile = "~/rave_data/data-small.zip", mode = "wb")
 download_subject_data(con = "~/rave_data/data-small.zip")
 
 # or the following

@@ -983,13 +983,13 @@ download_sample_data <- function(subject, version = 'v0.1.8-beta', ...){
 #' @param subject_settings override \code{"subject.yaml"} see details
 #' @param override_project if not null, project will be renamed to this value
 #' @param override_subject if not null, subject will be renamed to this value
-#' @param ... passed to \code{\link[utils]{download.file}}
+#' @param mode,... passed to \code{\link[utils]{download.file}}
 #' @examples
 #' \dontrun{
 #' # Normal example
 #' download.file(
 #'   'https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/data-large.zip',
-#'   destfile = "~/rave_data/data-small.zip")
+#'   destfile = "~/rave_data/data-small.zip", mode = "wb")
 #' download_subject_data(con = "~/rave_data/data-small.zip")
 #'
 #' # or the following
@@ -1023,7 +1023,7 @@ download_sample_data <- function(subject, version = 'v0.1.8-beta', ...){
 download_subject_data <- function(
   con, replace_if_exists = FALSE, override_project = NULL, override_subject = NULL,
   temp_dir = tempdir(), remove_zipfile = TRUE, subject_settings = NULL,
-  ...){
+  mode = "wb", ...){
   
   # Large files, need long time to download
   opt_timeout <- getOption('timeout', 1e10)
@@ -1047,7 +1047,7 @@ download_subject_data <- function(
     # prepare files
     temp_file = tempfile(pattern = 'junk_', temp_dir, fileext = '.zip')
     # download
-    utils::download.file(url, destfile = temp_file, ...)
+    utils::download.file(url, destfile = temp_file, mode = mode, ...)
   }else{
     remove_zipfile = FALSE
     temp_file = url
