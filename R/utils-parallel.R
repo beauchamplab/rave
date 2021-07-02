@@ -10,6 +10,7 @@
 #' @param .envir internally used
 #' @param .as_datatable logical, return result as \code{data.frame}. Experimental.
 #' @param .nrows integer, if \code{.as_datatable=TRUE}, number of rows expected.
+#' @param .callback function or \code{NULL}, callback function to monitor updates.
 #' @examples
 #' \dontrun{
 #' lapply_async(1:10, function(x){
@@ -120,6 +121,29 @@ lapply_async <- function(
   
   return(.future_values)
 }
+
+
+#' @rdname lapply_async
+#' @export
+lapply_async3 <- function(x, fun, ..., .globals = TRUE, .gc = TRUE, 
+                          .callback = NULL, .ncores = 0){
+  .ncores = as.integer(.ncores)
+  if(.ncores <= 0){
+    .ncores = rave_options('max_worker')
+  }
+  if(is.null(.packages)){
+    .packages = stringr::str_match(search(), 'package:(.*)')
+    .packages = .packages[,2]
+    .packages = rev(.packages[!is.na(.packages)])
+  }
+  dipsaus::make_forked_clusters(workers = .ncores, clean = TRUE)
+  dipsaus::lapply_async2(x = x, FUN = fun, FUN.args = list(...), 
+                         callback = .callback,
+                         plan = FALSE, 
+                         future.globals = .globals, 
+                         future.packages = .packages)
+}
+
 
 # lapply_async <- function(
 #   x, fun, ..., .ncores = 0, .call_back = NULL, .packages = NULL,

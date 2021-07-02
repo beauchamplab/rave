@@ -2,6 +2,7 @@
 % Please edit documentation in R/utils-parallel.R
 \name{lapply_async}
 \alias{lapply_async}
+\alias{lapply_async3}
 \title{\code{lapply} using future package in asynchronous way}
 \usage{
 lapply_async(
@@ -16,6 +17,16 @@ lapply_async(
   .gc = TRUE,
   .as_datatable = FALSE,
   .nrows = 0
+)
+
+lapply_async3(
+  x,
+  fun,
+  ...,
+  .globals = TRUE,
+  .gc = TRUE,
+  .callback = NULL,
+  .ncores = 0
 )
 }
 \arguments{
@@ -38,6 +49,8 @@ automatically. Otherwise you have to specify the packages that you want to load.
 \item{.as_datatable}{logical, return result as \code{data.frame}. Experimental.}
 
 \item{.nrows}{integer, if \code{.as_datatable=TRUE}, number of rows expected.}
+
+\item{.callback}{function or \code{NULL}, callback function to monitor updates.}
 }
 \description{
 \code{lapply} using future package in asynchronous way
