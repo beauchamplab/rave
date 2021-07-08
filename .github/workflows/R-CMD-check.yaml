@@ -31,10 +31,24 @@ jobs:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
       RSPM: ${{ matrix.config.rspm }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      HDF5_VERSION: 1.12.0
+      HDF5_DIR: ${{ github.workspace }}/cache/hdf5
 
     steps:
       - uses: actions/checkout@v2
 
+      - name: Cache HDF5
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.HDF5_DIR }}
+          key: ${{ runner.os }}-hdf5-${{ env.HDF5_VERSION }}
+
+      - name: Build HDF5
+        if: runner.os != 'Windows' && steps.cache-hdf5.outputs.cache-hit != 'true'
+        run: |
+          chmod a+x ./inst/hdf5_installer.sh
+          ./inst/hdf5_installer.sh
+          ls ${{ env.HDF5_DIR }}
       - uses: r-lib/actions/setup-r@v1
         with:
           r-version: ${{ matrix.config.r }}
@@ -43,6 +57,11 @@ jobs:
 
       - name: Query dependencies
         run: |
+          if(!endsWith(.Platform$OS.type, "indows")){
+            h5cc=file.path(Sys.getenv("HDF5_DIR"), "bin/h5cc")
+            h5cc=normalizePath(h5cc)
+            install.packages("hdf5r", configure.args=sprintf("--with-hdf5=%s", h5cc))
+          }
           install.packages('remotes')
           saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
           writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
@@ -63,7 +82,6 @@ jobs:
           do
             eval sudo $cmd
           done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "20.04"))')
-
       - name: Install dependencies
         run: |
           remotes::install_deps(dependencies = TRUE)
@@ -75,7 +93,7 @@ jobs:
           _R_CHECK_CRAN_INCOMING_REMOTE_: false
         run: |
           options(crayon.enabled = TRUE)
-          rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "error", check_dir = "check")
+          rcmdcheck::rcmdcheck(args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
         shell: Rscript {0}
 
       - name: Upload check results
