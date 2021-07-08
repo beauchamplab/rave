@@ -22,3 +22,7 @@
 ^docker/
 ^api/
 ^DEVREPO$
+^\.github$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

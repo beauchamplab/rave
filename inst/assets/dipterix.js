@@ -184,6 +184,26 @@ Shiny.addCustomMessageHandler('rave_close_tab', (data) => {
   });
 });
 
+Shiny.addCustomMessageHandler('rave_close_tab', (data) => {
+  if( typeof data.module_id !== 'string' ){ return; }
+  const containerId = '#' + data.module_id + '_UI',
+        headers = $(containerId + ' .box-header');
+  headers.each((ii) => {
+    const el_title = $(headers[ii]).find('.box-title');
+    if( el_title.length > 0 ){
+      let title = el_title[0].innerText;
+      if(data.title === title){
+        let btn = el_title
+          .siblings('.box-tools')
+          .find('.btn.btn-box-tool[data-widget="collapse"] .fa.fa-plus');
+        if(btn.length > 0){
+          $(btn[0]).click();
+        }
+      }
+    }
+  });
+});
+
 
 
 //Shiny.onInputChange(callback_id, re);
