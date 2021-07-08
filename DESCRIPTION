@@ -60,3 +60,4 @@ Suggests:
     rstudioapi
 VignetteBuilder: knitr
 Language: en-US
+URL: https://beauchamplab.github.io/rave
