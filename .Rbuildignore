@@ -13,6 +13,7 @@
 ^travis_setup.sh$
 \.md$
 ^test/
+^inst/hdf5_installer\.sh$
 ^cran-comments\.md$
 ^Updates\.md$
 ^Requirements\.md$
