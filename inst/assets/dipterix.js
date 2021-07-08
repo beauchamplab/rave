@@ -184,7 +184,7 @@ Shiny.addCustomMessageHandler('rave_close_tab', (data) => {
   });
 });
 
-Shiny.addCustomMessageHandler('rave_close_tab', (data) => {
+Shiny.addCustomMessageHandler('rave_open_tab', (data) => {
   if( typeof data.module_id !== 'string' ){ return; }
   const containerId = '#' + data.module_id + '_UI',
         headers = $(containerId + ' .box-header');
