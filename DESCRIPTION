@@ -1,7 +1,7 @@
 Package: rave
 Type: Package
 Title: R Analysis and Visualization of 'ECOG/iEEG' Data
-Version: 1.0.2
+Version: 1.0.2.1
 Authors@R: c(
     person("Zhengjia", "Wang", email = "dipterix.wang@gmail.com", role = c("aut", "cre")),
     person("John", "Magnotti", role = c("aut")),
@@ -18,7 +18,9 @@ Description: R Analysis and Visualization of 'ECOG/iEEG' Data
     'WebGL'.
 License: GPL-3
 Encoding: UTF-8
-LazyData: true
+Language: en-US
+URL: https://github.com/beauchamplab/rave, https://beauchamplab.github.io/rave
+BugReports: https://github.com/beauchamplab/rave/issues
 RoxygenNote: 7.1.1
 Depends: R (>= 3.6.0)
 Imports:
@@ -58,6 +60,3 @@ Suggests:
     roxygen2,
     testthat,
     rstudioapi
-VignetteBuilder: knitr
-Language: en-US
-URL: https://beauchamplab.github.io/rave
