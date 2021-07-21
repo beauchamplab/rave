@@ -39,7 +39,7 @@
 #'
 #' arr[,,1] <- 1:6
 #'
-#' # arr is a LazyArray and its partition files are
+#' # arr is a 'LazyArray' and its partition files are
 #' # missing except for the first one
 #' arr[]
 #'

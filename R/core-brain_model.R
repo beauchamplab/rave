@@ -106,7 +106,7 @@ rave_brain2 <- function(subject, surfaces = 'pial', use_141 = TRUE,
 # }
 
 
-#' Import 'csv' files that contain electrode information
+#' Import \code{.csv} files that contain electrode information
 #' @description The table to import must contains a column \code{'Electrode'}
 #' that is consistent with the corresponding subject.
 #' @param path path to the electrode file to import

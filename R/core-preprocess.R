@@ -434,7 +434,8 @@ rave_preprocess_tools <- function(env = new.env(), ...){
           bandwidths[[block]] %?<-% bandwidths[['default']]
           bands = bandwidths[[block]][['centers']]
           width = bandwidths[[block]][['widths']]
-          s = load_h5(cfile, name = sprintf('/raw/%s', block), read_only = T, ram = T)
+          s = load_h5(cfile, name = sprintf('/raw/%s', block), 
+                      read_only = TRUE, ram = TRUE)
           v = notch_channel(s, sample_rate = srate, bands = bands, width = width)
           # Save filtered
           save_h5(as.vector(v), file = cfile, name = paste0('/notch/' , block), chunk = c(1024))
