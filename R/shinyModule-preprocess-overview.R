@@ -803,9 +803,16 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
         bids_runs <- NULL
       }
       
-      raveio::rave_import(project_name = project_name, subject_code = subject_code,
-                          blocks, electrodes, format = fmt, 
-                          sample_rate = srate, conversion = lfp_unit, task_runs = bids_runs)
+      base::print(bquote(
+        raveio::rave_import(
+          project_name = .(project_name), subject_code = .(subject_code),
+          .(blocks), .(electrodes), format = .(fmt), sample_rate = .(srate), 
+          conversion = .(lfp_unit), task_runs = .(bids_runs))
+      ))
+      raveio::rave_import(
+        project_name = project_name, subject_code = subject_code,
+        blocks, electrodes, format = fmt, sample_rate = srate, 
+        conversion = lfp_unit, task_runs = bids_runs)
       utils$save_to_subject(checklevel = HAS_CACHE)
       utils$reset()
       msg = 'Raw voltage signals are cached.'

@@ -109,21 +109,21 @@ rave_preprocess <- function(
   ui = dashboardPage(
     skin = theme,
     control = div(),
-    header = shinydashboard::dashboardHeader(
+    header = raveui::dashboardHeader(
       title = 'RAVE Preprocess'
     ),
-    sidebar = shinydashboard::dashboardSidebar(
-      tagList(shinydashboard::sidebarMenu(
+    sidebar = raveui::dashboardSidebar(
+      tagList(raveui::sidebarMenu(
         id = 'sidebar',
         lapply(model_instances, function(x){
-          shinydashboard::menuItem(
+          raveui::menuItem(
             x$name,
             tabName = x$ID
           )
         }))
       )
     ),
-    body = shinydashboard::dashboardBody(
+    body = raveui::dashboardBody(
       shinyjs::useShinyjs(),
       singleton(
         tags$head(tags$script(stringr::str_c(
@@ -134,8 +134,8 @@ rave_preprocess <- function(
         )))
       ),
 
-      do.call(shinydashboard::tabItems, lapply(model_instances, function(x){
-        shinydashboard::tabItem(x$ID, x$UI)
+      do.call(raveui::tabItems, lapply(model_instances, function(x){
+        raveui::tabItem(x$ID, x$UI)
       }))
     )
   )

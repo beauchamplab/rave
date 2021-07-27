@@ -679,7 +679,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
             removeNotification(id = '..input_updated')
           }
 
-          shinydashboard::box(
+          raveui::box(
             width = 12L,
             update_btn
             # p(tagList(info))

@@ -65,22 +65,22 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
         }
       })
     ),
-    sidebar = shinydashboard::dashboardSidebar(
+    sidebar = raveui::dashboardSidebar(
       disable = disable_sidebar,
-      shinydashboard::sidebarMenu(
+      raveui::sidebarMenu(
         id = 'sidebar',
         .list =
           tagList(
             lapply(names(modules)[!names(modules) %in% "______"], function(nm){
               m = modules[[nm]]
               if(nm != "______"){
-                do.call(shinydashboard::menuItem, args = list(
+                do.call(raveui::menuItem, args = list(
                   text = nm,
                   expandedName = nm,
                   startExpanded = F,
                   lapply(m, function(smd){
                     mid_up = stringr::str_to_upper(smd$module_id)
-                    shinydashboard::menuSubItem(
+                    raveui::menuSubItem(
                       text = smd$label_name,
                       tabName = mid_up,
                       selected = mid_up %in% active_module
@@ -91,7 +91,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
             }),
             lapply(unlist(modules[["______"]]), function(smd){
               mid_up = stringr::str_to_upper(smd$module_id)
-              shinydashboard::menuItem(
+              raveui::menuItem(
                 text = smd$label_name,
                 tabName = mid_up,
                 selected = mid_up %in% active_module
@@ -104,12 +104,12 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
       uiOutput('mem_usage'),
       actionLink('control_panel_refresh', 'Click here to refresh!')
     ),
-    body = shinydashboard::dashboardBody(
+    body = raveui::dashboardBody(
       do.call(
-        shinydashboard::tabItems,
+        raveui::tabItems,
         args = local({
           re = lapply(unlist(modules), function(m) {
-            shinydashboard::tabItem(tabName = stringr::str_to_upper(m$module_id),
+            raveui::tabItem(tabName = stringr::str_to_upper(m$module_id),
                                     uiOutput(stringr::str_c(m$module_id, '_UI')))
           })
           names(re) = NULL
@@ -310,7 +310,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
         title = subject$id,
         easyClose = TRUE,
         size = 'l',
-        shinydashboard::tabBox(
+        raveui::tabBox(
           width = 12,
           tabPanel(
             title = '3D Viewer',

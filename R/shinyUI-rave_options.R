@@ -940,14 +940,14 @@ rave_options_gui <- local({
   
   function(..., launch.browser = TRUE){
     shiny::shinyApp(
-      ui = shinydashboard::dashboardPage(
-        header = shinydashboard::dashboardHeader(
+      ui = raveui::dashboardPage(
+        header = raveui::dashboardHeader(
           title = 'RAVE Settings'
         ),
-        sidebar = shinydashboard::dashboardSidebar(
+        sidebar = raveui::dashboardSidebar(
           disable = T
         ),
-        body = shinydashboard::dashboardBody(
+        body = raveui::dashboardBody(
           
           fluidRow(
             

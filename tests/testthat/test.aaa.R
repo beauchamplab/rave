@@ -1,6 +1,8 @@
 
 context("Dependencies")
 
+# library(testthat)
+
 
 test_that('Checking installed script dependencies', {
   

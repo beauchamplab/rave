@@ -39,7 +39,7 @@ Imports:
     future (>= 1.10.0),
     shiny (>= 1.0.5),
     stringr (>= 1.2.0),
-    shinydashboard (>= 0.6.0),
+    raveui (>= 0.0.1),
     fftwtools (>= 0.9-7),
     digest (>= 0.6.13),
     shinyjs (>= 1.0),

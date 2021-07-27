@@ -37,6 +37,33 @@ raveio::catgl
 #' @export
 dipsaus::clear_env
 
+#' @export
+box <- raveui::box
+
+#' @export
+tabBox <- raveui::tabBox
+
+#' @export
+close_tab <- raveui::close_tab
+
+#' @export
+open_tab <- raveui::open_tab
+
+#' @export
+dashboardPage <- raveui::dashboardPage
+
+#' @export
+dashboardBody <- raveui::dashboardBody
+
+#' @export
+dashboardHeader <- raveui::dashboardHeader
+
+#' @export
+dashboardSidebar <- raveui::dashboardSidebar
+
+#' @export
+dashboardControl <- raveui::dashboardControl
+
 # ------ 
 
 MNI305_to_MNI152 <- matrix(c(

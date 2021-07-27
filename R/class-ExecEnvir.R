@@ -641,7 +641,7 @@ ExecEnvir <- R6::R6Class(
                   class = 'btn btn-box-tool force-recalculate',
                   shiny::icon('refresh')
                 ),
-                div_elastic(css_selector = '.tab-pane')
+                raveui::div_elastic(css_selector = '.tab-pane')
               )),
               as_call2(
                 quote(shiny::fluidRow),
@@ -697,7 +697,7 @@ ExecEnvir <- R6::R6Class(
           )
           
           # quo_box = rlang::quo({
-          #   do.call(shinydashboard::tabBox,
+          #   do.call(raveui::tabBox,
           #           args = c(
           #             list(title = !!nm, width = !!widths[[ii]]),
           #             !!quo_panels
@@ -721,7 +721,7 @@ ExecEnvir <- R6::R6Class(
         url = openwetware_url(comp$label, type = 'output')
         if( length(margin) && is.numeric(margin) ){
           as_call2(
-            expand_box,
+            quote(raveui::expand_box),
             width = width,
             title = comp$label,
             collapsible = TRUE,
@@ -745,7 +745,7 @@ ExecEnvir <- R6::R6Class(
           # })
         }else{
           as_call2(
-            expand_box,
+            quote(raveui::expand_box),
             width = width,
             title = comp$label,
             box_link = url,

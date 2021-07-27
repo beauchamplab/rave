@@ -125,14 +125,14 @@ app_controller <- function(
         modules = module_list[[g]]
         if(length(modules)){
           quo_items = lapply(modules, function(m){
-            rlang::quo(shinydashboard::menuSubItem(
+            rlang::quo(raveui::menuSubItem(
               text = !!m$module_label,
               tabName = !!stringr::str_to_upper(m$module_id),
               selected = !!(m$module_id==active_id)
             ))
           })
           
-          quos[[length(quos) + 1]] = rlang::quo(shinydashboard::menuItem(
+          quos[[length(quos) + 1]] = rlang::quo(raveui::menuItem(
             text = !!g,
             !!!quo_items,
             startExpanded = !!(active_id %in% sapply(modules, '[[', 'module_id'))
@@ -142,7 +142,7 @@ app_controller <- function(
       
       for(m in module_list[['______']]){
         quos[[length(quos) + 1]] = rlang::quo({
-          shinydashboard::menuItem(
+          raveui::menuItem(
             text = !!m$module_label,
             tabName = !!stringr::str_to_upper(m$module_id),
             selected = !!(m$module_id==active_id)
@@ -220,10 +220,10 @@ app_ui <- function(adapter, token = NULL){
           )
         ),
         sidebar = as_call2(
-          quote(shinydashboard::dashboardSidebar),
+          quote(raveui::dashboardSidebar),
           disable = adapter$get_option('disable_sidebar', FALSE),
           as_call2(
-            quote(shinydashboard::sidebarMenu),
+            quote(raveui::sidebarMenu),
             id = 'sidebar', 
             .list = lapply(ui_quos, rlang::quo_squash)
           )
@@ -233,13 +233,13 @@ app_ui <- function(adapter, token = NULL){
           # actionLink('control_panel_refresh', 'Click here to refresh!')
         )),
         body = as_call2(
-          quote(shinydashboard::dashboardBody),
+          quote(raveui::dashboardBody),
           as_call2(
-            quote(shinydashboard::tabItems),
+            quote(raveui::tabItems),
             .list = unname(lapply(adapter$module_ids(), function(module_id) {
               # module_id = stringr::str_to_upper(module_id)
               as_call2(
-                quote(shinydashboard::tabItem),
+                quote(raveui::tabItem),
                 tabName = stringr::str_to_upper(module_id),
                 as_call2(
                   uiOutput,
@@ -913,37 +913,6 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
 start_rave <- app_controller
 
 
-
-
-
-
-#' @name rave-tabs
-#' @title Open/Close a tab in RAVE main application
-#' @param module_id character, module ID
-#' @param tabname character, tab box title
-#' @export
-close_tab <- function(module_id, tabname){
-  session = shiny::getDefaultReactiveDomain()
-  if(!is.null(session)){
-    session$sendCustomMessage('rave_close_tab', list(
-      module_id = module_id,
-      title = tabname
-    ))
-  }
-}
-
-
-#' @rdname rave-tabs
-#' @export
-open_tab <- function(module_id, tabname){
-  session = shiny::getDefaultReactiveDomain()
-  if(!is.null(session)){
-    session$sendCustomMessage('rave_open_tab', list(
-      module_id = module_id,
-      title = tabname
-    ))
-  }
-}
 
 
 

@@ -249,139 +249,139 @@ lapply_async3 <- function(x, fun, ..., .globals = TRUE, .gc = TRUE,
 
 
 
-setup_async_evaluator <- local({
-  id = rand_string()
-  initialized = FALSE
-  eval_path = file.path(subject_cache_dir(), 'EVALUATOR', id)
-  nworkers = 0
-  evaluator = NULL
-  
-  function(reset = FALSE, ...){
-    
-    max_worker = rave_options('max_worker')
-    if(nworkers == 0){
-      nworkers <<- max_worker
-    }
-    
-    if(!reset){
-      if(!initialized && dir.exists(eval_path)){
-        unlink(eval_path, recursive = TRUE, force = TRUE)
-      }
-      
-      evaluator <<- dipsaus::make_async_evaluator(
-        name = '.__RAVE_INTERNAL__.', path = eval_path, 
-        n_nodes = 1, n_subnodes = nworkers, ...)
-      if(initialized && nworkers != max_worker){
-        scale_fun = ifelse(max_worker > nworkers, 'scale_up', 'scale_down')
-        nworkers <<- max_worker
-        evaluator[[scale_fun]](1, nworkers)
-      }
-      
-    }else{
-      if( initialized ){
-        evaluator <- dipsaus::make_async_evaluator(
-          name = '.__RAVE_INTERNAL__.', path = eval_path, 
-          n_nodes = 1, n_subnodes = nworkers)
-        evaluator$terminate()
-      }
-      
-      unlink(eval_path, recursive = TRUE, force = TRUE)
-      
-      evaluator <<- dipsaus::make_async_evaluator(
-        name = '.__RAVE_INTERNAL__.', path = eval_path, 
-        n_nodes = 1, n_subnodes = nworkers, ...)
-    }
-    
-    
-    if(!initialized){
-      RaveFinalizer$new(function(...){
-        try({
-          evaluator$terminate()
-        }, silent = TRUE)
-      })
-    }
-    
-    initialized <<- TRUE
-    
-    evaluator
-  }
-})
-async <- function(expr, varname, success = NULL, failure = NULL, 
-                  quoted = FALSE, assign_env = new.env(parent = emptyenv()), 
-                  eval_env = parent.frame(), ..., .list = list(), 
-                  ...map = NULL, ...debug = FALSE,
-                  evaluator = NULL){
-  if(is.null(map)){
-    map <- dipsaus::rds_map()
-  }
-  s = Sys.time()
-  if(!quoted){
-    expr <- rlang::enquo(expr)
-  }
-  expr1 <- rlang::quo({
-    ...map = !!...map
-    if(...map$get(!!varname, missing_default = 0) == 0){
-      re = rlang::eval_tidy(!!expr)
-      ...map$set(!!varname, 1)
-      re
-    }
-  })
-  expr2 <- rlang::quo({
-    ...map = !!...map
-    re = rlang::eval_tidy(!!expr)
-    ...map$set(!!varname, 2)
-    re
-  })
-  base::print(Sys.time() - s)
-  
-  # incase the result is not evaluated
-  
-  delayedAssign(varname, {
-    rlang::eval_tidy(expr2, env = eval_env)
-  }, assign.env = assign_env)
-  
-  # TODO: wrap this into a internal function
-  if(...debug){
-    catgl('Obtain evaluator')
-  }
-  base::print(Sys.time() - s)
-  
-  if(is.null(evaluator)){
-    evaluator <- setup_async_evaluator()
-  }
-  
-  base::print(Sys.time() - s)
-  
-  if(...debug){
-    catgl('Schedule task - ', varname)
-  }
-  
-  evaluator$run(
-    expr = expr1,
-    success = function(res){
-      base::print(Sys.time() - s)
-      if(...map$get(varname, 0) == 1){
-        if(...debug){
-          catgl('Captured - ', varname)
-        }
-        assign_env[[varname]] <- res
-        if(is.function(success)){
-          success(res)
-        }
-      }else{
-        if(...debug){
-          catgl('Value already calculated, skipping assignment - ', varname)
-        }
-      }
-    },
-    failure = failure, 
-    ..., .list = .list, quoted = TRUE
-  )
-  base::print(Sys.time() - s)
-  
-  
-  assign_env
-  
-}
+# setup_async_evaluator <- local({
+#   id = rand_string()
+#   initialized = FALSE
+#   eval_path = file.path(subject_cache_dir(), 'EVALUATOR', id)
+#   nworkers = 0
+#   evaluator = NULL
+#   
+#   function(reset = FALSE, ...){
+#     
+#     max_worker = rave_options('max_worker')
+#     if(nworkers == 0){
+#       nworkers <<- max_worker
+#     }
+#     
+#     if(!reset){
+#       if(!initialized && dir.exists(eval_path)){
+#         unlink(eval_path, recursive = TRUE, force = TRUE)
+#       }
+#       
+#       evaluator <<- dipsaus::make_async_evaluator(
+#         name = '.__RAVE_INTERNAL__.', path = eval_path, 
+#         n_nodes = 1, n_subnodes = nworkers, ...)
+#       if(initialized && nworkers != max_worker){
+#         scale_fun = ifelse(max_worker > nworkers, 'scale_up', 'scale_down')
+#         nworkers <<- max_worker
+#         evaluator[[scale_fun]](1, nworkers)
+#       }
+#       
+#     }else{
+#       if( initialized ){
+#         evaluator <- dipsaus::make_async_evaluator(
+#           name = '.__RAVE_INTERNAL__.', path = eval_path, 
+#           n_nodes = 1, n_subnodes = nworkers)
+#         evaluator$terminate()
+#       }
+#       
+#       unlink(eval_path, recursive = TRUE, force = TRUE)
+#       
+#       evaluator <<- dipsaus::make_async_evaluator(
+#         name = '.__RAVE_INTERNAL__.', path = eval_path, 
+#         n_nodes = 1, n_subnodes = nworkers, ...)
+#     }
+#     
+#     
+#     if(!initialized){
+#       RaveFinalizer$new(function(...){
+#         try({
+#           evaluator$terminate()
+#         }, silent = TRUE)
+#       })
+#     }
+#     
+#     initialized <<- TRUE
+#     
+#     evaluator
+#   }
+# })
+# async <- function(expr, varname, success = NULL, failure = NULL, 
+#                   quoted = FALSE, assign_env = new.env(parent = emptyenv()), 
+#                   eval_env = parent.frame(), ..., .list = list(), 
+#                   ...map = NULL, ...debug = FALSE,
+#                   evaluator = NULL){
+#   if(is.null(map)){
+#     map <- dipsaus::rds_map()
+#   }
+#   s = Sys.time()
+#   if(!quoted){
+#     expr <- rlang::enquo(expr)
+#   }
+#   expr1 <- rlang::quo({
+#     ...map = !!...map
+#     if(...map$get(!!varname, missing_default = 0) == 0){
+#       re = rlang::eval_tidy(!!expr)
+#       ...map$set(!!varname, 1)
+#       re
+#     }
+#   })
+#   expr2 <- rlang::quo({
+#     ...map = !!...map
+#     re = rlang::eval_tidy(!!expr)
+#     ...map$set(!!varname, 2)
+#     re
+#   })
+#   base::print(Sys.time() - s)
+#   
+#   # incase the result is not evaluated
+#   
+#   delayedAssign(varname, {
+#     rlang::eval_tidy(expr2, env = eval_env)
+#   }, assign.env = assign_env)
+#   
+#   # TODO: wrap this into a internal function
+#   if(...debug){
+#     catgl('Obtain evaluator')
+#   }
+#   base::print(Sys.time() - s)
+#   
+#   if(is.null(evaluator)){
+#     evaluator <- setup_async_evaluator()
+#   }
+#   
+#   base::print(Sys.time() - s)
+#   
+#   if(...debug){
+#     catgl('Schedule task - ', varname)
+#   }
+#   
+#   evaluator$run(
+#     expr = expr1,
+#     success = function(res){
+#       base::print(Sys.time() - s)
+#       if(...map$get(varname, 0) == 1){
+#         if(...debug){
+#           catgl('Captured - ', varname)
+#         }
+#         assign_env[[varname]] <- res
+#         if(is.function(success)){
+#           success(res)
+#         }
+#       }else{
+#         if(...debug){
+#           catgl('Value already calculated, skipping assignment - ', varname)
+#         }
+#       }
+#     },
+#     failure = failure, 
+#     ..., .list = .list, quoted = TRUE
+#   )
+#   base::print(Sys.time() - s)
+#   
+#   
+#   assign_env
+#   
+# }
 
 
