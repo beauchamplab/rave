@@ -2,7 +2,7 @@
 % Please edit documentation in R/core-brain_model.R
 \name{import_electrodes}
 \alias{import_electrodes}
-\title{Import 'csv' files that contain electrode information}
+\title{Import \code{.csv} files that contain electrode information}
 \usage{
 import_electrodes(path, subject, use_fs = NA, ...)
 }

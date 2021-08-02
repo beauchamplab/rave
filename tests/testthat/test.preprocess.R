@@ -1,4 +1,4 @@
-
+# devtools::load_all(); require(testthat)
 context("Check preprocess pipeline with YAB")
 
 raw_dir = rave_options('raw_data_dir')

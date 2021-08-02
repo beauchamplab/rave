@@ -1,23 +1,25 @@
 env_address <- function(x){
-  if(requireNamespace('pryr', quietly = TRUE)){
-    f <- pryr::address
-  }else{
-    f <- function(x){
-      attr = attributes(x)
-      on.exit({
-        attributes(x) = attr
-      })
-      e = utils::capture.output(print(structure(x, class = 'environment')))
-      s = ''
-      p = 'environment: ([0-9a-fx]+)';
-      if(length(e) >= 1 && any(stringr::str_detect( e, p ))){
-        e = e[stringr::str_detect( e, p )];
-        s = stringr::str_match(e, 'environment: ([0-9a-fx]+)')[1,2]
-      }
-      
-      return(s)
-    }
-  }
+  ns <- asNamespace('dipsaus')
+  ns$object_address(x)
+  # if(requireNamespace('pryr', quietly = TRUE)){
+  #   f <- pryr::address
+  # }else{
+  #   f <- function(x){
+  #     attr = attributes(x)
+  #     on.exit({
+  #       attributes(x) = attr
+  #     })
+  #     e = utils::capture.output(print(structure(x, class = 'environment')))
+  #     s = ''
+  #     p = 'environment: ([0-9a-fx]+)';
+  #     if(length(e) >= 1 && any(stringr::str_detect( e, p ))){
+  #       e = e[stringr::str_detect( e, p )];
+  #       s = stringr::str_match(e, 'environment: ([0-9a-fx]+)')[1,2]
+  #     }
+  #     
+  #     return(s)
+  #   }
+  # }
   f(x)
 }
 
@@ -59,8 +61,8 @@ mem_used <- function(){
 
 
 object_size <- function(..., env = parent.frame()){
-  if(requireNamespace('pryr', quietly = TRUE)){
-    f <- pryr::object_size
+  if( dipsaus::package_installed('lobstr') ){
+    f <- lobstr::obj_size
   }else{
     f <- function(..., env){
       sapply(list(...), function(x){

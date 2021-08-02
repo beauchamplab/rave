@@ -51,7 +51,7 @@ arr <- lazyarray::lazyarray(path, storage_format = 'double', dim = 2:4)
 
 arr[,,1] <- 1:6
 
-# arr is a LazyArray and its partition files are
+# arr is a 'LazyArray' and its partition files are
 # missing except for the first one
 arr[]
 

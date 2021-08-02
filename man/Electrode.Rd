@@ -37,10 +37,10 @@ range(power3$get_data() - power4$get_data())
 
 # With or without hybrid, the size will be different
 # No hybrid, totally in memory
-pryr::object_size(power3)
+lobstr::obj_size(power3)
 #> 12 MB
 # Hybrid, data is swapped to hard-drive
-pryr::object_size(power4)
+lobstr::obj_size(power4)
 #> 908 kB
 }
 }

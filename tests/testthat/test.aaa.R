@@ -19,6 +19,8 @@ test_that('Checking installed script dependencies', {
   fns = fns[!fns %in% c('devtools::install_')]
   fns = stringr::str_split_fixed(fns, '[:]+', 2)
   
+  fns <- fns[!fns[,1] %in% c("pryr"), ]
+  
   apply(fns, 1, function(x){
     expect(
       exists(x[[2]], envir = asNamespace(x[[1]]), inherits = TRUE),

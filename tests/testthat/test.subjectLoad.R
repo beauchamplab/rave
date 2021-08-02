@@ -1,4 +1,4 @@
-
+# devtools::load_all(); require(testthat)
 
 context("Check with demo/YAB subject")
 
