@@ -111,7 +111,7 @@ utils$save_to_subject(checklevel = 3)
 
 
 # save subject meta data
-dir.create( file.path(dirs$channel_dir, 'cache'), recursive = T, showWarnings = F)
+dir.create( file.path(dirs$channel_dir, 'cache'), recursive = TRUE, showWarnings = FALSE)
 write.csv(data.frame(
   Electrode = subject_info$electrodes,
   Reference = 'noref'

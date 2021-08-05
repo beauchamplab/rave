@@ -40,7 +40,7 @@ export_diagnose_voltage = function(
   progress = progress('Generating Diagnostic Plots for Voltage', max = length(electrodes))
   on.exit({progress$close()})
   
-  dir.create(save_dir, recursive = T, showWarnings = F)
+  dir.create(save_dir, recursive = TRUE, showWarnings = FALSE)
   
   
   for(e in electrodes){

@@ -1,6 +1,8 @@
 # devtools::load_all(); require(testthat)
 context("Check preprocess pipeline with YAB")
 
+rave::arrange_data_dir(reset = TRUE)
+
 raw_dir = rave_options('raw_data_dir')
 has_yab = FALSE
 if(dir.exists(raw_dir)){

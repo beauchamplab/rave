@@ -597,15 +597,14 @@ Electrode <- R6::R6Class(
         dim_2 = nrow(freqs)   # Freq
         dim_3 = post + pre + 1     # Time
         # sample = matrix(rep(0, dim_1 * dim_3), c(dim_1, dim_3))
-        lapply(ep, function(row){
+        indices <- lapply(ep, function(row){
           block = row[['Block']]
           i = round(row[['Time']] * srate)
           return(list(
             ind = i + seq(-pre, post),
             block = row$Block
           ))
-        }) ->
-          indices
+        })
         
         # env = environment()
         bvec = sapply(indices,'[[', 'block')
@@ -658,10 +657,10 @@ Electrode <- R6::R6Class(
           swap_path = file.path(cache_root_dir, self$subject_id, self$electrode, epoch_name, refname)
         }
         
-        dir.create(swap_path, recursive = FALSE, showWarnings = FALSE)
+        dir.create(swap_path, recursive = TRUE, showWarnings = FALSE)
         
         # assign dim names
-        re[['volt']] = Tensor$new(
+        tmp <- Tensor$new(
           data = placehold,
           dim = c(dim(placehold), 1),
           dimnames = list(
@@ -672,6 +671,9 @@ Electrode <- R6::R6Class(
           varnames = c('Trial', 'Time', 'Electrode'),
           hybrid = hybrid, use_index = FALSE, multi_files = FALSE,
           temporary = FALSE, swap_file = file.path(swap_path, name))
+        # tmp$to_swap_now(use_index = FALSE)
+        tmp$temporary = FALSE
+        re[['volt']] = tmp
         
         rm(placehold)
       }
@@ -688,15 +690,14 @@ Electrode <- R6::R6Class(
           dim_2 = nrow(freqs)   # Freq
           dim_3 = post + pre + 1     # Time
           # sample = matrix(rep(0, dim_2 * dim_3), c(dim_2, dim_3))
-          lapply(ep, function(row){
+          indices <- lapply(ep, function(row){
             block = row[['Block']]
             i = round(row[['Time']] * srate)
             return(list(
               ind = i + seq(-pre, post),
               block = row$Block
             ))
-          }) ->
-            indices
+          })
           
           # env = environment()
           bvec = sapply(indices,'[[', 'block')
@@ -766,14 +767,17 @@ Electrode <- R6::R6Class(
             )
           }
           
-          dir.create(swap_path, recursive = FALSE, showWarnings = FALSE)
+          dir.create(swap_path, recursive = TRUE, showWarnings = FALSE)
           
-          re[[name]] = ECoGTensor$new(
+          tmp <- ECoGTensor$new(
             data = placehold, dimnames = dimnames,
             dim = sapply(dimnames, length),
             varnames = c('Trial', 'Frequency', 'Time', 'Electrode'),
             hybrid = hybrid, use_index = FALSE, multi_files = FALSE,
             temporary = FALSE, swap_file = file.path(swap_path, dname))
+          # tmp$to_swap_now(use_index = FALSE)
+          tmp$temporary = FALSE
+          re[[name]] = tmp
           
         }
         rm(placehold)

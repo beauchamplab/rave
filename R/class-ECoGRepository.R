@@ -319,27 +319,9 @@ ECoGRepository <- R6::R6Class(
         
         if('power' %in% data_type){
           
-          # results = lapply_async(electrodes, function(e){
-          #   # progress$inc(sprintf('Step %d (of %d) electrode %d (power)', count, n_dt, e))
-          #   electrode = raws[[as.character(e)]]
-          #   elc = electrode$epoch( epoch_name = epoch_name, pre = pre, post = post,
-          #                          types = 'power', raw = !referenced )
-          # 
-          #   power = elc$power; rm(elc)
-          #   if(!all(freq_subset)){
-          #     power$temporary = TRUE
-          #     power = power$subset(Frequency = freq_subset, drop = F, data_only = F)
-          #     power$to_swap_now(use_index = FALSE)
-          #     power$temporary = FALSE
-          #   }
-          #   gc()
-          #   power
-          # }, .call_back = function(i){
-          #   progress$inc(sprintf('Step %d (of %d) electrode %d (power)', count, n_dt, electrodes[i]))
-          # })
-          
-          # future::plan(future::sequential)
           rave_setup_workers()
+          
+          # electrodes = 14:15; self=env$.private$repo; epoch_name = "YABaOutlier"; pre=1;post=2;referenced=TRUE;raws=self$raw; freqs = load_meta(subject_id = self$subject$subject_id, meta_type = 'frequencies'); freq_subset = freqs$Frequency %within% c(0,100000)
           results = dipsaus::lapply_async2(electrodes, function(e){
             # progress$inc(sprintf('Step %d (of %d) electrode %d (power)', count, n_dt, e))
             electrode = raws[[as.character(e)]]
@@ -358,9 +340,13 @@ ECoGRepository <- R6::R6Class(
             power
           }, callback = function(e){
             sprintf('Loading power| - electrode %d', e)
-          }, plan = FALSE, future.chunk.size = 1)
+          }, plan = FALSE)
           
-          power = join_tensors(results)
+          # assign('xxxx', results, envir = globalenv())
+          # base::print('--------')
+          # base::print(results[[1]]$swap_file)
+          power = join_tensors(results, temporary = FALSE)
+          # base::print(power$swap_file)
           
           count = count + 1
           # gc()
@@ -404,7 +390,7 @@ ECoGRepository <- R6::R6Class(
           }, callback = function(e){
             sprintf('Loading phase| - electrode %d', e)
           }, plan = FALSE, future.chunk.size = 1)
-          phase = join_tensors(results)
+          phase = join_tensors(results, temporary = FALSE)
           count = count + 1
           # gc()
           
@@ -444,17 +430,16 @@ ECoGRepository <- R6::R6Class(
           results = dipsaus::lapply_async2(electrodes, function(e){
             electrode = raws[[as.character(e)]]
             elc = electrode$epoch( epoch_name = epoch_name, pre = pre, post = post,
-                                   types = 'volt', raw = !referenced )
-            # volt = elc$volt$get_data()
-            # rm(elc)
-            # volt = as.vector(volt)
+                                   types = 'volt', raw = !referenced )   
             volt = elc$volt
+            volt$to_swap_now(use_index = FALSE)
+            volt$temporary = FALSE
             return(volt)
           }, callback = function(e){
             sprintf('Loading voltage| - electrode %d', e)
           }, plan = FALSE, future.chunk.size = 1)
           
-          volt = join_tensors(results)
+          volt = join_tensors(results, temporary = FALSE)
           count = count + 1
           # gc()
           #
@@ -603,8 +588,8 @@ ECoGRepository <- R6::R6Class(
         data = aperm((aperm(
           self$power$subset(
             Electrode = Electrode %in% electrodes,
-            drop = F,
-            data_only = T
+            drop = FALSE,
+            data_only = TRUE
           ),
           c(1, 2, 4, 3)
         ) / as.vector(bl) - 1) * 100, c(1, 2, 4, 3)),

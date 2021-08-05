@@ -81,8 +81,7 @@ rave_prepare <- function(
     referenced = TRUE,
     func = NULL
   )
-
-
+  
 
   # Register to data_env
   subject = repo$subject
