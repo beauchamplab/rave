@@ -172,7 +172,7 @@ useful when data are very large.</p>
 
 <span class='va'>arr</span><span class='op'>[</span>,,<span class='fl'>1</span><span class='op'>]</span> <span class='op'>&lt;-</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>6</span>
 
-<span class='co'># arr is a LazyArray and its partition files are</span>
+<span class='co'># arr is a 'LazyArray' and its partition files are</span>
 <span class='co'># missing except for the first one</span>
 <span class='va'>arr</span><span class='op'>[</span><span class='op'>]</span>
 </div><div class='output co'>#&gt; , , 1
@@ -209,7 +209,8 @@ useful when data are very large.</p>
 </div><div class='output co'>#&gt; Dimension:  2 x 3 x 1 
 #&gt; - dim1: 1, 2
 #&gt; - dim2: 1, 2, 3
-#&gt; - dim3: 1</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/dim.html'>dim</a></span><span class='op'>(</span><span class='va'>ts1</span><span class='op'>)</span>
+#&gt; - dim3: 1
+#&gt; </div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/dim.html'>dim</a></span><span class='op'>(</span><span class='va'>ts1</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; [1] 2 3 1</div><div class='input'>
 <span class='co'># Fill in all missing partitions with NA</span>
 <span class='va'>ts2</span> <span class='op'>&lt;-</span> <span class='fu'>lazyarray_to_tensor</span><span class='op'>(</span><span class='va'>arr</span>, drop_partition <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span>
@@ -219,7 +220,8 @@ useful when data are very large.</p>
 </div><div class='output co'>#&gt; Dimension:  2 x 3 x 4 
 #&gt; - dim1: 1, 2
 #&gt; - dim2: 1, 2, 3
-#&gt; - dim3: 1, 2, 3, 4</div><div class='input'><span class='va'>ts2</span><span class='op'>$</span><span class='fu'>subset</span><span class='op'>(</span><span class='va'>dim3</span> <span class='op'>~</span> <span class='va'>dim3</span> <span class='op'>==</span> <span class='fl'>4</span>, data_only <span class='op'>=</span> <span class='cn'>TRUE</span>, drop <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+#&gt; - dim3: 1, 2, 3, 4
+#&gt; </div><div class='input'><span class='va'>ts2</span><span class='op'>$</span><span class='fu'>subset</span><span class='op'>(</span><span class='va'>dim3</span> <span class='op'>~</span> <span class='va'>dim3</span> <span class='op'>==</span> <span class='fl'>4</span>, data_only <span class='op'>=</span> <span class='cn'>TRUE</span>, drop <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;     dim2
 #&gt; dim1  1  2  3
 #&gt;    1 NA NA NA

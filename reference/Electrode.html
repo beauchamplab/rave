@@ -333,10 +333,10 @@ refers to epoch file <code>"epoch_default.csv"</code> in subject meta folder</p>
 
 <span class='co'># With or without hybrid, the size will be different</span>
 <span class='co'># No hybrid, totally in memory</span>
-<span class='fu'>pryr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/pryr/man/object_size.html'>object_size</a></span><span class='op'>(</span><span class='va'>power3</span><span class='op'>)</span>
+<span class='fu'>lobstr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lobstr/man/obj_size.html'>obj_size</a></span><span class='op'>(</span><span class='va'>power3</span><span class='op'>)</span>
 <span class='co'>#&gt; 12 MB</span>
 <span class='co'># Hybrid, data is swapped to hard-drive</span>
-<span class='fu'>pryr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/pryr/man/object_size.html'>object_size</a></span><span class='op'>(</span><span class='va'>power4</span><span class='op'>)</span>
+<span class='fu'>lobstr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lobstr/man/obj_size.html'>obj_size</a></span><span class='op'>(</span><span class='va'>power4</span><span class='op'>)</span>
 <span class='co'>#&gt; 908 kB</span>
 <span class='op'>}</span>
 </div></pre>
