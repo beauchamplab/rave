@@ -19,7 +19,7 @@ test_that('Checking installed script dependencies', {
   fns = fns[!fns %in% c('devtools::install_')]
   fns = stringr::str_split_fixed(fns, '[:]+', 2)
   
-  fns <- fns[!fns[,1] %in% c("pryr"), ]
+  fns <- fns[!fns[,1] %in% c("pryr", "hdf5r"), ]
   
   apply(fns, 1, function(x){
     expect(

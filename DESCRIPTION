@@ -22,14 +22,15 @@ Language: en-US
 URL: https://github.com/beauchamplab/rave, https://beauchamplab.github.io/rave
 BugReports: https://github.com/beauchamplab/rave/issues
 RoxygenNote: 7.1.1
-Depends: R (>= 3.6.0)
+Depends: 
+    R (>= 3.6.0),
+    raveio (>= 0.0.4)
 Imports:
     utils,
     stats,
     graphics,
     grDevices,
     lazyarray,
-    raveio (>= 0.0.3),
     htmltools (>= 0.3.6),
     devtools,
     grid,

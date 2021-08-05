@@ -190,13 +190,14 @@ test_that('Function rave_prepare with demo/YAB', {
     epoch = demo_checks$epochs[[1]]
     reference = demo_checks$references[[1]]
     env = new.env(parent = parent.env(globalenv()))
-    rave::rave_prepare(subject = 'demo/YAB', electrodes = c(14,15),
-                             time_range = c(1,2), epoch = epoch, 
-                             reference = reference, attach = FALSE, 
-                             data_types = c(
-                               'raw_power', 'raw_phase', 'raw_volt',
-                               'power', 'phase', 'volt'
-                             ), data_env = env)
+    rave::rave_prepare(
+      subject = 'demo/YAB', electrodes = c(14,15),
+      time_range = c(1,2), epoch = epoch, 
+      reference = reference, attach = FALSE, 
+      data_types = c(
+        'raw_power', 'raw_phase', 'raw_volt',
+        'power', 'phase', 'volt'
+      ), data_env = env)
     
     d = env$module_tools$get_electrode(electrode = 14, type = 'power')
     expect_is(d, 'ECoGTensor')

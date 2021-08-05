@@ -35,11 +35,11 @@ rave_prepare <- function(
   strict = FALSE,
   ...
 ){
-  # subject = 'demo/YAB'; electrodes = 14:15; epoch = 'YABaOutlier'; time_range = c(1,2); data_types = NULL; reference = 'default'
+  # subject = 'demo/YAB'; electrodes = 14:15; epoch = 'YABaOutlier'; time_range = c(1,2); data_types = NULL; reference = 'default'; strict = FALSE; frequency_range = NULL
   if(missing(subject)){
     # detach enironment
     if('rave_data' %in% search()){
-      base::detach('rave_data', character.only = T, force = T)
+      base::detach('rave_data', character.only = TRUE, force = TRUE)
     }
     return(invisible())
   }
