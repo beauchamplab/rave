@@ -312,6 +312,10 @@ ECoGRepository <- R6::R6Class(
       )
       count = 1
       
+      subject_id <- self$subject$id
+      ref_table <- self$reference$ref_table
+      ref_map <- self$reference
+      
       # to store raw
       
       # collapse results
@@ -319,38 +323,34 @@ ECoGRepository <- R6::R6Class(
         
         if('power' %in% data_type){
           
-          rave_setup_workers()
-          
           # electrodes = 14:15; self=env$.private$repo; epoch_name = "YABaOutlier"; pre=1;post=2;referenced=TRUE;raws=self$raw; freqs = load_meta(subject_id = self$subject$subject_id, meta_type = 'frequencies'); freq_subset = freqs$Frequency %within% c(0,100000)
-          results = dipsaus::lapply_async2(electrodes, function(e){
-            # progress$inc(sprintf('Step %d (of %d) electrode %d (power)', count, n_dt, e))
-            electrode = raws[[as.character(e)]]
-            elc = electrode$epoch( epoch_name = epoch_name, pre = pre, post = post,
-                                   types = 'power', raw = !referenced )
-            
-            power = elc$power; rm(elc)
-            if(!all(freq_subset)){
-              power$temporary = TRUE
-              power = power$subset(Frequency = freq_subset, 
-                                   drop = FALSE, data_only = FALSE)
-              power$to_swap_now(use_index = FALSE)
-              power$temporary = FALSE
-            }
-            gc()
-            power
-          }, callback = function(e){
-            sprintf('Loading power| - electrode %d', e)
-          }, plan = FALSE)
           
-          # assign('xxxx', results, envir = globalenv())
-          # base::print('--------')
-          # base::print(results[[1]]$swap_file)
+          results <- lapply_callr2(electrodes, dipsaus::new_function2(
+            args = alist(e=), body = bquote({
+              ref_table <- .(ref_table)
+              ref = ref_table$Reference[ref_table$Electrode == e]
+              electrode <- rave::Electrode$new(subject = .(subject_id), electrode = e, 
+                                         reference_by = ref, is_reference = FALSE)
+              elc = electrode$epoch( epoch_name = .(epoch_name), pre = .(pre),
+                                     post = .(post),
+                                     types = 'power', raw = .(!referenced) )
+              power = elc$power; rm(elc)
+              if(!all(.(freq_subset))){
+                power$temporary = TRUE
+                power = power$subset(Frequency = .(freq_subset),
+                                     drop = FALSE, data_only = FALSE)
+                power$to_swap_now(use_index = FALSE)
+                power$temporary = FALSE
+              }
+              power
+            }), quote_type = 'quote'
+          ), .ncores = rave_options('max_worker'), .callback = function(e){
+            sprintf('Loading power| - electrode %d', e)
+          })
+          
           power = join_tensors(results, temporary = FALSE)
-          # base::print(power$swap_file)
           
           count = count + 1
-          # gc()
-          
           rm(results)
           gc()
           
@@ -364,58 +364,30 @@ ECoGRepository <- R6::R6Class(
         
         if('phase' %in% data_type){
           
-          rave_setup_workers()
-          results = dipsaus::lapply_async2(electrodes, function(e){
-            electrode = raws[[as.character(e)]]
-            elc = electrode$epoch(epoch_name = epoch_name, pre = pre, post = post,
-                                  types = 'phase', raw = !referenced)
-            phase = elc$phase; rm(elc)
-            # if(!all(freq_subset)){
-            #   phase = phase$subset(Frequency = freq_subset, drop = F, data_only = F)
-            #   phase$to_swap_now(use_index = FALSE)
-            # }
-            # phase
-            if(!all(freq_subset)){
-              phase$temporary = TRUE
-              phase = phase$subset(Frequency = freq_subset, drop = FALSE, data_only = FALSE)
-              phase$to_swap_now(use_index = FALSE)
-              phase$temporary = FALSE
-            }
-            
-            gc()
-            # phase = elc$phase$subset(Frequency = freq_subset, drop = T, data_only = T)
-            # rm(elc)
-            # phase = as.vector(phase)
-            return(phase)
-          }, callback = function(e){
+          results <- lapply_callr2(electrodes, dipsaus::new_function2(
+            args = alist(e=), body = bquote({
+              ref_table <- .(ref_table)
+              ref = ref_table$Reference[ref_table$Electrode == e]
+              electrode <- rave::Electrode$new(subject = .(subject_id), electrode = e, 
+                                               reference_by = ref, is_reference = FALSE)
+              elc = electrode$epoch( epoch_name = .(epoch_name), pre = .(pre),
+                                     post = .(post),
+                                     types = 'phase', raw = .(!referenced) )
+              phase = elc$phase; rm(elc)
+              if(!all(.(freq_subset))){
+                phase$temporary = TRUE
+                phase = phase$subset(Frequency = .(freq_subset),
+                                     drop = FALSE, data_only = FALSE)
+                phase$to_swap_now(use_index = FALSE)
+                phase$temporary = FALSE
+              }
+              phase
+            }), quote_type = 'quote'
+          ), .ncores = rave_options('max_worker'), .callback = function(e){
             sprintf('Loading phase| - electrode %d', e)
-          }, plan = FALSE, future.chunk.size = 1)
+          })
           phase = join_tensors(results, temporary = FALSE)
           count = count + 1
-          # gc()
-          
-          # names(results) = paste0('V', seq_along(electrodes))
-          # results = do.call('data.frame', results)
-          #
-          # # Generate tensor for phase
-          # phase = ECoGTensor$new(0, dim = c(1,1,1,1), varnames = names(dimnames_wave), hybrid = F)
-          #
-          # # erase data
-          # phase$set_data(NULL)
-          # # reset dim and dimnames
-          # phase$dim = vapply(dimnames_wave, length, FUN.VALUE = 0, USE.NAMES = F)
-          # phase$dimnames = dimnames_wave
-          #
-          # # generate local cache for phase
-          # file = tempfile()
-          # raveio::save_fst(results, file, compress = 20)
-          # rm(results)
-          # gc()
-          #
-          # # change tensor file path
-          # phase$swap_file = file
-          # phase$hybrid = T
-          # phase$use_index = TRUE
           
           # set to be read-only
           phase$read_only = TRUE
@@ -426,18 +398,23 @@ ECoGRepository <- R6::R6Class(
         
         if('volt' %in% data_type){
           
-          rave_setup_workers()
-          results = dipsaus::lapply_async2(electrodes, function(e){
-            electrode = raws[[as.character(e)]]
-            elc = electrode$epoch( epoch_name = epoch_name, pre = pre, post = post,
-                                   types = 'volt', raw = !referenced )   
-            volt = elc$volt
-            volt$to_swap_now(use_index = FALSE)
-            volt$temporary = FALSE
-            return(volt)
-          }, callback = function(e){
+          results <- lapply_callr2(electrodes, dipsaus::new_function2(
+            args = alist(e=), body = bquote({
+              ref_table <- .(ref_table)
+              ref = ref_table$Reference[ref_table$Electrode == e]
+              electrode <- rave::Electrode$new(subject = .(subject_id), electrode = e, 
+                                               reference_by = ref, is_reference = FALSE)
+              elc = electrode$epoch( epoch_name = .(epoch_name), pre = .(pre),
+                                     post = .(post),
+                                     types = 'volt', raw = .(!referenced) )
+              volt = elc$volt; rm(elc)
+              volt$to_swap_now(use_index = FALSE)
+              volt$temporary = FALSE
+              volt
+            }), quote_type = 'quote'
+          ), .ncores = rave_options('max_worker'), .callback = function(e){
             sprintf('Loading voltage| - electrode %d', e)
-          }, plan = FALSE, future.chunk.size = 1)
+          })
           
           volt = join_tensors(results, temporary = FALSE)
           count = count + 1
