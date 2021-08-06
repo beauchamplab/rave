@@ -24,7 +24,7 @@ BugReports: https://github.com/beauchamplab/rave/issues
 RoxygenNote: 7.1.1
 Depends: 
     R (>= 3.6.0),
-    raveio (>= 0.0.4)
+    raveio (>= 0.0.4.9000)
 Imports:
     utils,
     stats,
