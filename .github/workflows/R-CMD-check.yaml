@@ -57,11 +57,8 @@ jobs:
 
       - name: Query dependencies
         run: |
-          if(!endsWith(.Platform$OS.type, "indows")){
-            h5cc=file.path(Sys.getenv("HDF5_DIR"), "bin/h5cc")
-            h5cc=normalizePath(h5cc)
-            install.packages("hdf5r", configure.args=sprintf("--with-hdf5=%s", h5cc))
-          }
+          install.packages('raveio')
+          raveio:::finalize_installation(upgrade = "always")
           install.packages('remotes')
           saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
           writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
