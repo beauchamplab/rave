@@ -133,7 +133,7 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
     git_repos <- tryCatch({
       readLines("https://raw.githubusercontent.com/beauchamplab/rave/master/DEVREPO")[1:3]
     }, error = function(e){
-      c("beauchamplab/raveio", "beauchamplab/rave", "beauchamplab/ravebuiltins@migrate2",  "dipterix/rutabaga@develop", 'dipterix/threeBrain', 'dipterix/dipsaus')
+      c("beauchamplab/rave", "beauchamplab/raveio", "beauchamplab/ravebuiltins@migrate2",  "dipterix/rutabaga@develop", 'dipterix/threeBrain', 'dipterix/dipsaus')
     })
     # lazy_install <- c(lazy_install, 'beauchamplab/ravebuiltins@migrate2', 'dipterix/rutabaga@develop')
     lazy_install <- c(lazy_install, git_repos[-1])
