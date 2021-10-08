@@ -21,7 +21,7 @@ Encoding: UTF-8
 Language: en-US
 URL: https://github.com/beauchamplab/rave, https://beauchamplab.github.io/rave
 BugReports: https://github.com/beauchamplab/rave/issues
-RoxygenNote: 7.1.1
+RoxygenNote: 7.1.2
 Depends: 
     R (>= 3.6.0),
     raveio (>= 0.0.4.9000)
@@ -62,7 +62,7 @@ Suggests:
     testthat,
     lobstr,
     rstudioapi
-Remotes:  
+Remotes: 
     dipterix/dipsaus,
     beauchamplab/raveio,
     dipterix/threeBrain

@@ -273,8 +273,10 @@ lapply_callr2 <- function(
       res$add(attr(code, "rs_exec_result"))
     }
     
+    res <- res$as_list()
+    
   }
   
+  res
   
-  res$as_list()
 }
