@@ -177,7 +177,7 @@ define_input_auto_recalculate <- function(inputId, label,
         }else{
           icon = NULL
           if(!!(!default_on)){
-            icon = shiny::icon('arrow-right')
+            icon = rave::shiny_icons$arrow_right
           }
           dipsaus::actionButtonStyled(
             ns(!!widget_id), !!label, width = '100%', type = !!button_type,

@@ -294,7 +294,7 @@ register_auto_calculate_widget = local({
         if(any(changed)){
           dipsaus::cat2('At least one changed: ', paste(input_ids[changed], collapse = ', '))
           lapply(this_env$buttons, function(bid){
-            dipsaus::updateActionButtonStyled(session, bid, disabled = FALSE, icon = shiny::icon('arrow-right'))
+            dipsaus::updateActionButtonStyled(session, bid, disabled = FALSE, icon = rave::shiny_icons$arrow_right)
           })
         }else{
           lapply(this_env$buttons, function(bid){
@@ -311,7 +311,7 @@ register_auto_calculate_widget = local({
         auto_recalculate( auto_calc )
         
         if(auto_calc){
-          icon = shiny::icon('arrow-right')
+          icon = rave::shiny_icons$arrow_right
         }else{
           icon = NULL
         }

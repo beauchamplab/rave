@@ -56,7 +56,7 @@ define_output_3d_viewer <- function(
           ' | ',
           htmltools::a(
             href = 'https://github.com/dipterix/threeBrain/blob/dev/shortcuts.md',
-            target = '_blank', ' Keyboard Shortcuts ', shiny::icon('external-link')
+            target = '_blank', ' Keyboard Shortcuts ', rave::shiny_icons$external_link
           ),
           eval(!!additional_ui)
         ),

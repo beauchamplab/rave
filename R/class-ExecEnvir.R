@@ -639,7 +639,7 @@ ExecEnvir <- R6::R6Class(
                 class = 'rave-abs-right',
                 div(
                   class = 'btn btn-box-tool force-recalculate',
-                  shiny::icon('refresh')
+                  shiny_icons$sync
                 ),
                 div_elastic(css_selector = '.tab-pane')
               )),
@@ -668,7 +668,7 @@ ExecEnvir <- R6::R6Class(
             #       class = 'rave-abs-right',
             #       div(
             #         class = 'btn btn-box-tool force-recalculate',
-            #         shiny::icon('refresh')
+            #         shiny_icons$sync
             #       ),
             #       div_elastic(css_selector = '.tab-pane')
             #     ),

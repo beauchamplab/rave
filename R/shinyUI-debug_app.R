@@ -384,7 +384,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
           p('This action will reset all input parameters. Click "Confirm" to proceed.'),
           size = 's', footer = tagList(
             tags$a(href = "#", class = "btn btn-default rave-restart-btn", 
-                   shiny::icon('refresh'), 'Confirm'),
+                   shiny_icons$sync, 'Confirm'),
             shiny::modalButton('Cancel')
           )
         )

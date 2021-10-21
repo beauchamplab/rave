@@ -275,30 +275,32 @@ expand_box <- function(
   if (collapsible) {
     buttonStatus <- status
     buttonStatus %?<-% "default"
-    collapseIcon <- if (collapsed)
-      "plus"
-    else "minus"
+    if(collapsed){
+      collapseIcon <- shiny_icons$plus
+    } else {
+      collapseIcon <- shiny_icons$minus
+    }
     collapseTag <-
       div(class = "box-tools pull-right",
           if (is.null(box_link)) NULL else tags$a(
             class = paste0("btn btn-box-tool"),
             href = box_link,
             target = "_blank",
-            shiny::icon('question-circle')
+            shiny_icons$help
           ),
           tags$button(
             class = "btn btn-box-tool force-recalculate",
-            shiny::icon('refresh')
+            shiny_icons$sync
           ),
           tags$button(
             class = "btn btn-box-tool rave-elastic-btn force-recalculate",
             'data-target' = paste0('#', boxId),
-            shiny::icon('expand')
+            shiny_icons$expand
           ),
           tags$button(
             class = paste0("btn btn-box-tool"),
             `data-widget` = "collapse",
-            shiny::icon(collapseIcon)
+            collapseIcon
           ))
   }
   headerTag <- NULL

@@ -166,6 +166,17 @@ wrap_callback <- function(.callback){
   callback
 }
 
+attached_packages <- function (include_base = FALSE) {
+  info <- utils::sessionInfo()
+  bk <- rev(info$basePkgs)
+  pk <- vapply(info$otherPkgs, "[[", "Package", "Package", 
+               USE.NAMES = FALSE)
+  pk <- rev(pk)
+  if (include_base) {
+    pk <- c(bk, pk)
+  }
+  pk
+}
 
 lapply_callr2 <- function(
   x, fun, ..., .callback = NULL,
@@ -174,109 +185,19 @@ lapply_callr2 <- function(
   .focus_on_console = TRUE, .rs = FALSE, .quiet = FALSE,
   .name = ""){
   
-  ns <- asNamespace('dipsaus')
   if( .ncores <= 0 ){
     .ncores <- rave_options('max_worker')
   }
   if(isTRUE(.packages == "")){
-    .packages <- ns$attached_packages()
+    .packages <- attached_packages()
   }
   .packages <- unique(c("dipsaus", .packages))
   
-  
-  if(is.function(ns$lapply_callr)){
-    res <- ns$lapply_callr(x, fun, ..., .callback = .callback,
-                           .globals = .globals, .ncores = .ncores,
-                           .packages = .packages,
-                           .focus_on_console = .focus_on_console, 
-                           .rs = FALSE, .quiet = .quiet,
-                           .name = .name)
-  } else {
-    nm <- names(formals(fun))[[1]]
-    tempdir(check = TRUE)
-    f <- tempfile(fileext = '.rds')
-    on.exit({ unlink(f) }, add = TRUE)
-    globals <- list(
-      formal = formals(fun),
-      body = body(fun),
-      globals = .globals,
-      args = c(structure(list(""), names = nm), list(...))
-    )
-    saveRDS(globals, file = f)
-    res <- dipsaus::fastqueue2()
-    queue <- dipsaus::fastqueue2()
-    if( .quiet ){
-      callback <- NULL
-    } else {
-      callback <- wrap_callback(.callback)
-    }
-    
-    old.handlers <- progressr::handlers(ns$handler_dipsaus_progress())
-    on.exit({
-      try({
-        progressr::handlers(old.handlers)
-      }, silent = TRUE)
-    }, add = TRUE)
-    
-    p <- NULL
-    progressr::with_progress({
-      if(is.function(callback)){
-        p <- progressr::progressor(along = x)
-      }
-      
-      
-      lapply(seq_along(x), function(ii){
-        if(queue$size() >= .ncores){
-          h <- queue$remove()
-          while ((code <- h()) > 0) {
-            Sys.sleep(0.2)
-          }
-          if( code < 0 ){
-            stop(attr(code, "rs_exec_error"), call. = FALSE)
-          }
-          res$add(attr(code, "rs_exec_result"))
-        }
-        if(is.function(callback)){
-          p(message = callback(x[[ii]], ii))
-        }
-        
-        h <- dipsaus::rs_exec(bquote({
-          .env <- new.env()
-          .globals <- readRDS(.(f))
-          
-          list2env(.globals$globals, envir = .env)
-          .globals$args[[.(nm)]] <- .(x[[ii]])
-          do.call(
-            new_function2(
-              args = .globals$formal,
-              body = .globals$body,
-              env = .env,
-              quote_type = 'quote'
-            ),
-            .globals$args
-          )
-        }), rs = FALSE, quoted = TRUE, name = sprintf("%s... - [%d]", .name, ii),
-        wait = FALSE, packages = .packages, focus_on_console = FALSE)
-        queue$add(h)
-      })
-      
-    })
-    
-    while(queue$size() > 0){
-      h <- queue$remove()
-      while ((code <- h()) > 0) {
-        Sys.sleep(0.2)
-      }
-      if( code < 0 ){
-        stop(attr(code, "rs_exec_error"), call. = FALSE)
-      }
-      res$add(attr(code, "rs_exec_result"))
-    }
-    
-    res <- res$as_list()
-    
-  }
-  
+  res <- dipsaus::lapply_callr(x, fun, ..., .callback = .callback,
+                         .globals = .globals, .ncores = .ncores,
+                         .packages = .packages,
+                         .focus_on_console = .focus_on_console, 
+                         .rs = FALSE, .quiet = .quiet,
+                         .name = .name)
   res
-  
 }

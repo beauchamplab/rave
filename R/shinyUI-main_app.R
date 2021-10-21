@@ -716,7 +716,7 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
             'Click "Confirm" to proceed.'),
           size = 's', footer = tagList(
             tags$a(href = "#", class = "btn btn-default rave-app-btn rave-restart-btn", 
-                   shiny::icon('refresh'), 'Confirm'),
+                   shiny_icons$sync, 'Confirm'),
             shiny::modalButton('Cancel')
           )
         )

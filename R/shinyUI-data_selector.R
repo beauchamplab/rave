@@ -15,7 +15,7 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
   
   header = function(){
     tags$li(
-      actionLink(ns('data_select'), 'Select Data', icon = shiny::icon('tasks'),
+      actionLink(ns('data_select'), 'Select Data', icon = shiny_icons$tasks,
                  role = 'button', class = 'nav-item nav-link')
     )
   }
@@ -48,7 +48,7 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
           title = 'Data Selection', size = 'l', easyClose = FALSE, fade = FALSE,
           footer = tagList(
             actionButton(ns('dismiss'), 'Cancel'),
-            dipsaus::actionButtonStyled(ns('import'), 'Load Data', type = 'primary', icon = shiny::icon('angle-right'))
+            dipsaus::actionButtonStyled(ns('import'), 'Load Data', type = 'primary', icon = shiny_icons$angle_right)
           ),
           # Style to make this modal bigger
           tags$style('.modal-lg { min-width: 80vw; }'),

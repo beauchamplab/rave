@@ -39,6 +39,32 @@ dipsaus::clear_env
 
 # ------ 
 
+# icons
+#' @title Shiny icons
+#' @export
+shiny_icons <- list(
+  bars = shiny::icon("bars"),
+  grid = shiny::icon("th"),
+  keyboard = shiny::icon("keyboard"),
+  help = shiny::icon('question-circle'),
+  sync = shiny::icon('sync'),
+  expand = shiny::icon('expand'),
+  tasks = shiny::icon('tasks'),
+  angle_right = shiny::icon('angle-right'),
+  arrow_right = shiny::icon('arrow-right'),
+  external_link = shiny::icon('external-link-alt'),
+  plus = shiny::icon('plus'),
+  minus = shiny::icon('minus'),
+  download = shiny::icon("download"),
+  save = shiny::icon("save"),
+  trash = shiny::icon("trash"),
+  export = shiny::icon("file-export"),
+  puzzle = shiny::icon("puzzle-piece"),
+  user_md = shiny::icon("user-md"),
+  image = shiny::icon("file-image"),
+  magic = shiny::icon("magic")
+)
+
 MNI305_to_MNI152 <- matrix(c(
   0.9975, -0.0073, 0.0176, -0.0429,
   0.0146, 1.0009, -0.0024, 1.5496,
