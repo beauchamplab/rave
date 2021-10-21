@@ -52,7 +52,6 @@ Imports:
     shinyWidgets (>= 0.5.3)
 Suggests:
     knitr,
-    rhdf5,
     data.table (>= 1.11.8),
     servr (>= 0.13),
     reticulate (>= 1.6),
