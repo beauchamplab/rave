@@ -40,7 +40,7 @@ dashboardHeader <- function (..., title = NULL, titleWidth = NULL, disable = FAL
       "display: none;", span(class = "logo", title),
     tags$nav(
       class = "navbar navbar-static-top",
-      role = "navigation", span(shiny::icon("bars"), style = "display:none;"),
+      role = "navigation", span(shiny_icons$bars, style = "display:none;"),
       div(
         class = 'navbar-collapse pull-left collapse',
         id="navbar-collapse", `aria-expanded`="false",
@@ -50,14 +50,14 @@ dashboardHeader <- function (..., title = NULL, titleWidth = NULL, disable = FAL
             a(href = "#", class = "nav-item nav-link force-recalculate",
               `data-toggle` = "offcanvas",
               role = "button", span(class = "sr-only", "Toggle navigation"),
-              shiny::icon('th'), span('Modules')
+              shiny_icons$grid, span('Modules')
             )
           ),
           tags$li(
             a(href = "#", class = "nav-item nav-link force-recalculate",
               `data-toggle` = "rave-toggle-inputs",
               role = "button", span(class = "sr-only", "Toggle input panel"),
-              shiny::icon('keyboard-o'), span('Input Panels')
+              shiny_icons$keyboard, span('Input Panels')
             )
           ),
           ...
@@ -237,19 +237,21 @@ box <- function (..., title = NULL, footer = NULL, status = NULL, solidHeader = 
   if (collapsible) {
     buttonStatus <- status
     buttonStatus %?<-% "default"
-    collapseIcon <- if (collapsed)
-      "plus"
-    else "minus"
+    if(collapsed){
+      collapseIcon <- shiny_icons$plus
+    } else {
+      collapseIcon <- shiny_icons$minus
+    }
     collapseTag <- div(
       class = "box-tools pull-right", 
       if (is.null(box_link)) NULL else tags$a(
         class = paste0("btn btn-box-tool"),
         href = box_link,
         target = "_blank",
-        shiny::icon('question-circle')
+        shiny_icons$help
       ),
       tags$button(class = paste0("btn btn-box-tool"),
-                  `data-widget` = "collapse", shiny::icon(collapseIcon)))
+                  `data-widget` = "collapse", collapseIcon))
   }
   headerTag <- NULL
   if (!is.null(titleTag) || !is.null(collapseTag)) {
@@ -282,7 +284,7 @@ tabBox <- function (..., id = NULL, selected = NULL, title = NULL, width = 6,
         class = paste0("btn btn-box-tool"),
         href = box_link,
         target = "_blank",
-        shiny::icon('question-circle')
+        shiny_icons$help
       )
     )
     if (side == "left") 
