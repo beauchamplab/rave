@@ -5,7 +5,7 @@
 \alias{shiny_icons}
 \title{Shiny icons}
 \format{
-An object of class \code{list} of length 12.
+An object of class \code{list} of length 20.
 }
 \usage{
 shiny_icons

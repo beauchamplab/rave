@@ -3,7 +3,7 @@ Type: Package
 Title: R Analysis and Visualization of 'ECOG/iEEG' Data
 Version: 1.0.2.3
 Authors@R: c(
-    person("Zhengjia", "Wang", email = "dipterix.wang@gmail.com", role = c("aut", "cre")),
+    person("Zhengjia", "Wang", email = "dipterix.wang@gmail.com", role = c("cph", "aut", "cre")),
     person("John", "Magnotti", role = c("aut")),
     person("Michael S.", "Beauchamp", role = c("aut", "fnd")),
     person("Beauchamp lab", email = "beauchamplab@gmail.com", role = c("cph", "fnd"))
@@ -19,12 +19,12 @@ Description: R Analysis and Visualization of 'ECOG/iEEG' Data
 License: GPL-3
 Encoding: UTF-8
 Language: en-US
-URL: https://github.com/beauchamplab/rave, https://beauchamplab.github.io/rave
+URL: https://rave.wiki
 BugReports: https://github.com/beauchamplab/rave/issues
 RoxygenNote: 7.1.2
 Depends: 
     R (>= 3.6.0),
-    raveio (>= 0.0.4.9000)
+    raveio (>= 0.0.5)
 Imports:
     utils,
     stats,

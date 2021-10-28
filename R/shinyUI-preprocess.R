@@ -66,11 +66,11 @@ rave_preprocess <- function(
         ..func = 'pre_epoch3'
       ),
       list(
-        ID = 'ELECLOCAL',
-        name = 'E-Localization (Beta)',
+        ID = 'LOCALIZATION',
+        name = 'Localization',
         checklevel = 1,
         doc_prefix = 'ravepreprocesseleclocalization',
-        ..func = 'rave_pre_eleclocal3'
+        ..func = 'pre_localization'
       )
       ,
       list(

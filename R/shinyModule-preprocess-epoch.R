@@ -97,7 +97,7 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
 
         local_data$blocks = utils$get_blocks()
 
-        dirs = utils$get_from_subject('dirs', list(), F)
+        dirs = utils$get_from_subject('dirs', list(), FALSE)
         epochs = list.files(dirs$meta_dir, pattern = '^epoch_.+.[cC][sS][vV]')
         if(length(epochs)){
           epochs = stringr::str_match(epochs, '^epoch_(.+).[cC][sS][vV]')[,2]
@@ -128,7 +128,7 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
               sub = sub[, c('Block', 'Time')]
             }
             sub
-          }, simplify = F, USE.NAMES = T)
+          }, simplify = FALSE, USE.NAMES = TRUE)
         }
       }
     })
@@ -136,7 +136,7 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
     observe({
       block = input$block
       if(length(block) && !is.blank(block)){
-        dirs = utils$get_from_subject('dirs', list(), F)
+        dirs = utils$get_from_subject('dirs', list(), FALSE)
         subject_code = utils$get_from_subject('subject_code')
 
 
@@ -161,7 +161,7 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
     output$inner_ui2 <- renderUI({
       block = input$block
       validate(need(length(block) && !is.blank(block), ''))
-      dirs = utils$get_from_subject('dirs', list(), F)
+      dirs = utils$get_from_subject('dirs', list(), FALSE)
       subject_code = utils$get_from_subject('subject_code')
 
 
@@ -192,7 +192,7 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
     output$inner_ui3 <- renderUI({
       block = input$block
       local_data$efile = efile = input$epoch_file
-      dirs = utils$get_from_subject('dirs', list(), F)
+      dirs = utils$get_from_subject('dirs', list(), FALSE)
 
 
 
