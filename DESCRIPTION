@@ -30,12 +30,11 @@ Imports:
     stats,
     graphics,
     grDevices,
-    lazyarray,
     htmltools (>= 0.3.6),
     devtools,
     grid,
     signal (>= 0.7-6),
-    dipsaus (>= 0.1.7.9000),
+    dipsaus (>= 0.1.9),
     R6 (>= 2.2.2),
     future (>= 1.10.0),
     shiny (>= 1.0.5),
@@ -60,6 +59,7 @@ Suggests:
     roxygen2,
     testthat,
     lobstr,
+    lazyarray,
     rstudioapi
 Remotes: 
     dipterix/dipsaus,

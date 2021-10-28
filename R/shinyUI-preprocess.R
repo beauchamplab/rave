@@ -53,6 +53,13 @@ rave_preprocess <- function(
       checklevel = 2,
       doc_prefix = 'ravepreprocesswavelet',
       ..func = 'rave_pre_wavelet3'
+    ),
+    list(
+      ID = 'LOCALIZATION',
+      name = 'Step 3. Localization',
+      checklevel = 1,
+      doc_prefix = 'ravepreprocesseleclocalization',
+      ..func = 'pre_localization'
     )
   )
   
@@ -60,26 +67,18 @@ rave_preprocess <- function(
     modules <- c(modules, list(
       list(
         ID = 'EPOCH',
-        name = 'Step 3. Trial Epoch',
+        name = 'Step 4. Trial Epoch',
         checklevel = 1,
         doc_prefix = 'ravepreprocessepoch',
         ..func = 'pre_epoch3'
-      ),
-      list(
-        ID = 'LOCALIZATION',
-        name = 'Localization',
-        checklevel = 1,
-        doc_prefix = 'ravepreprocesseleclocalization',
-        ..func = 'pre_localization'
       )
-      ,
-      list(
-        ID = 'ELECLOCALCT',
-        name = 'E-Localization w/ CT (Beta)',
-        checklevel = 1,
-        doc_prefix = 'ravepreprocesseleclocalizationct',
-        ..func = 'rave_pre_eleclocalct3'
-      )
+      # list(
+      #   ID = 'ELECLOCALCT',
+      #   name = 'E-Localization w/ CT (Beta)',
+      #   checklevel = 1,
+      #   doc_prefix = 'ravepreprocesseleclocalizationct',
+      #   ..func = 'rave_pre_eleclocalct3'
+      # )
     ))
   }
 
