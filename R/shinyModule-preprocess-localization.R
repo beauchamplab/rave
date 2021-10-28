@@ -83,7 +83,9 @@ pre_localization <- function(module_id = 'LOCALIZATION_M', sidebar_width = 2, do
       # get ct_path
       ct_paths <- c(
         file.path(subject$freesurfer_path, "RAVE", "ct_in_t1.nii"),
-        file.path(subject$freesurfer_path, "ct_in_t1.nii")
+        file.path(subject$freesurfer_path, "RAVE", "ct_in_t1.nii.gz"),
+        file.path(subject$freesurfer_path, "ct_in_t1.nii"),
+        file.path(subject$freesurfer_path, "ct_in_t1.nii.gz")
       )
       ct_paths <- ct_paths[file.exists(ct_paths)]
       if(!length(ct_paths)){
