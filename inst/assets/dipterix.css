@@ -178,6 +178,34 @@ body.rave-noscroll {
 }
 
 
+.nav-tabs-custom .btn-box-tool.toggle-tabbox .toggle-tabbox-minus {
+  display: inline;
+}
+
+.nav-tabs-custom.tabbox-closed .btn-box-tool.toggle-tabbox .toggle-tabbox-minus {
+  display: none;
+}
+
+.nav-tabs-custom .btn-box-tool.toggle-tabbox .toggle-tabbox-plus {
+  display: none;
+}
+
+.nav-tabs-custom.tabbox-closed .btn-box-tool.toggle-tabbox .toggle-tabbox-plus {
+  display: inline;
+}
+
+.nav-tabs-custom .tab-content {
+  visibility: visible;
+  max-height: inherit;
+  overflow-y: auto;
+}
+
+.nav-tabs-custom.tabbox-closed .tab-content {
+  visibility: collapse;
+  max-height: 0;
+  overflow-y: hidden;
+}
+
 /*
 #loading_img img{
 	min-width: 100% !important;

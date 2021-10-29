@@ -29,6 +29,13 @@ $(document).ready(function(){
 	$(document).on('click', '.rave-app-btn.rave-restart-btn', () => {
 	  window.location.reload(true);
 	});
+	
+	$(document).on('click', '.btn-box-tool.toggle-tabbox', (el) => {
+	  let pa = $(el.target).parents(".nav-tabs-custom");
+	  if(!pa.length) { return; }
+	  pa = $(pa[0]);
+	  pa.toggleClass("tabbox-closed");
+	});
 
 
   // Zoom in panels

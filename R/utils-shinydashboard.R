@@ -285,6 +285,11 @@ tabBox <- function (..., id = NULL, selected = NULL, title = NULL, width = 6,
         href = box_link,
         target = "_blank",
         shiny_icons$help
+      ),
+      tags$button(
+        class = paste0("btn btn-box-tool toggle-tabbox"),
+        shiny::div(class = "toggle-tabbox-minus", shiny_icons$minus),
+        shiny::div(class = "toggle-tabbox-plus", shiny_icons$plus)
       )
     )
     if (side == "left") 

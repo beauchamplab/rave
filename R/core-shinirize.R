@@ -15,7 +15,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
   }
 
   # Runtime environment
-  execenv = module$get_or_new_exec_env(session = session)
+  execenv <- module$get_or_new_exec_env(session = session)
   execenv$register_context('rave_running')
   rave_context(senv = execenv)
   
@@ -612,7 +612,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
                 'Output Types:',
                 choices = output_labels,
                 selected = output_labels,
-                multiple = T
+                multiple = TRUE
               )
             )
           )
