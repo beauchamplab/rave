@@ -46,6 +46,7 @@ useful when data are very large.
 }
 \examples{
 
+if(interactive()){
 path <- tempfile()
 arr <- lazyarray::lazyarray(path, storage_format = 'double', dim = 2:4)
 
@@ -71,7 +72,7 @@ ts2 <- lazyarray_to_tensor(arr, drop_partition = FALSE)
 ts2
 ts2$subset(dim3 ~ dim3 == 4, data_only = TRUE, drop = TRUE)
 
-
+}
 }
 \seealso{
 \code{\link{Tensor}}, \code{\link[lazyarray]{ClassLazyArray}}

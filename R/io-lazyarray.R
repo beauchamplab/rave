@@ -34,6 +34,7 @@
 #'
 #' @examples
 #'
+#' if(interactive()){
 #' path <- tempfile()
 #' arr <- lazyarray::lazyarray(path, storage_format = 'double', dim = 2:4)
 #'
@@ -59,7 +60,7 @@
 #' ts2
 #' ts2$subset(dim3 ~ dim3 == 4, data_only = TRUE, drop = TRUE)
 #'
-#'
+#' }
 #' @export
 lazyarray_to_tensor <- function(arr, drop_partition = FALSE){
   
