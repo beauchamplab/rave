@@ -132,7 +132,7 @@
     <tr>
       <th>theme</th>
       <td><p><code>"light"</code> or <code>"dark"</code>; default is current 
-theme saved in <code><a href='rave_options.html'>rave_options('current_theme')</a></code></p></td>
+theme saved in <code>rave_options('current_theme')</code></p></td>
     </tr>
     <tr>
       <th>session</th>
@@ -145,19 +145,23 @@ theme saved in <code><a href='rave_options.html'>rave_options('current_theme')</
     <p>A list contains all palettes found in the packages.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='va'>pal</span> <span class='op'>=</span> <span class='fu'>get_rave_theme</span><span class='op'>(</span><span class='st'>'rave'</span>, type <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>'continuous'</span>, <span class='st'>'discrete'</span><span class='op'>)</span>, theme<span class='op'>=</span><span class='st'>'light'</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>pal</span>, plot<span class='op'>=</span><span class='cn'>TRUE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; RAVE palettes in "light" mode for "continuous", "discrete" variables
-#&gt; Total 2 palettes:
-#&gt;   Default-Continuous (11 unique colors)
-#&gt;   Default-Discrete (6 unique colors)</div><div class='img'><img src='get_rave_theme-1.png' alt='' width='700' height='433' /></div><div class='input'>
-<span class='va'>pal</span> <span class='op'>=</span> <span class='fu'>get_rave_theme</span><span class='op'>(</span><span class='st'>'rave'</span>, type <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>'continuous'</span>, <span class='st'>'discrete'</span><span class='op'>)</span>, theme<span class='op'>=</span><span class='st'>'dark'</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>pal</span>, plot<span class='op'>=</span><span class='cn'>TRUE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; RAVE palettes in "dark" mode for "continuous", "discrete" variables
-#&gt; Total 2 palettes:
-#&gt;   Default-Discrete (6 unique colors)
-#&gt;   Default-Continuous (11 unique colors)</div><div class='img'><img src='get_rave_theme-2.png' alt='' width='700' height='433' /></div><div class='input'>
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='va'>pal</span> <span class='op'>=</span> <span class='fu'>get_rave_theme</span><span class='op'>(</span><span class='st'>'rave'</span>, type <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>'continuous'</span>, <span class='st'>'discrete'</span><span class='op'>)</span>, theme<span class='op'>=</span><span class='st'>'light'</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>pal</span>, plot<span class='op'>=</span><span class='cn'>TRUE</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> RAVE palettes in "light" mode for "continuous", "discrete" variables</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Total 2 palettes:</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   Default-Continuous (11 unique colors)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   Default-Discrete (6 unique colors)</span>
+<span class='r-plt img'><img src='get_rave_theme-1.png' alt='' width='700' height='433' /></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='va'>pal</span> <span class='op'>=</span> <span class='fu'>get_rave_theme</span><span class='op'>(</span><span class='st'>'rave'</span>, type <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>'continuous'</span>, <span class='st'>'discrete'</span><span class='op'>)</span>, theme<span class='op'>=</span><span class='st'>'dark'</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='va'>pal</span>, plot<span class='op'>=</span><span class='cn'>TRUE</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> RAVE palettes in "dark" mode for "continuous", "discrete" variables</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Total 2 palettes:</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   Default-Discrete (6 unique colors)</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   Default-Continuous (11 unique colors)</span>
+<span class='r-plt img'><img src='get_rave_theme-2.png' alt='' width='700' height='433' /></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

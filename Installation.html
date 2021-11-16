@@ -165,7 +165,7 @@
 <pre><code>sudo gedit /etc/apt/sources.list</code></pre>
 <p>Then there will be a text editor with lots of “deb”s in it. Append the following line at the end of this file</p>
 <pre><code>deb https://cloud.r-project.org/bin/linux/ubuntu xenial-cran35/</code></pre>
-<p><strong>IMPORTANT</strong> Based on you system, you might want to enter different repositories (<a href="https://cran.r-project.org/bin/linux/" class="uri">https://cran.r-project.org/bin/linux/</a>). However, this line should be with a format of <code>deb</code> + <code>[repository URL]</code> + <code>xenial</code> (or <code>xenial-cran35</code>) + <code><a href="https://rdrr.io/r/base/Arithmetic.html">/</a></code>. The difference between <code>xenial</code> and <code>xenial-cran35</code> will affect the version of R to be installed.</p>
+<p><strong>IMPORTANT</strong> Based on you system, you might want to enter different repositories (<a href="https://cran.r-project.org/bin/linux/" class="uri">https://cran.r-project.org/bin/linux/</a>). However, this line should be with a format of <code>deb</code> + <code>[repository URL]</code> + <code>xenial</code> (or <code>xenial-cran35</code>) + <code>/</code>. The difference between <code>xenial</code> and <code>xenial-cran35</code> will affect the version of R to be installed.</p>
 <p>Save the file and close text editor.</p>
 <ol>
 <li>In your terminal, update <code>apt-get</code> repository:</li>

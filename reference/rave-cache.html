@@ -215,37 +215,45 @@ then the variable will be accessible from other instances and modules.</p></td>
 missing, then return <code>NULL</code>.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='co'># global can be set to false within RAVE modules</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='fu'>cache</span><span class='op'>(</span><span class='st'>'a'</span>, <span class='fl'>1</span>, name <span class='op'>=</span> <span class='st'>'data'</span>, global <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span> <span class='co'># returns 1</span>
-</div><div class='output co'>#&gt; [1] 1</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='fu'>cache</span><span class='op'>(</span><span class='st'>'a'</span>, <span class='fl'>2</span>, name <span class='op'>=</span> <span class='st'>'data'</span>, global <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span> <span class='co'># still returns 1</span>
-</div><div class='output co'>#&gt; [1] 1</div><div class='input'>
-<span class='co'># clear cache (for global=TRUE)</span>
-<span class='fu'>clear_cache</span><span class='op'>(</span>levels <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>)</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='fu'>cache</span><span class='op'>(</span><span class='st'>'a'</span>, <span class='fl'>2</span>, name <span class='op'>=</span> <span class='st'>'data'</span>, global <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span> <span class='co'># Now returns 2</span>
-</div><div class='output co'>#&gt; [1] 2</div><div class='input'>
-<span class='co'># Not run `Sys.sleep` because a is cached</span>
-<span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='fu'>cache</span><span class='op'>(</span><span class='st'>'a'</span>, <span class='fl'>2</span>, name <span class='op'>=</span> <span class='st'>'data'</span>, global <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; [1] 2</div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='fu'>cache</span><span class='op'>(</span><span class='st'>'a'</span>, <span class='op'>{</span><span class='fu'><a href='https://rdrr.io/r/base/Sys.sleep.html'>Sys.sleep</a></span><span class='op'>(</span><span class='fl'>10</span><span class='op'>)</span>; <span class='fl'>1</span><span class='op'>}</span>, name <span class='op'>=</span> <span class='st'>'data'</span>, global <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; [1] 2</div><div class='input'>
-<span class='co'># get data without key</span>
-<span class='fu'>cache</span><span class='op'>(</span>name <span class='op'>=</span> <span class='st'>'data'</span>, global <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; [1] 2</div><div class='input'>
-<span class='co'># clear cache that is global-only</span>
-<span class='fu'>clear_cache</span><span class='op'>(</span>levels <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span>
-
-<span class='co'># Test (test=TRUE) if cache exists, if not, return value but no save</span>
-<span class='fu'>cache</span><span class='op'>(</span>name <span class='op'>=</span> <span class='st'>'abracadabra'</span>, val <span class='op'>=</span> <span class='st'>'no cache'</span>, global <span class='op'>=</span> <span class='cn'>TRUE</span>, test <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; [1] "no cache"</div><div class='input'><span class='fu'>cache</span><span class='op'>(</span>name <span class='op'>=</span> <span class='st'>'abracadabra'</span>, global <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; NULL</div><div class='input'>
-<span class='co'># cache module inputs</span>
-<span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-<span class='co'># Need to run in package module environment</span>
-<span class='fu'>cache_input</span><span class='op'>(</span><span class='st'>'abracadabra'</span>, <span class='st'>'no-magic'</span>, read_only <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>  
-<span class='op'>}</span>
-
-
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='co'># global can be set to false within RAVE modules</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='fu'>cache</span><span class='op'>(</span><span class='st'>'a'</span>, <span class='fl'>1</span>, name <span class='op'>=</span> <span class='st'>'data'</span>, global <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span> <span class='co'># returns 1</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] 1</span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='fu'>cache</span><span class='op'>(</span><span class='st'>'a'</span>, <span class='fl'>2</span>, name <span class='op'>=</span> <span class='st'>'data'</span>, global <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span> <span class='co'># still returns 1</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] 1</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># clear cache (for global=TRUE)</span></span>
+<span class='r-in'><span class='fu'>clear_cache</span><span class='op'>(</span>levels <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>3</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='fu'>cache</span><span class='op'>(</span><span class='st'>'a'</span>, <span class='fl'>2</span>, name <span class='op'>=</span> <span class='st'>'data'</span>, global <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span> <span class='co'># Now returns 2</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] 2</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Not run `Sys.sleep` because a is cached</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='fu'>cache</span><span class='op'>(</span><span class='st'>'a'</span>, <span class='fl'>2</span>, name <span class='op'>=</span> <span class='st'>'data'</span>, global <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] 2</span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/print.html'>print</a></span><span class='op'>(</span><span class='fu'>cache</span><span class='op'>(</span><span class='st'>'a'</span>, <span class='op'>{</span><span class='fu'><a href='https://rdrr.io/r/base/Sys.sleep.html'>Sys.sleep</a></span><span class='op'>(</span><span class='fl'>10</span><span class='op'>)</span>; <span class='fl'>1</span><span class='op'>}</span>, name <span class='op'>=</span> <span class='st'>'data'</span>, global <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] 2</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># get data without key</span></span>
+<span class='r-in'><span class='fu'>cache</span><span class='op'>(</span>name <span class='op'>=</span> <span class='st'>'data'</span>, global <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] 2</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># clear cache that is global-only</span></span>
+<span class='r-in'><span class='fu'>clear_cache</span><span class='op'>(</span>levels <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Test (test=TRUE) if cache exists, if not, return value but no save</span></span>
+<span class='r-in'><span class='fu'>cache</span><span class='op'>(</span>name <span class='op'>=</span> <span class='st'>'abracadabra'</span>, val <span class='op'>=</span> <span class='st'>'no cache'</span>, global <span class='op'>=</span> <span class='cn'>TRUE</span>, test <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> [1] "no cache"</span>
+<span class='r-in'><span class='fu'>cache</span><span class='op'>(</span>name <span class='op'>=</span> <span class='st'>'abracadabra'</span>, global <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> NULL</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># cache module inputs</span></span>
+<span class='r-in'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span class='r-in'><span class='co'># Need to run in package module environment</span></span>
+<span class='r-in'><span class='fu'>cache_input</span><span class='op'>(</span><span class='st'>'abracadabra'</span>, <span class='st'>'no-magic'</span>, read_only <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>  </span>
+<span class='r-in'><span class='op'>}</span></span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

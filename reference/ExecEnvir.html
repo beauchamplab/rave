@@ -180,7 +180,7 @@ this environment is not used. However, module creators don't directly
 access this environment once the module is initialized.</p></dd>
 
 <dt><code>ns</code></dt><dd><p>shiny name-space functions, is equivalent to 
-<code><a href='https://rdrr.io/pkg/shiny/man/NS.html'>shiny::NS(module_id)</a></code>. The goal is to add prefixes to module inputs
+<code>shiny::NS(module_id)</code>. The goal is to add prefixes to module inputs
 so that two modules with the same input ID are named differently</p></dd>
 
 <dt><code>auto_execute</code></dt><dd><p>(Deprecated) whether to auto-calculate results</p></dd>
@@ -542,19 +542,19 @@ Please use <code>cache_input</code> instead to get variable values.</p><h4 class
 
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'>
-<span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-
-<span class='co'># Load module</span>
-<span class='va'>module</span> <span class='op'>&lt;-</span> <span class='fu'><a href='get_module.html'>get_module</a></span><span class='op'>(</span><span class='st'>'ravebuiltins'</span>, <span class='st'>'power_explorer'</span><span class='op'>)</span>
-
-<span class='co'># Create execute environmen</span>
-<span class='va'>execenv</span> <span class='op'>&lt;-</span> <span class='va'>module</span><span class='op'>$</span><span class='fu'>get_or_new_exec_env</span><span class='op'>(</span><span class='op'>)</span>
-<span class='va'>execenv</span><span class='op'>$</span><span class='fu'>info</span><span class='op'>(</span><span class='op'>)</span>
-
-<span class='op'>}</span>
-
-</div></pre>
+    <pre class="examples"><span class='r-in'></span>
+<span class='r-in'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Load module</span></span>
+<span class='r-in'><span class='va'>module</span> <span class='op'>&lt;-</span> <span class='fu'><a href='get_module.html'>get_module</a></span><span class='op'>(</span><span class='st'>'ravebuiltins'</span>, <span class='st'>'power_explorer'</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Create execute environmen</span></span>
+<span class='r-in'><span class='va'>execenv</span> <span class='op'>&lt;-</span> <span class='va'>module</span><span class='op'>$</span><span class='fu'>get_or_new_exec_env</span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>execenv</span><span class='op'>$</span><span class='fu'>info</span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='op'>}</span></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

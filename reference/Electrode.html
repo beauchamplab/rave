@@ -303,43 +303,43 @@ refers to epoch file <code>"epoch_default.csv"</code> in subject meta folder</p>
 
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-<span class='co'># Electrode with no reference</span>
-<span class='va'>e1</span> <span class='op'>&lt;-</span> <span class='va'>Electrode</span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>'demo/YAB'</span>, electrode <span class='op'>=</span> <span class='fl'>14</span>, reference_by <span class='op'>=</span> <span class='st'>'noref'</span><span class='op'>)</span>
-<span class='va'>e1</span><span class='op'>$</span><span class='va'>reference</span>
-<span class='co'>#&gt; Subject: demo/YAB</span>
-<span class='co'>#&gt; Electrode: noref (Reference)</span>
-
-<span class='co'># Add Common Average Reference in rave/data/reference/ref_13-63,65-84.h5</span>
-<span class='va'>e2</span> <span class='op'>&lt;-</span> <span class='va'>Electrode</span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>'demo/YAB'</span>, electrode <span class='op'>=</span> <span class='fl'>14</span>, 
-                    reference_by <span class='op'>=</span> <span class='st'>'ref_13-63,65-84'</span><span class='op'>)</span>
-
-<span class='co'># Electrode with bipolar reference by another electrode</span>
-<span class='va'>e3</span> <span class='op'>&lt;-</span> <span class='va'>Electrode</span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>'demo/YAB'</span>, electrode <span class='op'>=</span> <span class='fl'>14</span>, reference_by <span class='op'>=</span> <span class='st'>'ref_15'</span><span class='op'>)</span>
-
-<span class='co'># Alternative way</span>
-<span class='va'>reference</span> <span class='op'>&lt;-</span> <span class='va'>Electrode</span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>'demo/YAB'</span>, electrode <span class='op'>=</span> <span class='fl'>15</span>, is_reference <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
-<span class='va'>e4</span> <span class='op'>&lt;-</span> <span class='va'>Electrode</span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>'demo/YAB'</span>, electrode <span class='op'>=</span> <span class='fl'>14</span>, reference_by <span class='op'>=</span> <span class='va'>reference</span><span class='op'>)</span>
-
-<span class='co'># e3, e4 are the same in scientific meaning. To test it, epoch them</span>
-<span class='va'>power3</span> <span class='op'>&lt;-</span> <span class='va'>e3</span><span class='op'>$</span><span class='fu'>epoch</span><span class='op'>(</span><span class='st'>'YABaOutlier'</span>, <span class='fl'>1</span>, <span class='fl'>2</span>, <span class='st'>'power'</span>, 
-                   raw <span class='op'>=</span> <span class='cn'>FALSE</span>, hybrid <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span><span class='op'>$</span><span class='va'>power</span>
-<span class='va'>power4</span> <span class='op'>&lt;-</span> <span class='va'>e4</span><span class='op'>$</span><span class='fu'>epoch</span><span class='op'>(</span><span class='st'>'YABaOutlier'</span>, <span class='fl'>1</span>, <span class='fl'>2</span>, <span class='st'>'power'</span>,
-                   raw <span class='op'>=</span> <span class='cn'>FALSE</span>, hybrid <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>$</span><span class='va'>power</span>
-
-<span class='co'># Compare e3 and e4, result difference should be 0</span>
-<span class='fu'><a href='https://rdrr.io/r/base/range.html'>range</a></span><span class='op'>(</span><span class='va'>power3</span><span class='op'>$</span><span class='fu'>get_data</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>-</span> <span class='va'>power4</span><span class='op'>$</span><span class='fu'>get_data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
-<span class='co'>#&gt; 0</span>
-
-<span class='co'># With or without hybrid, the size will be different</span>
-<span class='co'># No hybrid, totally in memory</span>
-<span class='fu'>lobstr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lobstr/man/obj_size.html'>obj_size</a></span><span class='op'>(</span><span class='va'>power3</span><span class='op'>)</span>
-<span class='co'>#&gt; 12 MB</span>
-<span class='co'># Hybrid, data is swapped to hard-drive</span>
-<span class='fu'>lobstr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lobstr/man/obj_size.html'>obj_size</a></span><span class='op'>(</span><span class='va'>power4</span><span class='op'>)</span>
-<span class='co'>#&gt; 908 kB</span>
-<span class='op'>}</span>
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span class='r-in'><span class='co'># Electrode with no reference</span></span>
+<span class='r-in'><span class='va'>e1</span> <span class='op'>&lt;-</span> <span class='va'>Electrode</span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>'demo/YAB'</span>, electrode <span class='op'>=</span> <span class='fl'>14</span>, reference_by <span class='op'>=</span> <span class='st'>'noref'</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>e1</span><span class='op'>$</span><span class='va'>reference</span></span>
+<span class='r-in'><span class='co'>#&gt; Subject: demo/YAB</span></span>
+<span class='r-in'><span class='co'>#&gt; Electrode: noref (Reference)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Add Common Average Reference in rave/data/reference/ref_13-63,65-84.h5</span></span>
+<span class='r-in'><span class='va'>e2</span> <span class='op'>&lt;-</span> <span class='va'>Electrode</span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>'demo/YAB'</span>, electrode <span class='op'>=</span> <span class='fl'>14</span>, </span>
+<span class='r-in'>                    reference_by <span class='op'>=</span> <span class='st'>'ref_13-63,65-84'</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Electrode with bipolar reference by another electrode</span></span>
+<span class='r-in'><span class='va'>e3</span> <span class='op'>&lt;-</span> <span class='va'>Electrode</span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>'demo/YAB'</span>, electrode <span class='op'>=</span> <span class='fl'>14</span>, reference_by <span class='op'>=</span> <span class='st'>'ref_15'</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Alternative way</span></span>
+<span class='r-in'><span class='va'>reference</span> <span class='op'>&lt;-</span> <span class='va'>Electrode</span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>'demo/YAB'</span>, electrode <span class='op'>=</span> <span class='fl'>15</span>, is_reference <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>e4</span> <span class='op'>&lt;-</span> <span class='va'>Electrode</span><span class='op'>$</span><span class='fu'>new</span><span class='op'>(</span><span class='st'>'demo/YAB'</span>, electrode <span class='op'>=</span> <span class='fl'>14</span>, reference_by <span class='op'>=</span> <span class='va'>reference</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># e3, e4 are the same in scientific meaning. To test it, epoch them</span></span>
+<span class='r-in'><span class='va'>power3</span> <span class='op'>&lt;-</span> <span class='va'>e3</span><span class='op'>$</span><span class='fu'>epoch</span><span class='op'>(</span><span class='st'>'YABaOutlier'</span>, <span class='fl'>1</span>, <span class='fl'>2</span>, <span class='st'>'power'</span>, </span>
+<span class='r-in'>                   raw <span class='op'>=</span> <span class='cn'>FALSE</span>, hybrid <span class='op'>=</span> <span class='cn'>FALSE</span><span class='op'>)</span><span class='op'>$</span><span class='va'>power</span></span>
+<span class='r-in'><span class='va'>power4</span> <span class='op'>&lt;-</span> <span class='va'>e4</span><span class='op'>$</span><span class='fu'>epoch</span><span class='op'>(</span><span class='st'>'YABaOutlier'</span>, <span class='fl'>1</span>, <span class='fl'>2</span>, <span class='st'>'power'</span>,</span>
+<span class='r-in'>                   raw <span class='op'>=</span> <span class='cn'>FALSE</span>, hybrid <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span><span class='op'>$</span><span class='va'>power</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Compare e3 and e4, result difference should be 0</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/range.html'>range</a></span><span class='op'>(</span><span class='va'>power3</span><span class='op'>$</span><span class='fu'>get_data</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>-</span> <span class='va'>power4</span><span class='op'>$</span><span class='fu'>get_data</span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-in'><span class='co'>#&gt; 0</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># With or without hybrid, the size will be different</span></span>
+<span class='r-in'><span class='co'># No hybrid, totally in memory</span></span>
+<span class='r-in'><span class='fu'>lobstr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lobstr/man/obj_size.html'>obj_size</a></span><span class='op'>(</span><span class='va'>power3</span><span class='op'>)</span></span>
+<span class='r-in'><span class='co'>#&gt; 12 MB</span></span>
+<span class='r-in'><span class='co'># Hybrid, data is swapped to hard-drive</span></span>
+<span class='r-in'><span class='fu'>lobstr</span><span class='fu'>::</span><span class='fu'><a href='https://rdrr.io/pkg/lobstr/man/obj_size.html'>obj_size</a></span><span class='op'>(</span><span class='va'>power4</span><span class='op'>)</span></span>
+<span class='r-in'><span class='co'>#&gt; 908 kB</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

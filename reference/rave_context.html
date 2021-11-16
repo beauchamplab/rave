@@ -218,120 +218,125 @@ don't use these variables for other purposes. See `Examples' for how to
 set and read the context.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='co'># ------- 1. Read/Set Context ---------</span>
-
-<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/dipterix/dipsaus'>dipsaus</a></span><span class='op'>)</span>
-<span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://rave.wiki'>rave</a></span><span class='op'>)</span>
-<span class='co'># Reset context for current environment</span>
-<span class='fu'>rave_context</span><span class='op'>(</span><span class='st'>'default'</span><span class='op'>)</span>
-
-<span class='co'># Read from current caller's environment</span>
-<span class='va'>fun</span> <span class='op'>&lt;-</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span><span class='op'>{</span>
-  <span class='va'>ctx</span> <span class='op'>&lt;-</span> <span class='fu'>rave_context</span><span class='op'>(</span><span class='op'>)</span>
-  <span class='fu'><a href='https://rdrr.io/pkg/dipsaus/man/cat2.html'>cat2</a></span><span class='op'>(</span><span class='st'>'The function is running under context - '</span>, <span class='va'>ctx</span><span class='op'>$</span><span class='va'>context</span><span class='op'>)</span>
-  <span class='fu'><a href='https://rdrr.io/pkg/dipsaus/man/cat2.html'>cat2</a></span><span class='op'>(</span><span class='st'>'The package under the context - '</span>, <span class='va'>ctx</span><span class='op'>$</span><span class='va'>package</span><span class='op'>)</span>
-  <span class='fu'><a href='https://rdrr.io/pkg/dipsaus/man/cat2.html'>cat2</a></span><span class='op'>(</span><span class='st'>'Module ID is - '</span>, <span class='va'>ctx</span><span class='op'>$</span><span class='va'>module_id</span><span class='op'>)</span>
-  <span class='fu'><a href='https://rdrr.io/pkg/dipsaus/man/cat2.html'>cat2</a></span><span class='op'>(</span><span class='st'>'Running instance is - '</span>, <span class='va'>ctx</span><span class='op'>$</span><span class='va'>instance</span><span class='op'>)</span>
-<span class='op'>}</span>
-<span class='fu'>fun</span><span class='op'>(</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; The function is running under context -  default 
-#&gt; The package under the context -   
-#&gt; Module ID is -   
-#&gt; Running instance is -  </div><div class='input'><span class='co'>## The function is running under context - default</span>
-<span class='co'>## The package under the context - </span>
-<span class='co'>## ...</span>
-
-<span class='co'># Set debug context </span>
-<span class='va'>debug_env</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/environment.html'>new.env</a></span><span class='op'>(</span><span class='op'>)</span>
-<span class='fu'>rave_context</span><span class='op'>(</span><span class='st'>'rave_module_debug'</span>, tenv <span class='op'>=</span> <span class='va'>debug_env</span><span class='op'>)</span>
-<span class='va'>debug_env</span><span class='op'>$</span><span class='va'>.__rave_package__.</span> <span class='op'>&lt;-</span> <span class='st'>'ravebuiltins'</span>
-
-<span class='co'># With debug_env, the function is aware of the package it's under</span>
-<span class='fu'><a href='https://rdrr.io/r/base/with.html'>with</a></span><span class='op'>(</span><span class='va'>debug_env</span>, <span class='op'>{</span> <span class='fu'>fun</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>}</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; The function is running under context -  rave_module_debug 
-#&gt; The package under the context -  ravebuiltins 
-#&gt; Module ID is -   
-#&gt; Running instance is -  </div><div class='input'><span class='co'>## The function is running under context - rave_module_debug</span>
-<span class='co'>## The package under the context - ravebuiltins</span>
-<span class='co'>## ...</span>
-
-<span class='co'># To set context within the function and affect the functions inide</span>
-<span class='va'>fun2</span> <span class='op'>&lt;-</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>module_id</span><span class='op'>)</span><span class='op'>{</span>
-  <span class='co'># Run rave_context and then set module ID</span>
-  <span class='fu'>rave_context</span><span class='op'>(</span><span class='st'>'rave_running_local'</span><span class='op'>)</span>
-  <span class='va'>.__rave_module__.</span> <span class='op'>&lt;-</span> <span class='va'>module_id</span>
-  <span class='fu'>fun</span><span class='op'>(</span><span class='op'>)</span>
-<span class='op'>}</span>
-<span class='fu'><a href='https://rdrr.io/r/base/with.html'>with</a></span><span class='op'>(</span><span class='va'>debug_env</span>, <span class='op'>{</span> <span class='fu'>fun2</span><span class='op'>(</span><span class='st'>'power_explorer'</span><span class='op'>)</span> <span class='op'>}</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; The function is running under context -  rave_running_local 
-#&gt; The package under the context -  ravebuiltins 
-#&gt; Module ID is -  power_explorer 
-#&gt; Running instance is -  </div><div class='input'><span class='co'>## The function is running under context - rave_running_local</span>
-<span class='co'>## The package under the context - ravebuiltins</span>
-<span class='co'>## Module ID is - power_explorer</span>
-<span class='co'>## ...</span>
-
-<span class='co'># Let's see what we can do with rave_module_debug</span>
-<span class='fu'><a href='https://rdrr.io/r/base/with.html'>with</a></span><span class='op'>(</span><span class='va'>debug_env</span>, <span class='op'>{</span> <span class='fu'><a href='get_path.html'>get_path</a></span><span class='op'>(</span><span class='st'>'inst/rave.yaml'</span><span class='op'>)</span> <span class='op'>}</span><span class='op'>)</span>
-<span class='co'># When I develop the package, it returns:</span>
-<span class='co'>## "/Users/beauchamplab/.../ravebuiltins/inst/settings.yaml"</span>
-<span class='co'># When I run in other places, it returns</span>
-<span class='co'>## "/Users/beauchamplab/Library/R/3.6/library/ravebuiltins/rave.yaml"</span>
-
-
-<span class='co'># ------- 2. Setting behaviors for context ---------</span>
-<span class='co'># One way to set different behaviors is to using `ctx`</span>
-<span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span>
-<span class='va'>fun</span> <span class='op'>&lt;-</span> <span class='kw'>function</span><span class='op'>(</span><span class='op'>)</span><span class='op'>{</span>
-  <span class='va'>ctx</span> <span class='op'>&lt;-</span> <span class='fu'>rave_context</span><span class='op'>(</span><span class='op'>)</span>
-  <span class='kw'><a href='https://rdrr.io/r/base/switch.html'>switch</a></span><span class='op'>(</span><span class='va'>ctx</span><span class='op'>$</span><span class='va'>context</span>, <span class='va'>...</span><span class='op'>)</span>
-<span class='op'>}</span>
-<span class='op'>}</span>
-
-<span class='co'># The other way is to use S3 generics provided by R syntax</span>
-<span class='va'>fun</span> <span class='op'>&lt;-</span> <span class='fu'><a href='rave_context_generics.html'>rave_context_generics</a></span><span class='op'>(</span><span class='st'>'fun'</span>, <span class='kw'>function</span><span class='op'>(</span><span class='va'>module_id</span>, <span class='va'>...</span><span class='op'>)</span><span class='op'>{</span><span class='op'>}</span><span class='op'>)</span>
-
-<span class='co'># action for default</span>
-<span class='va'>fun.default</span> <span class='op'>&lt;-</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span><span class='op'>{</span>
-  <span class='fu'><a href='https://rdrr.io/pkg/dipsaus/man/cat2.html'>cat2</a></span><span class='op'>(</span><span class='st'>'Function is not supposed to run under default context...'</span>,
-       level <span class='op'>=</span> <span class='st'>'ERROR'</span><span class='op'>)</span>
-<span class='op'>}</span>
-
-<span class='co'># for debug, set module ID and run with rave_running_local</span>
-<span class='va'>fun.rave_module_debug</span> <span class='op'>&lt;-</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>module_id</span>, <span class='va'>...</span><span class='op'>)</span><span class='op'>{</span>
-  <span class='fu'><a href='https://rdrr.io/pkg/dipsaus/man/cat2.html'>cat2</a></span><span class='op'>(</span><span class='st'>'Debug mode... loading a test subject'</span><span class='op'>)</span>
-  <span class='co'># Do something ... like automatically mount_demo_subject</span>
-  <span class='co'># by running mount_demo_subject()</span>
-  
-  <span class='fu'>rave_context</span><span class='op'>(</span><span class='st'>'rave_running_local'</span><span class='op'>)</span>
-  <span class='va'>.__rave_module__.</span> <span class='op'>&lt;-</span> <span class='va'>module_id</span>
-  <span class='co'># Recall the function under rave_running_local context</span>
-  <span class='fu'>fun</span><span class='op'>(</span><span class='va'>module_id</span>, <span class='va'>...</span><span class='op'>)</span>
-<span class='op'>}</span>
-
-<span class='co'># When running within RAVE container, local and with shiny</span>
-<span class='va'>fun.rave_running_local</span> <span class='op'>&lt;-</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span><span class='op'>{</span>
-  <span class='va'>ctx</span> <span class='op'>&lt;-</span> <span class='fu'>rave_context</span><span class='op'>(</span><span class='op'>)</span>
-  <span class='fu'><a href='https://rdrr.io/pkg/dipsaus/man/cat2.html'>cat2</a></span><span class='op'>(</span><span class='st'>'Yay, running '</span>, <span class='va'>ctx</span><span class='op'>$</span><span class='va'>module_id</span>, <span class='st'>' under context '</span>,
-       <span class='va'>ctx</span><span class='op'>$</span><span class='va'>context</span>, level<span class='op'>=</span><span class='st'>'INFO'</span><span class='op'>)</span>
-<span class='op'>}</span>
-<span class='va'>fun.rave_running</span> <span class='op'>&lt;-</span> <span class='va'>fun.rave_running_local</span>
-
-<span class='co'># Run in default mode, expect error message</span>
-<span class='fu'>fun</span><span class='op'>(</span><span class='st'>'power_explorer'</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Function is not supposed to run under default context... </div><div class='input'>
-<span class='co'># Run in debug mode</span>
-<span class='va'>debug_env</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/environment.html'>new.env</a></span><span class='op'>(</span><span class='op'>)</span>
-<span class='fu'>rave_context</span><span class='op'>(</span><span class='st'>'rave_module_debug'</span>, tenv <span class='op'>=</span> <span class='va'>debug_env</span><span class='op'>)</span>
-<span class='va'>debug_env</span><span class='op'>$</span><span class='va'>.__rave_package__.</span> <span class='op'>&lt;-</span> <span class='st'>'ravebuiltins'</span>
-
-<span class='co'># The function will run in debug mode, then rave_running_local</span>
-<span class='fu'><a href='https://rdrr.io/r/base/with.html'>with</a></span><span class='op'>(</span><span class='va'>debug_env</span>, <span class='op'>{</span> <span class='fu'>fun</span><span class='op'>(</span><span class='st'>'power_explorer'</span><span class='op'>)</span> <span class='op'>}</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; Debug mode... loading a test subject 
-#&gt; Yay, running  power_explorer  under context  rave_running_local </div><div class='input'>
-
-
-</div></pre>
+    <pre class="examples"><span class='r-in'><span class='co'># ------- 1. Read/Set Context ---------</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://github.com/dipterix/dipsaus'>dipsaus</a></span><span class='op'>)</span></span>
+<span class='r-in'><span class='kw'><a href='https://rdrr.io/r/base/library.html'>library</a></span><span class='op'>(</span><span class='va'><a href='https://rave.wiki'>rave</a></span><span class='op'>)</span></span>
+<span class='r-in'><span class='co'># Reset context for current environment</span></span>
+<span class='r-in'><span class='fu'>rave_context</span><span class='op'>(</span><span class='st'>'default'</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Read from current caller's environment</span></span>
+<span class='r-in'><span class='va'>fun</span> <span class='op'>&lt;-</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span><span class='op'>{</span></span>
+<span class='r-in'>  <span class='va'>ctx</span> <span class='op'>&lt;-</span> <span class='fu'>rave_context</span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/pkg/dipsaus/man/cat2.html'>cat2</a></span><span class='op'>(</span><span class='st'>'The function is running under context - '</span>, <span class='va'>ctx</span><span class='op'>$</span><span class='va'>context</span><span class='op'>)</span></span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/pkg/dipsaus/man/cat2.html'>cat2</a></span><span class='op'>(</span><span class='st'>'The package under the context - '</span>, <span class='va'>ctx</span><span class='op'>$</span><span class='va'>package</span><span class='op'>)</span></span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/pkg/dipsaus/man/cat2.html'>cat2</a></span><span class='op'>(</span><span class='st'>'Module ID is - '</span>, <span class='va'>ctx</span><span class='op'>$</span><span class='va'>module_id</span><span class='op'>)</span></span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/pkg/dipsaus/man/cat2.html'>cat2</a></span><span class='op'>(</span><span class='st'>'Running instance is - '</span>, <span class='va'>ctx</span><span class='op'>$</span><span class='va'>instance</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+<span class='r-in'><span class='fu'>fun</span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> The function is running under context -  default </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> The package under the context -   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Module ID is -   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Running instance is -  </span>
+<span class='r-in'><span class='co'>## The function is running under context - default</span></span>
+<span class='r-in'><span class='co'>## The package under the context - </span></span>
+<span class='r-in'><span class='co'>## ...</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Set debug context </span></span>
+<span class='r-in'><span class='va'>debug_env</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/environment.html'>new.env</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'>rave_context</span><span class='op'>(</span><span class='st'>'rave_module_debug'</span>, tenv <span class='op'>=</span> <span class='va'>debug_env</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>debug_env</span><span class='op'>$</span><span class='va'>.__rave_package__.</span> <span class='op'>&lt;-</span> <span class='st'>'ravebuiltins'</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># With debug_env, the function is aware of the package it's under</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/with.html'>with</a></span><span class='op'>(</span><span class='va'>debug_env</span>, <span class='op'>{</span> <span class='fu'>fun</span><span class='op'>(</span><span class='op'>)</span> <span class='op'>}</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> The function is running under context -  rave_module_debug </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> The package under the context -  ravebuiltins </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Module ID is -   </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Running instance is -  </span>
+<span class='r-in'><span class='co'>## The function is running under context - rave_module_debug</span></span>
+<span class='r-in'><span class='co'>## The package under the context - ravebuiltins</span></span>
+<span class='r-in'><span class='co'>## ...</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># To set context within the function and affect the functions inide</span></span>
+<span class='r-in'><span class='va'>fun2</span> <span class='op'>&lt;-</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>module_id</span><span class='op'>)</span><span class='op'>{</span></span>
+<span class='r-in'>  <span class='co'># Run rave_context and then set module ID</span></span>
+<span class='r-in'>  <span class='fu'>rave_context</span><span class='op'>(</span><span class='st'>'rave_running_local'</span><span class='op'>)</span></span>
+<span class='r-in'>  <span class='va'>.__rave_module__.</span> <span class='op'>&lt;-</span> <span class='va'>module_id</span></span>
+<span class='r-in'>  <span class='fu'>fun</span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/with.html'>with</a></span><span class='op'>(</span><span class='va'>debug_env</span>, <span class='op'>{</span> <span class='fu'>fun2</span><span class='op'>(</span><span class='st'>'power_explorer'</span><span class='op'>)</span> <span class='op'>}</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> The function is running under context -  rave_running_local </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> The package under the context -  ravebuiltins </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Module ID is -  power_explorer </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Running instance is -  </span>
+<span class='r-in'><span class='co'>## The function is running under context - rave_running_local</span></span>
+<span class='r-in'><span class='co'>## The package under the context - ravebuiltins</span></span>
+<span class='r-in'><span class='co'>## Module ID is - power_explorer</span></span>
+<span class='r-in'><span class='co'>## ...</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Let's see what we can do with rave_module_debug</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/with.html'>with</a></span><span class='op'>(</span><span class='va'>debug_env</span>, <span class='op'>{</span> <span class='fu'><a href='get_path.html'>get_path</a></span><span class='op'>(</span><span class='st'>'inst/rave.yaml'</span><span class='op'>)</span> <span class='op'>}</span><span class='op'>)</span></span>
+<span class='r-in'><span class='co'># When I develop the package, it returns:</span></span>
+<span class='r-in'><span class='co'>## "/Users/beauchamplab/.../ravebuiltins/inst/settings.yaml"</span></span>
+<span class='r-in'><span class='co'># When I run in other places, it returns</span></span>
+<span class='r-in'><span class='co'>## "/Users/beauchamplab/Library/R/3.6/library/ravebuiltins/rave.yaml"</span></span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># ------- 2. Setting behaviors for context ---------</span></span>
+<span class='r-in'><span class='co'># One way to set different behaviors is to using `ctx`</span></span>
+<span class='r-in'><span class='kw'>if</span> <span class='op'>(</span><span class='cn'>FALSE</span><span class='op'>)</span> <span class='op'>{</span></span>
+<span class='r-in'><span class='va'>fun</span> <span class='op'>&lt;-</span> <span class='kw'>function</span><span class='op'>(</span><span class='op'>)</span><span class='op'>{</span></span>
+<span class='r-in'>  <span class='va'>ctx</span> <span class='op'>&lt;-</span> <span class='fu'>rave_context</span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-in'>  <span class='kw'><a href='https://rdrr.io/r/base/switch.html'>switch</a></span><span class='op'>(</span><span class='va'>ctx</span><span class='op'>$</span><span class='va'>context</span>, <span class='va'>...</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># The other way is to use S3 generics provided by R syntax</span></span>
+<span class='r-in'><span class='va'>fun</span> <span class='op'>&lt;-</span> <span class='fu'><a href='rave_context_generics.html'>rave_context_generics</a></span><span class='op'>(</span><span class='st'>'fun'</span>, <span class='kw'>function</span><span class='op'>(</span><span class='va'>module_id</span>, <span class='va'>...</span><span class='op'>)</span><span class='op'>{</span><span class='op'>}</span><span class='op'>)</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># action for default</span></span>
+<span class='r-in'><span class='va'>fun.default</span> <span class='op'>&lt;-</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span><span class='op'>{</span></span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/pkg/dipsaus/man/cat2.html'>cat2</a></span><span class='op'>(</span><span class='st'>'Function is not supposed to run under default context...'</span>,</span>
+<span class='r-in'>       level <span class='op'>=</span> <span class='st'>'ERROR'</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># for debug, set module ID and run with rave_running_local</span></span>
+<span class='r-in'><span class='va'>fun.rave_module_debug</span> <span class='op'>&lt;-</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>module_id</span>, <span class='va'>...</span><span class='op'>)</span><span class='op'>{</span></span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/pkg/dipsaus/man/cat2.html'>cat2</a></span><span class='op'>(</span><span class='st'>'Debug mode... loading a test subject'</span><span class='op'>)</span></span>
+<span class='r-in'>  <span class='co'># Do something ... like automatically mount_demo_subject</span></span>
+<span class='r-in'>  <span class='co'># by running mount_demo_subject()</span></span>
+<span class='r-in'>  </span>
+<span class='r-in'>  <span class='fu'>rave_context</span><span class='op'>(</span><span class='st'>'rave_running_local'</span><span class='op'>)</span></span>
+<span class='r-in'>  <span class='va'>.__rave_module__.</span> <span class='op'>&lt;-</span> <span class='va'>module_id</span></span>
+<span class='r-in'>  <span class='co'># Recall the function under rave_running_local context</span></span>
+<span class='r-in'>  <span class='fu'>fun</span><span class='op'>(</span><span class='va'>module_id</span>, <span class='va'>...</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># When running within RAVE container, local and with shiny</span></span>
+<span class='r-in'><span class='va'>fun.rave_running_local</span> <span class='op'>&lt;-</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span><span class='op'>{</span></span>
+<span class='r-in'>  <span class='va'>ctx</span> <span class='op'>&lt;-</span> <span class='fu'>rave_context</span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-in'>  <span class='fu'><a href='https://rdrr.io/pkg/dipsaus/man/cat2.html'>cat2</a></span><span class='op'>(</span><span class='st'>'Yay, running '</span>, <span class='va'>ctx</span><span class='op'>$</span><span class='va'>module_id</span>, <span class='st'>' under context '</span>,</span>
+<span class='r-in'>       <span class='va'>ctx</span><span class='op'>$</span><span class='va'>context</span>, level<span class='op'>=</span><span class='st'>'INFO'</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>}</span></span>
+<span class='r-in'><span class='va'>fun.rave_running</span> <span class='op'>&lt;-</span> <span class='va'>fun.rave_running_local</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Run in default mode, expect error message</span></span>
+<span class='r-in'><span class='fu'>fun</span><span class='op'>(</span><span class='st'>'power_explorer'</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Function is not supposed to run under default context... </span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># Run in debug mode</span></span>
+<span class='r-in'><span class='va'>debug_env</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/environment.html'>new.env</a></span><span class='op'>(</span><span class='op'>)</span></span>
+<span class='r-in'><span class='fu'>rave_context</span><span class='op'>(</span><span class='st'>'rave_module_debug'</span>, tenv <span class='op'>=</span> <span class='va'>debug_env</span><span class='op'>)</span></span>
+<span class='r-in'><span class='va'>debug_env</span><span class='op'>$</span><span class='va'>.__rave_package__.</span> <span class='op'>&lt;-</span> <span class='st'>'ravebuiltins'</span></span>
+<span class='r-in'></span>
+<span class='r-in'><span class='co'># The function will run in debug mode, then rave_running_local</span></span>
+<span class='r-in'><span class='fu'><a href='https://rdrr.io/r/base/with.html'>with</a></span><span class='op'>(</span><span class='va'>debug_env</span>, <span class='op'>{</span> <span class='fu'>fun</span><span class='op'>(</span><span class='st'>'power_explorer'</span><span class='op'>)</span> <span class='op'>}</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Debug mode... loading a test subject </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> Yay, running  power_explorer  under context  rave_running_local </span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+<span class='r-in'></span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
