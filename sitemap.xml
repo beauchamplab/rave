@@ -1,6 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://beauchamplab.github.io/rave/404.html</loc>
+  </url>
+  <url>
+    <loc>https://beauchamplab.github.io/rave/Installation.html</loc>
+  </url>
+  <url>
+    <loc>https://beauchamplab.github.io/rave/Requirements.html</loc>
+  </url>
+  <url>
+    <loc>https://beauchamplab.github.io/rave/Updates.html</loc>
+  </url>
+  <url>
+    <loc>https://beauchamplab.github.io/rave/alternative_installation.html</loc>
+  </url>
+  <url>
+    <loc>https://beauchamplab.github.io/rave/authors.html</loc>
+  </url>
+  <url>
     <loc>https://beauchamplab.github.io/rave/index.html</loc>
   </url>
   <url>
@@ -146,6 +164,9 @@
   </url>
   <url>
     <loc>https://beauchamplab.github.io/rave/reference/import_electrodes.html</loc>
+  </url>
+  <url>
+    <loc>https://beauchamplab.github.io/rave/reference/index.html</loc>
   </url>
   <url>
     <loc>https://beauchamplab.github.io/rave/reference/init_app.html</loc>
