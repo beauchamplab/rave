@@ -562,7 +562,7 @@ define_input_analysis_data_csv <- function(
           project_name = subject$project_name
           tbls = dipsaus::drop_nulls(lapply(metas, function(x){
             # print('trying to load ' %&% x$fpath)
-            progress$inc(rutabaga::get_filename(x$fpath))
+            progress$inc(basename(x$fpath))
             if(endsWith(x$fpath, 'csv')) {
               tbl = data.table::fread(file = x$fpath, stringsAsFactors = FALSE, header = TRUE)
             } else {
