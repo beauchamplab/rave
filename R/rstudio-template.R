@@ -39,7 +39,7 @@ create_template <- function(path, ...){
   # migrate template
   template_dir = system.file('template', package = 'rave')
   # template_dir = './inst/template'
-  fs = list.files(template_dir, recursive = T, pattern = '^[a-zA-Z]', all.files = F, full.names = F)
+  fs = list.files(template_dir, recursive = TRUE, pattern = '^[a-zA-Z]', all.files = FALSE, full.names = FALSE)
   
   for(f in fs){
     s = readLines(file.path(template_dir, f))

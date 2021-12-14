@@ -3,7 +3,7 @@
 # ----------------------------------- Debug ------------------------------------
 require(${{PACKAGE}})
 
-env = dev_${{PACKAGE}}(T)
+env = dev_${{PACKAGE}}(TRUE)
 
 #' Load subject for debugging
 #' Make sure this is executed before developing the module to make sure
