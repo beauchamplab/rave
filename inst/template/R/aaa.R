@@ -22,7 +22,7 @@ NULL
 #' @export
 dev_${{PACKAGE}} <- function(expose_functions = FALSE, reload = TRUE){
   .__rave_context__. = 'rave_module_debug'
-  .__rave_package__. = 'ravebuiltins'
+  .__rave_package__. = '${{PACKAGE}}'
   if(reload){
     env <- rave::reload_module_package(expose_functions)
   }else{
