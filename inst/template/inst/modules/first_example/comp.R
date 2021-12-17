@@ -1,6 +1,8 @@
 # File defining module inputs, outputs
 
 # ----------------------------------- Debug ------------------------------------
+require(shiny)
+require(rave)
 require(${{PACKAGE}})
 
 env = dev_${{PACKAGE}}(TRUE)
@@ -99,6 +101,62 @@ define_input(
   }
 )
 
+define_input(
+  selectInput(inputId = 'requested_conditions', multiple = TRUE, choices = character(0), label='Conditions to include'),
+  
+  init_args = c('choices', 'selected'),
+  
+  init_expr = {
+    # the module_tools object allows access to the meta data, including the "trial label" variable called Condition
+    # The trial numbers and condition labels, are in the epoch file
+    # rstudioapi::navigateToFile(file.path(rave::rave_options('data_dir'), 'demo','DemoSubject','rave', 'meta','epoch_auditory_onset.csv'))
+    
+    choices = unique(module_tools$get_meta('trials')$Condition)
+    selected = choices
+  }
+)
+
+
+define_input(
+  sliderInput(inputId = 'requested_frequencies', label='Frequency Window', min = 0, max=1, value=0:1, step = 1, round=TRUE),
+  
+  init_args = c('min', 'max', 'value'),
+  
+  init_expr = {
+    # The frequency labels are defined in:
+    # rstudioapi::navigateToFile(file.path(rave::rave_options('data_dir'), 'demo','DemoSubject','rave', 'meta','frequencies.csv'))
+    
+    min = min(preload_info$frequencies)
+    max = max(preload_info$frequencies)
+    value = c(min,max)
+  }
+)
+
+define_input(
+  sliderInput(inputId = 'requested_baseline', label='Baseline Window', min = 0, max=1, value=0:1),
+  
+  init_args = c('min', 'max', 'value'),
+  
+  init_expr = {
+    min = min(preload_info$time_points)
+    max = max(preload_info$time_points)
+    value = c(min,0)
+  }
+)
+
+# the input_layout list is used by rave to determine order and grouping of layouts
+input_layout <- list(
+  'Select electrodes' = list('text_electrode'
+  ),
+  '[-]Analysis parameters' = list(
+    'requested_baseline',
+    'requested_frequencies'
+  ),
+  '[-]Select conditions' = list(
+    'requested_conditions'
+  )
+)
+
 # End of input
 # ----------------------------------  Outputs ----------------------------------
 #' Define Outputs
@@ -138,6 +196,13 @@ define_output(
   title = 'This Output Shows all the Printed Results',
   width = 12,
   order = 1
+)
+
+define_output(
+  plotOutput('plot_result'),
+  title = 'My Plot result',
+  width = 12,
+  order = 2
 )
 
 # <<<<<<<<<<<< End ----------------- [DO NOT EDIT THIS LINE] -------------------

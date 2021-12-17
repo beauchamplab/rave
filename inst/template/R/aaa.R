@@ -9,9 +9,11 @@
 # Make sure to declare ALL dependencies here to make sure R can find them.
 NULL
 
-
-#' @importFrom dipsaus cat2
-
+#' @import shiny
+#' @import raveio
+#' @import rave
+#' @import dipsaus
+NULL
 
 
 #' Function to load all development functions within an environment
@@ -37,6 +39,9 @@ dev_${{PACKAGE}} <- function(expose_functions = FALSE, reload = TRUE){
   env
 }
 
+`%within%` <- function (a, b) {
+  (a >= min(b)) & (a <= max(b))
+}
 
 finalize_installation <- function(upgrade = c("ask", "always", "never"), async = TRUE){
   upgrade <- match.arg(upgrade)

@@ -921,7 +921,7 @@ rave_options_gui <- local({
         output$template_viewer <- threeBrain::renderBrain({
           # Check if the template is valid
           if(length(local_data$brain)){
-            local_data$brain$plot(side_width = 150, side_display = FALSE)
+            local_data$brain$plot(side_width = 150, side_display = FALSE, show_modal = TRUE)
           }
           
         })

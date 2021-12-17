@@ -84,7 +84,7 @@ ECoGRepository <- R6::R6Class(
         
         epoch_info = paste0(
           'Epoch: ' , epoch_info , '\n' ,
-          ' - Electrodes: ' , deparse_selections(self$epochs$electrodes) , '\n' ,
+          ' - Electrodes: ' , dipsaus::deparse_svec(self$epochs$electrodes) , '\n' ,
           sprintf(' - From %.2f to %.2f (sec)\n', -epoch_param[1], epoch_param[2])
         )
       }else{

@@ -582,7 +582,7 @@ define_input_analysis_data_csv <- function(
             if( !!try_load_yaml ){
               yaml_path = paste0(x$fpath, '.yaml')
               if(file.exists(yaml_path)){
-                conf = yaml::read_yaml(yaml_path)
+                conf = as.list(raveio::load_yaml(yaml_path))
               }
             }
             # print('returning loaded data ')
@@ -1006,7 +1006,8 @@ define_input_analysis_yaml_chooser <- function(
             #   cl = names(cache_list); cl = cl[cl %in% names(local_dat)]
             #   cache_list[cl] = local_dat[cl]
             # }
-            yaml::write_yaml(x = cache_list, fileEncoding = 'utf-8', file = yaml_path)
+            raveio::save_yaml(x = cache_list, fileEncoding = 'utf-8', file = yaml_path)
+            # yaml::write_yaml(x = cache_list, fileEncoding = 'utf-8', file = yaml_path)
             return(TRUE)
           }
           

@@ -10,7 +10,7 @@ Binding: create_template
 Title: RAVE Module
 Subtitle: Create a new RAVE Module
 Caption: Create RAVE Module
-OpenFiles: vignettes/A_Quick_Start.Rmd, DESCRIPTION, inst/rave.yaml
+OpenFiles: DESCRIPTION, inst/rave.yaml
 
 Parameter: module_id
 Widget: TextInput
