@@ -1051,3 +1051,82 @@ define_input_analysis_yaml_chooser <- function(
   parent_env = parent.frame()
   eval_dirty(quo, env = parent_env)
 }
+
+
+define_input_condition_groups_default <- function(inputId, label = 'Group', initial_groups = 1){
+  quo = rlang::quo({
+    
+    define_input(
+      definition = compoundInput(
+        inputId = !!inputId, prefix= !!label, inital_ncomp = !!initial_groups, components = {
+          textInput('group_name', 'Name', value = '', placeholder = 'Condition Name')
+          selectInput('group_conditions', ' ', choices = '', multiple = TRUE)
+        }),
+      
+      init_args = c('initialize', 'value'),
+      
+      init_expr = {
+        cond = unique(preload_info$condition)
+        
+        initialize = list(
+          group_conditions = list(
+            choices = cond
+          )
+        )
+        default_val = list(
+          list(
+            group_name = 'All Conditions',
+            group_conditions = list(cond)
+          )
+        )
+        value = cache_input(!!inputId, default_val)
+        if( !length(value) || !is.list(value[[1]]) ||
+            !length(value[[1]]$group_conditions) || !any(value[[1]]$group_conditions %in% cond)){
+          value = default_val
+        }
+      }
+    )
+  })
+  
+  parent_frame = parent.frame()
+  
+  dipsaus::eval_dirty(quo, env = parent_frame)
+  
+}
+
+
+
+define_input_auto_recalculate <- function(inputId, label, 
+                                          type = c('checkbox', 'button'), 
+                                          button_type = 'primary', 
+                                          default_on = FALSE){
+  type = match.arg(type)
+  widget_id = paste0(inputId, '_', type)
+  
+  quo = rlang::quo({
+    define_input(customizedUI(inputId = !!inputId))
+    load_scripts(rlang::quo({
+      assign(!!inputId, function(){
+        if( !!type == 'checkbox' ){
+          checkboxInput(ns(!!widget_id), label = !!label, value = !!default_on)
+        }else{
+          icon = NULL
+          if(!!(!default_on)){
+            icon = rave::shiny_icons$arrow_right
+          }
+          dipsaus::actionButtonStyled(
+            ns(!!widget_id), !!label, width = '100%', type = !!button_type,
+            icon = icon)
+        }
+      })
+      
+      register_auto_calculate_widget(!!widget_id, !!type, !!default_on)
+      
+    }))
+  })
+  parent_env = parent.frame()
+  dipsaus::eval_dirty(quo, env = parent_env)
+  
+  
+}
+
