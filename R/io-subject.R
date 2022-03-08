@@ -14,10 +14,10 @@ cache_raw_voltage <- function(project_name, subject_code, blocks, electrodes, ..
   # }
   
   
-  progress = progress('Reading raw voltage signals from MATLAB...', max = length(electrodes)+1 )
-  on.exit({progress$close()})
+  # progress = progress('Reading raw voltage signals from MATLAB...', max = length(electrodes)+1 )
+  # on.exit({progress$close()})
   
-  lapply_async(electrodes, function(e){
+  lapply_async3(electrodes, function(e){
     cfile = file.path(dirs$preprocess_dir, 'voltage', sprintf('electrode_%d.h5', e))
     if(file.exists(cfile)){
       unlink(cfile)
@@ -31,9 +31,8 @@ cache_raw_voltage <- function(project_name, subject_code, blocks, electrodes, ..
     }, simplify = FALSE, USE.NAMES = TRUE) ->
       re
     return(re)
-  }, .call_back = function(i){
-    e = electrodes[i]
-    progress$inc(sprintf('Electrode - %d', e))
+  }, .callback = function(e){
+    sprintf('Electrode - %d', e)
   }) ->
     re
   
@@ -432,10 +431,8 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
   
   # 2. store all raw phase and power
   electrodes = subject$electrodes$Electrode
-  progress = progress('Create cache', max = length(electrodes) + 1)
-  on.exit({progress$close()})
-  gc(); gc()
-  lapply_async(electrodes, function(e){
+  gc()
+  lapply_async3(electrodes, function(e){
     # read power, phase, volt
     elec = Electrode$new(subject = subject, electrode = e, preload = c('raw_power', 'raw_phase', 'raw_volt'), reference_by = 'noref', is_reference = FALSE)
     
@@ -491,9 +488,8 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
     raveio::save_fst(volt, fst_file, compress = 100)
     rm(volt)
     
-  }, .call_back = function(ii){
-    progress$inc(sprintf('Electrode %d', electrodes[[ii]]))
-    # progress$inc(sprintf('Electrode %d', e))
+  }, .callback = function(e){
+    sprintf('Electrode - %d', e)
   }, .globals = c('electrodes', 'e', 'subject', 'epoch_tbl', 'srate_wave', 'time_pts_wave', 'subject_cache_dir', 'srate_volt', 'time_pts_volt'))
   
   # save references
@@ -842,7 +838,7 @@ load_cached_wave = function(cache_dir, electrodes, time_range,
   
   
   
-  data = lapply_async(electrodes, function(e){
+  data = lapply_async3(electrodes, function(e){
     fst_file = file.path(coef_dir, sprintf('%d.fst', e))
     
     d = raveio::load_fst(fst_file, from = idx_range[1], to = idx_range[2])[idx, ]
@@ -868,8 +864,8 @@ load_cached_wave = function(cache_dir, electrodes, time_range,
       }
     }
     return(d)
-  }, .call_back = function(ii){
-    progress$inc(sprintf('Loading electrode %d', electrodes[[ii]]))
+  }, .callback = function(e){
+    sprintf('Loading electrode %s', e)
   }, .globals = c('electrodes', 'e', 'coef_dir', 'idx_range', 'need_reference', 'ref_table', 'ref_data',
                   'need_both', 'data_type'))
   

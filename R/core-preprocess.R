@@ -416,9 +416,6 @@ rave_preprocess_tools <- function(env = new.env(), ...){
       blocks = utils$get_blocks()
       srate = utils$get_srate()
       
-      progress = progress('Notch filter in progress...', max = length(electrodes))
-      on.exit({progress$close()})
-      
       dirs = utils$get_from_subject('dirs', list(), customized = F)
       file = file.path(dirs$preprocess_dir, 'notch_voltage.h5')
       
@@ -426,7 +423,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
         unlink(file)
       }
       
-      lapply_async(seq_along(electrodes), function(ii){
+      lapply_async3(seq_along(electrodes), function(ii){
         e = electrodes[[ii]]
         cfile = file.path(dirs$preprocess_dir, 'voltage', sprintf('electrode_%d.h5', e))
         # load from file
@@ -441,8 +438,8 @@ rave_preprocess_tools <- function(env = new.env(), ...){
           save_h5(as.vector(v), file = cfile, name = paste0('/notch/' , block), chunk = c(1024))
         }
         
-      }, .packages = 'rave', .call_back = function(i){
-        progress$inc(sprintf('Electrode %d', electrodes[[i]]))
+      }, .packages = 'rave', .callback = function(e){
+        sprintf('Electrode %d', e)
       }) ->
         re
       
@@ -509,7 +506,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
         progress1$inc(paste0('Block - ' , block))
         # v = utils$load_voltage(electrodes = electrodes, blocks = block, raw = F)[[1]]
         
-        lapply_async(seq_along(electrodes), function(ii){
+        lapply_async3(seq_along(electrodes), function(ii){
           # This is electrode
           e = electrodes[[ii]]
           s = load_h5(
@@ -646,8 +643,8 @@ rave_preprocess_tools <- function(env = new.env(), ...){
           gc()
           return(NULL)
           
-        }, .ncores = ncores, .call_back = function(i){
-          progress2$inc(paste0('Electrode - ' , electrodes[i]))
+        }, .ncores = ncores, .callback = function(i){
+          paste0('Electrode - ' , electrodes[i])
         })
         invisible()
       })

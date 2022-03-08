@@ -302,7 +302,7 @@ bulk_wavelet <- function(
     return()
   }
   catgl('Time to grab a cup of coffee/go home.', level = 'INFO')
-  lapply_async(channels, function(chl){
+  lapply_async3(channels, function(chl){
     do.call('require', list(package = 'rave', character.only = T))
     do.call('require', list(package = 'stringr', character.only = T))
     cfile = file.path(dirs[[save_dir]], sprintf(filename, chl))
@@ -373,10 +373,9 @@ bulk_wavelet <- function(
         }
       }
     }
-  }, .call_back = function(i){
-    chl = channels[i]
+  }, .callback = function(chl){
     catgl('Performing wavelet - channel: ', chl)
-    progress$inc(sprintf('Channel - %d', chl))
+    sprintf('Channel - %d', chl)
   }, .ncores = ncores)
   
   

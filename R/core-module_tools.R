@@ -197,15 +197,15 @@ rave_module_tools <- function(env = NULL, data_env = getDefaultDataRepository(),
         dirs = data_env$subject$dirs
         electrodes = data_env$subject$electrodes$Electrode
         
-        progress = progress('Prepare preprocess voltage', max = length(electrodes) + 1)
+        progress = progress('Prepare preprocess voltage', max = 2)
         
-        lapply_async(electrodes, function(e){
+        lapply_async3(electrodes, function(e){
           sapply(blocks, function(b){
             f = file.path(dirs$channel_dir, 'voltage', sprintf('%d.h5', e))
             load_h5(f, paste0('/raw/voltage/', b), ram = T)
           }, simplify = F, USE.NAMES = T)
-        }, .call_back = function(i){
-          progress$inc(sprintf('Loading voltage data - %d', electrodes[i]))
+        }, .callback = function(e){
+          sprintf('Loading voltage data - %s', e)
         }, .globals = c('electrodes', 'e', 'blocks', 'dirs')) ->re
         
         progress$inc('Finalizing...')
