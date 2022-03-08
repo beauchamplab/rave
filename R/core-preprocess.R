@@ -438,7 +438,7 @@ rave_preprocess_tools <- function(env = new.env(), ...){
           save_h5(as.vector(v), file = cfile, name = paste0('/notch/' , block), chunk = c(1024))
         }
         
-      }, .packages = 'rave', .callback = function(e){
+      }, .callback = function(e){
         sprintf('Electrode %d', e)
       }) ->
         re
