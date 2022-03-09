@@ -4,7 +4,10 @@
 \alias{get_projects}
 \title{Find all Available RAVE Projects}
 \usage{
-get_projects()
+get_projects(refresh = TRUE)
+}
+\arguments{
+\item{refresh}{whether to refresh the project list; default is true}
 }
 \value{
 A vector of RAVE project names in characters

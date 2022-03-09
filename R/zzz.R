@@ -126,12 +126,11 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
   }
   
   lazy_install <- NULL
-  lazy_github <- NULL
   
   if(nightly){
     # get repos from Github
     git_repos <- tryCatch({
-      readLines("https://raw.githubusercontent.com/beauchamplab/rave/master/DEVREPO")[1:3]
+      readLines("https://raw.githubusercontent.com/beauchamplab/rave/master/DEVREPO")
     }, error = function(e){
       c("beauchamplab/rave", "beauchamplab/raveio", "beauchamplab/ravebuiltins@migrate2",  "dipterix/rutabaga@develop", 'dipterix/threeBrain', 'dipterix/dipsaus')
     })
@@ -141,15 +140,32 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
       # get directly from DEVREPO
       lazy_install <- c(lazy_install, git_repos[1])
     }
+    lazy_install <- lapply(strsplit(lazy_install, "[/@]"), function(x){
+      if(length(x) >= 2){
+        x[[2]]
+      } else {
+        x[[1]]
+      }
+    })
+    lazy_install <- unlist(lazy_install)
+    repos <- c(
+      beauchamplab = 'https://beauchamplab.r-universe.dev',
+      dipterix = 'https://dipterix.r-universe.dev',
+      getOption("repos")
+    )
   } else {
     lazy_install <- c(lazy_install, 'ravebuiltins', 'rutabaga')
     if(update_rave){
       lazy_install <- c(lazy_install, 'rave')
     }
-    lazy_install <- c(lazy_install, c('threeBrain', 'dipterix/dipsaus'))
+    lazy_install <- c(lazy_install, c(
+      'threeBrain', 'dipsaus', 'filearray', 'ravetools'))
+    repos <- getOption("repos")
   }
+  lazy_install <- unique(lazy_install)
   
-  dipsaus::prepare_install2(unique(lazy_install), restart = FALSE)
+  
+  dipsaus::prepare_install2(unique(lazy_install), restart = FALSE, repos = repos)
   
   arrange_modules(refresh = TRUE)
   
@@ -162,9 +178,7 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
 }
 
 check_dependencies2 <- function(){
-  # 
-  
-  
+
   catgl('Arranging all existing RAVE modules', level = 'INFO', end = '\n')
   arrange_modules(refresh = TRUE, reset = FALSE, quiet = TRUE)
   
@@ -177,7 +191,6 @@ check_dependencies2 <- function(){
       return(invisible())
     }
   }
-  
   
   # install demo subjects
   download_sample_data('_group_data', replace_if_exists = TRUE)

@@ -143,13 +143,16 @@ arrange_modules <- function(refresh = FALSE, reset = FALSE, quiet = FALSE){
 
 
 #' Find all Available RAVE Projects
+#' @param refresh whether to refresh the project list; default is true
 #' @return A vector of RAVE project names in characters
 #' @export
-get_projects <- function(){
-  data_dir = rave_options('data_dir')
-  pj = list.dirs(data_dir, full.names = F, recursive = F)
-  pj[stringr::str_detect(pj, '^[a-zA-Z0-9]') & pj != 'rave']
-}
+get_projects <- raveio::get_projects
+  
+#   function(){
+#   data_dir = rave_options('data_dir')
+#   pj = list.dirs(data_dir, full.names = F, recursive = F)
+#   pj[stringr::str_detect(pj, '^[a-zA-Z0-9]') & pj != 'rave']
+# }
 
 #' Get all subjects within project
 #' @param project_name project
