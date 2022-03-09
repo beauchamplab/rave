@@ -12,7 +12,7 @@ save_options <- function(){
 #' @export
 rave_options <- function(..., .save = TRUE, launch_gui = TRUE,
                          host = '127.0.0.1', port = NULL){
-  args = list(...)
+  args <- list(...)
   if(length(args) && length(names(args))){
     # set options
     for(nm in names(args)){
@@ -20,7 +20,7 @@ rave_options <- function(..., .save = TRUE, launch_gui = TRUE,
     }
   }else if (length(args)){
     # get options
-    args = c(...)
+    args <- c(...)
     re <- sapply(args, function(nm){
       val <- raveio::raveio_getopt(nm, default = NULL)
       if(nm %in% c('delay_input', 'image_width', 'image_height', 'drive_speed', 'max_worker', 'max_mem')){
@@ -54,7 +54,7 @@ rave_setup_workers <- function(n_workers = 0){
   
   # Force n_workers to be rave_option
   if( n_workers <= 0 ){
-    n_workers = max(rave_options('max_worker'), 1)
+    n_workers <- max(rave_options('max_worker'), 1)
   }
   
   dipsaus::make_forked_clusters(workers = n_workers)

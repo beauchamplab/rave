@@ -71,42 +71,42 @@ Subject <- R6::R6Class(
     #' @param strict whether to check if the raw folder exists
     initialize = function(project_name, subject_code, reference = NULL, 
                           strict = TRUE){
-      subject_id = sprintf('%s/%s', project_name, subject_code)
-      self$project_name = project_name
-      self$subject_code = subject_code
-      self$subject_id = subject_id
-      self$is_strict = strict
+      subject_id <- sprintf('%s/%s', project_name, subject_code)
+      self$project_name <- project_name
+      self$subject_code <- subject_code
+      self$subject_id <- subject_id
+      self$is_strict <- strict
       
-      self$meta = list()
-      private$loaded = new.env()
+      self$meta <- list()
+      private$loaded <- new.env()
       
       # load meta data
-      self$dirs = get_dir(subject_code = subject_code, project_name = project_name)
+      self$dirs <- get_dir(subject_code = subject_code, project_name = project_name)
       
       # meta_dir = self$dirs$meta_dir
       #
       # self$meta[['electrode']] = read.csv(file.path(meta_dir, 'electrodes.csv'), stringsAsFactors = F)
       # self$meta[['frequency']] = read.csv(file.path(meta_dir, 'frequencies.csv'), stringsAsFactors = F)
-      es = load_meta('electrodes', project_name = project_name, subject_code = subject_code)
+      es <- load_meta('electrodes', project_name = project_name, subject_code = subject_code)
       if(is.character(reference)){
-        ref = load_meta('references', project_name = project_name, subject_code = subject_code, meta_name = reference)
+        ref <- load_meta('references', project_name = project_name, subject_code = subject_code, meta_name = reference)
         if(is.data.frame(ref)){
-          es = merge(es, ref, by = 'Electrode')
+          es <- merge(es, ref, by = 'Electrode')
         }
       }
-      self$meta[['electrode']] = es
-      self$meta[['frequency']] = load_meta('frequencies', project_name = project_name, subject_code = subject_code)
+      self$meta[['electrode']] <- es
+      self$meta[['frequency']] <- load_meta('frequencies', project_name = project_name, subject_code = subject_code)
       
-      self$meta[['time_points']] = load_meta('time_points', project_name = project_name, subject_code = subject_code)
+      self$meta[['time_points']] <- load_meta('time_points', project_name = project_name, subject_code = subject_code)
       
-      tm = self$meta[['time_points']]$Time[1:2]
-      self$meta[['sample_rate']] = sample_rate = 1 / (tm[2] - tm[1])
+      tm <- self$meta[['time_points']]$Time[1:2]
+      self$meta[['sample_rate']] <- sample_rate <- 1 / (tm[2] - tm[1])
       
       
-      self$meta[['time_excluded']] = load_meta('time_excluded', project_name = project_name, subject_code = subject_code)
+      self$meta[['time_excluded']] <- load_meta('time_excluded', project_name = project_name, subject_code = subject_code)
       
       # load preprocess subject info
-      private$subjectinfo = SubjectInfo2$new(project_name = project_name,
+      private$subjectinfo <- SubjectInfo2$new(project_name = project_name,
                                              subject_code = subject_code, strict = strict)
     },
     
@@ -122,9 +122,9 @@ Subject <- R6::R6Class(
     #' @return the preprocess information correspond to the key
     preprocess_info = function(key, default = NULL, customized = FALSE){
       if(customized){
-        res = private$subjectinfo$logger$get_or_save(key = key)
+        res <- private$subjectinfo$logger$get_or_save(key = key)
       }else{
-        res = private$subjectinfo[[key]]
+        res <- private$subjectinfo[[key]]
       }
       res %?<-% default
       return(res)
@@ -135,7 +135,7 @@ Subject <- R6::R6Class(
     #' @return the electrodes that the subject has, including bad, or invalid
     #' electrodes.
     filter_all_electrodes = function(electrodes){
-      electrodes = electrodes[electrodes %in% private$subjectinfo$channels]
+      electrodes <- electrodes[electrodes %in% private$subjectinfo$channels]
       electrodes
     },
     
@@ -216,11 +216,11 @@ Subject <- R6::R6Class(
     #' @field valid_electrodes all valid electrodes in current reference scheme 
     #' (read-only)
     valid_electrodes = function(){
-      tbl = self$meta[['electrode']]
+      tbl <- self$meta[['electrode']]
       if(is.data.frame(tbl) && 'Reference' %in% names(tbl)){
-        re = tbl$Electrode[tbl$Reference != '']
+        re <- tbl$Electrode[tbl$Reference != '']
       }else{
-        re = private$subjectinfo$channels
+        re <- private$subjectinfo$channels
       }
       re
     },
@@ -278,14 +278,14 @@ as.character.Subject <- function(x, ...){
 as_subject <- function(subject, strict = TRUE, reference = 'default'){
   if(is.character(subject)){
     
-    sub_dir = file.path(rave_options('data_dir'), subject, 'rave')
+    sub_dir <- file.path(rave_options('data_dir'), subject, 'rave')
     if(!dir.exists(sub_dir)){
       stop('Subject ', subject, ' not found')
     }
     
-    s = stringr::str_split_fixed(subject, '/', n = 2)
-    s = unlist(s)
-    subject = Subject$new(project_name = s[1], subject_code = s[2], strict = strict, reference = reference)
+    s <- stringr::str_split_fixed(subject, '/', n = 2)
+    s <- unlist(s)
+    subject <- Subject$new(project_name = s[1], subject_code = s[2], strict = strict, reference = reference)
   }
   
   subject

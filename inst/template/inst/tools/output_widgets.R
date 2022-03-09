@@ -6,27 +6,27 @@ define_output_3d_viewer <- function(
 ){
   
   # Generate reactives
-  output_call = paste0(outputId, '_widget')
-  output_btn = paste0(outputId, '_btn')
-  output_new = paste0(outputId, '_new')
-  output_fun = paste0(outputId, '_fun')
+  output_call <- paste0(outputId, '_widget')
+  output_btn <- paste0(outputId, '_btn')
+  output_new <- paste0(outputId, '_new')
+  output_fun <- paste0(outputId, '_fun')
   
-  additional_ui = substitute(additional_ui)
-  
-  
+  additional_ui <- substitute(additional_ui)
   
   
-  quo = rlang::quo({
+  
+  
+  quo <- rlang::quo({
     
-    ...local_env = new.env()
+    ...local_env <- new.env()
     
     assign(!!outputId, function(){
-      clicked = shiny::isolate(input[[!!output_btn]])
+      clicked <- shiny::isolate(input[[!!output_btn]])
       
       if( !!hide_btn ){
-        btn = NULL
+        btn <- NULL
       }else{
-        btn = tagList(htmltools::a(
+        btn <- tagList(htmltools::a(
           id = ns(!!output_btn),
           href = '#',
           class = "action-button",
@@ -36,11 +36,11 @@ define_output_3d_viewer <- function(
       }
       
       if(is.null(!!height)){
-        client_size = get_client_size()
-        client_height = client_size$available_size[[2]] - 500
-        height = sprintf('%.0fpx', client_height)
+        client_size <- get_client_size()
+        client_height <- client_size$available_size[[2]] - 500
+        height <- sprintf('%.0fpx', client_height)
       }else{
-        height = !!height
+        height <- !!height
       }
       
       htmltools::tagList(
@@ -67,11 +67,11 @@ define_output_3d_viewer <- function(
     }, envir = environment())
     local({
       `%?<-%` <- dipsaus::`%?<-%`
-      input = getDefaultReactiveInput()
-      output = getDefaultReactiveOutput()
-      session = getDefaultReactiveDomain()
-      .env = environment()
-      .env$local_signal = 0
+      input <- getDefaultReactiveInput()
+      output <- getDefaultReactiveOutput()
+      session <- getDefaultReactiveDomain()
+      .env <- environment()
+      .env$local_signal <- 0
       
       observeEvent(input[[!!output_new]], {
         
@@ -80,55 +80,55 @@ define_output_3d_viewer <- function(
         if(!is.null(...local_env$widget)){
           
           # generate url
-          session = getDefaultReactiveDomain()
-          rave_id = session$userData$rave_id
-          if(is.null(rave_id)){ rave_id = '' }
-          token = session$userData$token
-          if(is.null(token)){ token = '' }
-          globalId = ns(!!output_call)
+          session <- getDefaultReactiveDomain()
+          rave_id <- session$userData$rave_id
+          if(is.null(rave_id)){ rave_id <- '' }
+          token <- session$userData$token
+          if(is.null(token)){ token <- '' }
+          globalId <- ns(!!output_call)
           
-          query_str = list(
+          query_str <- list(
             type = '3dviewer',
             globalId = htmltools::urlEncodePath(globalId),
             sessionId = htmltools::urlEncodePath(rave_id),
             token = token
           )
-          url = paste(sprintf('%s=%s', names(query_str), as.vector(query_str)), collapse = '&')
+          url <- paste(sprintf('%s=%s', names(query_str), as.vector(query_str)), collapse = '&')
           
           shinyjs::runjs(sprintf('window.open("/?%s");', url))
         }
         
       })
       
-      render_func = function( proxy ){
+      render_func <- function( proxy ){
         
         
         # Monitor subject change. If changed, then refresh!
         if(!monitor_subject_change()){
           return(NULL)
         }
-        local_signal = input[[!!output_btn]]
-        render_value = length(local_signal) && (local_signal != 0)
+        local_signal <- input[[!!output_btn]]
+        render_value <- length(local_signal) && (local_signal != 0)
         # if( render_value ){
         #   .env$local_signal = local_signal
         # }
         
         # get render function
-        f = get0(!!output_fun, envir = ..runtime_env, ifnotfound = function(...){
+        f <- get0(!!output_fun, envir = ..runtime_env, ifnotfound = function(...){
           dipsaus::cat2('3D Viewer', !!outputId,  'cannot find function', !!output_fun, level = 'INFO')
         })
         
         # get client size
-        client_size = get_client_size()
+        client_size <- get_client_size()
         if(!is.null(client_size)){
-          side_width = min(ceiling((client_size$available_size[[2]] - 300) / 3), 300)
+          side_width <- min(ceiling((client_size$available_size[[2]] - 300) / 3), 300)
         }else{
-          side_width = 250
+          side_width <- 250
         }
-        ...local_env$widget = NULL
-        re = f(render_value, side_width, ...local_env, proxy)
+        ...local_env$widget <- NULL
+        re <- f(render_value, side_width, ...local_env, proxy)
         if(is.null(...local_env$widget)){
-          ...local_env$widget = re
+          ...local_env$widget <- re
         }
         re
       }
@@ -148,12 +148,12 @@ define_output_3d_viewer <- function(
       # ns must be defined, but in get_module(..., local=T) will raise error
       # because we are not in shiny environment
       ns %?<-% function(x){x} 
-      session$userData$cross_session_funcs[[ns(!!output_call)]] = render_func
+      session$userData$cross_session_funcs[[ns(!!output_call)]] <- render_func
     })
   })
   
   # generate output
-  df = rlang::quo({
+  df <- rlang::quo({
     define_output(
       definition = customizedUI(!!outputId),
       title = !!title,

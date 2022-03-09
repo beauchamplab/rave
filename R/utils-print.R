@@ -7,7 +7,7 @@ as.character.rave_bytes <- function(x, digit=1, ...){
 
 #' @export
 print.rave_bytes <- function(x, digit=1, ...){
-  re = as.character(x, digit = digit, ...)
+  re <- as.character(x, digit = digit, ...)
   cat(re)
   invisible(re)
 }

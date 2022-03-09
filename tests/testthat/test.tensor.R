@@ -3,29 +3,29 @@
 context("Tensors")
 
 
-projects = get_projects()
+projects <- get_projects()
 
 
 
 test_that('Check the Tensor', {
-  x = 1:12
-  d = dim = c(3,2,2,1)
-  dn = list(
+  x <- 1:12
+  d <- dim <- c(3,2,2,1)
+  dn <- list(
     1:3,
     1:2,
     2:3,
     'A'
   )
-  vn = c('Trial', 'Frequency', 'Time', Electrode)
+  vn <- c('Trial', 'Frequency', 'Time', Electrode)
   
-  ts = Tensor$new(data = x, dim = d, dimnames = dn, varnames = vn)
-  ts1 = ECoGTensor$new(data = x, dim = d, dimnames = dn, varnames = vn)
+  ts <- Tensor$new(data = x, dim = d, dimnames = dn, varnames = vn)
+  ts1 <- ECoGTensor$new(data = x, dim = d, dimnames = dn, varnames = vn)
   
   expect_length(ts$collapse(keep = c(3,2)), prod(d[c(2,3)]))
   
   expect_identical(ts$dim, dim)
   
-  names(dn) = vn
+  names(dn) <- vn
   expect_identical(ts$dimnames, dn)
   
   # subset

@@ -1,7 +1,7 @@
 pre_localization <- function(module_id = 'LOCALIZATION_M', sidebar_width = 2, doc_prefix = 'ravepreprocesseleclocalization', ...){
-  ns = shiny::NS(module_id)
+  ns <- shiny::NS(module_id)
   
-  url_format = sprintf('https://openwetware.org/wiki/RAVE:ravepreprocess:%s:%%s_%%s', doc_prefix)
+  url_format <- sprintf('https://openwetware.org/wiki/RAVE:ravepreprocess:%s:%%s_%%s', doc_prefix)
   
   # module <- threeBrain::localization_module('N27', file.path(threeBrain::default_template_directory(), 'N27'))
   fslut_json <-
@@ -14,7 +14,7 @@ pre_localization <- function(module_id = 'LOCALIZATION_M', sidebar_width = 2, do
                   lapply(cmap$map, as.data.frame,
                          stringAsFactors = FALSE))
   
-  body = fluidRow(
+  body <- fluidRow(
     box(
       width = 12L,
       title = '3D Viewer',
@@ -40,7 +40,7 @@ pre_localization <- function(module_id = 'LOCALIZATION_M', sidebar_width = 2, do
     )
   )
   
-  server = function(input, output, session, user_data, utils, ...){
+  server <- function(input, output, session, user_data, utils, ...){
     shiny::updateSelectizeInput(
       session = session,
       inputId = "fslut",
@@ -54,7 +54,7 @@ pre_localization <- function(module_id = 'LOCALIZATION_M', sidebar_width = 2, do
       table = NULL,
       subject_id = ''
     )
-    local_env = dipsaus::fastmap2()
+    local_env <- dipsaus::fastmap2()
     
     localize <- function(){
       if(!isTRUE(local_reactive$subject_id != "")){ return() }

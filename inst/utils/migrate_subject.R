@@ -5,7 +5,7 @@ library(rave)
 # You need to implement some details in this step
 
 # TODO: set sample rate for voltage and wavelet, in addition, set frequencies
-subject_info = list(
+subject_info <- list(
   subject_code = 'YAB',
   project_name = 'test',
   blocks = c('008'),
@@ -16,7 +16,7 @@ subject_info = list(
   wave_num = c(3,20)  # This one is not that important
 )
 
-load_data = function(block, electrode){
+load_data <- function(block, electrode){
   # ---------------------------------------------------------------------------
   # TODO: You should implement this function to read from your data
   # for given block and electrode
@@ -51,7 +51,7 @@ load_data = function(block, electrode){
 
 # ---------------------------------------------------------------------------
 # Step 2: create subject
-utils = rave_preprocess_tools()
+utils <- rave_preprocess_tools()
 
 rave:::stopifnot2(
   !utils$has_raw_cache(),
@@ -64,32 +64,32 @@ utils$set_sample_rate(srate = subject_info$sample_rate_volt)
 
 # ---------------------------------------------------------------------------
 # Step 3: migrate data
-dirs = utils$get_from_subject('dirs')
+dirs <- utils$get_from_subject('dirs')
 for(e in subject_info$electrodes){
-  fname = sprintf('%d.h5', e)
+  fname <- sprintf('%d.h5', e)
   for(b in subject_info$blocks){
-    dat = load_data(block = b, electrode = e)
+    dat <- load_data(block = b, electrode = e)
     if(!is.null(dat$voltage)){
       # write voltage to e.h5
-      d = file.path(dirs$cache_dir, 'voltage', fname)
-      save_h5(as.vector(dat$voltage), file = d, name = sprintf('/raw/voltage/%s', b), chunk = 1024, replace = T)
-      save_h5(as.vector(dat$voltage), file = d, name = sprintf('/ref/voltage/%s', b), chunk = 1024, replace = T)
+      d <- file.path(dirs$cache_dir, 'voltage', fname)
+      save_h5(as.vector(dat$voltage), file = d, name = sprintf('/raw/voltage/%s', b), chunk = 1024, replace = TRUE)
+      save_h5(as.vector(dat$voltage), file = d, name = sprintf('/ref/voltage/%s', b), chunk = 1024, replace = TRUE)
       save_h5('noref', file = d, name = '/reference')
     }
 
     if(!is.null(dat$power)){
       # write voltage to e.h5
-      d = file.path(dirs$cache_dir, 'power', fname)
-      save_h5(as.matrix(dat$power), file = d, name = sprintf('/raw/power/%s', b), replace = T)
-      save_h5(as.matrix(dat$power), file = d, name = sprintf('/ref/power/%s', b), replace = T)
+      d <- file.path(dirs$cache_dir, 'power', fname)
+      save_h5(as.matrix(dat$power), file = d, name = sprintf('/raw/power/%s', b), replace = TRUE)
+      save_h5(as.matrix(dat$power), file = d, name = sprintf('/ref/power/%s', b), replace = TRUE)
       save_h5('noref', file = d, name = '/reference')
     }
 
     if(!is.null(dat$phase)){
       # write voltage to e.h5
-      d = file.path(dirs$cache_dir, 'phase', fname)
-      save_h5(as.matrix(dat$phase), file = d, name = sprintf('/raw/phase/%s', b), replace = T)
-      save_h5(as.matrix(dat$phase), file = d, name = sprintf('/ref/phase/%s', b), replace = T)
+      d <- file.path(dirs$cache_dir, 'phase', fname)
+      save_h5(as.matrix(dat$phase), file = d, name = sprintf('/raw/phase/%s', b), replace = TRUE)
+      save_h5(as.matrix(dat$phase), file = d, name = sprintf('/ref/phase/%s', b), replace = TRUE)
       save_h5('noref', file = d, name = '/reference')
     }
 
@@ -116,7 +116,7 @@ write.csv(data.frame(
   Electrode = subject_info$electrodes,
   Reference = 'noref'
 ), file.path(dirs$channel_dir, 'cache', 'cached_reference.csv'),
-row.names = F)
+row.names = FALSE)
 utils$gen_meta()
 
 # ---------------------------------------------------------------------------

@@ -13,6 +13,7 @@
 \alias{ECoGTensor}
 \alias{catgl}
 \alias{clear_env}
+\alias{get_projects}
 \title{Objects exported from other packages}
 \keyword{internal}
 \description{
@@ -22,6 +23,6 @@ below to see their documentation.
 \describe{
   \item{dipsaus}{\code{\link[dipsaus]{clear_env}}}
 
-  \item{raveio}{\code{\link[raveio]{ECoGTensor}}, \code{\link[raveio]{LazyFST}}, \code{\link[raveio]{LazyH5}}, \code{\link[raveio]{Tensor}}, \code{\link[raveio]{catgl}}, \code{\link[raveio]{load_fst_or_h5}}, \code{\link[raveio]{load_h5}}, \code{\link[raveio]{read_mat}}, \code{\link[raveio]{save_h5}}}
+  \item{raveio}{\code{\link[raveio]{ECoGTensor}}, \code{\link[raveio]{LazyFST}}, \code{\link[raveio]{LazyH5}}, \code{\link[raveio]{Tensor}}, \code{\link[raveio]{catgl}}, \code{\link[raveio]{get_projects}}, \code{\link[raveio]{load_fst_or_h5}}, \code{\link[raveio]{load_h5}}, \code{\link[raveio]{read_mat}}, \code{\link[raveio]{save_h5}}}
 }}
 

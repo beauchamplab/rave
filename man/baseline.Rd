@@ -10,7 +10,7 @@ baseline(
   to,
   method = "mean",
   unit = "\%",
-  data_only = F,
+  data_only = FALSE,
   hybrid = TRUE,
   swap_file = tempfile(),
   mem_optimize = TRUE,

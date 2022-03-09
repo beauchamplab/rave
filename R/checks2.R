@@ -1,6 +1,6 @@
 
 guess_raw_trace <- function(dat, electrodes = NULL, matrix = FALSE){
-  nms = names(dat)
+  nms <- names(dat)
   for(nm in nms){
     x <- dat[[nm]]
     if(!is.numeric(x) || mode(x) != "numeric"){ next }

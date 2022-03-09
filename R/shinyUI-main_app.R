@@ -12,38 +12,38 @@ app_controller <- function(
   tryCatch({ rave_prepare() }, error = function(e){})
 
   # Get options of whether this is a test mode
-  test.mode = list(...)[['test.mode']]; test.mode = isTRUE(test.mode)
+  test.mode <- list(...)[['test.mode']]; test.mode <- isTRUE(test.mode)
 
   # Get package modules
-  controller_env = environment()
-  loaded_modules = list()
-  module_table = arrange_modules(refresh = FALSE, reset = FALSE, quiet = TRUE)
-  dup = duplicated(module_table$Name)
+  controller_env <- environment()
+  loaded_modules <- list()
+  module_table <- arrange_modules(refresh = FALSE, reset = FALSE, quiet = TRUE)
+  dup <- duplicated(module_table$Name)
   if(any(dup)){
-    module_table$Name[dup] = sprintf('%s (%s)', module_table$Name[dup], module_table$Package[dup])
+    module_table$Name[dup] <- sprintf('%s (%s)', module_table$Name[dup], module_table$Package[dup])
   }
-  rave_pkgs = unique(module_table$Package)
+  rave_pkgs <- unique(module_table$Package)
 
   # define method to load modules
-  load_module = function(module_id, notification = FALSE){
+  load_module <- function(module_id, notification = FALSE){
     if('ModuleEnvir' %in% class(module_id)){
       # this is a module instance, no need to load new
-      controller_env$loaded_modules[[stringr::str_to_upper(module_id$module_id)]] = module_id
+      controller_env$loaded_modules[[stringr::str_to_upper(module_id$module_id)]] <- module_id
       return(module_id)
     }
-    module_id = stringr::str_to_upper(module_id)
+    module_id <- stringr::str_to_upper(module_id)
     # find module
     if(length(loaded_modules[[module_id]])){
       return(loaded_modules[[module_id]])
     }
 
     # Find package name
-    sel = stringr::str_to_upper(module_table$ID) == module_id
+    sel <- stringr::str_to_upper(module_table$ID) == module_id
     if(!any(sel)){
       return(NULL)
     }
 
-    pkg = module_table$Package[sel][[1]]
+    pkg <- module_table$Package[sel][[1]]
 
     # load the entire package!
     if(notification){
@@ -53,13 +53,13 @@ app_controller <- function(
       })
     }
     catgl('Loading module - ', module_id)
-    ms = detect_modules(packages = pkg, as_module = TRUE)
-    ms = unlist(ms)
+    ms <- detect_modules(packages = pkg, as_module = TRUE)
+    ms <- unlist(ms)
 
     # set module
     for(m in ms){
       if(is.null(controller_env$loaded_modules[[stringr::str_to_upper(m$module_id)]])){
-        controller_env$loaded_modules[[stringr::str_to_upper(m$module_id)]] = m
+        controller_env$loaded_modules[[stringr::str_to_upper(m$module_id)]] <- m
       }
     }
 
@@ -70,7 +70,7 @@ app_controller <- function(
 
   if(length(modules)){
     if(!is.list(modules)){
-      modules = unlist(list(modules))
+      modules <- unlist(list(modules))
     }
     for(mid in modules){
       load_module(mid)
@@ -78,13 +78,13 @@ app_controller <- function(
   }
 
   # generate module list (for sidebar)
-  groups = unique(module_table$Group)
-  groups[groups == ''] = '______'
-  module_list = sapply(groups, function(group_name){
-    sel = module_table$Group == group_name
-    re = lapply(module_table$ID[sel], function(mid){
-      idx = which(module_table$ID == mid)[1]
-      active = module_table$Active[idx]
+  groups <- unique(module_table$Group)
+  groups[groups == ''] <- '______'
+  module_list <- sapply(groups, function(group_name){
+    sel <- module_table$Group == group_name
+    re <- lapply(module_table$ID[sel], function(mid){
+      idx <- which(module_table$ID == mid)[1]
+      active <- module_table$Active[idx]
       if(!active){
         return(NULL)
       }
@@ -101,8 +101,8 @@ app_controller <- function(
   })
 
   # Data selector
-  data_selector = shiny_data_selector('DATA_SELECTOR', data_env = data_repo)
-  adapter = dipsaus::fastmap2()
+  data_selector <- shiny_data_selector('DATA_SELECTOR', data_env = data_repo)
+  adapter <- dipsaus::fastmap2()
   .subset2(adapter, 'mset')(
     data_selector_header = data_selector$header,
     data_selector_server = data_selector$server,
@@ -112,19 +112,19 @@ app_controller <- function(
     },
     get_module_ui = function(active_id = NULL){
       
-      module_ids = module_table$ID[module_table$Active]
+      module_ids <- module_table$ID[module_table$Active]
       active_id %?<-% module_ids[1]
       
       load_module(active_id)
       
-      groups = names(module_list)
+      groups <- names(module_list)
       
       # Generate quos
-      quos = list()
+      quos <- list()
       for(g in groups[groups != '______']){
-        modules = module_list[[g]]
+        modules <- module_list[[g]]
         if(length(modules)){
-          quo_items = lapply(modules, function(m){
+          quo_items <- lapply(modules, function(m){
             rlang::quo(shinydashboard::menuSubItem(
               text = !!m$module_label,
               tabName = !!stringr::str_to_upper(m$module_id),
@@ -132,7 +132,7 @@ app_controller <- function(
             ))
           })
           
-          quos[[length(quos) + 1]] = rlang::quo(shinydashboard::menuItem(
+          quos[[length(quos) + 1]] <- rlang::quo(shinydashboard::menuItem(
             text = !!g,
             !!!quo_items,
             startExpanded = !!(active_id %in% sapply(modules, '[[', 'module_id'))
@@ -141,7 +141,7 @@ app_controller <- function(
       }
       
       for(m in module_list[['______']]){
-        quos[[length(quos) + 1]] = rlang::quo({
+        quos[[length(quos) + 1]] <- rlang::quo({
           shinydashboard::menuItem(
             text = !!m$module_label,
             tabName = !!stringr::str_to_upper(m$module_id),
@@ -161,15 +161,15 @@ app_controller <- function(
     load_module = load_module
   )
   
-  ui_func = app_ui(adapter, token = token)
+  ui_func <- app_ui(adapter, token = token)
 
-  instance_id = paste(sample(c(letters, LETTERS, 0:9), 22), collapse = '')
-  server_func = app_server(adapter, instance_id, token = token, data_repo = data_repo)
+  instance_id <- paste(sample(c(letters, LETTERS, 0:9), 22), collapse = '')
+  server_func <- app_server(adapter, instance_id, token = token, data_repo = data_repo)
 
   reg.finalizer(
     controller_env,
     function(e){
-      dir_path = file.path(subject_cache_dir(), .subset2(e, 'instance_id'))
+      dir_path <- file.path(subject_cache_dir(), .subset2(e, 'instance_id'))
       if(dir.exists(dir_path)){
         unlink(dir_path, recursive = TRUE, FALSE)
       }
@@ -178,7 +178,7 @@ app_controller <- function(
   )
 
   RaveFinalizer$new(function(){
-    dir_path = file.path(subject_cache_dir(), instance_id)
+    dir_path <- file.path(subject_cache_dir(), instance_id)
     if(dir.exists(dir_path)){
       unlink(dir_path, recursive = TRUE, force = FALSE)
     }
@@ -190,16 +190,16 @@ app_controller <- function(
 
 app_ui <- function(adapter, token = NULL){
 
-  ui_functions = dipsaus::fastmap2(
+  ui_functions <- dipsaus::fastmap2(
     # Case n (default, load ravebuiltins)
     missing_default = function(active_id = NULL, has_modal = TRUE){
-      title = 'RAVE'
-      version = utils::packageVersion('rave')
-      version = sprintf('RAVE (%s)', paste(unlist(version), collapse = '.'))
-      simplify_header = adapter$get_option('simplify_header', FALSE)
-      ui_quos = adapter$get_module_ui(active_id = active_id)
+      title <- 'RAVE'
+      version <- utils::packageVersion('rave')
+      version <- sprintf('RAVE (%s)', paste(unlist(version), collapse = '.'))
+      simplify_header <- adapter$get_option('simplify_header', FALSE)
+      ui_quos <- adapter$get_module_ui(active_id = active_id)
       
-      quo = as_call2(
+      quo <- as_call2(
         quote(dashboardPage),
         skin = adapter$get_option('theme', 'purple'),
         title = title,
@@ -257,12 +257,12 @@ app_ui <- function(adapter, token = NULL){
     
   )
   
-  ui_functions[['404']] = function(...){
+  ui_functions[['404']] <- function(...){
     # 404
     '404'
   }
   
-  ui_functions[['3dviewer']] = function(global_id, session_id = NULL){
+  ui_functions[['3dviewer']] <- function(global_id, session_id = NULL){
     shiny::fillPage(
       title = 'RAVE 3D Viewer',
       padding = 0,
@@ -274,9 +274,9 @@ app_ui <- function(adapter, token = NULL){
   function(req){ #, parent_env = parent.frame()
     # First, get query string
 
-    qstr = req$QUERY_STRING
+    qstr <- req$QUERY_STRING
 
-    url_info = shiny::parseQueryString(qstr)
+    url_info <- shiny::parseQueryString(qstr)
 
     # If token should be provided, check token
     # ?token=...
@@ -294,10 +294,10 @@ app_ui <- function(adapter, token = NULL){
 
     # Default, load main app
     lapply(url_info$module_id, adapter$load_module)
-    nomodal = url_info$nomodal
+    nomodal <- url_info$nomodal
     nomodal %?<-% FALSE
-    nomodal = nomodal == 'true'
-    quo = ui_functions$default(active_id = url_info$module_id, has_modal = !nomodal)
+    nomodal <- nomodal == 'true'
+    quo <- ui_functions$default(active_id = url_info$module_id, has_modal = !nomodal)
 
   }
 
@@ -309,13 +309,13 @@ app_server_404 <- function(...){
 
 }
 app_server_3dviewer <- function(input, output, session, master_session, viewer_id){
-  master_root = master_session$rootScope()
+  master_root <- master_session$rootScope()
   
-  proxy = threeBrain::brain_proxy(viewer_id, session)
-  master_proxy = threeBrain::brain_proxy(viewer_id, master_root)
+  proxy <- threeBrain::brain_proxy(viewer_id, session)
+  master_proxy <- threeBrain::brain_proxy(viewer_id, master_root)
   
   output[[viewer_id]] <- threeBrain::renderBrain({
-    f = master_session$userData$cross_session_funcs[[viewer_id]]
+    f <- master_session$userData$cross_session_funcs[[viewer_id]]
     if(length(formals(f))){
       f( proxy )
     }else{
@@ -339,8 +339,8 @@ app_server_3dviewer <- function(input, output, session, master_session, viewer_i
   #   }
   # })
   observeEvent(master_proxy$sync, {
-    ctrl = master_proxy$get_controllers()
-    main_camera = master_proxy$main_camera
+    ctrl <- master_proxy$get_controllers()
+    main_camera <- master_proxy$main_camera
     if(length(main_camera)){
       if(length(main_camera$position) && length(main_camera$up)){
         proxy$set_camera(position = as.numeric(main_camera$position), up = as.numeric(main_camera$up))
@@ -353,8 +353,8 @@ app_server_3dviewer <- function(input, output, session, master_session, viewer_i
   })
   
   observeEvent(proxy$sync, {
-    ctrl = proxy$get_controllers()
-    main_camera = proxy$main_camera
+    ctrl <- proxy$get_controllers()
+    main_camera <- proxy$main_camera
     if(length(main_camera)){
       if(length(main_camera$position) && length(main_camera$up)){
         master_proxy$set_camera(position = as.numeric(main_camera$position), up = as.numeric(main_camera$up))
@@ -369,10 +369,10 @@ app_server_3dviewer <- function(input, output, session, master_session, viewer_i
 
   # Observe clicks
   # click_id = paste0(viewer_id, '_mouse_clicked')
-  dblclick_id = paste0(viewer_id, '_mouse_dblclicked')
+  dblclick_id <- paste0(viewer_id, '_mouse_dblclicked')
 
   observeEvent(input[[dblclick_id]], {
-    mouse_event = input[[dblclick_id]]
+    mouse_event <- input[[dblclick_id]]
 
     # Show information when double clicked
     try({
@@ -395,14 +395,14 @@ app_server_3dviewer <- function(input, output, session, master_session, viewer_i
 
 app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaultDataRepository()){
 
-  this_env = environment()
+  this_env <- environment()
 
-  test.mode = adapter$get_option('test.mode', FALSE)
+  test.mode <- adapter$get_option('test.mode', FALSE)
 
-  session_list = list()
-  rave_ids = NULL
+  session_list <- list()
+  rave_ids <- NULL
 
-  storage_keys = NULL
+  storage_keys <- NULL
 
 
   #################################################################
@@ -412,15 +412,15 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
       
     }
     
-    session_id = add_to_session(session)
+    session_id <- add_to_session(session)
     add_to_session(session, key = 'rave_instance', val = instance_id, override = TRUE)
     add_to_session(session, key = 'token', val = token, override = TRUE)
 
-    session$sendCustomMessage('rave_set_id', session_id);
-    session$userData$cross_session_funcs = list()
+    session$sendCustomMessage('rave_set_id', session_id)
+    session$userData$cross_session_funcs <- list()
 
     # 404 Page
-    query_str = shiny::isolate(getQueryString(session))
+    query_str <- shiny::isolate(getQueryString(session))
 
     if(!is.null(token)){
       if(!length(query_str$token) || !any(query_str$token %in% token)){
@@ -438,13 +438,13 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
       ))
     }
 
-    this_env$rave_ids = c(this_env$rave_ids, session_id)
-    this_env$session_list[[session_id]] = session
+    this_env$rave_ids <- c(this_env$rave_ids, session_id)
+    this_env$session_list[[session_id]] <- session
 
     # Global variable, timer etc.
-    async_timer = reactiveTimer(5000)
+    async_timer <- reactiveTimer(5000)
     # input_timer = reactiveTimer(rave_options('delay_input') / 2)
-    global_reactives = reactiveValues(
+    global_reactives <- reactiveValues(
       check_results = NULL,
       check_inputs = NULL,
       execute_module = '',
@@ -454,17 +454,17 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
       launch_selector = NULL
     )
 
-    local_data = reactiveValues(
+    local_data <- reactiveValues(
       mem_usage = NULL
     )
     observeEvent(async_timer(), {
-      global_reactives$check_results = Sys.time()
+      global_reactives$check_results <- Sys.time()
     })
 
-    local_env = environment()
-    modules = list()
-    shinirized_modules = list()
-    module_ui_functions = list()
+    local_env <- environment()
+    modules <- list()
+    shinirized_modules <- list()
+    module_ui_functions <- list()
     # if(length(modules)){
     #   module_ids = stringr::str_to_upper(sapply(modules, function(m){m$module_id}))
     #   names(modules) = module_ids
@@ -481,15 +481,15 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
 
 
 
-    update_variable = function(module_id, variable_name = NULL, value = NULL, flush = TRUE, ...){
+    update_variable <- function(module_id, variable_name = NULL, value = NULL, flush = TRUE, ...){
       if(is.null(variable_name)){ return() }
-      sidebar_id = stringr::str_to_upper(shiny::isolate(input$sidebar))
+      sidebar_id <- stringr::str_to_upper(shiny::isolate(input$sidebar))
       tryCatch({
-        m = modules[[stringr::str_to_upper(module_id)]]
+        m <- modules[[stringr::str_to_upper(module_id)]]
         if(is.null(m)){
           load_module(module_id)
         }
-        e = m$get_or_new_exec_env()
+        e <- m$get_or_new_exec_env()
         
         local({
           rave_context(senv = e)
@@ -509,41 +509,41 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
       })
     }
 
-    load_module = function(module_id){
-      module_id = stringr::str_to_upper(module_id)
+    load_module <- function(module_id){
+      module_id <- stringr::str_to_upper(module_id)
 
-      loaded = TRUE
+      loaded <- TRUE
 
       if(!module_id %in% names(local_env$modules)){
-        loaded = FALSE
-        quo = rlang::quo({
-          modules[[!!module_id]] = adapter$load_module(module_id = !!module_id, notification = TRUE)
-          m = shinirize(modules[[!!module_id]], test.mode = test.mode, data_env = data_repo)
-          shinirized_modules[[!!module_id]] = m
+        loaded <- FALSE
+        quo <- rlang::quo({
+          modules[[!!module_id]] <- adapter$load_module(module_id = !!module_id, notification = TRUE)
+          m <- shinirize(modules[[!!module_id]], test.mode = test.mode, data_env = data_repo)
+          shinirized_modules[[!!module_id]] <- m
           callModule(m$server, id = m$id, session = session, global_reactives = global_reactives)
-          module_ui_functions[[m$id]] = m$ui
+          module_ui_functions[[m$id]] <- m$ui
           rm(m)
         })
 
         # Try catch?
         safe_wrap_expr({
           dipsaus::eval_dirty(quo, env = local_env)
-          loaded = TRUE
+          loaded <- TRUE
         })
         
       }
 
       return(loaded)
     }
-    session$userData$rave_module = load_module
+    session$userData$rave_module <- load_module
 
     # Switch to module
     observe({
-      module_info = global_reactives$switch_module
+      module_info <- global_reactives$switch_module
 
       if(!is.null(module_info)){
-        module_ids = adapter$module_ids()
-        mid = module_info$module_id = stringr::str_to_upper(module_info$module_id)
+        module_ids <- adapter$module_ids()
+        mid <- module_info$module_id <- stringr::str_to_upper(module_info$module_id)
         # print(mid)
         load_module(mid)
         catgl('Switching to module - ', mid, level = 'INFO')
@@ -560,10 +560,10 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
 
 
     observeEvent(input[['..keyboard_event..']], {
-      global_reactives$keyboard_event = input[['..keyboard_event..']]
+      global_reactives$keyboard_event <- input[['..keyboard_event..']]
     })
     observeEvent(input[['..client_size..']], {
-      global_reactives$client_size = input[['..client_size..']]
+      global_reactives$client_size <- input[['..client_size..']]
     })
 
     ##################################################################
@@ -589,9 +589,9 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
     observe({
       if(global_reactives$has_data){
         # print(input$sidebar)
-        current_module_id = input$sidebar
-        global_reactives$execute_module = current_module_id
-        session$userData$rave_current_module_id = current_module_id
+        current_module_id <- input$sidebar
+        global_reactives$execute_module <- current_module_id
+        session$userData$rave_current_module_id <- current_module_id
         shinyjs::hide(id = '__rave__mask__', anim = FALSE)
         shinyjs::removeClass(selector = 'body', class = "rave-noscroll")
       }else{
@@ -604,7 +604,7 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
       callModule(m$server, id = m$id, session = session, global_reactives = global_reactives)
     })
     lapply(shinirized_modules, function(m){
-      local_env$module_ui_functions[[m$id]] = m$ui
+      local_env$module_ui_functions[[m$id]] <- m$ui
       # output[[stringr::str_c(m$id, '_UI')]] <- renderUI(m$ui())
     })
 
@@ -623,23 +623,23 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
     # some navigations
 
     observe({
-      refresh = global_reactives$force_refresh_all
+      refresh <- global_reactives$force_refresh_all
       if(global_reactives$has_data && check_data_repo('subject')){
-        subject_id = data_repo$subject$id
-        epoch_name = data_repo$preload_info$epoch_name
-        reference_name = data_repo$preload_info$reference_name
+        subject_id <- data_repo$subject$id
+        epoch_name <- data_repo$preload_info$epoch_name
+        reference_name <- data_repo$preload_info$reference_name
 
-        sub_label = (sprintf('[%s] - [%s] - [%s]', subject_id, epoch_name, reference_name))
-        suma_label = 'Launch SUMA'
+        sub_label <- (sprintf('[%s] - [%s] - [%s]', subject_id, epoch_name, reference_name))
+        suma_label <- 'Launch SUMA'
       }else{
-        suma_label = sub_label = ("")
+        suma_label <- sub_label <- ("")
       }
       updateActionButton(session, 'curr_subj_details_btn', label = sub_label)
       updateActionButton(session, 'curr_subj_launch_suma', label = suma_label)
     })
 
 
-    subject_modal = function(subject, current_electrodes = NULL){
+    subject_modal <- function(subject, current_electrodes = NULL){
       modalDialog(
         title = subject$id,
         easyClose = TRUE,
@@ -654,8 +654,8 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
     }
 
     observeEvent(input$curr_subj_details_btn, {
-      subject = data_repo[['subject']]
-      electrodes = data_repo$preload_info$electrodes
+      subject <- data_repo[['subject']]
+      electrodes <- data_repo$preload_info$electrodes
       if(!is.null(subject) && length(electrodes)){
         showModal(
           subject_modal(subject = subject, current_electrodes = electrodes)
@@ -664,12 +664,12 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
     })
 
     output$curr_subj_elec_table <- shiny::renderTable({
-      btn = input$curr_subj_details_btn
+      btn <- input$curr_subj_details_btn
       if(global_reactives$has_data && check_data_repo('subject')){
-        subject = data_repo[['subject']]
-        tbl = subject$electrodes
-        cols = names(tbl)
-        cols = cols[!cols %in% c('Coord_x', 'Coord_y', 'Coord_z')]
+        subject <- data_repo[['subject']]
+        tbl <- subject$electrodes
+        cols <- names(tbl)
+        cols <- cols[!cols %in% c('Coord_x', 'Coord_y', 'Coord_z')]
         return(tbl[, cols])
       }else{
         return(NULL)
@@ -677,23 +677,23 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
     }, striped = TRUE, spacing = 'xs', width = '100%', rownames = FALSE, digits = 2)
 
     output$curr_subj_3d_viewer <- threeBrain::renderBrain({
-      btn = input$curr_subj_details_btn
+      btn <- input$curr_subj_details_btn
       if( ! ( global_reactives$has_data && check_data_repo('subject') ) ){
         return(NULL)
       }
       
-      subject = get0('subject', envir = data_repo, ifnotfound = NULL)
+      subject <- get0('subject', envir = data_repo, ifnotfound = NULL)
       if( is.null(subject) ){
         return(NULL)
       }
       
-      brain = rave_brain2(subject = subject)
+      brain <- rave_brain2(subject = subject)
       if( is.null(brain) ){
         return(NULL)
       }
       
-      theme = get_rave_theme()$themes[[1]]
-      background = ifelse(theme == 'dark', '#1E1E1E', '#FFFFFF')
+      theme <- get_rave_theme()$themes[[1]]
+      background <- ifelse(theme == 'dark', '#1E1E1E', '#FFFFFF')
       
       brain$plot(control_display = TRUE, side_display = FALSE, background = background)
     })
@@ -701,8 +701,8 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
     observeEvent(input$curr_subj_launch_suma, {
       # launch suma
       if(check_data_repo('subject')){
-        subject = get0('subject', envir = data_repo)
-        suma_dir = subject$dirs$suma_dir
+        subject <- get0('subject', envir = data_repo)
+        suma_dir <- subject$dirs$suma_dir
         launch_suma(
           root_dir = suma_dir
         )
@@ -802,37 +802,37 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
 
 
     observeEvent(input[['__local_storage_inputs__']], {
-      all_inputs = input[['__local_storage_inputs__']]
+      all_inputs <- input[['__local_storage_inputs__']]
 
       if(!is.list(all_inputs)){
         return()
       }
 
-      module_ids = names(all_inputs)
-      module_ids = module_ids[stringr::str_to_upper(module_ids) %in% names(modules)]
+      module_ids <- names(all_inputs)
+      module_ids <- module_ids[stringr::str_to_upper(module_ids) %in% names(modules)]
 
-      sig = add_to_session(session)
+      sig <- add_to_session(session)
 
       sapply(module_ids, function(mid){
-        changed = FALSE
-        m = modules[[ stringr::str_to_upper(mid) ]]
-        execenv = m$get_or_new_exec_env(session = session)
+        changed <- FALSE
+        m <- modules[[ stringr::str_to_upper(mid) ]]
+        execenv <- m$get_or_new_exec_env(session = session)
         try({
-          inputs = eval(parse(text = all_inputs[[mid]]))
+          inputs <- eval(parse(text = all_inputs[[mid]]))
           # print(inputs)
 
           for(inputId in names(inputs)){
             
             catgl('Updating ', inputId, ' - ', session_id)
-            global = execenv$is_global(inputId)
+            global <- execenv$is_global(inputId)
 
-            new_v = inputs[[inputId]]
+            new_v <- inputs[[inputId]]
             
-            old_v = cache_input(inputId = inputId, val = new_v, read_only = TRUE)
+            old_v <- cache_input(inputId = inputId, val = new_v, read_only = TRUE)
             cache_input(inputId = inputId, val = new_v, read_only = FALSE)
             
             if(!identical(new_v, old_v)){
-              changed = TRUE
+              changed <- TRUE
             }
 
           }
@@ -849,8 +849,8 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
       if(length(changed) && any(changed)){
         catgl('Sync sessions...')
         # execenv$reload
-        global_reactives$force_refresh_all = Sys.time()
-        global_reactives$has_data = Sys.time()
+        global_reactives$force_refresh_all <- Sys.time()
+        global_reactives$has_data <- Sys.time()
       }
 
     })
@@ -871,7 +871,7 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
       session$onSessionEnded(function() {
         catgl('Clean up environment.')
 
-        this_env$rave_ids = this_env$rave_ids[!this_env$rave_ids == session_id]
+        this_env$rave_ids <- this_env$rave_ids[!this_env$rave_ids == session_id]
         lapply(unlist(modules), function(x){
           x$clean(session_id = session_id)
         })
@@ -880,7 +880,7 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
     }else{
       session$onSessionEnded(function() {
 
-        this_env$rave_ids = this_env$rave_ids[!this_env$rave_ids == session_id]
+        this_env$rave_ids <- this_env$rave_ids[!this_env$rave_ids == session_id]
         gc()
       })
 
@@ -923,7 +923,7 @@ start_rave <- app_controller
 #' @param tabname character, tab box title
 #' @export
 close_tab <- function(module_id, tabname){
-  session = shiny::getDefaultReactiveDomain()
+  session <- shiny::getDefaultReactiveDomain()
   if(!is.null(session)){
     session$sendCustomMessage('rave_close_tab', list(
       module_id = module_id,
@@ -936,7 +936,7 @@ close_tab <- function(module_id, tabname){
 #' @rdname rave-tabs
 #' @export
 open_tab <- function(module_id, tabname){
-  session = shiny::getDefaultReactiveDomain()
+  session <- shiny::getDefaultReactiveDomain()
   if(!is.null(session)){
     session$sendCustomMessage('rave_open_tab', list(
       module_id = module_id,

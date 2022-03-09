@@ -1,5 +1,5 @@
 
-dashboardControl = function (...,
+dashboardControl <- function (...,
                              disable = FALSE,
                              collapsed = FALSE)
 {
@@ -105,7 +105,7 @@ dashboardPage <- function (
   content <- div(class = "wrapper",
                  header, sidebar, body, control)
   
-  findAttribute = function (x, attr, val)
+  findAttribute <- function (x, attr, val)
   {
     if (is.atomic(x))
       return(FALSE)
@@ -127,7 +127,7 @@ dashboardPage <- function (
   
   
   # Modified addDeps:
-  addDeps = function (x)
+  addDeps <- function (x)
   {
     if (getOption("shiny.minified", TRUE)) {
       adminLTE_js <- "app.min.js"
@@ -162,7 +162,7 @@ dashboardPage <- function (
         script = shinydashboard_js,
         stylesheet = "shinydashboard.css"))
     
-    appendDependencies = function (x, value)
+    appendDependencies <- function (x, value)
     {
       if (inherits(value, "html_dependency"))
         value <- list(value)
@@ -179,9 +179,9 @@ dashboardPage <- function (
   
   
   if(controlbar_opened){
-    cls = ' control-sidebar-open'
+    cls <- ' control-sidebar-open'
   }else{
-    cls = ''
+    cls <- ''
   }
   
   
@@ -279,7 +279,7 @@ tabBox <- function (..., id = NULL, selected = NULL, title = NULL, width = 6,
                                                  class = "pull-right")
   }
   if (!is.null(title)) {
-    title = shiny::span(
+    title <- shiny::span(
       title, if (is.null(box_link)) NULL else tags$a(
         class = paste0("btn btn-box-tool"),
         href = box_link,

@@ -26,9 +26,9 @@ rstudio_viewer <- function(..., default = TRUE){
 select_path <- function(is_directory = TRUE){
   if(verify_rstudio_version()){
     if(is_directory){
-      path = rstudioapi::selectDirectory()
+      path <- rstudioapi::selectDirectory()
     }else{
-      path = rstudioapi::selectFile()
+      path <- rstudioapi::selectFile()
     }
     warning("Please fix the path in your script!!!\n\t", path)
     return(path)
@@ -40,10 +40,10 @@ select_path <- function(is_directory = TRUE){
 ask_question <- function(title, message, ok = 'Yes', cancel = 'No',
                          use_console = FALSE, level = 'WARNING'){
   if(!verify_rstudio_version()){
-    use_console = TRUE
+    use_console <- TRUE
   }
   if(use_console){
-    res = dipsaus::ask_yesno(title, '\n  - ', message)
+    res <- dipsaus::ask_yesno(title, '\n  - ', message)
     if(is.null(res) || is.na(res)){
       stop('Well... Maybe next time enter "yes" or "no" :)')
     }

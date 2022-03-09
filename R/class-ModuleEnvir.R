@@ -4,12 +4,12 @@
 # Function to bind functions to exec_env's wrappers
 # e is the execenv and w is its wrapper
 bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
-  w$async_var = function(x, default = NULL){
-    x_name = deparse(substitute(x))
-    val = NULL
-    future_env = self$param_env[['..rave_future_env']]
+  w$async_var <- function(x, default = NULL){
+    x_name <- deparse(substitute(x))
+    val <- NULL
+    future_env <- self$param_env[['..rave_future_env']]
     if(is.environment(future_env) || is.list(future_env)){
-      val = future_env[[x_name]]
+      val <- future_env[[x_name]]
       
       if(!is.null(val)){
         return(val)
@@ -18,15 +18,15 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
     return(default)
   }
   
-  w$reloadUI = function(){
+  w$reloadUI <- function(){
     self$reload()
   }
   
-  w$launch_selector = function(){
-    self$global_reactives$launch_selector = Sys.time()
+  w$launch_selector <- function(){
+    self$global_reactives$launch_selector <- Sys.time()
   }
   
-  w$monitor_subject_change = function(){
+  w$monitor_subject_change <- function(){
     
     if(shiny::is.reactivevalues(self$local_reactives)){
       if( self$local_reactives$initialized && self$local_reactives$has_data && self$local_reactives$focused ){
@@ -38,37 +38,37 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
       return(FALSE)
     }
   }
-  w$get_execenv_local_reactive = function(){
+  w$get_execenv_local_reactive <- function(){
     self$local_reactives
   }
   
   
-  w$get_client_size = function(){
+  w$get_client_size <- function(){
     if(is.reactivevalues(self$global_reactives)){
       return(shiny::isolate(self$global_reactives$client_size))
     }
     return(NULL)
   }
   
-  w$switch_to = function(module_id, varriable_name = NULL, value = NULL, quiet = F, ...){
+  w$switch_to <- function(module_id, varriable_name = NULL, value = NULL, quiet = FALSE, ...){
     if(is.reactivevalues(self$global_reactives)){
       # if missing module_id, jump to last activated module
       # This is a hidden feature if not specifying module_id
       # 1. in the dev mode, I'll raise error if module_id is not string
       # 2. Be careful when using this hidden feature since it might cause infinite loop
       if(missing(module_id)){
-        module_id = NULL
-        hist = isolate(self$global_reactives$view_history)
+        module_id <- NULL
+        hist <- isolate(self$global_reactives$view_history)
         if(length(hist) > 1){
-          ind = which(vapply(hist, '[[', logical(1L), 'activated'))
+          ind <- which(vapply(hist, '[[', logical(1L), 'activated'))
           if(length(ind)){
-            ind = ind[length(ind)]
-            module_id = hist[[ind]]$module_id
+            ind <- ind[length(ind)]
+            module_id <- hist[[ind]]$module_id
           }
         }
       }
       if(length(module_id)){
-        self$global_reactives$switch_module = c(
+        self$global_reactives$switch_module <- c(
           list(
             module_id = module_id,
             varriable_name = varriable_name,
@@ -84,37 +84,37 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
     }
   }
   
-  w$reload_module = function(){
+  w$reload_module <- function(){
     clear_cache(levels = 1)
     self$input_update(list(), init = TRUE)
   }
-  w$get_input_ids = function(render_inputs = FALSE, manual_inputs = FALSE){
-    input_ids = self$input_ids
+  w$get_input_ids <- function(render_inputs = FALSE, manual_inputs = FALSE){
+    input_ids <- self$input_ids
     
     if( !render_inputs ){
-      render_ids = self$rendering_inputIds
-      input_ids = input_ids[!input_ids %in% render_ids]
+      render_ids <- self$rendering_inputIds
+      input_ids <- input_ids[!input_ids %in% render_ids]
     }
     if( !manual_inputs ){
-      manual_ids = self$manual_inputIds
-      input_ids = input_ids[!input_ids %in% manual_ids]
+      manual_ids <- self$manual_inputIds
+      input_ids <- input_ids[!input_ids %in% manual_ids]
     }
     input_ids
   }
   
-  persist_widget = local({
-    auto = TRUE
-    temporary_on = FALSE
-    is_auto = function( on, include_temporary = FALSE, cancel_temporary = FALSE ){
+  persist_widget <- local({
+    auto <- TRUE
+    temporary_on <- FALSE
+    is_auto <- function( on, include_temporary = FALSE, cancel_temporary = FALSE ){
       if(!missing(on)){
         temporary_on <<- FALSE
         auto <<- !isFALSE(on)
         catgl('Auto Re-calculate is set to ', auto)
       }
       if( include_temporary ){
-        re = auto || temporary_on
+        re <- auto || temporary_on
       }else{
-        re = auto
+        re <- auto
       }
       if(cancel_temporary){
         temporary_on <<- FALSE
@@ -123,10 +123,10 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
       re
     }
     
-    trigger = function(force = TRUE){
+    trigger <- function(force = TRUE){
       temporary_on <<- isTRUE(force)
       if(shiny::is.reactivevalues(self$local_reactives)){
-        self$local_reactives$last_input = Sys.time()
+        self$local_reactives$last_input <- Sys.time()
       }
     }
     
@@ -136,32 +136,32 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
     )
     
   })
-  w$auto_recalculate = persist_widget$is_auto
-  w$trigger_recalculate = persist_widget$trigger
+  w$auto_recalculate <- persist_widget$is_auto
+  w$trigger_recalculate <- persist_widget$trigger
   
 
-  w$current_module = function(){
+  w$current_module <- function(){
     if(is.reactivevalues(self$global_reactives)){
       return(isolate(get_val(self$global_reactives, 'execute_module', default = '')))
     }
     return('')
   }
   
-  w$get_brain = function(surfaces = 'pial', multiple_subject = FALSE,
+  w$get_brain <- function(surfaces = 'pial', multiple_subject = FALSE,
                          data_repo = rave::getDefaultDataRepository()){
-    subject = get0('subject', envir = data_repo, ifnotfound = NULL)
-    brain = NULL
+    subject <- get0('subject', envir = data_repo, ifnotfound = NULL)
+    brain <- NULL
     if( !is.null(subject) ){
-      brain = rave_brain2(subject = subject, surfaces = surfaces, compute_template = FALSE)
+      brain <- rave_brain2(subject = subject, surfaces = surfaces, compute_template = FALSE)
       if( multiple_subject ){
-        brain = threeBrain::merge_brain(brain)
+        brain <- threeBrain::merge_brain(brain)
       }
     }
     brain
   }
   
-  w$require = function(package, ..., character.only = TRUE){
-    p = as.character(substitute(package))
+  w$require <- function(package, ..., character.only = TRUE){
+    p <- as.character(substitute(package))
     if(!dipsaus::package_installed(p)){
       try({
         catgl("Installing Package ", p, level = 'WARNING')
@@ -174,24 +174,24 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
     ),
     list(...)))
   }
-  w$library = w$require
+  w$library <- w$require
   
-  w$observe = function(x, env = NULL, quoted = FALSE, priority = 0, domain = NULL, ...){
+  w$observe <- function(x, env = NULL, quoted = FALSE, priority = 0, domain = NULL, ...){
     if(!quoted){
-      x = substitute(x)
+      x <- substitute(x)
     }
     
     # Make sure shiny doesn't crash
-    x = rlang::quo_squash(rlang::quo(
+    x <- rlang::quo_squash(rlang::quo(
       safe_wrap_expr(!!x)
     ))
     
     
     if(!is.environment(env)){
-      env = self$runtime_env
+      env <- self$runtime_env
     }
     if(is.null(domain)){
-      domain = self$wrapper_env$getDefaultReactiveDomain()
+      domain <- self$wrapper_env$getDefaultReactiveDomain()
     }
     shiny::observe(
       x = x,
@@ -203,32 +203,32 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
     )
   }
   
-  w$safe_wrap_expr = safe_wrap_expr
+  w$safe_wrap_expr <- safe_wrap_expr
   
-  w$observeEvent = function(
+  w$observeEvent <- function(
     eventExpr, handlerExpr, event.env = NULL,
     event.quoted = FALSE, handler.env = NULL, handler.quoted = FALSE,
     priority = 0, domain = NULL, ...
   ){
     if(!event.quoted){
-      eventExpr = substitute(eventExpr)
+      eventExpr <- substitute(eventExpr)
     }
     if(!is.environment(event.env)){
-      event.env = self$runtime_env
+      event.env <- self$runtime_env
     }
     
     if(!handler.quoted){
-      handlerExpr = substitute(handlerExpr)
+      handlerExpr <- substitute(handlerExpr)
     }
     if(!is.environment(handler.env)){
-      handler.env = self$runtime_env
+      handler.env <- self$runtime_env
     }
     if(is.null(domain)){
-      domain = self$wrapper_env$getDefaultReactiveDomain()
+      domain <- self$wrapper_env$getDefaultReactiveDomain()
     }
     
     # Make sure shiny doesn't crash
-    handlerExpr = rlang::quo_squash(rlang::quo(
+    handlerExpr <- rlang::quo_squash(rlang::quo(
       safe_wrap_expr(!!handlerExpr)
     ))
     
@@ -240,22 +240,22 @@ bind_wrapper_env <- function(self, w, shiny_mode = TRUE){
   }
   
   if(shiny_mode){
-    w$rave_inputs = self$rave_inputs
-    w$rave_outputs = self$rave_outputs
-    w$rave_updates = self$rave_updates
-    w$rave_execute = self$rave_execute
-    w$rave_ignore = do_nothing
+    w$rave_inputs <- self$rave_inputs
+    w$rave_outputs <- self$rave_outputs
+    w$rave_updates <- self$rave_updates
+    w$rave_execute <- self$rave_execute
+    w$rave_ignore <- do_nothing
   }else{
-    w$rave_inputs = rave_inputs
-    w$rave_outputs = rave_outputs
-    w$rave_updates = rave_updates
-    w$rave_execute = rave_execute
-    w$rave_ignore = rave_ignore
+    w$rave_inputs <- rave_inputs
+    w$rave_outputs <- rave_outputs
+    w$rave_updates <- rave_updates
+    w$rave_execute <- rave_execute
+    w$rave_ignore <- rave_ignore
   }
   
-  w$export_report = self$export_report
-  w$rave_prepare = do_nothing
-  w$ns = function(id){
+  w$export_report <- self$export_report
+  w$rave_prepare <- do_nothing
+  w$ns <- function(id){
     # ns will be changed during shinirize process
     self$ns(id)
   }
@@ -361,12 +361,12 @@ ModuleEnvir <- R6::R6Class(
       rmd_path = NULL,
       parent_env = globalenv()
     ){
-      self$module_id = module_id
-      self$label_name = label_name
-      self$author = author
-      self$version = version
-      self$packages = c('rave', packages)
-      self$rmd_path = rmd_path
+      self$module_id <- module_id
+      self$label_name <- label_name
+      self$author <- author
+      self$version <- version
+      self$packages <- c('rave', packages)
+      self$rmd_path <- rmd_path
       
       # Persist light version of module settings
       setting_file <- file.path('~/rave_modules/settings/', module_id)
@@ -379,7 +379,7 @@ ModuleEnvir <- R6::R6Class(
           unlink(setting_file, recursive = TRUE, force = TRUE)
         }
       }
-      self$cache_env = dipsaus::rds_map(path = setting_file)
+      self$cache_env <- dipsaus::rds_map(path = setting_file)
       
       # Note as of 11/11/2018:
       # The structure of module is parent_env -> wrapper -> static -> param -> runtime -> (parser)
@@ -483,20 +483,20 @@ ModuleEnvir <- R6::R6Class(
       
       
       if(!is.environment(parent_env) || identical(parent_env, globalenv())){
-        parent_env = new.env(parent = globalenv(), hash = TRUE)
+        parent_env <- new.env(parent = globalenv(), hash = TRUE)
       }
-      self$parent_env = parent_env
+      self$parent_env <- parent_env
       
       # validate script_path
       if(missing(script_path)){
         stopifnot2(!is.null(.script_content), msg = 'Script Path not specified')
-        script_path = file.path(dirname(rmd_path), '.rave_tmp.R')
+        script_path <- file.path(dirname(rmd_path), '.rave_tmp.R')
         writeLines(.script_content, script_path)
       }
       
       stopifnot2(file.exists(script_path), msg = sprintf('[File Not Found] %s', script_path))
-      script_path = base::normalizePath(script_path)
-      self$script_path = script_path
+      script_path <- base::normalizePath(script_path)
+      self$script_path <- script_path
       
     },
     
@@ -512,13 +512,13 @@ ModuleEnvir <- R6::R6Class(
     get_or_new_exec_env = function(session = getDefaultReactiveDomain(), 
                                    ..., new = FALSE){
       rave_context()
-      session_id = add_to_session(session)
+      session_id <- add_to_session(session)
       if(is.null(session_id)){
-        session_id = '.TEMP'
+        session_id <- '.TEMP'
       }
       
       if(new || is.null(private$exec_env[[session_id]])){
-        private$exec_env[[session_id]] = ExecEnvir$new(session = session, parent_env = self$parent_env)
+        private$exec_env[[session_id]] <- ExecEnvir$new(session = session, parent_env = self$parent_env)
         private$exec_env[[session_id]]$register_module(self)
       }
       return(private$exec_env[[session_id]])
@@ -532,25 +532,25 @@ ModuleEnvir <- R6::R6Class(
       
       rave_context()
       # load default script
-      default_src = readLines(system.file('default_module.R', package = 'rave'))
+      default_src <- readLines(system.file('default_module.R', package = 'rave'))
       # read in script, get package info
-      src = readLines(self$script_path)
-      src = c(default_src, src)
+      src <- readLines(self$script_path)
+      src <- c(default_src, src)
       
-      execenv = self$get_or_new_exec_env(session = session)
+      execenv <- self$get_or_new_exec_env(session = session)
       
       on.exit({
         rm(execenv)
       }, add = TRUE)
       
       # get
-      static_env = execenv$static_env
-      parse_env = execenv$parse_env
-      runtime_env = execenv$runtime_env
+      static_env <- execenv$static_env
+      parse_env <- execenv$parse_env
+      runtime_env <- execenv$runtime_env
       clear_env(parse_env)
       
       
-      parsed = parse(text = src)
+      parsed <- parse(text = src)
       for(i in 1:length(parsed)){
         
         # Use eval_dirty
@@ -584,11 +584,11 @@ ModuleEnvir <- R6::R6Class(
     #' @param session shiny session; see shiny \code{\link[shiny]{domains}}
     #' @return 'HTML' tags
     render_ui = function(session = getDefaultReactiveDomain()){
-      e = self$get_or_new_exec_env(session = session)
+      e <- self$get_or_new_exec_env(session = session)
       if(length(e$input_ids)){
-        sidebar_width = self$sidebar_width
+        sidebar_width <- self$sidebar_width
       }else{
-        sidebar_width = 0
+        sidebar_width <- 0
       }
       shiny::fluidRow(
         uiOutput(e$ns('.__rave_modal__.')),
@@ -606,14 +606,14 @@ ModuleEnvir <- R6::R6Class(
                      session_id){
       
       if(missing(session_id)){
-        session_id = add_to_session(session)
+        session_id <- add_to_session(session)
       }
       if(is.character(session_id)){
         # Clear runtime_env
         if( inherits(private$exec_env[[session_id]], 'ExecEnvir') ){
           private$exec_env[[session_id]]$clean()
         }
-        private$exec_env[[session_id]] = NULL
+        private$exec_env[[session_id]] <- NULL
       }
     }
   )

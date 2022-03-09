@@ -10,13 +10,13 @@ rave_version <- function(){
   
   try({
     # get rave_version
-    old_ver = rave_options('rave_ver')
+    old_ver <- rave_options('rave_ver')
     old_ver %?<-% rave_hist()$get_or_save('..rave_ver..', '0.0.0.0000')
-    new_ver = rave_version()
-    is_newer = tryCatch({
-      is_newer = utils::compareVersion(old_ver, new_ver) < 0
+    new_ver <- rave_version()
+    is_newer <- tryCatch({
+      is_newer <- utils::compareVersion(old_ver, new_ver) < 0
       if(!length(is_newer) || !is.logical(is_newer)){
-        is_newer = TRUE
+        is_newer <- TRUE
       }
       is_newer
     }, error = function(e){
@@ -31,7 +31,7 @@ rave_version <- function(){
       # New RAVE installed! update
       
       # 3. Data files
-      has_data = arrange_data_dir(TRUE)
+      has_data <- arrange_data_dir(TRUE)
       
       
       rave_hist()$save('..rave_ver..' = new_ver)
@@ -52,8 +52,8 @@ rave_version <- function(){
     
   })
   
-  template_subcode = rave_options('threeBrain_template_subject')
-  template_rootdir = rave_options('threeBrain_template_dir')
+  template_subcode <- rave_options('threeBrain_template_subject')
+  template_rootdir <- rave_options('threeBrain_template_dir')
   if( length(template_subcode) && template_subcode != '' && dir.exists(template_rootdir) ){
     options(
       `threeBrain.template_subject` = template_subcode,
@@ -99,13 +99,13 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
   # Check demo subjects
   if( demo_data ){
     catgl('Checking RAVE data repository', level = 'DEFAULT', end = '\n')
-    p = get_projects()
+    p <- get_projects()
     if(!length(p)){
-      has_demo = FALSE
+      has_demo <- FALSE
       if('demo' %in% p){
-        subs = get_subjects('demo')
+        subs <- get_subjects('demo')
         if(length(subs)){
-          has_demo = TRUE
+          has_demo <- TRUE
         }
       }
       if(!has_demo){
@@ -126,12 +126,11 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
   }
   
   lazy_install <- NULL
-  lazy_github <- NULL
   
   if(nightly){
     # get repos from Github
     git_repos <- tryCatch({
-      readLines("https://raw.githubusercontent.com/beauchamplab/rave/master/DEVREPO")[1:3]
+      readLines("https://raw.githubusercontent.com/beauchamplab/rave/master/DEVREPO")
     }, error = function(e){
       c("beauchamplab/rave", "beauchamplab/raveio", "beauchamplab/ravebuiltins@migrate2",  "dipterix/rutabaga@develop", 'dipterix/threeBrain', 'dipterix/dipsaus')
     })
@@ -141,15 +140,30 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
       # get directly from DEVREPO
       lazy_install <- c(lazy_install, git_repos[1])
     }
+    lazy_install <- lapply(strsplit(lazy_install, "[/@]"), function(x){
+      if(length(x) >= 2){
+        x[[2]]
+      } else {
+        x[[1]]
+      }
+    })
+    lazy_install <- unlist(lazy_install)
   } else {
     lazy_install <- c(lazy_install, 'ravebuiltins', 'rutabaga')
     if(update_rave){
       lazy_install <- c(lazy_install, 'rave')
     }
-    lazy_install <- c(lazy_install, c('threeBrain', 'dipterix/dipsaus'))
+    lazy_install <- c(lazy_install, c(
+      'threeBrain', 'dipsaus', 'filearray', 'ravetools'))
   }
+  lazy_install <- unique(lazy_install)
+  repos <- c(
+    beauchamplab = 'https://beauchamplab.r-universe.dev',
+    dipterixuniverse = 'https://dipterix.r-universe.dev',
+    getOption("repos")
+  )
   
-  dipsaus::prepare_install2(unique(lazy_install), restart = FALSE)
+  dipsaus::prepare_install2(unique(lazy_install), restart = FALSE, repos = repos)
   
   arrange_modules(refresh = TRUE)
   
@@ -162,22 +176,19 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
 }
 
 check_dependencies2 <- function(){
-  # 
-  
-  
+
   catgl('Arranging all existing RAVE modules', level = 'INFO', end = '\n')
   arrange_modules(refresh = TRUE, reset = FALSE, quiet = TRUE)
   
   # check if any demo data exists
   catgl('Checking RAVE data repository', level = 'INFO', end = '\n')
-  p = get_projects()
+  p <- get_projects()
   if('demo' %in% p){
-    subs = get_subjects('demo')
+    subs <- get_subjects('demo')
     if(length(subs)){
       return(invisible())
     }
   }
-  
   
   # install demo subjects
   download_sample_data('_group_data', replace_if_exists = TRUE)
@@ -277,17 +288,17 @@ finalize_installation <- function(packages, upgrade = c('always', 'ask', 'never'
   # }
   
   # Get all packages with rave.yaml
-  lib_path = .libPaths()
+  lib_path <- .libPaths()
   
-  allpackages = unlist(sapply(lib_path, function(lp){
+  allpackages <- unlist(sapply(lib_path, function(lp){
     list.dirs(lp, recursive = FALSE, full.names = FALSE)
   }, simplify = FALSE))
-  allpackages = unique(allpackages)
+  allpackages <- unique(allpackages)
   
-  yaml_path = sapply(allpackages, function(p){
+  yaml_path <- sapply(allpackages, function(p){
     system.file('rave.yaml', package = p)
   })
-  sel = yaml_path != ''
+  sel <- yaml_path != ''
   
   if(length(packages)){
     sel <- sel & (allpackages %in% packages)
@@ -346,7 +357,7 @@ finalize_installation <- function(packages, upgrade = c('always', 'ask', 'never'
   }, silent = TRUE)
   
   try({
-    startup_msg = rave_hist()$get_or_save('..rave_startup_msg..')
+    startup_msg <- rave_hist()$get_or_save('..rave_startup_msg..')
     if(interactive() && !is.null(startup_msg)){
       rave_hist()$save('..rave_startup_msg..' = NULL)
       packageStartupMessage(startup_msg)

@@ -24,7 +24,7 @@ load_scripts.default <- function(...){
 
 #' @export
 load_scripts.rave_module_debug <- function(..., asis = FALSE){
-  src = c(...)
+  src <- c(...)
   
   mount_demo_subject()
   
@@ -44,20 +44,20 @@ load_scripts.rave_module_debug <- function(..., asis = FALSE){
 load_scripts.rave_running <- function(..., asis = FALSE){
   rave_context()
   
-  fs = unlist(list(...))
-  fs = sapply(fs, function(x){
+  fs <- unlist(list(...))
+  fs <- sapply(fs, function(x){
     if(rlang::is_quosure(x)){ x }else{
       get_path(x) 
     }
   })
   
-  scripts = get('...scripts', envir = parent.frame(), inherits = TRUE)
-  scripts[['source']] = c(scripts[['source']], fs)
+  scripts <- get('...scripts', envir = parent.frame(), inherits = TRUE)
+  scripts[['source']] <- c(scripts[['source']], fs)
   
   if(is.null(scripts[['asis']])){
-    scripts[['asis']] = asis
+    scripts[['asis']] <- asis
   }
 }
 
 #' @export
-load_scripts.rave_running_local = load_scripts.rave_running
+load_scripts.rave_running_local <- load_scripts.rave_running

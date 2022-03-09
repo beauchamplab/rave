@@ -16,16 +16,16 @@ getDefaultReactiveOutput.default <- function(session = shiny::getDefaultReactive
 #' @rdname session-reactives
 #' @export
 getDefaultReactiveOutput.rave_module_debug <- function(session = shiny::getDefaultReactiveDomain()){
-  env = new.env(parent = emptyenv())
-  env$..warn = TRUE
-  class(env) = c('ravedev_ReactiveOutput', 'environment')
+  env <- new.env(parent = emptyenv())
+  env$..warn <- TRUE
+  class(env) <- c('ravedev_ReactiveOutput', 'environment')
   env
 }
 
 #' @rdname session-reactives
 #' @export
 getDefaultReactiveOutput.rave_running <- function(session = shiny::getDefaultReactiveDomain()){
-  ctx = rave_context()
+  ctx <- rave_context()
   session$rootScope()$makeScope(ctx$module_id)$output
 }
 
@@ -39,13 +39,13 @@ print.ravedev_ReactiveOutput <- function(x, ...){
   catgl('<Reactive Output> (Write-only)', level = 'INFO')
   for(k in ls(x, all.names = FALSE)){
     catgl(' ', k, '= ', level = 'INFO', pal = list('INFO' = 'orangered'), end = '')
-    s = paste(deparse(x[[k]]), sep = '\n\t')
+    s <- paste(deparse(x[[k]]), sep = '\n\t')
     catgl(s, level = 'INFO', pal = list('INFO' = 'dodgerblue3'), sep = '\n\t')
   }
   invisible(x)
 }
 .ravedev_ReactiveOutput_assign <- function(x, i, value){
-  value = substitute(value)
+  value <- substitute(value)
   assign(i, value, envir = x)
   invisible(x)
 }

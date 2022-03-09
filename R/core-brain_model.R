@@ -17,7 +17,7 @@ rave_brain2 <- function(subject, surfaces = 'pial', use_141 = TRUE,
   
   # if subject is NULL, use current loaded subject
   if( is.character( subject ) ){
-    subject = as_subject(subject, strict = FALSE)
+    subject <- as_subject(subject, strict = FALSE)
   }
   
   # To find freesurfer directory, here are the paths to search
@@ -26,22 +26,22 @@ rave_brain2 <- function(subject, surfaces = 'pial', use_141 = TRUE,
   # 3. rave_data/project/subject/
   # 3. if options('rave.freesurfer_dir') is provided, then XXX/subject/
   
-  fs_paths = c(
+  fs_paths <- c(
     file.path(subject$dirs$rave_dir, 'fs'),
     file.path(subject$dirs$rave_dir, '../fs'),
     file.path(subject$dirs$rave_dir, '../'),
     file.path(getOption('rave.freesurfer_dir'), subject$subject_code)
   )
-  fs_path = NULL
+  fs_path <- NULL
   for( p in fs_paths ){
     if( threeBrain::check_freesurfer_path(fs_subject_folder = p, autoinstall_template = FALSE) ){
-      fs_path = p
-      break;
+      fs_path <- p
+      break
     }
   }
   
   # load electrodes
-  electrode_table = load_meta('electrodes', 
+  electrode_table <- load_meta('electrodes', 
                               project_name = subject$project_name, 
                               subject_code = subject$subject_code)
   
@@ -50,7 +50,7 @@ rave_brain2 <- function(subject, surfaces = 'pial', use_141 = TRUE,
       return(invisible())
     }
     
-    brain = threeBrain::merge_brain()
+    brain <- threeBrain::merge_brain()
     
     brain$set_electrodes(electrodes = electrode_table)
     
@@ -58,24 +58,24 @@ rave_brain2 <- function(subject, surfaces = 'pial', use_141 = TRUE,
     # import from freesurfer folder
     if(recache){
       if( clean_before_cache ){
-        fs = list.files(file.path(fs_path, 'RAVE'), pattern = '\\.json$',
+        fs <- list.files(file.path(fs_path, 'RAVE'), pattern = '\\.json$',
                         all.files = FALSE, recursive = FALSE, full.names = TRUE, 
                         ignore.case = TRUE, include.dirs = FALSE, no.. = TRUE)
         lapply(fs, unlink)
       }
       threeBrain::import_from_freesurfer(fs_path, subject_name = subject$subject_code)
     }
-    brain = threeBrain::freesurfer_brain2(
+    brain <- threeBrain::freesurfer_brain2(
       fs_subject_folder = fs_path, subject_name = subject$subject_code, 
       surface_types = surfaces, use_141 = use_141)
     
     brain$set_electrodes(electrodes = electrode_table)
     
     if( compute_template ){
-      tf = tempfile() 
-      new_table = brain$calculate_template_coordinates(save_to = tf)
+      tf <- tempfile() 
+      new_table <- brain$calculate_template_coordinates(save_to = tf)
       if( file.exists(tf) ){
-        brain$electrodes$raw_table_path = NULL
+        brain$electrodes$raw_table_path <- NULL
         unlink(tf)
         # need to update meta
         save_meta(new_table, meta_type = 'electrodes', 

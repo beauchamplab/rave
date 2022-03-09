@@ -1,9 +1,9 @@
 # Documented on 2019-11-21
 
 as_call2 <- function(..., .list = list(), .drop_nulls = TRUE){
-  call = c(list(...), .list)
+  call <- c(list(...), .list)
   if( .drop_nulls ){
-    call = call[!vapply(call, is.null, FUN.VALUE = FALSE)]
+    call  <-  call[!vapply(call, is.null, FUN.VALUE = FALSE)]
   }
   as.call(call)
 }
@@ -159,8 +159,8 @@ ExecEnvir <- R6::R6Class(
     #' @return none
     reload = function(){
       if(is.reactivevalues(self$global_reactives)){
-        self$global_reactives$force_refresh_all = Sys.time()
-        self$global_reactives$has_data = Sys.time()
+        self$global_reactives$force_refresh_all <- Sys.time()
+        self$global_reactives$has_data <- Sys.time()
       }
     },
     
@@ -213,26 +213,26 @@ ExecEnvir <- R6::R6Class(
     initialize = function(session = getDefaultReactiveDomain(),
                           parent_env = NULL){
       if(!is.null(session) && !inherits(session, c('ShinySession', 'session_proxy'))){
-        private$session = session
+        private$session <- session
       }
-      self$ready_functions = list()
-      self$internal_reactives = shiny::reactiveValues()
-      self$cache_env = dipsaus::session_map()
-      self$cache_env$has_locker = FALSE
-      self$.__rave_module_instance__. = self
+      self$ready_functions <- list()
+      self$internal_reactives <- shiny::reactiveValues()
+      self$cache_env <- dipsaus::session_map()
+      self$cache_env$has_locker <- FALSE
+      self$.__rave_module_instance__. <- self
 
       # parent_env should be an unlocked environment that can be active binded
       if(!is.environment(parent_env)){
-        parent_env = new.env(parent = globalenv(), hash = TRUE)
+        parent_env <- new.env(parent = globalenv(), hash = TRUE)
       }
-      self$parent_env = parent_env
+      self$parent_env <- parent_env
 
       # wrapper has all kind of util functions and it'll be sealed (locked)
       # One thing to notice that non of the functions within wrapper_env are
       # evaluated within itself. All are evaluated under "self", i.e. ExecEnvir
       # The reason why we use wrapper_env is because we don't want anyone to
       # change those functions as they are critical to modules.
-      self$wrapper_env = new.env(parent = parent_env)
+      self$wrapper_env <- new.env(parent = parent_env)
 
       # active bindings to data repository which allow us
       # the access to data loaded in data repo.
@@ -240,45 +240,45 @@ ExecEnvir <- R6::R6Class(
 
       # static_env contains user self-defined functions. once initialized, they can
       # be read-only (in most of the cases).
-      self$static_env = new.env(parent = self$wrapper_env)
-      self$param_env = new.env(parent = self$static_env)
-      self$param_env$..rave_future_env = new.env()
+      self$static_env <- new.env(parent = self$wrapper_env)
+      self$param_env <- new.env(parent = self$static_env)
+      self$param_env$..rave_future_env <- new.env()
 
       # runtime_env, all variables will be stored within this environment, is the
       # one that real execute take place
-      self$runtime_env = new.env(parent = self$param_env)
-      self$static_env$..runtime_env = self$runtime_env
-      self$static_env$.env = self$runtime_env
-      self$static_env$..param_env = self$param_env
+      self$runtime_env <- new.env(parent = self$param_env)
+      self$static_env$..runtime_env <- self$runtime_env
+      self$static_env$.env <- self$runtime_env
+      self$static_env$..param_env <- self$param_env
       
-      self$async_env = new.env(parent = self$runtime_env)
+      self$async_env <- new.env(parent = self$runtime_env)
 
       # Environment for parsers. All source file will be parsed here
       # it can get access to runtime_env.
       # Old scheme was to parse src in static env and change function environment to
       # runtime_env, this is dangerous. So I come up with this solution
-      self$parse_env = new.env(parent = self$runtime_env)
+      self$parse_env <- new.env(parent = self$runtime_env)
 
 
-      self$ns = base::I
+      self$ns <- base::I
 
       bind_wrapper_env(self, self$wrapper_env)
 
-      self$wrapper_env$source = function(file, local = TRUE, ...){
+      self$wrapper_env$source <- function(file, local = TRUE, ...){
         if(environmentIsLocked(self$static_env)){
           return()
         }
 
         # Try to use the file under the same dir
-        dir = dirname(self$module_env$script_path)
-        tmp_file = file.path(dir, file)
+        dir <- dirname(self$module_env$script_path)
+        tmp_file <- file.path(dir, file)
         if(file.exists(tmp_file)){
           catgl('Try to source from [', tmp_file, ']')
-          self$runtime_env$.__tmp_file = tmp_file
+          self$runtime_env$.__tmp_file <- tmp_file
           eval(quote(base::source(.__tmp_file, local = TRUE)), self$runtime_env)
         }else if(file.exists(file)){
           # cat2('File [', tmp_file, '] does not exists, try to look for it.', level = 'INFO')
-          self$runtime_env$.__tmp_file = file
+          self$runtime_env$.__tmp_file <- file
           eval(quote(base::source(.__tmp_file, local = TRUE)), self$runtime_env)
         }else{
           catgl('File [', file, '] does not exists.', level = 'ERROR')
@@ -287,18 +287,18 @@ ExecEnvir <- R6::R6Class(
 
         # Speed up
         # copy_env(self$parse_env, self$static_env, deep = F)
-        list2env(as.list(self$runtime_env, all.names = T), envir = self$static_env)
+        list2env(as.list(self$runtime_env, all.names = TRUE), envir = self$static_env)
 
 
       }
 
       # advanced usage
-      self$wrapper_env$getDefaultReactiveDomain = function(
+      self$wrapper_env$getDefaultReactiveDomain <- function(
         session = shiny::getDefaultReactiveDomain()
       ){
-        id = self$module_env$module_id
+        id <- self$module_env$module_id
         if(is.null(session)){
-          session = private$session
+          session <- private$session
         }
         if(inherits(session, 'ShinySession')){
           return(session$makeScope(id))
@@ -307,7 +307,7 @@ ExecEnvir <- R6::R6Class(
         }
       }
 
-      self$wrapper_env$getDefaultReactiveInput = function(
+      self$wrapper_env$getDefaultReactiveInput <- function(
         session = self$wrapper_env$getDefaultReactiveDomain()
       ){
         
@@ -323,7 +323,7 @@ ExecEnvir <- R6::R6Class(
         return(NULL)
       }
 
-      self$wrapper_env$getDefaultReactiveOutput = function(
+      self$wrapper_env$getDefaultReactiveOutput <- function(
         session = self$wrapper_env$getDefaultReactiveDomain()
       ){
         
@@ -349,7 +349,7 @@ ExecEnvir <- R6::R6Class(
     #' @return none
     reset = function(inputs){
       if(shiny::is.reactivevalues(inputs)){
-        inputs = shiny::isolate(shiny::reactiveValuesToList(inputs))
+        inputs <- shiny::isolate(shiny::reactiveValuesToList(inputs))
       }
       rm(list = ls(self$runtime_env), envir = self$runtime_env)
       for(nm in self$input_ids){
@@ -367,11 +367,11 @@ ExecEnvir <- R6::R6Class(
       session_id = '__fake_runtime_env__', data_env = getDefaultDataRepository()
     ){
       # deep clone, but sharing the data, module environment
-      fakesession = fake_session(rave_id = session_id)
+      fakesession <- fake_session(rave_id = session_id)
 
-      m = self$module_env
-      new_exec = m$get_or_new_exec_env(
-        parent_env = data_env, session = fakesession, new = T
+      m <- self$module_env
+      new_exec <- m$get_or_new_exec_env(
+        parent_env = data_env, session = fakesession, new = TRUE
       )
 
 
@@ -389,10 +389,10 @@ ExecEnvir <- R6::R6Class(
     #' @return runtime environment
     execute_with = function(param, async = FALSE, plan = NULL){
       lapply(names(param), function(nm){
-        self$runtime_env[[nm]] = param[[nm]]
-        self$param_env[[nm]] = param[[nm]]
+        self$runtime_env[[nm]] <- param[[nm]]
+        self$param_env[[nm]] <- param[[nm]]
       })
-      res = self$execute(async = async)
+      res <- self$execute(async = async)
       if(async){
         catgl('Execute_with async not implemented.')
       }
@@ -405,12 +405,12 @@ ExecEnvir <- R6::R6Class(
     #' @return the names of the list
     names = function(x){
       if(is.list(x)){
-        nm = base::names(x)
+        nm <- base::names(x)
         if(length(x) != length(nm) && is.null(nm)){
-          nm = rep('', length(x))
+          nm <- rep('', length(x))
         }
       }else{
-        nm = base::names(x)
+        nm <- base::names(x)
       }
       return(nm)
     },
@@ -426,19 +426,19 @@ ExecEnvir <- R6::R6Class(
         catgl('Overriding Module Environment.', level = 'WARNING')
       }
       
-      self$module_env = module_env
-      self$ns = shiny::NS(module_env$module_id)
+      self$module_env <- module_env
+      self$ns <- shiny::NS(module_env$module_id)
       
       # Set context
       if( module_env$from_package ){
-        self$.__rave_package__. = module_env$package_name
+        self$.__rave_package__. <- module_env$package_name
       }else{
         catgl('Module is not from a known package, try to read from current context...', level = 'INFO')
-        ctx = rave_context(disallowed_context = 'default')
-        self$.__rave_package__. = ctx$package
+        ctx <- rave_context(disallowed_context = 'default')
+        self$.__rave_package__. <- ctx$package
       }
       
-      self$.__rave_module__. = module_env$module_id
+      self$.__rave_module__. <- module_env$module_id
       
       self$register_context(self$.__rave_context__.)
       
@@ -451,8 +451,8 @@ ExecEnvir <- R6::R6Class(
     #' locally
     #' @return None
     register_context = function(context = c('rave_running', 'rave_running_local')){
-      context = match.arg(context)
-      self$.__rave_context__. = context
+      context <- match.arg(context)
+      self$.__rave_context__. <- context
       rave_context(senv = self, tenv = self$wrapper_env)
       rave_context(senv = self, tenv = self$static_env)
       rave_context(senv = self, tenv = self$param_env)
@@ -472,56 +472,56 @@ ExecEnvir <- R6::R6Class(
     #' @return none
     rave_inputs = function(..., .input_panels = list(), .tabsets = list(), 
                            .env = NULL, .manual_inputs = NULL, .render_inputs = NULL){
-      .tabsets = .input_panels
+      .tabsets <- .input_panels
       if( !is.list(.tabsets) ){
-        .tabsets = list()
+        .tabsets <- list()
       }
-      package_name = get_package_name()
-      self$manual_inputIds = .manual_inputs
-      self$rendering_inputIds = .render_inputs
+      package_name <- get_package_name()
+      self$manual_inputIds <- .manual_inputs
+      self$rendering_inputIds <- .render_inputs
       
-      names(.tabsets) = sapply(names(.input_panels), function(nm){
-        s = stringr::str_trim(unlist(stringr::str_split(nm, '\\[|\\]')))
-        s = s[s!='']
+      names(.tabsets) <- sapply(names(.input_panels), function(nm){
+        s <- stringr::str_trim(unlist(stringr::str_split(nm, '\\[|\\]')))
+        s <- s[s!='']
         s[length(s)]
       })
 
 
-      .tabsetParams = lapply(names(.input_panels), function(nm){
-        s = stringr::str_trim(unlist(stringr::str_split(nm, '\\[|\\]')))
-        s = s[s!='']
-        re = list(
+      .tabsetParams <- lapply(names(.input_panels), function(nm){
+        s <- stringr::str_trim(unlist(stringr::str_split(nm, '\\[|\\]')))
+        s <- s[s!='']
+        re <- list(
           collapsed = '-' %in% s,
           headerColor = tryCatch({
-            col = NULL
-            tmp = s[stringr::str_detect(s, '^#')]
+            col <- NULL
+            tmp <- s[stringr::str_detect(s, '^#')]
             if(length(tmp) == 1){
               col2rgb(tmp)
-              col = tmp
+              col <- tmp
             }
             col
           }, error = function(e){NULL})
         )
         re
       })
-      names(.tabsetParams) = names(.tabsets)
-      quos = rlang::quos(...)
-      parsers = comp_parser()
+      names(.tabsetParams) <- names(.tabsets)
+      quos <- rlang::quos(...)
+      parsers <- comp_parser()
 
-      x = lapply(quos, parsers$parse_quo)
-      names(x) = ids = sapply(x, function(comp){comp$inputId})
+      x <- lapply(quos, parsers$parse_quo)
+      names(x) <- ids <- sapply(x, function(comp){comp$inputId})
 
       if(!'Local Variables' %in% names(.tabsets)){
-        rest_inputs = ids[!ids %in% unlist(.tabsets)]
+        rest_inputs <- ids[!ids %in% unlist(.tabsets)]
         if(length(rest_inputs)){
-          .tabsets[['Local Variables']] = c(rest_inputs)
+          .tabsets[['Local Variables']] <- c(rest_inputs)
         }
       }
 
 
       lapply(seq_along(.tabsets), function(ii){
-        tabName = names(.tabsets)[ii]
-        url = openwetware_url(tabName, type = 'input')
+        tabName <- names(.tabsets)[ii]
+        url <- openwetware_url(tabName, type = 'input')
         rlang::quo({
           do.call(box, args = c(
             list(width = 12,
@@ -531,29 +531,29 @@ ExecEnvir <- R6::R6Class(
             !!.tabsetParams[[tabName]],
             !!lapply(.tabsets[[tabName]], function(inputIds){
               if(length(inputIds) == 1){
-                comp = x[[inputIds]]
+                comp <- x[[inputIds]]
                 return(comp$expr)
               }else{
-                n = length(inputIds)
-                mod2 = n %% 2
-                mod3 = n %% 3
+                n <- length(inputIds)
+                mod2 <- n %% 2
+                mod3 <- n %% 3
                 if(mod3 == 0){
-                  flex_basis = rep('flex-basis: 33%;', n)
+                  flex_basis <- rep('flex-basis: 33%;', n)
                 }else if(mod2 == 0){
-                  flex_basis = rep('flex-basis: 50%;', n)
+                  flex_basis <- rep('flex-basis: 50%;', n)
                 }else if(mod3 == 1){
-                  flex_basis = rep('flex-basis: 50%;', n)
-                  flex_basis[length(flex_basis)] = 'flex-basis: 100%;'
+                  flex_basis <- rep('flex-basis: 50%;', n)
+                  flex_basis[length(flex_basis)] <- 'flex-basis: 100%;'
                 }else{
-                  flex_basis = rep('flex-basis:33%;', n)
-                  flex_basis[length(flex_basis) - c(0:1)] = 'flex-basis:50%;'
+                  flex_basis <- rep('flex-basis:33%;', n)
+                  flex_basis[length(flex_basis) - c(0:1)] <- 'flex-basis:50%;'
                 }
 
                 return(rlang::quo(
                   do.call(div, args = c(
                     list(class = 'rave-grid-inputs'),
                     !!lapply(seq_len(n), function(jj){
-                      inputId = inputIds[[jj]]
+                      inputId <- inputIds[[jj]]
                       rlang::quo(
                         do.call(div, args = c(
                           list(style = !!flex_basis[[jj]], !!x[[inputId]]$expr)
@@ -571,17 +571,17 @@ ExecEnvir <- R6::R6Class(
       }) ->
         ui_inputs
 
-      ui_inputs = rlang::quo({
+      ui_inputs <- rlang::quo({
         do.call(shiny::fluidRow, args = !!ui_inputs)
       })
-      ui_inputs = rlang::quo_squash(ui_inputs)
+      ui_inputs <- rlang::quo_squash(ui_inputs)
 
-      private$inputs = list(
+      private$inputs <- list(
         quos = ui_inputs,
         comp = x
       )
 
-      self$register_input_events = function(input, output, session, local_data){
+      self$register_input_events <- function(input, output, session, local_data){
         lapply(x, function(comp){
           comp$observers(input, output, session, local_data, self)
         })
@@ -597,40 +597,40 @@ ExecEnvir <- R6::R6Class(
     #' @param .env debug use
     #' @return none
     rave_outputs = function(..., .output_tabsets = list(), .tabsets = list(), .env = NULL){
-      .tabsets = .output_tabsets
-      quos = rlang::quos(...)
+      .tabsets <- .output_tabsets
+      quos <- rlang::quos(...)
       stopifnot2(length(quos) > 0, msg = 'No output defined!')
-      parsers = comp_parser()
-      x = lapply(names(quos), function(nm){
-        re = parsers$parse_quo(quos[[nm]])
-        re$label = nm
+      parsers <- comp_parser()
+      x <- lapply(names(quos), function(nm){
+        re <- parsers$parse_quo(quos[[nm]])
+        re$label <- nm
         re
       })
 
-      ids = sapply(x, function(comp){comp$outputId})
-      names(x) = ids
+      ids <- sapply(x, function(comp){comp$outputId})
+      names(x) <- ids
 
       #### Generate UIs for output
 
       # 1. tabsets in .tabsets
-      widths = .tabsets[['width']]
-      .tabsets[['width']] = NULL
+      widths <- .tabsets[['width']]
+      .tabsets[['width']] <- NULL
       widths %?<-% 12L
 
       if(length(.tabsets)){
-        names = names(.tabsets)
-        ntabs = length(names)
+        names <- names(.tabsets)
+        ntabs <- length(names)
         if(length(widths) < ntabs){
-          widths = rep(widths, ntabs)
+          widths <- rep(widths, ntabs)
         }
 
         lapply(seq_len(ntabs), function(ii){
-          nm = names[[ii]]
-          ids = .tabsets[[nm]]
+          nm <- names[[ii]]
+          ids <- .tabsets[[nm]]
 
-          quo_panels = lapply(seq_along(ids), function(ii){
-            comp = ids[ii]
-            title = names(comp)
+          quo_panels <- lapply(seq_along(ids), function(ii){
+            comp <- ids[ii]
+            title <- names(comp)
             
             as_call2(
               quote(shiny::tabPanel),
@@ -646,8 +646,8 @@ ExecEnvir <- R6::R6Class(
               as_call2(
                 quote(shiny::fluidRow),
                 .list = lapply(comp[[1]], function(output_id){
-                  comp = x[[output_id]]
-                  width = comp[['width']]; width %?<-% 12L
+                  comp <- x[[output_id]]
+                  width <- comp[['width']]; width %?<-% 12L
                   as_call2(
                     quote(shiny::column),
                     as_call2(
@@ -709,16 +709,16 @@ ExecEnvir <- R6::R6Class(
         }) ->
           tab_boxes
       }else{
-        tab_boxes = NULL
+        tab_boxes <- NULL
       }
 
-      left_ids = ids[!ids %in% unlist(.tabsets)]
+      left_ids <- ids[!ids %in% unlist(.tabsets)]
 
-      single_boxes = lapply(left_ids, function(nm){
-        comp = x[[nm]]
-        width = comp$width; width %?<-% 12L
-        margin = comp$margin
-        url = openwetware_url(comp$label, type = 'output')
+      single_boxes <- lapply(left_ids, function(nm){
+        comp <- x[[nm]]
+        width <- comp$width; width %?<-% 12L
+        margin <- comp$margin
+        url <- openwetware_url(comp$label, type = 'output')
         if( length(margin) && is.numeric(margin) ){
           as_call2(
             expand_box,
@@ -764,7 +764,7 @@ ExecEnvir <- R6::R6Class(
         
       })
 
-      ui_comps = as_call2(
+      ui_comps <- as_call2(
         quote(shiny::fluidRow),
         .list = c(tab_boxes, single_boxes)
       )
@@ -772,11 +772,11 @@ ExecEnvir <- R6::R6Class(
       # ui_comps = rlang::quo_squash(ui_comps)
 
       #### Reactive functions
-      private$outputs = list(
+      private$outputs <- list(
         quos = ui_comps,
         comp = x
       )
-      self$register_output_events = function(input, output, session, local_data){
+      self$register_output_events <- function(input, output, session, local_data){
         lapply(x, function(comp){
           comp$observers(input, output, session, local_data, self)
         })
@@ -788,15 +788,15 @@ ExecEnvir <- R6::R6Class(
     #' @param ... R expressions
     #' @param .env for debug use
     rave_updates = function(..., .env = NULL){
-      quos = rlang::quos(...)
-      quo_names = names(quos)
-      quos = lapply(quos, rlang::quo_squash)
-      names(quos) = quo_names
-      private$update = quos
+      quos <- rlang::quos(...)
+      quo_names <- names(quos)
+      quos <- lapply(quos, rlang::quo_squash)
+      names(quos) <- quo_names
+      private$update <- quos
 
-      self$input_update = function(input, session = getDefaultReactiveDomain(), init = FALSE){
-        start = Sys.time()
-        input = dipsaus::drop_nulls(input)
+      self$input_update <- function(input, session = getDefaultReactiveDomain(), init = FALSE){
+        start <- Sys.time()
+        input <- dipsaus::drop_nulls(input)
         if(!init){
           # Deprecated, do nothing
           return(invisible())
@@ -804,20 +804,20 @@ ExecEnvir <- R6::R6Class(
         # if(is.null(session)){
         #   session = getDefaultReactiveDomain() #private$session
         # }
-        var_names = names(private$update)
-        n_errors = c(0,0)
-        envir = environment()
-        errors = NULL
+        var_names <- names(private$update)
+        n_errors <- c(0,0)
+        envir <- environment()
+        errors <- NULL
         # passed = TRUE
         for(quo in private$update[var_names == '']){
           tryCatch({
             dipsaus::eval_dirty( quo, env = self$param_env )
           },error = function(e){
             catgl('Error in updating input (initialization)', level = 'ERROR')
-            s = capture.output(traceback(e))
+            s <- capture.output(traceback(e))
             lapply(s, catgl, level = 'ERROR')
-            envir$n_errors[1] = envir$n_errors[1] + 1
-            envir$errors = c(envir$errors, as.character(e))
+            envir$n_errors[1] <- envir$n_errors[1] + 1
+            envir$errors <- c(envir$errors, as.character(e))
             # envir$passed = FALSE
           })
 
@@ -833,37 +833,37 @@ ExecEnvir <- R6::R6Class(
           #   break;
           # }
           tryCatch({
-            comp = private$inputs$comp[[varname]]
+            comp <- private$inputs$comp[[varname]]
             if(is.null(comp)){
               return()
             }
-            new_args = dipsaus::eval_dirty(
+            new_args <- dipsaus::eval_dirty(
               private$update[[varname]], data = input, env = self$param_env
             )
 
             comp$updates(session = session, .args = new_args)
           },error = function(e){
             catgl('Error in updating input ', varname, level = 'ERROR')
-            s = capture.output(traceback(e))
+            s <- capture.output(traceback(e))
             lapply(s, catgl, level = 'ERROR')
-            envir$n_errors[2] = envir$n_errors[2] + 1
-            envir$passed = FALSE
+            envir$n_errors[2] <- envir$n_errors[2] + 1
+            envir$passed <- FALSE
           })
         }
 
 
-        end = Sys.time()
-        delta = time_diff(start, end)
+        end <- Sys.time()
+        delta <- time_diff(start, end)
         catgl(sprintf('Updating inputs takes %.2f %s. Total errors: %d + %d', delta$delta, delta$units, n_errors[1], n_errors[2]))
 
 
         # Activate this module if no error occurred during input-update phase
-        hist_len = isolate(length(self$global_reactives$view_history))
+        hist_len <- isolate(length(self$global_reactives$view_history))
         if(length(hist_len)){
           if(sum(n_errors)){
-            global_reactives$view_history[[hist_len]]$activated = FALSE
+            global_reactives$view_history[[hist_len]]$activated <- FALSE
           }else{
-            global_reactives$view_history[[hist_len]]$activated = TRUE
+            global_reactives$view_history[[hist_len]]$activated <- TRUE
           }
         }
 
@@ -883,40 +883,40 @@ ExecEnvir <- R6::R6Class(
     #' @param .env debug use
     #' @return none, but \code{ExecEnvir$execute} will be generated.
     rave_execute = function(..., auto = TRUE, .env = NULL, async_vars = NULL){
-      quos = rlang::quos_auto_name(rlang::quos(...))
-      quos = sapply(quos, rlang::quo_squash, simplify = FALSE, USE.NAMES = TRUE)
+      quos <- rlang::quos_auto_name(rlang::quos(...))
+      quos <- sapply(quos, rlang::quo_squash, simplify = FALSE, USE.NAMES = TRUE)
 
-      normal_quos = quos[!names(quos) %in% 'async']
-      private$executes = c(private$executes, normal_quos)
-      async_quo = quos[['async']]
-      self$async_module = !is.null(async_quo)
-      self$auto_execute = auto
+      normal_quos <- quos[!names(quos) %in% 'async']
+      private$executes <- c(private$executes, normal_quos)
+      async_quo <- quos[['async']]
+      self$async_module <- !is.null(async_quo)
+      self$auto_execute <- auto
 
-      self$execute = function(async = FALSE, force = FALSE){
+      self$execute <- function(async = FALSE, force = FALSE){
         if(!force && !self$auto_execute){
           return()
         }
-        self$runtime_env$.is_async = async
-        async_future = NULL
+        self$runtime_env$.is_async <- async
+        async_future <- NULL
         
 
         if(async){
           if(self$async_module){
             clear_env(self$async_env)
-            self$async_env[['..async_quo']] = async_quo
-            self$async_env[['..async_var']] = async_vars
+            self$async_env[['..async_quo']] <- async_quo
+            self$async_env[['..async_var']] <- async_vars
 
-            packages = stringr::str_match(search(), '^package:(.+)$')[,2] 
-            packages = packages[!is.na(packages)]
-            packages = unique(packages, self$module_env$packages)
+            packages <- stringr::str_match(search(), '^package:(.+)$')[,2] 
+            packages <- packages[!is.na(packages)]
+            packages <- unique(packages, self$module_env$packages)
 
-            self$param_env$..rave_future_obj =
+            self$param_env$..rave_future_obj <-
               future::future({
                 dipsaus::eval_dirty(..async_quo)#, env = async_env)
                 if(is.null(..async_var)){
                   return(environment())
                 }else{
-                  re = sapply(..async_var, get0, simplify = FALSE, USE.NAMES = TRUE)
+                  re <- sapply(..async_var, get0, simplify = FALSE, USE.NAMES = TRUE)
                   re
                 }
               }, packages = packages, evaluator = future::multiprocess, 
@@ -939,16 +939,16 @@ ExecEnvir <- R6::R6Class(
     #' @param session shiny session instance
     set_browser = function(expr, session = getDefaultReactiveDomain()){
       if(is.null(session)){
-        session = private$session
+        session <- private$session
       }
 
-      current_key = add_to_session(session)
+      current_key <- add_to_session(session)
 
-      children_keys = add_to_session(session, 'rave_linked_by', NULL)
-      children_keys = children_keys[!children_keys %in% current_key]
+      children_keys <- add_to_session(session, 'rave_linked_by', NULL)
+      children_keys <- children_keys[!children_keys %in% current_key]
       # children_keys = unique(c(current_key, children_keys))
 
-      module_id = self$module_env$module_id
+      module_id <- self$module_env$module_id
 
       lapply(children_keys, function(storage_key){
         session$sendCustomMessage('rave_set_storage', list(
@@ -965,30 +965,30 @@ ExecEnvir <- R6::R6Class(
     #' @param sidebar_width integer from 1 to 11, the width of the input panels
     #' @return HTML tags
     generate_input_ui = function(sidebar_width = 3L){
-      ns = self$ns
+      ns <- self$ns
       # env = environment()
 
-      more_btns = list(
+      more_btns <- list(
         # vignette = tags$li(actionLink(self$ns('..vignette'), 'Show Module Description')),
         async = tags$li(actionLink(self$ns('..async_run'), 'Run Algorithm (Async)')),
         export = tags$li(actionLink(self$ns('..incubator'), 'Exports'))
       )
 
       # exports
-      export_func = names(as.list(self$static_env))
-      is_export_func = vapply(export_func, function(x){
+      export_func <- names(as.list(self$static_env))
+      is_export_func <- vapply(export_func, function(x){
         is.function(self$static_env[[x]]) && stringr::str_detect(x, 'export_')
       }, FUN.VALUE = logical(1))
       if(length(is_export_func) == 0 || sum(is_export_func) == 0){
-        more_btns[['export']] = NULL
+        more_btns[['export']] <- NULL
       }
 
       # Async
       if(!self$async_module){
-        more_btns[['async']] = NULL
+        more_btns[['async']] <- NULL
       }
 
-      more_ui = NULL
+      more_ui <- NULL
       
       # TODO: do we really want more...? 
       # if(length(more_btns)){
@@ -1007,7 +1007,7 @@ ExecEnvir <- R6::R6Class(
 
 
       if(sidebar_width == 0){
-        sidebar_width = '3 hidden';
+        sidebar_width <- '3 hidden'
       }
 
       div(
@@ -1027,7 +1027,7 @@ ExecEnvir <- R6::R6Class(
     #' the output panel width is calculated as \code{12-sidebar_width}
     #' @return HTML tags
     generate_output_ui = function(sidebar_width = 3L){
-      ns = self$ns
+      ns <- self$ns
       # env = environment()
       div(
         class = sprintf('col-sm-%d rave-output-panel', 12L - sidebar_width),
@@ -1041,12 +1041,12 @@ ExecEnvir <- R6::R6Class(
     #' Please use \code{cache_input} instead to get variable values.
     #' @param inputId input ID
     is_global = function(inputId){
-      tabsets = private$tabsets
+      tabsets <- private$tabsets
       if(length(tabsets) == 0){
         return(FALSE)
       }
-      nms = names(tabsets)
-      ts = unlist(tabsets[stringr::str_detect(stringr::str_to_lower(nms), 'global')])
+      nms <- names(tabsets)
+      ts <- unlist(tabsets[stringr::str_detect(stringr::str_to_lower(nms), 'global')])
       if(length(ts) == 0){
         return(FALSE)
       }
@@ -1062,15 +1062,15 @@ ExecEnvir <- R6::R6Class(
     
     #' @field input_labels vector of input labels (read-only)
     input_labels = function(){
-      re = lapply(private$inputs$comp, function(x){x$args$label})
-      names(re) = names(private$inputs$comp)
+      re <- lapply(private$inputs$comp, function(x){x$args$label})
+      names(re) <- names(private$inputs$comp)
       return(re)
     },
     
     #' @field output_labels vector of output labels (read-only)
     output_labels = function(){
-      re = lapply(private$outputs$comp, function(x){x$label})
-      names(re) = names(private$outputs$comp)
+      re <- lapply(private$outputs$comp, function(x){x$label})
+      names(re) <- names(private$outputs$comp)
       return(re)
     },
     

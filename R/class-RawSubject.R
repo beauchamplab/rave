@@ -33,7 +33,7 @@ SubjectInfo2 <- R6::R6Class(
     
     # Init
     initialize = function(project_name, subject_code, strict = TRUE){
-      self$dirs = get_dir(subject_code = subject_code, project_name = project_name)
+      self$dirs <- get_dir(subject_code = subject_code, project_name = project_name)
       if(strict && !dir.exists(self$dirs$pre_subject_dir)){
         stop('Subject NOT Found!')
       }
@@ -41,82 +41,82 @@ SubjectInfo2 <- R6::R6Class(
       get_dir(subject_code = subject_code, project_name = project_name,
               mkdirs = 'preprocess_dir')
       
-      self$project_name = project_name
-      self$subject_code = subject_code
-      private$settings_file = file.path(self$dirs$preprocess_dir, 'rave.yaml')
-      private$log_file = file.path(self$dirs$preprocess_dir, 'log.csv')
+      self$project_name <- project_name
+      self$subject_code <- subject_code
+      private$settings_file <- file.path(self$dirs$preprocess_dir, 'rave.yaml')
+      private$log_file <- file.path(self$dirs$preprocess_dir, 'log.csv')
       
       
       # load available info
-      self$available_blocks = list.dirs(self$dirs$pre_subject_dir, full.names = F, recursive = F)
+      self$available_blocks <- list.dirs(self$dirs$pre_subject_dir, full.names = FALSE, recursive = FALSE)
       # self$available_channels
       
       
       
-      self$logger = RAVEHistory$new(
+      self$logger <- RAVEHistory$new(
         path = self$dirs$preprocess_dir,
         name = 'rave.yaml', use_yaml = TRUE
       )
-      self$cacher = RAVEHistory$new(
+      self$cacher <- RAVEHistory$new(
         path = self$dirs$preprocess_dir,
         name = 'rave.RData', use_yaml = FALSE
       )
       
-      self$blocks = self$logger$get_or_save('blocks')
-      self$channels = self$logger$get_or_save('channels')
-      self$srate = self$logger$get_or_save('srate')
-      self$badchan = self$logger$get_or_save('badchan')
-      self$epichan = self$logger$get_or_save('epichan')
-      self$exclchan = self$logger$get_or_save('exclchan')
+      self$blocks <- self$logger$get_or_save('blocks')
+      self$channels <- self$logger$get_or_save('channels')
+      self$srate <- self$logger$get_or_save('srate')
+      self$badchan <- self$logger$get_or_save('badchan')
+      self$epichan <- self$logger$get_or_save('epichan')
+      self$exclchan <- self$logger$get_or_save('exclchan')
       
-      self$valid = TRUE
+      self$valid <- TRUE
     },
     set_blocks = function(blocks, force = FALSE){
-      is_changed = FALSE
+      is_changed <- FALSE
       if(!force){
-        blocks = blocks[blocks %in% self$available_blocks]
+        blocks <- blocks[blocks %in% self$available_blocks]
       }
       if(!base::setequal(self$blocks, blocks)){
-        self$blocks = blocks
-        is_changed = TRUE
+        self$blocks <- blocks
+        is_changed <- TRUE
       }
       return(is_changed)
     },
     set_channels = function(channels, name = 'channels'){
-      is_changed = FALSE
+      is_changed <- FALSE
       if(name == 'channels'){
         if(!setequal(self[[name]], channels)){
-          self$channels = channels
-          is_changed = TRUE
+          self$channels <- channels
+          is_changed <- TRUE
         }
         
       }else{
-        channels = channels[channels %in% self$channels]
+        channels <- channels[channels %in% self$channels]
         if(!setequal(self[[name]], channels)){
           assign(name, channels, envir = self)
-          is_changed = TRUE
+          is_changed <- TRUE
         }
       }
       return(is_changed)
     },
     save = function(action = '', message = '', ...){
-      defaults = data.frame(
+      defaults <- data.frame(
         Index = 0,
         Date = strftime(Sys.time(), '%Y-%m-%d %H:%M:%S %Z'),
         Action = 'Initialization',
         Message = sprintf('Subject folder created - %s', base::normalizePath(self$dirs$subject_dir)),
-        stringsAsFactors = F
+        stringsAsFactors = FALSE
       )
-      history = self$logger$get_or_save('log', defaults, save = TRUE, inherits = FALSE)
+      history <- self$logger$get_or_save('log', defaults, save = TRUE, inherits = FALSE)
       # if(!is.data.frame(history)){
       #   history = defaults
       # }
-      history = rbind(data.frame(
+      history <- rbind(data.frame(
         Index = max(history$Index) + 1,
         Date = strftime(Sys.time(), '%Y-%m-%d %H:%M:%S %Z'),
         Action = action,
         Message = message,
-        stringsAsFactors = F
+        stringsAsFactors = FALSE
       ), history)
       
       self$logger$save(

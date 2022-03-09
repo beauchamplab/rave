@@ -56,21 +56,21 @@ rave_prepare <- function(
   if(!missing(frequency_range)){
     catgl('Frequencies: ', (frequency_range[1]), ' Hz - to: ', frequency_range[2], ' Hz.')
   }else{
-    frequency_range = NULL
+    frequency_range <- NULL
     catgl('Frequencies: All')
   }
   if(is.character(subject)){
-    subject_split = unlist(strsplit(subject, '/|\\\\'))
-    subject = Subject$new(project_name = subject_split[[1]], subject_code = subject_split[[2]], reference = reference, strict = strict)
+    subject_split <- unlist(strsplit(subject, '/|\\\\'))
+    subject <- Subject$new(project_name = subject_split[[1]], subject_code = subject_split[[2]], reference = reference, strict = strict)
   }
 
-  subject$is_strict = strict
+  subject$is_strict <- strict
 
-  repo = ECoGRepository$new(subject = subject, autoload = FALSE, reference = reference)
+  repo <- ECoGRepository$new(subject = subject, autoload = FALSE, reference = reference)
   repo$load_electrodes(electrodes = electrodes, reference = reference)
 
   # Set epoch information
-  tmp = c('power', 'phase', 'volt'); tmp = tmp[tmp %in% data_types]
+  tmp <- c('power', 'phase', 'volt'); tmp <- tmp[tmp %in% data_types]
   repo$epoch(
     epoch_name = epoch,
     pre = time_range[1],
@@ -84,31 +84,31 @@ rave_prepare <- function(
   
 
   # Register to data_env
-  subject = repo$subject
-  meta = subject$meta
-  meta[['epoch_data']] = load_meta('epoch', subject_id = subject$subject_id, meta_name = epoch)
-  meta[['epoch_info']] = list(
+  subject <- repo$subject
+  meta <- subject$meta
+  meta[['epoch_data']] <- load_meta('epoch', subject_id = subject$subject_id, meta_name = epoch)
+  meta[['epoch_info']] <- list(
     name = epoch,
     time_range = time_range
   )
   # Change frequencies if specified
-  freqs = subject$frequencies$Frequency
+  freqs <- subject$frequencies$Frequency
   if(!is.null(frequency_range)){
-    freq_subset = freqs %within% frequency_range
+    freq_subset <- freqs %within% frequency_range
     if(!sum(freq_subset)){
-      freq_subset[which.min(abs(freqs - frequency_range[1]))] = TRUE
+      freq_subset[which.min(abs(freqs - frequency_range[1]))] <- TRUE
     }
-    freqs = freqs[freq_subset]
+    freqs <- freqs[freq_subset]
   }
-  data_env$.private = new.env(parent = baseenv())
-  data_env$.private$repo = repo
-  data_env$.private$meta = meta
-  data_env$.private$preproc_tools = rave_preprocess_tools()
+  data_env$.private <- new.env(parent = baseenv())
+  data_env$.private$repo <- repo
+  data_env$.private$meta <- meta
+  data_env$.private$preproc_tools <- rave_preprocess_tools()
   data_env$.private$preproc_tools$check_load_subject(subject_code = subject$subject_code, project_name = subject$project_name, strict = subject$is_strict)
-  data_env$data_check = check_subjects2(project_name = subject$project_name,
+  data_env$data_check <- check_subjects2(project_name = subject$project_name,
                                                subject_code = subject$subject_code, quiet = TRUE)
-  data_env$subject = subject
-  data_env$preload_info = list(
+  data_env$subject <- subject
+  data_env$preload_info <- list(
     epoch_name = data_env$.private$meta$epoch_info$name,
     reference_name = reference,
     time_points = seq(-time_range[1], time_range[2], by = 1/subject$sample_rate),
@@ -116,16 +116,16 @@ rave_prepare <- function(
     frequencies = freqs,
     condition = unique(data_env$.private$meta$epoch_data$Condition)
   )
-  data_env$.module_data = new.env(parent = baseenv())
+  data_env$.module_data <- new.env(parent = baseenv())
   # Load other data
-  other_data_types = data_types[!data_types %in% c('power', 'volt')]
+  other_data_types <- data_types[!data_types %in% c('power', 'volt')]
   if(length(other_data_types)){
-    module_data_dir = subject$dirs$module_data_dir
+    module_data_dir <- subject$dirs$module_data_dir
     lapply(other_data_types, function(path){
       data_env$.module_data[[path]] %?<-% new.env(parent = emptyenv())
       lapply(list.files(file.path(module_data_dir, path)), function(name){
-        re = data_env$module_tools$get_subject_data(path = path, name = name)
-        data_env$.module_data[[path]][[name]] = re
+        re <- data_env$module_tools$get_subject_data(path = path, name = name)
+        data_env$.module_data[[path]][[name]] <- re
         NULL
       })
       NULL
@@ -133,16 +133,16 @@ rave_prepare <- function(
   }
 
   # register util functions
-  data_env$module_tools = rave_module_tools(data_env = data_env)
+  data_env$module_tools <- rave_module_tools(data_env = data_env)
 
 
   ##### Attach data_env #####
   if(attach != FALSE){
     if('rave_data' %in% search()){
-      base::detach('rave_data', character.only = T, force = T)
+      base::detach('rave_data', character.only = TRUE, force = TRUE)
     }
 
-    rave_idx = which(search() == "package:rave")
+    rave_idx <- which(search() == "package:rave")
 
     if(length(rave_idx)){
       do.call('attach', list(data_env, name = 'rave_data', pos = rave_idx))
@@ -153,17 +153,17 @@ rave_prepare <- function(
 
 
     if(attach == TRUE || attach %in% c('R', 'r')){
-      prefix = ''
-      dev_env = 'r'
+      prefix <- ''
+      dev_env <- 'r'
     }else if (stringr::str_to_lower(attach) %in% c('py2', 'py3')){
-      prefix = 'r.'
-      dev_env = 'python'
-      dev_ver = stringr::str_to_lower(attach)
+      prefix <- 'r.'
+      dev_env <- 'python'
+      dev_ver <- stringr::str_to_lower(attach)
     }
 
     catgl('Environment for subject [', subject$id, '] has been created!',
            ' Here are some variables that can be used directly: ', level = 'INFO')
-    for(nm in ls(envir = data_env, all.names = F)){
+    for(nm in ls(envir = data_env, all.names = FALSE)){
       cat('- ', prefix, nm, '\n', sep = '')
     }
     catgl('Check ?rave_prepare for details.', level = 'INFO')
@@ -173,7 +173,7 @@ rave_prepare <- function(
       # py_console(py3 = (dev_ver == 'py3'))
     }
   }
-  re = data_env
+  re <- data_env
   re
 }
 

@@ -37,6 +37,9 @@ raveio::catgl
 #' @export
 dipsaus::clear_env
 
+#' @export
+raveio::get_projects
+
 # ------ 
 
 # icons
@@ -73,11 +76,11 @@ MNI305_to_MNI152 <- matrix(c(
 ), nrow = 4, byrow = TRUE)
 
 
-debug_mode = FALSE
+debug_mode <- FALSE
 
 toggle_debug <- function(on){
   if(missing(on)){
-    on = !debug_mode
+    on <- !debug_mode
   }
   debug_mode <<- on
   on
@@ -95,21 +98,21 @@ debug <- function(..., .envir = parent.frame(), level = 'DEBUG'){
 }
 
 soft_deprecated <- function(){
-  env = parent.frame()
-  call = do.call(match.call, envir = env, args = list())
+  env <- parent.frame()
+  call <- do.call(match.call, envir = env, args = list())
   catgl('Function {call[[1]]} is soft-Deprecated. Details: \n{deparse(call)}', level = 'WARNING')
 }
 
 hard_deprecated <- function(){
-  env = parent.frame()
-  call = do.call(match.call, envir = env, args = list())
+  env <- parent.frame()
+  call <- do.call(match.call, envir = env, args = list())
   catgl('Function {call[[1]]} is soft-Deprecated. Details: \n{deparse(call)}', level = 'FATAL')
 }
 
 
 # override tempfile
 subject_cache_dir <- function(){
-  re = rave_options('tensor_temp_path')
+  re <- rave_options('tensor_temp_path')
   if(length(re) != 1 || !is.character(re) || re %in% c('', '/', '~')){
     re <-  '~/rave_data/cache_dir'
   }
@@ -122,8 +125,8 @@ do_nothing <- dipsaus::do_nothing
 
 ### Stores internal settings (session-based)
 ..setup_env <- new.env(parent = baseenv())
-..setup_env$..setup_env = ..setup_env
-..setup_env$finalizers = list()
+..setup_env$..setup_env <- ..setup_env
+..setup_env$finalizers <- list()
 
 get_conf <- function(key, default = NULL){
   soft_deprecated()
@@ -139,7 +142,7 @@ set_conf <- function(key, val, remove_if_null = TRUE){
   if(remove_if_null && (missing(val) || is.null(val))){
     rm(list = key, envir = ..setup_env, inherits = FALSE)
   }else{
-    ..setup_env[[key]] = val
+    ..setup_env[[key]] <- val
   }
 }
 
@@ -162,27 +165,27 @@ rave_context_list <- list(
   running = 'rave_running',                   # RAVE is running in shiny           has package and module
   run_local = 'rave_running_local'            # RAVE is running locally            has package and module
 )
-rave_context_c = unlist(rave_context_list)
+rave_context_c <- unlist(rave_context_list)
 
 rave_debug <- function(local=TRUE){
-  genv = globalenv()
-  genv$.__rave_context__. = 'rave_module_debug'
-  genv$.__rave_package__. = 'ravebuiltins'
-  genv$.__rave_module__. = 'power_explorer'
+  genv <- globalenv()
+  genv$.__rave_context__. <- 'rave_module_debug'
+  genv$.__rave_package__. <- 'ravebuiltins'
+  genv$.__rave_module__. <- 'power_explorer'
   if(!local){
     
-    m = to_module('power_explorer')
-    genv$.__rave_context__. = 'rave_running'
-    genv$.__rave_module_instance__. = m$get_or_new_exec_env()
+    m <- to_module('power_explorer')
+    genv$.__rave_context__. <- 'rave_running'
+    genv$.__rave_module_instance__. <- m$get_or_new_exec_env()
   }
   
   
-  genv$module_id = 'power_explorer'
-  genv$package = 'ravebuiltins'
+  genv$module_id <- 'power_explorer'
+  genv$package <- 'ravebuiltins'
 }
 
 get_running_instance <- function(senv, test = TRUE){
-  has = exists('.__rave_module_instance__.', envir = senv, inherits = TRUE)
+  has <- exists('.__rave_module_instance__.', envir = senv, inherits = TRUE)
   if(test){
     return(has)
   }
@@ -360,25 +363,25 @@ rave_context <- function(context, require_contexts, disallowed_context,
                         error_msg, spos = 2L, senv,
                         tpos = 1L, tenv){
   if(missing(tenv)){
-    tenv = parent.frame(tpos)
+    tenv <- parent.frame(tpos)
   }
   # if(missing(senv)){
   #   senv = parent.frame(spos)
   # }
   if(missing(senv)){
-    sys_parents = rev(sys.parents())
-    idx = which(sys_parents == 0)
+    sys_parents <- rev(sys.parents())
+    idx <- which(sys_parents == 0)
     if(length(idx)){
-      sys_parents = sys_parents[seq_len(idx[[1]])]
+      sys_parents <- sys_parents[seq_len(idx[[1]])]
     }
     if(spos >= 2L){
-      sys_parents = sys_parents[-seq_len(spos-1)]
+      sys_parents <- sys_parents[-seq_len(spos-1)]
     }
     
-    senv = parent.frame()
+    senv <- parent.frame()
     for(n in sys_parents){
       if(exists('.__rave_context__.', frame = n)){
-        senv = sys.frame(n)
+        senv <- sys.frame(n)
         break()
       }
     }
@@ -388,10 +391,10 @@ rave_context <- function(context, require_contexts, disallowed_context,
   #   senv = sys.frame(spos)
   # }
   if(missing(context)){
-    context = get0('.__rave_context__.', envir = senv, ifnotfound = 'default', inherits = TRUE)
+    context <- get0('.__rave_context__.', envir = senv, ifnotfound = 'default', inherits = TRUE)
   }
   
-  call = paste(deparse(do.call(sys.call, list(), envir = senv)), collapse = '')
+  call <- paste(deparse(do.call(sys.call, list(), envir = senv)), collapse = '')
   
   if(!missing(require_contexts)){
     if(!all(require_contexts %in% context)){
@@ -417,7 +420,7 @@ rave_context <- function(context, require_contexts, disallowed_context,
   }
   
   if(!missing(disallowed_context)){
-    sel = context %in% disallowed_context
+    sel <- context %in% disallowed_context
     if(any(sel)){
       # calls = sys.calls()
       # lapply(seq_along(calls), function(ii){
@@ -455,29 +458,29 @@ rave_context <- function(context, require_contexts, disallowed_context,
   
   
   
-  package = get0('.__rave_package__.', envir = senv, inherits = TRUE, ifnotfound = '')
-  moduleid = get0('.__rave_module__.', envir = senv, inherits = TRUE, ifnotfound = '')
-  instance = NULL
+  package <- get0('.__rave_package__.', envir = senv, inherits = TRUE, ifnotfound = '')
+  moduleid <- get0('.__rave_module__.', envir = senv, inherits = TRUE, ifnotfound = '')
+  instance <- NULL
   
-  context = context[context %in% rave_context_c]
+  context <- context[context %in% rave_context_c]
   if(!length(context)){
-    context = 'default'
+    context <- 'default'
   }
-  tenv$.__rave_context__. = context
+  tenv$.__rave_context__. <- context
   
   if('rave_running' %in% context){
-    tenv$.__rave_package__. = package
-    tenv$.__rave_module__. = moduleid
+    tenv$.__rave_package__. <- package
+    tenv$.__rave_module__. <- moduleid
     if(!get_running_instance(senv)){
       catgl('RAVE is running but no instance is found', level = 'WARNING')
     }
-    instance = get_running_instance(senv, test = FALSE)
-    tenv$.__rave_module_instance__. = instance
+    instance <- get_running_instance(senv, test = FALSE)
+    tenv$.__rave_module_instance__. <- instance
   }else if('rave_running_local' %in% context){
-    tenv$.__rave_package__. = package
-    tenv$.__rave_module__. = moduleid
+    tenv$.__rave_package__. <- package
+    tenv$.__rave_module__. <- moduleid
   }else if('rave_module_debug' %in% context){
-    tenv$.__rave_package__. = package
+    tenv$.__rave_package__. <- package
   }
   invisible(list(
     context = context,
@@ -500,7 +503,7 @@ rave_context_generics <- function(fun_name, fun = function(){}){
   stopifnot2(is.character(fun_name), msg = 'fun_name must be characters')
   
   body(fun) <- rlang::quo_squash(rlang::quo({
-    .__rave_temp__. = rave_context()
+    .__rave_temp__. <- rave_context()
     # cat2(!!fun_name, ' - ', paste(unlist(.__rave_temp__.), collapse = ','))
     UseMethod(!!fun_name, structure(list(), class = .__rave_temp__.$context))
   }))

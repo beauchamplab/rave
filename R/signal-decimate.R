@@ -15,7 +15,7 @@ fir1 <- function (n, w, type = c("low", "high", "stop", "pass", "DC-0", "DC-1"),
   ftype <- tolower(type) %in% c("low", "stop", "dc-1")
   bands <- length(w) + 1
   f <- numeric(2 * bands)
-  f[2 * bands] = 1
+  f[2 * bands] <- 1
   f[seq(2, 2 * bands - 1, by = 2)] <- w
   f[seq(3, 2 * bands - 1, by = 2)] <- w
   m <- numeric(2 * bands)
@@ -32,7 +32,7 @@ fir1 <- function (n, w, type = c("low", "high", "stop", "pass", "DC-0", "DC-1"),
       ## use the gain at half the sample frequency
       w_o <- 1
     }else{
-      w_o <- f(3) + (f(4)-f(3))/2;
+      w_o <- f(3) + (f(4)-f(3))/2
     }
     renorm <- 1/abs(signal::polyval(b, exp(-(0+1i) * pi * w_o)))
     b <- renorm * b
@@ -59,7 +59,7 @@ decimate <- function (x, q, n = if (ftype == "iir") 8 else 30, ftype = "iir") {
     lpad <- 2*x[1] - x[(nfilt+1):2]
     rpad <- 2*x[l_x] - x[l_x - (1:nfilt)]
     y <- signal::fftfilt(b, c(lpad, x, rpad))
-    y = y[ceiling(nfilt + n/2) + (1:l_x)]
+    y <- y[ceiling(nfilt + n/2) + (1:l_x)]
   }
   else {
     b <- signal::cheby1(n, 0.05, 0.8/q)

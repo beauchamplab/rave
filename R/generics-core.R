@@ -12,7 +12,7 @@ prepend_ns <- function(arg, call){
 #' @return An \code{\link[rave]{ExecEnvir}} instance
 #' @export
 getExecEnvirFromContext <- function(){
-  ctx = rave_context()
+  ctx <- rave_context()
   ctx$instance
 }
 
@@ -21,9 +21,9 @@ getExecEnvirFromContext <- function(){
 #' @return An \code{\link[rave]{ModuleEnvir}} instance
 #' @export
 getModuleEnvirFromContext <- function(){
-  e = getExecEnvirFromContext()
+  e <- getExecEnvirFromContext()
   if(!is.null(e)){
-    e = e$module_env
+    e <- e$module_env
   }
   e
 }

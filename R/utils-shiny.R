@@ -1,6 +1,6 @@
 
 safe_wrap_expr <- function(expr, onFailure = NULL, onError = NULL, finally = {}){
-  ...internal_expr... = substitute(expr)
+  ...internal_expr... <- substitute(expr)
   withRestarts({
     
     tryCatch({
@@ -59,19 +59,19 @@ safe_wrap_expr <- function(expr, onFailure = NULL, onError = NULL, finally = {})
 
 observe <- function(x, env = NULL, quoted = FALSE, priority = 0, domain = NULL, ...){
   if(!quoted){
-    x = substitute(x)
+    x <- substitute(x)
   }
   
   # Make sure shiny doesn't crash
-  x = rlang::quo_squash(rlang::quo(
+  x <- rlang::quo_squash(rlang::quo(
     safe_wrap_expr(!!x)
   ))
   
   if(!is.environment(env)){
-    env = parent.frame()
+    env <- parent.frame()
   }
   if(is.null(domain)){
-    domain = getDefaultReactiveDomain()
+    domain <- getDefaultReactiveDomain()
   }
   shiny::observe(
     x = x,
@@ -84,35 +84,35 @@ observe <- function(x, env = NULL, quoted = FALSE, priority = 0, domain = NULL, 
 }
 
 
-observeEvent = function(
+observeEvent <- function(
   eventExpr, handlerExpr, event.env = NULL,
   event.quoted = FALSE, handler.env = NULL, handler.quoted = FALSE,
   priority = 0, domain = NULL, ...
 ){
   if(!event.quoted){
-    eventExpr = substitute(eventExpr)
+    eventExpr <- substitute(eventExpr)
   }
   if(!is.environment(event.env)){
-    event.env = parent.frame()
+    event.env <- parent.frame()
   }
   
   if(!handler.quoted){
-    handlerExpr = substitute(handlerExpr)
+    handlerExpr <- substitute(handlerExpr)
   }
   if(!is.environment(handler.env)){
-    handler.env = parent.frame()
+    handler.env <- parent.frame()
   }
   if(is.null(domain)){
-    domain = getDefaultReactiveDomain()
+    domain <- getDefaultReactiveDomain()
   }
   
   # Make sure shiny doesn't crash
-  eventExpr = rlang::quo_squash(rlang::quo(
+  eventExpr <- rlang::quo_squash(rlang::quo(
     safe_wrap_expr(!!eventExpr)
   ))
   
   
-  handlerExpr = rlang::quo_squash(rlang::quo(
+  handlerExpr <- rlang::quo_squash(rlang::quo(
     safe_wrap_expr(!!handlerExpr)
   ))
   
@@ -146,35 +146,35 @@ add_to_session <- function(
 #' @return Fake shiny session for debug purpose
 #' @export
 fake_session <- function(rave_id = '__fake_session__', id = NULL){
-  self_id = id
-  fakesession = new.env()
+  self_id <- id
+  fakesession <- new.env()
   
-  shiny = asNamespace('shiny')
+  shiny <- asNamespace('shiny')
   list2env(as.list(shiny$createMockDomain()), fakesession)
   
-  fakesession$sendInputMessage = function(inputId, message){
+  fakesession$sendInputMessage <- function(inputId, message){
     return(message)
   }
-  fakesession$userData = new.env(parent = emptyenv())
-  fakesession$userData$rave_id = rave_id
-  fakesession$ns = shiny::NS(id)
+  fakesession$userData <- new.env(parent = emptyenv())
+  fakesession$userData$rave_id <- rave_id
+  fakesession$ns <- shiny::NS(id)
   
-  fakesession$makeScope = function(id = NULL){
+  fakesession$makeScope <- function(id = NULL){
     if( identical(self_id, id) ){
       return(fakesession)
     }else{
-      re = fake_session(rave_id = rave_id, id = id)
-      re$userData = fakesession$userData
+      re <- fake_session(rave_id = rave_id, id = id)
+      re$userData <- fakesession$userData
       return(re)
     }
   }
   
-  fakesession$rootScope = function(){
+  fakesession$rootScope <- function(){
     if(is.null(self_id)){
       return(fakesession)
     }else{
-      re = fake_session(rave_id = rave_id, id = NULL)
-      re$userData = fakesession$userData
+      re <- fake_session(rave_id = rave_id, id = NULL)
+      re$userData <- fakesession$userData
       return(re)
     }
   }
@@ -183,8 +183,8 @@ fake_session <- function(rave_id = '__fake_session__', id = NULL){
 }
 
 with_fake_session <- function(func, ...){
-  fakesession = new.env()
-  fakesession$sendInputMessage = function(inputId, message){
+  fakesession <- new.env()
+  fakesession$sendInputMessage <- function(inputId, message){
     return(message)
   }
   local({
@@ -197,17 +197,17 @@ with_fake_session <- function(func, ...){
 #' @param .args same as ...
 #' @param .func function to pass to with_fake_session
 get_fake_updated_message <- function(..., .args = list(), .func = NULL){
-  .args = c(
+  .args <- c(
     list(...),
     .args
   )
-  .args = dipsaus::drop_nulls(.args)
+  .args <- dipsaus::drop_nulls(.args)
   if(sum(names(.args) %in% c('choices', 'selected')) > 0){
-    .func = shiny::updateSelectInput
+    .func <- shiny::updateSelectInput
   }
   
   if(is.function(.func)){
-    .args = c(
+    .args <- c(
       func = .func,
       .args
     )
@@ -238,7 +238,7 @@ div_elastic <- function(css_selector, any = TRUE){
     re
   
   if(!missing(css_selector)){
-    re = htmltools::tagAppendAttributes(re, 'data-target' = css_selector)
+    re <- htmltools::tagAppendAttributes(re, 'data-target' = css_selector)
   }
   re
 }
@@ -250,7 +250,7 @@ expand_box <- function(
   collapsed = FALSE, box_link = NULL
 ){
   boxClass <- "box"
-  boxId = paste0(sample(c(LETTERS, letters, 0:9), 16), collapse = '')
+  boxId <- paste0(sample(c(LETTERS, letters, 0:9), 16), collapse = '')
   if (solidHeader || !is.null(background)) {
     boxClass <- paste(boxClass, "box-solid")
   }
@@ -325,72 +325,72 @@ expand_box <- function(
 
 
 
-parsers = new.env()
-parsers[['.default_parser']] = function(expr, env = environment()){
-  fun = eval(expr[[1]], envir = env)
-  width = eval(expr[['width']])
+parsers <- new.env()
+parsers[['.default_parser']] <- function(expr, env = environment()){
+  fun <- eval(expr[[1]], envir = env)
+  width <- eval(expr[['width']])
   if(length(width) != 1 || !is.numeric(width)){
-    width = 12L
+    width <- 12L
   }else{
-    expr[['width']] = NULL
+    expr[['width']] <- NULL
   }
   
-  expr = match.call(
+  expr <- match.call(
     definition = fun,
     call = expr
   )
-  outputId = expr[['outputId']]
-  inputId = expr[['inputId']]
+  outputId <- expr[['outputId']]
+  inputId <- expr[['inputId']]
   if(length(inputId)){
     # this is an input
-    expr[['inputId']] = as.call(list(quote(ns), inputId))
-    observers = function(input, output, session, local_data, exec_env){
+    expr[['inputId']] <- as.call(list(quote(ns), inputId))
+    observers <- function(input, output, session, local_data, exec_env){
       observe({
         # rave_context(senv = exec_env, tpos = 1L)
         rave_context(senv = exec_env)
-        val = input[[inputId]]
-        t = Sys.time()
+        val <- input[[inputId]]
+        t <- Sys.time()
         
         # Make sure the data has been loaded
         if(isolate(local_data$has_data)){
           
           # Assign variables into param_env and runtime env so that rave_execute can access to the variables
-          exec_env$param_env[[inputId]] = val
-          exec_env$runtime_env[[inputId]] = val
+          exec_env$param_env[[inputId]] <- val
+          exec_env$runtime_env[[inputId]] <- val
           
           # Check variable type. By default it triggers rave_execute and refresh the whole process
           # However there are two exceptions
           if( inputId %in% exec_env$rendering_inputIds ){
             # this input only updates renderings, skip main
-            local_data$has_results = t
+            local_data$has_results <- t
           }else if( !inputId %in% exec_env$manual_inputIds ){
             # need to run rave_execute
             # cat2('Input ', inputId, ' is changed')
-            local_data$last_input = t
+            local_data$last_input <- t
           }
         }
         # cat2('Assigned input - ', inputId, sprintf(' (%.3f sec)', as.numeric(Sys.time() - t)))
       })
     }
-    updates = function(session, ..., .args = list()){
-      args = c(list(...), .args)
+    updates <- function(session, ..., .args = list()){
+      args <- c(list(...), .args)
       if(length(args) == 0){
         catgl('Nothing to update')
         return()
       }
-      fun_name = utils::tail(unlist(stringr::str_split(as.character(expr[[1]]), ':')), 1)
-      fun_name = stringr::str_c('update', stringr::str_to_upper(stringr::str_sub(fun_name, end = 1L)), stringr::str_sub(fun_name, start = 2L))
+      fun_name <- utils::tail(unlist(stringr::str_split(as.character(expr[[1]]), ':')), 1)
+      fun_name <- stringr::str_c('update', stringr::str_to_upper(stringr::str_sub(fun_name, end = 1L)), stringr::str_sub(fun_name, start = 2L))
       
       args[['inputId']] %?<-% inputId
-      args[['session']] = session
+      args[['session']] <- session
       
       if('' %in% names(args)){
-        nms = names(args)
-        sel = nms == 'value'
-        nms[which(nms == '')[1]] = 'value'
-        names(args) = nms
+        nms <- names(args)
+        sel <- nms == 'value'
+        nms[which(nms == '')[1]] <- 'value'
+        names(args) <- nms
         if(sum(sel)){
-          args = args[!sel]
+          args <- args[!sel]
         }
       }
       
@@ -398,19 +398,19 @@ parsers[['.default_parser']] = function(expr, env = environment()){
     }
   }else{
     # this is an output
-    expr[['outputId']] = as.call(list(quote(ns), outputId))
-    updates = function(session, ..., .args = list()){}
-    observers = function(input, output, session, local_data, exec_env){
+    expr[['outputId']] <- as.call(list(quote(ns), outputId))
+    updates <- function(session, ..., .args = list()){}
+    observers <- function(input, output, session, local_data, exec_env){
       if(length(outputId)){
-        fun_name = utils::tail(unlist(stringr::str_split(as.character(expr[[1]]), ':')), 1)
-        fun_name = stringr::str_c('render', stringr::str_to_upper(stringr::str_sub(fun_name, end = 1L)), stringr::str_sub(fun_name, start = 2L))
-        fun_name = stringr::str_replace(fun_name, 'Output', '')
+        fun_name <- utils::tail(unlist(stringr::str_split(as.character(expr[[1]]), ':')), 1)
+        fun_name <- stringr::str_c('render', stringr::str_to_upper(stringr::str_sub(fun_name, end = 1L)), stringr::str_sub(fun_name, start = 2L))
+        fun_name <- stringr::str_replace(fun_name, 'Output', '')
         
-        output[[outputId]] = do.call(fun_name, args = list(quote({
+        output[[outputId]] <- do.call(fun_name, args = list(quote({
           rave_context(senv = exec_env)
           local_data$show_results
           if(isolate(local_data$has_data)){
-            func = get0(outputId, envir = exec_env$param_env, inherits = TRUE)
+            func <- get0(outputId, envir = exec_env$param_env, inherits = TRUE)
             if(is.function(func)){
               func()
             }
@@ -420,7 +420,7 @@ parsers[['.default_parser']] = function(expr, env = environment()){
     }
   }
   
-  args = as.list(expr)[-1]
+  args <- as.list(expr)[-1]
   
   list(
     expr = expr,
@@ -436,23 +436,23 @@ parsers[['.default_parser']] = function(expr, env = environment()){
 }
 
 
-comp_parsers = list(
+comp_parsers <- list(
   set = function(fun_name, pkg_name, handler, .env = NULL){
     if(missing(pkg_name) || !length(pkg_name) || is.blank(pkg_name)){
-      pkg_name = '.default'
+      pkg_name <- '.default'
     }
     parsers[[pkg_name]] %?<-% list()
     .env %?<-% parsers
-    environment(handler) = .env
-    parsers[[pkg_name]][[fun_name]] = handler
+    environment(handler) <- .env
+    parsers[[pkg_name]][[fun_name]] <- handler
   },
   has = function(fun_name, pkg_name){
     if(missing(pkg_name) || !length(pkg_name) || is.blank(pkg_name)){
-      pkg_name = '.default'
+      pkg_name <- '.default'
     }
     parsers[[pkg_name]] %?<-% list()
     if(fun_name %in% names(parsers[[pkg_name]])){
-      ps = parsers[[pkg_name]][[fun_name]]
+      ps <- parsers[[pkg_name]][[fun_name]]
       if(is.function(ps)){
         return(TRUE)
       }else{
@@ -464,73 +464,73 @@ comp_parsers = list(
   },
   get = function(fun_name, pkg_name = '.default'){
     if(comp_parsers$has(fun_name, pkg_name)){
-      ps = parsers[[pkg_name]][[fun_name]]
+      ps <- parsers[[pkg_name]][[fun_name]]
     }else{
-      ps = parsers[['.default_parser']]
+      ps <- parsers[['.default_parser']]
     }
     
-    f = function(...){
-      re = ps(...)
+    f <- function(...){
+      re <- ps(...)
       if(pkg_name != '.default'){
-        fun = list(as.symbol('::'), as.symbol(pkg_name), as.symbol(fun_name))
-        re$expr[[1]] = as.call(fun)
+        fun <- list(as.symbol('::'), as.symbol(pkg_name), as.symbol(fun_name))
+        re$expr[[1]] <- as.call(fun)
       }
       re
     }
     return(f)
   },
   parse_quo = function(quo){
-    expr = rlang::quo_squash(quo)
-    env = rlang::quo_get_env(quo)
+    expr <- rlang::quo_squash(quo)
+    env <- rlang::quo_get_env(quo)
     stopifnot2(is.call(expr), msg = sprintf(
       'Need a function call but given: "%s"', deparse(expr)
     ))
     
-    fun = eval(expr[[1]], envir = env)
-    fun_expr = as.character(expr[[1]])
-    fun_name = utils::tail(fun_expr, 1)
+    fun <- eval(expr[[1]], envir = env)
+    fun_expr <- as.character(expr[[1]])
+    fun_name <- utils::tail(fun_expr, 1)
     if(length(fun_expr) > 1){
-      fun_pkg = fun_expr[2]
+      fun_pkg <- fun_expr[2]
     }else{
-      fun_env = environment(fun)
+      fun_env <- environment(fun)
       if(isNamespace(fun_env)){
-        fun_pkg = environmentName(fun_env)
+        fun_pkg <- environmentName(fun_env)
       }else{
-        fun_pkg = ''
+        fun_pkg <- ''
       }
     }
     
-    fun = comp_parsers$get(fun_name = fun_name, pkg_name = fun_pkg)
+    fun <- comp_parsers$get(fun_name = fun_name, pkg_name = fun_pkg)
     fun(expr, env)
   }
 )
 
 
 # register
-parsers[['shiny']] = list(
+parsers[['shiny']] <- list(
   'selectInput' = function(expr, env = environment()){
-    re = parsers[['.default_parser']](expr, env)
-    inputId = re$inputId
+    re <- parsers[['.default_parser']](expr, env)
+    inputId <- re$inputId
     
-    re$initial_value = re$args[['selected']]
+    re$initial_value <- re$args[['selected']]
     
-    re$updates = function(session, ..., .args = list()){
-      args = c(list(...), .args)
+    re$updates <- function(session, ..., .args = list()){
+      args <- c(list(...), .args)
       if(length(args) == 0){
         return()
       }
       
       args[['inputId']] %?<-% inputId
-      args[['session']] = session
+      args[['session']] <- session
       
-      sel = '' == names(args)
+      sel <- '' == names(args)
       if(any(sel)){
-        nms = names(args)
-        sel1 = nms == 'selected'
-        nms[sel] = 'selected'
-        names(args) = nms
+        nms <- names(args)
+        sel1 <- nms == 'selected'
+        nms[sel] <- 'selected'
+        names(args) <- nms
         if(sum(sel1)){
-          args = args[!sel1]
+          args <- args[!sel1]
         }
       }
       
@@ -541,15 +541,15 @@ parsers[['shiny']] = list(
     return(re)
   },
   'htmlOutput' = function(expr, env = environment()){
-    re = parsers[['.default_parser']](expr, env)
-    outputId = re$outputId
+    re <- parsers[['.default_parser']](expr, env)
+    outputId <- re$outputId
     
-    re$observers = function(input, output, session, local_data, exec_env){
-      output[[outputId]] = shiny::renderText({
+    re$observers <- function(input, output, session, local_data, exec_env){
+      output[[outputId]] <- shiny::renderText({
         rave_context(senv = exec_env)
         local_data$show_results
         if (isolate(local_data$has_data)) {
-          func = get0(outputId, envir = exec_env$param_env,
+          func <- get0(outputId, envir = exec_env$param_env,
                       inherits = TRUE)
           if (is.function(func)) {
             func()
@@ -560,15 +560,15 @@ parsers[['shiny']] = list(
     return(re)
   },
   'verbatimTextOutput' = function(expr, env = environment()){
-    re = parsers[['.default_parser']](expr, env)
-    outputId = re$outputId
+    re <- parsers[['.default_parser']](expr, env)
+    outputId <- re$outputId
     
-    re$observers = function(input, output, session, local_data, exec_env){
-      output[[outputId]] = shiny::renderPrint({
+    re$observers <- function(input, output, session, local_data, exec_env){
+      output[[outputId]] <- shiny::renderPrint({
         rave_context(senv = exec_env)
         local_data$show_results
         if (isolate(local_data$has_data)) {
-          func = get0(outputId, envir = exec_env$param_env,
+          func <- get0(outputId, envir = exec_env$param_env,
                       inherits = TRUE)
           if (is.function(func)) {
             func()
@@ -579,15 +579,15 @@ parsers[['shiny']] = list(
     return(re)
   },
   'plotOutput' = function(expr, env = environment()){
-    re = parsers[['.default_parser']](expr, env)
-    outputId = re$outputId
+    re <- parsers[['.default_parser']](expr, env)
+    outputId <- re$outputId
     
-    re$observers = function(input, output, session, local_data, exec_env){
-      output[[outputId]] = shiny::renderPlot({
+    re$observers <- function(input, output, session, local_data, exec_env){
+      output[[outputId]] <- shiny::renderPlot({
         rave_context(senv = exec_env)
         local_data$show_results
         if (isolate(local_data$has_data)) {
-          func = get0(outputId, envir = exec_env$param_env,
+          func <- get0(outputId, envir = exec_env$param_env,
                       inherits = TRUE)
           if (is.function(func)) {
             func()
@@ -595,21 +595,21 @@ parsers[['shiny']] = list(
         }
       })
     }
-    re$margin = -10
+    re$margin <- -10
     return(re)
   }
 )
 
-parsers[['DT']] = list(
+parsers[['DT']] <- list(
   'DTOutput' = function(expr, env = environment()){
-    re = parsers[['.default_parser']](expr, env)
-    outputId = re$outputId
-    re$observers = function(input, output, session, local_data, exec_env){
-      output[[outputId]] = DT::renderDT({
+    re <- parsers[['.default_parser']](expr, env)
+    outputId <- re$outputId
+    re$observers <- function(input, output, session, local_data, exec_env){
+      output[[outputId]] <- DT::renderDT({
         rave_context(senv = exec_env)
         local_data$show_results
         if (isolate(local_data$has_data)) {
-          func = get0(outputId, envir = exec_env$param_env,
+          func <- get0(outputId, envir = exec_env$param_env,
                       inherits = TRUE)
           if (is.function(func)) {
             func()
@@ -620,14 +620,14 @@ parsers[['DT']] = list(
     return(re)
   },
   'dataTableOutput' = function(expr, env = environment()){
-    re = parsers[['.default_parser']](expr, env)
-    outputId = re$outputId
-    re$observers = function(input, output, session, local_data, exec_env){
-      output[[outputId]] = DT::renderDataTable({
+    re <- parsers[['.default_parser']](expr, env)
+    outputId <- re$outputId
+    re$observers <- function(input, output, session, local_data, exec_env){
+      output[[outputId]] <- DT::renderDataTable({
         rave_context(senv = exec_env)
         local_data$show_results
         if (isolate(local_data$has_data)) {
-          func = get0(outputId, envir = exec_env$param_env,
+          func <- get0(outputId, envir = exec_env$param_env,
                       inherits = TRUE)
           if (is.function(func)) {
             func()
@@ -639,17 +639,17 @@ parsers[['DT']] = list(
   }
 )
 
-parsers[['dipsaus']] = list(
+parsers[['dipsaus']] <- list(
   'compoundInput2' = function(expr, env = environment()){
-    re = parsers[['.default_parser']](expr, env)
-    inputId = re$inputId
-    re$updates = function(session, ..., .args = list()){
-      args = c(list(...), .args)
+    re <- parsers[['.default_parser']](expr, env)
+    inputId <- re$inputId
+    re$updates <- function(session, ..., .args = list()){
+      args <- c(list(...), .args)
       
       if(length(args) == 0){
         return()
       }
-      args[['session']] = session
+      args[['session']] <- session
       args[['inputId']] %?<-% inputId
       
       do.call(dipsaus::updateCompoundInput2, args = args)
@@ -658,15 +658,15 @@ parsers[['dipsaus']] = list(
     return(re)
   },
   'actionButtonStyled' = function(expr, env = environment()){
-    re = parsers[['.default_parser']](expr, env)
-    inputId = re$inputId
-    re$updates = function(session, ..., .args = list()){
-      args = c(list(...), .args)
+    re <- parsers[['.default_parser']](expr, env)
+    inputId <- re$inputId
+    re$updates <- function(session, ..., .args = list()){
+      args <- c(list(...), .args)
       
       if(length(args) == 0){
         return()
       }
-      args[['session']] = session
+      args[['session']] <- session
       args[['inputId']] %?<-% inputId
       
       do.call(dipsaus::updateActionButtonStyled, args = args)
@@ -676,27 +676,27 @@ parsers[['dipsaus']] = list(
   }
 )
 
-parsers[['rave']] = list(
+parsers[['rave']] <- list(
   'customizedUI' = function(expr, env = environment()){
     # expr : customizedUI('id')
-    expr = match.call(customizedUI, expr)
-    inputId = expr[['inputId']]
-    width = eval(expr[['width']])
+    expr <- match.call(customizedUI, expr)
+    inputId <- expr[['inputId']]
+    width <- eval(expr[['width']])
     if(!is.null(width)){
-      expr[['width']] = NULL
+      expr[['width']] <- NULL
     }else{
-      width = 12L
+      width <- 12L
     }
-    args = as.list(expr)[-1];
+    args <- as.list(expr)[-1]
     
-    expr[['inputId']] = as.call(list(quote(ns), inputId))
+    expr[['inputId']] <- as.call(list(quote(ns), inputId))
     
-    expr[[1]] = quote(shiny::uiOutput)
-    observers = function(input, output, session, local_data, exec_env){
+    expr[[1]] <- quote(shiny::uiOutput)
+    observers <- function(input, output, session, local_data, exec_env){
       output[[inputId]] <- shiny::renderUI({
         rave_context(senv = exec_env)
         if(local_data$has_data){
-          func = exec_env$static_env[[inputId]]
+          func <- exec_env$static_env[[inputId]]
           tryCatch({
             if(is.function(func)){
               func()
@@ -723,17 +723,17 @@ parsers[['rave']] = list(
   }
 )
 
-parsers[['threeBrain']] = list(
+parsers[['threeBrain']] <- list(
   'threejsBrainOutput' = function(expr, env = environment()){
-    re = parsers[['.default_parser']](expr, env)
-    outputId = re$outputId
+    re <- parsers[['.default_parser']](expr, env)
+    outputId <- re$outputId
     
-    re$observers = function(input, output, session, local_data, exec_env){
-      output[[outputId]] = threeBrain::renderBrain({
+    re$observers <- function(input, output, session, local_data, exec_env){
+      output[[outputId]] <- threeBrain::renderBrain({
         rave_context(senv = exec_env)
         local_data$show_results
         if (isolate(local_data$has_data)) {
-          func = get0(outputId, envir = exec_env$param_env,
+          func <- get0(outputId, envir = exec_env$param_env,
                       inherits = TRUE)
           if (is.function(func)) {
             func()
@@ -741,34 +741,34 @@ parsers[['threeBrain']] = list(
         }
       })
     }
-    re$margin = -10
+    re$margin <- -10
     return(re)
   }
 )
 
 comp_parser_template <- function(expr, update_fun, env = environment(), keyword = 'selected'){
-  re = parsers[['.default_parser']](expr, env)
-  inputId = re$inputId
+  re <- parsers[['.default_parser']](expr, env)
+  inputId <- re$inputId
   
-  re$initial_value = re$args[[keyword]]
+  re$initial_value <- re$args[[keyword]]
   
-  re$updates = function(session, ..., .args = list()){
-    args = c(list(...), .args)
+  re$updates <- function(session, ..., .args = list()){
+    args <- c(list(...), .args)
     if(length(args) == 0){
       return()
     }
     
     args[['inputId']] %?<-% inputId
-    args[['session']] = session
+    args[['session']] <- session
     
-    sel = '' == names(args)
+    sel <- '' == names(args)
     if(any(sel)){
-      nms = names(args)
-      sel1 = nms == keyword
-      nms[sel] = keyword
-      names(args) = nms
+      nms <- names(args)
+      sel1 <- nms == keyword
+      nms[sel] <- keyword
+      names(args) <- nms
       if(sum(sel1)){
-        args = args[!sel1]
+        args <- args[!sel1]
       }
     }
     
@@ -777,17 +777,17 @@ comp_parser_template <- function(expr, update_fun, env = environment(), keyword 
   }
 }
 
-parsers[['shinyWidgets']] = list(
+parsers[['shinyWidgets']] <- list(
   'actionBttn' = function(expr, env = environment()){
-    re = parsers[['.default_parser']](expr, env)
-    inputId = re$inputId
-    re$updates = function(session, ..., .args = list()){
-      args = c(list(...), .args)
+    re <- parsers[['.default_parser']](expr, env)
+    inputId <- re$inputId
+    re$updates <- function(session, ..., .args = list()){
+      args <- c(list(...), .args)
       
       if(length(args) == 0){
         return()
       }
-      args[['session']] = session
+      args[['session']] <- session
       args[['inputId']] %?<-% inputId
       
       do.call(shiny::updateActionButton, args = args)
