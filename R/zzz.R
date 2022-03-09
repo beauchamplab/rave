@@ -148,11 +148,6 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
       }
     })
     lazy_install <- unlist(lazy_install)
-    repos <- c(
-      beauchamplab = 'https://beauchamplab.r-universe.dev',
-      dipterix = 'https://dipterix.r-universe.dev',
-      getOption("repos")
-    )
   } else {
     lazy_install <- c(lazy_install, 'ravebuiltins', 'rutabaga')
     if(update_rave){
@@ -160,10 +155,13 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
     }
     lazy_install <- c(lazy_install, c(
       'threeBrain', 'dipsaus', 'filearray', 'ravetools'))
-    repos <- getOption("repos")
   }
   lazy_install <- unique(lazy_install)
-  
+  repos <- c(
+    beauchamplab = 'https://beauchamplab.r-universe.dev',
+    dipterix = 'https://dipterix.r-universe.dev',
+    getOption("repos")
+  )
   
   dipsaus::prepare_install2(unique(lazy_install), restart = FALSE, repos = repos)
   

@@ -37,6 +37,9 @@ raveio::catgl
 #' @export
 dipsaus::clear_env
 
+#' @export
+raveio::get_projects
+
 # ------ 
 
 # icons
