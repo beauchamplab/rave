@@ -22,33 +22,33 @@ find.in.path <- function(file) { #Pretty much same as first.in.path
 #for TXT or sphinx purposes
 help.cat.file.AFNI <- function (pname=NULL, targ='TXT') {
    if (is.null(pname)) {
-      err.AFNI("NULL name for help function");
-      return("");
+      err.AFNI("NULL name for help function")
+      return("")
    }
         if (targ == 'TXT') {
-         dopt = '-hdoc_2_txt';
+         dopt = '-hdoc_2_txt'
    } else if (targ == 'SPX') {
-      dopt = '-hdoc_2_spx';
+      dopt = '-hdoc_2_spx'
    } else if (targ == 'ASPX') {
-      dopt = '-hdoc_2_aspx';
+      dopt = '-hdoc_2_aspx'
    } else if (targ == 'RAW') {
-      return("");
+      return("")
    } else {
-      warn.AFNI(paste("targ", targ,"unknown. Assuming 'TXT'"));
-      dopt = '-hdoc_2_txt';
+      warn.AFNI(paste("targ", targ,"unknown. Assuming 'TXT'"))
+      dopt = '-hdoc_2_txt'
    }
-   return(paste("|apsearch ", dopt ,pname,"-"));
+   return(paste("|apsearch ", dopt ,pname,"-"))
 }
 
 #print warnings a la AFNI
 prompt.AFNI <- function (str='I await', choices=c('y','n'), vals=NULL) {
    if (!is.null(vals) && length(vals) != length(choices)) {
       err.AFNI(paste("Have ", length(choices), "options, but",
-                     length(vals), "values to return"));
+                     length(vals), "values to return"))
       return(0)
    }
    choices[1]<-toupper(choices[1])
-   kk<-vector(length=0);
+   kk<-vector(length=0)
    spr <- paste(str," [",paste(choices, collapse='|'),"]:", sep='')
    if (BATCH_MODE) { #Only two choices available for this one!
       if (length(choices)!=2) {
@@ -64,7 +64,7 @@ prompt.AFNI <- function (str='I await', choices=c('y','n'), vals=NULL) {
          cat(spr)
          bb <- readLines(n=1)
          if (bb == '') {
-            kk <- 1;
+            kk <- 1
          } else {
             kk <-which(tolower(choices) == tolower(bb))
          }
@@ -93,7 +93,7 @@ warn.AFNI <- function (str='Consider yourself warned',
    else ff <- ''
    cat(  '\n', 'oo Warning: ',  callstr,'\n   ',
          paste(str, collapse=''), nnn,
-       sep='', file = ff);
+       sep='', file = ff)
 }
 
 err.AFNI <- function (str='Danger Danger Will Robinson',
@@ -109,7 +109,7 @@ err.AFNI <- function (str='Danger Danger Will Robinson',
    else ff <- ''
    cat(  '\n', '** Error: ',  callstr,'\n   ',
          paste(str, collapse=''), nnn,
-       sep='', file = ff);
+       sep='', file = ff)
 }
 
 errex.AFNI <- function (str='Alas this must end',
@@ -142,12 +142,12 @@ note.AFNI <- function (str='May I speak frankly?',
    cat(  '\n', '++ Note: ',  callstr,
          sprintf('%s\n   ', tm),
          paste(str, collapse=''),nnn,
-       sep='', file = ff);
+       sep='', file = ff)
 }
 
 exit.AFNI <- function(str='The piano has been drinking.', stat=0) {
    if (BATCH_MODE) {
-      quit(save='no', status = stat);
+      quit(save='no', status = stat)
    } else {
       #note.AFNI(str)
       stop(str)
@@ -161,7 +161,7 @@ set_R_io <- function() {
    if (!is.null(ll)) {
       dd <- try(dyn.load(ll), silent=TRUE)
       if (dd[[1]]!="R_io") {
-         warn.AFNI(paste("Failed to load R_io.so with this error message:\n"));
+         warn.AFNI(paste("Failed to load R_io.so with this error message:\n"))
          dyn.load(ll)
       } else {
          rio <- 1
@@ -366,23 +366,23 @@ date.stamp <- function (fancy=FALSE) {
 
 parse.AFNI.name.selectors <- function(filename,verb=0) {
    n <- list()
-   n$brsel<- NULL;
-   n$rosel<- NULL;
-   n$rasel<- NULL;
-   n$insel<- NULL;
+   n$brsel<- NULL
+   n$rosel<- NULL
+   n$rasel<- NULL
+   n$insel<- NULL
 
-   selecs <- strsplit(filename,"\\[|\\{|<|#")[[1]];
+   selecs <- strsplit(filename,"\\[|\\{|<|#")[[1]]
    n$name <- selecs[1]
    for (ss in selecs[2:length(selecs)]) {
       if (length(grep("]",ss))) {
-         n$brsel <- strsplit(ss,"\\]")[[1]][1];
+         n$brsel <- strsplit(ss,"\\]")[[1]][1]
       } else if (length(grep("}",ss))) {
-         n$rosel <- strsplit(ss,"\\}")[[1]][1];
+         n$rosel <- strsplit(ss,"\\}")[[1]][1]
       } else if (length(grep(">",ss))) {
-         n$rasel <- strsplit(ss,">")[[1]][1];
+         n$rasel <- strsplit(ss,">")[[1]][1]
       }
    }
-   selecs <- strsplit(filename,"#")[[1]];
+   selecs <- strsplit(filename,"#")[[1]]
    if (length(selecs) > 1) {
       n$insel <- selecs[2]
    }
@@ -392,7 +392,7 @@ parse.AFNI.name.selectors <- function(filename,verb=0) {
 
 parse.AFNI.name <- function(filename, verb = 0) {
   if (filename == '-self_test') { #Secret testing flag
-      note.AFNI('Function running in test mode');
+      note.AFNI('Function running in test mode')
       show.AFNI.name(parse.AFNI.name('DePath/hello.DePrefix', verb))
       show.AFNI.name(parse.AFNI.name('DePath/DePrefix+acpc', verb))
       show.AFNI.name(parse.AFNI.name('DePath/DePrefix+acpc.', verb))
@@ -410,22 +410,22 @@ parse.AFNI.name <- function(filename, verb = 0) {
    an <- list()
    an$view <- NULL
    an$pprefix <- NULL
-   an$brsel <- NULL;
-   an$rosel <- NULL;
-   an$rasel <- NULL;
-   an$insel <- NULL;
-   an$type <- NULL;
-   an$path <- NULL;
-   an$orig_name <- filename;
-   an$file <- NULL;
+   an$brsel <- NULL
+   an$rosel <- NULL
+   an$rasel <- NULL
+   an$insel <- NULL
+   an$type <- NULL
+   an$path <- NULL
+   an$orig_name <- filename
+   an$file <- NULL
 
    if (verb) { cat ('Parsing >>',filename,'<<\n', sep=''); }
    if (!is.character(filename)) {
       warning(paste('filename >>',
                      filename, '<< not a character string\n', sep=''),
-                 immediate. = TRUE);
-      traceback();
-      return(NULL);
+                 immediate. = TRUE)
+      traceback()
+      return(NULL)
    }
    #Deal with special names:
    if (length(grep("^1D:.*$",filename))) {
@@ -440,10 +440,10 @@ parse.AFNI.name <- function(filename, verb = 0) {
    n <- parse.AFNI.name.selectors(filename, verb)
    filename <- n$name
    an$file  <- n$name
-   an$brsel <- n$brsel;
-   an$rosel <- n$rosel;
-   an$rasel <- n$rasel;
-   an$insel <- n$insel;
+   an$brsel <- n$brsel
+   an$rosel <- n$rosel
+   an$rasel <- n$rasel
+   an$insel <- n$insel
 
    #Remove last dot if there
    filename <- sub('\\.$','',filename)
@@ -492,37 +492,37 @@ parse.AFNI.name <- function(filename, verb = 0) {
    an$path <- dirname(an$orig_name)
 
    if (verb > 2) {
-      note.AFNI("Browser not active");
+      note.AFNI("Browser not active")
       # browser()
    }
    if (  an$type != '1D' && (
          !is.null(an$brsel) || !is.null(an$rosel) ||
          !is.null(an$rasel) || !is.null(an$insel))) {
        #Remove trailing quote if any
-       an$prefix <- gsub("'$", '', an$prefix);
-       an$prefix <- gsub('"$', '', an$prefix);
-       an$pprefix <- gsub("'$",'', an$pprefix);
-       an$pprefix <- gsub('"$','', an$pprefix);
+       an$prefix <- gsub("'$", '', an$prefix)
+       an$prefix <- gsub('"$', '', an$prefix)
+       an$pprefix <- gsub("'$",'', an$pprefix)
+       an$pprefix <- gsub('"$','', an$pprefix)
    }
 
    if ( an$type != 'BRIK' ) {
       #Put the extension back on
-      an$pprefix <- paste(an$pprefix,an$ext, sep='');
-      an$prefix <- paste(an$prefix,an$ext, sep='');
+      an$pprefix <- paste(an$pprefix,an$ext, sep='')
+      an$prefix <- paste(an$prefix,an$ext, sep='')
    }
   return(an)
 }
 
 exists.AFNI.name <- function(an) {
-   if (is.character(an)) an <- parse.AFNI.name(an);
+   if (is.character(an)) an <- parse.AFNI.name(an)
 
    ans <- 0
    if (file.exists(head.AFNI.name(an))) ans <- ans + 1;
 
    if (file.exists(brik.AFNI.name(an)) ||
        file.exists(paste(brik.AFNI.name(an),'.gz', sep='')) ||
-       file.exists(paste(brik.AFNI.name(an),'.Z', sep=''))) ans <- ans + 2;
-   return(ans);
+       file.exists(paste(brik.AFNI.name(an),'.Z', sep=''))) ans <- ans + 2
+   return(ans)
 }
 
 #Read parameters for -dataTable options (e.g. 3dLME)
@@ -531,7 +531,7 @@ exists.AFNI.name <- function(an) {
 #returned as if they were found on the command line
 dataTable.AFNI.parse <- function(opts) {
    if (is.null(opts) || length(opts) ==  0) {
-      return(NULL);
+      return(NULL)
    }
    if (length(opts) == 1 && length(grep('^@.*$',opts))) {
       ff <- strsplit(opts, '')[[1]]
@@ -3088,7 +3088,7 @@ write.c.AFNI <- function( filename, dset=NULL, label=NULL, space=NULL,
          return(NULL);
       }
    } else if (class(dset) == "AFNI_R_dataset") {
-      err.AFNI("Should not be with R dataset here");
+      err.AFNI("Should not be with R dataset here")
       return(NULL);
    } else {
       #Assume user sent in an array, not a dset

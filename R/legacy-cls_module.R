@@ -37,7 +37,7 @@ attachDefaultDataRepository <- function(
     try({detach('rave_data')}, silent = TRUE)
   }
 
-  rave_idx = which(search() == "package:rave")
+  rave_idx <- which(search() == "package:rave")
 
   if(length(rave_idx)){
     do.call('attach', list(rave_data, name = 'rave_data', pos = rave_idx))
@@ -52,8 +52,8 @@ attachDefaultDataRepository <- function(
 #' @param ... Expressions
 #' @export
 rave_ignore <- function(...){
-  quos = rlang::quos(...)
-  for(i in 1:length(quos)){
+  quos <- rlang::quos(...)
+  for(i in seq_len(length(quos))){
     catgl('> ', rlang::quo_squash(quos[[i]]), level = 'INFO')
     dipsaus::eval_dirty(quos[[i]], globalenv())
   }
@@ -63,21 +63,21 @@ rave_ignore <- function(...){
 rave_inputs <- function(..., .input_panels = list(), 
                         .tabsets = list(), .env = globalenv(),
                         .manual_inputs = NULL, .render_inputs = NULL){
-  quos = rlang::quos(...)
-  parser = comp_parser()
+  quos <- rlang::quos(...)
+  parser <- comp_parser()
   lapply(quos, function(quo){
-    comp = parser$parse_quo(quo)
-    value = eval(comp$initial_value, envir = .env)
-    inputId = comp$inputId
-    .env[[inputId]] = value
+    comp <- parser$parse_quo(quo)
+    value <- eval(comp$initial_value, envir = .env)
+    inputId <- comp$inputId
+    .env[[inputId]] <- value
 
     return(list(inputId = inputId, value = value))
   }) ->
     re
-  nms = lapply(re, function(x){x$inputId})
-  vals = lapply(re, function(x){x$value})
-  names(vals) = nms
-  .env[['.tmp_init']] = vals
+  nms <- lapply(re, function(x){x$inputId})
+  vals <- lapply(re, function(x){x$value})
+  names(vals) <- nms
+  .env[['.tmp_init']] <- vals
   invisible(vals)
 }
 
@@ -89,8 +89,8 @@ rave_outputs <- function(..., .output_tabsets = list()){
 
 rave_updates <- function(..., .env = globalenv()){
 
-  res = rlang::quos(...)
-  nms = names(res)
+  res <- rlang::quos(...)
+  nms <- names(res)
   if(length(nms) == 0){
     return()
   }
@@ -98,15 +98,15 @@ rave_updates <- function(..., .env = globalenv()){
     dipsaus::eval_dirty(quo, env = .env)
   })
 
-  nms = nms[nms != '']
+  nms <- nms[nms != '']
 
   # parser = comp_parser()
   for(nm in nms){
-    val = dipsaus::eval_dirty(res[[nm]], env = .env)
+    val <- dipsaus::eval_dirty(res[[nm]], env = .env)
     try({
-      re = val$value
+      re <- val$value
       re %?<-% val$selected
-      .env[[nm]] = re
+      .env[[nm]] <- re
     })
   }
 
@@ -119,7 +119,7 @@ rave_execute <- function(..., auto = TRUE, .env = globalenv()){
   soft_deprecated()
   
   assign('.is_async', TRUE, envir = .env)
-  quos = rlang::quos(...)
+  quos <- rlang::quos(...)
 
   for( quo in quos ){
     catgl('> ', rlang::quo_squash(quo), level = 'INFO')
@@ -133,9 +133,9 @@ rave_execute <- function(..., auto = TRUE, .env = globalenv()){
 async_var <- function(x, default = NULL){
   tryCatch({
     if(is.null(x)){
-      re = default
+      re <- default
     }else{
-      re = x
+      re <- x
     }
     re
   }, error = function(e){

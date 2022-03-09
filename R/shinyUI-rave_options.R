@@ -1,5 +1,5 @@
 rave_options_gui <- local({
-  opt_names = list(
+  opt_names <- list(
     # Systems
     'max_mem' = 'Max RAM for this machine in GB',
     'max_worker' = 'Maximum number of CPU cores to be used',
@@ -21,36 +21,36 @@ rave_options_gui <- local({
   )
   
   ######## UI and observers
-  comps = list()
+  comps <- list()
   # ------------------------ raw_data_dir ------------------------
   {
-    comps[[length(comps) + 1]] = list(
+    comps[[length(comps) + 1]] <- list(
       type = 'Core Settings',
       opt_name = 'raw_data_dir',
       observer = rlang::quo({
-        opt_id = 'raw_data_dir'
+        opt_id <- 'raw_data_dir'
         output$raw_data_dir_input <- renderUI({
           shiny::textInput(opt_id, opt_names[[opt_id]], value = local_data[[opt_id]])
         })
         output$raw_data_dir_ui <- renderUI({
-          val = input[[opt_id]]
+          val <- input[[opt_id]]
           val %?<-% rave_options(opt_id)
-          msg = ''
-          col = 'red'
-          btn = TRUE
-          label = "Set Directory"
+          msg <- ''
+          col <- 'red'
+          btn <- TRUE
+          label <- "Set Directory"
           if(dir.exists(val)){
-            finfo = file.info(val)
+            finfo <- file.info(val)
             if(!finfo$isdir){
-              msg = 'This is not a valid "directory" path'
-              btn = F
+              msg <- 'This is not a valid "directory" path'
+              btn <- FALSE
             }else if(val == rave_options(opt_id)){
-              btn = F
+              btn <- FALSE
             }
           }else{
-            msg = 'Path not exists, click "Create & Set Directory" to create'
-            col = 'black'
-            label = "Create & Set Directory"
+            msg <- 'Path not exists, click "Create & Set Directory" to create'
+            col <- 'black'
+            label <- "Create & Set Directory"
           }
           
           return(tagList(
@@ -62,15 +62,15 @@ rave_options_gui <- local({
           ))
         })
         observeEvent(input$raw_data_dir_reset, {
-          dir = input[[opt_id]]
+          dir <- input[[opt_id]]
           if(!dir.exists(dir)){
             dir.create(dir, recursive = TRUE, showWarnings = FALSE)
           }
           # Make sure it exists, otherwise error notification
           if(dir.exists(dir)){
-            dir = try_normalizePath(path = dir)
-            arg = list(dir)
-            names(arg) = opt_id
+            dir <- try_normalizePath(path = dir)
+            arg <- list(dir)
+            names(arg) <- opt_id
             do.call(set_opt, arg)
             showNotification('Raw data directory is set.', type = 'message', id = paste0(opt_id, '_noty'))
           }else{
@@ -83,33 +83,33 @@ rave_options_gui <- local({
   
   # ------------------------ bids_data_dir ------------------------
   {
-    comps[[length(comps) + 1]] = list(
+    comps[[length(comps) + 1]] <- list(
       type = 'Core Settings',
       opt_name = 'bids_data_dir',
       observer = rlang::quo({
-        opt_id = 'bids_data_dir'
+        opt_id <- 'bids_data_dir'
         output$bids_data_dir_input <- renderUI({
           shiny::textInput(opt_id, opt_names[[opt_id]], value = local_data[[opt_id]])
         })
         output$bids_data_dir_ui <- renderUI({
-          val = input[[opt_id]]
+          val <- input[[opt_id]]
           val %?<-% rave_options(opt_id)
-          msg = ''
-          col = 'red'
-          btn = TRUE
-          label = "Set Directory"
+          msg <- ''
+          col <- 'red'
+          btn <- TRUE
+          label <- "Set Directory"
           if(dir.exists(val)){
-            finfo = file.info(val)
+            finfo <- file.info(val)
             if(!finfo$isdir){
-              msg = 'This is not a valid "directory" path'
-              btn = FALSE
+              msg <- 'This is not a valid "directory" path'
+              btn <- FALSE
             }else if(val == rave_options(opt_id)){
-              btn = FALSE
+              btn <- FALSE
             }
           }else{
-            msg = 'Path not exists, click "Create & Set Directory" to create'
-            col = 'black'
-            label = "Create & Set Directory"
+            msg <- 'Path not exists, click "Create & Set Directory" to create'
+            col <- 'black'
+            label <- "Create & Set Directory"
           }
           
           return(tagList(
@@ -121,15 +121,15 @@ rave_options_gui <- local({
           ))
         })
         observeEvent(input$bids_data_dir_reset, {
-          dir = input[[opt_id]]
+          dir <- input[[opt_id]]
           if(!dir.exists(dir)){
             dir.create(dir, recursive = TRUE, showWarnings = FALSE)
           }
           # Make sure it exists, otherwise error notification
           if(dir.exists(dir)){
-            dir = try_normalizePath(path = dir)
-            arg = list(dir)
-            names(arg) = opt_id
+            dir <- try_normalizePath(path = dir)
+            arg <- list(dir)
+            names(arg) <- opt_id
             do.call(set_opt, arg)
             showNotification('Raw data directory is set.', type = 'message', id = paste0(opt_id, '_noty'))
           }else{
@@ -145,34 +145,34 @@ rave_options_gui <- local({
   # ------------------------ data_dir ----------------------------
   {
     
-    comps[[length(comps) + 1]] = list(
+    comps[[length(comps) + 1]] <- list(
       type = 'Core Settings',
       opt_name = 'data_dir',
       observer = rlang::quo({
-        opt_id = 'data_dir'
-        output_uiid = paste0(opt_id, '_input')
-        resp_uiid = paste0(opt_id, '_ui')
-        set_btnid = paste0(opt_id, '_set')
+        opt_id <- 'data_dir'
+        output_uiid <- paste0(opt_id, '_input')
+        resp_uiid <- paste0(opt_id, '_ui')
+        set_btnid <- paste0(opt_id, '_set')
         output[[output_uiid]] <- renderUI({
           shiny::textInput(opt_id, opt_names[[opt_id]], value = local_data[[opt_id]])
         })
         output[[resp_uiid]] <- renderUI({
-          val = input[[opt_id]]
+          val <- input[[opt_id]]
           val %?<-% rave_options(opt_id)
-          msg = ''
-          btn = TRUE
-          label = "Set Directory"
+          msg <- ''
+          btn <- TRUE
+          label <- "Set Directory"
           if(dir.exists(val)){
-            finfo = file.info(val)
+            finfo <- file.info(val)
             if(!finfo$isdir){
-              msg = 'This is not a valid "directory" path'
-              btn = F
+              msg <- 'This is not a valid "directory" path'
+              btn <- FALSE
             }else if(val == rave_options(opt_id)){
-              btn = F
+              btn <- FALSE
             }
           }else{
-            msg = 'Path not exists, click "Create & Set Directory" to create and set this option.'
-            label = "Create & Set Directory"
+            msg <- 'Path not exists, click "Create & Set Directory" to create and set this option.'
+            label <- "Create & Set Directory"
           }
           
           return(tagList(
@@ -184,19 +184,19 @@ rave_options_gui <- local({
           ))
         })
         observeEvent(input[[set_btnid]], {
-          dir = input[[opt_id]]
+          dir <- input[[opt_id]]
           if(!dir.exists(dir)){
             dir.create(dir, recursive = TRUE, showWarnings = FALSE)
           }
           # Make sure it exists, otherwise error notification
           if(dir.exists(dir)){
-            dir = try_normalizePath(path = dir)
-            arg = list(dir)
-            names(arg) = opt_id
+            dir <- try_normalizePath(path = dir)
+            arg <- list(dir)
+            names(arg) <- opt_id
             do.call(set_opt, arg)
             
             # test speed
-            speed = test_hdspeed()
+            speed <- test_hdspeed()
             set_opt(drive_speed = speed)
             showNotification('RAVE data directory is set.', type = 'message', id = paste0(opt_id, '_noty'))
             
@@ -210,33 +210,33 @@ rave_options_gui <- local({
   
   # ------------------------ tensor_temp_path ------------------------
   {
-    comps[[length(comps) + 1]] = list(
+    comps[[length(comps) + 1]] <- list(
       type = 'Core Settings',
       opt_name = 'tensor_temp_path',
       observer = rlang::quo({
-        opt_id = 'tensor_temp_path'
+        opt_id <- 'tensor_temp_path'
         output$tensor_temp_path_input <- renderUI({
           shiny::textInput(opt_id, opt_names[[opt_id]], value = local_data[[opt_id]])
         })
         output$tensor_temp_path_ui <- renderUI({
-          val = input[[opt_id]]
+          val <- input[[opt_id]]
           val %?<-% rave_options(opt_id)
-          msg = ''
-          col = 'red'
-          btn = TRUE
-          label = "Set Directory"
+          msg <- ''
+          col <- 'red'
+          btn <- TRUE
+          label <- "Set Directory"
           if(dir.exists(val)){
-            finfo = file.info(val)
+            finfo <- file.info(val)
             if(!finfo$isdir){
-              msg = 'This is not a valid "directory" path'
-              btn = FALSE
+              msg <- 'This is not a valid "directory" path'
+              btn <- FALSE
             }else if(val == rave_options(opt_id)){
-              btn = FALSE
+              btn <- FALSE
             }
           }else{
-            msg = 'Path not exists, click "Create & Set Directory" to create'
-            col = 'black'
-            label = "Create & Set Directory"
+            msg <- 'Path not exists, click "Create & Set Directory" to create'
+            col <- 'black'
+            label <- "Create & Set Directory"
           }
           
           return(tagList(
@@ -248,15 +248,15 @@ rave_options_gui <- local({
           ))
         })
         observeEvent(input$tensor_temp_path_reset, {
-          dir = input[[opt_id]]
+          dir <- input[[opt_id]]
           if(!dir.exists(dir)){
             dir.create(dir, recursive = TRUE, showWarnings = FALSE)
           }
           # Make sure it exists, otherwise error notification
           if(dir.exists(dir)){
-            dir = try_normalizePath(path = dir)
-            arg = list(dir)
-            names(arg) = opt_id
+            dir <- try_normalizePath(path = dir)
+            arg <- list(dir)
+            names(arg) <- opt_id
             do.call(set_opt, arg)
             showNotification('Raw data directory is set.', type = 'message', id = paste0(opt_id, '_noty'))
           }else{
@@ -514,25 +514,25 @@ rave_options_gui <- local({
   
   # ------------------------ max_mem ------------------------
   {
-    comps[[length(comps) + 1]] = list(
+    comps[[length(comps) + 1]] <- list(
       type = 'System',
       opt_name = 'max_mem',
       observer = rlang::quo({
-        opt_id = 'max_mem'
-        output_uiid = paste0(opt_id, '_input')
-        resp_uiid = paste0(opt_id, '_ui')
-        set_btnid = paste0(opt_id, '_set')
-        notification_id = paste0(opt_id, '_noty')
+        opt_id <- 'max_mem'
+        output_uiid <- paste0(opt_id, '_input')
+        resp_uiid <- paste0(opt_id, '_ui')
+        set_btnid <- paste0(opt_id, '_set')
+        notification_id <- paste0(opt_id, '_noty')
         
         output[[output_uiid]] <- renderUI({
           shiny::numericInput(opt_id, opt_names[[opt_id]], value = local_data[[opt_id]])
         })
         
         output[[resp_uiid]] <- renderUI({
-          val = input[[opt_id]]
+          val <- input[[opt_id]]
           local_data$refresh
           if(length(val) != 1 || is.na(val)){
-            val = rave_options(opt_id)
+            val <- rave_options(opt_id)
           }
           if(val == rave_options(opt_id)){
             return()
@@ -540,9 +540,9 @@ rave_options_gui <- local({
           if(val < 2){
             return(tags$small(span(style = 'color:red', 'I can barely do anything with memory<2GB')))
           }
-          msg = NULL
+          msg <- NULL
           if(val < rave_options('max_worker') * 8){
-            msg = p(
+            msg <- p(
               tags$small(span("It is highly recommended that Max RAM size >= 8GB x CPU allowed. If you don't have enough RAM, it's OK to ignore this message :)"))
             )
           }
@@ -553,7 +553,7 @@ rave_options_gui <- local({
         })
         
         observeEvent(input[[set_btnid]], {
-          val = input[[opt_id]]
+          val <- input[[opt_id]]
           if(length(val) == 1 && val >=2){
             set_opt(max_mem = val)
             showNotification(gl('Max RAM is set - {val}'), type = 'message', id = notification_id)
@@ -567,25 +567,25 @@ rave_options_gui <- local({
   
   # ------------------------ max_worker ------------------------
   {
-    comps[[length(comps) + 1]] = list(
+    comps[[length(comps) + 1]] <- list(
       type = 'System',
       opt_name = 'max_worker',
       observer = rlang::quo({
-        opt_id = 'max_worker'
-        output_uiid = paste0(opt_id, '_input')
-        resp_uiid = paste0(opt_id, '_ui')
-        set_btnid = paste0(opt_id, '_set')
-        notification_id = paste0(opt_id, '_noty')
+        opt_id <- 'max_worker'
+        output_uiid <- paste0(opt_id, '_input')
+        resp_uiid <- paste0(opt_id, '_ui')
+        set_btnid <- paste0(opt_id, '_set')
+        notification_id <- paste0(opt_id, '_noty')
         
         output[[output_uiid]] <- renderUI({
           shiny::numericInput(opt_id, opt_names[[opt_id]], value = local_data[[opt_id]])
         })
         
         output[[resp_uiid]] <- renderUI({
-          val = input[[opt_id]]
+          val <- input[[opt_id]]
           local_data$refresh
           if(length(val) != 1 || is.na(val)){
-            val = rave_options(opt_id)
+            val <- rave_options(opt_id)
           }
           if(val == rave_options(opt_id)){
             return()
@@ -593,15 +593,15 @@ rave_options_gui <- local({
           if(val < 1){
             return(tags$small(span(style = 'color:red', 'At least one CPU is needed')))
           }
-          msg = NULL
-          ncores = future::availableCores()
+          msg <- NULL
+          ncores <- future::availableCores()
           if(val >= ncores){
-            msg = p(
+            msg <- p(
               tags$small(span(HTML(gl("It is recommended that the number of CPU utilized is (the number of CPU cores) - 1 = {ncores-1}. This ensures good utilizations of your CPU while still leaving one core for the other tasks."))))
             )
           }
           if(stringr::str_detect(stringr::str_to_lower(Sys.info()['sysname']), '^win')){
-            msg = p(
+            msg <- p(
               tags$small(span(style = 'color:red;', "WARNING: you are using Windows system. Windows doesn't allow forked clusters, therefore this value is not used."))
             )
           }
@@ -612,9 +612,9 @@ rave_options_gui <- local({
         })
         
         observeEvent(input[[set_btnid]], {
-          val = input[[opt_id]]
+          val <- input[[opt_id]]
           if(length(val) == 1 && val >= 1){
-            val = round(val)
+            val <- round(val)
             set_opt(max_worker = val)
             showNotification(gl('Max workers is set - {val}'), type = 'message', id = notification_id)
             return()
@@ -630,26 +630,26 @@ rave_options_gui <- local({
   # ------------------------ Drive-Speed ------------------------
   {
     
-    comps[[length(comps) + 1]] = list(
+    comps[[length(comps) + 1]] <- list(
       type = 'System',
       opt_name = 'drive_speed',
       observer = rlang::quo({
-        opt_id = 'drive_speed'
-        output_uiid = paste0(opt_id, '_input')
-        resp_uiid = paste0(opt_id, '_ui')
+        opt_id <- 'drive_speed'
+        output_uiid <- paste0(opt_id, '_input')
+        resp_uiid <- paste0(opt_id, '_ui')
         output[[output_uiid]] <- renderUI({
-          speed = local_data[[opt_id]]
+          speed <- local_data[[opt_id]]
           
           # if speed is blank, test speed
           if(!is.numeric(speed) || length(speed) != 2){
-            speed = test_hdspeed()
+            speed <- test_hdspeed()
             if(!any(is.na(speed))){
               set_opt(drive_speed = speed)
             }
           }
           
-          upload_speed = speed[1]
-          download_speed = speed[2]
+          upload_speed <- speed[1]
+          download_speed <- speed[2]
           
           tagList(
             span(strong(opt_names[[opt_id]]), sprintf(': Write - %.1f MB/sec, Read - %.1f MB/sec ', upload_speed, download_speed),
@@ -657,7 +657,7 @@ rave_options_gui <- local({
           )
         })
         observeEvent(input[[opt_id]], {
-          speed = test_hdspeed()
+          speed <- test_hdspeed()
           set_opt(drive_speed = speed)
           set_opt(check_updates_onstartup = FALSE)
         })
@@ -669,25 +669,25 @@ rave_options_gui <- local({
   # ------------------------ Template Brain --------------------
   {
     
-    comps[[length(comps) + 1]] = list(
+    comps[[length(comps) + 1]] <- list(
       type = '3D Viewer',
       opt_name = 'template_brain',
       observer = rlang::quo({
-        opt_id = 'template_brain'
-        output_uiid = paste0(opt_id, '_input')
-        resp_uiid = paste0(opt_id, '_ui')
+        opt_id <- 'template_brain'
+        output_uiid <- paste0(opt_id, '_input')
+        resp_uiid <- paste0(opt_id, '_ui')
         output[[output_uiid]] <- renderUI({
           local_data$refresh_3dviewer
           # get current template 
-          old_sub = rave_options(opt_id)
-          tsub = isolate(local_data$current_sub)
+          old_sub <- rave_options(opt_id)
+          tsub <- isolate(local_data$current_sub)
           tsub %?<-% old_sub
           tsub %?<-% getOption('threeBrain.template_subject', 'N27')
           
           # TODO: get all possible subjects
-          template_subs = list.dirs('~/rave_data/others/three_brain/', full.names = FALSE, recursive = FALSE)
-          template_subs = unique(c(tsub, template_subs, '[import new]'))
-          template_subs = template_subs[!stringr::str_detect(template_subs, '^_')]
+          template_subs <- list.dirs('~/rave_data/others/three_brain/', full.names = FALSE, recursive = FALSE)
+          template_subs <- unique(c(tsub, template_subs, '[import new]'))
+          template_subs <- template_subs[!stringr::str_detect(template_subs, '^_')]
           
           tagList(
             p(
@@ -722,11 +722,11 @@ rave_options_gui <- local({
         })
         
         output$template_snapshot <- renderUI({
-          tsub = input$template_subname
-          rootdir = '~/rave_data/others/three_brain/'
+          tsub <- input$template_subname
+          rootdir <- '~/rave_data/others/three_brain/'
           dir_create(rootdir, recursive = TRUE)
-          rootdir = normalizePath(rootdir)
-          tdir = file.path(rootdir, tsub)
+          rootdir <- normalizePath(rootdir)
+          tdir <- file.path(rootdir, tsub)
           if(length(tdir) && dir.exists(tdir)){
             set_opt(threeBrain_template_subject = tsub)
             set_opt(threeBrain_template_dir = rootdir)
@@ -743,40 +743,40 @@ rave_options_gui <- local({
           } else{ NULL }
         })
         
-        roots = c('Current Path' = getwd(), 'Home' = '~', 'Root' = '/')
+        roots <- c('Current Path' = getwd(), 'Home' = '~', 'Root' = '/')
         
         shinyFiles::shinyDirChoose( input, session$ns('template_subdir'), 
                                     roots = roots, defaultRoot = 'Home', filetypes = '')
         
         output$template_target <- renderUI({
-          path = get_fspath(quiet = TRUE)
-          passed = TRUE
+          path <- get_fspath(quiet = TRUE)
+          passed <- TRUE
           if(is.null(path)){
-            path = span(style = 'color:red', 'not set')
-            passed = FALSE
+            path <- span(style = 'color:red', 'not set')
+            passed <- FALSE
           } else if( isFALSE(path) ){
-            path = span(style = 'color:red', ' (not valid FreeSurfer directory)')
-            passed = FALSE
+            path <- span(style = 'color:red', ' (not valid FreeSurfer directory)')
+            passed <- FALSE
           }
-          subname = input$template_newname
+          subname <- input$template_newname
           if(subname == ''){
-            subname = span(style = 'color:red', 'not set')
-            passed = FALSE
+            subname <- span(style = 'color:red', 'not set')
+            passed <- FALSE
           }else{
-            new_name2 = stringr::str_remove_all(subname, '[^0-9a-zA-Z_]')
-            new_name2 = stringr::str_remove_all(new_name2, '^[_]*')
+            new_name2 <- stringr::str_remove_all(subname, '[^0-9a-zA-Z_]')
+            new_name2 <- stringr::str_remove_all(new_name2, '^[_]*')
             if(new_name2 != subname){
-              subname = span(style = 'color:red', 'not valid. Please only enter letters, digits, and "_". ',
+              subname <- span(style = 'color:red', 'not valid. Please only enter letters, digits, and "_". ',
                              'Avoid "_" in the first character.')
-              passed = FALSE
+              passed <- FALSE
             }
           }
           if(passed){
-            msg = tags$small(
+            msg <- tags$small(
               'Please press ', span(style = 'color:red', 'import button'), ' to set & preview'
             )
           }else{
-            msg = NULL
+            msg <- NULL
           }
           p(
             'Template subject code: ', subname, br(),
@@ -785,27 +785,27 @@ rave_options_gui <- local({
           )
         })
         
-        get_fspath = function( quiet = FALSE ){
-          dir = as.list(input$template_subdir)
+        get_fspath <- function( quiet = FALSE ){
+          dir <- as.list(input$template_subdir)
           
           if(!length(dir$root) || !(dir$root %in% names(roots))){ return() }
-          root = roots[[dir$root]]
-          paths = c(list(root), as.list(dir$path))
-          names(paths) = NULL
+          root <- roots[[dir$root]]
+          paths <- c(list(root), as.list(dir$path))
+          names(paths) <- NULL
           
-          path = normalizePath(do.call(file.path, paths), mustWork = FALSE)
+          path <- normalizePath(do.call(file.path, paths), mustWork = FALSE)
           if(!dir.exists(path)){
             if( quiet ){ return(FALSE) }
             stop('Cannot find path to template brain')
           }
           # check file name
-          paths = stringr::str_split(path, '/|\\\\', simplify = TRUE)
-          depth = length(paths)
+          paths <- stringr::str_split(path, '/|\\\\', simplify = TRUE)
+          depth <- length(paths)
           if(paths[depth] %in% c('mri', 'label', 'surf', 'RAVE', 'SUMA')){
             # this is not the root dir for subject
-            path = dirname(path)
-            paths = stringr::str_split(path, '/|\\\\', simplify = TRUE)
-            depth = length(paths)
+            path <- dirname(path)
+            paths <- stringr::str_split(path, '/|\\\\', simplify = TRUE)
+            depth <- length(paths)
           }
           
           # check path
@@ -824,32 +824,32 @@ rave_options_gui <- local({
         
         
         observeEvent(input$template_import, {
-          new_name = input$template_newname
+          new_name <- input$template_newname
           if( !length(new_name) || new_name == '' ){
             stop('Please enter name for new template brain')
           }
-          new_name2 = stringr::str_remove_all(new_name, '[^0-9a-zA-Z_]')
-          new_name2 = stringr::str_remove_all(new_name2, '^[_]*')
+          new_name2 <- stringr::str_remove_all(new_name, '[^0-9a-zA-Z_]')
+          new_name2 <- stringr::str_remove_all(new_name2, '^[_]*')
           if(new_name2 != new_name){
             stop('Template name can only contains letters, digits and "_". "_" cannot be the first character.')
           }
-          source_path = get_fspath()
+          source_path <- get_fspath()
           # check if the path exists in three_brain, just ignore and override
-          target_dir = file.path('~/rave_data/others/three_brain/', new_name2)
+          target_dir <- file.path('~/rave_data/others/three_brain/', new_name2)
           dir_create(target_dir)
-          target_dir = normalizePath(target_dir)
+          target_dir <- normalizePath(target_dir)
           
           if(target_dir != source_path){
             # override
-            fs = list.files(source_path, full.names = TRUE, all.files = FALSE, include.dirs = TRUE, recursive = FALSE)
-            prog = dipsaus::progress2('Copying files to home - rave_data - others - three_brain', max = length(fs)+1, shiny_auto_close = TRUE)
+            fs <- list.files(source_path, full.names = TRUE, all.files = FALSE, include.dirs = TRUE, recursive = FALSE)
+            prog <- dipsaus::progress2('Copying files to home - rave_data - others - three_brain', max = length(fs)+1, shiny_auto_close = TRUE)
             
             lapply(fs, function(f){
               prog$inc(detail = f)
               file.copy(f, target_dir, overwrite = TRUE, recursive = TRUE)
             })
           }else{
-            prog = dipsaus::progress2('Re-cache brain', max = 1, shiny_auto_close = TRUE)
+            prog <- dipsaus::progress2('Re-cache brain', max = 1, shiny_auto_close = TRUE)
           }
           
           # unlink cache
@@ -863,26 +863,26 @@ rave_options_gui <- local({
           )
           
           # now update?
-          local_data$current_sub = new_name2
-          local_data$refresh_3dviewer = Sys.time()
+          local_data$current_sub <- new_name2
+          local_data$refresh_3dviewer <- Sys.time()
         })
         
-        .env = environment()
+        .env <- environment()
         
         observeEvent(input$template_downloadn27, {
           # print(input$template_downloadn27)
           threeBrain::download_N27()
-          local_data$brain = threeBrain::merge_brain()
-          local_data$refresh_3dviewer2 = Sys.time()
+          local_data$brain <- threeBrain::merge_brain()
+          local_data$refresh_3dviewer2 <- Sys.time()
         })
         
         output[[resp_uiid]] <- renderUI({
           local_data$refresh_3dviewer2
-          tsub = input$template_subname
+          tsub <- input$template_subname
           if( length(tsub) && (tsub != '[import new]') ){
             # check brain
             tryCatch({
-              local_data$brain = threeBrain::freesurfer_brain2(
+              local_data$brain <- threeBrain::freesurfer_brain2(
                 fs_subject_folder = file.path('~/rave_data/others/three_brain/', tsub),
                 subject_name = tsub,
                 surface_types = c('pial')
@@ -891,7 +891,7 @@ rave_options_gui <- local({
                 threeBrain::threejsBrainOutput(session$ns('template_viewer'))
               )
             }, error = function(e){
-              local_data$brain = NULL
+              local_data$brain <- NULL
               # return method to download
               
               if(tsub == 'N27'){
@@ -931,9 +931,9 @@ rave_options_gui <- local({
   }
   
   # ------------------------ Module file ------------------------
-  load_module_table = function(){
-    modules = arrange_modules(FALSE, FALSE, FALSE)
-    modules = modules[, c("ID", "Name", "Group", "Package", "Active", "Notes")]
+  load_module_table <- function(){
+    modules <- arrange_modules(FALSE, FALSE, FALSE)
+    modules <- modules[, c("ID", "Name", "Group", "Package", "Active", "Notes")]
     modules
   }
   
@@ -945,7 +945,7 @@ rave_options_gui <- local({
           title = 'RAVE Settings'
         ),
         sidebar = shinydashboard::dashboardSidebar(
-          disable = T
+          disable = TRUE
         ),
         body = shinydashboard::dashboardBody(
           
@@ -974,7 +974,7 @@ rave_options_gui <- local({
                         dipsaus::drop_nulls(
                           lapply(comps, function(comp){
                             if(comp$type == 'Core Settings'){
-                              id = comp$opt_name
+                              id <- comp$opt_name
                               tagList(
                                 uiOutput(paste0(id, '_input')),
                                 uiOutput(paste0(id, '_ui')),
@@ -1000,7 +1000,7 @@ rave_options_gui <- local({
                         dipsaus::drop_nulls(
                           lapply(comps, function(comp){
                             if(comp$type == 'System'){
-                              id = comp$opt_name
+                              id <- comp$opt_name
                               tagList(
                                 uiOutput(paste0(id, '_input')),
                                 uiOutput(paste0(id, '_ui')),
@@ -1030,7 +1030,7 @@ rave_options_gui <- local({
                       dipsaus::drop_nulls(
                         lapply(comps, function(comp){
                           if(comp$type == '3D Viewer'){
-                            id = comp$opt_name
+                            id <- comp$opt_name
                             tagList(
                               column(
                                 width = 3L,
@@ -1094,24 +1094,24 @@ rave_options_gui <- local({
         skin = 'purple'
       ),
       server = function(input, output, session){
-        modules = load_module_table()
-        has_copy = FALSE
+        modules <- load_module_table()
+        has_copy <- FALSE
         
-        local_data = reactiveValues(refresh = NULL, modules = modules)
-        envir = environment()
+        local_data <- reactiveValues(refresh = NULL, modules = modules)
+        envir <- environment()
         
         for(opt_id in names(opt_names)){
-          local_data[[opt_id]] = rave_options(opt_id)
+          local_data[[opt_id]] <- rave_options(opt_id)
         }
         
-        set_opt = function(...){
+        set_opt <- function(...){
           rave_options(..., launch_gui = FALSE, .save = TRUE)
-          args = list(...)
+          args <- list(...)
           for(nm in names(args)){
-            local_data[[nm]] = args[[nm]]
+            local_data[[nm]] <- args[[nm]]
             catgl('Setting option: {nm} => {args[[nm]]}')
           }
-          local_data$refresh = Sys.time()
+          local_data$refresh <- Sys.time()
         }
         
         lapply(comps, function(comp){
@@ -1119,15 +1119,15 @@ rave_options_gui <- local({
         })
         
         observeEvent(input$SUMA_test, {
-          suma_path = rave_options('suma_path')
-          suma_lib = rave_options('suma_lib')
+          suma_path <- rave_options('suma_path')
+          suma_lib <- rave_options('suma_lib')
           system2('suma', env = c(
             gl('PATH=$PATH:"{suma_path}"'),
             suma_lib
-          ), wait = F)
+          ), wait = FALSE)
           showModal(shiny::modalDialog(
             title = 'Test SUMA',
-            easyClose = F,
+            easyClose = FALSE,
             footer = shiny::modalButton('Confirm & Dismiss'),
             p('If SUMA window pops out, then you have the right settings. Dismiss this dialogue or use the following debug information:'),
             hr(),
@@ -1153,8 +1153,8 @@ rave_options_gui <- local({
         
         
         observeEvent(input$module_update, {
-          envir$modules = arrange_modules(refresh = TRUE, reset = FALSE, quiet = FALSE)
-          local_data$table_updated = Sys.time()
+          envir$modules <- arrange_modules(refresh = TRUE, reset = FALSE, quiet = FALSE)
+          local_data$table_updated <- Sys.time()
         })
         
         output$modules <- DT::renderDT({
@@ -1171,15 +1171,15 @@ rave_options_gui <- local({
         })
         
         
-        proxy = DT::dataTableProxy('modules')
+        proxy <- DT::dataTableProxy('modules')
         
         observeEvent(input$modules_cell_edit, {
-          info = input$modules_cell_edit
-          row = info$row
-          col = info$col + 1
-          tbl = envir$modules
-          var = names(tbl)[[col]]
-          val = info$value
+          info <- input$modules_cell_edit
+          row <- info$row
+          col <- info$col + 1
+          tbl <- envir$modules
+          var <- names(tbl)[[col]]
+          val <- info$value
           switch (
             var,
             'ID' = {
@@ -1196,12 +1196,12 @@ rave_options_gui <- local({
             },
             'Active' = {
               tryCatch({
-                val = stringr::str_to_lower(stringr::str_c(val))
-                val_nb = suppressWarnings(as.numeric(val))
+                val <- stringr::str_to_lower(stringr::str_c(val))
+                val_nb <- suppressWarnings(as.numeric(val))
                 if(stringr::str_detect(val, '(t)|(tr(u)|(ue))') || (!is.na(val_nb) && val_nb > 0)){
-                  val = TRUE
+                  val <- TRUE
                 }else{
-                  val = FALSE
+                  val <- FALSE
                 }
                 val
               }, error = function(e){
@@ -1225,13 +1225,13 @@ rave_options_gui <- local({
               utils::write.csv(envir$modules, rave_options('module_lookup_file'), row.names = FALSE)
             }else{
               safe_write_csv(envir$modules, rave_options('module_lookup_file'), row.names = FALSE)
-              envir$has_copy = TRUE
+              envir$has_copy <- TRUE
             }
             
-            local_data$table_updated = Sys.time()
+            local_data$table_updated <- Sys.time()
           }
           
-          local_data$refresh = Sys.time()
+          local_data$refresh <- Sys.time()
           
         })
         

@@ -17,55 +17,55 @@
 #' @seealso \code{\link[grDevices]{pdf}}, \code{\link{diagnose_signal}}, 
 #' \code{\link[rave]{pwelch}}
 #' @export
-export_diagnose_voltage = function(
+export_diagnose_voltage <- function(
   subject, electrodes, blocks, save_dir = './export', width = 12, height = 7, 
-  useDingbats = F, onefile = T, winlen, freq_lim, nclass = 50, 
+  useDingbats = FALSE, onefile = TRUE, winlen, freq_lim, nclass = 50, 
   fore_col = 'black', back_col = 'grey80', ...
 ){
-  subject = stringr::str_split_fixed(subject, '/', 2)
+  subject <- stringr::str_split_fixed(subject, '/', 2)
   # load preprocess info
-  utils = rave_preprocess_tools()
+  utils <- rave_preprocess_tools()
   utils$check_load_subject(subject_code = subject[2], project_name = subject[1])
   if(utils$notch_filtered()){
-    has_notch = T
+    has_notch <- TRUE
   }else{
-    has_notch = F
+    has_notch <- FALSE
   }
   
   blocks %?<-% utils$get_blocks()
-  srate = utils$get_srate()
+  srate <- utils$get_srate()
   winlen %?<-% (2 * srate)
   freq_lim %?<-% (srate / 2)
   
-  progress = progress('Generating Diagnostic Plots for Voltage', max = length(electrodes))
+  progress <- progress('Generating Diagnostic Plots for Voltage', max = length(electrodes))
   on.exit({progress$close()})
   
   dir.create(save_dir, recursive = TRUE, showWarnings = FALSE)
   
   
   for(e in electrodes){
-    file = file.path(save_dir, sprintf('Voltage_Diagnose_%d.pdf', e))
+    file <- file.path(save_dir, sprintf('Voltage_Diagnose_%d.pdf', e))
     grDevices::pdf(file = file, width = width, height = height, useDingbats = useDingbats, ..., onefile = onefile)
     tryCatch({
       progress$inc(sprintf(' - Electrode %d', e))
-      raw_volt = utils$load_voltage(electrodes = e, blocks = blocks, raw = T)
+      raw_volt <- utils$load_voltage(electrodes = e, blocks = blocks, raw = TRUE)
       if(has_notch){
-        notch_volt = utils$load_voltage(electrodes = e, blocks = blocks, raw = F)
+        notch_volt <- utils$load_voltage(electrodes = e, blocks = blocks, raw = FALSE)
       }
       
       for(b in blocks){
         if(has_notch){
-          s1 = notch_volt[[b]]
-          s2 = raw_volt[[b]]
-          name = 'Notch'
-          col = c(fore_col, 'grey80')
-          main = sprintf('Notch Filtered Signal - Block: %s, Electrode: %d', b, e)
+          s1 <- notch_volt[[b]]
+          s2 <- raw_volt[[b]]
+          name <- 'Notch'
+          col <- c(fore_col, 'grey80')
+          main <- sprintf('Notch Filtered Signal - Block: %s, Electrode: %d', b, e)
         }else{
-          s1 = raw_volt[[b]]
-          s2 = NULL
-          name = 'Raw'
-          col = fore_col
-          main = sprintf('Raw Voltage Signal - Block: %s, Electrode: %d', b, e)
+          s1 <- raw_volt[[b]]
+          s2 <- NULL
+          name <- 'Raw'
+          col <- fore_col
+          main <- sprintf('Raw Voltage Signal - Block: %s, Electrode: %d', b, e)
         }
         
         

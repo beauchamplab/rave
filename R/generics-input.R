@@ -21,9 +21,9 @@ getDefaultReactiveInput.default <- function(session){
 #' @rdname session-reactives
 #' @export
 getDefaultReactiveInput.rave_module_debug <- function(session){
-  env = new.env(parent = emptyenv())
-  env$..warn = TRUE
-  class(env) = c('ravedev_ReactiveInput', 'environment')
+  env <- new.env(parent = emptyenv())
+  env$..warn <- TRUE
+  class(env) <- c('ravedev_ReactiveInput', 'environment')
   env
 }
 
@@ -32,7 +32,7 @@ getDefaultReactiveInput.rave_module_debug <- function(session){
 getDefaultReactiveInput.rave_running <- function(
   session = shiny::getDefaultReactiveDomain()
 ){
-  ctx = rave_context()
+  ctx <- rave_context()
   # session = shiny::getDefaultReactiveDomain()
   # session = session$makeScope(ctx$module_id)
   session$makeScope(ctx$module_id)$input
@@ -48,7 +48,7 @@ print.ravedev_ReactiveInput <- function(x, ...){
   catgl('<Reactive Input> (Read-only)', level = 'INFO')
   for(k in ls(x, all.names = FALSE)){
     catgl(' ', k, '= ', level = 'INFO', pal = list('INFO' = 'orangered'), end = '')
-    s = paste(deparse(x[[k]]), sep = '\n\t')
+    s <- paste(deparse(x[[k]]), sep = '\n\t')
     catgl(s, level = 'INFO', pal = list('INFO' = 'dodgerblue3'), sep = '\n\t')
   }
   invisible(x)

@@ -14,17 +14,17 @@ eval_when_ready.default <- function(FUN){
 #' @export
 eval_when_ready.rave_module_debug <- function(FUN){
   rave_context()
-  env = parent.frame()
+  env <- parent.frame()
   FUN(env)
 }
 
 
 #' @export
 eval_when_ready.rave_running <- function(FUN){
-  ctx = rave_context()
-  e = ctx$instance
+  ctx <- rave_context()
+  e <- ctx$instance
   if(is.function(FUN)){
-    e$ready_functions[[length(e$ready_functions) + 1]] = FUN
+    e$ready_functions[[length(e$ready_functions) + 1]] <- FUN
   }
 }
 

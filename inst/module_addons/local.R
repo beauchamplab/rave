@@ -1,15 +1,15 @@
 
-observe = function(...){}
-observeEvent = function(...){}
+observe <- function(...){}
+observeEvent <- function(...){}
 
 getDefaultReactiveDomain <- function(){
   rave::fake_session()
 }
 
 reactiveValues <- function(...){
-  env = new.env(parent = emptyenv())
+  env <- new.env(parent = emptyenv())
   list2env(list(...), env)
-  class(env) = c('dev_raveReactiveValues', 'environment')
+  class(env) <- c('dev_raveReactiveValues', 'environment')
   env
 }
 

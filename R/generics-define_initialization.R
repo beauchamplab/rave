@@ -39,12 +39,12 @@
 NULL
 
 .define_initialization <- function(expr){
-  init_env = get('...init_env', envir = parent.frame(), inherits = TRUE)
+  init_env <- get('...init_env', envir = parent.frame(), inherits = TRUE)
   if(isFALSE(init_env[['init']])){
-    init_env[['init']] = list()
+    init_env[['init']] <- list()
   }
-  expr = substitute(expr)
-  init_env[['init']][[length(init_env[['init']]) + 1]] = expr
+  expr <- substitute(expr)
+  init_env[['init']][[length(init_env[['init']]) + 1]] <- expr
 }
 
 #' @rdname define_initialization
@@ -63,7 +63,7 @@ define_initialization.default <- function(expr){
 `define_initialization.rave_module_debug` <- function(expr){
   rave_context('rave_module_debug')
   mount_demo_subject()
-  expr = substitute(expr)
+  expr <- substitute(expr)
   eval(expr, envir = parent.frame())
 }
 

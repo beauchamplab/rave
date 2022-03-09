@@ -1,13 +1,13 @@
 rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_prefix = 'ravepreprocessoverview'){
-  ns = shiny::NS(module_id)
+  ns <- shiny::NS(module_id)
   
-  HAS_CACHE = 1L
+  HAS_CACHE <- 1L
   
-  url_format = sprintf('https://openwetware.org/wiki/RAVE:ravepreprocess:%s:%%s_%%s', doc_prefix)
+  url_format <- sprintf('https://openwetware.org/wiki/RAVE:ravepreprocess:%s:%%s_%%s', doc_prefix)
   
   file_formats <- names(raveio::IMPORT_FORMATS)
 
-  body = fluidRow(
+  body <- fluidRow(
     box(
       # id = ns('sidebar'),
       width = sidebar_width,
@@ -86,8 +86,8 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
 
 
 
-  server = function(input, output, session, user_data, utils, project_name = NULL, subject_code = NULL, ...){
-    local_data = reactiveValues(
+  server <- function(input, output, session, user_data, utils, project_name = NULL, subject_code = NULL, ...){
+    local_data <- reactiveValues(
       all_projects = '',
       project_name = '',
       subject_code = ''
@@ -95,19 +95,19 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
 
     # eval once
     # To be changed
-    local_data$all_projects = potential_projects = get_projects()
+    local_data$all_projects <- potential_projects <- get_projects()
 
-    last_inputs = utils$last_inputs()
+    last_inputs <- utils$last_inputs()
     if(!is.null(project_name)){
-      local_data$project_name = project_name
+      local_data$project_name <- project_name
     }else{
-      local_data$project_name = last_inputs$last_project_name
+      local_data$project_name <- last_inputs$last_project_name
     }
     
     if(!is.null(subject_code)){
-      local_data$subject_code = subject_code
+      local_data$subject_code <- subject_code
     }else{
-      local_data$subject_code = last_inputs$last_subject_code
+      local_data$subject_code <- last_inputs$last_subject_code
     }
     
     observeEvent(input$project_name, {
@@ -117,15 +117,15 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
 
     # Reactives
     observe({
-      local_data$reset = Sys.time()
+      local_data$reset <- Sys.time()
       
       # project_name_sel = get_val(input, 'project_name_sel', default = 'New Project...')
       # if( project_name_sel == 'New Project...' ){
       #   utils$clear_subject()
       #   return()
       # }
-      project_name = get_val(local_data, 'project_name', default = '')
-      subject_code = get_val(input, 'subject_code', default = '')
+      project_name <- get_val(local_data, 'project_name', default = '')
+      subject_code <- get_val(input, 'subject_code', default = '')
       
       catgl(sprintf(
         'Check whether subject has been imported: %s/%s',
@@ -134,13 +134,13 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       
       if(!is.blank(subject_code) && !is.blank(project_name)){
         # check if subject dir exists
-        dirs = get_dir(subject_code = subject_code, project_name = project_name)
+        dirs <- get_dir(subject_code = subject_code, project_name = project_name)
         catgl(dirs$preprocess_dir)
         if(dir.exists(dirs$preprocess_dir)){
           # subject exists, load subject data
           utils$load_subject(subject_code = subject_code, project_name = project_name)
           # local_data$project_name = project_name
-          local_data$subject_code = subject_code
+          local_data$subject_code <- subject_code
           showNotification(p('Subject ', subject_code, '(', project_name, ')', ' loaded!'), type = 'message')
           return()
         }
@@ -156,10 +156,10 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       input$save
       input$save1
     }, {
-      project_name = get_val(local_data, 'project_name', default = '')
-      subject_code = get_val(input, 'subject_code', default = '')
+      project_name <- get_val(local_data, 'project_name', default = '')
+      subject_code <- get_val(input, 'subject_code', default = '')
       if(!is.blank(subject_code) && !is.blank(project_name)){
-        dirs = get_dir(subject_code = subject_code, project_name = project_name)
+        dirs <- get_dir(subject_code = subject_code, project_name = project_name)
         
         if(isTRUE(local_data$is_bids)){
           target_bids <- normalizePath(raveio::raveio_getopt('bids_data_dir'), mustWork = FALSE)
@@ -190,32 +190,32 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
              utils$get_from_subject('subject_code', '') == subject_code
           ){
             # Subject already loaded, save!
-            n_changes = 3
+            n_changes <- 3
             if(!utils$set_blocks(input$blocks)){
-              blocks = utils$get_from_subject('blocks', NULL)
+              blocks <- utils$get_from_subject('blocks', NULL)
               updateSelectInput(session, inputId = 'blocks', selected = blocks)
-              n_changes = n_changes - 1
+              n_changes <- n_changes - 1
             }
             
             if(!utils$set_electrodes(input$channels, name = 'channels')){
-              channels = dipsaus::deparse_svec(utils$get_from_subject('channels', NULL))
+              channels <- dipsaus::deparse_svec(utils$get_from_subject('channels', NULL))
               updateTextInput(session, inputId = 'channels', value = channels)
-              n_changes = n_changes - 1
+              n_changes <- n_changes - 1
             }
             
             if(!utils$set_srate(input$srate)){
-              srate = utils$get_from_subject('srate', 0)
+              srate <- utils$get_from_subject('srate', 0)
               updateNumericInput(session, 'srate', value = srate)
-              n_changes = n_changes - 1
+              n_changes <- n_changes - 1
             }
             
             # Check if subject has been imported or not
             if(!utils$has_raw_cache() && length(utils$get_blocks()) && length(utils$get_electrodes())){
               # Subject is created but not imported
               # Check if channels are matched with subject raw files
-              electrodes = utils$get_electrodes()
-              blocks = utils$get_blocks()
-              pre_dir = utils$get_from_subject('dirs')$pre_subject_dir
+              electrodes <- utils$get_electrodes()
+              blocks <- utils$get_blocks()
+              pre_dir <- utils$get_from_subject('dirs')$pre_subject_dir
               # # check if block maches
               # wrong_blocks = blocks[!blocks %in% list.dirs(pre_dir, recursive = F, full.names = F)]
               # if(length(wrong_blocks)){
@@ -245,13 +245,13 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
             }
           }else{
             # No subject or subject changed, discard changes and load
-            local_data$all_projects = unique(c(isolate(local_data$all_projects), project_name))
+            local_data$all_projects <- unique(c(isolate(local_data$all_projects), project_name))
             utils$save_subject(subject_code = subject_code, project_name = project_name)
             showNotification(p('Subject ', subject_code, '(', project_name, ')', ' created/switched!'), type = 'message')
           }
           
-          local_data$project_name = project_name
-          local_data$subject_code = subject_code
+          local_data$project_name <- project_name
+          local_data$subject_code <- subject_code
         }else{
           showNotification(p('Subject ', subject_code, ' NOT found!'), type = 'error')
         }        
@@ -259,23 +259,23 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
     })
 
     output$step_1_msg <- renderUI({
-      scode = input$subject_code
+      scode <- input$subject_code
       project_name <- local_data$project_name
-      raw_dir = normalizePath(rave_options('raw_data_dir'), mustWork = FALSE)
-      target_dir = file.path(raw_dir, scode)
-      has_scode = length(scode) && scode != ''
+      raw_dir <- normalizePath(rave_options('raw_data_dir'), mustWork = FALSE)
+      target_dir <- file.path(raw_dir, scode)
+      has_scode <- length(scode) && scode != ''
       if( !has_scode ){
         return('')
       }
-      valid_scode = stringr::str_detect(scode, '^[a-zA-Z0-9][a-zA-Z0-9_]{0,50}$')
+      valid_scode <- stringr::str_detect(scode, '^[a-zA-Z0-9][a-zA-Z0-9_]{0,50}$')
       if( !valid_scode ){
         return(p(style='color:red;word-break: break-word;',
                     'Invalid subject code. Only letters (A-Z), numbers (0-9) and "_" are allowed. (Do not start with "_")'))
       }
-      has_dir = dir.exists(target_dir)
+      has_dir <- dir.exists(target_dir)
       if( has_dir ){
-        local_data$has_dir = TRUE
-        local_data$is_bids = FALSE
+        local_data$has_dir <- TRUE
+        local_data$is_bids <- FALSE
         return(p(style='color:green;word-break: break-word;',sprintf('%s (found!)', target_dir)))
       } else {
         
@@ -283,12 +283,12 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
         target_bids <- normalizePath(raveio::raveio_getopt('bids_data_dir'), mustWork = FALSE)
         target_bids <- file.path(target_bids, project_name, sprintf('sub-%s', scode))
         if(dir.exists(target_bids)){
-          local_data$has_dir = TRUE
-          local_data$is_bids = TRUE
+          local_data$has_dir <- TRUE
+          local_data$is_bids <- TRUE
           return(p(style='color:green;word-break: break-word;',sprintf('%s (found!)', target_bids)))
         }
-        local_data$is_bids = NULL
-        local_data$has_dir = FALSE
+        local_data$is_bids <- NULL
+        local_data$has_dir <- FALSE
         return(p(style='color:red;word-break: break-word;',
                  sprintf('%s (NOT found)', target_dir),
                  sprintf('%s (NOT found)', target_bids)))
@@ -338,15 +338,15 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
     
     
     output$step_2_msg <- renderUI({
-      project_name = get_val(local_data, 'project_name', default = '')
-      subject_code = get_val(input, 'subject_code', default = '')
+      project_name <- get_val(local_data, 'project_name', default = '')
+      subject_code <- get_val(input, 'subject_code', default = '')
       
       catgl(sprintf(
         'Check subject path: %s/%s',
         project_name, subject_code
       ))
       
-      data_dir = normalizePath(rave_options('data_dir'), mustWork = FALSE)
+      data_dir <- normalizePath(rave_options('data_dir'), mustWork = FALSE)
       if( subject_code == '' ){
         if( project_name != '' ){
           return(p(style='color:red;word-break: break-word;', 'Please enter subject code first!'))
@@ -358,12 +358,12 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
         return()
       }
       
-      valid_proj = stringr::str_detect(project_name, '^[a-zA-Z0-9][a-zA-Z0-9_]*')
+      valid_proj <- stringr::str_detect(project_name, '^[a-zA-Z0-9][a-zA-Z0-9_]*')
       if( !valid_proj ){
         return(p(style='color:red;word-break: break-word;', 'Project name is not valid. Use letters, digits, and "_" (Do not start with "_")'))
       }
       
-      fpath = file.path(data_dir, project_name, subject_code)
+      fpath <- file.path(data_dir, project_name, subject_code)
       if( dir.exists(fpath) && isTRUE(input$project_name_sel == 'New Project...') ){
         return(p(style = 'color:blue;word-break: break-word;', sprintf(
           'Subject [%s/%s] already exists and loaded',
@@ -378,7 +378,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
     })
     
     output$overview_inputs4 <- renderUI({
-      reset = user_data$reset
+      reset <- user_data$reset
       local_data$reset
       if( isTRUE(utils$has_subject()) ){
         return()
@@ -388,58 +388,58 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
     })
 
     output$overview_inputs5 <- renderUI({
-      reset = user_data$reset
+      reset <- user_data$reset
       local_data$reset
       if( !isTRUE(utils$has_subject()) ){
         return(p(style='color:grey;word-break: break-word;',
                     'Please specify subject code, project name and make sure press the "Create Subject" button'))
       }
-      last_inputs = utils$last_inputs()
-      srate = utils$get_from_subject('srate', default = 0)
-      block_choices = utils$get_from_subject('available_blocks', '')
-      block_selected = utils$get_from_subject('blocks', NULL)
-      channels = dipsaus::deparse_svec(utils$get_from_subject('channels', NULL))
+      last_inputs <- utils$last_inputs()
+      srate <- utils$get_from_subject('srate', default = 0)
+      block_choices <- utils$get_from_subject('available_blocks', '')
+      block_selected <- utils$get_from_subject('blocks', NULL)
+      channels <- dipsaus::deparse_svec(utils$get_from_subject('channels', NULL))
       # exclchan = dipsaus::deparse_svec(utils$get_from_subject('exclchan', NULL))
       # badchan = dipsaus::deparse_svec(utils$get_from_subject('badchan', NULL))
       # epichan = dipsaus::deparse_svec(utils$get_from_subject('epichan', NULL))
       # catgl('gen UI')
 
 
-      block_label = 'Folders (sessions or blocks)'
-      elec_label = 'Electrodes'
-      srate_label = 'Sample Rate'
-      unit_label = 'Physical unit'
-      save_label = 'Update Changes'
-      file_format_ui = NULL
+      block_label <- 'Folders (sessions or blocks)'
+      elec_label <- 'Electrodes'
+      srate_label <- 'Sample Rate'
+      unit_label <- 'Physical unit'
+      save_label <- 'Update Changes'
+      file_format_ui <- NULL
 
-      save_type = 'primary';
-      btn_cls = ''
-      save_id = 'save2'
+      save_type <- 'primary'
+      btn_cls <- ''
+      save_id <- 'save2'
       if(!utils$has_subject()){
-        save_label = 'Create Subject'
-        save_id = 'save'
+        save_label <- 'Create Subject'
+        save_id <- 'save'
       }else{
         if(utils$has_raw_cache()){
-          block_label = 'Folders (sessions or blocks, read-only)'
-          elec_label = 'Electrodes (read-only)'
-          save_type = 'warning'
+          block_label <- 'Folders (sessions or blocks, read-only)'
+          elec_label <- 'Electrodes (read-only)'
+          save_type <- 'warning'
         }else{
-          save_label = 'Check Subject'
-          file_format_ui = tagList(
+          save_label <- 'Check Subject'
+          file_format_ui <- tagList(
             selectInput(ns('file_format'), 'File format', choices = file_formats),
             uiOutput(ns('format_demo'))
           )
         }
         if(utils$notch_filtered()){
-          srate_label = 'Sample Rate (read-only)'
-          save_type = 'warning'
-          btn_cls = 'hidden'
+          srate_label <- 'Sample Rate (read-only)'
+          save_type <- 'warning'
+          btn_cls <- 'hidden'
         }
       }
 
 
 
-      re = shiny::tagList(
+      re <- shiny::tagList(
         shiny::selectInput(ns('blocks'), block_label, selected = block_selected, choices = block_choices, multiple = TRUE),
         shiny::textInput(ns('channels'), elec_label, placeholder = 'E.g. 1-84', value = channels),
         shiny::fluidRow(
@@ -509,7 +509,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
     })
 
     output$overview_table <- renderTable({
-      reset = user_data$reset
+      reset <- user_data$reset
       list(
         `Project Name` = utils$get_from_subject('project_name', NA),
         `Subject Code` = utils$get_from_subject('subject_code', NA),
@@ -524,8 +524,8 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
     })
 
     output$subject_log_table <- renderTable({
-      reset = user_data$reset
-      log = as.data.frame(utils$get_from_subject('log', data.frame(), customized = T))
+      reset <- user_data$reset
+      log <- as.data.frame(utils$get_from_subject('log', data.frame(), customized = TRUE))
       log
 
     })
@@ -533,27 +533,27 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
     
     # Check and import subject
     observeEvent(input$save2, {
-      local_data$import_valid = TRUE
-      local_data$import_checks = NULL
+      local_data$import_valid <- TRUE
+      local_data$import_checks <- NULL
       
       electrodes <- dipsaus::parse_svec(input$channels)
       srate <- input$srate
       blocks <- input$blocks
       file_format <- input$file_format
-      project_name = get_val(local_data, 'project_name', default = '')
-      subject_code = get_val(input, 'subject_code', default = '')
+      project_name <- get_val(local_data, 'project_name', default = '')
+      subject_code <- get_val(input, 'subject_code', default = '')
       
       if(!length(blocks)){
         showNotification(p('No block is chosen. At least one block is needed'), type = 'error')
-        local_data$import_valid = FALSE
+        local_data$import_valid <- FALSE
       }
       if(!length(electrodes)){
         showNotification(p('Please enter electrodes to be imported'), type = 'error')
-        local_data$import_valid = FALSE
+        local_data$import_valid <- FALSE
       }
       if(srate <= 0){
         showNotification(p('Sample rate is invalid: must be positive'), type = 'error')
-        local_data$import_valid = FALSE
+        local_data$import_valid <- FALSE
       }
       if(isFALSE(local_data$import_valid)){
         return()
@@ -564,7 +564,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       
       if(utils$has_raw_cache()){
         showNotification(p('Subject has been imported, please proceed to other modules'), type = 'error')
-        local_data$import_valid = FALSE
+        local_data$import_valid <- FALSE
         return()
       }
       
@@ -597,7 +597,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
         freeze_lfp = utils$has_raw_cache()
       ))
       
-      local_data$import_checks = import_checks
+      local_data$import_checks <- import_checks
       local_data$input_changed_import <- TRUE
       local_data$input_changed_import2 <- TRUE
     }, ignoreInit = TRUE, ignoreNULL = TRUE)
@@ -636,9 +636,9 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
         ))
       }
       
-      project_name = local_data$project_name
+      project_name <- local_data$project_name
       project_name %?<-% ''
-      subject_code = input$subject_code
+      subject_code <- input$subject_code
       subject_code %?<-% ''
       utils$check_load_subject(subject_code = subject_code, project_name = project_name)
       
@@ -705,7 +705,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       if(main_results$lfp_file_format %in% c(3:6)){
         color <- 'color: red;'
       } else {
-        color = ''
+        color <- ''
       }
       
       if(isTRUE(last_time == last_time2)){
@@ -752,8 +752,8 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
         showNotification(p('Failed validation. Please check your raw data'), type = 'error')
       }
       
-      project_name = get_val(local_data, 'project_name', default = '')
-      subject_code = get_val(input, 'subject_code', default = '')
+      project_name <- get_val(local_data, 'project_name', default = '')
+      subject_code <- get_val(input, 'subject_code', default = '')
       utils$check_load_subject(subject_code = subject_code, project_name = project_name)
       
       if(utils$has_raw_cache()){
@@ -769,8 +769,8 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       utils$set_blocks(blocks)
       utils$set_electrodes(electrodes)
       utils$set_sample_rate(srate)
-      dirs = utils$get_from_subject('dirs', list(), customized = FALSE)
-      file = file.path(dirs$preprocess_dir, 'raw_voltage.h5')
+      dirs <- utils$get_from_subject('dirs', list(), customized = FALSE)
+      file <- file.path(dirs$preprocess_dir, 'raw_voltage.h5')
       
       if(file.exists(file)){
         unlink(file)
@@ -808,8 +808,8 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
                           sample_rate = srate, conversion = lfp_unit, task_runs = bids_runs)
       utils$save_to_subject(checklevel = HAS_CACHE)
       utils$reset()
-      msg = 'Raw voltage signals are cached.'
-      type = 'message'
+      msg <- 'Raw voltage signals are cached.'
+      type <- 'message'
       utils$showNotification(msg, type = type)
       shiny::removeModal()
       

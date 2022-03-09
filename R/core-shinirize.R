@@ -7,10 +7,10 @@
 shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = TRUE,
                       data_env = getDefaultDataRepository()){
   # assign variables
-  MODULE_ID = module$module_id
-  MODULE_LABEL = module$label_name
+  MODULE_ID <- module$module_id
+  MODULE_LABEL <- module$label_name
   
-  logger = function(...){
+  logger <- function(...){
     catgl('[', MODULE_ID, '] ', ..., strftime(Sys.time(), ' - %M:%S', usetz = FALSE))
   }
 
@@ -30,7 +30,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
   list(
     id = MODULE_ID,
     ui = function(){
-      title = sprintf('RAVE - %s', MODULE_LABEL)
+      title <- sprintf('RAVE - %s', MODULE_LABEL)
       module$render_ui(session = session)
     },
     server = function(input, output, session, global_reactives, env = new.env()){
@@ -102,9 +102,9 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       #
       # Now let's init local_data (reactive) storing flags
       #### ####
-      execenv$global_reactives = global_reactives
+      execenv$global_reactives <- global_reactives
 
-      local_data = reactiveValues(
+      local_data <- reactiveValues(
 
         # Flag indicating if data is present
         has_data = FALSE,
@@ -137,19 +137,19 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         current_param = list()
       )
 
-      execenv$local_reactives = local_data
+      execenv$local_reactives <- local_data
 
       # TODO: remove this environment
-      local_static = new.env()
+      local_static <- new.env()
       local({
-        activated = FALSE
+        activated <- FALSE
       }, envir = local_static)
 
       ###### 0. debounce inputs - rate policy ######
       # Note: One way to debug is to remove "debounce"
       last_input <- debounce(
         reactive({
-          re = local_data$last_input
+          re <- local_data$last_input
           if(check_active()){
             # catgl('Input changed')
             return(re)
@@ -175,7 +175,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
       run_script <- debounce(
         reactive({
-          re = local_data$run_script
+          re <- local_data$run_script
           # catgl('Cheking')
           if( check_active(reactive = FALSE) && length(re) && !isFALSE(re) ){
             catgl('Ready, prepared to execute scripts.')
@@ -196,7 +196,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       # })
 
       reactive({
-        re = local_data$has_results
+        re <- local_data$has_results
         if(check_active()){
           catgl('Rendering')
           return(re)
@@ -207,21 +207,21 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
       ###### 1. Utils ######
 
-      check_active = function(reactive = F){
+      check_active <- function(reactive = FALSE){
         if(reactive){
-          I = base::I
+          I <- base::I
         }else{
-          I = shiny::isolate
+          I <- shiny::isolate
         }
         # Has data
-        has_data = get_val(I(local_data$has_data), default = FALSE)
-        has_data = length(has_data) && !isFALSE(has_data)
+        has_data <- get_val(I(local_data$has_data), default = FALSE)
+        has_data <- length(has_data) && !isFALSE(has_data)
         # initialized
-        initialized = get_val(I(local_data$initialized), default = FALSE)
-        initialized = isTRUE(initialized)
+        initialized <- get_val(I(local_data$initialized), default = FALSE)
+        initialized <- isTRUE(initialized)
         # is current module focused
-        focused = get_val(I(local_data$focused), default = FALSE)
-        focused = isTRUE(focused)
+        focused <- get_val(I(local_data$focused), default = FALSE)
+        focused <- isTRUE(focused)
 
         if(has_data && focused && initialized){
           # catgl('Pass active check', level = 'INFO')
@@ -237,17 +237,17 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       cache_all_inputs <- function(save = TRUE){
         # params = isolate(reactiveValuesToList(input))
         lapply(execenv$input_ids, function(inputId){
-          val = shiny::isolate({ input[[inputId]] })
+          val <- shiny::isolate({ input[[inputId]] })
           cache_input(inputId = inputId, val = val, read_only = !save)
         }) ->
           altered_params
 
-        names(altered_params) = execenv$input_ids
-        altered_params = dipsaus::drop_nulls(altered_params)
+        names(altered_params) <- execenv$input_ids
+        altered_params <- dipsaus::drop_nulls(altered_params)
 
         if(save){
-          param_str = shiny::isolate(shiny::reactiveValuesToList(input, all.names = TRUE))
-          param_str = paste(deparse(param_str), collapse = '')
+          param_str <- shiny::isolate(shiny::reactiveValuesToList(input, all.names = TRUE))
+          param_str <- paste(deparse(param_str), collapse = '')
           execenv$set_browser(param_str)
         }
         return(altered_params)
@@ -259,40 +259,40 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         # if not, disable local_data$has_data and return NULL
 
         # Pass the check, local_data$has_data = T
-        local_data$has_data = global_reactives$has_data
+        local_data$has_data <- global_reactives$has_data
       }, priority = -1L)
 
       # Signal to force deactivate module
       observeEvent(global_reactives$force_refresh_all, {
         catgl('Force refresh all - reset: ', stringr::str_to_upper(MODULE_ID))
         # terminate all current running process
-        local_data$suspended = TRUE
-        local_data$initialized = FALSE
-        local_static$activated = FALSE
+        local_data$suspended <- TRUE
+        local_data$initialized <- FALSE
+        local_static$activated <- FALSE
 
-        params = isolate(reactiveValuesToList(input))
+        params <- isolate(reactiveValuesToList(input))
         clear_cache(levels = 1)
         execenv$reset(params)
       }, priority = 999L)
 
       # Assign local_data$focused
       observe({
-        m = global_reactives$execute_module
+        m <- global_reactives$execute_module
         if(length(m) && m == stringr::str_to_upper(MODULE_ID)){
           catgl('Sidebar switched to ', m)
-          local_data$focused = T
+          local_data$focused <- TRUE
 
           # Add to global_reactives current module ID
           # this is used to keep track of user view history
-          global_reactives$view_history = c(
+          global_reactives$view_history <- c(
             isolate(global_reactives$view_history),
             list(list(
               module_id = m,
-              activated = F
+              activated = FALSE
             ))
           )
         }else{
-          local_data$focused = F
+          local_data$focused <- FALSE
         }
       }, priority = 999L)
 
@@ -304,7 +304,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
       observe({
         if(has_results() != FALSE){
-          local_data$show_results = Sys.time()
+          local_data$show_results <- Sys.time()
         }
       })
 
@@ -317,16 +317,16 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       # We know has_data = T, also focused = T. However, initialized is not available
       #
       # What will happen: inputs will be updated, initialized will be T and last_input() will be triggered
-      update_input = function(){
+      update_input <- function(){
         catgl('Initializing/Updating inputs')
         # step 1: get updated inputs
-        params = cache_all_inputs(save = FALSE)
+        params <- cache_all_inputs(save = FALSE)
 
         # step 2: set initializa = TRUE
-        local_data$initialized = TRUE
+        local_data$initialized <- TRUE
 
         # step 3: update UI
-        err_info = execenv$input_update(input = params, session = session, init = TRUE)
+        err_info <- execenv$input_update(input = params, session = session, init = TRUE)
 
         # step 4: in case no UI updated, force trigger last_input()
         # TODO: since updating UI takes time, if it exceed 0.1 sec, then
@@ -335,12 +335,12 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         # twice.
         # However, if n_errors[1] > 0, which means initial update has errors, we stop the process
         # because the module might encounter fatal error (lack of data or code error)
-        n_errors = err_info$n_errors
+        n_errors <- err_info$n_errors
         if(n_errors[1] > 0){
           catgl('Terminate the process due to initialization failures. Data not loaded? or code error? See the following information', level = 'INFO')
           sapply(err_info$init_error_msgs, logger, level = 'ERROR')
         }else{
-          local_data$last_input = Sys.time()
+          local_data$last_input <- Sys.time()
         }
       }
 
@@ -349,10 +349,10 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       #  Initialized, has data, module activated
       # since Initialized = T, rave_inputs and updates are done, we only need to run script (rave_execute)
       observe({
-        last_input_updated = last_input()
+        last_input_updated <- last_input()
         if(!isFALSE(last_input_updated)){
           # catgl('Last input updated')
-          local_data$run_script = Sys.time()
+          local_data$run_script <- Sys.time()
         }
       })
 
@@ -369,19 +369,19 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         safe_wrap_expr({
         # tryCatch({
           # record time
-          start_time = Sys.time()
+          start_time <- Sys.time()
           execenv$execute(async = async, force = force)
           if(async){
-            local_data$suspended = FALSE
+            local_data$suspended <- FALSE
             showNotification(p('Running in the background. Results will be shown once finished.'), type = 'message', id = 'async_msg')
           }else{
-            local_data$has_results = Sys.time()
-            end_time = Sys.time()
-            dta = time_diff(start_time, end_time)
+            local_data$has_results <- Sys.time()
+            end_time <- Sys.time()
+            dta <- time_diff(start_time, end_time)
             catgl(MODULE_LABEL, ' - Exec time: ', sprintf('%.3f (%s)', dta$delta, dta$units), level = 'INFO')
           }
 
-          local_data$last_executed = TRUE
+          local_data$last_executed <- TRUE
           cache_all_inputs()
           cache_input(inputId = '..onced', val = TRUE, read_only = FALSE, shared = FALSE)
 
@@ -396,7 +396,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
           # })
 
         }, onFailure = function(e){
-          local_data$last_executed = FALSE
+          local_data$last_executed <- FALSE
         }, finally = {
           
           removeNotification(id = '.rave_main')
@@ -409,7 +409,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       # 1. Initialized, has data, module activated,
       # 2. Some input changed
       observe({
-        run_script_signal = run_script()
+        run_script_signal <- run_script()
         if( shiny::isTruthy(run_script_signal) ){
           exec_script()
         }
@@ -420,16 +420,16 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         if(!is.null(local_data$run_async)){
           showNotification(p('There is another process running in the background. ', actionLink(execenv$ns('..kill'), 'Proceed?')), type = 'warning', duration = NULL, id = 'async_msg')
         }else{
-          local_data$run_async = Sys.time()
+          local_data$run_async <- Sys.time()
         }
       })
 
       observeEvent(input$..kill, {
-        local_data$run_async = Sys.time()
+        local_data$run_async <- Sys.time()
       })
 
       observeEvent(local_data$run_async, {
-        is_run = !is.null(local_data$run_async)
+        is_run <- !is.null(local_data$run_async)
         if(is_run){
           catgl('Running the script with async')
           exec_script(async = TRUE, force = TRUE)
@@ -440,27 +440,27 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       observeEvent(global_reactives$check_results, {
         if(!isolate(local_data$suspended)){
           catgl('Checking futures')
-          f = execenv$param_env[['..rave_future_obj']]
+          f <- execenv$param_env[['..rave_future_obj']]
           if(!is.null(f) && inherits(f, 'Future')){
             if(future::resolved(f)){
-              execenv$param_env[['..rave_future_env']] = tryCatch({
+              execenv$param_env[['..rave_future_env']] <- tryCatch({
                 future::value(f)
               }, error = function(e){
                 catgl('[ASYNC]: ', MODULE_LABEL, ' got an error during async evaluation:', level = 'ERROR')
                 catgl(paste(utils::capture.output(traceback(e)), collapse = '\n'), level = 'ERROR')
                 return(NULL)
               })
-              local_data$suspended = TRUE
+              local_data$suspended <- TRUE
               # Need to run script again to update async_vars
               # However, we cannot directly call run_script since users might switch to other modules
               # We leave a flag instead
               # exec_script(async = F)
-              local_data$run_script = Sys.time()
-              local_data$run_async = NULL
+              local_data$run_script <- Sys.time()
+              local_data$run_async <- NULL
               showNotification(p('Async evaluation is finished - ', MODULE_LABEL), duration = NULL, type = 'message')
             }
           }else{
-            local_data$suspended = TRUE
+            local_data$suspended <- TRUE
           }
         }
       })
@@ -491,22 +491,22 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
 
       observeEvent(input$..incubator, {
-        input_labels = stringr::str_c(unlist(execenv$input_labels))
-        export_func = ls(execenv$static_env)
-        is_export_func = vapply(export_func, function(x){
+        input_labels <- stringr::str_c(unlist(execenv$input_labels))
+        export_func <- ls(execenv$static_env)
+        is_export_func <- vapply(export_func, function(x){
           is.function(execenv$static_env[[x]]) && stringr::str_detect(x, 'export_')
         }, FUN.VALUE = logical(1))
-        export_func = export_func[is_export_func]
+        export_func <- export_func[is_export_func]
 
         if(length(export_func)){
 
           # find all analysis names
-          analysis_names = module_analysis_names(module_id = MODULE_ID)
+          analysis_names <- module_analysis_names(module_id = MODULE_ID)
 
           showModal(
             modalDialog(
               title = '',
-              easyClose = T,
+              easyClose = TRUE,
               footer = tagList(
                 modalButton('Cancel'),
                 actionButton(execenv$ns('.export_ready'), 'OK')
@@ -541,30 +541,30 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
       })
 
       observeEvent(input$.export_ready, {
-        fun_name = input$.export_func
-        analysis_name = input$.export_name
+        fun_name <- input$.export_func
+        analysis_name <- input$.export_name
         if(analysis_name == '[New..]'){
-          analysis_name = input$.export_name_txt
-          analysis_name = stringr::str_remove_all(analysis_name, '[^a-zA-Z0-9_]')
+          analysis_name <- input$.export_name_txt
+          analysis_name <- stringr::str_remove_all(analysis_name, '[^a-zA-Z0-9_]')
         }
-        analysis_name = stringr::str_to_upper(analysis_name)
+        analysis_name <- stringr::str_to_upper(analysis_name)
 
         tryCatch({
-          f = execenv$static_env[[fun_name]]
-          fm = formals(f)
+          f <- execenv$static_env[[fun_name]]
+          fm <- formals(f)
           if(is.null(fm[['...']])){
             fm %?<-% list()
-            fm[['...']] = rlang::sym('')
-            formals(f) = fm
+            fm[['...']] <- rlang::sym('')
+            formals(f) <- fm
           }
-          con = subject_tmpfile(
+          con <- subject_tmpfile(
             module_id = MODULE_ID,
             fun_name = stringr::str_remove(fun_name, '^export_'),
             pattern = sprintf(
             '[%s]_', strftime(Sys.time(), '%Y%m%d-%H%M%S')
           ))
 
-          res = f(con, analysis_name, dirname(con))
+          res <- f(con, analysis_name, dirname(con))
           # Save to group analysis
           catgl('Saving to group analysis tables...')
           module_analysis_save(module_id = MODULE_ID, analysis_name = analysis_name, file = con, meta = res)
@@ -578,20 +578,20 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
       observeEvent(input$.gen_report, {
 
-        curr_e = dipsaus::deparse_svec(get('electrodes', envir = data_env, inherits = F))
-        output_labels = stringr::str_c(unlist(execenv$output_labels))
-        input_labels = stringr::str_c(unlist(execenv$input_labels))
+        curr_e <- dipsaus::deparse_svec(get('electrodes', envir = data_env, inherits = FALSE))
+        output_labels <- stringr::str_c(unlist(execenv$output_labels))
+        input_labels <- stringr::str_c(unlist(execenv$input_labels))
         # guess inputs
-        sel = stringr::str_detect(stringr::str_to_lower(input_labels), 'electrode')
+        sel <- stringr::str_detect(stringr::str_to_lower(input_labels), 'electrode')
         if(sum(sel)){
-          selected = input_labels[sel][1]
+          selected <- input_labels[sel][1]
         }else{
-          selected = NULL
+          selected <- NULL
         }
 
-        modal = shiny::modalDialog(
+        modal <- shiny::modalDialog(
           title = 'Export as Report',
-          easyClose = F,
+          easyClose = FALSE,
           footer = tagList(
             modalButton("Cancel"),
             downloadButton(execenv$ns('.do_gen_report'))
@@ -627,18 +627,18 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
         },
         content = function(con) {
           tryCatch({
-            electrodes = dipsaus::parse_svec(input$.report_electrodes)
-            electrodes = data_env$valid_electrodes(electrodes)
-            inputId = execenv$input_ids[unlist(execenv$input_labels) == input$.report_inputid]
-            outputId = execenv$output_ids[unlist(execenv$output_labels) %in% input$.report_outputid]
+            electrodes <- dipsaus::parse_svec(input$.report_electrodes)
+            electrodes <- data_env$valid_electrodes(electrodes)
+            inputId <- execenv$input_ids[unlist(execenv$input_labels) == input$.report_inputid]
+            outputId <- execenv$output_ids[unlist(execenv$output_labels) %in% input$.report_outputid]
             if(length(outputId) == 0){
-              outputId = execenv$output_ids[1]
+              outputId <- execenv$output_ids[1]
             }
-            param = lapply(execenv$input_ids, function(nm){
+            param <- lapply(execenv$input_ids, function(nm){
               input[[nm]]
             })
-            names(param) = execenv$input_ids
-            args = list(
+            names(param) <- execenv$input_ids
+            args <- list(
               module = module,
               inputId = inputId,
               valueList = as.list(electrodes),
@@ -649,10 +649,10 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
               envir = new.env(parent = data_env)
             )
             print(args)
-            output_fpath = do.call(export_report, args = args)
+            output_fpath <- do.call(export_report, args = args)
 
             print(output_fpath)
-            file.copy(output_fpath, con, overwrite = T)
+            file.copy(output_fpath, con, overwrite = TRUE)
             # write.csv(data, con)
           },error = function(e){
             writeLines(utils::capture.output(traceback(e)), con)
@@ -662,20 +662,20 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
       # Special output - if module is not auto updated
       output[['..params_current']] <- renderUI({
-        input_changed = NULL
-        update_btn = NULL
+        input_changed <- NULL
+        update_btn <- NULL
         if(!execenv$auto_execute){
           # Check if any params changed
           vapply(execenv$input_ids, function(inputId){
-            re = !isTRUE(all.equal(local_data$current_param[[inputId]], input[[inputId]], check.attributes = F))
+            re <- !isTRUE(all.equal(local_data$current_param[[inputId]], input[[inputId]], check.attributes = FALSE))
             re
           }, FUN.VALUE = FALSE) ->
             input_changed
           if(length(input_changed) && any(input_changed)){
-            update_btn = dipsaus::actionButtonStyled(execenv$ns('..force_execute'), 'Update Output', type = 'warning', width = '100%')
+            update_btn <- dipsaus::actionButtonStyled(execenv$ns('..force_execute'), 'Update Output', type = 'warning', width = '100%')
             showNotification(p('Input changed, click ', actionLink(execenv$ns('..force_execute_1'), 'here'), ' or press ', strong('Ctrl/Command+Enter'), ' to update output.'), duration = NULL, id = '..input_updated')
           }else{
-            update_btn = dipsaus::actionButtonStyled(execenv$ns('..force_execute'), 'Update Output', type = 'default', disabled = TRUE, width = '100%')
+            update_btn <- dipsaus::actionButtonStyled(execenv$ns('..force_execute'), 'Update Output', type = 'default', disabled = TRUE, width = '100%')
             removeNotification(id = '..input_updated')
           }
 
@@ -699,7 +699,7 @@ shinirize <- function(module, session = getDefaultReactiveDomain(), test.mode = 
 
       observeEvent(global_reactives$keyboard_event, {
         if(local_data$focused){
-          e = global_reactives$keyboard_event
+          e <- global_reactives$keyboard_event
           if(length(e) && length(e$enter_hit) && length(e$ctrl_hit) && e$enter_hit && e$ctrl_hit){
             # catgl('Keyboard Signal Received.')
             exec_script(async = e$shift_hit, force = TRUE)

@@ -51,20 +51,20 @@ diagnose_signal <- function(
   
   # is sc not specified, and srate is too high, compress s1
   if(try_compress && (is.null(sc) || (srate > 200 && length(s1) / srate > 300))){
-    sratec = 100
+    sratec <- 100
     sc <- s1[round(seq(1, length(s1), by = srate/sratec))]
   }else{
     sc %?<-% s1
-    sratec = srate / length(s1) * length(sc)
+    sratec <- srate / length(s1) * length(sc)
   }
-  max_freq = min(max_freq, floor(srate/ 2))
-  xlim = c(0, max_freq)
+  max_freq <- min(max_freq, floor(srate/ 2))
+  xlim <- c(0, max_freq)
   
   # Calculate boundary to draw
   if(is.null(boundary)){
-    boundary = std* stats::sd(s1)
+    boundary <- std* stats::sd(s1)
   }
-  ylim = max(abs(s1), boundary)
+  ylim <- max(abs(s1), boundary)
   
   # Grid layout
   if(length(which) == 0){
@@ -107,7 +107,7 @@ diagnose_signal <- function(
   
   
   if(length(which) == 0 || 3 %in% which){
-    log_xlim = log10(sapply(xlim, max, 1))
+    log_xlim <- log10(sapply(xlim, max, 1))
     if(!is.null(s2)){
       pwelch(s2, fs = srate, window = window,
              noverlap = noverlap, plot = 1, col = col[2], cex = cex, ylim = flim,
@@ -159,60 +159,60 @@ plot_signals <- function(
   signals, sample_rate = 1, col = 1, space = 0.995, space_mode = 'quantile',
   start_time = 0, duration = NULL, compress = TRUE,
   channel_names = NULL, ylab = 'Channel', time_shift = 0, lwd = 0.5,cex = 2,
-  new_plot = T, plot = 'base', xlim = NULL,  ...
+  new_plot = TRUE, plot = 'base', xlim = NULL,  ...
 ){
   if(space_mode == 'quantile'){
-    space = stats::quantile(signals, space, na.rm = T) *2
+    space <- stats::quantile(signals, space, na.rm = TRUE) *2
   }
-  compress = round(compress)
+  compress <- round(compress)
   if(compress == 1){
     if(length(duration)){
-      n_tp = round(duration * sample_rate)
+      n_tp <- round(duration * sample_rate)
     }else{
-      n_tp = round(ncol(signals) - start_time * sample_rate)
+      n_tp <- round(ncol(signals) - start_time * sample_rate)
     }
     if(n_tp > 10000){
-      compress = (n_tp / 10000)
+      compress <- (n_tp / 10000)
     }
   }
   
   
   if(compress > 1){
-    sample_rate = sample_rate / compress
-    signals = signals[, round(seq(1, ncol(signals), by = compress))]
+    sample_rate <- sample_rate / compress
+    signals <- signals[, round(seq(1, ncol(signals), by = compress))]
   }
-  ns = nrow(signals)       # Number of channels
-  nt = ncol(signals)       # Total time points
+  ns <- nrow(signals)       # Number of channels
+  nt <- ncol(signals)       # Total time points
   if(length(col) == 1){
-    col = rep(col, ns)     # Color for each channels
+    col <- rep(col, ns)     # Color for each channels
   }
-  y0 = (1:ns) * space      # Re-calculate zero lines for each channels
-  r = y0 + signals         # Re-calculate channel positions
-  Time = (seq_len(nt) -1) / sample_rate   # True time in seconds
+  y0 <- (1:ns) * space      # Re-calculate zero lines for each channels
+  r <- y0 + signals         # Re-calculate channel positions
+  Time <- (seq_len(nt) -1) / sample_rate   # True time in seconds
   
-  start_time = min(start_time, range(Time)[2]-10/sample_rate)
+  start_time <- min(start_time, range(Time)[2]-10/sample_rate)
   if(is.null(duration)){
-    time_range = c(start_time, range(Time)[2])      # duration is max range by default
+    time_range <- c(start_time, range(Time)[2])      # duration is max range by default
   }else{
-    time_range = c(start_time, start_time + duration)
+    time_range <- c(start_time, start_time + duration)
   }
   
-  tsl = Time %within% time_range
+  tsl <- Time %within% time_range
   
-  r = r[,tsl]
-  Time = Time[tsl]
-  nt = ncol(r)
+  r <- r[,tsl]
+  Time <- Time[tsl]
+  nt <- ncol(r)
   
   if(is.null(channel_names)){
-    channel_names = paste(1:ns)   # Assign channel names
+    channel_names <- paste(1:ns)   # Assign channel names
     if(length(y0) > 30){
-      ind = seq(0, length(y0), by = 5)
-      ind = unique(c(1, ind[-1], length(y0)))
+      ind <- seq(0, length(y0), by = 5)
+      ind <- unique(c(1, ind[-1], length(y0)))
       if(utils::tail(diff(ind), 1) == 1){
-        ind = ind[-(length(ind) - 1)]
+        ind <- ind[-(length(ind) - 1)]
       }
-      y0 = y0[ind]
-      channel_names = channel_names[ind]
+      y0 <- y0[ind]
+      channel_names <- channel_names[ind]
     }
   }
   

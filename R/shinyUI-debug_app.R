@@ -19,29 +19,29 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     rave_prepare()
   }, error = function(e){})
   
-  test.mode = list(...)[['test.mode']]
+  test.mode <- list(...)[['test.mode']]
   if(is.null(test.mode)) {
     if(is.null(modules)){
-      test.mode = isTRUE(rave_options('test_mode'))
+      test.mode <- isTRUE(rave_options('test_mode'))
     }else{
-      test.mode = FALSE
+      test.mode <- FALSE
     }
   }
   if(!length(modules)){
-    modules = load_modules()
+    modules <- load_modules()
   }
   
   if(!is.list(modules)){
-    modules = list("______" = list(modules))
+    modules <- list("______" = list(modules))
   }
   
-  data_selector = shiny_data_selector('DATA_SELECTOR', data_env = data_repo)
-  ui = dashboardPage(
+  data_selector <- shiny_data_selector('DATA_SELECTOR', data_env = data_repo)
+  ui <- dashboardPage(
     skin = theme,
     title = 'R Analysis and Visualization of ECoG/iEEG Data',
     header = dashboardHeader(
       title = local({
-        ver = utils::packageVersion('rave')
+        ver <- utils::packageVersion('rave')
         sprintf('RAVE (%s)', paste(unlist(ver), collapse = '.'))
       }),
       btn_text_right = 'RAM Usage',
@@ -72,14 +72,14 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
         .list =
           tagList(
             lapply(names(modules)[!names(modules) %in% "______"], function(nm){
-              m = modules[[nm]]
+              m <- modules[[nm]]
               if(nm != "______"){
                 do.call(shinydashboard::menuItem, args = list(
                   text = nm,
                   expandedName = nm,
-                  startExpanded = F,
+                  startExpanded = FALSE,
                   lapply(m, function(smd){
-                    mid_up = stringr::str_to_upper(smd$module_id)
+                    mid_up <- stringr::str_to_upper(smd$module_id)
                     shinydashboard::menuSubItem(
                       text = smd$label_name,
                       tabName = mid_up,
@@ -90,7 +90,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
               }
             }),
             lapply(unlist(modules[["______"]]), function(smd){
-              mid_up = stringr::str_to_upper(smd$module_id)
+              mid_up <- stringr::str_to_upper(smd$module_id)
               shinydashboard::menuItem(
                 text = smd$label_name,
                 tabName = mid_up,
@@ -108,11 +108,11 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
       do.call(
         shinydashboard::tabItems,
         args = local({
-          re = lapply(unlist(modules), function(m) {
+          re <- lapply(unlist(modules), function(m) {
             shinydashboard::tabItem(tabName = stringr::str_to_upper(m$module_id),
                                     uiOutput(stringr::str_c(m$module_id, '_UI')))
           })
-          names(re) = NULL
+          names(re) <- NULL
           re
         })
       )
@@ -125,7 +125,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     )
   )
   
-  server = function(input, output, session){
+  server <- function(input, output, session){
     # output$.init_mask <- renderUI({
     #   input$.init_mask_f5
     #   img_list = get_people()
@@ -144,9 +144,9 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     #################################################################
     
     # Global variable, timer etc.
-    async_timer = reactiveTimer(5000)
+    async_timer <- reactiveTimer(5000)
     # input_timer = reactiveTimer(rave_options('delay_input') / 2)
-    global_reactives = reactiveValues(
+    global_reactives <- reactiveValues(
       check_results = NULL,
       check_inputs = NULL,
       execute_module = '',
@@ -155,11 +155,11 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
       timer_count = 0
     )
     
-    local_data = reactiveValues(
+    local_data <- reactiveValues(
       mem_usage = NULL
     )
     observeEvent(async_timer(), {
-      global_reactives$check_results = Sys.time()
+      global_reactives$check_results <- Sys.time()
     })
     
     
@@ -179,9 +179,9 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     
     
     # unlist(modules) will flatten modules but it's still a list
-    module_ids = stringr::str_to_upper(sapply(unlist(modules), function(m){m$module_id}))
-    session$userData$rave_module = function(module_id){
-      module_id = stringr::str_to_upper(module_id)
+    module_ids <- stringr::str_to_upper(sapply(unlist(modules), function(m){m$module_id}))
+    session$userData$rave_module <- function(module_id){
+      module_id <- stringr::str_to_upper(module_id)
       if(module_id %in% module_ids){
         for(m in unlist(modules)){
           if(stringr::str_to_upper(m$module_id) == module_id){
@@ -191,19 +191,19 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
       }
       return(NULL)
     }
-    update_variable = function(module_id, variable_name = NULL, value = NULL, 
+    update_variable <- function(module_id, variable_name = NULL, value = NULL, 
                                flush = TRUE, ...){
       
       if(is.null(variable_name)){ return() }
-      sidebar_id = stringr::str_to_upper(shiny::isolate(input$sidebar))
+      sidebar_id <- stringr::str_to_upper(shiny::isolate(input$sidebar))
       tryCatch({
-        module_id = stringr::str_to_upper(module_id)
-        m = unlist(modules)[module_ids %in% module_id]
+        module_id <- stringr::str_to_upper(module_id)
+        m <- unlist(modules)[module_ids %in% module_id]
         
         if(length(m) == 1){
           
-          m = m[[1]]
-          e = m$get_or_new_exec_env()
+          m <- m[[1]]
+          e <- m$get_or_new_exec_env()
           local({
             rave_context(senv = e)
             
@@ -225,9 +225,9 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     
     # Switch to module
     observe({
-      module_info = global_reactives$switch_module
+      module_info <- global_reactives$switch_module
       if(!is.null(module_info)){
-        mid = module_info$module_id = stringr::str_to_upper(module_info$module_id)
+        mid <- module_info$module_id <- stringr::str_to_upper(module_info$module_id)
         if(mid %in% module_ids){
           catgl('Switching to module - ', mid, level = 'INFO')
           do.call(update_variable, module_info)
@@ -237,10 +237,10 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     })
     
     observeEvent(input[['..keyboard_event..']], {
-      global_reactives$keyboard_event = input[['..keyboard_event..']]
+      global_reactives$keyboard_event <- input[['..keyboard_event..']]
     })
     observeEvent(input[['..client_size..']], {
-      global_reactives$client_size = input[['..client_size..']]
+      global_reactives$client_size <- input[['..client_size..']]
     })
     
     
@@ -254,8 +254,8 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     # load modules
     # progress bar won't show title here, this is because shiny render detail information first and then
     # message
-    .progress = progress(title = '', max = length(unlist(modules)))
-    shinirized_modules = lapply(unlist(modules), function(m){
+    .progress <- progress(title = '', max = length(unlist(modules)))
+    shinirized_modules <- lapply(unlist(modules), function(m){
       .progress$inc(sprintf('Loading - %s', m$label_name))
       shinirize(m, test.mode = test.mode, data_env = data_repo)
     })
@@ -263,9 +263,9 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     
     observe({
       if(global_reactives$has_data){
-        current_module_id = input$sidebar
-        global_reactives$execute_module = current_module_id
-        session$userData$rave_current_module_id = current_module_id
+        current_module_id <- input$sidebar
+        global_reactives$execute_module <- current_module_id
+        session$userData$rave_current_module_id <- current_module_id
         shinyjs::hide(id = '__rave__mask__', anim = TRUE, animType = 'slide')
         shinyjs::removeClass(selector = 'body', class = "rave-noscroll")
       }else{
@@ -289,23 +289,23 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     # some navigations
     
     observe({
-      refresh = global_reactives$force_refresh_all
+      refresh <- global_reactives$force_refresh_all
       if(global_reactives$has_data && check_data_repo('subject')){
-        subject_id = data_repo$subject$id
-        epoch_name = data_repo$preload_info$epoch_name
-        reference_name = data_repo$preload_info$reference_name
+        subject_id <- data_repo$subject$id
+        epoch_name <- data_repo$preload_info$epoch_name
+        reference_name <- data_repo$preload_info$reference_name
         
-        sub_label = (sprintf('[%s] - [%s] - [%s]', subject_id, epoch_name, reference_name))
-        suma_label = 'Launch SUMA'
+        sub_label <- (sprintf('[%s] - [%s] - [%s]', subject_id, epoch_name, reference_name))
+        suma_label <- 'Launch SUMA'
       }else{
-        suma_label = sub_label = ("")
+        suma_label <- sub_label <- ("")
       }
       updateActionButton(session, 'curr_subj_details_btn', label = sub_label)
       updateActionButton(session, 'curr_subj_launch_suma', label = suma_label)
     })
     
     
-    subject_modal = function(subject, current_electrodes = NULL){
+    subject_modal <- function(subject, current_electrodes = NULL){
       modalDialog(
         title = subject$id,
         easyClose = TRUE,
@@ -326,8 +326,8 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     }
     
     observeEvent(input$curr_subj_details_btn, {
-      subject = data_repo[['subject']]
-      electrodes = data_repo$preload_info$electrodes
+      subject <- data_repo[['subject']]
+      electrodes <- data_repo$preload_info$electrodes
       if(!is.null(subject) && length(electrodes)){
         showModal(
           subject_modal(subject = subject, current_electrodes = electrodes)
@@ -336,12 +336,12 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     })
     
     output$curr_subj_elec_table <- renderDataTable({
-      btn = input$curr_subj_details_btn
+      btn <- input$curr_subj_details_btn
       if(global_reactives$has_data && check_data_repo('subject')){
-        subject = data_repo[['subject']]
-        tbl = subject$electrodes
-        cols = names(tbl)
-        cols = cols[!cols %in% c('Coord_x', 'Coord_y', 'Coord_z')]
+        subject <- data_repo[['subject']]
+        tbl <- subject$electrodes
+        cols <- names(tbl)
+        cols <- cols[!cols %in% c('Coord_x', 'Coord_y', 'Coord_z')]
         return(tbl[, cols])
       }else{
         return(NULL)
@@ -349,17 +349,17 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     })
     
     output$curr_subj_3d_viewer <- threeBrain::renderBrain({
-      btn = input$curr_subj_details_btn
+      btn <- input$curr_subj_details_btn
       if( ! ( global_reactives$has_data && check_data_repo('subject') ) ){
         return(NULL)
       }
       
-      subject = get0('subject', envir = data_repo, ifnotfound = NULL)
+      subject <- get0('subject', envir = data_repo, ifnotfound = NULL)
       if( is.null(subject) ){
         return(NULL)
       }
       
-      brain = rave_brain2(subject = subject)
+      brain <- rave_brain2(subject = subject)
       if( is.null(brain) ){
         return(NULL)
       }
@@ -370,8 +370,8 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     observeEvent(input$curr_subj_launch_suma, {
       # launch suma
       if(check_data_repo('subject')){
-        subject = data_repo[['subject']]
-        suma_dir = subject$dirs$suma_dir
+        subject <- data_repo[['subject']]
+        suma_dir <- subject$dirs$suma_dir
         launch_suma(
           root_dir = suma_dir
         )
@@ -397,24 +397,24 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     # })
     
     output$mem_usage <- renderUI({
-      mem_usage = local_data$mem_usage
+      mem_usage <- local_data$mem_usage
       if(is.null(mem_usage)){
         return()
       }
       
-      name = c(
+      name <- c(
         'Total Usage',
         'Shared Data Usage',
         sapply(mem_usage$module_usage, '[[', 'Name')
       )
       
-      usage = c(
+      usage <- c(
         mem_usage$total_mem,
         mem_usage$data_usage + mem_usage$other_usage,
         sapply(mem_usage$module_usage, '[[', 'usage')
       )
       
-      perc = usage / max(usage)
+      perc <- usage / max(usage)
       
       
       tagList(
@@ -424,29 +424,29 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
           style = 'padding:15px;',
           tagList(
             lapply(seq_along(name), function(ii){
-              nm = name[[ii]]
-              us = usage[[ii]]
-              pc = perc[[ii]]
-              status = switch (nm,
+              nm <- name[[ii]]
+              us <- usage[[ii]]
+              pc <- perc[[ii]]
+              status <- switch (nm,
                                'Total Usage' = {
-                                 max_ram = rave_options('max_mem') * 1000^3
-                                 pc_total = us / max_ram
-                                 ind = (pc_total < 0.75) + (pc_total < 0.9) + 1
+                                 max_ram <- rave_options('max_mem') * 1000^3
+                                 pc_total <- us / max_ram
+                                 ind <- (pc_total < 0.75) + (pc_total < 0.9) + 1
                                  c('danger', 'warning', 'success')[ind]
                                },
                                'Shared Data Usage' = 'primary',
                                'Misc & Others Sessions' = 'primary',
                                {
-                                 ind = (pc < 0.5) + 1
+                                 ind <- (pc < 0.5) + 1
                                  c('warning', 'primary')[ind]
                                }
               )
-              txt_size = as.character(dipsaus::to_ram_size(us))
-              txt_perc = sprintf('%d%%', as.integer(pc*100))
+              txt_size <- as.character(dipsaus::to_ram_size(us))
+              txt_perc <- sprintf('%d%%', as.integer(pc*100))
               if(stringr::str_length(nm) > 22){
-                nm_alt = paste0(stringr::str_sub(nm, end = 19), '...')
+                nm_alt <- paste0(stringr::str_sub(nm, end = 19), '...')
               }else{
-                nm_alt = nm
+                nm_alt <- nm
               }
               
               tags$li(
@@ -468,7 +468,7 @@ init_app <- function(modules = NULL, active_module = NULL, launch.browser = TRUE
     
     #################################################################
     # on session ended, clean memory
-    session_id = add_to_session(session)
+    session_id <- add_to_session(session)
     
     if(!test.mode){
       session$onSessionEnded(function() {

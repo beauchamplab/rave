@@ -25,14 +25,14 @@ rave_preprocess <- function(
   ...
 ){
   # Steps 0 Variables
-  default_project_name = ''
-  default_subject_code = ''
-  model_instances = NULL
+  default_project_name <- ''
+  default_subject_code <- ''
+  model_instances <- NULL
 
   rave_setup_workers()
 
 
-  modules = list(
+  modules <- list(
     list(
       ID = 'OVERVIEW',
       name = 'Overview',
@@ -87,7 +87,7 @@ rave_preprocess <- function(
   model_instances <- lapply(modules, function(x){
     with(x, {
       ..func %?<-% stringr::str_c('rave_pre_', stringr::str_to_lower(ID), ver)
-      instance = do.call(..func, list(
+      instance <- do.call(..func, list(
         module_id = paste0(ID , '_M'),
         sidebar_width = sidebar_width
       ))#, envir = loadNamespace('rave'))
@@ -105,7 +105,7 @@ rave_preprocess <- function(
   })
 
 
-  ui = dashboardPage(
+  ui <- dashboardPage(
     skin = theme,
     control = div(),
     header = shinydashboard::dashboardHeader(
@@ -142,7 +142,7 @@ rave_preprocess <- function(
 
 
 
-  server = function(input, output, session){
+  server <- function(input, output, session){
     user_data <- reactiveValues(
       checklevel = 0,
       reset = NULL
@@ -152,14 +152,14 @@ rave_preprocess <- function(
     utils <- rave_preprocess_tools(env = env)
 
     # Reset modules
-    utils$reset = function(){
-      user_data$reset = Sys.time()
+    utils$reset <- function(){
+      user_data$reset <- Sys.time()
     }
 
-    utils$last_inputs = function(name){
-      last_project_name = rave_hist()$get_or_save('.rave_pre_project_name', '', save = FALSE)
-      last_subject_code = rave_hist()$get_or_save('.rave_pre_subject_code', '', save = FALSE)
-      last_notch_freq = rave_hist()$get_or_save('.rave_pre_notch_freq', 60, save = FALSE)
+    utils$last_inputs <- function(name){
+      last_project_name <- rave_hist()$get_or_save('.rave_pre_project_name', '', save = FALSE)
+      last_subject_code <- rave_hist()$get_or_save('.rave_pre_subject_code', '', save = FALSE)
+      last_notch_freq <- rave_hist()$get_or_save('.rave_pre_notch_freq', 60, save = FALSE)
 
       return(list(
         last_project_name = last_project_name,
@@ -168,14 +168,14 @@ rave_preprocess <- function(
     }
 
     # Load subject
-    utils$load_subject = function(subject_code, project_name){
+    utils$load_subject <- function(subject_code, project_name){
       catgl('Loading Subject')
-      dirs = get_dir(subject_code = subject_code, project_name = project_name)
+      dirs <- get_dir(subject_code = subject_code, project_name = project_name)
       stopifnot2(dir.exists(dirs$preprocess_dir), msg = paste0(
         'Subject ' , subject_code , ' has no project folder ' , project_name
       ))
-      s = SubjectInfo2$new(project_name = project_name, subject_code = subject_code)
-      id = paste0(s$project_name , '/' , s$subject_code)
+      s <- SubjectInfo2$new(project_name = project_name, subject_code = subject_code)
+      id <- paste0(s$project_name , '/' , s$subject_code)
 
       rave_hist()$save(
         .rave_pre_project_name = project_name,
@@ -183,7 +183,7 @@ rave_preprocess <- function(
       )
 
       if(id != utils$get_subject_id()){
-        env$subject = s
+        env$subject <- s
       }
       utils$reset()
       catgl('Loaded Subject')

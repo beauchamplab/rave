@@ -1,16 +1,16 @@
 # Function to create a RAVE module template
 create_template <- function(path, ...){
-  this_call = match.call()
+  this_call <- match.call()
   catgl(deparse(this_call))
-  args = list(...)
+  args <- list(...)
   
   # step 1: get package name
   # path = normalizePath(path)
   
   catgl('Creating RAVE Module -', path)
   
-  PACKAGE = utils::tail(strsplit(path, '\\\\|/')[[1]],1)
-  MODULEID = args[['module_id']]
+  PACKAGE <- utils::tail(strsplit(path, '\\\\|/')[[1]],1)
+  MODULEID <- args[['module_id']]
   
   # ensure path exists
   dir_create(path)
@@ -22,35 +22,35 @@ create_template <- function(path, ...){
   
   
   # check MODULEID, must starts with 'a-zA-z' and only contains 'a-zA-Z0-9_'
-  MODULEID = gsub('[^a-zA-Z_]', '', MODULEID)
-  MODULEID = gsub('[_]{2,}', '_', MODULEID)
+  MODULEID <- gsub('[^a-zA-Z_]', '', MODULEID)
+  MODULEID <- gsub('[_]{2,}', '_', MODULEID)
   if(MODULEID == ''){
-    MODULEID = 'module_id'
+    MODULEID <- 'module_id'
   }
   catgl('First Module ID -', MODULEID)
   
-  MODULELABEL = args[['module_label']]
-  MODULELABEL = gsub('(^[\\ ]*)|([\\ ]$)', '', MODULELABEL)
+  MODULELABEL <- args[['module_label']]
+  MODULELABEL <- gsub('(^[\\ ]*)|([\\ ]$)', '', MODULELABEL)
   if(MODULELABEL == ''){
-    MODULELABEL = 'Missing Label'
+    MODULELABEL <- 'Missing Label'
   }
   catgl('First Module Label -', MODULELABEL)
   
   # migrate template
-  template_dir = system.file('template', package = 'rave')
+  template_dir <- system.file('template', package = 'rave')
   # template_dir = './inst/template'
-  fs = list.files(template_dir, recursive = TRUE, pattern = '^[a-zA-Z]', all.files = FALSE, full.names = FALSE)
+  fs <- list.files(template_dir, recursive = TRUE, pattern = '^[a-zA-Z]', all.files = FALSE, full.names = FALSE)
   
   for(f in fs){
-    s = readLines(file.path(template_dir, f))
-    s = paste(s, collapse = '\n')
-    s = raveio::glue(s, .open = "${{", .close = "}}")
-    f = stringr::str_replace(f, 'first_example', MODULEID)
+    s <- readLines(file.path(template_dir, f))
+    s <- paste(s, collapse = '\n')
+    s <- raveio::glue(s, .open = "${{", .close = "}}")
+    f <- stringr::str_replace(f, 'first_example', MODULEID)
     writeLines(s, con = file.path(path, f))
   }
   
   # Write .Rbuildignore
-  s = c("^.*\\.Rproj$", "^\\.Rproj\\.user$", "^hello\\.R$", "^readme\\.md$",  "adhoc/")
+  s <- c("^.*\\.Rproj$", "^\\.Rproj\\.user$", "^hello\\.R$", "^readme\\.md$",  "adhoc/")
   writeLines(s, con = file.path(path, '.Rbuildignore'))
   
   # Rename template.Rproj

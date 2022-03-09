@@ -17,9 +17,9 @@ pwelch <- function (
   
   
   x <- as.vector(x)
-  x_len = length(x)
+  x_len <- length(x)
   
-  nfft = max(min(nfft, length(x)), window)
+  nfft <- max(min(nfft, length(x)), window)
   
   window <- hanning(window)
   
@@ -31,24 +31,24 @@ pwelch <- function (
   step <- max(floor(window_len - noverlap + 0.99), 1)
   
   ## Average the slices
-  offset = seq(1, x_len-window_len+1, by = step)
+  offset <- seq(1, x_len-window_len+1, by = step)
   
-  N = length(offset);
+  N <- length(offset)
   
   sapply(seq_len(N), function(i){
-    a = detrend_naive(x[offset[i] - 1 + seq_len(window_len)])
-    a = fftwtools::fftw_r2c(postpad(a$Y * window, nfft))
+    a <- detrend_naive(x[offset[i] - 1 + seq_len(window_len)])
+    a <- fftwtools::fftw_r2c(postpad(a$Y * window, nfft))
     Mod(a)^2
   }) ->
     re
   
-  NN = floor((nfft + 1) / 2)
+  NN <- floor((nfft + 1) / 2)
   
-  freq = seq(1, fs / 2, length.out = NN)
-  spec = rowMeans(re[seq_len(NN),,drop = F]) / (window_len / 2)^2
+  freq <- seq(1, fs / 2, length.out = NN)
+  spec <- rowMeans(re[seq_len(NN),,drop = FALSE]) / (window_len / 2)^2
   
   
-  res = list(
+  res <- list(
     freq = freq,
     spec = spec,
     method = "Welch"
@@ -87,21 +87,21 @@ pwelch <- function (
   # class(res) <- "spec"
   if (plot) {
     if(log == 'xy'){
-      xlab = 'Log10(Frequency)'
-      ylab = 'Power/Frequency (dB/Hz)'
-      freq = log10(freq)
-      spec = log10(spec) * 10
+      xlab <- 'Log10(Frequency)'
+      ylab <- 'Power/Frequency (dB/Hz)'
+      freq <- log10(freq)
+      spec <- log10(spec) * 10
     }else if(log == 'y'){
-      xlab = 'Frequency'
-      ylab = 'Power/Frequency (dB/Hz)'
-      spec = log10(spec) * 10
+      xlab <- 'Frequency'
+      ylab <- 'Power/Frequency (dB/Hz)'
+      spec <- log10(spec) * 10
     }else if(log == 'x'){
-      xlab = 'Log10(Frequency)'
-      ylab = 'Power'
-      freq = log10(freq)
+      xlab <- 'Log10(Frequency)'
+      ylab <- 'Power'
+      freq <- log10(freq)
     }else{
-      xlab = 'Frequency'
-      ylab = 'Power'
+      xlab <- 'Frequency'
+      ylab <- 'Power'
     }
     if(plot == 2){
       graphics::points(freq, spec, type = 'l', col = col)

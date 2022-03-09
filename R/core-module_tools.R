@@ -6,26 +6,26 @@
 rave_module_tools <- function(env = NULL, data_env = getDefaultDataRepository(), 
                               quiet = FALSE) {
   if(!is.environment(data_env)){
-    data_env = getDefaultDataRepository()
+    data_env <- getDefaultDataRepository()
   }
-  tools = new.env()
+  tools <- new.env()
   
   local({
     ####### part 1: Data ######
-    is_loaded = function(data_type){
-      repo = data_env$.private$repo
+    is_loaded <- function(data_type){
+      repo <- data_env$.private$repo
       on.exit(rm(repo))
       !is.null(repo[[data_type]])
     }
     
-    get_electrode = function(electrode, type = 'power', reference = NULL, epoch = NULL){
+    get_electrode <- function(electrode, type = 'power', reference = NULL, epoch = NULL){
       # type = 'power'; reference = NULL; epoch = NULL
       stopifnot2(type %in% c('power', 'phase', 'volt'), msg = 'type must be power, phase or volt')
       if(is.null(epoch)){
-        epoch = data_env$preload_info$epoch_name
+        epoch <- data_env$preload_info$epoch_name
       }
       if(is.null(reference)){
-        reference = data_env$preload_info$reference_name
+        reference <- data_env$preload_info$reference_name
       }
       # Check if the epoch and reference is the same as current loaded
       if(
@@ -38,39 +38,39 @@ rave_module_tools <- function(env = NULL, data_env = getDefaultDataRepository(),
       }
       
       # Not yet loaded, check if can be loaded from fst
-      ref_tbl = load_meta('references', subject_id = data_env$subject$id, meta_name = reference)
+      ref_tbl <- load_meta('references', subject_id = data_env$subject$id, meta_name = reference)
       stopifnot2(is.data.frame(ref_tbl), msg = paste('Cannot find reference', reference))
       
-      ref = ref_tbl$Reference[ref_tbl$Electrode == electrode]
+      ref <- ref_tbl$Reference[ref_tbl$Electrode == electrode]
       if(!length(ref) || ref == ''){
         stop('Bad electrode!')
       }
       
-      time_range = data_env$.private$meta$epoch_info$time_range
+      time_range <- data_env$.private$meta$epoch_info$time_range
       
-      e = Electrode$new(subject = data_env$subject$id, electrode = electrode, reference_by = ref, preload = NULL)
-      re = e$epoch(epoch_name = epoch, pre = time_range[1], post = time_range[2], types = type, raw = FALSE)[[type]]
+      e <- Electrode$new(subject = data_env$subject$id, electrode = electrode, reference_by = ref, preload = NULL)
+      re <- e$epoch(epoch_name = epoch, pre = time_range[1], post = time_range[2], types = type, raw = FALSE)[[type]]
       
       re
       
     }
     
     
-    get_power = function(force = TRUE, referenced = TRUE, use_cache = TRUE) {
-      repo = data_env$.private$repo
+    get_power <- function(force = TRUE, referenced = TRUE, use_cache = TRUE) {
+      repo <- data_env$.private$repo
       on.exit(rm(repo))
-      nm = ifelse(referenced, 'power', 'raw_power')
+      nm <- ifelse(referenced, 'power', 'raw_power')
       if(force && is.null(repo[[nm]])){
-        epoch_name = data_env$.private$meta$epoch_info$name
-        time_range = data_env$.private$meta$epoch_info$time_range
-        electrodes = data_env$preload_info$electrodes
-        frequency_range = data_env$preload_info$frequencies
-        ref_name = data_env$preload_info$reference_name
+        epoch_name <- data_env$.private$meta$epoch_info$name
+        time_range <- data_env$.private$meta$epoch_info$time_range
+        electrodes <- data_env$preload_info$electrodes
+        frequency_range <- data_env$preload_info$frequencies
+        ref_name <- data_env$preload_info$reference_name
         
-        re = NULL
+        re <- NULL
         if(use_cache){
           # Try to load from cache
-          re = load_local_cache(
+          re <- load_local_cache(
             project_name = data_env$subject$project_name, subject_code = data_env$subject$subject_code,
             epoch = epoch_name, time_range = time_range,
             frequency_range = frequency_range, electrodes = electrodes,
@@ -81,11 +81,11 @@ rave_module_tools <- function(env = NULL, data_env = getDefaultDataRepository(),
         
         if(!is.null(re)){
           if(isTRUE(referenced)){
-            repo$power = re$power
-            repo$phase = re$phase
+            repo$power <- re$power
+            repo$phase <- re$phase
           }else{
-            repo$raw_power = re$power
-            repo$raw_phase = re$phase
+            repo$raw_power <- re$power
+            repo$raw_phase <- re$phase
           }
           rm(re)
         }else{
@@ -104,19 +104,19 @@ rave_module_tools <- function(env = NULL, data_env = getDefaultDataRepository(),
       return(repo[[nm]])
     }
     
-    get_phase = function(force = T, referenced = T){
-      repo = data_env$.private$repo
+    get_phase <- function(force = TRUE, referenced = TRUE){
+      repo <- data_env$.private$repo
       on.exit(rm(repo))
-      nm = ifelse(referenced, 'phase', 'raw_phase')
+      nm <- ifelse(referenced, 'phase', 'raw_phase')
       if(force && is.null(repo[[nm]])){
-        epoch_name = data_env$.private$meta$epoch_info$name
-        time_range = data_env$.private$meta$epoch_info$time_range
-        electrodes = data_env$preload_info$electrodes
-        frequency_range = data_env$preload_info$frequencies
-        ref_name = data_env$preload_info$reference_name
+        epoch_name <- data_env$.private$meta$epoch_info$name
+        time_range <- data_env$.private$meta$epoch_info$time_range
+        electrodes <- data_env$preload_info$electrodes
+        frequency_range <- data_env$preload_info$frequencies
+        ref_name <- data_env$preload_info$reference_name
         
         # Try to load from cache
-        re = load_local_cache(
+        re <- load_local_cache(
           project_name = data_env$subject$project_name, subject_code = data_env$subject$subject_code,
           epoch = epoch_name, time_range = time_range,
           frequency_range = frequency_range, electrodes = electrodes,
@@ -125,11 +125,11 @@ rave_module_tools <- function(env = NULL, data_env = getDefaultDataRepository(),
         
         if(!is.null(re)){
           if(isTRUE(referenced)){
-            repo$power = re$power
-            repo$phase = re$phase
+            repo$power <- re$power
+            repo$phase <- re$phase
           }else{
-            repo$raw_power = re$power
-            repo$raw_phase = re$phase
+            repo$raw_power <- re$power
+            repo$raw_phase <- re$phase
           }
           rm(re)
         }else{
@@ -148,19 +148,19 @@ rave_module_tools <- function(env = NULL, data_env = getDefaultDataRepository(),
       return(repo[[nm]])
     }
     
-    get_voltage = function(force = T, referenced = T){
-      repo = data_env$.private$repo
+    get_voltage <- function(force = TRUE, referenced = TRUE){
+      repo <- data_env$.private$repo
       on.exit(rm(repo))
-      nm = ifelse(referenced, 'volt', 'raw_volt')
+      nm <- ifelse(referenced, 'volt', 'raw_volt')
       if(force && is.null(repo[[nm]])){
-        epoch_name = data_env$.private$meta$epoch_info$name
-        time_range = data_env$.private$meta$epoch_info$time_range
-        electrodes = data_env$preload_info$electrodes
+        epoch_name <- data_env$.private$meta$epoch_info$name
+        time_range <- data_env$.private$meta$epoch_info$time_range
+        electrodes <- data_env$preload_info$electrodes
         
-        ref_name = data_env$preload_info$reference_name
+        ref_name <- data_env$preload_info$reference_name
         
         # Try to load from cache
-        re = load_local_cache(
+        re <- load_local_cache(
           project_name = data_env$subject$project_name,
           subject_code = data_env$subject$subject_code,
           epoch = epoch_name, time_range = time_range,
@@ -171,9 +171,9 @@ rave_module_tools <- function(env = NULL, data_env = getDefaultDataRepository(),
         
         if(!is.null(re)){
           if(isTRUE(referenced)){
-            repo$volt = re$volt
+            repo$volt <- re$volt
           }else{
-            repo$raw_volt = re$volt
+            repo$raw_volt <- re$volt
           }
         }else{
           repo$epoch(
@@ -190,33 +190,33 @@ rave_module_tools <- function(env = NULL, data_env = getDefaultDataRepository(),
       return(repo[[nm]])
     }
     
-    get_voltage2 = function(){
+    get_voltage2 <- function(){
       
       if(is.null(data_env$.private[['volt_unblocked']])){
-        blocks = data_env$subject$preprocess_info('blocks')
-        dirs = data_env$subject$dirs
-        electrodes = data_env$subject$electrodes$Electrode
+        blocks <- data_env$subject$preprocess_info('blocks')
+        dirs <- data_env$subject$dirs
+        electrodes <- data_env$subject$electrodes$Electrode
         
-        progress = progress('Prepare preprocess voltage', max = 2)
+        progress <- progress('Prepare preprocess voltage', max = 2)
         
         lapply_async3(electrodes, function(e){
           sapply(blocks, function(b){
-            f = file.path(dirs$channel_dir, 'voltage', sprintf('%d.h5', e))
-            load_h5(f, paste0('/raw/voltage/', b), ram = T)
-          }, simplify = F, USE.NAMES = T)
+            f <- file.path(dirs$channel_dir, 'voltage', sprintf('%d.h5', e))
+            load_h5(f, paste0('/raw/voltage/', b), ram = TRUE)
+          }, simplify = FALSE, USE.NAMES = TRUE)
         }, .callback = function(e){
           sprintf('Loading voltage data - %s', e)
         }, .globals = c('electrodes', 'e', 'blocks', 'dirs')) ->re
         
         progress$inc('Finalizing...')
         
-        data_env$.private[['volt_unblocked']] = new.env()
-        r = sapply(blocks, function(b) {
-          l = list()
-          l[electrodes] = lapply(re, function(comp) {
+        data_env$.private[['volt_unblocked']] <- new.env()
+        r <- sapply(blocks, function(b) {
+          l <- list()
+          l[electrodes] <- lapply(re, function(comp) {
             comp[[b]]
           })
-        }, simplify = F, USE.NAMES = T)
+        }, simplify = FALSE, USE.NAMES = TRUE)
         
         list2env(r, envir = data_env$.private[['volt_unblocked']])
         
@@ -228,15 +228,15 @@ rave_module_tools <- function(env = NULL, data_env = getDefaultDataRepository(),
       data_env$.private[['volt_unblocked']]
     }
     
-    clean = function(items = c('raw_volt', 'raw_phase', 'raw_power')){
+    clean <- function(items = c('raw_volt', 'raw_phase', 'raw_power')){
       for(i in items){
-        data_env$.private$repo[[i]] = NULL
+        data_env$.private$repo[[i]] <- NULL
       }
       gc()
     }
     
-    get_meta = function(name) {
-      meta = data_env$.private$meta
+    get_meta <- function(name) {
+      meta <- data_env$.private$meta
       switch (
         name,
         'electrodes' = {
@@ -254,23 +254,23 @@ rave_module_tools <- function(env = NULL, data_env = getDefaultDataRepository(),
       )
     }
     
-    get_subject_dirs = function() {
+    get_subject_dirs <- function() {
       data_env$subject$dirs
     }
     
     
-    get_loaded_electrodes = function() {
-      repo = data_env$.private$repo
+    get_loaded_electrodes <- function() {
+      repo <- data_env$.private$repo
       on.exit(rm(repo))
-      e = names(repo$raw)
-      e = as.numeric(e)
-      e = e[!is.na(e)]
+      e <- names(repo$raw)
+      e <- as.numeric(e)
+      e <- e[!is.na(e)]
       sort(e)
     }
     
     
     
-    get_sample_rate = function(original = F){
+    get_sample_rate <- function(original = FALSE){
       if(original){
         return(data_env$.private$preproc_tools$get_srate())
       }else{
@@ -279,7 +279,7 @@ rave_module_tools <- function(env = NULL, data_env = getDefaultDataRepository(),
     }
     
     ###### Part 2: utilities #######
-    get_valid_electrodes = function(electrodes = seq_len(10000)){
+    get_valid_electrodes <- function(electrodes = seq_len(10000)){
       data_env[['subject']]$filter_valid_electrodes(electrodes = electrodes)
     }
     
@@ -291,30 +291,30 @@ rave_module_tools <- function(env = NULL, data_env = getDefaultDataRepository(),
     
     # TODO: Check if this works
     # baseline = rave::baseline
-    baseline = baseline
+    baseline <- baseline
     
-    reload = function(epoch, epoch_range, reference, electrodes){
-      has_change = F
+    reload <- function(epoch, epoch_range, reference, electrodes){
+      has_change <- FALSE
       if(missing(electrodes)){
-        electrodes = data_env$preload_info$electrodes
+        electrodes <- data_env$preload_info$electrodes
       }else{
-        has_change = T
+        has_change <- TRUE
       }
       if(missing(epoch)){
-        epoch = data_env$preload_info$epoch_name
+        epoch <- data_env$preload_info$epoch_name
       }else{
-        has_change = T
+        has_change <- TRUE
       }
       if(missing(epoch_range)){
-        epoch_range = range(data_env$preload_info$time_points)
-        epoch_range = abs(epoch_range)
+        epoch_range <- range(data_env$preload_info$time_points)
+        epoch_range <- abs(epoch_range)
       }else{
-        has_change = T
+        has_change <- TRUE
       }
       if(missing(reference)){
-        reference = data_env$preload_info$reference_name
+        reference <- data_env$preload_info$reference_name
       }else{
-        has_change = T
+        has_change <- TRUE
       }
       
       rave_prepare(
@@ -323,14 +323,14 @@ rave_module_tools <- function(env = NULL, data_env = getDefaultDataRepository(),
         epoch = epoch,
         time_range = epoch_range,
         reference = reference,
-        attach = F,
+        attach = FALSE,
         data_types = NULL
       )
       
-      group = 'main_app'
-      last_entry('electrodes', electrodes, save = T, group = group)
-      last_entry('epoch', epoch, save = T, group = group)
-      last_entry('epoch_range', epoch_range, save = T, group = group)
+      group <- 'main_app'
+      last_entry('electrodes', electrodes, save = TRUE, group = group)
+      last_entry('epoch', epoch, save = TRUE, group = group)
+      last_entry('epoch_range', epoch_range, save = TRUE, group = group)
       
       # execenv$reloadUI()
       # global_reactives$force_refresh_all = Sys.time()

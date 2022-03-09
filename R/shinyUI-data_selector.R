@@ -1,7 +1,7 @@
 
 shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()){
   
-  fband = list(
+  fband <- list(
     'Delta' = c(0.5, 3),
     'Theta' = c(4, 7),
     'Alpha' = c(8, 13),
@@ -11,24 +11,24 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
     'High Gamma' = c(75, 150)
   )
   
-  ns = shiny::NS(module_id)
+  ns <- shiny::NS(module_id)
   
-  header = function(){
+  header <- function(){
     tags$li(
       actionLink(ns('data_select'), 'Select Data', icon = shiny_icons$tasks,
                  role = 'button', class = 'nav-item nav-link')
     )
   }
-  control = function(){
+  control <- function(){
     NULL
   }
   
   
   
-  server = function(input, output, session, global_reactives, clear_cache = NULL){
+  server <- function(input, output, session, global_reactives, clear_cache = NULL){
     # Vars
-    group = 'main_app2'
-    local_data = reactiveValues(
+    group <- 'main_app2'
+    local_data <- reactiveValues(
       has_subject = FALSE,
       check_result = list(),
       load_mesh = !isFALSE(last_entry('load_mesh', TRUE, save = FALSE, group = group)),
@@ -37,12 +37,12 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
       # prevent will be set to false only when modal expanded
       prevent_dblclick = TRUE
     )
-    local_env = dipsaus::fastmap2()
+    local_env <- dipsaus::fastmap2()
     
     ##### Show modal when 'data_select' is clicked
     open_modal <- function(){
       shinyjs::addClass(selector = 'body', class = "rave-noscroll")
-      local_env$is_open = TRUE
+      local_env$is_open <- TRUE
       shiny::showModal(
         shiny::modalDialog(
           title = 'Data Selection', size = 'l', easyClose = FALSE, fade = FALSE,
@@ -58,9 +58,9 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
     }
     
     dismiss_modal <- function(){
-      shinyjs::removeClass(selector = 'body', class = "rave-noscroll");
+      shinyjs::removeClass(selector = 'body', class = "rave-noscroll")
       removeModal()
-      local_env$is_open = FALSE
+      local_env$is_open <- FALSE
     }
     
     observeEvent(input$data_select, {
@@ -72,12 +72,12 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
     })
     
     ##### Modal layout
-    data_modal = function(){
+    data_modal <- function(){
       # Gather data
-      projects = get_projects()
-      local_data$modal_refresh = Sys.time()
-      local_data$prevent_dblclick = FALSE
-      last_project = last_entry('project_name', default = NULL, group = group)
+      projects <- get_projects()
+      local_data$modal_refresh <- Sys.time()
+      local_data$prevent_dblclick <- FALSE
+      last_project <- last_entry('project_name', default = NULL, group = group)
       if(length(projects) == 0){
         return(p(strong('No valid project detected. Make sure there is at least one project folder in your data directory!')))
       }
@@ -123,24 +123,24 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
     
     
     ##### Reactives: dynamic inputs #####
-    output$ui_subject = renderUI({
-      projects = get_projects()
-      project = input$project_name
+    output$ui_subject <- renderUI({
+      projects <- get_projects()
+      project <- input$project_name
       local_data$modal_refresh
-      local_data$modal_refresh1 = Sys.time()
+      local_data$modal_refresh1 <- Sys.time()
       
       if(length(project) == 1 && project %in% projects){
         
         # Get subject
-        subjects = get_subjects(project)
+        subjects <- get_subjects(project)
         
         if(length(subjects) == 0){
           return(p(strong('No valid subject in this project')))
         }
         
-        last_subject = last_entry('subject_code', default = NULL, group = group)
+        last_subject <- last_entry('subject_code', default = NULL, group = group)
         if(length(last_subject) != 1 || !last_subject %in% subjects){
-          last_subject = subjects[1]
+          last_subject <- subjects[1]
         }
         return(
           selectInput(ns('subject_code'), 'Subject', choices = subjects, selected = last_subject)
@@ -152,74 +152,74 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
     
     observe({
       # Get project and subject first
-      project = input$project_name
-      subject = input$subject_code
+      project <- input$project_name
+      subject <- input$subject_code
       
       if(is.null(project) || is.blank(project) || is.null(subject) || is.blank(subject)){
-        local_data$has_subject = FALSE
-        local_data$check_result = NULL
+        local_data$has_subject <- FALSE
+        local_data$check_result <- NULL
         return()
       }
       
       # Check validity of subject
       tryCatch({
-        check_result = check_subjects2(project_name = project, subject_code = subject)
+        check_result <- check_subjects2(project_name = project, subject_code = subject)
         # We need channel_dir, meta_dir, notch_filter, wavelet, meta_electrode, meta_epoch, meta_frequency
         # if reference == T, we need meta_reference
-        must_true = c('channel_dir', 'meta_dir', 'notch_filter', 'wavelet',
+        must_true <- c('channel_dir', 'meta_dir', 'notch_filter', 'wavelet',
                       'meta_electrode', 'meta_epoch', 'meta_frequency')
         if(all(unlist(check_result$check[must_true]))){
-          local_data$has_subject = TRUE
-          local_data$check_result = check_result
+          local_data$has_subject <- TRUE
+          local_data$check_result <- check_result
         }else{
-          local_data$has_subject = FALSE
-          local_data$check_result = check_result
+          local_data$has_subject <- FALSE
+          local_data$check_result <- check_result
         }
       }, error = function(e){
-        local_data$has_subject = FALSE
-        local_data$check_result = NULL
+        local_data$has_subject <- FALSE
+        local_data$check_result <- NULL
       })
       
     })
     
     # step 2: subset data
-    output$ui_step2 = renderUI({
+    output$ui_step2 <- renderUI({
       
       local_data$modal_refresh1
       
       validate(need(local_data$has_subject && is.list(local_data$check_result), message = ''))
-      check_result = local_data$check_result
+      check_result <- local_data$check_result
       
       
       # Epoch files
-      last_epoch = last_entry('epoch_name', NULL, group = group)
+      last_epoch <- last_entry('epoch_name', NULL, group = group)
       if(length(last_epoch) !=1 || !last_epoch %in% check_result$epochs){
-        last_epoch = NULL
+        last_epoch <- NULL
       }
       
       # reference files
-      last_reference = last_entry('reference_name', NULL, group = group)
+      last_reference <- last_entry('reference_name', NULL, group = group)
       if(length(last_reference) !=1 || !last_reference %in% check_result$references){
-        last_entry('reference_name', 'default', group = group, save = T)
-        last_reference = 'default'
+        last_entry('reference_name', 'default', group = group, save = TRUE)
+        last_reference <- 'default'
       }
       
       # epoch_range
-      last_time_range = last_entry('time_range', NULL, group = group)
+      last_time_range <- last_entry('time_range', NULL, group = group)
       if(length(last_time_range)!=2){
-        last_time_range = c(1,2)
+        last_time_range <- c(1,2)
       }
-      last_time_range[1] = max(last_time_range[1], 0)
-      last_time_range[2] = max(last_time_range[2], 0)
+      last_time_range[1] <- max(last_time_range[1], 0)
+      last_time_range[2] <- max(last_time_range[2], 0)
       
       # Electrodes
-      last_electrodes = last_entry('electrodes', '', group = group)
+      last_electrodes <- last_entry('electrodes', '', group = group)
       if(!isTRUE(check_result$log$preprocess$subject_code == last_entry('subject_code', '', group = group))){
-        last_electrodes = dipsaus::deparse_svec(check_result$log$preprocess$channels)
+        last_electrodes <- dipsaus::deparse_svec(check_result$log$preprocess$channels)
       }
       
       # Frequencies
-      freqs = utils::tail(check_result$log$preprocess$wavelet_log, 1)[[1]][['frequencies']]
+      freqs <- utils::tail(check_result$log$preprocess$wavelet_log, 1)[[1]][['frequencies']]
       
       # Return
       tagList(
@@ -379,43 +379,43 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
     })
     
     observe({
-      local_data$mask = mask_file = input$mask
-      check_result = isolate(local_data$check_result)
+      local_data$mask <- mask_file <- input$mask
+      check_result <- isolate(local_data$check_result)
       tryCatch({
-        mask_tbl = utils::read.csv(mask_file$datapath, header = T)
+        mask_tbl <- utils::read.csv(mask_file$datapath, header = TRUE)
         if(!is.integer(mask_tbl[,1])){
           # the first column is not electrode, add the column "Electrode" to table
-          mask_tbl$Electrode = seq_len(nrow(mask_tbl))
-          nms = names(mask_tbl); nms = nms[nms != 'Electrode']
-          mask_tbl = mask_tbl[,c('Electrode', nms)]
+          mask_tbl$Electrode <- seq_len(nrow(mask_tbl))
+          nms <- names(mask_tbl); nms <- nms[nms != 'Electrode']
+          mask_tbl <- mask_tbl[,c('Electrode', nms)]
         }
         
-        mask_tbl = mask_tbl[mask_tbl$Electrode %in% check_result$log$preprocess$channels, ]
+        mask_tbl <- mask_tbl[mask_tbl$Electrode %in% check_result$log$preprocess$channels, ]
         
         if(nrow(mask_tbl) == 0 || ncol(mask_tbl) <= 1){
-          local_data$mask_table = NULL
+          local_data$mask_table <- NULL
         }else{
-          local_data$mask_table = mask_tbl
+          local_data$mask_table <- mask_tbl
         }
       }, error = function(e){
         if(length(mask_file$datapath) == 1){
           showNotification(p('Cannot parse mask file'), type = 'error')
         }
-        local_data$mask_table = NULL
+        local_data$mask_table <- NULL
       })
     })
     
     output$frequency_txt <- renderText({
       validate(need(local_data$has_subject && is.list(local_data$check_result), message = ''))
-      check_result = local_data$check_result
-      w = check_result$log$preprocess$wavelet_log
-      freqs = w[[length(w)]]$frequencies
+      check_result <- local_data$check_result
+      w <- check_result$log$preprocess$wavelet_log
+      freqs <- w[[length(w)]]$frequencies
       # f = input$frequencies
       
-      n_tf = length(freqs)
+      n_tf <- length(freqs)
       # freqs = freqs[freqs %within% f]
       
-      n_f = length(freqs)
+      n_f <- length(freqs)
       if(n_f){
         sprintf('%d out of %d frequencies selected, actual range: %.0fHz - %.0fHz', n_f, n_tf, min(freqs), max(freqs))
       }else{
@@ -425,30 +425,30 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
     
     output$electrode_txt <- renderText({
       validate(need(local_data$has_subject && is.list(local_data$check_result), message = ''))
-      txt = input$electrodes
-      check_result = local_data$check_result
+      txt <- input$electrodes
+      check_result <- local_data$check_result
       if(is.null(check_result)){
         return('')
       }
       
       # try to load reference table
       
-      es = dipsaus::parse_svec(txt)
-      sel = es %in% check_result$log$preprocess$channels
+      es <- dipsaus::parse_svec(txt)
+      sel <- es %in% check_result$log$preprocess$channels
       
-      ref = input$reference
+      ref <- input$reference
       if(length(ref) == 1 && ref %in% check_result$references){
         # load reference
-        project = isolate(input$project_name)
-        subject = isolate(input$subject_code)
+        project <- isolate(input$project_name)
+        subject <- isolate(input$subject_code)
         
-        ref_tbl = load_meta('references', project_name = project, subject_code = subject, meta_name = ref)
-        sel = sel & (es %in% ref_tbl$Electrode[ref_tbl$Reference != ''])
+        ref_tbl <- load_meta('references', project_name = project, subject_code = subject, meta_name = ref)
+        sel <- sel & (es %in% ref_tbl$Electrode[ref_tbl$Reference != ''])
       }
       
-      es = es[sel]
-      ne = length(es)
-      txt = dipsaus::deparse_svec(es)
+      es <- es[sel]
+      ne <- length(es)
+      txt <- dipsaus::deparse_svec(es)
       if(ne){
         if(isTRUE(input$group_module)){
           sprintf('For group analysis, only *one* electrode is required to be loaded')
@@ -463,8 +463,8 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
     
     output$ui_mask <- renderUI({
       validate(need(!is.null(local_data$mask_table), message = ''))
-      mask_table = local_data$mask_table
-      vars = c('[NONE..]', names(mask_table))
+      mask_table <- local_data$mask_table
+      vars <- c('[NONE..]', names(mask_table))
       # Only three selection is allowed
       div(
         actionLink(ns('toggle_filter'), 'Show/Hide Filters', onclick=sprintf('$("#%s").toggle();', ns('mask_filters'))),
@@ -505,34 +505,34 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
     
     observe({
       # filters
-      mask_table = local_data$mask_table
+      mask_table <- local_data$mask_table
       if(is.null(mask_table)){
         return()
       }
-      res = as.integer(mask_table[,1])
-      txt = dipsaus::deparse_svec(res)
+      res <- as.integer(mask_table[,1])
+      txt <- dipsaus::deparse_svec(res)
       try({
-        sel = rep(TRUE, length(res))
+        sel <- rep(TRUE, length(res))
         for(ii in 1:3){
-          lgt = input[[paste0('filter_lgt_', ii)]]
-          var = input[[paste0('filter_col_' , ii)]]
-          op = input[[paste0('filter_op_' , ii)]]
-          val = input[[paste0('filter_val_' , ii)]]
+          lgt <- input[[paste0('filter_lgt_', ii)]]
+          var <- input[[paste0('filter_col_' , ii)]]
+          op <- input[[paste0('filter_op_' , ii)]]
+          val <- input[[paste0('filter_val_' , ii)]]
           
           if(var %in% names(mask_table)){
-            x = mask_table[[var]]
+            x <- mask_table[[var]]
             if(is.numeric(x)){
-              val = suppressWarnings({
-                r = unlist(stringr::str_split(val, '[^0-9\\.]+'))
-                r = r[!is.blank(r)]
-                r = as.numeric(r)
+              val <- suppressWarnings({
+                r <- unlist(stringr::str_split(val, '[^0-9\\.]+'))
+                r <- r[!is.blank(r)]
+                r <- as.numeric(r)
                 r
               })
               if(any(is.na(val))){ next }
             }else{
-              val = unlist(stringr::str_split(val, '[,\\ ]+'))
+              val <- unlist(stringr::str_split(val, '[,\\ ]+'))
             }
-            subsel = switch (op,
+            subsel <- switch (op,
                              '=' = { x == val[1] },
                              '>' = { x > val[1] },
                              '>=' = { x >= val[1] },
@@ -544,38 +544,38 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
             )
             
             if(ii == 1){
-              sel = subsel
+              sel <- subsel
             }else{
-              fun = (c(`&`, `|`)[c('AND', 'OR') %in% lgt])
+              fun <- (c(`&`, `|`)[c('AND', 'OR') %in% lgt])
               if(!length(fun)){
-                fun = `|`
+                fun <- `|`
               }
-              sel = fun[[1]](sel, subsel)
+              sel <- fun[[1]](sel, subsel)
             }
           }
         }
         
-        res = res[sel]
-        txt = dipsaus::deparse_svec(res)
-        last_electrodes = last_entry('electrodes', txt, group = group, save = T)
-      }, silent = T)
+        res <- res[sel]
+        txt <- dipsaus::deparse_svec(res)
+        last_electrodes <- last_entry('electrodes', txt, group = group, save = TRUE)
+      }, silent = TRUE)
       updateTextInput(session = session, inputId = 'electrodes', value = txt)
     })
     
     
     output$epoch_txt <- renderText({
-      project = input$project_name
-      subject = input$subject_code
-      epoch = input$epoch
-      time_range = c(input$epoch_pre, input$epoch_post)
+      project <- input$project_name
+      subject <- input$subject_code
+      epoch <- input$epoch
+      time_range <- c(input$epoch_pre, input$epoch_post)
       
-      fn = function(...){return('')}
+      fn <- function(...){return('')}
       tryCatch({
-        epoch_table = load_meta(meta_type = 'epoch', meta_name = epoch, project_name = project, subject_code = subject)
-        n_trials = nrow(epoch_table)
-        n_cond = length(unique(epoch_table$Condition))
-        n_t = (time_range[2] + time_range[1])
-        s = sprintf('%d trials, %d unique condition types, %.1f seconds',
+        epoch_table <- load_meta(meta_type = 'epoch', meta_name = epoch, project_name = project, subject_code = subject)
+        n_trials <- nrow(epoch_table)
+        n_cond <- length(unique(epoch_table$Condition))
+        n_t <- (time_range[2] + time_range[1])
+        s <- sprintf('%d trials, %d unique condition types, %.1f seconds',
                     n_trials, n_cond, n_t)
         return(s)
       }, error = fn, warning = fn)
@@ -584,7 +584,7 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
     
     ##### Dynamic previews #####
     output$ui_preview <- renderUI({
-      check_result = local_data$check_result
+      check_result <- local_data$check_result
       if(!local_data$has_subject){
         # Show error message
         if(is.null(check_result)){
@@ -594,7 +594,7 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
           ))
         }else{
           # Subject exists, but some procedure needs to be done before importing
-          must_true = list(
+          must_true <- list(
             'channel_dir' = 'No data folder found (preprocess)',
             'meta_dir' = 'No meta directory found',
             'notch_filter' = 'Needs Notch filter (preprocess)',
@@ -603,8 +603,8 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
             'meta_epoch' = 'Meta data has no epoch information',
             'meta_frequency' = 'Meta data has no frequency information (wavelet?)'
           )
-          r = check_result$check[names(must_true)]
-          r = must_true[!unlist(r)]
+          r <- check_result$check[names(must_true)]
+          r <- must_true[!unlist(r)]
           return(div(p('This subject failed the data check.'), tags$ul(
             tagList(lapply(r, tags$li))
           )))
@@ -639,22 +639,22 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
     })
     
     observe({
-      load_mesh = input$load_mesh
+      load_mesh <- input$load_mesh
       if(length(load_mesh) && is.logical(load_mesh)){
-        local_data$load_mesh = load_mesh
+        local_data$load_mesh <- load_mesh
         last_entry('load_mesh', !isFALSE(load_mesh), save = TRUE, group = group)
       }
     })
     
     output$ui_summary <- renderUI({
       validate(need(local_data$has_subject, message = ''))
-      check_result = local_data$check_result
+      check_result <- local_data$check_result
       
-      project = input$project_name
-      subject = input$subject_code
+      project <- input$project_name
+      subject <- input$subject_code
       
       # check if subject exists
-      sub_dir = file.path(rave_options('data_dir'), project, subject, 'rave')
+      sub_dir <- file.path(rave_options('data_dir'), project, subject, 'rave')
       if(!dir.exists(sub_dir)){
         return(p(
           'File path not found:', br(), sub_dir
@@ -662,34 +662,34 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
       }
       
       # Trial
-      epoch = input$epoch
+      epoch <- input$epoch
       # Check epoch file
-      msg = check_epoch(sprintf('%s/%s', project, subject), epoch_name = epoch)
+      msg <- check_epoch(sprintf('%s/%s', project, subject), epoch_name = epoch)
       if(!isTRUE(msg)){
-        msg = msg$message
+        msg <- msg$message
         
-        sub = as_subject(sprintf('%s/%s', project, subject), strict = FALSE)
-        blocks = sub$preprocess_info('blocks')
-        blocks = c(rep(blocks[1], 4), blocks[-1])
-        examp = data.frame(
+        sub <- as_subject(sprintf('%s/%s', project, subject), strict = FALSE)
+        blocks <- sub$preprocess_info('blocks')
+        blocks <- c(rep(blocks[1], 4), blocks[-1])
+        examp <- data.frame(
           Block = blocks,
           Time = c('5.12', '10.4', '...', rep('', length(blocks) - 3)),
           Trial = seq_along(blocks),
           Condition = c('cond1', 'cond2', '...', rep('', length(blocks) - 3))
         )
-        examp = utils::capture.output({print(examp)})
+        examp <- utils::capture.output({print(examp)})
         
-        time_range = ''
-        time_points = load_meta('time_points', project, subject)
+        time_range <- ''
+        time_points <- load_meta('time_points', project, subject)
         if(is.data.frame(time_points)){
-          time_range = lapply(split(time_points, time_points$Block), function(s){
-            rg = range(s$Time)
+          time_range <- lapply(split(time_points, time_points$Block), function(s){
+            rg <- range(s$Time)
             
             tags$li(
               sprintf('Block %s, Time range: %.2f ~ %.2f seconds', unique(s$Block), rg[1], rg[2])
             )
           })
-          time_range = tags$ul(tagList(time_range))
+          time_range <- tags$ul(tagList(time_range))
         }
         
         return(p(
@@ -706,31 +706,31 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
       }
       
       
-      epoch_table = load_meta(meta_type = 'epoch', meta_name = epoch, project_name = project, subject_code = subject)
+      epoch_table <- load_meta(meta_type = 'epoch', meta_name = epoch, project_name = project, subject_code = subject)
       
-      n_trials = nrow(epoch_table)
+      n_trials <- nrow(epoch_table)
       
       # Frequency
-      w = check_result$log$preprocess$wavelet_log
-      w = w[[length(w)]]
-      freqs = w$frequencies#[w$frequencies %within% input$frequencies]
-      n_freqs = length(freqs)
+      w <- check_result$log$preprocess$wavelet_log
+      w <- w[[length(w)]]
+      freqs <- w$frequencies#[w$frequencies %within% input$frequencies]
+      n_freqs <- length(freqs)
       
       # Time Points
-      time_range = c(input$epoch_pre, input$epoch_post)
-      total_time = sum(time_range)
-      n_time_wave = w$target_srate * total_time + 1
-      n_time_volt = check_result$log$preprocess$srate * total_time + 1
+      time_range <- c(input$epoch_pre, input$epoch_post)
+      total_time <- sum(time_range)
+      n_time_wave <- w$target_srate * total_time + 1
+      n_time_volt <- check_result$log$preprocess$srate * total_time + 1
       
       # Electrodes
-      elec = input$electrodes
-      elec = dipsaus::parse_svec(elec)
-      elec = elec[elec %in% check_result$log$preprocess$channels]
-      n_electrodes = length(elec)
+      elec <- input$electrodes
+      elec <- dipsaus::parse_svec(elec)
+      elec <- elec[elec %in% check_result$log$preprocess$channels]
+      n_electrodes <- length(elec)
       
       # usage
-      s_volt = prod(n_trials, n_time_volt, n_electrodes) * 8.25 * 3
-      s_power = prod(n_trials, n_freqs, n_time_wave, n_electrodes) * 8.25 * 3
+      s_volt <- prod(n_trials, n_time_volt, n_electrodes) * 8.25 * 3
+      s_power <- prod(n_trials, n_freqs, n_time_wave, n_electrodes) * 8.25 * 3
       
       # # SUMA brain?
       # suma_dir = get_dir(subject_code = subject, project_name = project)$suma_dir
@@ -754,18 +754,18 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
       #   }
       # }
       
-      drive_speed = rave_options('drive_speed')
+      drive_speed <- rave_options('drive_speed')
       if(length(drive_speed) >= 2){
-        drive_speed = as.numeric(drive_speed[2])
+        drive_speed <- as.numeric(drive_speed[2])
       }else{
-        drive_speed = NA
+        drive_speed <- NA
       }
       
       
-      n_trials = as.integer(n_trials)
-      n_time_volt = as.integer(n_time_volt)
-      n_electrodes = as.integer(n_electrodes)
-      n_time_wave = as.integer(n_time_wave)
+      n_trials <- as.integer(n_trials)
+      n_time_volt <- as.integer(n_time_volt)
+      n_electrodes <- as.integer(n_electrodes)
+      n_time_wave <- as.integer(n_time_wave)
       
       p(
         strong('Voltage: '), sprintf('%d Trials x %d Timepoints x %d Electrodes (%s)',
@@ -829,26 +829,26 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
     #   brain$view(control_gui = F, width = '100%', height = '500px', center = T, show_mesh = load_mesh)
     # })
     
-    proxy = threeBrain::brain_proxy('three_viewer')
+    proxy <- threeBrain::brain_proxy('three_viewer')
     output$three_viewer <- threeBrain::renderBrain({
-      project = input$project_name
-      subject = input$subject_code
-      subject_id = sprintf('%s/%s', project, subject)
-      ref = input$reference
-      elec = dipsaus::parse_svec(input$electrodes)
-      load_mesh = input$load_mesh
+      project <- input$project_name
+      subject <- input$subject_code
+      subject_id <- sprintf('%s/%s', project, subject)
+      ref <- input$reference
+      elec <- dipsaus::parse_svec(input$electrodes)
+      load_mesh <- input$load_mesh
       
       # Check whether subject exists
-      dirs = get_dir(subject_id = subject_id)
+      dirs <- get_dir(subject_id = subject_id)
       
       validate(
         need(local_data$has_subject, message = ''),
         need(dir.exists(dirs$subject_dir), message = 'Subject does not exist!')
       )
       
-      subject = as_subject(subject_id, reference = ref, strict = FALSE)
+      subject <- as_subject(subject_id, reference = ref, strict = FALSE)
       
-      brain = rave_brain2( subject = subject, surfaces = 'pial', 
+      brain <- rave_brain2( subject = subject, surfaces = 'pial', 
                            compute_template = FALSE, 
                            usetemplateifmissing = FALSE )
       
@@ -857,45 +857,45 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
       }
       
       
-      valid_e = subject$filter_valid_electrodes(elec)
-      invalid_e = subject$filter_all_electrodes(elec)
-      invalid_e = invalid_e[!invalid_e %in% valid_e]
+      valid_e <- subject$filter_valid_electrodes(elec)
+      invalid_e <- subject$filter_all_electrodes(elec)
+      invalid_e <- invalid_e[!invalid_e %in% valid_e]
       
-      f = factor(c('Loading', 'Bad', 'Not Loaded'), levels = c('Loading', 'Bad', 'Not Loaded'))
-      tbl = subject$electrodes
-      tbl$Value = f[3]
-      tbl$Value[tbl$Electrode %in% valid_e] = f[1]
-      tbl$Value[tbl$Electrode %in% invalid_e] = f[2]
+      f <- factor(c('Loading', 'Bad', 'Not Loaded'), levels = c('Loading', 'Bad', 'Not Loaded'))
+      tbl <- subject$electrodes
+      tbl$Value <- f[3]
+      tbl$Value[tbl$Electrode %in% valid_e] <- f[1]
+      tbl$Value[tbl$Electrode %in% invalid_e] <- f[2]
       
-      is_template = FALSE
+      is_template <- FALSE
       if(length(brain$template_object)){
-        brain = brain$template_object
-        is_template = TRUE
+        brain <- brain$template_object
+        is_template <- TRUE
       }
       brain$set_electrode_values(table_or_path = tbl[, c('Electrode', 'Value')])
       
       if(is_template){
         for(e in brain$electrodes$objects){
-          e$name = paste(stringr::str_replace(e$name, '^[^,]*, ', ''), '(template brain)')
+          e$name <- paste(stringr::str_replace(e$name, '^[^,]*, ', ''), '(template brain)')
         }
       }
       
       for(e in valid_e){
         if( !is.null(brain$electrodes$objects[[e]]) ){
-          brain$electrodes$objects[[e]]$custom_info = paste('Reference Group:', tbl$Group[tbl$Electrode == e])
+          brain$electrodes$objects[[e]]$custom_info <- paste('Reference Group:', tbl$Group[tbl$Electrode == e])
         }
       }
       for(e in invalid_e){
         if( !is.null(brain$electrodes$objects[[e]]) ){
-          brain$electrodes$objects[[e]]$custom_info = paste('Reference Group:', tbl$Group[tbl$Electrode == e], '(electrode not used)')
+          brain$electrodes$objects[[e]]$custom_info <- paste('Reference Group:', tbl$Group[tbl$Electrode == e], '(electrode not used)')
         }
       }
       
-      zoom = shiny::isolate({
+      zoom <- shiny::isolate({
         proxy$main_camera$zoom
       })
-      theme = get_rave_theme()$themes[[1]]
-      background = ifelse(theme == 'dark', '#1E1E1E', '#FFFFFF')
+      theme <- get_rave_theme()$themes[[1]]
+      background <- ifelse(theme == 'dark', '#1E1E1E', '#FFFFFF')
       brain$plot(control_panel = FALSE, side_canvas = FALSE, 
                  default_colormap = 'Value', volumes = FALSE, 
                  surfaces = load_mesh, start_zoom = zoom, 
@@ -905,7 +905,7 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
     
     
     observeEvent(input$import, {
-      check_result = local_data$check_result
+      check_result <- local_data$check_result
       if(local_data$prevent_dblclick){
         return()
       }
@@ -913,25 +913,25 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
         showNotification(p('Invalid subject. Please make sure you have run preprocess and generate epoch files.'), type = 'error', id = ns('data_import'))
         return()
       }
-      subject_code = input$subject_code
-      project_name = input$project_name
+      subject_code <- input$subject_code
+      project_name <- input$project_name
       
-      epoch = input$epoch
-      epoch_range = c(input$epoch_pre, input$epoch_post)
-      reference = input$reference
-      subject_id = paste0(project_name , '/' , subject_code)
-      electrodes = dipsaus::parse_svec(input$electrodes)
+      epoch <- input$epoch
+      epoch_range <- c(input$epoch_pre, input$epoch_post)
+      reference <- input$reference
+      subject_id <- paste0(project_name , '/' , subject_code)
+      electrodes <- dipsaus::parse_svec(input$electrodes)
       
-      tmp_subject = Subject$new(project_name = project_name, subject_code = subject_code, reference = reference, strict = FALSE)
-      electrodes = tmp_subject$filter_valid_electrodes(electrodes)
+      tmp_subject <- Subject$new(project_name = project_name, subject_code = subject_code, reference = reference, strict = FALSE)
+      electrodes <- tmp_subject$filter_valid_electrodes(electrodes)
       
       if(length(electrodes) == 0){
         showNotification('You must select at least one electrode', type = 'error', id = ns('data_import'))
         return(NULL)
       }
       
-      frequencies = tmp_subject$frequencies$Frequency #input$frequencies
-      freqs = tmp_subject$frequencies$Frequency %within% frequencies
+      frequencies <- tmp_subject$frequencies$Frequency #input$frequencies
+      freqs <- tmp_subject$frequencies$Frequency %within% frequencies
       if(!sum(freqs)){
         showNotification('No frequency found in your selected frequency band', type = 'error', id = ns('data_import'))
         return(NULL)
@@ -952,7 +952,7 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
       last_entry('reference_name', reference, save = TRUE, group = group)
       clear_cache(levels = 1)
       if(isTRUE(input$group_module)){
-        electrodes = electrodes[1]
+        electrodes <- electrodes[1]
       }
       gc()
       rave_prepare(
@@ -967,13 +967,13 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
       )
       
       # refresh UIs
-      global_reactives$force_refresh_all = Sys.time()
-      global_reactives$has_data = Sys.time()
+      global_reactives$force_refresh_all <- Sys.time()
+      global_reactives$has_data <- Sys.time()
       
-      shinyjs::removeClass(selector = 'body', class = "rave-noscroll");
+      shinyjs::removeClass(selector = 'body', class = "rave-noscroll")
       removeModal()
       # Remove
-      local_data$prevent_dblclick = TRUE
+      local_data$prevent_dblclick <- TRUE
       catgl('Subject loaded, trigger module to refresh...')
     })
     
@@ -981,7 +981,7 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
     ##### End of server #####
     
     # onload, check if data has been loaded into datarepo
-    data_loaded = rlang::env_has(
+    data_loaded <- rlang::env_has(
       data_env,
       nms = c(
         ".private",
@@ -993,15 +993,15 @@ shiny_data_selector <- function(module_id, data_env = getDefaultDataRepository()
       inherit = FALSE
     )
     if(all(data_loaded)){
-      global_reactives$force_refresh_all = Sys.time()
-      global_reactives$has_data = Sys.time()
+      global_reactives$force_refresh_all <- Sys.time()
+      global_reactives$has_data <- Sys.time()
     } else {
       open_modal()
     }
     
   }
   
-  launch = function(){
+  launch <- function(){
     shinyjs::click(ns('data_select'))
   }
   

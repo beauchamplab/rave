@@ -52,18 +52,18 @@ NULL
 
 
 .cache_global_container <- local({
-  map = NULL
-  tmp_map = NULL
+  map <- NULL
+  tmp_map <- NULL
   function(temorary = FALSE){
     if(is.null(map)){
       map <<- dipsaus::session_map()
-      map$has_locker = FALSE
+      map$has_locker <- FALSE
       RaveFinalizer$new(function(...){
         map$destroy()
       })
       
       tmp_map <<- dipsaus::session_map()
-      tmp_map$has_locker = FALSE
+      tmp_map$has_locker <- FALSE
       RaveFinalizer$new(function(...){
         tmp_map$destroy()
       })
@@ -79,12 +79,12 @@ NULL
 
 .cache_global <- function(key, val, name, replace=FALSE, has_key = TRUE, 
                           test = FALSE, temporary = FALSE, ...){
-  map = .cache_global_container(temporary)
-  tres = FALSE
+  map <- .cache_global_container(temporary)
+  tres <- FALSE
   if( has_key ){
-    tres = map$has(name, signature = key)
+    tres <- map$has(name, signature = key)
   }else{
-    tres = map$has(name)
+    tres <- map$has(name)
   }
   if( test ){
     return(tres)
@@ -101,33 +101,33 @@ NULL
 .cache <- function(key, val, name, replace=FALSE, global=FALSE, 
                    persist=FALSE, test = FALSE, temporary = FALSE, ...){
   
-  ctx = rave_context()
-  instance = ctx$instance
+  ctx <- rave_context()
+  instance <- ctx$instance
   
-  has_key = TRUE
+  has_key <- TRUE
   if(missing(val)){
-    val = NULL
-    replace = FALSE
+    val <- NULL
+    replace <- FALSE
   }
   if(missing(key)){
-    key = NULL
-    replace = FALSE
-    has_key = FALSE
+    key <- NULL
+    replace <- FALSE
+    has_key <- FALSE
   }
   if(test){
     # has_key = FALSE
-    replace = FALSE
+    replace <- FALSE
   }
   
   if(!global && is.null(instance)){
     debug('Module is not activated, temporary cached {name} to global container. This warning only appears when developing modules.', level = 'WARNING')
-    global = TRUE
+    global <- TRUE
   }
   
   if( global ){
     if( test ){
       # Variable is cached in global environment, check whether cache exists
-      tres_gl = .cache_global(key = key, name = name, replace = FALSE, 
+      tres_gl <- .cache_global(key = key, name = name, replace = FALSE, 
                               has_key = has_key, test = TRUE, 
                               temporary = temporary)
       # if exist in global cache, then obtain the value
@@ -149,17 +149,17 @@ NULL
   # global is false
   if( !replace ){
     if( has_key ){
-      tres = instance$cache_env$has(name, signature = key)
+      tres <- instance$cache_env$has(name, signature = key)
     }else{
-      tres = instance$cache_env$has(name)
+      tres <- instance$cache_env$has(name)
     }
     if( tres ){
       return(instance$cache_env$get(name))
     }
     if( has_key ){
-      tres = instance$module_env$cache_env$has(name, signature = key)
+      tres <- instance$module_env$cache_env$has(name, signature = key)
     }else{
-      tres = instance$module_env$cache_env$has(name)
+      tres <- instance$module_env$cache_env$has(name)
     }
     if( tres ){
       return(instance$module_env$cache_env$get(name))
@@ -184,7 +184,7 @@ cache <- rave_context_generics('cache', .cache)
 
 #' @rdname rave-cache
 #' @export
-cache.rave_running = .cache
+cache.rave_running <- .cache
 
 #' @rdname rave-cache
 #' @export
@@ -201,27 +201,27 @@ cache.default <- cache.rave_running_local
 #' @export
 cache_input <- function(inputId, val = NULL, read_only = TRUE, ..., 
                         session = getDefaultReactiveDomain()){
-  ctx = rave_context(disallowed_context = 'default')
-  module_id = ctx$module_id
-  rave_id = add_to_session(session)
+  ctx <- rave_context(disallowed_context = 'default')
+  module_id <- ctx$module_id
+  rave_id <- add_to_session(session)
   
-  key = list(
+  key <- list(
     type = '.rave-input-Dipterix',
     special = inputId %in% c('..onced'),
     module_id = module_id,
     rave_id = rave_id,
     msg = 'I need to add something that is hard to guess - Dipterix'
   )
-  test = FALSE
+  test <- FALSE
   if(read_only){
     # Only check if name exists
-    test = TRUE
+    test <- TRUE
   }else{
-    nm = shiny::NS(module_id)(inputId)
+    nm <- shiny::NS(module_id)(inputId)
     cache(key, val, nm, replace = !read_only, global = TRUE)
   }
   
-  re = cache(key, val, inputId, replace = !read_only, global = FALSE, 
+  re <- cache(key, val, inputId, replace = !read_only, global = FALSE, 
         persist = FALSE, test = test)
   debug('Cache {inputId} - {paste(deparse(re), collapse = "")}')
   re
@@ -230,18 +230,18 @@ cache_input <- function(inputId, val = NULL, read_only = TRUE, ...,
 #' @rdname rave-cache
 #' @export
 clear_cache <- function(levels = 1){
-  ctx = rave_context()
+  ctx <- rave_context()
   if(1 %in% levels){
     if(length(ctx$instance)){
-      names = ctx$instance$cache_env$keys()
-      input_ids = ctx$instance$input_ids
-      names = names[!names %in% input_ids]
+      names <- ctx$instance$cache_env$keys()
+      input_ids <- ctx$instance$input_ids
+      names <- names[!names %in% input_ids]
       ctx$instance$cache_env$remove(names)
     }
   }
   
   if(2 %in% levels){
-    map = .cache_global_container()
+    map <- .cache_global_container()
     map$reset()
   }
   
@@ -250,6 +250,6 @@ clear_cache <- function(levels = 1){
       ctx$instance$module_env$cache_env$reset()
     }
   }
-  tmp_map = .cache_global_container(TRUE)
+  tmp_map <- .cache_global_container(TRUE)
   tmp_map$reset()
 }

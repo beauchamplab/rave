@@ -2,9 +2,9 @@ library(rave)
 
 # preprocessing with no gui
 
-utils = rave_preprocess_tools()
+utils <- rave_preprocess_tools()
 # settings
-subject_info = list(
+subject_info <- list(
   subject_code = 'YAB',
   project_name = 'test',
   blocks = c('008'),#, '010', '011', '012'),
@@ -48,7 +48,7 @@ utils$set_sample_rate(srate = subject_info$sample_rate)
 
 # Step 2: import subject data from matlab if not cached yet
 if(!utils$has_raw_cache()){
-  utils$collect_raw_voltage(force = F)
+  utils$collect_raw_voltage(force = FALSE)
 }
 
 # Step 3: notch filter and diagnose

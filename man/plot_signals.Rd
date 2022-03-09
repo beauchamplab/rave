@@ -18,7 +18,7 @@ plot_signals(
   time_shift = 0,
   lwd = 0.5,
   cex = 2,
-  new_plot = T,
+  new_plot = TRUE,
   plot = "base",
   xlim = NULL,
   ...

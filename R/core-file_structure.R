@@ -6,8 +6,8 @@
 #' @export
 arrange_data_dir <- function(first_time = FALSE, reset = FALSE){
   if(first_time || reset){
-    data_dir = '~/rave_data/data_dir'
-    raw_dir = '~/rave_data/raw_dir'
+    data_dir <- '~/rave_data/data_dir'
+    raw_dir <- '~/rave_data/raw_dir'
     
     dir.create(data_dir, showWarnings = FALSE, recursive = TRUE)
     dir.create(raw_dir, showWarnings = FALSE, recursive = TRUE)
@@ -24,8 +24,8 @@ arrange_data_dir <- function(first_time = FALSE, reset = FALSE){
     )
   }
   
-  data_dir = rave_options('data_dir')
-  raw_dir = rave_options('raw_data_dir')
+  data_dir <- rave_options('data_dir')
+  raw_dir <- rave_options('raw_data_dir')
   
   if(!dir.exists(data_dir) || !dir.exists(raw_dir)){
     catgl('Cannot find data directory for RAVE. Please make sure that these folder exists', level = 'ERROR')
@@ -39,11 +39,11 @@ arrange_data_dir <- function(first_time = FALSE, reset = FALSE){
     
     # Test speed
     if(!isTRUE(rave_options('disable_startup_speed_check'))){
-      speed = test_hdspeed(quiet = TRUE)
+      speed <- test_hdspeed(quiet = TRUE)
       rave_options(drive_speed = speed)
     }
     
-    return(T)
+    return(TRUE)
   }
   
 }
@@ -55,28 +55,28 @@ arrange_data_dir <- function(first_time = FALSE, reset = FALSE){
 #' @export
 arrange_modules <- function(refresh = FALSE, reset = FALSE, quiet = FALSE){
   
-  col_names = c('ID', 'Name', 'Group', 'Package', 'Active', 'Notes')
-  fpath = rave_options('module_lookup_file')
-  dirname = dirname(fpath)
+  col_names <- c('ID', 'Name', 'Group', 'Package', 'Active', 'Notes')
+  fpath <- rave_options('module_lookup_file')
+  dirname <- dirname(fpath)
   if(!dir.exists(dirname)){
     dir.create(dirname, showWarnings = FALSE, recursive = TRUE)
   }
   if(!file.exists(fpath)){
     catgl('First time? looking for modules', quiet = quiet)
-    refresh = TRUE
+    refresh <- TRUE
   }
   
-  old_table = NULL
+  old_table <- NULL
   
   
   if(!reset && file.exists(fpath)){
-    tbl = utils::read.csv(fpath, stringsAsFactors = F)
-    nms = names(tbl)
+    tbl <- utils::read.csv(fpath, stringsAsFactors = FALSE)
+    nms <- names(tbl)
     if(!all(col_names %in% nms)){
-      refresh = TRUE
+      refresh <- TRUE
     }else{
-      tbl = tbl[, col_names]
-      old_table = tbl
+      tbl <- tbl[, col_names]
+      old_table <- tbl
     }
   }
   
@@ -84,8 +84,8 @@ arrange_modules <- function(refresh = FALSE, reset = FALSE, quiet = FALSE){
     catgl('Trying to locate all possible modules...', quiet = quiet)
     
     # detect all modules
-    tbl = detect_modules(as_module = FALSE)
-    tbl = as.data.frame(tbl, stringsAsFactors = F)
+    tbl <- detect_modules(as_module = FALSE)
+    tbl <- as.data.frame(tbl, stringsAsFactors = FALSE)
     
     # if(nrow(tbl) == 0){
     #   stop("No module detected. Please install\n\tdevtools::install_github('beauchamplab/ravebuiltins', upgrade = 'never')\nand then run \n\trave::arrange_modules(refresh = TRUE)")
@@ -96,35 +96,35 @@ arrange_modules <- function(refresh = FALSE, reset = FALSE, quiet = FALSE){
       catgl('No modules can be found. Installing builtin modules using \n\tdevtools::install_github("beauchamplab/ravebuiltins@dev")', level = 'ERROR')
       devtools::install_github("beauchamplab/ravebuiltins@dev", upgrade = 'never')
       
-      tbl = detect_modules(as_module = FALSE)
-      tbl = as.data.frame(tbl, stringsAsFactors = F)
+      tbl <- detect_modules(as_module = FALSE)
+      tbl <- as.data.frame(tbl, stringsAsFactors = FALSE)
     }
-    names(tbl) = col_names[1:4]
+    names(tbl) <- col_names[1:4]
     
     
     
     # join
     if(is.data.frame(old_table) && !reset){
-      tbl = merge(tbl, old_table, by = names(tbl), all.x = TRUE, no.dups = TRUE)
-      tbl$Active[is.na(tbl$Active)] = TRUE
-      tbl$Notes[is.na(tbl$Notes)] = ''
+      tbl <- merge(tbl, old_table, by = names(tbl), all.x = TRUE, no.dups = TRUE)
+      tbl$Active[is.na(tbl$Active)] <- TRUE
+      tbl$Notes[is.na(tbl$Notes)] <- ''
     }else{
-      tbl$Active = TRUE
-      tbl$Notes = ''
+      tbl$Active <- TRUE
+      tbl$Notes <- ''
     }
     
     # try for each module, validate
     for(ii in seq_len(nrow(tbl))){
-      row = tbl[ii, ]
+      row <- tbl[ii, ]
       if(row$Active){
-        module_id = row$ID
-        package_name = row$Package
+        module_id <- row$ID
+        package_name <- row$Package
         catgl('Validating [', module_id, '] (Package - ', package_name, ')', level = 'INFO', quiet = quiet)
-        m = get_module(package_name, module_id)
+        m <- get_module(package_name, module_id)
         
         if(!any(c('ModuleEnvir', 'R6') %in% class(m))){
-          tbl[ii, 'Active'] = FALSE
-          tbl[ii, 'Notes'] = 'Cannot initialize'
+          tbl[ii, 'Active'] <- FALSE
+          tbl[ii, 'Notes'] <- 'Cannot initialize'
         }
       }
     }
@@ -133,7 +133,7 @@ arrange_modules <- function(refresh = FALSE, reset = FALSE, quiet = FALSE){
     safe_write_csv(tbl, fpath, row.names = FALSE)
   }
   
-  tbl$Notes[is.na(tbl$Notes)] = ''
+  tbl$Notes[is.na(tbl$Notes)] <- ''
   
   tbl
 }
@@ -154,15 +154,15 @@ arrange_modules <- function(refresh = FALSE, reset = FALSE, quiet = FALSE){
 #' @param check_rawdata logical, whether raw subject folder exists, default false
 #' @export
 get_subjects <- function(project_name, check_subfolders = TRUE, check_rawdata = FALSE){
-  data_dir = rave_options('data_dir')
-  sub = list.dirs(file.path(data_dir, project_name), full.names = F, recursive = F)
-  sub = sub[stringr::str_detect(sub, '^[a-zA-Z0-9]') & sub!= 'rave']
+  data_dir <- rave_options('data_dir')
+  sub <- list.dirs(file.path(data_dir, project_name), full.names = FALSE, recursive = FALSE)
+  sub <- sub[stringr::str_detect(sub, '^[a-zA-Z0-9]') & sub!= 'rave']
   if( check_subfolders ){
-    sub = sub[dir.exists(file.path(data_dir, project_name, sub, 'rave'))]
+    sub <- sub[dir.exists(file.path(data_dir, project_name, sub, 'rave'))]
   }
   if( check_rawdata ){
-    raw_dir = rave_options('raw_data_dir')
-    sub = sub[dir.exists(file.path(raw_dir, sub))]
+    raw_dir <- rave_options('raw_data_dir')
+    sub <- sub[dir.exists(file.path(raw_dir, sub))]
   }
   sub
 }
@@ -177,55 +177,55 @@ get_subjects <- function(project_name, check_subfolders = TRUE, check_rawdata = 
 #' @param relative whether to return relative path or absolute to root directory
 #' @export
 get_dir <- function(subject_code, project_name, block_num, mkdirs = NULL, subject_id, relative = FALSE){
-  re = list()
+  re <- list()
   
-  re$data_dir = rave_options('data_dir')
-  re$raw_data_dir = rave_options('raw_data_dir')
+  re$data_dir <- rave_options('data_dir')
+  re$raw_data_dir <- rave_options('raw_data_dir')
   
   if(relative){
-    re$data_dir = '.'
+    re$data_dir <- '.'
   }
   
   if(!(missing(subject_code) || missing(project_name))){
-    re$subject_name = paste0(project_name, '/', subject_code)
+    re$subject_name <- paste0(project_name, '/', subject_code)
   }else if(!missing(subject_id)){
-    re$subject_name = subject_id
-    project_name = stringr::str_split(subject_id, '/')[[1]][[1]]
+    re$subject_name <- subject_id
+    project_name <- stringr::str_split(subject_id, '/')[[1]][[1]]
   }
   if(!is.null(re$subject_name)){
     
-    re$subject_dir = (file.path(re$data_dir, re$subject_name))
-    re$preprocess_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'preprocess'))
+    re$subject_dir <- (file.path(re$data_dir, re$subject_name))
+    re$preprocess_dir <- (file.path(re$data_dir, re$subject_name, 'rave', 'preprocess'))
     # re$pre_visual_dir = (file.path(re$data_dir, re$subject_name, 'preprocess', 'visualizations'))
-    re$rave_dir = (file.path(re$data_dir, re$subject_name, 'rave'))
-    re$project_dir = (file.path(re$data_dir, project_name))
-    re$meta_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'meta'))
-    re$cache_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'data'))
-    re$channel_dir = re$cache_dir
-    re$reference_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'data', 'reference'))
-    re$suma_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'suma'))
-    re$suma_out_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'suma'))
+    re$rave_dir <- (file.path(re$data_dir, re$subject_name, 'rave'))
+    re$project_dir <- (file.path(re$data_dir, project_name))
+    re$meta_dir <- (file.path(re$data_dir, re$subject_name, 'rave', 'meta'))
+    re$cache_dir <- (file.path(re$data_dir, re$subject_name, 'rave', 'data'))
+    re$channel_dir <- re$cache_dir
+    re$reference_dir <- (file.path(re$data_dir, re$subject_name, 'rave', 'data', 'reference'))
+    re$suma_dir <- (file.path(re$data_dir, re$subject_name, 'rave', 'suma'))
+    re$suma_out_dir <- (file.path(re$data_dir, re$subject_name, 'rave', 'suma'))
     
-    re$copied_raw_dir = copied_raw_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'raw'))
+    re$copied_raw_dir <- copied_raw_dir <- (file.path(re$data_dir, re$subject_name, 'rave', 'raw'))
     
-    re$module_data_dir = (file.path(re$data_dir, re$subject_name, 'rave', 'module_data'))
+    re$module_data_dir <- (file.path(re$data_dir, re$subject_name, 'rave', 'module_data'))
     
     if(!missing(subject_code)){
       if(!dir.exists(copied_raw_dir)){
-        re$pre_subject_dir = (file.path(re$raw_data_dir, subject_code))
+        re$pre_subject_dir <- (file.path(re$raw_data_dir, subject_code))
       }else{
-        re$pre_subject_dir = copied_raw_dir
+        re$pre_subject_dir <- copied_raw_dir
       }
       
       if(!missing(block_num)){
-        re$block_dir = (file.path(re$raw_data_dir, subject_code, block_num))
+        re$block_dir <- (file.path(re$raw_data_dir, subject_code, block_num))
       }
     }
   }
   
   for(dname in mkdirs){
     if(dname %in% names(re)){
-      dir = re[[dname]]
+      dir <- re[[dname]]
       if(!dir.exists(dir)){
         dir_create(dir)
       }

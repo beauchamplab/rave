@@ -54,7 +54,7 @@ node_size <- function(){
 
 
 mem_used <- function(){
-  mem = dipsaus::mem_limit2()
+  mem <- dipsaus::mem_limit2()
   show_bytes(mem$total - mem$free)
 }
 

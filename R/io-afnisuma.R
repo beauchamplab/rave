@@ -5,146 +5,146 @@
 #' @author John Magnotti
 #' @param con \code{mgrid} file
 #' @param raw raw file or processed I guess
-read_mgrid <- function(con, raw = F){
+read_mgrid <- function(con, raw = FALSE){
   soft_deprecated()
   # con = '/Volumes/data/iElVis_files/YBY/elec_recon/YBY.mgrid'
-  s = readLines(con)
-  ind = which(stringr::str_detect(s, '^#- - - - '))
+  s <- readLines(con)
+  ind <- which(stringr::str_detect(s, '^#- - - - '))
   if(!length(ind)){
     return(NULL)
   }
-  s = stringr::str_trim(s)
-  re = list()
-  re[['header']] = list()
-  re[['groups']] = list()
+  s <- stringr::str_trim(s)
+  re <- list()
+  re[['header']] <- list()
+  re[['groups']] <- list()
   
   # header
-  header = s[seq_len(ind[1])]
-  i = which(stringr::str_detect(header, '^[^#]')); i = i[i > 1]
-  val = header[i]
-  key = stringr::str_remove(header[i-1], '^#')
-  re[['header']][key] = val
+  header <- s[seq_len(ind[1])]
+  i <- which(stringr::str_detect(header, '^[^#]')); i <- i[i > 1]
+  val <- header[i]
+  key <- stringr::str_remove(header[i-1], '^#')
+  re[['header']][key] <- val
   
   # grid and electrodes
-  ind = cbind(ind, c(ind[-1]-1, length(s)))
+  ind <- cbind(ind, c(ind[-1]-1, length(s)))
   
-  current_group = list()
+  current_group <- list()
   
   for(ii in seq_len(nrow(ind))){
-    entry = s[seq(ind[ii, 1], ind[ii, 2])]
-    target = stringr::str_match(entry[2], '(Electrode [a-zA-Z]*)[ ]*([0-9]*)[ ]*([0-9]*)')
+    entry <- s[seq(ind[ii, 1], ind[ii, 2])]
+    target <- stringr::str_match(entry[2], '(Electrode [a-zA-Z]*)[ ]*([0-9]*)[ ]*([0-9]*)')
     
-    name = stringr::str_trim(target[2])
+    name <- stringr::str_trim(target[2])
     
-    i = which(stringr::str_detect(entry, '^[^#]')); i = i[i > 3]
-    val = entry[i]
-    key = stringr::str_remove(entry[i-1], '^#')
-    tmp = list()
-    tmp[key] = val
+    i <- which(stringr::str_detect(entry, '^[^#]')); i <- i[i > 3]
+    val <- entry[i]
+    key <- stringr::str_remove(entry[i-1], '^#')
+    tmp <- list()
+    tmp[key] <- val
     
     switch (
       name,
       'Electrode Grid' = {
         # this is a grid decription
         if(length(current_group)){
-          re[['groups']][[length(re[['groups']]) + 1]] = current_group
+          re[['groups']][[length(re[['groups']]) + 1]] <- current_group
         }
-        current_group = list()
-        current_group[['group_number']] = as.integer(target[3]) + 1
-        group_info = list()
-        group_info[['group_name']] = tmp[['Description']]
+        current_group <- list()
+        current_group[['group_number']] <- as.integer(target[3]) + 1
+        group_info <- list()
+        group_info[['group_name']] <- tmp[['Description']]
         if(!is.null(tmp[['Radius']])){
-          group_info[['radius']] = as.numeric(tmp[['Radius']]);
+          group_info[['radius']] <- as.numeric(tmp[['Radius']])
         }
         if(is_invalid(group_info[['radius']])){
-          group_info[['radius']] = 2
+          group_info[['radius']] <- 2
         }
         
         if(!is.null(tmp[['Thickeness']])){
-          group_info[['thickeness']] = as.numeric(tmp[['Thickeness']]);
+          group_info[['thickeness']] <- as.numeric(tmp[['Thickeness']])
         }
         if(is_invalid(group_info[['thickeness']])){
-          group_info[['thickeness']] = 0.05
+          group_info[['thickeness']] <- 0.05
         }
         
         if(!is.null(tmp[['Color']])){
-          group_info[['color']] = as.numeric(unlist(stringr::str_split(tmp[['Color']], '[^0-9\\.]+')))
+          group_info[['color']] <- as.numeric(unlist(stringr::str_split(tmp[['Color']], '[^0-9\\.]+')))
         }
         if(is_invalid(group_info[['color']])){
-          group_info[['color']] = c(0.5, 0.5, 0.5)
+          group_info[['color']] <- c(0.5, 0.5, 0.5)
         }
         
         if(!is.null(tmp[['Dimensions']])){
-          group_info[['dimension']] = as.integer(unlist(stringr::str_split(tmp[['Dimensions']], '[^0-9\\.]+')))
+          group_info[['dimension']] <- as.integer(unlist(stringr::str_split(tmp[['Dimensions']], '[^0-9\\.]+')))
         }
         if(is_invalid(group_info[['dimension']])){
-          group_info[['dimension']] = NULL
+          group_info[['dimension']] <- NULL
         }
         
-        current_group[['group_info']] = group_info
+        current_group[['group_info']] <- group_info
       },
       'Electrode' = {
         # this is electrode
-        elec_info = list()
+        elec_info <- list()
         
         # position
-        pos = tmp[['Position']]
+        pos <- tmp[['Position']]
         pos %?<-% '0 0 0'
-        pos = as.numeric(unlist(stringr::str_extract_all(pos, '[0-9\\.]+')))
+        pos <- as.numeric(unlist(stringr::str_extract_all(pos, '[0-9\\.]+')))
         if(length(pos) != 3){
-          pos = c(0,0,0)
+          pos <- c(0,0,0)
         }
-        elec_info[['position']] = pos
+        elec_info[['position']] <- pos
         
-        elec_info[['place']] = as.integer(target[3:4])
+        elec_info[['place']] <- as.integer(target[3:4])
         
         
         current_group[['electrodes']] %?<-% list()
-        current_group[['electrodes']][[length(current_group[['electrodes']]) + 1]] = elec_info
+        current_group[['electrodes']][[length(current_group[['electrodes']]) + 1]] <- elec_info
       }
     )
     
   }
   
   if(length(current_group)){
-    re[['groups']][[length(re[['groups']]) + 1]] = current_group
+    re[['groups']][[length(re[['groups']]) + 1]] <- current_group
   }
   
   # data check and finalize
-  re[['groups']] = dipsaus::drop_nulls(lapply(re$groups, function(group){
+  re[['groups']] <- dipsaus::drop_nulls(lapply(re$groups, function(group){
     if(!length(group$electrodes)){
       return()
     }
-    dimension = group$group_info$dimension
-    g_name = group$group_info$group_name
+    dimension <- group$group_info$dimension
+    g_name <- group$group_info$group_name
     if(is.null(g_name) || g_name == ''){
-      g_name = paste0('G', group$group_number)
+      g_name <- paste0('G', group$group_number)
     }
     
-    places = sapply(group$electrodes, function(e){
+    places <- sapply(group$electrodes, function(e){
       as.integer(e$place)
     })
-    width = max(places[2,]) + 1
+    width <- max(places[2,]) + 1
     
-    group$electrodes = lapply(group$electrodes, function(e){
-      p = as.integer(e$place)
-      e$electrode_number = p[1] * width + p[2] + 1
-      e$electrode_name = sprintf('%s_%d', g_name, e$electrode_number)
+    group$electrodes <- lapply(group$electrodes, function(e){
+      p <- as.integer(e$place)
+      e$electrode_number <- p[1] * width + p[2] + 1
+      e$electrode_name <- sprintf('%s_%d', g_name, e$electrode_number)
       e
     })
     
-    names(group$electrodes) = sapply(group$electrodes, '[[', 'electrode_name')
+    names(group$electrodes) <- sapply(group$electrodes, '[[', 'electrode_name')
     group
   }))
   
   if(!raw){
-    header = re$header
+    header <- re$header
     
     lapply(re$groups, function(group){
-      group_name = group$group_info$group_name
-      radius = group$group_info$radius
-      thickness = group$group_info$thickeness
-      color = group$group_info$color
+      group_name <- group$group_info$group_name
+      radius <- group$group_info$radius
+      thickness <- group$group_info$thickeness
+      color <- group$group_info$color
       tryCatch({
         grDevices::rgb(color[1],color[2],color[3], maxColorValue = 1)
       },error = function(e){
@@ -167,10 +167,10 @@ read_mgrid <- function(con, raw = F){
       }))
     }) ->
       re
-    re = do.call(rbind, re)
-    re$Electrode = seq_len(nrow(re))
+    re <- do.call(rbind, re)
+    re$Electrode <- seq_len(nrow(re))
     
-    re = list(
+    re <- list(
       electrodes = re[, c('Electrode', 'Coord_x', 'Coord_y', 'Coord_z', 'Label')],
       reference = re[, c('Electrode', 'Group', 'Reference', 'Group_Radius', 'Group_Thickness', 'Group_Color')]
     )
@@ -200,37 +200,37 @@ suma_spec_parse <- function(subject, spec_file){
   soft_deprecated()
   if(missing(spec_file)){
     if(is.character(subject)){
-      subject = stringr::str_split_fixed(subject, '/', 2)
-      subject = Subject$new(project_name = subject[1], subject_code = subject[2], strict = FALSE)
+      subject <- stringr::str_split_fixed(subject, '/', 2)
+      subject <- Subject$new(project_name = subject[1], subject_code = subject[2], strict = FALSE)
     }
-    suma_dir = subject$dirs$suma_dir
+    suma_dir <- subject$dirs$suma_dir
     spec_file %?<-% file.path(suma_dir, catgl('{rave_options("suma_spec_file")}'))
     if(!file.exists(spec_file)){
-      spec_file = file.path(suma_dir, spec_file)
+      spec_file <- file.path(suma_dir, spec_file)
     }
   }
   
-  s = readLines(spec_file)
+  s <- readLines(spec_file)
   
-  s = s[!stringr::str_detect(s, '^[\\ \\t]*#')]
+  s <- s[!stringr::str_detect(s, '^[\\ \\t]*#')]
   
   
-  ind = which(stringr::str_detect(s, '^[\\ \\t]*NewSurface[\\ \\t]*$'))
-  surface = list()
+  ind <- which(stringr::str_detect(s, '^[\\ \\t]*NewSurface[\\ \\t]*$'))
+  surface <- list()
   if(length(ind)){
-    ind = cbind(ind+1, c(ind[-1]-1, length(s)))
-    ind = ind[ind[,1] <= ind[,2],,drop = F]
-    n = nrow(ind)
+    ind <- cbind(ind+1, c(ind[-1]-1, length(s)))
+    ind <- ind[ind[,1] <= ind[,2],,drop = FALSE]
+    n <- nrow(ind)
     if(n > 0){
       lapply(seq_len(n), function(ii){
-        entry = s[seq(ind[ii,1], ind[ii,2])]
+        entry <- s[seq(ind[ii,1], ind[ii,2])]
         # try to evaluate them
-        entry = stringr::str_split_fixed(entry, '=', 2)
-        entry[, 2] = stringr::str_trim(entry[, 2])
-        entry[, 1] = stringr::str_trim(entry[, 1])
-        entry = entry[entry[,2] != '', , drop = F]
-        val = as.list(entry[,2])
-        names(val) = entry[,1]
+        entry <- stringr::str_split_fixed(entry, '=', 2)
+        entry[, 2] <- stringr::str_trim(entry[, 2])
+        entry[, 1] <- stringr::str_trim(entry[, 1])
+        entry <- entry[entry[,2] != '', , drop = FALSE]
+        val <- as.list(entry[,2])
+        names(val) <- entry[,1]
         val
       }) ->
         surface
@@ -245,19 +245,19 @@ suma_spec_parse <- function(subject, spec_file){
 suma_surface_volume_parse <- function(file_path){
   soft_deprecated()
   if(stringr::str_detect(stringr::str_to_lower(file_path), '\\.brik$')){
-    file_path = stringr::str_replace(file_path, '\\.[bB][rR][iI][kK]$', '.head')
+    file_path <- stringr::str_replace(file_path, '\\.[bB][rR][iI][kK]$', '.head')
   }
   if(!stringr::str_detect(stringr::str_to_lower(file_path), '\\.head$')){
-    file_path = paste0(file_path, '.head')
+    file_path <- paste0(file_path, '.head')
   }
   # load file
-  s = readLines(file_path)
-  ind = which(stringr::str_detect(s, '^[\\ \\t]*type[\\ \\t]*=[\\ \\t]*[a-zA-Z0-9]+\\-attribute'))
+  s <- readLines(file_path)
+  ind <- which(stringr::str_detect(s, '^[\\ \\t]*type[\\ \\t]*=[\\ \\t]*[a-zA-Z0-9]+\\-attribute'))
   
-  values = list()
+  values <- list()
   
-  match_extract = function(x, p, row = 1, col = 2){
-    s = stringr::str_match(x, p)
+  match_extract <- function(x, p, row = 1, col = 2){
+    s <- stringr::str_match(x, p)
     if(length(s)){
       if(nrow(s) >= row && ncol(s) >= col){
         return(s[row, col])
@@ -267,39 +267,39 @@ suma_surface_volume_parse <- function(file_path){
   }
   
   if(length(ind)){
-    ind = cbind(ind, c(ind[-1]-1, length(s)))
-    n = nrow(ind)
+    ind <- cbind(ind, c(ind[-1]-1, length(s)))
+    n <- nrow(ind)
     for(ii in seq_len(n)){
-      sub = stringr::str_trim(s[seq(ind[ii, 1], ind[ii, 2])])
-      entry = paste(sub, collapse = '|')
+      sub <- stringr::str_trim(s[seq(ind[ii, 1], ind[ii, 2])])
+      entry <- paste(sub, collapse = '|')
       # parse the first three rows
-      type = match_extract(entry, 'type[\\ \\t]*=[\\ \\t]*([\\w]+)\\-attribute[\\|]')
-      name = match_extract(entry, 'name[\\ \\t]*=[\\ \\t]*([\\w]+)[\\|]')
-      count = match_extract(entry, 'count[\\ \\t]*=[\\ \\t]*([0-9]+)[\\|]')
+      type <- match_extract(entry, 'type[\\ \\t]*=[\\ \\t]*([\\w]+)\\-attribute[\\|]')
+      name <- match_extract(entry, 'name[\\ \\t]*=[\\ \\t]*([\\w]+)[\\|]')
+      count <- match_extract(entry, 'count[\\ \\t]*=[\\ \\t]*([0-9]+)[\\|]')
       
       if(!any(is.na(type), is.na(name), is.na(count)) && length(sub) >= 4){
-        type = stringr::str_to_lower(type)
-        count = as.integer(count)
-        name = stringr::str_to_upper(name)
+        type <- stringr::str_to_lower(type)
+        count <- as.integer(count)
+        name <- stringr::str_to_upper(name)
         
         switch (type,
                 'string' = {
-                  sub = paste0(sub[-(1:3)], collapse = '')
+                  sub <- paste0(sub[-(1:3)], collapse = '')
                   stringr::str_sub(sub, end = count)
                 },
                 'integer' = {
-                  sub = paste0(sub[-(1:3)], collapse = ' ')
-                  val = as.integer(unlist(stringr::str_split(sub, '[ \\.]+')))
+                  sub <- paste0(sub[-(1:3)], collapse = ' ')
+                  val <- as.integer(unlist(stringr::str_split(sub, '[ \\.]+')))
                   if(length(val) > count){
-                    val = val[seq_len(count)]
+                    val <- val[seq_len(count)]
                   }
                   val
                 },
                 'float' = {
-                  sub = paste0(sub[-(1:3)], collapse = ' ')
-                  val = as.numeric(unlist(stringr::str_split(sub, '[ ]+')))
+                  sub <- paste0(sub[-(1:3)], collapse = ' ')
+                  val <- as.numeric(unlist(stringr::str_split(sub, '[ ]+')))
                   if(length(val) > count){
-                    val = val[seq_len(count)]
+                    val <- val[seq_len(count)]
                   }
                   val
                 },{
@@ -308,7 +308,7 @@ suma_surface_volume_parse <- function(file_path){
         ) ->
           val
         
-        values[[name]] = list(
+        values[[name]] <- list(
           type = type,
           count = count,
           value = val
@@ -331,18 +331,18 @@ launch_suma <- function(
 ){
   soft_deprecated()
   if(missing(spec_file)){
-    spec_file = rave_options('suma_spec_file')
+    spec_file <- rave_options('suma_spec_file')
   }
   # make everything absolute
-  suma_path = try_normalizePath(rave_options('suma_path'))
-  spec_file = try_normalizePath(file.path(root_dir, spec_file))
+  suma_path <- try_normalizePath(rave_options('suma_path'))
+  spec_file <- try_normalizePath(file.path(root_dir, spec_file))
   
   # El Captitan 'DYLD_LIBRARY_PATH=/opt/X11/lib/flat_namespace'
   # High Sierra "DYLD_FALLBACK_LIBRARY_PATH=/Applications/AFNI"
-  suma_lib = rave_options('suma_lib')
+  suma_lib <- rave_options('suma_lib')
   
   
-  wd = getwd()
+  wd <- getwd()
   on.exit({setwd(wd)})
   if(dir.exists(root_dir)){
     setwd(root_dir)
@@ -350,7 +350,7 @@ launch_suma <- function(
             args = c('-spec', sprintf('"%s"', spec_file)),
             env = c(sprintf('PATH=$PATH:"%s"', suma_path),
                     suma_lib),
-            wait = F)
+            wait = FALSE)
   }
   
   setwd(wd)
@@ -361,35 +361,35 @@ launch_suma <- function(
 read.rosa <- function(path){
   soft_deprecated()
   # path = '~/Downloads/XXXXXXXXXXX 20181113 190540.ros'
-  regex_number = '[-]{0,1}[0-9]*[.]{0,1}[0-9]*'
-  re = list()
-  dat = stringr::str_trim(readLines(path))
+  regex_number <- '[-]{0,1}[0-9]*[.]{0,1}[0-9]*'
+  re <- list()
+  dat <- stringr::str_trim(readLines(path))
   # Trajectory
-  idx_trajectory = which(dat == '[TRAJECTORY]')
-  n_trajectory = as.integer( dat[ idx_trajectory+1 ] )
+  idx_trajectory <- which(dat == '[TRAJECTORY]')
+  n_trajectory <- as.integer( dat[ idx_trajectory+1 ] )
   
-  idx_acpc = which(dat == '[ACPC]')
-  trajectory = stringr::str_match(dat[idx_trajectory : idx_acpc], sprintf(
+  idx_acpc <- which(dat == '[ACPC]')
+  trajectory <- stringr::str_match(dat[idx_trajectory : idx_acpc], sprintf(
     '^([^\\ ]+) 0 [0-9]+ 1 (%s) (%s) (%s) [012] (%s) (%s) (%s) %s %s',
     regex_number, regex_number, regex_number, regex_number, regex_number, 
     regex_number, regex_number, regex_number
   ))
-  is_traj = rowSums(!is.na(trajectory)) == 8
+  is_traj <- rowSums(!is.na(trajectory)) == 8
   if(sum(is_traj) != n_trajectory){
     catgl(sprintf('Trajectory number does not match: expected %s, found %s', n_trajectory, sum(is_traj)), level = 'WARNING')
   }
-  anchors = trajectory[is_traj,3:8,drop=FALSE]
-  anchors = as.numeric(anchors)
-  dim(anchors) = c(n_trajectory, 6)
-  anchors = apply(anchors, 1, function(x){
+  anchors <- trajectory[is_traj,3:8,drop=FALSE]
+  anchors <- as.numeric(anchors)
+  dim(anchors) <- c(n_trajectory, 6)
+  anchors <- apply(anchors, 1, function(x){
     list(
       start = x[4:6],
       end = x[1:3]
     )
   })
-  names(anchors) = trajectory[is_traj, 2]
+  names(anchors) <- trajectory[is_traj, 2]
   
-  re$trajectory = anchors
+  re$trajectory <- anchors
   re
 }
 
@@ -412,12 +412,12 @@ write.niml <- function(values_matrix, electrode_numbers=NULL, value_labels=NULL,
                        work_dir = './', ...) {
   soft_deprecated()
   
-  AFNI_PATH = try_normalizePath(rave_options('suma_path'))
-  faces_per_electrode = rave_options('suma_nodes_per_electrodes')
+  AFNI_PATH <- try_normalizePath(rave_options('suma_path'))
+  faces_per_electrode <- rave_options('suma_nodes_per_electrodes')
   
-  fname = paste0(prefix, '_', stringr::str_replace_all(Sys.time(), '\\ |:|/', '_'))
+  fname <- paste0(prefix, '_', stringr::str_replace_all(Sys.time(), '\\ |:|/', '_'))
   niml_fname <- paste0(fname, '.niml.dset')
-  csv_fname = paste0(fname, '.csv')
+  csv_fname <- paste0(fname, '.csv')
   
   # get useful defaults
   # if value_labels weren't passed in, maybe there are column names?
@@ -427,9 +427,9 @@ write.niml <- function(values_matrix, electrode_numbers=NULL, value_labels=NULL,
   
   # if electrode_numbers weren't passed in, maybe there are row.names?
   if(length(electrode_numbers) != nrow(values_matrix)){
-    electrode_numbers = 1:nrow(values_matrix)
+    electrode_numbers <- 1:nrow(values_matrix)
   }else{
-    electrode_numbers = as.numeric(electrode_numbers)
+    electrode_numbers <- as.numeric(electrode_numbers)
   }
   
   # adding the electrode number as a column is a nice thing to do
@@ -441,28 +441,29 @@ write.niml <- function(values_matrix, electrode_numbers=NULL, value_labels=NULL,
   # duplicate indices and values to match #faces in SUMA spheres
   indices <- rep(electrode_numbers, each=faces_per_electrode)
   
-  values_matrix = apply(values_matrix, 2, as.numeric)
-  values_matrix[is.na(values_matrix)] = 0
+  values_matrix <- apply(values_matrix, 2, as.numeric)
+  values_matrix[is.na(values_matrix)] <- 0
   
-  values <- values_matrix[rep(1:nrow(values_matrix), each=faces_per_electrode),]
+  values <- values_matrix[rep(seq_len(nrow(values_matrix)), 
+                              each=faces_per_electrode),]
   
-  values = matrix(as.numeric(values), ncol = length(value_labels), byrow = F)
+  values <- matrix(as.numeric(values), ncol = length(value_labels), byrow = FALSE)
   
   # Turn the electrode ID into an ascending vertex ID,
   # this is aware that electrode numbers may not be sequential and AFNI starts at 0
-  indices = (indices - 1) * faces_per_electrode + seq(0, faces_per_electrode - 1)
+  indices <- (indices - 1) * faces_per_electrode + seq(0, faces_per_electrode - 1)
   
   # write out the values and indicies files
   if(!dir.exists(work_dir)){
     dir.create(work_dir, recursive = TRUE)
   }
-  work_dir = try_normalizePath(work_dir)
-  value_file = file.path(work_dir, value_file)
-  index_file = file.path(work_dir, index_file)
-  niml_fname = file.path(work_dir, niml_fname)
-  csv_fname = file.path(work_dir, csv_fname)
+  work_dir <- try_normalizePath(work_dir)
+  value_file <- file.path(work_dir, value_file)
+  index_file <- file.path(work_dir, index_file)
+  niml_fname <- file.path(work_dir, niml_fname)
+  csv_fname <- file.path(work_dir, csv_fname)
   
-  utils::write.csv(values_matrix, csv_fname, row.names = F)
+  utils::write.csv(values_matrix, csv_fname, row.names = FALSE)
   
   mapply(function(x, file) {
     utils::write.table(x, file, row.names=FALSE, col.names=FALSE)
@@ -498,7 +499,7 @@ write.niml <- function(values_matrix, electrode_numbers=NULL, value_labels=NULL,
     ),
     env = c(sprintf('PATH=$PATH:"%s"', AFNI_PATH),
             rave_options('suma_lib')),
-    wait = F
+    wait = FALSE
   )
   
   return (cmd)

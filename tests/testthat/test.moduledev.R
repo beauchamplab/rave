@@ -43,9 +43,9 @@ test_that('module configuration info', {
   
   
   local({
-    .__rave_package__. = 'ravebuiltins'
-    ctx = rave_context('rave_module_debug')
-    .__rave_package__. = 'ravebuiltins'
+    .__rave_package__. <- 'ravebuiltins'
+    ctx <- rave_context('rave_module_debug')
+    .__rave_package__. <- 'ravebuiltins'
     
     
     expect_true(get_root_dir() %in% c(

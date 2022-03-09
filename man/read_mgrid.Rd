@@ -4,7 +4,7 @@
 \alias{read_mgrid}
 \title{Make \code{iElvis} \code{mgrid} file}
 \usage{
-read_mgrid(con, raw = F)
+read_mgrid(con, raw = FALSE)
 }
 \arguments{
 \item{con}{\code{mgrid} file}

@@ -3,17 +3,17 @@ context("Check preprocess pipeline with YAB")
 
 rave::arrange_data_dir(reset = TRUE)
 
-raw_dir = rave_options('raw_data_dir')
-has_yab = FALSE
+raw_dir <- rave_options('raw_data_dir')
+has_yab <- FALSE
 if(dir.exists(raw_dir)){
-  subjects = list.dirs(raw_dir, full.names = FALSE, recursive = FALSE)
-  has_yab = 'YAB' %in% subjects
+  subjects <- list.dirs(raw_dir, full.names = FALSE, recursive = FALSE)
+  has_yab <- 'YAB' %in% subjects
 }
 skip_if_not(has_yab, message = 'Found raw YAB')
 
 
-test_with_no_output = function(msg, expr){
-  expr = substitute(expr)
+test_with_no_output <- function(msg, expr){
+  expr <- substitute(expr)
   test_that(msg, {
     capture.output({
       force(expr)
@@ -25,15 +25,15 @@ test_with_no_output = function(msg, expr){
 test_that('Preprocess pipeline with YAB', {
   
   capture.output({
-    utils = rave_preprocess_tools()
+    utils <- rave_preprocess_tools()
     
-    data_dir = rave_options('data_dir')
-    raw_dir = rave_options('raw_data_dir')
+    data_dir <- rave_options('data_dir')
+    raw_dir <- rave_options('raw_data_dir')
     on.exit({
       rave_options(data_dir = data_dir, raw_data_dir = raw_dir)
     })
     
-    tmp_dir = tempfile()
+    tmp_dir <- tempfile()
     rave:::dir_create(file.path(tmp_dir, 'junk'))
     
     rave_options(data_dir = tmp_dir)
@@ -97,7 +97,7 @@ test_that('Preprocess pipeline with YAB', {
     
     
     # apply wavelet
-    test_wavelet = rave_options('test_wavelet')
+    test_wavelet <- rave_options('test_wavelet')
     skip_if(isFALSE(test_wavelet), message = 'Skipping wavelet flag')
     rave_options('test_wavelet' = FALSE)
     utils$apply_wavelet(electrodes = 14, target_srate = 100, frequencies = 1, wave_num = 1, ncores = 1)

@@ -22,11 +22,11 @@ RaveFinalizer <- R6::R6Class(
       
     },
     initialize = function(fun){
-      self$.fin = fun
+      self$.fin <- fun
       
       # Trick: make this class persistent so that it won't trigger gc()
       # unless R session closed
-      ..setup_env$finalizers[[length(..setup_env$finalizers) + 1]] = self
+      ..setup_env$finalizers[[length(..setup_env$finalizers) + 1]] <- self
     }
   )
 )

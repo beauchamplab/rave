@@ -16,39 +16,39 @@ NULL
 #' @export
 notch_filter <- function(s, sample_rate, lb, ub, domain = 1){
   max_freq <- sample_rate / 2
-  n = length(s)
+  n <- length(s)
   df <- 2 * max_freq / length(s)
-  centre_freq = (lb + ub) / 2
-  filter_width = (-lb + ub)
+  centre_freq <- (lb + ub) / 2
+  filter_width <- (-lb + ub)
   
-  x = seq(0, max_freq, by = df)
-  gauss = exp(-(centre_freq - x)^2 * 10)
-  cnt_gauss = round(centre_freq / df)
+  x <- seq(0, max_freq, by = df)
+  gauss <- exp(-(centre_freq - x)^2 * 10)
+  cnt_gauss <- round(centre_freq / df)
   
-  flat_padd = 0 # flat padding at the max value of the gaussian
-  padd_left = floor(flat_padd/2);
-  padd_right = ceiling(flat_padd/2);
+  flat_padd <- 0 # flat padding at the max value of the gaussian
+  padd_left <- floor(flat_padd/2)
+  padd_right <- ceiling(flat_padd/2)
   
-  gauss_left = gauss[(padd_left+1):cnt_gauss]
-  gauss_right = gauss[-((padd_left+1):cnt_gauss)]
+  gauss_left <- gauss[(padd_left+1):cnt_gauss]
+  gauss_right <- gauss[-((padd_left+1):cnt_gauss)]
   
-  our_wind = 1 - c(gauss_left, rep(0, flat_padd), gauss_right)
+  our_wind <- 1 - c(gauss_left, rep(0, flat_padd), gauss_right)
   
-  n_r = length(our_wind)
+  n_r <- length(our_wind)
   if(n %% 2 == 0){
-    n_r = n_r - 1
-    our_wind = our_wind[c(1:n_r, n_r:1)]
+    n_r <- n_r - 1
+    our_wind <- our_wind[c(1:n_r, n_r:1)]
   }else{
-    our_wind = our_wind[c(1:n_r, (n_r-1):1)]
+    our_wind <- our_wind[c(1:n_r, (n_r-1):1)]
   }
   
   
   if(domain == 1){
-    s = fftwtools::fftw_r2c(s) / n
+    s <- fftwtools::fftw_r2c(s) / n
   }
   
   
-  filt_signal = fftwtools::fftw_c2r(s * our_wind)
+  filt_signal <- fftwtools::fftw_c2r(s * our_wind)
   filt_signal
   
 }
@@ -63,11 +63,11 @@ notch_filter <- function(s, sample_rate, lb, ub, domain = 1){
 #' @export
 notch_channel <- function(s, sample_rate, bands = c(60, 120, 180), 
                           width = c(1,2,2)){
-  s = as.vector(s)
-  lbs = bands - width
-  ubs = bands + width
+  s <- as.vector(s)
+  lbs <- bands - width
+  ubs <- bands + width
   for(i in 1:length(bands)){
-    s = notch_filter(s, sample_rate, lbs[i], ubs[i], domain = 1)
+    s <- notch_filter(s, sample_rate, lbs[i], ubs[i], domain = 1)
   }
   s
 }
