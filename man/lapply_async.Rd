@@ -26,8 +26,7 @@ lapply_async3(
   .globals = TRUE,
   .gc = TRUE,
   .callback = NULL,
-  .ncores = 0,
-  .packages = NULL
+  .ncores = 0
 )
 }
 \arguments{

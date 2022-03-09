@@ -26,115 +26,160 @@ lapply_async <- function(
   .envir = environment(), .globals = TRUE, .gc = TRUE, .as_datatable = FALSE,
   .nrows = 0
 ){
-  if(!length(x)){
-    return(list())
+  call <- as.list(match.call())
+  if(any(c(".envir", ".as_datatable", ".nrows") %in% names(call))) {
+    warning('lapply_async: arguments ".envir", ".as_datatable", ".nrows" are deprecated. They will be ignored.')
   }
-  .colnames <- paste0('V', seq_along(x))
+  
   .ncores <- as.integer(.ncores)
   if(.ncores <= 0){
     .ncores <- rave_options('max_worker')
   }
-  # compatible with windows
-  args <- list(...)
-  if(stringr::str_detect(Sys.info()['sysname'], '^[wW]in') || .ncores == 1){
-    return(lapply(seq_along(x), function(ii){
-      if(is.function(.call_back)){
-        try({
-          .call_back(ii)
-        })
-      }
-      do.call(fun, c( list(quote(x[ii])), args), envir = environment())
-    }))
-  }
-  
-  
   if(is.null(.packages)){
     .packages <- stringr::str_match(search(), 'package:(.*)')
     .packages <- .packages[,2]
     .packages <- rev(.packages[!is.na(.packages)])
   }
-  .niter <- length(x)
+  dipsaus::make_forked_clusters(workers = .ncores, clean = TRUE)
   
-  
-  rave_setup_workers(.ncores)
-  if(.ncores != rave_options('max_worker')){
-    on.exit({
-      rave_setup_workers()
-    })
-  }
-  
-  
-  .future_list <- list()
-  
-  if(.as_datatable){
-    .future_values <- data.frame(
-      V1 = rep(NA, .nrows),
-      keep.rownames = FALSE, stringsAsFactors = FALSE
-    )
-  }else{
-    .future_values <- list()
-  }
-  
-  
-  
-  
-  if(.niter == 0){
-    return(list())
-  }
-  
-  .this_env <- environment()
-  ..started <- FALSE
-  
-  
-  lapply(seq_along(x), function(.i){
-    if(is.function(.call_back)){
-      try({
-        .call_back(.i)
-      })
-    }
-    
-    expr <- rlang::quo_squash(rlang::quo({ do.call(fun, c(list(quote(x[[!!.i]])), args)) }))
-    
-    .this_env$.future_list[[length(.future_list) + 1]] <- future::future(expr, envir = .envir, substitute = FALSE, lazy = FALSE, globals = .globals, .packages = .packages, gc = .gc)
-    
-    
-    if(length(.future_list) >= .ncores){
-      # wait for one of futures resolved
-      if(!..started && .as_datatable){
-        .this_env$..started <- TRUE
-        .this_env$.future_values[[1]] <- future::value(.future_list[[1]])
-      }else{
-        .this_env$.future_values[[1 + length(.future_values)]] <- future::value(.future_list[[1]])
+  if(is.function(.call_back)){
+    if(length(formals(.call_back)) >= 1){
+      .callback <- function(el) {
+        idx <- which(vapply(x, function(el2){ identical(el, el2) }, FALSE))
+        if(length(idx)){
+          re <- .call_back(idx[[1]])
+          if(!is.character(re)){ re <- "" }
+        } else {
+          re <- ""
+        }
+        re
       }
-      
-      .this_env$.future_list[[1]] <- NULL
+    } else {
+      .callback <- function(){
+        re <- .call_back()
+        if(!is.character(re)){ re <- "" }
+        re
+      }
     }
-  })
-  
-  if(length(.future_list)){
-    future::resolve(.future_list)
-    while(length(.future_list)){
-      .future_values[[1 + length(.future_values)]] <- future::value(.future_list[[1]])
-      .future_list[[1]] <- NULL
-    }
+    
+  } else {
+    .callback <- NULL
   }
+  dipsaus::lapply_async2(x = x, FUN = fun, FUN.args = list(...), 
+                         callback = .callback,
+                         plan = FALSE, 
+                         future.globals = .globals, 
+                         future.packages = .packages)
   
-  return(.future_values)
+  # if(!length(x)){
+  #   return(list())
+  # }
+  # .colnames = paste0('V', seq_along(x))
+  # .ncores = as.integer(.ncores)
+  # if(.ncores <= 0){
+  #   .ncores = rave_options('max_worker')
+  # }
+  # # compatible with windows
+  # args = list(...)
+  # if(stringr::str_detect(Sys.info()['sysname'], '^[wW]in') || .ncores == 1){
+  #   return(lapply(seq_along(x), function(ii){
+  #     if(is.function(.call_back)){
+  #       try({
+  #         .call_back(ii)
+  #       })
+  #     }
+  #     do.call(fun, c( list(quote(x[ii])), args), envir = environment())
+  #   }))
+  # }
+  # 
+  # 
+  # if(is.null(.packages)){
+  #   .packages = stringr::str_match(search(), 'package:(.*)')
+  #   .packages = .packages[,2]
+  #   .packages = rev(.packages[!is.na(.packages)])
+  # }
+  # .niter = length(x)
+  # 
+  # 
+  # rave_setup_workers(.ncores)
+  # if(.ncores != rave_options('max_worker')){
+  #   on.exit({
+  #     rave_setup_workers()
+  #   })
+  # }
+  # 
+  # 
+  # .future_list = list()
+  # 
+  # if(.as_datatable){
+  #   .future_values = data.frame(
+  #     V1 = rep(NA, .nrows),
+  #     keep.rownames = FALSE, stringsAsFactors = FALSE
+  #   )
+  # }else{
+  #   .future_values = list()
+  # }
+  # 
+  # 
+  # 
+  # 
+  # if(.niter == 0){
+  #   return(list())
+  # }
+  # 
+  # .this_env = environment()
+  # ..started = FALSE
+  # 
+  # 
+  # lapply(seq_along(x), function(.i){
+  #   if(is.function(.call_back)){
+  #     try({
+  #       .call_back(.i)
+  #     })
+  #   }
+  #   
+  #   expr = rlang::quo_squash(rlang::quo({ do.call(fun, c(list(quote(x[[!!.i]])), args)) }))
+  #   
+  #   .this_env$.future_list[[length(.future_list) + 1]] = future::future(expr, envir = .envir, substitute = FALSE, lazy = FALSE, globals = .globals, .packages = .packages, gc = .gc)
+  #   
+  #   
+  #   if(length(.future_list) >= .ncores){
+  #     # wait for one of futures resolved
+  #     if(!..started && .as_datatable){
+  #       .this_env$..started = TRUE
+  #       .this_env$.future_values[[1]] = future::value(.future_list[[1]])
+  #     }else{
+  #       .this_env$.future_values[[1 + length(.future_values)]] = future::value(.future_list[[1]])
+  #     }
+  #     
+  #     .this_env$.future_list[[1]] = NULL
+  #   }
+  # })
+  # 
+  # if(length(.future_list)){
+  #   future::resolve(.future_list)
+  #   while(length(.future_list)){
+  #     .future_values[[1 + length(.future_values)]] = future::value(.future_list[[1]])
+  #     .future_list[[1]] = NULL
+  #   }
+  # }
+  # 
+  # return(.future_values)
 }
 
 
 #' @rdname lapply_async
 #' @export
 lapply_async3 <- function(x, fun, ..., .globals = TRUE, .gc = TRUE, 
-                          .callback = NULL, .ncores = 0, .packages = NULL){
-  .ncores <- as.integer(.ncores)
+                          .callback = NULL, .ncores = 0){
+  .ncores = as.integer(.ncores)
   if(.ncores <= 0){
-    .ncores <- rave_options('max_worker')
+    .ncores = rave_options('max_worker')
   }
   if(is.null(.packages)){
-    .packages <- stringr::str_match(search(), 'package:(.*)')
-    .packages <- .packages[,2]
-    .packages <- rev(.packages[!is.na(.packages)])
+    .packages = stringr::str_match(search(), 'package:(.*)')
+    .packages = .packages[,2]
+    .packages = rev(.packages[!is.na(.packages)])
   }
   dipsaus::make_forked_clusters(workers = .ncores, clean = TRUE)
   dipsaus::lapply_async2(x = x, FUN = fun, FUN.args = list(...), 
@@ -194,10 +239,10 @@ lapply_callr2 <- function(
   .packages <- unique(c("dipsaus", .packages))
   
   res <- dipsaus::lapply_callr(x, fun, ..., .callback = .callback,
-                         .globals = .globals, .ncores = .ncores,
-                         .packages = .packages,
-                         .focus_on_console = .focus_on_console, 
-                         .rs = FALSE, .quiet = .quiet,
-                         .name = .name)
+                               .globals = .globals, .ncores = .ncores,
+                               .packages = .packages,
+                               .focus_on_console = .focus_on_console, 
+                               .rs = FALSE, .quiet = .quiet,
+                               .name = .name)
   res
 }
