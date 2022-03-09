@@ -126,7 +126,7 @@ lapply_async <- function(
 #' @rdname lapply_async
 #' @export
 lapply_async3 <- function(x, fun, ..., .globals = TRUE, .gc = TRUE, 
-                          .callback = NULL, .ncores = 0){
+                          .callback = NULL, .ncores = 0, .packages = NULL){
   .ncores = as.integer(.ncores)
   if(.ncores <= 0){
     .ncores = rave_options('max_worker')
