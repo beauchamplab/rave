@@ -465,10 +465,8 @@ rave_preprocess_tools <- function(env = new.env(), ...){
       
       compress_rate <- srate / target_srate
       
-      progress2 <- progress('Block Progress', max = length(electrodes))
       progress1 <- progress('Overall Progress', max = length(blocks))
       on.exit({
-        progress2$close()
         progress1$close()
       })
       
@@ -500,11 +498,21 @@ rave_preprocess_tools <- function(env = new.env(), ...){
         }
       })
       
+      
+      
       # load signals
       lapply(blocks, function(block){
-        progress2$reset(detail = 'Initializing...')
         progress1$inc(paste0('Block - ' , block))
         # v = utils$load_voltage(electrodes = electrodes, blocks = block, raw = F)[[1]]
+        
+        # create wavelet kernel
+        data_length <- length(load_h5(
+          file = file.path(dirs$preprocess_dir, 'voltage', 
+                           sprintf('electrode_%d.h5', electrodes[[1]])),
+          name = sprintf('/notch/%s', block),
+          ram = FALSE
+        ))
+        ravetools:::wavelet_kernels2_double(freqs = frequencies, srate = srate, wave_num = wave_num, data_length = data_length)
         
         lapply_async3(seq_along(electrodes), function(ii){
           # This is electrode
@@ -515,21 +523,30 @@ rave_preprocess_tools <- function(env = new.env(), ...){
             ram = TRUE
           )
           
+          # re <- wavelet(s, freqs = frequencies, srate = srate, wave_num = wave_num)
+          #
+          # # Subset coefficients to save space
+          # ind <- floor(seq(1, ncol(re$phase), by = compress_rate))
           
-          re <- wavelet(s, freqs = frequencies, srate = srate, wave_num = wave_num)
+          re <- ravetools::morlet_wavelet(data = s, freqs = frequencies, srate = srate, wave_num = wave_num, precision = "double")
           
           # Subset coefficients to save space
-          ind <- floor(seq(1, ncol(re$phase), by = compress_rate))
+          ind <- floor(seq(1, data_length, by = compress_rate))
           
-          #
-          coef <- re$coef[, ind, drop = FALSE]
-          re$coef <- NULL
-          phase <- re$phase[, ind, drop = FALSE]
-          re$phase <- NULL
-          power <- re$power[, ind, drop = FALSE]
-          re$power <- NULL
-          rm(re)
-          gc()
+          
+          coef <- t(re$real[ind, , drop = FALSE] + 1i * re$imag[ind, , drop = FALSE])
+          # coef <- re$coef[, ind, drop = FALSE]
+          # re$coef <- NULL
+          phase <- Arg(coef)
+          # phase <- re$phase[, ind, drop = FALSE]
+          # re$phase <- NULL
+          power <- Mod(coef)^2
+          # power <- re$power[, ind, drop = FALSE]
+          # re$power <- NULL
+          re$real$.mode <- "readwrite"
+          re$real$delete()
+          re$imag$.mode <- "readwrite"
+          re$imag$delete()
           
           # Save power and phase voltage
           # power
@@ -679,7 +696,6 @@ rave_preprocess_tools <- function(env = new.env(), ...){
       # write fast caches
       # if(isTRUE(fast_cache)){
       #   progress1$inc('Generating fast cache')
-      #   progress2$reset(detail = 'Initializing...')
       #   utils$gen_cache(progress = progress2)
       # }
     }
