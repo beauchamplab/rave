@@ -492,7 +492,7 @@ check_subject <- function(subject, stop_on_error = FALSE){
     n_freq <- length(wave_log$frequencies)
     wave_srate <- wave_log$target_srate
     
-    expected_length <- floor(signal_length / volt_srate * wave_srate) + 1
+    expected_length <- floor((signal_length-1) / volt_srate * wave_srate) + 1
     
     
     for(dtype in c('power', 'phase')){
@@ -734,7 +734,7 @@ check_subject <- function(subject, stop_on_error = FALSE){
             n_freq <- length(wave_log$frequencies)
             wave_srate <- wave_log$target_srate
             
-            expected_length <- floor(signal_length / volt_srate * wave_srate) + 1
+            expected_length <- floor((signal_length-1) / volt_srate * wave_srate) + 1
             
             lapply(fs, function(f){
               msg("checking reference: ", f)
