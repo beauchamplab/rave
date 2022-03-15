@@ -55,7 +55,7 @@ lapply_async <- function(
         re
       }
     } else {
-      .callback <- function(){
+      .callback <- function(el){
         re <- .call_back()
         if(!is.character(re)){ re <- "" }
         re

@@ -567,6 +567,7 @@ check_subject <- function(subject, stop_on_error = FALSE){
       
     }
     
+    
   } else{
     fs <- list.files(file.path(dirs$cache_dir, c('power', 'phase')), 
                     pattern = '\\.h5$', all.files = TRUE, full.names = TRUE, recursive = TRUE)
@@ -724,6 +725,63 @@ check_subject <- function(subject, stop_on_error = FALSE){
                   paste('-     ', fs[!fe], collapse = '\n'))
             pass <- FALSE
           }
+          
+          if(res$check$wavelet){
+            fs <- fs[fe]
+            wave_log <- res$log$preprocess$wavelet_log
+            wave_log <- wave_log[[length(wave_log)]]
+            
+            n_freq <- length(wave_log$frequencies)
+            wave_srate <- wave_log$target_srate
+            
+            expected_length <- floor(signal_length / volt_srate * wave_srate) + 1
+            
+            lapply(fs, function(f){
+              msg("checking reference: ", f)
+              fpath <- file.path(dirs$reference_dir, f)
+              names <- raveio::h5_names(fpath)
+              names <- gsub("^/", "", names)
+              
+              
+              lapply(seq_along(blocks), function(ii){
+                block <- blocks[[ii]]
+                
+                # voltage
+                expected_name <- sprintf("voltage/%s", block)
+                if(!expected_name %in% names){
+                  raise("Reference ", f, " does not contain data ", expected_name)
+                } else {
+                  d <- raveio::load_h5(fpath, expected_name, read_only = TRUE, ram = FALSE)
+                  if(!isTRUE(signal_length[[ii]] == length(d))) {
+                    raise("Reference ", f, ", data ", expected_name, " might have inconsistent length: expected (", signal_length[[ii]], "), actual: (", length(d), ")")
+                  }
+                }
+                
+                
+                # coef
+                expected_name <- sprintf("wavelet/coef/%s", block)
+                if(!expected_name %in% names){
+                  raise("Reference ", f, " does not contain data ", expected_name)
+                } else {
+                  d <- raveio::load_h5(fpath, expected_name, read_only = TRUE, ram = FALSE)
+                  dm <- dim(d)
+                  expected_dm <- c(n_freq, expected_length[[ii]], 2)
+                  if(!isTRUE(
+                    length(dm) == length(expected_dm) &&
+                    all(dm == expected_dm)
+                  )) {
+                    raise("Reference ", f, ", data ", expected_name, " might have inconsistent dimensions: expected (", paste(expected_dm, collapse = "x"), "), actual: (", paste(dm, collapse = "x"), ")")
+                  }
+                }
+                
+              })
+              
+              
+            })
+            
+            
+          }
+          
         }
         if(length(ref2)){
           fs <- sprintf('%s.h5', ref2)
