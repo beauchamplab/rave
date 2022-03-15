@@ -65,5 +65,4 @@ Suggests:
 Remotes:  
     dipterix/dipsaus,
     beauchamplab/raveio,
-    dipterix/threeBrain,
-    dipterix/ravetools
+    dipterix/threeBrain
