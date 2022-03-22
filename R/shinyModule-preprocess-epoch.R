@@ -10,7 +10,7 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
     stringsAsFactors = FALSE,
     staged = list()
   )
-
+  
   body <- fluidRow(
     box(
       width = sidebar_width,
@@ -80,44 +80,44 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
       )
     )
   )
-
+  
   server <- function(input, output, session, user_data, utils, ...){
     local_data <- reactiveValues(
       blocks = '',
       efile = NULL
     )
-
+    
     local_env <- new.env()
-
+    
     # Step 1: init
     observe({
       user_data$reset
       # get epoch raw files (potential)
       if(utils$notch_filtered()){
-
+        
         local_data$blocks <- utils$get_blocks()
-
+        
         dirs <- utils$get_from_subject('dirs', list(), FALSE)
         epochs <- list.files(dirs$meta_dir, pattern = '^epoch_.+.[cC][sS][vV]')
         if(length(epochs)){
           epochs <- stringr::str_match(epochs, '^epoch_(.+).[cC][sS][vV]')[,2]
         }
         local_data$epoch_files <- c('New Epoch...', epochs)
-
+        
         local_data$staged <- list()
       }else{
         local_data$staged <- list()
         local_data$blocks <- ''
       }
     })
-
+    
     observe({
       epoch_name <- input$epoch_name
       if(length(epoch_name)){
-
+        
         epoch_name <- sprintf('epoch_%s.csv', epoch_name)
         dirs <- utils$get_from_subject('dirs', list(), FALSE)
-
+        
         fpath <- file.path(dirs$meta_dir, epoch_name)
         if(file.exists(fpath)){
           catgl('Loading epoch from file.')
@@ -132,22 +132,22 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
         }
       }
     })
-
+    
     observe({
       block <- input$block
       if(length(block) && !is.blank(block)){
         dirs <- utils$get_from_subject('dirs', list(), FALSE)
         subject_code <- utils$get_from_subject('subject_code')
-
-
+        
+        
         raw_files <- list.files(file.path(dirs$pre_subject_dir, block))
         excl_files <- sprintf('%sDatafile%s_ch%s.mat', subject_code, block, utils$get_electrodes())
         selected_files <- raw_files[!raw_files %in% excl_files]
       }
     })
-
-
-
+    
+    
+    
     # step 2: UI
     output$inner_ui <- renderUI({
       blocks <- local_data$blocks
@@ -157,14 +157,14 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
         selectInput(ns('block'), 'Block', choices = blocks)
       )
     })
-
+    
     output$inner_ui2 <- renderUI({
       block <- input$block
       validate(need(length(block) && !is.blank(block), ''))
       dirs <- utils$get_from_subject('dirs', list(), FALSE)
       subject_code <- utils$get_from_subject('subject_code')
-
-
+      
+      
       raw_files <- list.files(file.path(dirs$pre_subject_dir, block))
       excl_files <- sprintf('%sDatafile%s_ch%s.mat', subject_code, block, utils$get_electrodes())
       # guess selected file
@@ -178,40 +178,56 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
       if(!length(selected_files)){
         selected_files <- raw_files[!raw_files %in% excl_files]
       }
-
+      
       if(length(selected_files)){
         selected_files <- selected_files[1]
       }else{
         selected_files <- NULL
       }
-
-
+      
+      
       selectInput(ns('epoch_file'), 'Epoch File', choices = raw_files, selected = selected_files)
     })
-
+    
     output$inner_ui3 <- renderUI({
       block <- input$block
       local_data$efile <- efile <- input$epoch_file
       dirs <- utils$get_from_subject('dirs', list(), FALSE)
-
-
-
+      
+      
+      
       validate(
         need(length(block) && !is.blank(block), ''),
         need(length(efile) && length(dirs) && file.exists(efile_path <- file.path(dirs$pre_subject_dir, block, efile)), '')
       )
-
-      local_data$raw_data <- raw_data <- raveio::read_mat(efile_path)
-      dnames <- names(raw_data)
-      dnames %?<-% 'Default...'
-      dname_sel <- ifelse('analogTraces' %in% dnames, 'analogTraces', dnames[1])
-      sample_rate <- get_val(isolate(local_data$sample_rate), default = 30000)
+      
+      if(endsWith(tolower(efile_path), "edf")) {
+        header <- raveio::read_edf_header(efile_path)
+        content <- raveio::read_edf_signal(efile_path, signal_numbers = seq_len(header$nSignals))
+        local_data$raw_data <- structure(list(
+          edf_path = efile_path,
+          header = header,
+          content = content
+        ), class = "edf_data")
+        dnames <- header$sHeaders$label
+        dname_sel <- ifelse('DC1' %in% dnames, 'DC1', dnames[1])
+        sample_rate <- c(header$sampleRate2[dnames %in% dname_sel], 30000)[[1]]
+      } else {
+        raw_data <- raveio::read_mat(efile_path)
+        local_data$raw_data <- raw_data
+        dnames <- names(raw_data)
+        dnames %?<-% 'Default...'
+        dname_sel <- ifelse('analogTraces' %in% dnames, 'analogTraces', dnames[1])
+        sample_rate <- get_val(isolate(local_data$sample_rate), default = 30000)
+      }
+      
+      
       min_trial_duration <- get_val(isolate(local_data$min_trial_duration), default = 0L)
       is_symmetric <- get_val(isolate(local_data$is_symmetric), default = FALSE)
       direction <- get_val(isolate(local_data$direction), default = 'Above')
       lag <- get_val(isolate(local_data$lag), default = FALSE)
-
-
+      
+      
       tagList(
         selectInput(ns('data_name'), 'Variable name', choices = dnames, selected = dname_sel),
         numericInput(ns('sample_rate'), 'Variable sample rate', min = 0, value = sample_rate),
@@ -222,17 +238,17 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
         numericInput(ns('min_trial_duration'), 'Minimal trial duration (s):', min = 0L, value = min_trial_duration)
       )
     })
-
+    
     observe({
       local_data$min_trial_duration <- input$min_trial_duration
       local_data$is_symmetric <- input$is_symmetric
       local_data$direction <- input$direction
       local_data$lag <- input$lag
     })
-
-
-
-
+    
+    
+    
+    
     observe({
       # extract data
       srate <- input$sample_rate
@@ -244,49 +260,58 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
       lag %?<-% FALSE
       is_symmetric <- input$is_symmetric
       is_symmetric %?<-% FALSE
-
+      
       data_name <- input$data_name
       dat <- NULL
       compressed_signal <- NULL
       raw_compressed_singal <- NULL
-
+      
       if(length(data_name)){
-        if(data_name == 'Default...'){
-          dat <- as.vector(unlist(local_data$raw_data))
-        }else{
-          dat <- as.vector(local_data$raw_data[[data_name]])
+        raw_data <- local_data$raw_data
+        if(inherits(raw_data, "edf_data")) {
+          dat <- raw_data$content$get_signal(
+            which(raw_data$content$selected_signal_names %in% data_name)
+          )
+          dat <- dat$signal
+        } else {
+          if(data_name == 'Default...'){
+            dat <- as.vector(unlist(local_data$raw_data))
+          }else{
+            dat <- as.vector(local_data$raw_data[[data_name]])
+          }
         }
+        
       }
-
+      
       if(!is.null(dat) && is.numeric(dat) && srate > 0){
-
+        
         cr <- srate / 100
         ind <- round(seq(1, length(dat), by = cr))
-
+        
         raw_compressed_singal <- dat[ind]
-
+        
         if(lag){
           dat <- diff.default(dat, 1)
         }
-
+        
         if(is_symmetric){
           dat <- abs(dat)
         }
-
-
-
+        
+        
+        
         compressed_signal <- dat[ind]
-
+        
         local_data$time <- seq_along(dat) / srate
         local_data$compressed_time <- seq_along(compressed_signal) / 100
       }
-
+      
       local_data$signal <- dat
-
+      
       local_data$compressed_signal <- compressed_signal
       local_data$raw_compressed_singal <- raw_compressed_singal
     })
-
+    
     plot_volt <- function(time, signal, plot_range, use_abs, vlines = NULL, hlines = NULL, vcols = 2, ...){
       if(!length(time)){
         return()
@@ -301,7 +326,7 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
           ylim <- c(-plot_range, plot_range)
         }
       }
-
+      
       if(use_abs){
         main <- 'Absolute(Signal)'
       }else{
@@ -315,7 +340,7 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
         graphics::abline(v = vlines, col = vcols)
       }
     }
-
+    
     # Renderings
     output$console_plot <- renderPlot({
       is_symmetric <- input$is_symmetric
@@ -324,9 +349,9 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
       time <- local_data$compressed_time
       signal <- local_data$compressed_signal
       block <- input$block
-
+      
       validate(need(length(signal), 'No signal detected.'))
-
+      
       vcol <- NULL
       st <- local_data$selected_time
       if(length(st)){
@@ -334,18 +359,18 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
         st <- st[si]
         vcol <- rep('red', length(st))
       }
-
+      
       staged_tbl <- get_staged_epoch(block)
       if(nrow(staged_tbl)){
         st1 <- staged_tbl$Time
         st <- c(st, st1)
         vcol <- c(vcol, rep('green', length(st1)))
       }
-
+      
       plot_volt(time, signal, plot_range = plot_range, use_abs = is_symmetric, hlines = local_data$threshold, vlines = st, vcols = vcol)
     })
-
-
+    
+    
     observeEvent(input$console_plot_clicked, {
       e <- input$console_plot_clicked
       if(!is.null(e)){
@@ -353,7 +378,7 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
         local_data$threshold <- thred
       }
     })
-
+    
     observe({
       thred <- local_data$threshold
       signal <- local_data$signal
@@ -361,7 +386,7 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
       srate <- local_data$sample_rate
       direction <- input$direction
       block <- input$block
-
+      
       if(!zero_length(thred, signal, direction, srate)){
         if(direction == 'Above'){
           sel <- signal > thred
@@ -378,7 +403,7 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
         ind <- as.integer(stringr::str_extract(sel, '^[0-9]+'))
         ind <- ind[!is.na(ind)]
         selected_time <- ind / srate
-
+        
         staged_tbl <- get_staged_epoch(block)
         if(nrow(staged_tbl)){
           tmp <- staged_tbl$Time
@@ -390,23 +415,23 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
         local_data$selected_time <- selected_time
       }
     })
-
+    
     output$epoch_tmp <- DT::renderDataTable({
       selected_time <- local_data$selected_time
       validate(need(length(selected_time), 'Click on the plot left to threshold data.'))
-
+      
       tbl <- data.frame(
         Index = seq_along(selected_time),
         Time = selected_time
       )
-
+      
       if(nrow(tbl)){
         brush <- local_data$time_brush
         displayStart <- 0
         if(!is.null(brush)){
           displayStart <- min(which(tbl$Time >= brush[1])) - 1
         }
-
+        
         DT::formatRound(
           DT::datatable(
             tbl, rownames = FALSE,options = list(
@@ -416,9 +441,9 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
           c('Time'), 2
         )
       }
-
+      
     })
-
+    
     output$epoch_staged <- DT::renderDataTable({
       block <- input$block
       tbl <- get_staged_epoch(block)
@@ -433,7 +458,7 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
           c('Time'), 2)
       }
     })
-
+    
     observeEvent(input$epoch_staged_rows_selected, {
       s <- input$epoch_staged_rows_selected
       block <- input$block
@@ -441,18 +466,18 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
       tbl <- tbl[-s,]
       local_data$staged[[block]] <- tbl
     })
-
+    
     observe({
       local_data$selected_time_ind <- input$epoch_tmp_rows_selected
     })
-
+    
     output$console_plot_sub <- renderPlot({
       time <- local_data$compressed_time
       signal <- local_data$raw_compressed_singal
       block <- input$block
-
+      
       validate(need(length(signal), 'No signal detected.'))
-
+      
       vcol <- NULL
       st <- local_data$selected_time
       if(length(st)){
@@ -460,28 +485,28 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
         st <- st[si]
         vcol <- rep('red', length(st))
       }
-
+      
       staged_tbl <- get_staged_epoch(block)
       if(nrow(staged_tbl)){
         st1 <- staged_tbl$Time
         st <- c(st, st1)
         vcol <- c(vcol, rep('green', length(st1)))
       }
-
+      
       e <- input$console_plot_brush
       if(!is.null(e)){
         xmin <- e$xmin
         xmax <- e$xmax
-
+        
         local_data$time_brush <- c(xmin, xmax)
-
+        
         plot_volt(time, signal, plot_range = NULL, use_abs = FALSE, hlines = local_data$threshold, vlines = st,
                   xlim = c(xmin, xmax), vcols = vcol)
       }else{
         local_data$time_brush <- NULL
       }
     })
-
+    
     get_staged_epoch <- function(block){
       if(length(block)){
         tbl <- as.data.frame(local_data$staged[[block]], stringsAsFactors = FALSE)
@@ -489,12 +514,12 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
         data.frame()
       }
     }
-
+    
     observeEvent(input$discard, {
       block <- input$block
       local_data$staged[[block]] <- data.frame()
     })
-
+    
     proxy <- DT::dataTableProxy('epoch_tmp')
     observeEvent(input$toggle, {
       s <- input$epoch_tmp_rows_selected
@@ -505,7 +530,7 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
     observeEvent(input$clear, {
       DT::selectRows(proxy, as.integer(0))
     })
-
+    
     observeEvent(input$stage, {
       si <- local_data$selected_time_ind
       block <- input$block
@@ -518,11 +543,11 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
           Time = s
         ))
         tbl <- tbl[order(tbl$Time), ]
-
+        
         local_data$staged[[block]] <- tbl
       }
     })
-
+    
     get_epochs <- function(){
       blocks <- utils$get_blocks()
       tbl <- data.frame()
@@ -536,7 +561,7 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
       }
       tbl
     }
-
+    
     get_save_path <- function(){
       sname <- input$save_name
       if(is_invalid(sname, .invalids = c('null', 'blank'))){
@@ -544,10 +569,10 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
       }
       dirs <- utils$get_from_subject('dirs', list(), FALSE)
       fpath <- file.path(dirs$meta_dir, sprintf('epoch_%s.csv', sname))
-
+      
       try_normalizePath(fpath)
     }
-
+    
     output$epoch_preview <- DT::renderDataTable({
       get_epochs()
     })
@@ -558,12 +583,12 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
       save_path <- get_save_path()
       tbl <- get_epochs()
       safe_write_csv(tbl, save_path, row.names = FALSE)
-
+      
       showNotification(p('Epoch file exported.'), type = 'message')
     })
-
+    
   }
-
+  
   return(list(
     body = body,
     server = server
