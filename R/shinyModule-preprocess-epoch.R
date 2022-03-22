@@ -201,11 +201,27 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
         need(length(efile) && length(dirs) && file.exists(efile_path <- file.path(dirs$pre_subject_dir, block, efile)), '')
       )
 
-      local_data$raw_data <- raw_data <- raveio::read_mat(efile_path)
-      dnames <- names(raw_data)
-      dnames %?<-% 'Default...'
-      dname_sel <- ifelse('analogTraces' %in% dnames, 'analogTraces', dnames[1])
-      sample_rate <- get_val(isolate(local_data$sample_rate), default = 30000)
+      if(endsWith(tolower(efile_path), "edf")) {
+        header <- raveio::read_edf_header(efile_path)
+        content <- raveio::read_edf_signal(efile_path, signal_numbers = seq_len(header$nSignals))
+        local_data$raw_data <- structure(list(
+          edf_path = efile_path,
+          header = header,
+          content = content
+        ), class = "edf_data")
+        dnames <- header$sHeaders$label
+        dname_sel <- ifelse('DC1' %in% dnames, 'DC1', dnames[1])
+        sample_rate <- c(header$sampleRate2[dnames %in% dname_sel], 30000)[[1]]
+      } else {
+        raw_data <- raveio::read_mat(efile_path)
+        local_data$raw_data <- raw_data
+        dnames <- names(raw_data)
+        dnames %?<-% 'Default...'
+        dname_sel <- ifelse('analogTraces' %in% dnames, 'analogTraces', dnames[1])
+        sample_rate <- get_val(isolate(local_data$sample_rate), default = 30000)
+      }
+      
+      
       min_trial_duration <- get_val(isolate(local_data$min_trial_duration), default = 0L)
       is_symmetric <- get_val(isolate(local_data$is_symmetric), default = FALSE)
       direction <- get_val(isolate(local_data$direction), default = 'Above')
@@ -251,11 +267,20 @@ pre_epoch3 <- function(module_id = 'EPOCH_M', sidebar_width = 2, doc_prefix = 'r
       raw_compressed_singal <- NULL
 
       if(length(data_name)){
-        if(data_name == 'Default...'){
-          dat <- as.vector(unlist(local_data$raw_data))
-        }else{
-          dat <- as.vector(local_data$raw_data[[data_name]])
+        raw_data <- local_data$raw_data
+        if(inherits(raw_data, "edf_data")) {
+          dat <- raw_data$content$get_signal(
+            which(raw_data$content$selected_signal_names %in% data_name)
+          )
+          dat <- dat$signal
+        } else {
+          if(data_name == 'Default...'){
+            dat <- as.vector(unlist(local_data$raw_data))
+          }else{
+            dat <- as.vector(local_data$raw_data[[data_name]])
+          }
         }
+        
       }
 
       if(!is.null(dat) && is.numeric(dat) && srate > 0){
