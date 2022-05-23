@@ -52,14 +52,6 @@ rave_version <- function(){
     
   })
   
-  template_subcode <- rave_options('threeBrain_template_subject')
-  template_rootdir <- rave_options('threeBrain_template_dir')
-  if( length(template_subcode) && template_subcode != '' && dir.exists(template_rootdir) ){
-    options(
-      `threeBrain.template_subject` = template_subcode,
-      `threeBrain.template_dir` = template_rootdir
-    )
-  }
 
 }
 
