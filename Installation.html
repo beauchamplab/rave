@@ -44,56 +44,45 @@
     </div>
 
 <div id="prerequisite-installation-guide-for-rave-for-mac-windows-and-linux" class="section level1">
-
 <p>Click on your operating system.</p>
 <ul><li><a href="#macos">Mac OS</a></li>
 <li><a href="#windows">Windows (Windows 10, with Bash enabled)</a></li>
 <li><a href="#ubuntu">Ubuntu 16.04+</a></li>
 </ul><div class="section level2">
 <h2 id="macos">MacOS<a class="anchor" aria-label="anchor" href="#macos"></a></h2>
-<ol style="list-style-type: decimal"><li>First, go to Cran-R official website and download install the latest version of R:</li>
-</ol><p><a href="https://cran.r-project.org/bin/macosx/" class="external-link">https://cran.r-project.org/bin/macosx/</a></p>
-<ol start="2" style="list-style-type: decimal"><li>After installing R, make sure that you install Xcode from the Mac App Store: ( <a href="https://www.moncefbelyamani.com/how-to-install-xcode-homebrew-git-rvm-ruby-on-mac/" class="external-link">here</a> is a helpful article in case of errors)</li>
-</ol><p>Open Terminal (in the Applications folder), enter</p>
+<ol style="list-style-type: decimal"><li>First, go to Cran-R official website and download install the latest version of R:</li></ol><p><a href="https://cran.r-project.org/bin/macosx/" class="external-link">https://cran.r-project.org/bin/macosx/</a></p>
+<ol start="2" style="list-style-type: decimal"><li>After installing R, make sure that you install Xcode from the Mac App Store: ( <a href="https://www.moncefbelyamani.com/how-to-install-xcode-homebrew-git-rvm-ruby-on-mac/" class="external-link">here</a> is a helpful article in case of errors)</li></ol><p>Open Terminal (in the Applications folder), enter</p>
 <pre><code><span class="va">xcode</span><span class="op">-</span><span class="va">select</span> <span class="op">-</span><span class="op">-</span><span class="va">install</span></code></pre>
 <p>Click <strong>yes</strong> to proceed installing command-line tools. On first use, you will br required to read and accept the Apple license.</p>
 <p><em>Don’t worry if the following error occurs. It just means you have already installed xcode command line tools.</em></p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb2-1"><a href="#cb2-1"></a><span class="co">// xcode-select: error: command line tools are already installed, use "Software Update" to install updates</span></span></code></pre></div>
-<ol start="3" style="list-style-type: decimal"><li>Install the free version of RStudio Desktop here:</li>
-</ol><p><a href="https://www.rstudio.com/products/rstudio/download/" class="external-link">https://www.rstudio.com/products/rstudio/download/</a></p>
+<ol start="3" style="list-style-type: decimal"><li>Install the free version of RStudio Desktop here:</li></ol><p><a href="https://www.rstudio.com/products/rstudio/download/" class="external-link">https://www.rstudio.com/products/rstudio/download/</a></p>
 </div>
 <div class="section level2">
 <h2 id="windows">Windows<a class="anchor" aria-label="anchor" href="#windows"></a></h2>
 <p>You will be asked many questions by the installers; the default response is fine for all of them. 1. Install the latest version of R</p>
 <p><a href="https://cran.r-project.org/bin/windows/base/" class="external-link">https://cran.r-project.org/bin/windows/base/</a></p>
-<ol start="2" style="list-style-type: decimal"><li>Install the latest version of RTools. The version of RTools must match your version of R.</li>
-</ol><p><a href="https://cran.r-project.org/bin/windows/Rtools/" class="external-link">https://cran.r-project.org/bin/windows/Rtools/</a></p>
-<ol start="3" style="list-style-type: decimal"><li>Download and install the free version of RStudio Desktop for Windows.</li>
-</ol><p><a href="https://www.rstudio.com/products/rstudio/download/" class="external-link">https://www.rstudio.com/products/rstudio/download/</a></p>
+<ol start="2" style="list-style-type: decimal"><li>Install the latest version of RTools. The version of RTools must match your version of R.</li></ol><p><a href="https://cran.r-project.org/bin/windows/Rtools/" class="external-link">https://cran.r-project.org/bin/windows/Rtools/</a></p>
+<ol start="3" style="list-style-type: decimal"><li>Download and install the free version of RStudio Desktop for Windows.</li></ol><p><a href="https://www.rstudio.com/products/rstudio/download/" class="external-link">https://www.rstudio.com/products/rstudio/download/</a></p>
 </div>
 <div class="section level2">
 <h2 id="ubuntu">Ubuntu<a class="anchor" aria-label="anchor" href="#ubuntu"></a></h2>
-<ol style="list-style-type: decimal"><li>Add R-Cran repository to your app list:</li>
-</ol><p>Open terminal (if you don’t know how, look at your sidebar in ubuntu, <code>search your computer</code> enter “terminal”, and open it), type the following code:</p>
+<ol style="list-style-type: decimal"><li>Add R-Cran repository to your app list:</li></ol><p>Open terminal (if you don’t know how, look at your sidebar in ubuntu, <code>search your computer</code> enter “terminal”, and open it), type the following code:</p>
 <pre><code>sudo gedit /etc/apt/sources.list</code></pre>
 <p>Then there will be a text editor with lots of “deb”s in it. Append the following line at the end of this file</p>
 <pre><code>deb https://cloud.r-project.org/bin/linux/ubuntu xenial-cran35/</code></pre>
 <p><strong>IMPORTANT</strong> Based on you system, you might want to enter different repositories (<a href="https://cran.r-project.org/bin/linux/" class="external-link uri">https://cran.r-project.org/bin/linux/</a>). However, this line should be with a format of <code>deb</code> + <code>[repository URL]</code> + <code>xenial</code> (or <code>xenial-cran35</code>) + <code>/</code>. The difference between <code>xenial</code> and <code>xenial-cran35</code> will affect the version of R to be installed.</p>
 <p>Save the file and close text editor.</p>
-<ol start="2" style="list-style-type: decimal"><li>In your terminal, update <code>apt-get</code> repository:</li>
-</ol><pre><code>sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+<ol start="2" style="list-style-type: decimal"><li>In your terminal, update <code>apt-get</code> repository:</li></ol><pre><code>sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 sudo apt-get update</code></pre>
 <p>The first line gives you access to the new repository (it adds keys to your computer so that you can safely download R).</p>
-<ol start="3" style="list-style-type: decimal"><li>Install R</li>
-</ol><p>Copy the following command line by line into your terminal and run</p>
+<ol start="3" style="list-style-type: decimal"><li>Install R</li></ol><p>Copy the following command line by line into your terminal and run</p>
 <pre><code>sudo apt-get install r-base</code></pre>
 <pre><code>sudo apt-get install r-base-dev</code></pre>
-<ol start="4" style="list-style-type: decimal"><li>Install compiling tools and system dependencies</li>
-</ol><p>After installing R, copy the following command to your terminal and run:</p>
+<ol start="4" style="list-style-type: decimal"><li>Install compiling tools and system dependencies</li></ol><p>After installing R, copy the following command to your terminal and run:</p>
 <pre><code>sudo apt-get install libssl-dev libcurl4-openssl-dev libssh2-1-dev libv8-3.14-dev libxml2-dev libfftw3-dev libtiff5-dev libhdf5-dev</code></pre>
 <p>The first three packages <code>libssl-dev</code> <code>libcurl4-openssl-dev</code> <code>libssh2-1-dev</code> are necessary for <code>devtools</code> (compilers). <code>libv8-3.14-dev</code> is for <code>V8</code> package to enable JavaScript. <code>libxml2-dev</code> is for <code>xml2</code>. <code>libfftw3-dev</code> <code>libtiff5-dev</code> are necessary for fast-fourier transformations and <code>libhdf5-dev</code> is for reading and writing data in open data format <code>HDF5</code>.</p>
-<ol start="5" style="list-style-type: decimal"><li>Install the free version of RStudio Desktop here:</li>
-</ol><p>Go to <a href="https://www.rstudio.com/products/rstudio/download/#download" class="external-link uri">https://www.rstudio.com/products/rstudio/download/#download</a> and download one with keywords “Ubuntu 16.04+/Debian 9+ (64-bit)”, move the downloaded file to your <strong>desktop</strong>, rename it “rstudio.deb”.</p>
+<ol start="5" style="list-style-type: decimal"><li>Install the free version of RStudio Desktop here:</li></ol><p>Go to <a href="https://www.rstudio.com/products/rstudio/download/#download" class="external-link uri">https://www.rstudio.com/products/rstudio/download/#download</a> and download one with keywords “Ubuntu 16.04+/Debian 9+ (64-bit)”, move the downloaded file to your <strong>desktop</strong>, rename it “rstudio.deb”.</p>
 <p>Open terminal, type the folloing command in your terminal</p>
 <pre><code>cd ~/Desktop
 sudo apt-get install libjpeg62</code></pre>
@@ -119,7 +108,7 @@ sudo apt-get install libjpeg62</code></pre>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer></div>
