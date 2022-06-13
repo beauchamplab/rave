@@ -69,38 +69,59 @@
     <h2>Arguments</h2>
     <dl><dt>subject</dt>
 <dd><p>characters, format: <code>"PROJECT/SUBJECT"</code></p></dd>
+
+
 <dt>electrodes</dt>
 <dd><p>integer vector, which electrodes to be loaded</p></dd>
+
+
 <dt>epoch</dt>
 <dd><p>characters, name for epoch data. For example, <code>"epoch1"</code> 
 refers to epoch file <code>"epoch_epoch1.csv"</code> in subject meta folder</p></dd>
+
+
 <dt>time_range</dt>
 <dd><p>vector of length 2. <code>time_range[1]=1</code> indicates 1 
 second before onset will be loaded; <code>time_range[2]=1.5</code> means 1.5 
 seconds after onset will be loaded. Make sure both are positive number in 
 seconds</p></dd>
+
+
 <dt>frequency_range</dt>
 <dd><p>vector of length 2 - lowest and highest frequencies. 
 By default is all frequencies. Only applied to power and phase data.</p></dd>
+
+
 <dt>data_types</dt>
 <dd><p>vector of characters, data to be pre-loaded. 
 <code>"power"</code> refers to referenced power (power spectrum) data, 
 <code>"phase"</code> refers to referenced phase data, and <code>"volt"</code> 
 is referenced voltage (original analog traces) data</p></dd>
+
+
 <dt>reference</dt>
 <dd><p>name of reference data. For example, <code>"default"</code> refers
 to reference file <code>"reference_default.csv"</code> in subject meta folder</p></dd>
+
+
 <dt>attach, </dt>
 <dd><p>characters or <code>NULL</code>, <code>NULL</code> if you don't want to 
 attach it, <code>"r"</code> if want to load data as R environment, <code>"py"</code> is 
 for python, and <code>"matlab"</code> is for Matlab. (python and Matlab are under 
 construction)</p></dd>
+
+
 <dt>data_env</dt>
 <dd><p>environment to load data into.</p></dd>
+
+
 <dt>strict</dt>
 <dd><p>whether to check if raw data exists. Default is no (suggested)</p></dd>
+
+
 <dt>...</dt>
 <dd><p>ignored</p></dd>
+
 </dl></div>
 
   </div>
@@ -115,7 +136,7 @@ construction)</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

@@ -108,15 +108,15 @@ data.</p>
 <div class="section">
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
 
-<ul><li><p><a href="#method-info"><code>ECoGRepository$info()</code></a></p></li>
-<li><p><a href="#method-print"><code>ECoGRepository$print()</code></a></p></li>
-<li><p><a href="#method-new"><code>ECoGRepository$new()</code></a></p></li>
-<li><p><a href="#method-get_electrode"><code>ECoGRepository$get_electrode()</code></a></p></li>
-<li><p><a href="#method-load_electrodes"><code>ECoGRepository$load_electrodes()</code></a></p></li>
-<li><p><a href="#method-epoch"><code>ECoGRepository$epoch()</code></a></p></li>
-<li><p><a href="#method-load_reference"><code>ECoGRepository$load_reference()</code></a></p></li>
-<li><p><a href="#method-baseline"><code>ECoGRepository$baseline()</code></a></p></li>
-</ul></div><p></p><hr><a id="method-info"></a><div class="section">
+<ul><li><p><a href="#method-ECoGRepository-info"><code>ECoGRepository$info()</code></a></p></li>
+<li><p><a href="#method-ECoGRepository-print"><code>ECoGRepository$print()</code></a></p></li>
+<li><p><a href="#method-ECoGRepository-new"><code>ECoGRepository$new()</code></a></p></li>
+<li><p><a href="#method-ECoGRepository-get_electrode"><code>ECoGRepository$get_electrode()</code></a></p></li>
+<li><p><a href="#method-ECoGRepository-load_electrodes"><code>ECoGRepository$load_electrodes()</code></a></p></li>
+<li><p><a href="#method-ECoGRepository-epoch"><code>ECoGRepository$epoch()</code></a></p></li>
+<li><p><a href="#method-ECoGRepository-load_reference"><code>ECoGRepository$load_reference()</code></a></p></li>
+<li><p><a href="#method-ECoGRepository-baseline"><code>ECoGRepository$baseline()</code></a></p></li>
+</ul></div><p></p><hr><a id="method-ECoGRepository-info"></a><div class="section">
 <h3 id="method-info-">Method <code>info()</code><a class="anchor" aria-label="anchor" href="#method-info-"></a></h3>
 <p>obtain the information</p><div class="section">
 <h4 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a></h4>
@@ -136,7 +136,7 @@ data.</p>
 <p>character of the information</p>
 </div>
 
-</div><p></p><hr><a id="method-print"></a><div class="section">
+</div><p></p><hr><a id="method-ECoGRepository-print"></a><div class="section">
 <h3 id="method-print-">Method <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code><a class="anchor" aria-label="anchor" href="#method-print-"></a></h3>
 <p>print memory address</p><div class="section">
 <h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
@@ -156,7 +156,7 @@ data.</p>
 <p>none</p>
 </div>
 
-</div><p></p><hr><a id="method-new"></a><div class="section">
+</div><p></p><hr><a id="method-ECoGRepository-new"></a><div class="section">
 <h3 id="method-new-">Method <code>new()</code><a class="anchor" aria-label="anchor" href="#method-new-"></a></h3>
 <p>constructor</p><div class="section">
 <h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
@@ -187,7 +187,7 @@ electrodes, default is yes.</p></dd>
 <p>An <code>ECoGRepository</code> instance</p>
 </div>
 
-</div><p></p><hr><a id="method-get_electrode"></a><div class="section">
+</div><p></p><hr><a id="method-ECoGRepository-get_electrode"></a><div class="section">
 <h3 id="method-get-electrode-">Method <code>get_electrode()</code><a class="anchor" aria-label="anchor" href="#method-get-electrode-"></a></h3>
 <p>get <code><a href="Electrode.html">Electrode</a></code> instances</p><div class="section">
 <h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
@@ -212,7 +212,7 @@ etc.</p></dd>
 <p>list of environments containing electrode instances</p>
 </div>
 
-</div><p></p><hr><a id="method-load_electrodes"></a><div class="section">
+</div><p></p><hr><a id="method-ECoGRepository-load_electrodes"></a><div class="section">
 <h3 id="method-load-electrodes-">Method <code>load_electrodes()</code><a class="anchor" aria-label="anchor" href="#method-load-electrodes-"></a></h3>
 <p>load electrodes; usually don't need to directly call this 
 method if <code>autoload</code> is true when initializing the repository</p><div class="section">
@@ -237,7 +237,7 @@ method if <code>autoload</code> is true when initializing the repository</p><div
 <p>none</p>
 </div>
 
-</div><p></p><hr><a id="method-epoch"></a><div class="section">
+</div><p></p><hr><a id="method-ECoGRepository-epoch"></a><div class="section">
 <h3 id="method-epoch-">Method <code>epoch()</code><a class="anchor" aria-label="anchor" href="#method-epoch-"></a></h3>
 <p>slice the data according to epoch table</p><div class="section">
 <h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
@@ -304,7 +304,7 @@ for phase data and <code>"volt"</code> for voltage or analog signal traces.</p><
 <p>none. However the results are stored in public fields.</p>
 </div>
 
-</div><p></p><hr><a id="method-load_reference"></a><div class="section">
+</div><p></p><hr><a id="method-ECoGRepository-load_reference"></a><div class="section">
 <h3 id="method-load-reference-">Method <code>load_reference()</code><a class="anchor" aria-label="anchor" href="#method-load-reference-"></a></h3>
 <p>load references</p><div class="section">
 <h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
@@ -328,7 +328,7 @@ for phase data and <code>"volt"</code> for voltage or analog signal traces.</p><
 <p>none</p>
 </div>
 
-</div><p></p><hr><a id="method-baseline"></a><div class="section">
+</div><p></p><hr><a id="method-ECoGRepository-baseline"></a><div class="section">
 <h3 id="method-baseline-">Method <code><a href="baseline.html">baseline()</a></code><a class="anchor" aria-label="anchor" href="#method-baseline-"></a></h3>
 <p>baseline signals (deprecated)</p><div class="section">
 <h4 id="usage-7">Usage<a class="anchor" aria-label="anchor" href="#usage-7"></a></h4>
@@ -397,7 +397,7 @@ instead</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

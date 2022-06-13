@@ -96,32 +96,55 @@
     <h2>Arguments</h2>
     <dl><dt>key</dt>
 <dd><p>any R object, a named list would be the best.</p></dd>
+
+
 <dt>val</dt>
 <dd><p>value to cache, if key exists, then value will not be evaluated nor saved</p></dd>
+
+
 <dt>name, inputId</dt>
 <dd><p>character name of the dataset or input</p></dd>
+
+
 <dt>replace</dt>
 <dd><p>if true, force replace the cached object with current one</p></dd>
+
+
 <dt>global</dt>
 <dd><p>whether to cache the variable in global environment. If true,
 then the variable will be accessible from other instances and modules.</p></dd>
+
+
 <dt>persist</dt>
 <dd><p>logical, whether persist on the hard-disk, only used when 
 <code>global=FALSE</code>, the persisted data will be used by each modules</p></dd>
+
+
 <dt>test, read_only</dt>
 <dd><p>whether not to save the value if cache is not found</p></dd>
+
+
 <dt>temporary</dt>
 <dd><p>whether to use temporary map to cache, used internally.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>ignored</p></dd>
+
+
 <dt>session</dt>
 <dd><p>shiny session instance</p></dd>
+
+
 <dt>levels</dt>
 <dd><p>levels when clear the cache</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>Cached value, or <code>val</code>. If cache and <code>val</code> are both 
+    
+
+<p>Cached value, or <code>val</code>. If cache and <code>val</code> are both 
 missing, then return <code>NULL</code>.</p>
     </div>
 
@@ -179,7 +202,7 @@ missing, then return <code>NULL</code>.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

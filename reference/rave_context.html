@@ -66,31 +66,51 @@
     <h2>Arguments</h2>
     <dl><dt>context</dt>
 <dd><p>context string for target environment, optional, see `Details'</p></dd>
+
+
 <dt>require_contexts</dt>
 <dd><p>characters, (optional): required context for current 
 function. If any context is missing, the function will raise errors</p></dd>
+
+
 <dt>disallowed_context</dt>
 <dd><p>characters, (optional): defines the contexts that 
 don't work for the function. If running within such contexts, the function 
 will raise errors</p></dd>
+
+
 <dt>error_msg</dt>
 <dd><p>characters, (optional): if running in improper contexts, the
 message to display, will passed to <code><a href="https://rdrr.io/r/base/stop.html" class="external-link">stop</a></code></p></dd>
+
+
 <dt>spos</dt>
 <dd><p>levels to go up to search for <code>senv</code>, passed to 
 <code><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></code></p></dd>
+
+
 <dt>senv</dt>
 <dd><p>environment to read 'RAVE' contexts</p></dd>
+
+
 <dt>tpos</dt>
 <dd><p>levels to go up to search for <code>tenv</code>, passed to 
 <code><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></code></p></dd>
+
+
 <dt>tenv</dt>
 <dd><p>environment to set 'RAVE' contexts</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A list of current context, including the package name, module ID, 
-and current <code>ExecEnvir</code> instance if running under <code>"rave_running"</code>context.</p>
+    
+
+<p>A list of current context, including the package name, module ID, 
+and current <code>ExecEnvir</code> instance if running under <code>"rave_running"</code></p>
+ 
+
+<p>context.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -273,7 +293,7 @@ set and read the context.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

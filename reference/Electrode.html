@@ -127,14 +127,14 @@ data exist in file system before and after reference</p></dd>
 <div class="section">
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
 
-<ul><li><p><a href="#method-info"><code>Electrode$info()</code></a></p></li>
-<li><p><a href="#method-print"><code>Electrode$print()</code></a></p></li>
-<li><p><a href="#method-switch_reference"><code>Electrode$switch_reference()</code></a></p></li>
-<li><p><a href="#method-referenced"><code>Electrode$referenced()</code></a></p></li>
-<li><p><a href="#method-clean"><code>Electrode$clean()</code></a></p></li>
-<li><p><a href="#method-new"><code>Electrode$new()</code></a></p></li>
-<li><p><a href="#method-epoch"><code>Electrode$epoch()</code></a></p></li>
-</ul></div><p></p><hr><a id="method-info"></a><div class="section">
+<ul><li><p><a href="#method-Electrode-info"><code>Electrode$info()</code></a></p></li>
+<li><p><a href="#method-Electrode-print"><code>Electrode$print()</code></a></p></li>
+<li><p><a href="#method-Electrode-switch_reference"><code>Electrode$switch_reference()</code></a></p></li>
+<li><p><a href="#method-Electrode-referenced"><code>Electrode$referenced()</code></a></p></li>
+<li><p><a href="#method-Electrode-clean"><code>Electrode$clean()</code></a></p></li>
+<li><p><a href="#method-Electrode-new"><code>Electrode$new()</code></a></p></li>
+<li><p><a href="#method-Electrode-epoch"><code>Electrode$epoch()</code></a></p></li>
+</ul></div><p></p><hr><a id="method-Electrode-info"></a><div class="section">
 <h3 id="method-info-">Method <code>info()</code><a class="anchor" aria-label="anchor" href="#method-info-"></a></h3>
 <p>print electrode information</p><div class="section">
 <h4 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a></h4>
@@ -146,7 +146,7 @@ data exist in file system before and after reference</p></dd>
 <p>none</p>
 </div>
 
-</div><p></p><hr><a id="method-print"></a><div class="section">
+</div><p></p><hr><a id="method-Electrode-print"></a><div class="section">
 <h3 id="method-print-">Method <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code><a class="anchor" aria-label="anchor" href="#method-print-"></a></h3>
 <p>overrides default print method</p><div class="section">
 <h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
@@ -166,7 +166,7 @@ data exist in file system before and after reference</p></dd>
 <p>none</p>
 </div>
 
-</div><p></p><hr><a id="method-switch_reference"></a><div class="section">
+</div><p></p><hr><a id="method-Electrode-switch_reference"></a><div class="section">
 <h3 id="method-switch-reference-">Method <code>switch_reference()</code><a class="anchor" aria-label="anchor" href="#method-switch-reference-"></a></h3>
 <p>switch reference (experimental)</p><div class="section">
 <h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
@@ -186,7 +186,7 @@ data exist in file system before and after reference</p></dd>
 <p>none</p>
 </div>
 
-</div><p></p><hr><a id="method-referenced"></a><div class="section">
+</div><p></p><hr><a id="method-Electrode-referenced"></a><div class="section">
 <h3 id="method-referenced-">Method <code>referenced()</code><a class="anchor" aria-label="anchor" href="#method-referenced-"></a></h3>
 <p>get referenced data</p><div class="section">
 <h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
@@ -214,7 +214,7 @@ environment with each element a <code><a href="https://beauchamplab.github.io/ra
 <code><a href="https://beauchamplab.github.io/raveio/reference/LazyFST.html">LazyFST</a></code> instance.</p>
 </div>
 
-</div><p></p><hr><a id="method-clean"></a><div class="section">
+</div><p></p><hr><a id="method-Electrode-clean"></a><div class="section">
 <h3 id="method-clean-">Method <code>clean()</code><a class="anchor" aria-label="anchor" href="#method-clean-"></a></h3>
 <p>remove data from memory</p><div class="section">
 <h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
@@ -238,7 +238,7 @@ environment with each element a <code><a href="https://beauchamplab.github.io/ra
 <p>none</p>
 </div>
 
-</div><p></p><hr><a id="method-new"></a><div class="section">
+</div><p></p><hr><a id="method-Electrode-new"></a><div class="section">
 <h3 id="method-new-">Method <code>new()</code><a class="anchor" aria-label="anchor" href="#method-new-"></a></h3>
 <p>constructor</p><div class="section">
 <h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
@@ -283,7 +283,7 @@ meaning no reference to the electrode</p></dd>
 <p>An <code>Electrode</code> instance</p>
 </div>
 
-</div><p></p><hr><a id="method-epoch"></a><div class="section">
+</div><p></p><hr><a id="method-Electrode-epoch"></a><div class="section">
 <h3 id="method-epoch-">Method <code>epoch()</code><a class="anchor" aria-label="anchor" href="#method-epoch-"></a></h3>
 <p>epoch electrode</p><div class="section">
 <h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
@@ -389,7 +389,7 @@ refers to epoch file <code>"epoch_default.csv"</code> in subject meta folder</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>
