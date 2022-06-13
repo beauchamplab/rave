@@ -66,8 +66,7 @@ pre_localization <- function(module_id = 'LOCALIZATION_M', sidebar_width = 2, do
         local_env$brain <- 
           threeBrain::freesurfer_brain2(
             fs_subject_folder = subject$freesurfer_path,
-            subject_name = subject$subject_code,
-            surface_types = c("pial", 'white')
+            subject_name = subject$subject_code
           )
       }
       

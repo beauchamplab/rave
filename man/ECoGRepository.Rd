@@ -69,19 +69,19 @@ Zhengjia Wang
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-info}{\code{ECoGRepository$info()}}
-\item \href{#method-print}{\code{ECoGRepository$print()}}
-\item \href{#method-new}{\code{ECoGRepository$new()}}
-\item \href{#method-get_electrode}{\code{ECoGRepository$get_electrode()}}
-\item \href{#method-load_electrodes}{\code{ECoGRepository$load_electrodes()}}
-\item \href{#method-epoch}{\code{ECoGRepository$epoch()}}
-\item \href{#method-load_reference}{\code{ECoGRepository$load_reference()}}
-\item \href{#method-baseline}{\code{ECoGRepository$baseline()}}
+\item \href{#method-ECoGRepository-info}{\code{ECoGRepository$info()}}
+\item \href{#method-ECoGRepository-print}{\code{ECoGRepository$print()}}
+\item \href{#method-ECoGRepository-new}{\code{ECoGRepository$new()}}
+\item \href{#method-ECoGRepository-get_electrode}{\code{ECoGRepository$get_electrode()}}
+\item \href{#method-ECoGRepository-load_electrodes}{\code{ECoGRepository$load_electrodes()}}
+\item \href{#method-ECoGRepository-epoch}{\code{ECoGRepository$epoch()}}
+\item \href{#method-ECoGRepository-load_reference}{\code{ECoGRepository$load_reference()}}
+\item \href{#method-ECoGRepository-baseline}{\code{ECoGRepository$baseline()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-info"></a>}}
-\if{latex}{\out{\hypertarget{method-info}{}}}
+\if{html}{\out{<a id="method-ECoGRepository-info"></a>}}
+\if{latex}{\out{\hypertarget{method-ECoGRepository-info}{}}}
 \subsection{Method \code{info()}}{
 obtain the information
 \subsection{Usage}{
@@ -100,8 +100,8 @@ character of the information
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-print"></a>}}
-\if{latex}{\out{\hypertarget{method-print}{}}}
+\if{html}{\out{<a id="method-ECoGRepository-print"></a>}}
+\if{latex}{\out{\hypertarget{method-ECoGRepository-print}{}}}
 \subsection{Method \code{print()}}{
 print memory address
 \subsection{Usage}{
@@ -120,8 +120,8 @@ none
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-ECoGRepository-new"></a>}}
+\if{latex}{\out{\hypertarget{method-ECoGRepository-new}{}}}
 \subsection{Method \code{new()}}{
 constructor
 \subsection{Usage}{
@@ -147,8 +147,8 @@ An \code{ECoGRepository} instance
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-get_electrode"></a>}}
-\if{latex}{\out{\hypertarget{method-get_electrode}{}}}
+\if{html}{\out{<a id="method-ECoGRepository-get_electrode"></a>}}
+\if{latex}{\out{\hypertarget{method-ECoGRepository-get_electrode}{}}}
 \subsection{Method \code{get_electrode()}}{
 get \code{\link[rave]{Electrode}} instances
 \subsection{Usage}{
@@ -170,8 +170,8 @@ list of environments containing electrode instances
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-load_electrodes"></a>}}
-\if{latex}{\out{\hypertarget{method-load_electrodes}{}}}
+\if{html}{\out{<a id="method-ECoGRepository-load_electrodes"></a>}}
+\if{latex}{\out{\hypertarget{method-ECoGRepository-load_electrodes}{}}}
 \subsection{Method \code{load_electrodes()}}{
 load electrodes; usually don't need to directly call this 
 method if \code{autoload} is true when initializing the repository
@@ -193,8 +193,8 @@ none
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-epoch"></a>}}
-\if{latex}{\out{\hypertarget{method-epoch}{}}}
+\if{html}{\out{<a id="method-ECoGRepository-epoch"></a>}}
+\if{latex}{\out{\hypertarget{method-ECoGRepository-epoch}{}}}
 \subsection{Method \code{epoch()}}{
 slice the data according to epoch table
 \subsection{Usage}{
@@ -244,8 +244,8 @@ none. However the results are stored in public fields.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-load_reference"></a>}}
-\if{latex}{\out{\hypertarget{method-load_reference}{}}}
+\if{html}{\out{<a id="method-ECoGRepository-load_reference"></a>}}
+\if{latex}{\out{\hypertarget{method-ECoGRepository-load_reference}{}}}
 \subsection{Method \code{load_reference()}}{
 load references
 \subsection{Usage}{
@@ -266,8 +266,8 @@ none
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-baseline"></a>}}
-\if{latex}{\out{\hypertarget{method-baseline}{}}}
+\if{html}{\out{<a id="method-ECoGRepository-baseline"></a>}}
+\if{latex}{\out{\hypertarget{method-ECoGRepository-baseline}{}}}
 \subsection{Method \code{baseline()}}{
 baseline signals (deprecated)
 \subsection{Usage}{

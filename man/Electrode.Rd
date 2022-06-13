@@ -91,18 +91,18 @@ data exist in file system before and after reference}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-info}{\code{Electrode$info()}}
-\item \href{#method-print}{\code{Electrode$print()}}
-\item \href{#method-switch_reference}{\code{Electrode$switch_reference()}}
-\item \href{#method-referenced}{\code{Electrode$referenced()}}
-\item \href{#method-clean}{\code{Electrode$clean()}}
-\item \href{#method-new}{\code{Electrode$new()}}
-\item \href{#method-epoch}{\code{Electrode$epoch()}}
+\item \href{#method-Electrode-info}{\code{Electrode$info()}}
+\item \href{#method-Electrode-print}{\code{Electrode$print()}}
+\item \href{#method-Electrode-switch_reference}{\code{Electrode$switch_reference()}}
+\item \href{#method-Electrode-referenced}{\code{Electrode$referenced()}}
+\item \href{#method-Electrode-clean}{\code{Electrode$clean()}}
+\item \href{#method-Electrode-new}{\code{Electrode$new()}}
+\item \href{#method-Electrode-epoch}{\code{Electrode$epoch()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-info"></a>}}
-\if{latex}{\out{\hypertarget{method-info}{}}}
+\if{html}{\out{<a id="method-Electrode-info"></a>}}
+\if{latex}{\out{\hypertarget{method-Electrode-info}{}}}
 \subsection{Method \code{info()}}{
 print electrode information
 \subsection{Usage}{
@@ -114,8 +114,8 @@ none
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-print"></a>}}
-\if{latex}{\out{\hypertarget{method-print}{}}}
+\if{html}{\out{<a id="method-Electrode-print"></a>}}
+\if{latex}{\out{\hypertarget{method-Electrode-print}{}}}
 \subsection{Method \code{print()}}{
 overrides default print method
 \subsection{Usage}{
@@ -134,8 +134,8 @@ none
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-switch_reference"></a>}}
-\if{latex}{\out{\hypertarget{method-switch_reference}{}}}
+\if{html}{\out{<a id="method-Electrode-switch_reference"></a>}}
+\if{latex}{\out{\hypertarget{method-Electrode-switch_reference}{}}}
 \subsection{Method \code{switch_reference()}}{
 switch reference (experimental)
 \subsection{Usage}{
@@ -154,8 +154,8 @@ none
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-referenced"></a>}}
-\if{latex}{\out{\hypertarget{method-referenced}{}}}
+\if{html}{\out{<a id="method-Electrode-referenced"></a>}}
+\if{latex}{\out{\hypertarget{method-Electrode-referenced}{}}}
 \subsection{Method \code{referenced()}}{
 get referenced data
 \subsection{Usage}{
@@ -180,8 +180,8 @@ environment with each element a \code{\link[raveio]{LazyH5}} or
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clean"></a>}}
-\if{latex}{\out{\hypertarget{method-clean}{}}}
+\if{html}{\out{<a id="method-Electrode-clean"></a>}}
+\if{latex}{\out{\hypertarget{method-Electrode-clean}{}}}
 \subsection{Method \code{clean()}}{
 remove data from memory
 \subsection{Usage}{
@@ -202,8 +202,8 @@ none
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-Electrode-new"></a>}}
+\if{latex}{\out{\hypertarget{method-Electrode-new}{}}}
 \subsection{Method \code{new()}}{
 constructor
 \subsection{Usage}{
@@ -239,8 +239,8 @@ An \code{\link[rave]{Electrode}} instance
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-epoch"></a>}}
-\if{latex}{\out{\hypertarget{method-epoch}{}}}
+\if{html}{\out{<a id="method-Electrode-epoch"></a>}}
+\if{latex}{\out{\hypertarget{method-Electrode-epoch}{}}}
 \subsection{Method \code{epoch()}}{
 epoch electrode
 \subsection{Usage}{

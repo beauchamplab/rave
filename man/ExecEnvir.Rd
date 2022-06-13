@@ -134,32 +134,32 @@ before functions calls}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-reload}{\code{ExecEnvir$reload()}}
-\item \href{#method-finalize}{\code{ExecEnvir$finalize()}}
-\item \href{#method-info}{\code{ExecEnvir$info()}}
-\item \href{#method-print}{\code{ExecEnvir$print()}}
-\item \href{#method-clean}{\code{ExecEnvir$clean()}}
-\item \href{#method-new}{\code{ExecEnvir$new()}}
-\item \href{#method-reset}{\code{ExecEnvir$reset()}}
-\item \href{#method-copy}{\code{ExecEnvir$copy()}}
-\item \href{#method-execute_with}{\code{ExecEnvir$execute_with()}}
-\item \href{#method-names}{\code{ExecEnvir$names()}}
-\item \href{#method-register_module}{\code{ExecEnvir$register_module()}}
-\item \href{#method-register_context}{\code{ExecEnvir$register_context()}}
-\item \href{#method-rave_inputs}{\code{ExecEnvir$rave_inputs()}}
-\item \href{#method-rave_outputs}{\code{ExecEnvir$rave_outputs()}}
-\item \href{#method-rave_updates}{\code{ExecEnvir$rave_updates()}}
-\item \href{#method-rave_execute}{\code{ExecEnvir$rave_execute()}}
-\item \href{#method-set_browser}{\code{ExecEnvir$set_browser()}}
-\item \href{#method-generate_input_ui}{\code{ExecEnvir$generate_input_ui()}}
-\item \href{#method-generate_output_ui}{\code{ExecEnvir$generate_output_ui()}}
-\item \href{#method-is_global}{\code{ExecEnvir$is_global()}}
-\item \href{#method-clone}{\code{ExecEnvir$clone()}}
+\item \href{#method-ExecEnvir-reload}{\code{ExecEnvir$reload()}}
+\item \href{#method-ExecEnvir-finalize}{\code{ExecEnvir$finalize()}}
+\item \href{#method-ExecEnvir-info}{\code{ExecEnvir$info()}}
+\item \href{#method-ExecEnvir-print}{\code{ExecEnvir$print()}}
+\item \href{#method-ExecEnvir-clean}{\code{ExecEnvir$clean()}}
+\item \href{#method-ExecEnvir-new}{\code{ExecEnvir$new()}}
+\item \href{#method-ExecEnvir-reset}{\code{ExecEnvir$reset()}}
+\item \href{#method-ExecEnvir-copy}{\code{ExecEnvir$copy()}}
+\item \href{#method-ExecEnvir-execute_with}{\code{ExecEnvir$execute_with()}}
+\item \href{#method-ExecEnvir-names}{\code{ExecEnvir$names()}}
+\item \href{#method-ExecEnvir-register_module}{\code{ExecEnvir$register_module()}}
+\item \href{#method-ExecEnvir-register_context}{\code{ExecEnvir$register_context()}}
+\item \href{#method-ExecEnvir-rave_inputs}{\code{ExecEnvir$rave_inputs()}}
+\item \href{#method-ExecEnvir-rave_outputs}{\code{ExecEnvir$rave_outputs()}}
+\item \href{#method-ExecEnvir-rave_updates}{\code{ExecEnvir$rave_updates()}}
+\item \href{#method-ExecEnvir-rave_execute}{\code{ExecEnvir$rave_execute()}}
+\item \href{#method-ExecEnvir-set_browser}{\code{ExecEnvir$set_browser()}}
+\item \href{#method-ExecEnvir-generate_input_ui}{\code{ExecEnvir$generate_input_ui()}}
+\item \href{#method-ExecEnvir-generate_output_ui}{\code{ExecEnvir$generate_output_ui()}}
+\item \href{#method-ExecEnvir-is_global}{\code{ExecEnvir$is_global()}}
+\item \href{#method-ExecEnvir-clone}{\code{ExecEnvir$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-reload"></a>}}
-\if{latex}{\out{\hypertarget{method-reload}{}}}
+\if{html}{\out{<a id="method-ExecEnvir-reload"></a>}}
+\if{latex}{\out{\hypertarget{method-ExecEnvir-reload}{}}}
 \subsection{Method \code{reload()}}{
 (experimental) signal the modules to reload
 \subsection{Usage}{
@@ -171,8 +171,8 @@ none
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-finalize"></a>}}
-\if{latex}{\out{\hypertarget{method-finalize}{}}}
+\if{html}{\out{<a id="method-ExecEnvir-finalize"></a>}}
+\if{latex}{\out{\hypertarget{method-ExecEnvir-finalize}{}}}
 \subsection{Method \code{finalize()}}{
 garbage collection
 \subsection{Usage}{
@@ -184,8 +184,8 @@ none
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-info"></a>}}
-\if{latex}{\out{\hypertarget{method-info}{}}}
+\if{html}{\out{<a id="method-ExecEnvir-info"></a>}}
+\if{latex}{\out{\hypertarget{method-ExecEnvir-info}{}}}
 \subsection{Method \code{info()}}{
 print variables in different layers (environment)
 \subsection{Usage}{
@@ -197,8 +197,8 @@ none
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-print"></a>}}
-\if{latex}{\out{\hypertarget{method-print}{}}}
+\if{html}{\out{<a id="method-ExecEnvir-print"></a>}}
+\if{latex}{\out{\hypertarget{method-ExecEnvir-print}{}}}
 \subsection{Method \code{print()}}{
 print the memory address
 \subsection{Usage}{
@@ -217,8 +217,8 @@ memory address
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clean"></a>}}
-\if{latex}{\out{\hypertarget{method-clean}{}}}
+\if{html}{\out{<a id="method-ExecEnvir-clean"></a>}}
+\if{latex}{\out{\hypertarget{method-ExecEnvir-clean}{}}}
 \subsection{Method \code{clean()}}{
 clean the environments to release the resource
 \subsection{Usage}{
@@ -230,8 +230,8 @@ none
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-ExecEnvir-new"></a>}}
+\if{latex}{\out{\hypertarget{method-ExecEnvir-new}{}}}
 \subsection{Method \code{new()}}{
 constructor
 \subsection{Usage}{
@@ -250,8 +250,8 @@ or global environment}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-reset"></a>}}
-\if{latex}{\out{\hypertarget{method-reset}{}}}
+\if{html}{\out{<a id="method-ExecEnvir-reset"></a>}}
+\if{latex}{\out{\hypertarget{method-ExecEnvir-reset}{}}}
 \subsection{Method \code{reset()}}{
 reset the runtime environment, rarely used
 \subsection{Usage}{
@@ -270,8 +270,8 @@ none
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-copy"></a>}}
-\if{latex}{\out{\hypertarget{method-copy}{}}}
+\if{html}{\out{<a id="method-ExecEnvir-copy"></a>}}
+\if{latex}{\out{\hypertarget{method-ExecEnvir-copy}{}}}
 \subsection{Method \code{copy()}}{
 (deprecated) copy the instance locally
 \subsection{Usage}{
@@ -296,8 +296,8 @@ a copied instance
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-execute_with"></a>}}
-\if{latex}{\out{\hypertarget{method-execute_with}{}}}
+\if{html}{\out{<a id="method-ExecEnvir-execute_with"></a>}}
+\if{latex}{\out{\hypertarget{method-ExecEnvir-execute_with}{}}}
 \subsection{Method \code{execute_with()}}{
 (deprecated) execute module with given parameter
 \subsection{Usage}{
@@ -320,8 +320,8 @@ runtime environment
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-names"></a>}}
-\if{latex}{\out{\hypertarget{method-names}{}}}
+\if{html}{\out{<a id="method-ExecEnvir-names"></a>}}
+\if{latex}{\out{\hypertarget{method-ExecEnvir-names}{}}}
 \subsection{Method \code{names()}}{
 returns names of a list, if names are null, 
 returns blank characters
@@ -341,8 +341,8 @@ the names of the list
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-register_module"></a>}}
-\if{latex}{\out{\hypertarget{method-register_module}{}}}
+\if{html}{\out{<a id="method-ExecEnvir-register_module"></a>}}
+\if{latex}{\out{\hypertarget{method-ExecEnvir-register_module}{}}}
 \subsection{Method \code{register_module()}}{
 register \code{\link[rave]{ModuleEnvir}} instance
 \subsection{Usage}{
@@ -363,8 +363,8 @@ none
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-register_context"></a>}}
-\if{latex}{\out{\hypertarget{method-register_context}{}}}
+\if{html}{\out{<a id="method-ExecEnvir-register_context"></a>}}
+\if{latex}{\out{\hypertarget{method-ExecEnvir-register_context}{}}}
 \subsection{Method \code{register_context()}}{
 Register 'RAVE' context for current environment 
 (internally used)
@@ -385,8 +385,8 @@ None
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-rave_inputs"></a>}}
-\if{latex}{\out{\hypertarget{method-rave_inputs}{}}}
+\if{html}{\out{<a id="method-ExecEnvir-rave_inputs"></a>}}
+\if{latex}{\out{\hypertarget{method-ExecEnvir-rave_inputs}{}}}
 \subsection{Method \code{rave_inputs()}}{
 parse input components
 \subsection{Usage}{
@@ -422,8 +422,8 @@ none
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-rave_outputs"></a>}}
-\if{latex}{\out{\hypertarget{method-rave_outputs}{}}}
+\if{html}{\out{<a id="method-ExecEnvir-rave_outputs"></a>}}
+\if{latex}{\out{\hypertarget{method-ExecEnvir-rave_outputs}{}}}
 \subsection{Method \code{rave_outputs()}}{
 parse output components
 \subsection{Usage}{
@@ -451,8 +451,8 @@ none
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-rave_updates"></a>}}
-\if{latex}{\out{\hypertarget{method-rave_updates}{}}}
+\if{html}{\out{<a id="method-ExecEnvir-rave_updates"></a>}}
+\if{latex}{\out{\hypertarget{method-ExecEnvir-rave_updates}{}}}
 \subsection{Method \code{rave_updates()}}{
 input initialization when \code{iEEG/ECoG} data are imported
 \subsection{Usage}{
@@ -470,8 +470,8 @@ input initialization when \code{iEEG/ECoG} data are imported
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-rave_execute"></a>}}
-\if{latex}{\out{\hypertarget{method-rave_execute}{}}}
+\if{html}{\out{<a id="method-ExecEnvir-rave_execute"></a>}}
+\if{latex}{\out{\hypertarget{method-ExecEnvir-rave_execute}{}}}
 \subsection{Method \code{rave_execute()}}{
 parse, and compile to main function
 \subsection{Usage}{
@@ -496,8 +496,8 @@ none, but \code{ExecEnvir$execute} will be generated.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-set_browser"></a>}}
-\if{latex}{\out{\hypertarget{method-set_browser}{}}}
+\if{html}{\out{<a id="method-ExecEnvir-set_browser"></a>}}
+\if{latex}{\out{\hypertarget{method-ExecEnvir-set_browser}{}}}
 \subsection{Method \code{set_browser()}}{
 (experimental) cache R expression in browser 
 \code{localStorage}
@@ -516,8 +516,8 @@ none, but \code{ExecEnvir$execute} will be generated.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-generate_input_ui"></a>}}
-\if{latex}{\out{\hypertarget{method-generate_input_ui}{}}}
+\if{html}{\out{<a id="method-ExecEnvir-generate_input_ui"></a>}}
+\if{latex}{\out{\hypertarget{method-ExecEnvir-generate_input_ui}{}}}
 \subsection{Method \code{generate_input_ui()}}{
 generate input panels according to parsed \code{rave_inputs}
 \subsection{Usage}{
@@ -536,8 +536,8 @@ HTML tags
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-generate_output_ui"></a>}}
-\if{latex}{\out{\hypertarget{method-generate_output_ui}{}}}
+\if{html}{\out{<a id="method-ExecEnvir-generate_output_ui"></a>}}
+\if{latex}{\out{\hypertarget{method-ExecEnvir-generate_output_ui}{}}}
 \subsection{Method \code{generate_output_ui()}}{
 generate outputs labels according to parsed 
 \code{rave_outputs}
@@ -558,8 +558,8 @@ HTML tags
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-is_global"></a>}}
-\if{latex}{\out{\hypertarget{method-is_global}{}}}
+\if{html}{\out{<a id="method-ExecEnvir-is_global"></a>}}
+\if{latex}{\out{\hypertarget{method-ExecEnvir-is_global}{}}}
 \subsection{Method \code{is_global()}}{
 (deprecated) check if variable is shared across modules.
 Please use \code{cache_input} instead to get variable values.
@@ -576,8 +576,8 @@ Please use \code{cache_input} instead to get variable values.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-ExecEnvir-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-ExecEnvir-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

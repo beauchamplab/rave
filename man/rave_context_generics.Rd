@@ -4,8 +4,11 @@
 \alias{rave_context_generics}
 \title{Create S3 Generics that Respects 'RAVE' Context}
 \usage{
-rave_context_generics(fun_name, fun = function() {
-})
+rave_context_generics(
+  fun_name,
+  fun = function() {
+ }
+)
 }
 \arguments{
 \item{fun_name}{generic function name}

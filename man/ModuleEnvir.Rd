@@ -54,18 +54,18 @@ package. This value is required to be true since \code{"rave-0.1.9"}.}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-info}{\code{ModuleEnvir$info()}}
-\item \href{#method-print}{\code{ModuleEnvir$print()}}
-\item \href{#method-new}{\code{ModuleEnvir$new()}}
-\item \href{#method-get_or_new_exec_env}{\code{ModuleEnvir$get_or_new_exec_env()}}
-\item \href{#method-load_script}{\code{ModuleEnvir$load_script()}}
-\item \href{#method-render_ui}{\code{ModuleEnvir$render_ui()}}
-\item \href{#method-clean}{\code{ModuleEnvir$clean()}}
+\item \href{#method-ModuleEnvir-info}{\code{ModuleEnvir$info()}}
+\item \href{#method-ModuleEnvir-print}{\code{ModuleEnvir$print()}}
+\item \href{#method-ModuleEnvir-new}{\code{ModuleEnvir$new()}}
+\item \href{#method-ModuleEnvir-get_or_new_exec_env}{\code{ModuleEnvir$get_or_new_exec_env()}}
+\item \href{#method-ModuleEnvir-load_script}{\code{ModuleEnvir$load_script()}}
+\item \href{#method-ModuleEnvir-render_ui}{\code{ModuleEnvir$render_ui()}}
+\item \href{#method-ModuleEnvir-clean}{\code{ModuleEnvir$clean()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-info"></a>}}
-\if{latex}{\out{\hypertarget{method-info}{}}}
+\if{html}{\out{<a id="method-ModuleEnvir-info"></a>}}
+\if{latex}{\out{\hypertarget{method-ModuleEnvir-info}{}}}
 \subsection{Method \code{info()}}{
 print module information
 \subsection{Usage}{
@@ -77,8 +77,8 @@ none
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-print"></a>}}
-\if{latex}{\out{\hypertarget{method-print}{}}}
+\if{html}{\out{<a id="method-ModuleEnvir-print"></a>}}
+\if{latex}{\out{\hypertarget{method-ModuleEnvir-print}{}}}
 \subsection{Method \code{print()}}{
 print module information and returns memory address
 \subsection{Usage}{
@@ -94,8 +94,8 @@ print module information and returns memory address
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-ModuleEnvir-new"></a>}}
+\if{latex}{\out{\hypertarget{method-ModuleEnvir-new}{}}}
 \subsection{Method \code{new()}}{
 constructor
 \subsection{Usage}{
@@ -125,8 +125,8 @@ constructor
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-get_or_new_exec_env"></a>}}
-\if{latex}{\out{\hypertarget{method-get_or_new_exec_env}{}}}
+\if{html}{\out{<a id="method-ModuleEnvir-get_or_new_exec_env"></a>}}
+\if{latex}{\out{\hypertarget{method-ModuleEnvir-get_or_new_exec_env}{}}}
 \subsection{Method \code{get_or_new_exec_env()}}{
 get the corresponding \code{\link[rave]{ExecEnvir}} with 
 shiny session
@@ -156,8 +156,8 @@ current module and given session
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-load_script"></a>}}
-\if{latex}{\out{\hypertarget{method-load_script}{}}}
+\if{html}{\out{<a id="method-ModuleEnvir-load_script"></a>}}
+\if{latex}{\out{\hypertarget{method-ModuleEnvir-load_script}{}}}
 \subsection{Method \code{load_script()}}{
 load and compile script into registered 
 \code{\link[rave]{ExecEnvir}}
@@ -177,8 +177,8 @@ none
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-render_ui"></a>}}
-\if{latex}{\out{\hypertarget{method-render_ui}{}}}
+\if{html}{\out{<a id="method-ModuleEnvir-render_ui"></a>}}
+\if{latex}{\out{\hypertarget{method-ModuleEnvir-render_ui}{}}}
 \subsection{Method \code{render_ui()}}{
 generate 'HTML' tags
 \subsection{Usage}{
@@ -197,8 +197,8 @@ generate 'HTML' tags
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clean"></a>}}
-\if{latex}{\out{\hypertarget{method-clean}{}}}
+\if{html}{\out{<a id="method-ModuleEnvir-clean"></a>}}
+\if{latex}{\out{\hypertarget{method-ModuleEnvir-clean}{}}}
 \subsection{Method \code{clean()}}{
 clean the module environment
 \subsection{Usage}{
