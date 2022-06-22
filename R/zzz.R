@@ -5,6 +5,20 @@ rave_version <- function(){
   as.character(utils::packageVersion('rave'))
 }
 
+latest_version <- function() {
+  tryCatch({
+    suppressWarnings({
+      versions <- raveio::load_json("https://beauchamplab.r-universe.dev/packages/rave")
+      return(list(
+        version = versions$Version[[1]],
+        built = versions$Built$Date[[1]]
+      ))
+    })
+  }, error = function(e){
+    NULL
+  })
+}
+
 
 .onLoad <- function(libname, pkgname){
   
@@ -124,7 +138,7 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
     git_repos <- tryCatch({
       readLines("https://raw.githubusercontent.com/beauchamplab/rave/master/DEVREPO")
     }, error = function(e){
-      c("beauchamplab/rave", "beauchamplab/raveio", "beauchamplab/ravebuiltins@migrate2",  "dipterix/rutabaga@develop", 'dipterix/threeBrain', 'dipterix/dipsaus')
+      c("beauchamplab/rave", "beauchamplab/raveio", "beauchamplab/ravebuiltins@migrate2", "dipterix/rutabaga@develop", 'dipterix/threeBrain', 'dipterix/dipsaus', 'dipterix/ravedash', 'dipterix/shidashi', 'dipterix/rpymat', 'dipterix/ravetools')
     })
     # lazy_install <- c(lazy_install, 'beauchamplab/ravebuiltins@migrate2', 'dipterix/rutabaga@develop')
     lazy_install <- c(lazy_install, git_repos[-1])
@@ -146,7 +160,8 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
       lazy_install <- c(lazy_install, 'rave')
     }
     lazy_install <- c(lazy_install, c(
-      'threeBrain', 'dipsaus', 'filearray', 'ravetools'))
+      'threeBrain', 'dipsaus', 'filearray', 'ravetools',
+      'rpymat', 'shidashi', 'ravedash'))
   }
   lazy_install <- unique(lazy_install)
   repos <- c(
@@ -332,14 +347,26 @@ finalize_installation <- function(packages, upgrade = c('always', 'ask', 'never'
 .onAttach <- function(libname, pkgname){
   try({
     if( arrange_data_dir(FALSE) ){
+      
+      current_version <- rave_version()
+      latest_version <- latest_version()
+      if(is.null(latest_version)) {
+        latest_version <- "(Unable to obtain the update information)"
+      } else {
+        latest_version <- sprintf("%s (built: %s)", latest_version$version, latest_version$built)
+      }
+      
       packageStartupMessage(sprintf(paste(
-        "RAVE is loaded! - %s",
+        "RAVE is loaded!",
+        "  Current version          - %s",
+        "  Latest available version - %s",
         "Data Repository:     \t%s",
         "Raw-data Repository: \t%s",
         "\nTo set option, type %s.",
         sep = '\n'
       ),
-      rave_version(), rave_options('data_dir'), rave_options('raw_data_dir'),
+      current_version, latest_version,
+      rave_options('data_dir'), rave_options('raw_data_dir'),
       sQuote('rave_options(launch_gui=TRUE)')
       ))
     }else{

@@ -1,6 +1,11 @@
 beauchamplab/rave
 beauchamplab/raveio
-beauchamplab/ravebuiltins@migrate2
-dipterix/rutabaga
-dipterix/threeBrain
+dipterix/filearray
+dipterix/shidashi
+dipterix/rpymat
 dipterix/dipsaus
+dipterix/threeBrain
+dipterix/rutabaga
+dipterix/ravedash
+dipterix/ravetools
+beauchamplab/ravebuiltins@migrate2
