@@ -19,7 +19,7 @@ shared the same storage format, hence it's possible to convert from
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.2.10</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.2.11</span>
       </span>
     </div>
 
@@ -54,7 +54,7 @@ shared the same storage format, hence it's possible to convert from
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">lazyarray_to_tensor</span><span class="op">(</span><span class="va">arr</span>, drop_partition <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">lazyarray_to_tensor</span><span class="op">(</span><span class="va">arr</span>, drop_partition <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -103,34 +103,34 @@ useful when data are very large.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"></span>
-<span class="r-in"><span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
-<span class="r-in"><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">arr</span> <span class="op">&lt;-</span> <span class="fu">lazyarray</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lazyarray/man/lazyarray.html" class="external-link">lazyarray</a></span><span class="op">(</span><span class="va">path</span>, storage_format <span class="op">=</span> <span class="st">'double'</span>, dim <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">arr</span><span class="op">[</span>,,<span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="fl">6</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># arr is a 'LazyArray' and its partition files are</span></span>
-<span class="r-in"><span class="co"># missing except for the first one</span></span>
-<span class="r-in"><span class="va">arr</span><span class="op">[</span><span class="op">]</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">arr</span><span class="op">$</span><span class="fu">get_partition_fpath</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># only keep the existing partition</span></span>
-<span class="r-in"><span class="va">ts1</span> <span class="op">&lt;-</span> <span class="fu">lazyarray_to_tensor</span><span class="op">(</span><span class="va">arr</span>, drop_partition <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># the last 3 partitions are dropped, result in 2x3x1 dimension</span></span>
-<span class="r-in"><span class="va">ts1</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">ts1</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># Fill in all missing partitions with NA</span></span>
-<span class="r-in"><span class="va">ts2</span> <span class="op">&lt;-</span> <span class="fu">lazyarray_to_tensor</span><span class="op">(</span><span class="va">arr</span>, drop_partition <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># ts2 dimension is 22x3x4</span></span>
-<span class="r-in"><span class="va">ts2</span></span>
-<span class="r-in"><span class="va">ts2</span><span class="op">$</span><span class="fu">subset</span><span class="op">(</span><span class="va">dim3</span> <span class="op">~</span> <span class="va">dim3</span> <span class="op">==</span> <span class="fl">4</span>, data_only <span class="op">=</span> <span class="cn">TRUE</span>, drop <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span></span>
+<span class="r-in"><span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">arr</span> <span class="op">&lt;-</span> <span class="fu">lazyarray</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/lazyarray/man/lazyarray.html" class="external-link">lazyarray</a></span><span class="op">(</span><span class="va">path</span>, storage_format <span class="op">=</span> <span class="st">'double'</span>, dim <span class="op">=</span> <span class="fl">2</span><span class="op">:</span><span class="fl">4</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">arr</span><span class="op">[</span>,,<span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="fl">6</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># arr is a 'LazyArray' and its partition files are</span></span></span>
+<span class="r-in"><span><span class="co"># missing except for the first one</span></span></span>
+<span class="r-in"><span><span class="va">arr</span><span class="op">[</span><span class="op">]</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/files.html" class="external-link">file.exists</a></span><span class="op">(</span><span class="va">arr</span><span class="op">$</span><span class="fu">get_partition_fpath</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># only keep the existing partition</span></span></span>
+<span class="r-in"><span><span class="va">ts1</span> <span class="op">&lt;-</span> <span class="fu">lazyarray_to_tensor</span><span class="op">(</span><span class="va">arr</span>, drop_partition <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># the last 3 partitions are dropped, result in 2x3x1 dimension</span></span></span>
+<span class="r-in"><span><span class="va">ts1</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">ts1</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Fill in all missing partitions with NA</span></span></span>
+<span class="r-in"><span><span class="va">ts2</span> <span class="op">&lt;-</span> <span class="fu">lazyarray_to_tensor</span><span class="op">(</span><span class="va">arr</span>, drop_partition <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># ts2 dimension is 22x3x4</span></span></span>
+<span class="r-in"><span><span class="va">ts2</span></span></span>
+<span class="r-in"><span><span class="va">ts2</span><span class="op">$</span><span class="fu">subset</span><span class="op">(</span><span class="va">dim3</span> <span class="op">~</span> <span class="va">dim3</span> <span class="op">==</span> <span class="fl">4</span>, data_only <span class="op">=</span> <span class="cn">TRUE</span>, drop <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -145,7 +145,7 @@ useful when data are very large.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

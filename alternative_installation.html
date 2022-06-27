@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.2.10</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.2.11</span>
       </span>
     </div>
 
@@ -48,40 +48,40 @@
 <p>First, <a href="./Installation.html">install all required prerequisites</a>. RAVE requires the latest versions of R (&gt;= 3.6.0) and RStudio. Trying to install RAVE on older versions of R and RStudio will lead to unpredictable error messages. For cloud-based RAVE or other use cases where multiple users will run RAVE on a single server, consider RStudio Server instead of RStudio.</p>
 <p>Next, open the RStudio application using the desktop shortcut; in Mac OSX, RStudio can be found in the Applications folder. Copy and paste the following commands (one at a time) into the RStudio console to install the current version of RAVE. Answer “Yes” to any questions that appear. In the case of errors, relaunch RStudio and repeat the commands.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># this step requires XCode on mac or RTools on Windows</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'devtools'</span><span class="op">)</span>
-<span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/remote-reexports.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">'beauchamplab/rave'</span><span class="op">)</span>
-
-<span class="co"># this step will install other packages needed by RAVE. If asked to compile packages from source, </span>
-<span class="co"># you can say safely say no. </span>
-<span class="fu">rave</span><span class="fu">::</span><span class="fu"><a href="reference/check_dependencies.html">check_dependencies</a></span><span class="op">(</span><span class="op">)</span>
-<span class="co"># this step may fail on Windows. If so, run </span>
-<span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"dipterix/dipsaus"</span>, upgrade <span class="op">=</span> <span class="cn">FALSE</span>, force <span class="op">=</span> <span class="cn">FALSE</span>, quiet <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
-
-<span class="co"># this step ensures all available RAVE modules are accessible</span>
-<span class="fu">rave</span><span class="fu">::</span><span class="fu"><a href="reference/arrange_modules.html">arrange_modules</a></span><span class="op">(</span><span class="cn">TRUE</span>, <span class="cn">TRUE</span><span class="op">)</span>
-
-<span class="co"># This step ensures you have a template brain already installed.</span>
-<span class="fu">threeBrain</span><span class="fu">::</span><span class="fu"><a href="https://dipterix.org/threeBrain/reference/template_subject.html" class="external-link">download_N27</a></span><span class="op">(</span>make_default <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># this step requires XCode on mac or RTools on Windows</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">'devtools'</span><span class="op">)</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">'beauchamplab/rave'</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># this step will install other packages needed by RAVE. If asked to compile packages from source, </span></span>
+<span><span class="co"># you can say safely say no. </span></span>
+<span><span class="fu">rave</span><span class="fu">::</span><span class="fu"><a href="reference/check_dependencies.html">check_dependencies</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="co"># this step may fail on Windows. If so, run </span></span>
+<span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"dipterix/dipsaus"</span>, upgrade <span class="op">=</span> <span class="cn">FALSE</span>, force <span class="op">=</span> <span class="cn">FALSE</span>, quiet <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># this step ensures all available RAVE modules are accessible</span></span>
+<span><span class="fu">rave</span><span class="fu">::</span><span class="fu"><a href="reference/arrange_modules.html">arrange_modules</a></span><span class="op">(</span><span class="cn">TRUE</span>, <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># This step ensures you have a template brain already installed.</span></span>
+<span><span class="fu">threeBrain</span><span class="fu">::</span><span class="fu"><a href="https://dipterix.org/threeBrain/reference/template_subject.html" class="external-link">download_N27</a></span><span class="op">(</span>make_default <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>To update existing installations of RAVE, run the following commands after making sure to update R and RStudio. Start RAVE and verify that the newer version loads. RStudio is unable to update packages that are in use, so it may be necessary to restart RStudio and retry the update. As an additional step, use the RStudio package manager to delete all RAVE packages and reinstall.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/remote-reexports.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">'beauchamplab/rave'</span><span class="op">)</span>
-<span class="fu">rave</span><span class="fu">::</span><span class="fu"><a href="reference/check_dependencies.html">check_dependencies</a></span><span class="op">(</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">'beauchamplab/rave'</span><span class="op">)</span></span>
+<span><span class="fu">rave</span><span class="fu">::</span><span class="fu"><a href="reference/check_dependencies.html">check_dependencies</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <ul><li>After installing or updating RAVE, quit and restart RStudio before continuing.</li></ul><div class="section level2">
 <h2 id="download-demo-data">Download Demo data<a class="anchor" aria-label="anchor" href="#download-demo-data"></a></h2>
 <ul><li>If you do not have any data in RAVE format, we recommend you download some sample data. Each RStudio command below downloads a dataset from a single subject.</li></ul><div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># 500MB ~ 1.5 GB per subject</span>
-<span class="fu">rave</span><span class="fu">::</span><span class="fu"><a href="reference/download_sample_data.html">download_sample_data</a></span><span class="op">(</span><span class="st">'KC'</span><span class="op">)</span>
-<span class="fu">rave</span><span class="fu">::</span><span class="fu"><a href="reference/download_sample_data.html">download_sample_data</a></span><span class="op">(</span><span class="st">'YAB'</span><span class="op">)</span>
-<span class="fu">rave</span><span class="fu">::</span><span class="fu"><a href="reference/download_sample_data.html">download_sample_data</a></span><span class="op">(</span><span class="st">'YAD'</span><span class="op">)</span>
-<span class="fu">rave</span><span class="fu">::</span><span class="fu"><a href="reference/download_sample_data.html">download_sample_data</a></span><span class="op">(</span><span class="st">'YAF'</span><span class="op">)</span>
-<span class="fu">rave</span><span class="fu">::</span><span class="fu"><a href="reference/download_sample_data.html">download_sample_data</a></span><span class="op">(</span><span class="st">'YAH'</span><span class="op">)</span>
-<span class="fu">rave</span><span class="fu">::</span><span class="fu"><a href="reference/download_sample_data.html">download_sample_data</a></span><span class="op">(</span><span class="st">'YAI'</span><span class="op">)</span>
-<span class="fu">rave</span><span class="fu">::</span><span class="fu"><a href="reference/download_sample_data.html">download_sample_data</a></span><span class="op">(</span><span class="st">'YAJ'</span><span class="op">)</span>
-<span class="fu">rave</span><span class="fu">::</span><span class="fu"><a href="reference/download_sample_data.html">download_sample_data</a></span><span class="op">(</span><span class="st">'YAK'</span><span class="op">)</span>
-
-<span class="co"># download group analysis sample - 72 MB. Please download at least 1 subject above.</span>
-<span class="fu">rave</span><span class="fu">::</span><span class="fu"><a href="reference/download_sample_data.html">download_sample_data</a></span><span class="op">(</span><span class="st">'_group_data'</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># 500MB ~ 1.5 GB per subject</span></span>
+<span><span class="fu">rave</span><span class="fu">::</span><span class="fu"><a href="reference/download_sample_data.html">download_sample_data</a></span><span class="op">(</span><span class="st">'KC'</span><span class="op">)</span></span>
+<span><span class="fu">rave</span><span class="fu">::</span><span class="fu"><a href="reference/download_sample_data.html">download_sample_data</a></span><span class="op">(</span><span class="st">'YAB'</span><span class="op">)</span></span>
+<span><span class="fu">rave</span><span class="fu">::</span><span class="fu"><a href="reference/download_sample_data.html">download_sample_data</a></span><span class="op">(</span><span class="st">'YAD'</span><span class="op">)</span></span>
+<span><span class="fu">rave</span><span class="fu">::</span><span class="fu"><a href="reference/download_sample_data.html">download_sample_data</a></span><span class="op">(</span><span class="st">'YAF'</span><span class="op">)</span></span>
+<span><span class="fu">rave</span><span class="fu">::</span><span class="fu"><a href="reference/download_sample_data.html">download_sample_data</a></span><span class="op">(</span><span class="st">'YAH'</span><span class="op">)</span></span>
+<span><span class="fu">rave</span><span class="fu">::</span><span class="fu"><a href="reference/download_sample_data.html">download_sample_data</a></span><span class="op">(</span><span class="st">'YAI'</span><span class="op">)</span></span>
+<span><span class="fu">rave</span><span class="fu">::</span><span class="fu"><a href="reference/download_sample_data.html">download_sample_data</a></span><span class="op">(</span><span class="st">'YAJ'</span><span class="op">)</span></span>
+<span><span class="fu">rave</span><span class="fu">::</span><span class="fu"><a href="reference/download_sample_data.html">download_sample_data</a></span><span class="op">(</span><span class="st">'YAK'</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># download group analysis sample - 72 MB. Please download at least 1 subject above.</span></span>
+<span><span class="fu">rave</span><span class="fu">::</span><span class="fu"><a href="reference/download_sample_data.html">download_sample_data</a></span><span class="op">(</span><span class="st">'_group_data'</span><span class="op">)</span></span></code></pre></div>
 <p>Once you see the following message, the subject is downloaded. The directory (XXX) will vary depending on the machine. If a subject previously exists, RAVE will ask you to choose from replacing, creating new or abandon the downloaded subject.</p>
 <pre><code>[ INFO ]: Expanding zip file
 [ INFO ]: Copy from tempdir to data repository
@@ -107,7 +107,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

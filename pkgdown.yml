@@ -1,8 +1,8 @@
 pandoc: 2.7.3
-pkgdown: 2.0.4
+pkgdown: 2.0.5
 pkgdown_sha: ~
 articles: {}
-last_built: 2022-06-22T18:56Z
+last_built: 2022-06-27T16:27Z
 urls:
   reference: https://beauchamplab.github.io/rave/reference
   article: https://beauchamplab.github.io/rave/articles

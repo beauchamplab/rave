@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.2.10</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.2.11</span>
       </span>
     </div>
 
@@ -125,7 +125,7 @@ package. This value is required to be true since <code>"rave-0.1.9"</code>.</p><
 <h3 id="method-info-">Method <code>info()</code><a class="anchor" aria-label="anchor" href="#method-info-"></a></h3>
 <p>print module information</p><div class="section">
 <h4 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">ModuleEnvir</span><span class="op">$</span><span class="fu">info</span><span class="op">(</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">ModuleEnvir</span><span class="op">$</span><span class="fu">info</span><span class="op">(</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -137,7 +137,7 @@ package. This value is required to be true since <code>"rave-0.1.9"</code>.</p><
 <h3 id="method-print-">Method <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code><a class="anchor" aria-label="anchor" href="#method-print-"></a></h3>
 <p>print module information and returns memory address</p><div class="section">
 <h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">ModuleEnvir</span><span class="op">$</span><span class="fu">print</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">ModuleEnvir</span><span class="op">$</span><span class="fu">print</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -153,17 +153,17 @@ package. This value is required to be true since <code>"rave-0.1.9"</code>.</p><
 <h3 id="method-new-">Method <code>new()</code><a class="anchor" aria-label="anchor" href="#method-new-"></a></h3>
 <p>constructor</p><div class="section">
 <h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va"><a href="../reference/ModuleEnvir.html">ModuleEnvir</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span>
-  <span class="va">module_id</span>,
-  <span class="va">label_name</span>,
-  <span class="va">script_path</span>,
-  author <span class="op">=</span> <span class="cn">NULL</span>,
-  version <span class="op">=</span> <span class="st">"0"</span>,
-  packages <span class="op">=</span> <span class="cn">NULL</span>,
-  .script_content <span class="op">=</span> <span class="cn">NULL</span>,
-  rmd_path <span class="op">=</span> <span class="cn">NULL</span>,
-  parent_env <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/environment.html" class="external-link">globalenv</a></span><span class="op">(</span><span class="op">)</span>
-<span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va"><a href="../reference/ModuleEnvir.html">ModuleEnvir</a></span><span class="op">$</span><span class="fu">new</span><span class="op">(</span></span>
+<span>  <span class="va">module_id</span>,</span>
+<span>  <span class="va">label_name</span>,</span>
+<span>  <span class="va">script_path</span>,</span>
+<span>  author <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  version <span class="op">=</span> <span class="st">"0"</span>,</span>
+<span>  packages <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  .script_content <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  rmd_path <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  parent_env <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/environment.html" class="external-link">globalenv</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -188,11 +188,11 @@ package. This value is required to be true since <code>"rave-0.1.9"</code>.</p><
 <p>get the corresponding <code><a href="ExecEnvir.html">ExecEnvir</a></code> with 
 shiny session</p><div class="section">
 <h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">ModuleEnvir</span><span class="op">$</span><span class="fu">get_or_new_exec_env</span><span class="op">(</span>
-  session <span class="op">=</span> <span class="fu">getDefaultReactiveDomain</span><span class="op">(</span><span class="op">)</span>,
-  <span class="va">...</span>,
-  new <span class="op">=</span> <span class="cn">FALSE</span>
-<span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">ModuleEnvir</span><span class="op">$</span><span class="fu">get_or_new_exec_env</span><span class="op">(</span></span>
+<span>  session <span class="op">=</span> <span class="fu">getDefaultReactiveDomain</span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  new <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -223,7 +223,7 @@ current module and given session</p>
 <p>load and compile script into registered 
 <code><a href="ExecEnvir.html">ExecEnvir</a></code></p><div class="section">
 <h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">ModuleEnvir</span><span class="op">$</span><span class="fu">load_script</span><span class="op">(</span>session <span class="op">=</span> <span class="fu">getDefaultReactiveDomain</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">ModuleEnvir</span><span class="op">$</span><span class="fu">load_script</span><span class="op">(</span>session <span class="op">=</span> <span class="fu">getDefaultReactiveDomain</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -243,7 +243,7 @@ current module and given session</p>
 <h3 id="method-render-ui-">Method <code>render_ui()</code><a class="anchor" aria-label="anchor" href="#method-render-ui-"></a></h3>
 <p>generate 'HTML' tags</p><div class="section">
 <h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">ModuleEnvir</span><span class="op">$</span><span class="fu">render_ui</span><span class="op">(</span>session <span class="op">=</span> <span class="fu">getDefaultReactiveDomain</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">ModuleEnvir</span><span class="op">$</span><span class="fu">render_ui</span><span class="op">(</span>session <span class="op">=</span> <span class="fu">getDefaultReactiveDomain</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -263,7 +263,7 @@ current module and given session</p>
 <h3 id="method-clean-">Method <code>clean()</code><a class="anchor" aria-label="anchor" href="#method-clean-"></a></h3>
 <p>clean the module environment</p><div class="section">
 <h4 id="usage-6">Usage<a class="anchor" aria-label="anchor" href="#usage-6"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span class="va">ModuleEnvir</span><span class="op">$</span><span class="fu">clean</span><span class="op">(</span>session <span class="op">=</span> <span class="fu">getDefaultReactiveDomain</span><span class="op">(</span><span class="op">)</span>, <span class="va">session_id</span><span class="op">)</span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">ModuleEnvir</span><span class="op">$</span><span class="fu">clean</span><span class="op">(</span>session <span class="op">=</span> <span class="fu">getDefaultReactiveDomain</span><span class="op">(</span><span class="op">)</span>, <span class="va">session_id</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -285,16 +285,16 @@ current module and given session</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">module</span> <span class="op">&lt;-</span> <span class="fu"><a href="get_module.html">get_module</a></span><span class="op">(</span><span class="st">'ravebuiltins'</span>, <span class="st">'power_explorer'</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">module</span></span>
-<span class="r-in"><span class="co">#&gt; Module Name: Power Explorer </span></span>
-<span class="r-in"><span class="co">#&gt; Version: 0 </span></span>
-<span class="r-in"><span class="co">#&gt; Script Path: ... </span></span>
-<span class="r-in"><span class="co">#&gt; Author(s):</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">module</span> <span class="op">&lt;-</span> <span class="fu"><a href="get_module.html">get_module</a></span><span class="op">(</span><span class="st">'ravebuiltins'</span>, <span class="st">'power_explorer'</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">module</span></span></span>
+<span class="r-in"><span><span class="co">#&gt; Module Name: Power Explorer </span></span></span>
+<span class="r-in"><span><span class="co">#&gt; Version: 0 </span></span></span>
+<span class="r-in"><span><span class="co">#&gt; Script Path: ... </span></span></span>
+<span class="r-in"><span><span class="co">#&gt; Author(s):</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -309,7 +309,7 @@ current module and given session</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

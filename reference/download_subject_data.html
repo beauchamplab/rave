@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.2.10</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.2.11</span>
       </span>
     </div>
 
@@ -50,17 +50,17 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">download_subject_data</span><span class="op">(</span>
-  <span class="va">con</span>,
-  replace_if_exists <span class="op">=</span> <span class="cn">FALSE</span>,
-  override_project <span class="op">=</span> <span class="cn">NULL</span>,
-  override_subject <span class="op">=</span> <span class="cn">NULL</span>,
-  temp_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,
-  remove_zipfile <span class="op">=</span> <span class="cn">TRUE</span>,
-  subject_settings <span class="op">=</span> <span class="cn">NULL</span>,
-  mode <span class="op">=</span> <span class="st">"wb"</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">download_subject_data</span><span class="op">(</span></span>
+<span>  <span class="va">con</span>,</span>
+<span>  replace_if_exists <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  override_project <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  override_subject <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  temp_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  remove_zipfile <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  subject_settings <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  mode <span class="op">=</span> <span class="st">"wb"</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -110,34 +110,34 @@ default project name, subject code, data directory and raw data directory.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
-<span class="r-in"><span class="co"># Normal example</span></span>
-<span class="r-in"><span class="fu"><a href="https://rdrr.io/r/utils/download.file.html" class="external-link">download.file</a></span><span class="op">(</span></span>
-<span class="r-in">  <span class="st">'https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/data-large.zip'</span>,</span>
-<span class="r-in">  destfile <span class="op">=</span> <span class="st">"~/rave_data/data-small.zip"</span>, mode <span class="op">=</span> <span class="st">"wb"</span><span class="op">)</span></span>
-<span class="r-in"><span class="fu">download_subject_data</span><span class="op">(</span>con <span class="op">=</span> <span class="st">"~/rave_data/data-small.zip"</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># or the following</span></span>
-<span class="r-in"><span class="co"># download_subject_data(</span></span>
-<span class="r-in"><span class="co"># 'https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/data-large.zip'</span></span>
-<span class="r-in"><span class="co"># )</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># rename project to demo_junk</span></span>
-<span class="r-in"><span class="fu">download_subject_data</span><span class="op">(</span>con <span class="op">=</span> <span class="st">"~/rave_data/data-small.zip"</span>,</span>
-<span class="r-in">           override_project <span class="op">=</span> <span class="st">'demo_junk'</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># override settings</span></span>
-<span class="r-in"><span class="fu">download_subject_data</span><span class="op">(</span></span>
-<span class="r-in">  con <span class="op">=</span> <span class="st">"~/rave_data/data-small.zip"</span>,</span>
-<span class="r-in">  subject_settings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span class="r-in">    <span class="co"># subject conf</span></span>
-<span class="r-in">    <span class="st">'demo_project/demo_subject'</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
-<span class="r-in">      data_dir <span class="op">=</span> <span class="st">'data 2/data_dir/demo/sub1'</span>,</span>
-<span class="r-in">      raw_dir <span class="op">=</span> <span class="st">'data 2/raw_dir/sub1'</span></span>
-<span class="r-in">    <span class="op">)</span></span>
-<span class="r-in">  <span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"><span class="op">}</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span><span class="co"># Normal example</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/download.file.html" class="external-link">download.file</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="st">'https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/data-large.zip'</span>,</span></span>
+<span class="r-in"><span>  destfile <span class="op">=</span> <span class="st">"~/rave_data/data-small.zip"</span>, mode <span class="op">=</span> <span class="st">"wb"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">download_subject_data</span><span class="op">(</span>con <span class="op">=</span> <span class="st">"~/rave_data/data-small.zip"</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># or the following</span></span></span>
+<span class="r-in"><span><span class="co"># download_subject_data(</span></span></span>
+<span class="r-in"><span><span class="co"># 'https://s3-us-west-2.amazonaws.com/rave-demo-subject/sfn-demo/data-large.zip'</span></span></span>
+<span class="r-in"><span><span class="co"># )</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># rename project to demo_junk</span></span></span>
+<span class="r-in"><span><span class="fu">download_subject_data</span><span class="op">(</span>con <span class="op">=</span> <span class="st">"~/rave_data/data-small.zip"</span>,</span></span>
+<span class="r-in"><span>           override_project <span class="op">=</span> <span class="st">'demo_junk'</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># override settings</span></span></span>
+<span class="r-in"><span><span class="fu">download_subject_data</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  con <span class="op">=</span> <span class="st">"~/rave_data/data-small.zip"</span>,</span></span>
+<span class="r-in"><span>  subject_settings <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="co"># subject conf</span></span></span>
+<span class="r-in"><span>    <span class="st">'demo_project/demo_subject'</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      data_dir <span class="op">=</span> <span class="st">'data 2/data_dir/demo/sub1'</span>,</span></span>
+<span class="r-in"><span>      raw_dir <span class="op">=</span> <span class="st">'data 2/raw_dir/sub1'</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -152,7 +152,7 @@ default project name, subject code, data directory and raw data directory.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>
