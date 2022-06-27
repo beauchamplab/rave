@@ -174,6 +174,11 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
   
   arrange_modules(refresh = TRUE)
   
+  try({
+    pkgs <- lazy_install[!lazy_install %in% c("threeBrain", "ravebuiltins")]
+    finalize_installation(upgrade = "always", async = FALSE)
+  }, silent = TRUE)
+  
   if( restart ){
     dipsaus::restart_session()
   }
