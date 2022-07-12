@@ -98,7 +98,7 @@ app_controller <- function(
       )
     })
     dipsaus::drop_nulls(re)
-  })
+  }, simplify = FALSE, USE.NAMES = TRUE)
 
   # Data selector
   data_selector <- shiny_data_selector('DATA_SELECTOR', data_env = data_repo)
