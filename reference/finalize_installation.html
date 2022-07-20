@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.2.12</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.2.13</span>
       </span>
     </div>
 
@@ -52,7 +52,7 @@
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">finalize_installation</span><span class="op">(</span></span>
 <span>  <span class="va">packages</span>,</span>
-<span>  upgrade <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"always"</span>, <span class="st">"ask"</span>, <span class="st">"never"</span><span class="op">)</span>,</span>
+<span>  upgrade <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ask"</span>, <span class="st">"config-only"</span>, <span class="st">"always"</span>, <span class="st">"never"</span>, <span class="st">"data-only"</span><span class="op">)</span>,</span>
 <span>  async <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -66,8 +66,9 @@ or leave it blank to upgrade all.</p></dd>
 
 
 <dt>upgrade</dt>
-<dd><p>whether to ask. Default is 'always' to receive default 
-settings Other choices are 'ask' or 'never'.</p></dd>
+<dd><p>whether to ask. Default is <code>'always'</code> to receive default 
+settings. Other choices are <code>'ask'</code>, <code>'never'</code>, 
+<code>'config-only'</code>, and <code>'data-only'</code></p></dd>
 
 
 <dt>async</dt>
@@ -87,7 +88,7 @@ settings Other choices are 'ask' or 'never'.</p></dd>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer></div>
