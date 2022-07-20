@@ -6,7 +6,7 @@
 \usage{
 finalize_installation(
   packages,
-  upgrade = c("always", "ask", "never"),
+  upgrade = c("ask", "config-only", "always", "never", "data-only"),
   async = TRUE
 )
 }
@@ -15,8 +15,9 @@ finalize_installation(
 data, or \code{c('threeBrain', 'ravebuiltins')} to upgrade built-in data, 
 or leave it blank to upgrade all.}
 
-\item{upgrade}{whether to ask. Default is 'always' to receive default 
-settings Other choices are 'ask' or 'never'.}
+\item{upgrade}{whether to ask. Default is \code{'always'} to receive default 
+settings. Other choices are \code{'ask'}, \code{'never'}, 
+\code{'config-only'}, and \code{'data-only'}}
 
 \item{async}{whether to run scripts in parallel; default is true.}
 }

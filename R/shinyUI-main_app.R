@@ -913,10 +913,6 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
 start_rave <- app_controller
 
 
-
-
-
-
 #' @name rave-tabs
 #' @title Open/Close a tab in RAVE main application
 #' @param module_id character, module ID

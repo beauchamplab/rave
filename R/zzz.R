@@ -106,7 +106,7 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
   if( demo_data ){
     catgl('Checking RAVE data repository', level = 'DEFAULT', end = '\n')
     p <- get_projects()
-    if(!length(p)){
+    if(length(p) == 0 || (length(p) == 1 && 'demo' %in% p)){
       has_demo <- FALSE
       if('demo' %in% p){
         subs <- get_subjects('demo')
@@ -169,14 +169,13 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
     dipterixuniverse = 'https://dipterix.r-universe.dev',
     getOption("repos")
   )
-  
-  dipsaus::prepare_install2(unique(lazy_install), restart = FALSE, repos = repos)
+  dipsaus::prepare_install2(lazy_install, restart = FALSE, repos = repos)
   
   arrange_modules(refresh = TRUE)
   
   try({
-    pkgs <- lazy_install[!lazy_install %in% c("threeBrain", "ravebuiltins")]
-    finalize_installation(upgrade = "always", async = FALSE)
+    # pkgs <- lazy_install[!lazy_install %in% c("threeBrain", "ravebuiltins")]
+    finalize_installation(upgrade = c("config-only", "always"), async = FALSE)
   }, silent = TRUE)
   
   if( restart ){
@@ -277,13 +276,20 @@ finalize_installation_internal_demo <- function(upgrade = c('ask', 'always', 'ne
 #' @param packages package name to finalize. 'rave' to only update base demo 
 #' data, or \code{c('threeBrain', 'ravebuiltins')} to upgrade built-in data, 
 #' or leave it blank to upgrade all.
-#' @param upgrade whether to ask. Default is 'always' to receive default 
-#' settings Other choices are 'ask' or 'never'.
+#' @param upgrade whether to ask. Default is \code{'always'} to receive default 
+#' settings. Other choices are \code{'ask'}, \code{'never'}, 
+#' \code{'config-only'}, and \code{'data-only'}
 #' @param async whether to run scripts in parallel; default is true.
 #' 
 #' @export
-finalize_installation <- function(packages, upgrade = c('always', 'ask', 'never'), async = TRUE){
-  upgrade <- match.arg(upgrade)
+finalize_installation <- function(
+  packages, upgrade = c('ask', 'config-only', 'always', 'never', 'data-only'), 
+  async = TRUE){
+  
+  upgrade <- upgrade[upgrade %in% c('ask', 'config-only', 'always', 'never', 'data-only')]
+  if(!length(upgrade)) {
+    upgrade <- "ask"
+  }
   
   if(missing(packages)){
     packages <- NULL
@@ -329,10 +335,17 @@ finalize_installation <- function(packages, upgrade = c('always', 'ask', 'never'
         ns <- asNamespace(pkg)
         fun <- ns[[fname]]
         if(is.function(fun)){
-          if('async' %in% names(formals(fun))){
-            fun(upgrade, async)
+          fml <- formals(fun)
+          upgrade1 <- tryCatch({
+            dipsaus::`%OF%`(upgrade, eval(fml$upgrade))
+          }, error = function(e) {
+            upgrade
+          })
+          # print(upgrade1)
+          if('async' %in% names(fml)){
+            fun(upgrade = upgrade1, async)
           } else {
-            fun(upgrade)
+            fun(upgrade = upgrade1)
           }
         }
       }
