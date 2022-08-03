@@ -1,7 +1,7 @@
 Package: rave
 Type: Package
 Title: R Analysis and Visualization of 'ECOG/iEEG' Data
-Version: 1.0.2.13
+Version: 1.0.2.14
 Authors@R: c(
     person("Zhengjia", "Wang", email = "dipterix.wang@gmail.com", role = c("cph", "aut", "cre")),
     person("John", "Magnotti", role = c("aut")),
@@ -21,10 +21,9 @@ Encoding: UTF-8
 Language: en-US
 URL: https://rave.wiki
 BugReports: https://github.com/beauchamplab/rave/issues
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.1
 Depends: 
-    R (>= 3.6.0),
-    raveio (>= 0.0.5)
+    R (>= 3.6.0)
 Imports:
     utils,
     stats,
@@ -49,7 +48,9 @@ Imports:
     threeBrain (>= 0.2.1),
     shinyFiles (>= 0.7.3),
     shinyWidgets (>= 0.5.3),
-    ravetools (>= 0.0.3)
+    raveio (>= 0.0.5),
+    ravetools (>= 0.0.3),
+    ravedash
 Suggests:
     knitr,
     data.table (>= 1.11.8),
@@ -61,9 +62,6 @@ Suggests:
     testthat,
     lobstr,
     lazyarray,
-    rstudioapi,
-    ravedash
-Remotes: 
-    dipterix/dipsaus,
-    beauchamplab/raveio,
-    dipterix/threeBrain
+    rpymat,
+    filearray,
+    rstudioapi

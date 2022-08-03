@@ -15,20 +15,22 @@ utils::capture.output({
 skip_if_not(has_demo, message = 'Has demo project')
 skip_if_not(has_yab, message = 'Found demo/YAB')
 
-check_with_subject <- function(expr){
+test_with_no_output <- function(expr){
   
   utils::capture.output({
-    force(expr)
-  }, type = 'output')
+    utils::capture.output({
+      force(expr)
+    }, type = 'output')
+  }, type = 'message')
+  
   
 }
-
 
 
 # Check the normal processing pipeline
 test_that('Checkers - checks.R', {
   
-  check_with_subject({
+  test_with_no_output({
     res <- demo_checks
     
     # Must have exactly the same names
@@ -57,7 +59,7 @@ test_that('Checkers - checks.R', {
 
 
 test_that('Class Subject with demo/YAB', {
-  check_with_subject({
+  test_with_no_output({
     reference <- demo_checks$references[[1]]
     
     
@@ -74,7 +76,7 @@ test_that('Class Subject with demo/YAB', {
 })
 
 test_that('Function load_metas with demo/YAB', {
-  check_with_subject({
+  test_with_no_output({
     epoch <- demo_checks$epochs[[1]]
     reference <- demo_checks$references[[1]]
     
@@ -97,7 +99,7 @@ test_that('Function load_metas with demo/YAB', {
 })
 
 test_that('Class Electrode with demo/YAB', {
-  check_with_subject({
+  test_with_no_output({
     epoch <- demo_checks$epochs[[1]]
     reference <- demo_checks$references[[1]]
     # Electrode
@@ -144,7 +146,7 @@ test_that('Class Electrode with demo/YAB', {
 })
 
 test_that('Class ECoGRepository with demo/YAB', {
-  check_with_subject({
+  test_with_no_output({
     epoch <- demo_checks$epochs[[1]]
     reference <- demo_checks$references[[1]]
     
@@ -189,7 +191,7 @@ test_that('Class ECoGRepository with demo/YAB', {
 })
 
 test_that('Function rave_prepare with demo/YAB', {
-  check_with_subject({
+  test_with_no_output({
     epoch <- demo_checks$epochs[[1]]
     reference <- demo_checks$references[[1]]
     env <- new.env(parent = parent.env(globalenv()))

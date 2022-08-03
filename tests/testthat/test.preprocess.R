@@ -12,19 +12,22 @@ if(dir.exists(raw_dir)){
 skip_if_not(has_yab, message = 'Found raw YAB')
 
 
-test_with_no_output <- function(msg, expr){
-  expr <- substitute(expr)
-  test_that(msg, {
-    capture.output({
+test_with_no_output <- function(expr){
+  
+  utils::capture.output({
+    utils::capture.output({
       force(expr)
     }, type = 'output')
-  })
+  }, type = 'message')
+  
+  
 }
+
 
 # Check the preprocess pipeline
 test_that('Preprocess pipeline with YAB', {
   
-  capture.output({
+  test_with_no_output({
     utils <- rave_preprocess_tools()
     
     data_dir <- rave_options('data_dir')
