@@ -2,6 +2,7 @@
 % Please edit documentation in R/shinyUI-main_app.R
 \name{start_rave}
 \alias{start_rave}
+\alias{launch_demo}
 \title{Start RAVE main application}
 \usage{
 start_rave(
@@ -13,6 +14,15 @@ start_rave(
   simplify_header = FALSE,
   token = NULL,
   data_repo = getDefaultDataRepository(),
+  ...
+)
+
+launch_demo(
+  modules = "power_explorer",
+  launch.browser = TRUE,
+  theme = "green",
+  disable_sidebar = TRUE,
+  simplify_header = FALSE,
   ...
 )
 }

@@ -912,6 +912,173 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
 #' @export
 start_rave <- app_controller
 
+#' @rdname start_rave
+#' @export
+launch_demo <- function(
+    modules = "power_explorer", launch.browser = TRUE, theme = "green", 
+    disable_sidebar = TRUE, simplify_header = FALSE, ...) {
+    
+  selected_modules <- modules
+  launch.browser <- TRUE
+  modules <- NULL
+  token <- NULL
+  test.mode <- TRUE
+  data_repo <- getDefaultDataRepository()
+  
+  options(shiny.maxRequestSize = 1024^3)
+  tryCatch({
+    rave_prepare(subject = "demo/DemoSubject", electrodes = c(13:16,24), epoch = "auditory_onset", time_range = c(1,2), reference = "default", attach = FALSE)
+  }, error = function(e) {
+  })
+  
+  controller_env <- environment()
+  loaded_modules <- list()
+  module_table <- arrange_modules(refresh = FALSE, reset = FALSE, 
+                                  quiet = TRUE)
+  dup <- duplicated(module_table$Name)
+  if (any(dup)) {
+    module_table$Name[dup] <- sprintf("%s (%s)", module_table$Name[dup], 
+                                      module_table$Package[dup])
+  }
+  rave_pkgs <- unique(module_table$Package)
+  
+  module_table <- do.call("rbind", lapply(selected_modules, function(mid) {
+    sel <- module_table$ID %in% mid
+    if(!any(sel)) { return(NULL) }
+    module_table[sel, , drop = FALSE]
+  }))
+  
+  if(!nrow(module_table)) {
+    stop("Cannot find one or more demo modules. Please make sure the module IDs are correct")
+  }
+        
+  load_module <- function(module_id, notification = FALSE) {
+    if ("ModuleEnvir" %in% class(module_id)) {
+      controller_env$loaded_modules[[stringr::str_to_upper(module_id$module_id)]] <- module_id
+      return(module_id)
+    }
+    module_id <- stringr::str_to_upper(module_id)
+    if (length(loaded_modules[[module_id]])) {
+      return(loaded_modules[[module_id]])
+    }
+    sel <- stringr::str_to_upper(module_table$ID) == module_id
+    if (!any(sel)) {
+      return(NULL)
+    }
+    pkg <- module_table$Package[sel][[1]]
+    if (notification) {
+      shiny::showNotification(p("Loading module - ", module_id), 
+                              type = "message", duration = NULL, id = "load_module_notif")
+      on.exit({
+        shiny::removeNotification(id = "load_module_notif")
+      })
+    }
+    catgl("Loading module - ", module_id)
+    ms <- detect_modules(packages = pkg, as_module = TRUE)
+    ms <- unlist(ms)
+    for (m in ms) {
+      if (is.null(controller_env$loaded_modules[[stringr::str_to_upper(m$module_id)]])) {
+        controller_env$loaded_modules[[stringr::str_to_upper(m$module_id)]] <- m
+      }
+    }
+    return(loaded_modules[[module_id]])
+  }
+  if (length(modules)) {
+    if (!is.list(modules)) {
+      modules <- unlist(list(modules))
+    }
+    for (mid in modules) {
+      load_module(mid)
+    }
+  }
+  groups <- unique(module_table$Group)
+  groups[groups == ""] <- "______"
+  module_list <- sapply(groups, function(group_name) {
+    sel <- module_table$Group == group_name
+    re <- lapply(module_table$ID[sel], function(mid) {
+      idx <- which(module_table$ID == mid)[1]
+      active <- module_table$Active[idx]
+      if (!active) {
+        return(NULL)
+      }
+      list(module_id = mid, module_label = module_table$Name[idx], 
+           active = module_table$Active[idx], init = function() {
+             load_module(mid)
+           })
+    })
+    dipsaus::drop_nulls(re)
+  }, simplify = FALSE, USE.NAMES = TRUE)
+  data_selector <- shiny_data_selector("DATA_SELECTOR", data_env = data_repo)
+  adapter <- dipsaus::fastmap2()
+  
+  .subset2(adapter, "mset")(
+    data_selector_header = data_selector$header, 
+    data_selector_server = data_selector$server, launch_selector = data_selector$launch, 
+    get_option = function(opt, default = NULL) {
+      get0(opt, ifnotfound = default, envir = controller_env, 
+           inherits = FALSE)
+    }, 
+    get_module_ui = function(active_id = NULL) {
+      module_ids <- module_table$ID[module_table$Active]
+      active_id %?<-% module_ids[1]
+      load_module(active_id)
+      groups <- names(module_list)
+      quos <- list()
+      for (g in groups[groups != "______"]) {
+        modules <- module_list[[g]]
+        if (length(modules)) {
+          quo_items <- lapply(modules, function(m) {
+            rlang::quo(shinydashboard::menuSubItem(text = !!m$module_label, 
+                                                   tabName = !!stringr::str_to_upper(m$module_id), 
+                                                   selected = !!(m$module_id == active_id)))
+          })
+          quos[[length(quos) + 1]] <- rlang::quo(shinydashboard::menuItem(text = !!g, 
+                                                                          !!!quo_items, startExpanded = !!(active_id %in% 
+                                                                                                             sapply(modules, "[[", "module_id"))))
+        }
+      }
+      for (m in module_list[["______"]]) {
+        quos[[length(quos) + 1]] <- rlang::quo({
+          shinydashboard::menuItem(text = !!m$module_label, 
+                                   tabName = !!stringr::str_to_upper(m$module_id), 
+                                   selected = !!(m$module_id == active_id))
+        })
+      }
+      quos
+    }, 
+    module_ids = function(loaded_only = FALSE) {
+      if (loaded_only) {
+        sapply(loaded_modules, "[[", "module_id")
+      }
+      else {
+        module_table$ID[module_table$Active]
+      }
+    }, 
+    load_module = load_module
+  )
+  
+  ui_func <- app_ui(adapter, token = token)
+  instance_id <- paste(sample(c(letters, LETTERS, 0:9), 22), 
+                       collapse = "")
+  server_func <- app_server(adapter, instance_id, token = token, 
+                            data_repo = data_repo)
+  reg.finalizer(controller_env, function(e) {
+    dir_path <- file.path(subject_cache_dir(), .subset2(e, 
+                                                        "instance_id"))
+    if (dir.exists(dir_path)) {
+      unlink(dir_path, recursive = TRUE, FALSE)
+    }
+  }, onexit = TRUE)
+  RaveFinalizer$new(function() {
+    dir_path <- file.path(subject_cache_dir(), instance_id)
+    if (dir.exists(dir_path)) {
+      unlink(dir_path, recursive = TRUE, force = FALSE)
+    }
+  })
+  shiny::shinyApp(ui = ui_func, server = server_func, options = list(launch.browser = launch.browser))
+    
+}
+
 
 #' @name rave-tabs
 #' @title Open/Close a tab in RAVE main application
