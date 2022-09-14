@@ -284,80 +284,88 @@ finalize_installation_internal_demo <- function(upgrade = c('ask', 'always', 'ne
 #' @export
 finalize_installation <- function(
   packages, upgrade = c('ask', 'config-only', 'always', 'never', 'data-only'), 
-  async = TRUE){
+  async = FALSE){
   
-  upgrade <- upgrade[upgrade %in% c('ask', 'config-only', 'always', 'never', 'data-only')]
-  if(!length(upgrade)) {
-    upgrade <- "ask"
-  }
-  
-  if(missing(packages)){
-    packages <- NULL
-  }
-  # 
-  # if(!length(packages) || 'threeBrain' %in% packages){
-  #   # Check N27 brain
-  #   # To be backward compatible, we need to check threeBrain files
-  #   tmp <- system.file('rave.yaml', package = 'threeBrain')
-  #   if(tmp == ''){
-  #     threeBrain::download_N27()
-  #     threeBrain::merge_brain()
-  #   }
-  # }
-  
-  # Get all packages with rave.yaml
-  lib_path <- .libPaths()
-  
-  allpackages <- unlist(sapply(lib_path, function(lp){
-    list.dirs(lp, recursive = FALSE, full.names = FALSE)
-  }, simplify = FALSE))
-  allpackages <- unique(allpackages)
-  
-  yaml_path <- sapply(allpackages, function(p){
-    system.file('rave.yaml', package = p)
-  })
-  sel <- yaml_path != ''
-  
-  if(length(packages)){
-    sel <- sel & (allpackages %in% packages)
-  }
-  packages <- allpackages[sel]
-  
-  for(pkg in packages){
-    tryCatch({
-      
-      # load yaml
-      conf <- raveio::load_yaml(system.file('rave.yaml', package = pkg))
-      
-      fname <- conf$finalize_installation
-      
-      if(is.character(fname) && length(fname) == 1){
-        ns <- asNamespace(pkg)
-        fun <- ns[[fname]]
-        if(is.function(fun)){
-          fml <- formals(fun)
-          upgrade1 <- tryCatch({
-            dipsaus::`%OF%`(upgrade, eval(fml$upgrade))
-          }, error = function(e) {
-            upgrade
-          })
-          # print(upgrade1)
-          if('async' %in% names(fml)){
-            fun(upgrade = upgrade1, async)
-          } else {
-            fun(upgrade = upgrade1)
+  suppressWarnings({
+    upgrade <- upgrade[upgrade %in% c('ask', 'config-only', 'always', 'never', 'data-only')]
+    if(!length(upgrade)) {
+      upgrade <- "ask"
+    }
+    
+    if(missing(packages)){
+      packages <- NULL
+    }
+    # 
+    # if(!length(packages) || 'threeBrain' %in% packages){
+    #   # Check N27 brain
+    #   # To be backward compatible, we need to check threeBrain files
+    #   tmp <- system.file('rave.yaml', package = 'threeBrain')
+    #   if(tmp == ''){
+    #     threeBrain::download_N27()
+    #     threeBrain::merge_brain()
+    #   }
+    # }
+    
+    # Get all packages with rave.yaml
+    lib_path <- .libPaths()
+    
+    allpackages <- unlist(sapply(lib_path, function(lp){
+      list.dirs(lp, recursive = FALSE, full.names = FALSE)
+    }, simplify = FALSE))
+    allpackages <- unique(allpackages)
+    
+    yaml_path <- sapply(allpackages, function(p){
+      system.file('rave.yaml', package = p)
+    })
+    sel <- yaml_path != ''
+    
+    if(length(packages)){
+      sel <- sel & (allpackages %in% packages)
+    }
+    packages <- allpackages[sel]
+    
+    for(pkg in packages){
+      tryCatch({
+        
+        # load yaml
+        conf <- raveio::load_yaml(system.file('rave.yaml', package = pkg))
+        
+        fname <- conf$finalize_installation
+        
+        if(is.character(fname) && length(fname) == 1){
+          ns <- asNamespace(pkg)
+          fun <- ns[[fname]]
+          if(is.function(fun)){
+            fml <- formals(fun)
+            upgrade1 <- tryCatch({
+              dipsaus::`%OF%`(upgrade, eval(fml$upgrade))
+            }, error = function(e) {
+              upgrade
+            })
+            # print(upgrade1)
+            if('async' %in% names(fml)){
+              fun(upgrade = upgrade1, async)
+            } else {
+              fun(upgrade = upgrade1)
+            }
           }
         }
-      }
+        
+      }, error = function(e){
+        catgl('Error found while finalize installation of [', pkg, ']. Reason:\n',
+              e$message, '\nSkipping...\n', level = 'WARNING')
+      })
       
-    }, error = function(e){
-      catgl('Error found while finalize installation of [', pkg, ']. Reason:\n',
-                    e$message, '\nSkipping...\n', level = 'WARNING')
-    })
+    }
     
-  }
+    if( async ) {
+      catgl('Scheduled. There might be some job running in the background. Please wait for them to finish.')
+    } else {
+      catgl("Finalize installation done!", level = "INFO")
+      message("Finalize installation done! Please close all your R/RStudio sessions and restart.")
+    }
+  })
   
-  catgl('Scheduled. There might be some job running in the background. Please wait for them to finish.')
   invisible()
 }
 

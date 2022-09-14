@@ -43,7 +43,7 @@ dev_${{PACKAGE}} <- function(expose_functions = FALSE, reload = TRUE){
   (a >= min(b)) & (a <= max(b))
 }
 
-finalize_installation <- function(upgrade = c("ask", "always", "never"), async = TRUE){
+finalize_installation <- function(upgrade = c("ask", "always", "never"), async = FALSE){
   upgrade <- match.arg(upgrade)
   
   dst_path <- tools::R_user_dir("${{PACKAGE}}", which = "data")

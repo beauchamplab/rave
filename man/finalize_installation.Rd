@@ -7,7 +7,7 @@
 finalize_installation(
   packages,
   upgrade = c("ask", "config-only", "always", "never", "data-only"),
-  async = TRUE
+  async = FALSE
 )
 }
 \arguments{
