@@ -106,7 +106,8 @@ check_dependencies <- function(update_rave = TRUE, restart = TRUE,
   ravemanager <- asNamespace("ravemanager")
   ravemanager$install(upgrade_manager = FALSE)
   
-  arrange_modules(refresh = TRUE)
+  rave <- asNamespace("rave")
+  rave$arrange_modules(refresh = TRUE)
   
   if( restart ){
     f <- get0(".rs.restartR", ifnotfound = NULL)
