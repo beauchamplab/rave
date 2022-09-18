@@ -96,90 +96,23 @@ restart_r <- function(){
 check_dependencies <- function(update_rave = TRUE, restart = TRUE, 
                                nightly = FALSE, demo_data = FALSE, ...){
   
-  # Check N27 brain
-  catgl('Checking N27 brain', level = 'DEFAULT', end = '\n')
-  threeBrain::merge_brain()
-  catgl('   - Done', level = 'INFO', end = '\n')
-  
-  
-  # Check demo subjects
-  if( demo_data ){
-    catgl('Checking RAVE data repository', level = 'DEFAULT', end = '\n')
-    p <- get_projects()
-    if(length(p) == 0 || (length(p) == 1 && 'demo' %in% p)){
-      has_demo <- FALSE
-      if('demo' %in% p){
-        subs <- get_subjects('demo')
-        if(length(subs)){
-          has_demo <- TRUE
-        }
-      }
-      if(!has_demo){
-        if(interactive()){
-          ans <- dipsaus::ask_yesno("There is no project found in data repository. Install demo subjects?")
-        } else {
-          ans <- TRUE
-        }
-        if(isTRUE(ans)){
-          # install demo subjects
-          download_sample_data('_group_data', replace_if_exists = TRUE)
-          download_sample_data('KC')
-          download_sample_data('YAB')
-        }
-      }
-      catgl('   - Done', level = 'INFO', end = '\n')
-    }
+  if(!dipsaus::package_installed("ravemanager")) {
+    utils::install.packages("ravemanager", repos = c(
+      beauchamplab = "https://beauchamplab.r-universe.dev", 
+      dipterix = "https://dipterix.r-universe.dev", 
+      CRAN = "https://cloud.r-project.org"))
   }
   
-  lazy_install <- NULL
-  
-  if(nightly){
-    # get repos from Github
-    git_repos <- tryCatch({
-      readLines("https://raw.githubusercontent.com/beauchamplab/rave/master/DEVREPO")
-    }, error = function(e){
-      c("beauchamplab/rave", "beauchamplab/raveio", "beauchamplab/ravebuiltins@migrate2", "dipterix/rutabaga@develop", 'dipterix/threeBrain', 'dipterix/dipsaus', 'dipterix/ravedash', 'dipterix/shidashi', 'dipterix/rpymat', 'dipterix/ravetools')
-    })
-    # lazy_install <- c(lazy_install, 'beauchamplab/ravebuiltins@migrate2', 'dipterix/rutabaga@develop')
-    lazy_install <- c(lazy_install, git_repos[-1])
-    if(update_rave){
-      # get directly from DEVREPO
-      lazy_install <- c(lazy_install, git_repos[1])
-    }
-    lazy_install <- lapply(strsplit(lazy_install, "[/@]"), function(x){
-      if(length(x) >= 2){
-        x[[2]]
-      } else {
-        x[[1]]
-      }
-    })
-    lazy_install <- unlist(lazy_install)
-  } else {
-    lazy_install <- c(lazy_install, 'ravebuiltins', 'rutabaga')
-    if(update_rave){
-      lazy_install <- c(lazy_install, 'rave')
-    }
-    lazy_install <- c(lazy_install, c(
-      'threeBrain', 'dipsaus', 'filearray', 'ravetools',
-      'rpymat', 'shidashi', 'ravedash'))
-  }
-  lazy_install <- unique(lazy_install)
-  repos <- c(
-    beauchamplab = 'https://beauchamplab.r-universe.dev',
-    dipterixuniverse = 'https://dipterix.r-universe.dev',
-    getOption("repos")
-  )
-  dipsaus::prepare_install2(lazy_install, restart = FALSE, repos = repos)
+  ravemanager <- asNamespace("ravemanager")
+  ravemanager$install(upgrade_manager = FALSE)
   
   arrange_modules(refresh = TRUE)
   
-  try({
-    # pkgs <- lazy_install[!lazy_install %in% c("threeBrain", "ravebuiltins")]
-    finalize_installation(upgrade = c("config-only", "always"), async = FALSE)
-  }, silent = TRUE)
-  
   if( restart ){
-    dipsaus::restart_session()
+    f <- get0(".rs.restartR", ifnotfound = NULL)
+    if(is.function(f)) {
+      f()
+    }
   }
   
   return(invisible())
