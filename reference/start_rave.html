@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">rave</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.3.1</span>
       </span>
     </div>
 
@@ -69,6 +69,15 @@
 <span>  disable_sidebar <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  simplify_header <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">start_rave2</span><span class="op">(</span></span>
+<span>  host <span class="op">=</span> <span class="st">"127.0.0.1"</span>,</span>
+<span>  port <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  launch.browser <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  jupyter <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  as_job <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -109,6 +118,11 @@ a <code>?token=...</code> is needed in url to access to the application.</p></dd
 
 <dt>...</dt>
 <dd><p>other parameters. See details.</p></dd>
+
+
+<dt>host, port, jupyter, as_job</dt>
+<dd><p>'RAVE' 2.0 related arguments; see 
+<code>start_session</code></p></dd>
 
 </dl></div>
 
