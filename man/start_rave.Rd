@@ -3,6 +3,7 @@
 \name{start_rave}
 \alias{start_rave}
 \alias{launch_demo}
+\alias{start_rave2}
 \title{Start RAVE main application}
 \usage{
 start_rave(
@@ -25,6 +26,15 @@ launch_demo(
   simplify_header = FALSE,
   ...
 )
+
+start_rave2(
+  host = "127.0.0.1",
+  port = NULL,
+  launch.browser = TRUE,
+  jupyter = FALSE,
+  as_job = FALSE,
+  ...
+)
 }
 \arguments{
 \item{modules}{character vector, modules modules to load before starting application.}
@@ -45,6 +55,9 @@ a \code{?token=...} is needed in url to access to the application.}
 \item{data_repo}{internally used.}
 
 \item{...}{other parameters. See details.}
+
+\item{host, port, jupyter, as_job}{'RAVE' 2.0 related arguments; see 
+\code{\link[ravedash]{start_session}}}
 }
 \description{
 Start RAVE main application

@@ -907,6 +907,8 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
 #' @param data_repo internally used.
 #' @param token character vector, default is \code{NULL}. If specified, then
 #' a \code{?token=...} is needed in url to access to the application.
+#' @param host,port,jupyter,as_job 'RAVE' 2.0 related arguments; see 
+#' \code{\link[ravedash]{start_session}}
 #' @param ... other parameters. See details.
 #'
 #' @export
@@ -1079,6 +1081,12 @@ launch_demo <- function(
     
 }
 
+#' @rdname start_rave
+#' @export
+start_rave2 <- function(host = "127.0.0.1", port = NULL, launch.browser = TRUE, jupyter = FALSE, as_job = FALSE, ...) {
+  ravedash::start_session(..., host = host, port = port, jupyter = jupyter,
+                          as_job = as_job, launch_browser = launch.browser)
+}
 
 #' @name rave-tabs
 #' @title Open/Close a tab in RAVE main application

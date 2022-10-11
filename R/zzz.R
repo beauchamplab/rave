@@ -322,12 +322,14 @@ finalize_installation <- function(
         "  Latest available version - %s",
         "Data Repository:     \t%s",
         "Raw-data Repository: \t%s",
-        "\nTo set option, type %s.",
+        "\nTo set option, type %s",
+        "To check for update, type %s.",
         sep = '\n'
       ),
       current_version, latest_version,
       rave_options('data_dir'), rave_options('raw_data_dir'),
-      sQuote('rave_options(launch_gui=TRUE)')
+      sQuote('rave::rave_options(launch_gui=TRUE)'),
+      sQuote('ravemanager::version_info()')
       ))
     }else{
       packageStartupMessage('[WARNING]: Cannot find RAVE repository! Please run the following command set them.\n\trave::rave_options()')
