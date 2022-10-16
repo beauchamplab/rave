@@ -60,7 +60,8 @@ jobs:
           install.packages('remotes')
           install.packages('ravemanager', repos = c(beauchamplab = "https://beauchamplab.r-universe.dev", dipterix = "https://dipterix.r-universe.dev", CRAN = "https://cloud.r-project.org"))
           Sys.setenv("RAVE_LIB_PATH" = .libPaths()[[1]])
-          ravemanager::install()
+          ravemanager::install(finalize = FALSE)
+          rave::download_sample_data('YAB', replace_if_exists = TRUE)
           saveRDS(remotes::dev_package_deps(dependencies = TRUE), ".github/depends.Rds", version = 2)
           writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), ".github/R-version")
         shell: Rscript {0}
