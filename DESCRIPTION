@@ -19,11 +19,10 @@ Description: R Analysis and Visualization of 'ECOG/iEEG' Data
 License: GPL-3
 Encoding: UTF-8
 Language: en-US
-URL: https://rave.wiki
+URL: https://rave.wiki,
+    https://beauchamplab.github.io/rave/
 BugReports: https://github.com/beauchamplab/rave/issues
-RoxygenNote: 7.2.1
-Depends: 
-    R (>= 3.6.0)
+RoxygenNote: 7.2.3
 Imports:
     utils,
     stats,
