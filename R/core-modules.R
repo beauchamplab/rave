@@ -372,7 +372,7 @@ module_as_function <- function(package = package, module_id = module_id, reload 
           re <- sapply(async_vars, get0, simplify = FALSE, USE.NAMES = TRUE)
           return(re)
         }
-      }, packages = pkgs, evaluator = future::multiprocess,
+      }, packages = pkgs, evaluator = future::multisession,
       envir = ..tmp, gc = TRUE)
     }
     

@@ -919,7 +919,7 @@ ExecEnvir <- R6::R6Class(
                   re <- sapply(..async_var, get0, simplify = FALSE, USE.NAMES = TRUE)
                   re
                 }
-              }, packages = packages, evaluator = future::multiprocess, 
+              }, packages = packages, evaluator = future::multisession, 
               envir = self$async_env,
               gc = FALSE)
           }

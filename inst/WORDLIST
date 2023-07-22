@@ -4,7 +4,6 @@ ECOG
 ECoG
 FreeSurfer
 HDF
-LazyArray
 Morlet
 Nifti
 Preprocess
@@ -13,6 +12,7 @@ SUMA
 UI
 WebGL
 Welch
+YAEL
 cloneable
 iEEG
 isualization

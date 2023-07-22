@@ -1088,6 +1088,27 @@ start_rave2 <- function(host = "127.0.0.1", port = NULL, launch.browser = TRUE, 
                           as_job = as_job, launch_browser = launch.browser)
 }
 
+#' @name start_yael
+#' @title Start 'YAEL' electrode localization
+#' @param host host IP address
+#' @param port integer port number; default is random
+#' @param launch.browser whether to launch browsers
+#' @param as_job whether to launch in background; available only in 'RStudio'
+#' @param ... passed to \code{\link[ravedash]{start_session}}
+#' @export
+start_yael <- function(host = "127.0.0.1", port = NULL, launch.browser = TRUE, as_job = FALSE, ...) {
+  modules = c(
+    "surface_reconstruction",
+    "electrode_localization",
+    "custom_3d_viewer",
+    "configure_rave"
+  )
+  page_title = c("YAEL", sprintf("YAEL (%s)", utils::packageVersion("threeBrain")))
+  ravedash::start_session(..., host = host, port = port, jupyter = FALSE,
+                          as_job = as_job, launch_browser = launch.browser, 
+                          modules = modules, page_title = page_title)
+}
+
 #' @name rave-tabs
 #' @title Open/Close a tab in RAVE main application
 #' @param module_id character, module ID
