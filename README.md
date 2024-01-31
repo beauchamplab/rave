@@ -9,14 +9,16 @@ For all RAVE info, including installation instructions, visit https://rave.wiki
 [![R-CMD-check](https://github.com/beauchamplab/rave/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/beauchamplab/rave/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
-RAVE contains multiple R & Python packages, pipeline modules, and analysis snippets.
+RAVE contains multiple R & Python packages, pipeline modules, and analysis snippets. 
 
 * [rave-pipelines](https://github.com/dipterix/rave-pipelines): Reproducible pipelines for iEEG preprocessing and data exploration
 * [rave-gists](https://github.com/rave-ieeg/rave-gists): Code snippets written for individual labs/researchers
 
 ### Package Builder Status
 
-All packages are hosted on CRAN and/or r-universe. Please follow [the instructions](https://openwetware.org/wiki/RAVE:Install) to install them. Low-level documentations are available for developers.
+All packages are hosted on CRAN and/or r-universe. Please follow [the instructions](https://openwetware.org/wiki/RAVE:Install) to install them instead of installing them individually.
+
+Low-level documentations are available for developers.
 
 |Source Package|Build Version|Builder Status|Description & Documentation|
 |:--|:--|:--|:--|
