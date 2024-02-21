@@ -5,10 +5,6 @@
 
 For all RAVE info, including installation instructions, visit https://rave.wiki 
 
-<!-- badges: start -->
-[![R-CMD-check](https://github.com/beauchamplab/rave/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/beauchamplab/rave/actions/workflows/R-CMD-check.yaml)
-<!-- badges: end -->
-
 RAVE contains multiple R & Python packages, pipeline modules, and analysis snippets. 
 
 * [rave-pipelines](https://github.com/dipterix/rave-pipelines): Reproducible pipelines for iEEG preprocessing and data exploration
