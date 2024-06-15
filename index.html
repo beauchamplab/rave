@@ -5,28 +5,14 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content='R Analysis and Visualization of ECOG/iEEG Data 
-    RAVE provides cross-platform analysis and visualizations for neuroscience 
-    ECoG/iEEG data by "just clicking buttons". This package include: (a) pre-processing 
-    of ECoG/iEEG raw data into HDF5 format (a cross-platform data format that can be 
-    used for R, Matlab, Python, Java and C/C++); (b) ECoG/iEEG epoch and visualizations
-    in real time; (c) Users can write customized analysis as R packages and easily 
-    insert into RAVE for interactive visualizations. (d) 3D viewers driven by 
-    WebGL.'>
+<meta name="description" content='R Analysis and Visualization of ECOG/iEEG Data RAVE provides cross-platform analysis and visualizations for neuroscience ECoG/iEEG data by "just clicking buttons". This package include: (a) pre-processing of ECoG/iEEG raw data into HDF5 format (a cross-platform data format that can be used for R, Matlab, Python, Java and C/C++); (b) ECoG/iEEG epoch and visualizations in real time; (c) Users can write customized analysis as R packages and easily insert into RAVE for interactive visualizations. (d) 3D viewers driven by WebGL.'>
 <title>R Analysis and Visualization of ECOG/iEEG Data • rave</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="R Analysis and Visualization of ECOG/iEEG Data">
-<meta property="og:description" content='R Analysis and Visualization of ECOG/iEEG Data 
-    RAVE provides cross-platform analysis and visualizations for neuroscience 
-    ECoG/iEEG data by "just clicking buttons". This package include: (a) pre-processing 
-    of ECoG/iEEG raw data into HDF5 format (a cross-platform data format that can be 
-    used for R, Matlab, Python, Java and C/C++); (b) ECoG/iEEG epoch and visualizations
-    in real time; (c) Users can write customized analysis as R packages and easily 
-    insert into RAVE for interactive visualizations. (d) 3D viewers driven by 
-    WebGL.'>
+<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js" integrity="sha512-7O5pXpc0oCRrxk8RUfDYFgn0nO1t+jLuIOQdOMRp4APB7uZ4vSjspzp5y6YDtDs4VzUSTbWzBFZ/LKJhnyFOKw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="R Analysis and Visualization of ECOG/iEEG Data">
+<meta property="og:description" content='R Analysis and Visualization of ECOG/iEEG Data RAVE provides cross-platform analysis and visualizations for neuroscience ECoG/iEEG data by "just clicking buttons". This package include: (a) pre-processing of ECoG/iEEG raw data into HDF5 format (a cross-platform data format that can be used for R, Matlab, Python, Java and C/C++); (b) ECoG/iEEG epoch and visualizations in real time; (c) Users can write customized analysis as R packages and easily insert into RAVE for interactive visualizations. (d) 3D viewers driven by WebGL.'>
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -36,7 +22,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
     
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
+    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light" data-bs-theme="light"><div class="container">
     
     <a class="navbar-brand me-2" href="index.html">rave</a>
 
@@ -73,12 +59,10 @@
 <div class="row">
   <main id="main" class="col-md-9"><p><img src="https://raw.githubusercontent.com/beauchamplab/rave/master/inst/assets/images/cover.gif" align="right"></p>
 <div class="section level1">
-<div class="page-header"><h1 id="rave-rreproducible-analysis-and-visualization-of-intracranial-electroencephalography">RAVE: <strong>R</strong><em>reproducible</em> <strong>A</strong><em>nalysis and</em> <strong>V</strong><em>isualization of intracranial</em> <strong>E</strong><em>lectroencephalography</em>
-<a class="anchor" aria-label="anchor" href="#rave-rreproducible-analysis-and-visualization-of-intracranial-electroencephalography"></a>
+<div class="page-header"><h1 id="rave-reproducible-analysis-and-visualization-of-intracranial-electroencephalography">RAVE: <strong>R</strong><em>eproducible</em> <strong>A</strong><em>nalysis and</em> <strong>V</strong><em>isualization of intracranial</em> <strong>E</strong><em>lectroencephalography</em>
+<a class="anchor" aria-label="anchor" href="#rave-reproducible-analysis-and-visualization-of-intracranial-electroencephalography"></a>
 </h1></div>
 <p>For all RAVE info, including installation instructions, visit <a href="https://rave.wiki" class="external-link uri">https://rave.wiki</a></p>
-<!-- badges: start -->
-
 <p>RAVE contains multiple R &amp; Python packages, pipeline modules, and analysis snippets.</p>
 <ul>
 <li>
@@ -89,86 +73,73 @@
 <div class="section level3">
 <h3 id="package-builder-status">Package Builder Status<a class="anchor" aria-label="anchor" href="#package-builder-status"></a>
 </h3>
-<p>All packages are hosted on CRAN and/or r-universe. Please follow <a href="https://openwetware.org/wiki/RAVE:Install" class="external-link">the instructions</a> to install them instead of installing them individually.</p>
+<p>All packages are hosted on CRAN and/or r-universe. Please follow <a href="https://openwetware.org/wiki/RAVE:Install" class="external-link">the instructions</a> to install them using recommended approach.</p>
 <p>Low-level documentations are available for developers.</p>
 <table class="table">
 <colgroup>
-<col width="25%">
-<col width="25%">
-<col width="25%">
-<col width="25%">
+<col width="33%">
+<col width="33%">
+<col width="33%">
 </colgroup>
 <thead><tr class="header">
-<th align="left">Source Package</th>
-<th align="left">Build Version</th>
-<th align="left">Builder Status</th>
+<th align="left">Source Package (Github)</th>
+<th align="left">CI/CD Build Version</th>
 <th align="left">Description &amp; Documentation</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
 <td align="left"><a href="https://github.com/dipterix/ravemanager" class="external-link"><img src="https://img.shields.io/github/r-package/v/dipterix/ravemanager/master?logo=github&amp;style=flat-square&amp;color=white&amp;label=ravemanager" alt="ravemanager"></a></td>
 <td align="left"><a href="https://rave-ieeg.r-universe.dev/ravemanager" class="external-link"><img src="https://rave-ieeg.r-universe.dev/badges/ravemanager?color=blue&amp;style=classic" alt="r-universe"></a></td>
-<td align="left"><a href="https://github.com/dipterix/ravemanager/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/dipterix/ravemanager/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></td>
-<td align="left"><a href="https://dipterix.org/ravemanager/reference/index.html" class="external-link">Dependence manager</a></td>
+<td align="left"><a href="https://dipterix.org/ravemanager/" class="external-link">Dependence manager</a></td>
 </tr>
 <tr class="even">
 <td align="left"><a href="https://github.com/beauchamplab/rave" class="external-link"><img src="https://img.shields.io/github/r-package/v/beauchamplab/rave/master?logo=github&amp;style=flat-square&amp;color=white&amp;label=rave" alt="rave"></a></td>
 <td align="left"><a href="https://rave-ieeg.r-universe.dev/rave" class="external-link"><img src="https://rave-ieeg.r-universe.dev/badges/rave?color=blue&amp;style=classic" alt="r-universe"></a></td>
-<td align="left"><a href="https://github.com/beauchamplab/rave/actions" class="external-link"><img src="https://github.com/beauchamplab/rave/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a></td>
-<td align="left"><a href="https://openwetware.org/wiki/RAVE" class="external-link">Main package</a></td>
+<td align="left"><a href="https://rave.wiki" class="external-link">Main package</a></td>
 </tr>
 <tr class="odd">
 <td align="left"><a href="https://github.com/dipterix/ravedash" class="external-link"><img src="https://img.shields.io/github/r-package/v/dipterix/ravedash/master?logo=github&amp;style=flat-square&amp;color=white&amp;label=ravedash" alt="ravedash"></a></td>
 <td align="left"><a href="https://rave-ieeg.r-universe.dev/ravedash" class="external-link"><img src="https://rave-ieeg.r-universe.dev/badges/ravedash?color=blue&amp;style=classic" alt="r-universe"></a></td>
-<td align="left"><a href="https://github.com/dipterix/ravedash/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/dipterix/ravedash/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></td>
 <td align="left"><a href="https://dipterix.org/ravedash/" class="external-link">Front-end dashboard</a></td>
 </tr>
 <tr class="even">
 <td align="left"><a href="https://github.com/dipterix/ravetools" class="external-link"><img src="https://img.shields.io/github/r-package/v/dipterix/ravetools/master?logo=github&amp;style=flat-square&amp;color=white&amp;label=ravetools" alt="ravetools"></a></td>
 <td align="left"><a href="https://rave-ieeg.r-universe.dev/ravetools" class="external-link"><img src="https://rave-ieeg.r-universe.dev/badges/ravetools?color=blue&amp;style=classic" alt="r-universe"></a></td>
-<td align="left"><a href="https://github.com/dipterix/ravetools/actions" class="external-link"><img src="https://github.com/dipterix/ravetools/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a></td>
 <td align="left"><a href="https://dipterix.org/ravetools/" class="external-link">Signal processing</a></td>
 </tr>
 <tr class="odd">
 <td align="left"><a href="https://github.com/beauchamplab/raveio" class="external-link"><img src="https://img.shields.io/github/r-package/v/beauchamplab/raveio/master?logo=github&amp;style=flat-square&amp;color=white&amp;label=raveio" alt="raveio"></a></td>
 <td align="left"><a href="https://rave-ieeg.r-universe.dev/raveio" class="external-link"><img src="https://rave-ieeg.r-universe.dev/badges/raveio?color=blue&amp;style=classic" alt="r-universe"></a></td>
-<td align="left"><a href="https://github.com/beauchamplab/raveio/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/beauchamplab/raveio/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></td>
-<td align="left"><a href="https://beauchamplab.github.io/raveio/reference/index.html">File system support</a></td>
+<td align="left"><a href="https://beauchamplab.github.io/raveio/">File system support</a></td>
 </tr>
 <tr class="even">
 <td align="left"><a href="https://github.com/dipterix/filearray" class="external-link"><img src="https://img.shields.io/github/r-package/v/dipterix/filearray/master?logo=github&amp;style=flat-square&amp;color=white&amp;label=filearray" alt="filearray"></a></td>
 <td align="left"><a href="https://rave-ieeg.r-universe.dev/filearray" class="external-link"><img src="https://rave-ieeg.r-universe.dev/badges/filearray?color=blue&amp;style=classic" alt="r-universe"></a></td>
-<td align="left"><a href="https://github.com/dipterix/filearray/actions" class="external-link"><img src="https://github.com/dipterix/filearray/workflows/R-CMD-check/badge.svg" alt="R-check"></a></td>
 <td align="left"><a href="https://dipterix.org/filearray/" class="external-link">Out-of-memory analysis</a></td>
 </tr>
 <tr class="odd">
 <td align="left"><a href="https://github.com/dipterix/threeBrain" class="external-link"><img src="https://img.shields.io/github/r-package/v/dipterix/threeBrain/master?logo=github&amp;style=flat-square&amp;color=white&amp;label=threeBrain" alt="threeBrain"></a></td>
 <td align="left"><a href="https://rave-ieeg.r-universe.dev/threeBrain" class="external-link"><img src="https://rave-ieeg.r-universe.dev/badges/threeBrain?color=blue&amp;style=classic" alt="r-universe"></a></td>
-<td align="left"><a href="https://github.com/dipterix/threeBrain/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/dipterix/threeBrain/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></td>
 <td align="left"><a href="https://dipterix.org/threeBrain/" class="external-link">3D viewer engine</a></td>
 </tr>
 <tr class="even">
 <td align="left"><a href="https://github.com/dipterix/rpymat" class="external-link"><img src="https://img.shields.io/github/r-package/v/dipterix/rpymat/master?logo=github&amp;style=flat-square&amp;color=white&amp;label=rpymat" alt="rpymat"></a></td>
 <td align="left"><a href="https://rave-ieeg.r-universe.dev/rpymat" class="external-link"><img src="https://rave-ieeg.r-universe.dev/badges/rpymat?color=blue&amp;style=classic" alt="r-universe"></a></td>
-<td align="left"><a href="https://github.com/dipterix/rpymat/actions" class="external-link"><img src="https://github.com/dipterix/rpymat/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a></td>
 <td align="left"><a href="https://dipterix.org/rpymat/" class="external-link">Python manager &amp; interface</a></td>
 </tr>
 <tr class="odd">
 <td align="left"><a href="https://github.com/dipterix/rpyANTs" class="external-link"><img src="https://img.shields.io/github/r-package/v/dipterix/rpyANTs/master?logo=github&amp;style=flat-square&amp;color=white&amp;label=rpyANTs" alt="rpyANTs"></a></td>
 <td align="left"><a href="https://rave-ieeg.r-universe.dev/rpyANTs" class="external-link"><img src="https://rave-ieeg.r-universe.dev/badges/rpyANTs?color=blue&amp;style=classic" alt="r-universe"></a></td>
-<td align="left"><a href="https://github.com/dipterix/rpyANTs/actions" class="external-link"><img src="https://github.com/dipterix/rpyANTs/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a></td>
 <td align="left"><a href="https://dipterix.org/rpyANTs/" class="external-link">Interface to ANTs</a></td>
 </tr>
 <tr class="even">
 <td align="left"><a href="https://github.com/dipterix/dipsaus" class="external-link"><img src="https://img.shields.io/github/r-package/v/dipterix/dipsaus/master?logo=github&amp;style=flat-square&amp;color=white&amp;label=dipsaus" alt="dipsaus"></a></td>
 <td align="left"><a href="https://rave-ieeg.r-universe.dev/dipsaus" class="external-link"><img src="https://rave-ieeg.r-universe.dev/badges/dipsaus?color=blue&amp;style=classic" alt="r-universe"></a></td>
-<td align="left"><a href="https://github.com/dipterix/dipsaus/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/dipterix/dipsaus/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></td>
 <td align="left"><a href="https://dipterix.org/dipsaus/" class="external-link">Utility functions</a></td>
 </tr>
 <tr class="odd">
 <td align="left"><a href="https://github.com/dipterix/readNSx" class="external-link"><img src="https://img.shields.io/github/r-package/v/dipterix/readNSx/master?logo=github&amp;style=flat-square&amp;color=white&amp;label=readNSx" alt="readNSx"></a></td>
 <td align="left"><a href="https://rave-ieeg.r-universe.dev/readNSx" class="external-link"><img src="https://rave-ieeg.r-universe.dev/badges/readNSx?color=blue&amp;style=classic" alt="r-universe"></a></td>
-<td align="left"><a href="https://github.com/dipterix/readNSx/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/dipterix/readNSx/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></td>
 <td align="left"><a href="https://dipterix.org/readNSx/" class="external-link">BlackRock NEV/NSx reader</a></td>
 </tr>
 </tbody>
@@ -209,25 +180,18 @@
 </ul>
 </div>
 
-<div class="dev-status">
-<h2 data-toc-skip>Dev status</h2>
-<ul class="list-unstyled">
-<li><a href="https://github.com/beauchamplab/rave/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/beauchamplab/rave/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
-</ul>
-</div>
+
 
   </aside>
 </div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p></p>
-<p>Developed by Zhengjia Wang, John Magnotti, Michael S. Beauchamp, Beauchamp lab.</p>
+  <p>Developed by Zhengjia Wang, John Magnotti, Michael S. Beauchamp, Beauchamp lab.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
 </div>
 
     </footer>
