@@ -1,6 +1,6 @@
 <img src="https://raw.githubusercontent.com/beauchamplab/rave/master/inst/assets/images/cover.gif" align="right" />
 
-# RAVE: __R__*reproducible* __A__*nalysis and* __V__*isualization of intracranial* __E__*lectroencephalography*
+# RAVE: __R__*eproducible* __A__*nalysis and* __V__*isualization of intracranial* __E__*lectroencephalography*
 
 
 For all RAVE info, including installation instructions, visit https://rave.wiki 
