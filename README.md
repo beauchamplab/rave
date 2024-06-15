@@ -12,7 +12,7 @@ RAVE contains multiple R & Python packages, pipeline modules, and analysis snipp
 
 ### Package Builder Status
 
-All packages are hosted on CRAN and/or r-universe. Please follow [the instructions](https://openwetware.org/wiki/RAVE:Install) to install them instead of installing them individually.
+All packages are hosted on CRAN and/or r-universe. Please follow [the instructions](https://openwetware.org/wiki/RAVE:Install) to install them using recommended approach.
 
 Low-level documentations are available for developers.
 
