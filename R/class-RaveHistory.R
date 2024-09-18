@@ -8,7 +8,7 @@ RAVEHistory <- R6::R6Class(
   ),
   public = list(
     
-    initialize = function(path = '~/', name = '.rave.history.yaml', 
+    initialize = function(path = raveio::cache_root(), name = '.rave.history.yaml', 
                           use_yaml = FALSE){
       private$save_path <- file.path(path, name)
       private$use_yaml <- use_yaml
