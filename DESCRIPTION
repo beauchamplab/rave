@@ -49,8 +49,7 @@ Imports:
     shinyWidgets (>= 0.5.3),
     raveio (>= 0.0.5),
     ravetools (>= 0.0.3),
-    ravedash,
-    ieegio (>= 0.0.2.9011)
+    ravedash
 Suggests:
     knitr,
     data.table (>= 1.11.8),
