@@ -2,11 +2,12 @@
 % Please edit documentation in R/shinyUI-main_app.R
 \name{start_rave}
 \alias{start_rave}
+\alias{start_rave_legacy}
 \alias{launch_demo}
 \alias{start_rave2}
 \title{Start RAVE main application}
 \usage{
-start_rave(
+start_rave_legacy(
   modules = NULL,
   active_module = NULL,
   launch.browser = TRUE,
@@ -28,6 +29,15 @@ launch_demo(
 )
 
 start_rave2(
+  host = "127.0.0.1",
+  port = NULL,
+  launch.browser = TRUE,
+  jupyter = FALSE,
+  as_job = FALSE,
+  ...
+)
+
+start_rave(
   host = "127.0.0.1",
   port = NULL,
   launch.browser = TRUE,

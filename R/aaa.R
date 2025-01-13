@@ -17,7 +17,7 @@ raveio::LazyFST
 raveio::load_fst_or_h5
 
 #' @export
-raveio::LazyH5
+ieegio::LazyH5
 
 #' @export
 raveio::load_h5

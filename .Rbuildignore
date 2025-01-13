@@ -29,3 +29,4 @@
 ^docs$
 ^pkgdown$
 ^uninstall\.R$
+^inst/webr-rave/

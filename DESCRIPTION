@@ -1,7 +1,7 @@
 Package: rave
 Type: Package
 Title: R Analysis and Visualization of 'ECOG/iEEG' Data
-Version: 1.0.3.3
+Version: 1.0.5
 Authors@R: c(
     person("Zhengjia", "Wang", email = "dipterix.wang@gmail.com", role = c("cph", "aut", "cre")),
     person("John", "Magnotti", role = c("aut")),
@@ -22,7 +22,7 @@ Language: en-US
 URL: https://rave.wiki,
     https://beauchamplab.github.io/rave/
 BugReports: https://github.com/beauchamplab/rave/issues
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Imports:
     utils,
     stats,
@@ -49,7 +49,8 @@ Imports:
     shinyWidgets (>= 0.5.3),
     raveio (>= 0.0.5),
     ravetools (>= 0.0.3),
-    ravedash
+    ravedash,
+    ieegio (>= 0.0.2.9011)
 Suggests:
     knitr,
     data.table (>= 1.11.8),

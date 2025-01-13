@@ -175,7 +175,7 @@ get referenced data
 If \code{ram} is true, then returns a list of matrices. The 
 length of the list equals the number of blocks, and each matrix is 
 frequency by time points. If \code{ram} is false, then returns an 
-environment with each element a \code{\link[raveio]{LazyH5}} or 
+environment with each element a \code{\link[ieegio]{LazyH5}} or 
 \code{\link[raveio]{LazyFST}} instance.
 }
 }

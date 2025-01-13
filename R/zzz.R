@@ -8,10 +8,10 @@ rave_version <- function(){
 latest_version <- function() {
   tryCatch({
     suppressWarnings({
-      versions <- raveio::load_json("https://beauchamplab.r-universe.dev/packages/rave")
+      versions <- raveio::load_json("https://rave-ieeg.r-universe.dev/api/packages/rave")
       return(list(
         version = versions$Version[[1]],
-        built = versions$Built$Date[[1]]
+        built = versions$Packaged$Date
       ))
     })
   }, error = function(e){
@@ -342,7 +342,7 @@ finalize_installation <- function(
     if(interactive() && !is.null(startup_msg)){
       rave_hist()$save('..rave_startup_msg..' = NULL)
       packageStartupMessage(startup_msg)
-      packageStartupMessage('Please run ', sQuote("rave::check_dependencies()"), " to check dependencies.")
+      # packageStartupMessage('Please run ', sQuote("rave::check_dependencies()"), " to check dependencies.")
     }
   }, silent = TRUE)
   
