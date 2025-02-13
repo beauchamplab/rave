@@ -912,7 +912,7 @@ app_server <- function(adapter, instance_id, token = NULL, data_repo = getDefaul
 #' @param ... other parameters. See details.
 #'
 #' @export
-start_rave <- app_controller
+start_rave_legacy <- app_controller
 
 #' @rdname start_rave
 #' @export
@@ -1087,6 +1087,10 @@ start_rave2 <- function(host = "127.0.0.1", port = NULL, launch.browser = TRUE, 
   ravedash::start_session(..., host = host, port = port, jupyter = jupyter,
                           as_job = as_job, launch_browser = launch.browser)
 }
+
+#' @rdname start_rave
+#' @export
+start_rave <- start_rave2
 
 #' @name start_yael
 #' @title Start 'YAEL' electrode localization

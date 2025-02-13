@@ -26,6 +26,6 @@ below to see their documentation.
 
   \item{ravedash}{\code{\link[ravedash]{shiny_icons}}}
 
-  \item{raveio}{\code{\link[raveio]{catgl}}, \code{\link[raveio]{ECoGTensor}}, \code{\link[raveio]{get_projects}}, \code{\link[raveio]{LazyFST}}, \code{\link[raveio]{LazyH5}}, \code{\link[raveio]{load_fst_or_h5}}, \code{\link[raveio]{load_h5}}, \code{\link[raveio]{read_mat}}, \code{\link[raveio]{save_h5}}, \code{\link[raveio]{Tensor}}}
+  \item{raveio}{\code{\link[raveio]{catgl}}, \code{\link[raveio]{ECoGTensor}}, \code{\link[raveio]{get_projects}}, \code{\link[raveio]{LazyFST}}, \code{\link[raveio:reexports]{LazyH5}}, \code{\link[raveio]{load_fst_or_h5}}, \code{\link[raveio]{load_h5}}, \code{\link[raveio]{read_mat}}, \code{\link[raveio]{save_h5}}, \code{\link[raveio]{Tensor}}}
 }}
 

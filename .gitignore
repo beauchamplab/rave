@@ -21,3 +21,5 @@ old
 docs
 _rs_job.R
 ui.R
+node_modules/
+webr-rave/
