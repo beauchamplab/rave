@@ -1,315 +1,107 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://beauchamplab.github.io/rave/404.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/Installation.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/Requirements.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/Updates.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/alternative_installation.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/index.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/ECoGRepository.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/Electrode.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/ExecEnvir.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/ModuleEnvir.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/Subject.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/any_subject_loaded.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/archive_subject.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/arrange_data_dir.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/arrange_modules.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/as_subject.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/attachDefaultDataRepository.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/baseline.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/cache_raw_voltage.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/check_data_repo.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/check_dependencies.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/check_epoch.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/check_subject.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/check_subjects2.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/check_subjects_old.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/create_local_cache.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/customizedUI.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/decimate_fir.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/define_initialization.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/define_input.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/define_output.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/detect_modules.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/diagnose_signal.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/download_sample_data.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/download_subject_data.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/electrode_localization.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/eval_when_ready.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/export_diagnose_voltage.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/fake_session.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/finalize_installation.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/getDefaultDataRepository.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/getExecEnvirFromContext.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/getModuleEnvirFromContext.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/get_content.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/get_dir.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/get_fake_updated_message.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/get_mem_usage.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/get_module.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/get_path.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/get_rave_theme.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/get_subjects.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/get_val.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/import_electrodes.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/init_app.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/init_module.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/lapply_async.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/load_local_cache.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/load_meta.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/load_modules.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/load_rave_module_package.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/load_scripts.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/module_analysis_names.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/mount_demo_subject.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/notch_channel.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/notch_filter.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/plot_signals.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/progress.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/pwelch.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/r_to_py.Subject.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/rave-cache.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/rave-tabs.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/rave_brain2.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/rave_checks.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/rave_context.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/rave_context_generics.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/rave_failure.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/rave_ignore.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/rave_import_rawdata.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/rave_module_tools.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/rave_options.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/rave_prepare.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/rave_preprocess.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/rave_preprocess_tools.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/rave_version.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/read_mgrid.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/reexports.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/reload_module_package.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/safe_write_csv.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/save_meta.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/save_options.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/session-reactives.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/set_rave_theme.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/shinirize.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/start_rave.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/start_yael.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/subject_tmpfile.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/suma_spec_parse.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/suma_surface_volume_parse.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/to_module.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/view_layout.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/wavelet.html</loc>
-  </url>
-  <url>
-    <loc>https://beauchamplab.github.io/rave/reference/wavelet_kernels.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://beauchamplab.github.io/rave/404.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/Installation.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/Requirements.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/Updates.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/alternative_installation.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/authors.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/index.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/ECoGRepository.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/Electrode.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/ExecEnvir.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/ModuleEnvir.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/Subject.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/any_subject_loaded.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/archive_subject.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/arrange_data_dir.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/arrange_modules.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/as_subject.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/attachDefaultDataRepository.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/baseline.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/cache_raw_voltage.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/check_data_repo.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/check_dependencies.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/check_epoch.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/check_subject.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/check_subjects2.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/check_subjects_old.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/create_local_cache.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/customizedUI.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/decimate_fir.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/define_initialization.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/define_input.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/define_output.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/detect_modules.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/diagnose_signal.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/download_sample_data.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/download_subject_data.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/electrode_localization.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/eval_when_ready.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/export_diagnose_voltage.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/fake_session.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/finalize_installation.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/getDefaultDataRepository.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/getExecEnvirFromContext.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/getModuleEnvirFromContext.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/get_content.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/get_dir.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/get_fake_updated_message.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/get_mem_usage.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/get_module.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/get_path.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/get_rave_theme.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/get_subjects.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/get_val.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/import_electrodes.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/index.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/init_app.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/init_module.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/lapply_async.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/load_local_cache.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/load_meta.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/load_modules.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/load_rave_module_package.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/load_scripts.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/module_analysis_names.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/mount_demo_subject.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/notch_channel.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/notch_filter.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/plot_signals.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/progress.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/pwelch.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/r_to_py.Subject.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/rave-cache.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/rave-tabs.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/rave_brain2.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/rave_checks.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/rave_context.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/rave_context_generics.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/rave_failure.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/rave_ignore.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/rave_import_rawdata.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/rave_module_tools.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/rave_options.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/rave_prepare.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/rave_preprocess.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/rave_preprocess_tools.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/rave_version.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/read_mgrid.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/reexports.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/reload_module_package.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/safe_write_csv.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/save_meta.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/save_options.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/session-reactives.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/set_rave_theme.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/shinirize.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/start_rave.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/start_yael.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/subject_tmpfile.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/suma_spec_parse.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/suma_surface_volume_parse.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/to_module.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/view_layout.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/wavelet.html</loc></url>
+<url><loc>https://beauchamplab.github.io/rave/reference/wavelet_kernels.html</loc></url>
 </urlset>
+
