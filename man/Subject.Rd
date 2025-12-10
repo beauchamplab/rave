@@ -74,7 +74,6 @@ initializing the instance}
 \itemize{
 \item \href{#method-Subject-info}{\code{Subject$info()}}
 \item \href{#method-Subject-print}{\code{Subject$print()}}
-\item \href{#method-Subject-finalize}{\code{Subject$finalize()}}
 \item \href{#method-Subject-new}{\code{Subject$new()}}
 \item \href{#method-Subject-preprocess_info}{\code{Subject$preprocess_info()}}
 \item \href{#method-Subject-filter_all_electrodes}{\code{Subject$filter_all_electrodes()}}
@@ -115,16 +114,6 @@ override of default print method
 \subsection{Returns}{
 default memory address of the environment
 }
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Subject-finalize"></a>}}
-\if{latex}{\out{\hypertarget{method-Subject-finalize}{}}}
-\subsection{Method \code{finalize()}}{
-called when garbage collected
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Subject$finalize()}\if{html}{\out{</div>}}
-}
-
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Subject-new"></a>}}

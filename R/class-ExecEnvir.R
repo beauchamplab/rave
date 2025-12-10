@@ -39,7 +39,12 @@ ExecEnvir <- R6::R6Class(
     outputs = NULL,
     update = NULL,
     tabsets = NULL,
-    executes = NULL
+    executes = NULL,
+    
+    finalize = function(){
+      self$clean()
+      catgl(sprintf('[%s] Runtime Environment Removed.', self$module_env$module_id))
+    }
   ),
   public = list(
     #' @field .__rave_context__. context string for current instance, indicating
@@ -162,13 +167,6 @@ ExecEnvir <- R6::R6Class(
         self$global_reactives$force_refresh_all <- Sys.time()
         self$global_reactives$has_data <- Sys.time()
       }
-    },
-    
-    #' @description garbage collection
-    #' @return none
-    finalize = function(){
-      self$clean()
-      catgl(sprintf('[%s] Runtime Environment Removed.', self$module_env$module_id))
     },
     
     #' @description print variables in different layers (environment)

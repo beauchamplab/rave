@@ -19,7 +19,11 @@ Subject <- R6::R6Class(
   classname = 'Subject',
   private = list(
     loaded = NULL,
-    subjectinfo = NULL
+    subjectinfo = NULL,
+    
+    finalize = function(){
+      rm(list = ls(private$loaded), envir = private$loaded)
+    }
   ),
   public = list(
     
@@ -57,10 +61,6 @@ Subject <- R6::R6Class(
       self$info()
     },
     
-    #' @description called when garbage collected
-    finalize = function(){
-      rm(list = ls(private$loaded), envir = private$loaded)
-    },
     
     #' @description constructor
     #' @param project_name project name

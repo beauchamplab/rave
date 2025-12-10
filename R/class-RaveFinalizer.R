@@ -5,9 +5,7 @@ RaveFinalizer <- R6::R6Class(
   cloneable = FALSE,
   portable = TRUE,
   parent_env = ..setup_env,
-  public = list(
-    .fin = NULL,
-    files = NULL,
+  private = list(
     finalize = function(){
       if(is.function(self$.fin)){
         try({
@@ -20,7 +18,11 @@ RaveFinalizer <- R6::R6Class(
         lapply(self$files, unlink, recursive = TRUE)
       }
       
-    },
+    }
+  ),
+  public = list(
+    .fin = NULL,
+    files = NULL,
     initialize = function(fun){
       self$.fin <- fun
       
