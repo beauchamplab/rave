@@ -1102,7 +1102,7 @@ start_rave <- start_rave2
 #' @export
 start_yael <- function(host = "127.0.0.1", port = NULL, launch.browser = TRUE, as_job = FALSE, ...) {
   modules = c(
-    "surface_reconstruction",
+    "yael_preprocess",
     "electrode_localization",
     "custom_3d_viewer",
     "configure_rave"

@@ -135,7 +135,6 @@ before functions calls}
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-ExecEnvir-reload}{\code{ExecEnvir$reload()}}
-\item \href{#method-ExecEnvir-finalize}{\code{ExecEnvir$finalize()}}
 \item \href{#method-ExecEnvir-info}{\code{ExecEnvir$info()}}
 \item \href{#method-ExecEnvir-print}{\code{ExecEnvir$print()}}
 \item \href{#method-ExecEnvir-clean}{\code{ExecEnvir$clean()}}
@@ -164,19 +163,6 @@ before functions calls}
 (experimental) signal the modules to reload
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{ExecEnvir$reload()}\if{html}{\out{</div>}}
-}
-
-\subsection{Returns}{
-none
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-ExecEnvir-finalize"></a>}}
-\if{latex}{\out{\hypertarget{method-ExecEnvir-finalize}{}}}
-\subsection{Method \code{finalize()}}{
-garbage collection
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ExecEnvir$finalize()}\if{html}{\out{</div>}}
 }
 
 \subsection{Returns}{

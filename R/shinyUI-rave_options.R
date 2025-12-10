@@ -882,10 +882,9 @@ rave_options_gui <- local({
           if( length(tsub) && (tsub != '[import new]') ){
             # check brain
             tryCatch({
-              local_data$brain <- threeBrain::freesurfer_brain2(
-                fs_subject_folder = file.path('~/rave_data/others/three_brain/', tsub),
-                subject_name = tsub,
-                surface_types = c('pial')
+              local_data$brain <- threeBrain::threeBrain(
+                path = file.path('~/rave_data/others/three_brain/', tsub),
+                subject_code = tsub
               )
               return(
                 threeBrain::threejsBrainOutput(session$ns('template_viewer'))
