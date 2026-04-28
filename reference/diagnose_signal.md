@@ -127,7 +127,7 @@ diagnose_signal(s2, srate = 200)
 #> [1] 4.431596
 #> 
 #> $boundary
-#> [1] 3.67794
+#> [1] 3.674513
 #> 
 
 # Apply notch filter
@@ -138,7 +138,7 @@ diagnose_signal(s1, s2, srate = 200)
 #> [1] 3.755492
 #> 
 #> $boundary
-#> [1] 2.980751
+#> [1] 2.98199
 #> 
 
 ```
