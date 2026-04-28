@@ -286,6 +286,8 @@ mount_demo_subject.rave_running_local <- do_nothing
   }
 }
 rave_dev_env <- rave_context_generics('rave_dev_env', .rave_dev_env)
+
+#' @export
 rave_dev_env.rave_module_debug <- .rave_dev_env
 rave_dev_env.rave_running <- do_nothing
 rave_dev_env.rave_running_local <- do_nothing

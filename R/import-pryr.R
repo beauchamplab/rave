@@ -23,7 +23,7 @@ env_address <- function(x){
   # f(x)
 }
 
-
+#' @export
 print.bytes <- function(x, digits = 3, ...){
   power <- min(floor(log(abs(x), 1000)), 4)
   if (power < 1) {

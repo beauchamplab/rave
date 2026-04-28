@@ -8,7 +8,7 @@ test_that('Checking installed script dependencies', {
   
   fs <- list.files(system.file('', package = 'rave'), pattern = '\\.[rR]$', full.names = TRUE, recursive = TRUE)
   pkgs <- lapply(fs, function(f){
-    s <- readLines(f)
+    s <- readLines(f, warn = FALSE)
     s <- stringr::str_trim(s)
     s <- stringr::str_remove_all(s, '#.*$')
     unique(unlist(stringr::str_extract_all(s, pattern = '[a-zA-Z0-9.]+[:]{2,3}+[a-zA-Z0-9._]+')))
