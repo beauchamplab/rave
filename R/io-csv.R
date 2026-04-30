@@ -217,7 +217,7 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
       # check blocks
       preprocess_yaml <- file.path(meta_dir, '..', 'preprocess', 'rave.yaml')
       if(file.exists(preprocess_yaml)){
-        preproc_info <- raveio::load_yaml(preprocess_yaml)
+        preproc_info <- ravepipeline::load_yaml(preprocess_yaml)
         if(length(preproc_info$blocks)){
           pass_test <- TRUE
           # let's check block!
@@ -261,7 +261,7 @@ load_meta <- function(meta_type, project_name, subject_code, subject_id, meta_na
     }
     else if(meta_type == 'info'){
       info_file <- file.path(meta_dir, 'info.yaml')
-      info <- as.list(raveio::load_yaml(info_file))
+      info <- as.list(ravepipeline::load_yaml(info_file))
       return(info)
     }
     else if(meta_type == 'time_excluded'){

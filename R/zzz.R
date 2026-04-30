@@ -262,7 +262,7 @@ finalize_installation <- function(
       tryCatch({
         
         # load yaml
-        conf <- raveio::load_yaml(system.file('rave.yaml', package = pkg))
+        conf <- ravepipeline::load_yaml(system.file('rave.yaml', package = pkg))
         
         fname <- conf$finalize_installation
         

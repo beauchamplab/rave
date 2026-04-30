@@ -16,13 +16,13 @@ rave_options <- function(..., .save = TRUE, launch_gui = TRUE,
   if(length(args) && length(names(args))){
     # set options
     for(nm in names(args)){
-      raveio::raveio_setopt(nm, args[[nm]], .save = .save)
+      ravepipeline::raveio_setopt(nm, args[[nm]], .save = .save)
     }
   }else if (length(args)){
     # get options
     args <- c(...)
     re <- sapply(args, function(nm){
-      val <- raveio::raveio_getopt(nm, default = NULL)
+      val <- ravepipeline::raveio_getopt(nm, default = NULL)
       if(nm %in% c('delay_input', 'image_width', 'image_height', 'drive_speed', 'max_worker', 'max_mem')){
         val <- as.numeric(val)
       } else if (nm %in% c('test_mode', 'fast_cache')){

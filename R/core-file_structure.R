@@ -39,13 +39,17 @@ arrange_data_dir <- function(first_time = FALSE, reset = FALSE){
     
     # Test speed
     if(!isTRUE(rave_options('disable_startup_speed_check'))){
-      speed <- test_hdspeed(quiet = TRUE)
-      rave_options(drive_speed = speed)
+      # speed <- test_hdspeed(quiet = TRUE)
+      # rave_options(drive_speed = speed)
     }
     
     return(TRUE)
   }
   
+}
+
+test_hdspeed <- function(...) {
+  c(NA, NA)
 }
 
 #' Update (optional), and check validity of modules

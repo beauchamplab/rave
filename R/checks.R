@@ -87,7 +87,7 @@ check_subjects2 <- function(
     if(re[['preprocess_dir']]){
       pre_yaml_file <- file.path(dirs$preprocess_dir, 'rave.yaml')
       if(file.exists(pre_yaml_file)){
-        pre_hist <- as.list(raveio::load_yaml(pre_yaml_file))
+        pre_hist <- as.list(ravepipeline::load_yaml(pre_yaml_file))
         log_data[['preprocess']] <- pre_hist
       }
     }
@@ -96,7 +96,7 @@ check_subjects2 <- function(
     save_log <- TRUE
     yaml_file <- file.path(dirs$rave_dir, 'log.yaml')
     if(file.exists(yaml_file)){
-      log_data_old <- as.list(raveio::load_yaml(yaml_file))
+      log_data_old <- as.list(ravepipeline::load_yaml(yaml_file))
       if(!is.null(log_data[['preprocess']])){
         # compare
         if(identical(log_data_old[['preprocess']], log_data[['preprocess']], num.eq = TRUE, ignore.environment = TRUE, ignore.bytecode = TRUE)){
@@ -112,7 +112,7 @@ check_subjects2 <- function(
     # save to log.yaml
     if(save_log){
       catgl('Creating/replacing log.yaml...')
-      raveio::save_yaml(log_data, yaml_file, fileEncoding = 'utf-8')
+      ravepipeline::save_yaml(log_data, yaml_file, fileEncoding = 'utf-8')
     }
     
   }

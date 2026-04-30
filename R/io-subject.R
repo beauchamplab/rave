@@ -553,7 +553,7 @@ create_local_cache <- function(project_name, subject_code, epoch, time_range){
   config$epoch_signatures <- digest::digest(epoch_tbl[, c('Block', 'Time', 'Trial')]) # sorted by trial!
   
   
-  raveio::save_yaml(config, file.path(subject_cache_dir, 'config.yaml'), fileEncoding = 'utf-8')
+  ravepipeline::save_yaml(config, file.path(subject_cache_dir, 'config.yaml'), fileEncoding = 'utf-8')
   
   utils::write.csv(epoch_tbl, file.path(subject_cache_dir, 'epoch.csv'), row.names = FALSE)
   
@@ -594,7 +594,7 @@ load_local_cache <- function(project_name, subject_code, epoch, time_range,
   
   # 2, load cached configs
   tryCatch({
-    config <- raveio::load_yaml(file.path(cache_dir, 'config.yaml'))
+    config <- ravepipeline::load_yaml(file.path(cache_dir, 'config.yaml'))
     
     epoch_cached <- utils::read.csv(
       file.path(cache_dir, 'epoch.csv'),
@@ -1075,7 +1075,7 @@ download_subject_data <- function(
     if(length(yaml_files)){
       depth <- stringr::str_count(yaml_files, '(/|\\\\)')
       file <- yaml_files[which.min(depth)[1]]
-      meta <- as.list(raveio::load_yaml(file))
+      meta <- as.list(ravepipeline::load_yaml(file))
     }else{
       catgl('No subjects.yaml found! Please use "subject_settings" argument to specify subject settings', level = 'FATAL')
     }
@@ -1349,7 +1349,7 @@ archive_subject <- function(project_name, subject_code,
   ))
   names(conf) <- subject$id
   
-  raveio::save_yaml(conf, file = file.path(root_dir, 'subjects.yaml'), fileEncoding = 'utf-8')
+  ravepipeline::save_yaml(conf, file = file.path(root_dir, 'subjects.yaml'), fileEncoding = 'utf-8')
   dir_create(save_to)
   save_to <- file.path(normalizePath(save_to), sprintf('%s_%s.zip', project_name, subject_code))
   setwd(root_dir)

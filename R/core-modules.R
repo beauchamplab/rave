@@ -123,7 +123,7 @@ detect_modules <- function(packages, as_module = TRUE, ...){
     ypath <- x[2]
     
     tryCatch({
-      conf <- raveio::load_yaml(ypath)
+      conf <- ravepipeline::load_yaml(ypath)
       do.call('rbind', lapply(conf$modules, function(m){
         module_id <- m$module_id
         label_name <- m$module_label

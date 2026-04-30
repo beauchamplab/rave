@@ -86,7 +86,7 @@ get_path <- function(..., mustWork = FALSE, is_directory = FALSE){
 load_rave_yaml <- function(){
   rave_context(disallowed_context = 'default')
   path <- get_path('inst', 'rave.yaml', mustWork = TRUE)
-  conf <- as.list(raveio::load_yaml(path))
+  conf <- as.list(ravepipeline::load_yaml(path))
   conf
 }
 
@@ -103,7 +103,7 @@ load_pkg_description <- function(check_dependencies = c('cran', 'Remotes'),
                                   force_update_remote = FALSE){
   rave_context(disallowed_context = 'default')
   path <- get_path('DESCRIPTION', mustWork = TRUE)
-  desc <- as.list(raveio::load_yaml(path))
+  desc <- as.list(ravepipeline::load_yaml(path))
   
   if('cran' %in% check_dependencies){
     devtools::install_dev_deps(get_root_dir(), dependencies = TRUE)

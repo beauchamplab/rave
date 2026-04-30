@@ -1,5 +1,4 @@
 #' @import shiny
-#' @import raveio
 #' @import dipsaus
 #' @importFrom ravedash shiny_icons
 #' @importFrom graphics axis par points rect
@@ -9,42 +8,6 @@
 NULL
 
 # ------- Re-export
-
-#' @export
-raveio::LazyFST
-
-#' @export
-raveio::load_fst_or_h5
-
-#' @export
-raveio::LazyH5
-
-#' @export
-raveio::load_h5
-
-#' @export
-raveio::save_h5
-
-#' @export
-raveio::read_mat
-
-#' @export
-raveio::Tensor
-
-#' @export
-raveio::ECoGTensor
-
-#' @export
-raveio::catgl
-
-#' @export
-dipsaus::clear_env
-
-#' @export
-raveio::get_projects
-
-#' @export
-ravedash::shiny_icons
 
 # ------ 
 
@@ -69,7 +32,7 @@ toggle_debug <- function(on){
 
 ### For dev use only:
 gl <- function(..., .envir = parent.frame()){
-  raveio::glue(..., .envir = .envir)
+  ravepipeline::glue(..., .envir = .envir)
 }
 
 debug <- function(..., .envir = parent.frame(), level = 'DEBUG'){

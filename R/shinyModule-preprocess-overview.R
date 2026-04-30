@@ -162,7 +162,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
         dirs <- get_dir(subject_code = subject_code, project_name = project_name)
         
         if(isTRUE(local_data$is_bids)){
-          target_bids <- normalizePath(raveio::raveio_getopt('bids_data_dir'), mustWork = FALSE)
+          target_bids <- normalizePath(ravepipeline::raveio_getopt('bids_data_dir'), mustWork = FALSE)
           target_bids <- file.path(target_bids, project_name, sprintf('sub-%s', subject_code))
           dirs$bids_subject_dir <- target_bids
           if(dir.exists(dirs$bids_subject_dir)){
@@ -280,7 +280,7 @@ rave_pre_overview3 <- function(module_id = 'OVERVIEW_M', sidebar_width = 2, doc_
       } else {
         
         # check BIDS
-        target_bids <- normalizePath(raveio::raveio_getopt('bids_data_dir'), mustWork = FALSE)
+        target_bids <- normalizePath(ravepipeline::raveio_getopt('bids_data_dir'), mustWork = FALSE)
         target_bids <- file.path(target_bids, project_name, sprintf('sub-%s', scode))
         if(dir.exists(target_bids)){
           local_data$has_dir <- TRUE

@@ -12,12 +12,12 @@ clear_dir <- function(dir) {
 }
 
 tryCatch({
-  raveio::clear_cached_files()
+  ravecore::clear_cached_files()
 }, error = function() {
   clear_dir('~/rave_data/cache_dir/')
   clear_dir(tools::R_user_dir('raveio', "cache"))
   try({
-    clear_dir(raveio::cache_root())
+    clear_dir(ravecore::cache_root())
   }, silent = TRUE)
   
   ravetools_path <- file.path(
@@ -36,7 +36,7 @@ tryCatch({
 })
 
 # Remove templates
-clear_dir(raveio::raveio_getopt("module_root_dir"))
+clear_dir(ravepipeline::raveio_getopt("module_root_dir"))
 clear_dir(threeBrain::default_template_directory())
 
 # Remove packages

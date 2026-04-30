@@ -16,7 +16,7 @@ rave_brain2 <- function(subject, surfaces = 'pial', use_141 = TRUE,
                         compute_template = FALSE, usetemplateifmissing = FALSE){
   
   # Use raveio
-  raveio::rave_brain(subject = subject, surfaces = surfaces, use_141 = use_141,
+  ravecore::rave_brain(subject = subject, surfaces = surfaces, use_141 = use_141,
                      recache = recache, clean_before_cache = clean_before_cache,
                      compute_template = compute_template, 
                      usetemplateifmissing = usetemplateifmissing)

@@ -8,7 +8,7 @@ RAVEHistory <- R6::R6Class(
   ),
   public = list(
     
-    initialize = function(path = raveio::cache_root(), name = '.rave.history.yaml', 
+    initialize = function(path = ravecore::cache_root(), name = '.rave.history.yaml', 
                           use_yaml = FALSE){
       private$save_path <- file.path(path, name)
       private$use_yaml <- use_yaml
@@ -29,7 +29,7 @@ RAVEHistory <- R6::R6Class(
         }
       }
       if(private$use_yaml){
-        raveio::save_yaml(as.list(private$env),
+        ravepipeline::save_yaml(as.list(private$env),
                          file = private$save_path)
       }else{
         saveRDS(private$env, file = private$save_path)
@@ -38,7 +38,7 @@ RAVEHistory <- R6::R6Class(
     },
     load = function(){
       if(private$use_yaml){
-        re <- raveio::load_yaml(file = private$save_path)
+        re <- ravepipeline::load_yaml(file = private$save_path)
         if(length(private$env) < 10){
           private$env <- dipsaus::fastmap2()
         }
