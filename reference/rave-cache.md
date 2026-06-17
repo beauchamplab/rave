@@ -104,6 +104,7 @@ Cached value, or `val`. If cache and `val` are both missing, then return
 ## Examples
 
 ``` r
+
 # global can be set to false within RAVE modules
 print(cache('a', 1, name = 'data', global = TRUE)) # returns 1
 #> [1] 1

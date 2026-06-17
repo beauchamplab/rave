@@ -36,6 +36,7 @@ None
 ## Examples
 
 ``` r
+
 if (FALSE) { # \dontrun{
 # Requires to install R package beauchamplab/ravebuiltins
 

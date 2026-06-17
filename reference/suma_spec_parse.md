@@ -24,6 +24,7 @@ suma_spec_parse(subject, spec_file)
 ## Examples
 
 ``` r
+
 if (FALSE) { # \dontrun{
 subject = 'Demo/YAB'
 # or create subject object

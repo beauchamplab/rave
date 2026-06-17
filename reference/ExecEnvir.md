@@ -660,6 +660,7 @@ The objects of this class are cloneable with this method.
 ## Examples
 
 ``` r
+
 if (FALSE) { # \dontrun{
 
 # Load module

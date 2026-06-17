@@ -45,6 +45,7 @@ then it defaults to "light".
 ## Examples
 
 ``` r
+
 # Retrieve current theme
 get_val(rave_options('default_theme'), default = 'light')
 #> [1] "light"

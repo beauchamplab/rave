@@ -13,7 +13,7 @@
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/beauchamplab/rave/blob/master/inst/CITATION)
+[`inst/CITATION`](https://github.com/beauchamplab/rave/blob/v1.0.6/inst/CITATION)
 
 Magnotti, JF, Wang, Z, Beauchamp, MS. RAVE: comprehensive open-source
 software for reproducible analysis and visualization of intracranial EEG

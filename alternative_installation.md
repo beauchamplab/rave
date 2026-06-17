@@ -23,6 +23,7 @@ the current version of RAVE. Answer “Yes” to any questions that appear.
 In the case of errors, relaunch RStudio and repeat the commands.
 
 ``` r
+
 # this step requires XCode on mac or RTools on Windows
 install.packages('devtools')
 devtools::install_github('beauchamplab/rave')
@@ -48,6 +49,7 @@ As an additional step, use the RStudio package manager to delete all
 RAVE packages and reinstall.
 
 ``` r
+
 devtools::install_github('beauchamplab/rave')
 rave::check_dependencies()
 ```
@@ -62,6 +64,7 @@ rave::check_dependencies()
   a single subject.
 
 ``` r
+
 # 500MB ~ 1.5 GB per subject
 rave::download_sample_data('KC')
 rave::download_sample_data('YAB')
