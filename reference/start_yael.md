@@ -36,3 +36,18 @@ start_yael(
 
   passed to
   [`start_session`](https://dipterix.org/ravedash/reference/rave-session.html)
+
+## Value
+
+A 'shiny' application object (invisibly when launched as a job).
+
+## Examples
+
+``` r
+
+if (interactive()) {
+ 
+start_yael()
+
+}
+```

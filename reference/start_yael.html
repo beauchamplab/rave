@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">rave</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.99.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -28,7 +28,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>Start 'YAEL' electrode localization</h1>
-      <small class="dont-index">Source: <a href="https://github.com/beauchamplab/rave/blob/v1.0.6/R/shinyUI-main_app.R" class="external-link"><code>R/shinyUI-main_app.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/beauchamplab/rave/blob/master/R/launcher.R" class="external-link"><code>R/launcher.R</code></a></small>
       <div class="d-none name"><code>start_yael.Rd</code></div>
     </div>
 
@@ -71,17 +71,32 @@
 <dd><p>passed to <code><a href="https://dipterix.org/ravedash/reference/rave-session.html" class="external-link">start_session</a></code></p></dd>
 
 </dl></div>
+    <div class="section level2">
+    <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
+    <p>A 'shiny' application object (invisibly when launched as a job).</p>
+    </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span> </span></span>
+<span class="r-in"><span><span class="fu">start_yael</span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">
-  <p>Developed by Zhengjia Wang, John Magnotti, Michael S. Beauchamp, Beauchamp lab.</p>
+  <p>Developed by Zhengjia Wang, John Magnotti, Xiang Zhang, Michael S. Beauchamp.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

@@ -2,18 +2,20 @@
 
 ## Authors
 
-- **Zhengjia Wang**. Copyright holder, author, maintainer.
+- **Zhengjia Wang**. Author, maintainer.
 
 - **John Magnotti**. Author.
 
-- **Michael S. Beauchamp**. Author, funder.
+- **Xiang Zhang**. Author.
 
-- **Beauchamp lab**. Copyright holder, funder.
+- **Michael S. Beauchamp**. Author.
+
+- **Beauchamp lab**. Copyright holder.
 
 ## Citation
 
 Source:
-[`inst/CITATION`](https://github.com/beauchamplab/rave/blob/v1.0.6/inst/CITATION)
+[`inst/CITATION`](https://github.com/beauchamplab/rave/blob/master/inst/CITATION)
 
 Magnotti, JF, Wang, Z, Beauchamp, MS. RAVE: comprehensive open-source
 software for reproducible analysis and visualization of intracranial EEG

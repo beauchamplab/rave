@@ -1,31 +1,10 @@
-# Start RAVE main application
+# Start 'RAVE' main application
 
-Start RAVE main application
+Start 'RAVE' main application
 
 ## Usage
 
 ``` r
-start_rave_legacy(
-  modules = NULL,
-  active_module = NULL,
-  launch.browser = TRUE,
-  theme = "purple",
-  disable_sidebar = FALSE,
-  simplify_header = FALSE,
-  token = NULL,
-  data_repo = getDefaultDataRepository(),
-  ...
-)
-
-launch_demo(
-  modules = "power_explorer",
-  launch.browser = TRUE,
-  theme = "green",
-  disable_sidebar = TRUE,
-  simplify_header = FALSE,
-  ...
-)
-
 start_rave2(
   host = "127.0.0.1",
   port = NULL,
@@ -47,44 +26,48 @@ start_rave(
 
 ## Arguments
 
-- modules:
+- host:
 
-  character vector, modules modules to load before starting application.
+  host IP address; default is `"127.0.0.1"`
 
-- active_module:
+- port:
 
-  character, which module to show as default.
+  integer port number; default is random
 
 - launch.browser:
 
-  logical, whether to launch browser.
+  whether to launch browser; default is true
 
-- theme:
+- jupyter:
 
-  character, color theme, default is `'purple'`.
+  whether to launch the 'Jupyter' server; default is false
 
-- disable_sidebar:
+- as_job:
 
-  logical, whether to hide sidebar.
-
-- simplify_header:
-
-  logical, whether to show simplified header.
-
-- token:
-
-  character vector, default is `NULL`. If specified, then a `?token=...`
-  is needed in url to access to the application.
-
-- data_repo:
-
-  internally used.
+  whether to launch in the background as an 'RStudio' job; available
+  only in 'RStudio'
 
 - ...:
 
-  other parameters. See details.
-
-- host, port, jupyter, as_job:
-
-  'RAVE' 2.0 related arguments; see
+  passed to
   [`start_session`](https://dipterix.org/ravedash/reference/rave-session.html)
+
+## Value
+
+A 'shiny' application object (invisibly when launched as a job).
+
+## See also
+
+[`start_session`](https://dipterix.org/ravedash/reference/rave-session.html)
+
+## Examples
+
+``` r
+
+if (interactive()) {
+ 
+start_rave()
+
+}
+
+```
