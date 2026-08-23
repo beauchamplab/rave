@@ -3,9 +3,9 @@
 # Removes cached files
 clear_dir <- function(dir) {
   try({
-    if(length(dir) != 1) { return() }
-    if(is.na(dir)) { return() }
-    if(!dir.exists(dir)) { return() }
+    if (length(dir) != 1) { return() }
+    if (is.na(dir)) { return() }
+    if (!dir.exists(dir)) { return() }
     cat("Clearing ", dir, "\n")
     unlink(dir, recursive = TRUE)
   }, silent = TRUE)
@@ -30,7 +30,7 @@ tryCatch({
     ),
     "ravetools"
   )
-  if(isTRUE(dir.exists(ravetools_path))) {
+  if (isTRUE(dir.exists(ravetools_path))) {
     unlink(ravetools_path, recursive = TRUE)
   }
 })

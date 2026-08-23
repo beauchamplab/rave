@@ -2,8 +2,8 @@ library(shiny)
 
 # As an example, I created a
 # function to check whether power is loaded, returns TRUE/FALSE
-check_power <- function(referenced = TRUE, env = getDefaultDataRepository()){
-  if(referenced){
+check_power <- function(referenced = TRUE, env = getDefaultDataRepository()) {
+  if (referenced) {
     inherits(env$.private$repo$power, 'ECoGTensor')
   } else {
     inherits(env$.private$repo$raw_power, 'ECoGTensor')
@@ -25,7 +25,7 @@ rave_validate(expr = {
   
   # Multiple `rave_need` is allowed, failing one invalidates the process
   
-}, onfailing = function(opt, map, env = getDefaultDataRepository()){
+}, onfailing = function(opt, map, env = getDefaultDataRepository()) {
   # opt is a list containing whatever variables created in `expr`
   # `map` is where you should save/read your data, 
   # I'll create a function getModuleMap('ravebuiltins') so that you can also
@@ -63,7 +63,7 @@ rave_validate(expr = {
     expectedloadingtime = 10,
     expectedloadingsize = 1024^2
   ))
-}, import = function(opt, map){
+}, import = function(opt, map) {
   # opt will contain variables in `expr`, and variables created in UI
   # map is where you should save your data to
   # Use it as a global repository for the package (across modules but within one session)
@@ -97,9 +97,9 @@ NULL$aaa$bbb
 pryr::mem_used()
 
 # Case 1: variable created inside of function and returns function/environment
-f1 <- (function(){
+f1 <- (function() {
   x <- rnorm(1000000)
-  function(){ length(x) }
+  function() { length(x) }
 })()
 pryr::object_size(f1)
 f1()
@@ -108,8 +108,8 @@ pryr::object_size(f1)
 
 
 # case 2: variable declaired in params
-f2 <- (function(x = rnorm(1000000)){
-  function(){ length(x) }
+f2 <- (function(x = rnorm(1000000)) {
+  function() { length(x) }
 })()
 
 pryr::object_size(f2)
@@ -120,10 +120,10 @@ pryr::object_size(f2)
 
 # case 3: use environment to control memory leak (only leak a small portion)
 env <- new.env(); env$x <- rnorm(1000000)
-f3 <- (function(){
+f3 <- (function() {
   # `envir` will be leaked
   envir = env
-  function(){ length(envir$x) }
+  function() { length(envir$x) }
 })()
 
 pryr::object_size(f3)
@@ -137,9 +137,9 @@ pryr::object_size(f3)
 # Case 4: save as case 3, but using function. 
 # confirmed what's leaked is pointer of env instead of things inside of env
 env <- list(); env$f <- f1
-f4 <- (function(){
+f4 <- (function() {
   envir = env
-  function(){ envir$f() }
+  function() { envir$f() }
 })()
 pryr::object_size(env)
 pryr::object_size(f4)

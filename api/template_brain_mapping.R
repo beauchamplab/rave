@@ -14,7 +14,7 @@ N27brain = threeBrain::merge_brain()$template_object
 
 # Do it in parallel
 rave:::rave_setup_workers()
-tbls = dipsaus::lapply_async2(subjects, function(sub){
+tbls = dipsaus::lapply_async2(subjects, function(sub) {
   cat('Analyzing for subject -', sub, '\n')
   brain <- rave::rave_brain2(sprintf('%s/%s', project, sub))
   
@@ -23,7 +23,7 @@ tbls = dipsaus::lapply_async2(subjects, function(sub){
   
   # Get attached surface type for each electrodes
   surf_type = brain$electrodes$raw_table$SurfaceType
-  if(is.null(surf_type)){
+  if (is.null(surf_type)) {
     surf_type = 'pial'
   }
   
@@ -43,7 +43,7 @@ tbls = dipsaus::lapply_async2(subjects, function(sub){
   tbl = tryCatch({
     tbl = brain$calculate_template_coordinates(save_to = FALSE)
     tbl
-  }, error = function(e){
+  }, error = function(e) {
     brain$electrodes$raw_table$SurfaceElectrode = FALSE
     tbl = brain$calculate_template_coordinates(save_to = FALSE)
     tbl
@@ -51,9 +51,9 @@ tbls = dipsaus::lapply_async2(subjects, function(sub){
   
   
   # Get N27brain's mesh
-  N27coord = sapply( seq_len(nrow(tbl)), function(i){
+  N27coord = sapply( seq_len(nrow(tbl)), function(i) {
     row = tbl[i,]
-    if(!is.null(N27brain$surfaces[[row$SurfaceType]]$group)){
+    if (!is.null(N27brain$surfaces[[row$SurfaceType]]$group)) {
       tryCatch({
         vert <- N27brain$surfaces[[row$SurfaceType]]$group$get_data(
           sprintf(
@@ -63,10 +63,10 @@ tbls = dipsaus::lapply_async2(subjects, function(sub){
           )
         )
         coord = vert[row$VertexNumber, ]
-        if(length(coord) == 3){
+        if (length(coord) == 3) {
           return(coord)
         }
-      }, error = function(e){
+      }, error = function(e) {
         c(NA, NA, NA)
       })
       
@@ -78,7 +78,7 @@ tbls = dipsaus::lapply_async2(subjects, function(sub){
   tbl$N27_z = N27coord[3,]
   tbl$Subject = sub
   tbl
-}, callback = function(sub){
+}, callback = function(sub) {
   paste('Analyzing for subject -', sub)
 }, future.chunk.size = 1)
 

@@ -1,6 +1,0 @@
-# Package Versions
-# name, version, source, details
-
-rutabaga, 0.1.7, github, dipterix/rutabaga
-gifti, 0.7.5, cran, muschellij2/gifti
-threeBrain, 0.1.4, github, dipterix/threeBrain
